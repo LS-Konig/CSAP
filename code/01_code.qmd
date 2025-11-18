@@ -40,6 +40,8 @@ p_required <- c(
   "janitor", # easy wrangling and exploratory tables
   "knitr", # kable()
   "ggpubr", # ggplot themes and shortcuts
+  "scales",
+  "viridis",
   "brms", # bayesian regression models using stan
   "sessioninfo" # documentation
 )
@@ -347,7 +349,59 @@ labels_der_outpartisan_comb <- eu25games2019 |>
 ## Implicit vs explicit partisans distributions
 
 ```{r}
+#| label: fig-impl-expl-distribution
+
+toplot <- eu25games2019 |>
+  select(meta_country, der_partisanship, meta_pid) |>
+  distinct(meta_pid, .keep_all = T) |>
+  filter(!is.na(der_partisanship)) |>
+  group_by(meta_country) |>
+  count(der_partisanship) |>
+  mutate(
+    total_n = sum(n),
+    prop = n / total_n
+  ) |>
+  ungroup()
+
+expl_prop <- toplot |>
+  filter(der_partisanship == "1_pid_expl") |>
+  select(meta_country, expl_prop = prop)
+
+toplot <- toplot |>
+  left_join(
+    expl_prop,
+    by = join_by(meta_country)
+  ) |>
+  mutate(
+    meta_country = fct_reorder(meta_country, expl_prop),
+    der_partisanship2 = case_when(
+      der_partisanship == "1_pid_expl" ~ "Explicit",
+      der_partisanship == "2_pid_impl" ~ "Implicit",
+      der_partisanship == "3_nopid" ~ "None"
+    )
+  )
+
+ggplot(
+  toplot,
+  aes(x = n, y = meta_country, fill = der_partisanship2)
+) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_viridis_d() +
+  scale_x_continuous(labels = percent) +
+  labs(
+    x = "Share",
+    y = "Country",
+    fill = "Partisanship"
+  ) +
+  theme_pubr()
+```
+
+```{r}
 #| label: distr-expl-impl
+
+eu25games2019 |>
+  tabyl(der_partisanship) |>
+  adorn_totals()
 
 eu25games2019 |>
   tabyl(der_outpartisan_comb) |>

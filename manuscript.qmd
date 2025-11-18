@@ -86,7 +86,7 @@ State of the art literature:
 
 ## Research Design {#sec-design}
 
-
+{{< embed code/01_code.qmd#fig-impl-expl-distribution >}}
 
 ## Empirical Analysis {#sec-analysis}
 
