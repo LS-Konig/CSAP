@@ -12,9 +12,9 @@ _freeze/
 _publish.yml
 **/.ipynb_checkpoints/
 
-# Rendered Outputs
-*.pdf*
-*.htmls*
+# Rendered Outputs (Ignore all PDF and HTML files)
+*.pdf
+*.html
 
 # Cache folders and files
 *cache*
