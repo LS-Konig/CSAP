@@ -1,0 +1,411 @@
+---
+title: |
+  CSAP Code Notebook 1
+subtitle: |
+  Exploratory Analyses
+author:
+  - name: Tristan Muno
+    email: tristan.muno@uni-mannheim.de
+    affiliations:
+      - name: University of Mannheim
+        department: School of Social Sciences
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse", #dplyr, ggplot, tibbles etc
+  "here", # relative and sys agnostic file paths
+  "janitor", # easy wrangling and exploratory tables
+  "knitr", # kable()
+  "ggpubr", # ggplot themes and shortcuts
+  "brms", # bayesian regression models using stan
+  "sessioninfo" # documentation
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  pak::pkg_install(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+```{r}
+#| label: load-data
+
+# Load Data
+load(here("data", "01_raw", "eu25games2019.RData"))
+
+```
+
+# Exploratory Analysis: Cross-National Distribution of Partisan Attachement
+
+
+We have:
+  - Partisan Attachement (`q_party_id`)
+  - Vote Intention (`q_vote_intention``q_vote_intention_hypo`)
+  - Reported Vote Choice (`q_voted_party`, `q_voted_party_hypo`)
+  - Reported Vote Choice 2014 (`q_voted_party_2014`)
+
+- Given our primary interest in explicit and implicit attachement, we pursue a maximizing strategy (i.e., for example, collapsing `vote_intention` and `vote_intention_hypo`)
+
+```{r}
+#| label: party-variables-aggregated
+
+eu25games2019 <- eu25games2019 |>
+  # Create aggregated/combined variables
+  mutate(
+    der_vote_combined_name = coalesce(
+      ext_q_vote_intention_pf_name,
+      ext_q_vote_intention_hypo_pf_name,
+      ext_q_voted_party_pf_name,
+      ext_q_voted_party_hypo_pf_name
+    ),
+    der_vote_combined_id = coalesce(
+      ext_q_vote_intention_pf_id,
+      ext_q_vote_intention_hypo_pf_id,
+      ext_q_voted_party_pf_id,
+      ext_q_voted_party_hypo_pf_id
+    ),
+    der_vote_cat = case_when(
+      der_vote_combined_name == "other" ~ "Other",
+      der_vote_combined_name == "dont-know" ~ "Don't know",
+      is.na(der_vote_combined_name) ~ "NA",
+      .default = "Vote reported"
+    ),
+    der_pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No Party ID",
+      ext_q_party_id_pf_name == "other" ~ "Other",
+      is.na(ext_q_party_id_pf_name) ~ "NA",
+      .default = "Party ID reported"
+    )
+  ) |>
+  # Convert to factors and sort by frequency
+  mutate(
+    across(
+      c(der_vote_combined_name, der_vote_combined_id, der_vote_cat, der_pid),
+      ~ fct_infreq(as.character(.x))
+    )
+  )
+
+```
+
+# Distribution of implicit and explicit partisans pooled and across countries
+
+## Tables
+
+```{r}
+#| label: tbl-distr-partyid-pooled
+#| tbl-cap: "Distribution of reported partisan attachement (*explicit partisan identity*) in the pooled sample."
+
+eu25games2019 |>
+  tabyl(der_pid) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+```{r}
+#| label: tbl-distr-vote-pooled
+#| tbl-cap: "Distribution of reported vote intention and choice (*implicit partisan identity*) in the pooled sample."
+
+eu25games2019 |>
+  tabyl(der_vote_cat) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+
+```{r}
+#| label: tbl-cross-vote-pid-pooled
+#| tbl-cap: "Distribution of explicit and implicit partisan identities in the pooled sample."
+
+eu25games2019 |>
+  tabyl(der_pid, der_vote_cat) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+```{r}
+#| label: tbl-distr-partyid-country
+#| tbl-cap: "Distribution of reported partisan attachement (*explicit partisan identity*) by country."
+
+eu25games2019 |>
+  tabyl(der_pid, meta_country) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+```{r}
+#| label: tbl-distr-vote-country
+#| tbl-cap: "Distribution of reported vote intention and choice (*implicit partisan identity*) in the pooled sample."
+
+eu25games2019 |>
+  tabyl(der_vote_cat, meta_country) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+
+```{r}
+#| label: tbl-cross-vote-pid-country
+#| tbl-cap: "Distribution of explicit and implicit partisan identities by country."
+
+eu25games2019 |>
+  tabyl(der_pid, der_vote_cat, meta_country) |>
+  adorn_totals()
+
+```
+
+## Figures
+
+```{r}
+#| label: fig-distr-partisans
+#| fig-cap: "Distribution of Reported Partisan Affiliation and Vote Choice/Intention across included European countries."
+
+df_reshaped <- eu25games2019 |>
+  group_by(meta_country, der_nopid, der_vote_cat) |>
+  count() |>
+  ungroup()
+
+df_reshaped
+
+total_counts <- df_reshaped |>
+  group_by(meta_country, der_nopid) |>
+  summarise(n = sum(n), .groups = "drop") |>
+  mutate(
+    nopid2 = if_else(der_nopid == 1, "No PID", "PID"),
+    toprint = paste0(
+      nopid2,
+      "\n",
+      as.character(n)
+    ),
+    toprint2 = as.character(n)
+  )
+
+ggplot(df_reshaped, aes(x = as.factor(der_nopid), y = n, fill = der_vote_cat)) +
+  geom_col() +
+  geom_text(
+    data = total_counts,
+    aes(label = toprint2, fill = "black"),
+    vjust = if_else(
+      total_counts$der_nopid == 1,
+      0,
+      1
+    ),
+    size = 3
+  ) +
+  facet_wrap(~meta_country) +
+  labs(y = "N", x = "") +
+  scale_x_discrete(labels = c("0" = "PID", "1" = "No PID")) +
+  scale_fill_manual(
+    values = c(
+      "Don't know" = "darkgray",
+      "NA" = "black",
+      "Other" = "orange",
+      "Vote reported" = "gold"
+    )
+  ) +
+  theme_pubr()
+```
+
+# Comparing levels of affective polarization between explicit and implicit partisans
+
+
+```{r}
+#| label: main-iv
+
+# what to do: estimate aff pol model separately or interaction term?
+# preferred choice: create variable storing the different factor levels,
+# allows direct comparison and inclusion of all cases in model
+
+# wait I need 2 steps: 1 variable storing the type of partisanship,
+# and 1 mapping the conjoint profiles
+
+# create implicit/explicit partisan marker variable
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    # combined variable for partisanship
+    der_partisanship = case_when(
+      der_pid == "Party ID reported" ~ "1_pid_expl",
+      der_pid == "No Party ID" & der_vote_cat == "Vote reported" ~ "2_pid_impl",
+      der_pid == "No Party ID" & der_vote_cat == "Don't know" ~ "3_nopid",
+      der_pid == "No Party ID" & der_vote_cat == "NA" ~ "3_nopid",
+      der_pid == "NA" & der_vote_cat == "Vote reported" ~ "2_pid_impl",
+      der_pid == "NA" & der_vote_cat == "Don't know" ~ "3_nopid",
+      der_pid == "NA" & der_vote_cat == "NA" ~ "3_nopid"
+    )
+  )
+
+# now let's create a new co/outpartisan variable including implicit partisans too
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    der_outpartisan_comb = case_when(
+      # === EXPLICIT PID =======================================================
+      # case 1: pid and control group (implies conational)
+      der_partisanship == "1_pid_expl" &
+        cj_trmnt == "4_somenat" &
+        der_conational == "co-national" ~ "1_control_expl",
+      # case 2: pid and copartisan (same)
+      der_partisanship == "1_pid_expl" &
+        str_detect(cj_trmnt, "partisan") &
+        (ext_cj_party_pf_name == ext_q_party_id_pf_name) ~ "2_co_expl",
+      # case 3: pid and outpartisan
+      der_partisanship == "1_pid_expl" &
+        str_detect(cj_trmnt, "partisan") &
+        (ext_cj_party_pf_name != ext_q_party_id_pf_name) ~ "3_out_expl",
+      # case 4: pid and eu outnational cj (hence no party shown)
+      der_partisanship == "1_pid_expl" &
+        !str_detect(cj_trmnt, "partisan") &
+        str_detect(cj_trmnt, "eunat") ~ "97_eunat_expl",
+      # case 5: pid and noneu outnational cj (hence no party shown)
+      der_partisanship == "1_pid_expl" &
+        !str_detect(cj_trmnt, "partisan") &
+        str_detect(cj_trmnt, "somenat") ~ "98_outnat_expl",
+
+      # === IMPLICIT PID =======================================================
+      # case 4: pid and control group
+      der_partisanship == "2_pid_impl" &
+        cj_trmnt == "4_somenat" &
+        der_conational == "co-national" ~ "4_control_impl",
+      # case 5: impl pid and copartisan
+      der_partisanship == "2_pid_impl" &
+        str_detect(cj_trmnt, "partisan") &
+        (ext_cj_party_pf_name == der_vote_combined_name) ~ "5_co_impl",
+      # case 6: pid and outpartisan
+      der_partisanship == "2_pid_impl" &
+        str_detect(cj_trmnt, "partisan") &
+        (ext_cj_party_pf_name != der_vote_combined_name) ~ "6_out_impl",
+      # case 4: pid and eu outnational cj (hence no party shown)
+      der_partisanship == "2_pid_impl" &
+        !str_detect(cj_trmnt, "partisan") &
+        str_detect(cj_trmnt, "eunat") ~ "97_eunat_impl",
+      # case 5: pid and noneu outnational cj (hence no party shown)
+      der_partisanship == "2_pid_impl" &
+        !str_detect(cj_trmnt, "partisan") &
+        str_detect(cj_trmnt, "somenat") ~ "98_outnat_impl",
+
+      # === NO PID =============================================================
+      # case 1: nopid and conational
+      der_partisanship == "3_nopid" &
+        der_conational == "co-national" ~ "99_conat_nopid",
+      der_partisanship == "3_nopid" &
+        der_conational == "out-national-EU" ~ "99_outnatEU_nopid",
+      der_partisanship == "3_nopid" &
+        der_conational == "out-national-non-EU" ~ "99_outnat_nopid",
+      .default = NA
+    )
+  )
+
+labels_der_outpartisan_comb <- eu25games2019 |>
+  distinct(der_outpartisan_comb) |>
+  mutate()
+
+```
+
+## Implicit vs explicit partisans distributions
+
+```{r}
+#| label: distr-expl-impl
+
+eu25games2019 |>
+  tabyl(der_outpartisan_comb) |>
+  adorn_totals()
+
+```
+
+```{r}
+#| label: distr-expl-impl-country
+
+eu25games2019 |>
+  tabyl(der_outpartisan_comb, meta_country) |>
+  adorn_totals()
+```
+
+
+# Save dataset ready for estimation
+
+```{r}
+#| label: save-data-2model
+
+save(
+  eu25games2019,
+  file = here(
+    "data",
+    "02_processed",
+    "eu25games2019.RData"
+  )
+)
+
+```
+
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
+
+
+  
