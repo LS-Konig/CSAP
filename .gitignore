@@ -1,0 +1,26 @@
+
+# IDE and R-specific files
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Quarto
+.quarto
+_extensions/
+_freeze/
+_publish.yml
+**/.ipynb_checkpoints/
+
+# Rendered Outputs
+*.pdf
+*.htmls
+
+# Cache folders and files
+*cache*
+*code_files*
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+
