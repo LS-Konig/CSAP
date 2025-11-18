@@ -13,8 +13,8 @@ _publish.yml
 **/.ipynb_checkpoints/
 
 # Rendered Outputs
-*.pdf
-*.htmls
+*.pdf*
+*.htmls*
 
 # Cache folders and files
 *cache*
