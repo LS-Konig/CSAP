@@ -123,6 +123,8 @@ The underlying idea is to study the effect of explicit subjective group attachem
 
 [^1]: We omit the prefix quasi- for readability when referring to treatments, controls, and causal terminology. This choice is purely stylistic and does not imply that our design is experimental.
 
+The effect of the partisan-group-relative-variable is conditional on the type of partisanship. The partisan-group-relative-variable is itself a function of assigned partisan ingroup of respondents (by attachement for explicit and by vote intention/choice for implicit) and the displayed party affiliation of the conjoint profile.
+
 ### Data {#sec-data}
 
 We analyze data from @hahm2024divided ...
@@ -131,15 +133,45 @@ We analyze data from @hahm2024divided ...
 
 We code...
 
+Partisanship
+
+$T = 1$ -> explicit partisanship
+$T = 0$ -> implicit partisanship
+
+Conjoint stimuli
+$Z$
+
+Partisan Group-relative variable (Co-, Out- or Non-partisan)
+$P_g$
+
 ### Dependent variable {#sec-dv}
 
 Token allocated in the experiment
+
+$Y$
 
 ### Control variables {#sec-dv}
 
 ### Causal model
 
+Partianship -> Conjoint_Profiles -> Tokens
+
 ### Statistical model
+
+Let $Y_{ripc}$ be the number of tokens allocated in round $r$ by respondent $i$ of party $p$ in country $c$.
+
+Then, 
+
+$$
+Y_{ripc} = \beta_1 * P_G + \beta_2 * T + \beta_3 * P_G * T
+$$
+
+tbd
+
+nested random intercepts at $i$, $p$, and $c$
+and random effects for $p$ and $c$
+
+to account for party level variation in both the general extend of token spending patterns and the specific effect of explicitly feeling attached. and for comparative analyses of country differences in the effects of T 
 
 ### Quantities of interest
 
@@ -151,7 +183,7 @@ Measure:
   - Implicit partisans:
     - (Expected number in tokens allocated | coplayer is copartisan & implicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & implicit partisanship)
 
-ATE = AffPol_Explicit - AffPol_Implicit
+CATE = AffPol_Explicit - AffPol_Implicit
 
 #### Ingroup favoritms
 
@@ -161,7 +193,7 @@ Measure:
   - Implicit partisans:
     - (Expected number in tokens allocated | coplayer is copartisan & implicit partisanship) - (Expected number in tokens allocated | coplayer is nonpartisan (control) & implicit partisanship)
 
-ATE = InFav_Explicit - InFav_Implicit
+CATE = InFav_Explicit - InFav_Implicit
 
 #### Outgroup derogation
 
@@ -171,7 +203,7 @@ Measure:
   - Implicit partisans:
     - (Expected number in tokens allocated | coplayer is nonpartisan (control) & implicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & implicit partisanship)
 
-ATE = OutDer_Explicit - OutDer_Implicit
+CATE = OutDer_Explicit - OutDer_Implicit
 
 ## Empirical analysis {#sec-analysis}
 
