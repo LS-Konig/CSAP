@@ -99,15 +99,81 @@ Afterwards, we introduce our analytical distinction and present our argument why
 
 Finally, we synthesize existing literature on partisanship and affective polarization to formulate hypothesis about potential differences between explicit and implicit partisans regarding their affective polarization behavior.
 
-## Research Design {#sec-design}
+Hypotheses:
+
+$H_1$: Explicit partisans exhibit higher levels of affective polarization than implicit partisans.
+
+$H_2$: Explicit partisans exhibit higher levels of ingroup favoritism than implicit partisans.
+
+$H_3$: Explicit partisans exhibit higher levels of outgroup derogation than implicit partisans.
+
+Note that these hypotheses are logically dependent: As ingroup favoritsm and outgroup derogation are two subcomponents that jointly make up affective polarization, if $H_1$ were true, either $H_2$ or $H_3$ or both have to be true by extension.
+
+$H_2$: Explicit partisans exhibit both more ingroup favoritsm and more outgroup derogation than implicit partisans.
+
+depending on literature, additional comparative hypothesis
+
+## Research design {#sec-design}
 
 In this section, we situate our measurement approach of affective polarization, present the used data and out empirical strategie to approximate an isolation of the causal effect of *explicit* partisanship on our outcomes of interest: affective polarization, ingroup favoritism and outgroup derogation.
 
 In causal terminology, explicit partisans form our treatment group ($T = 1$), with implicit partisans constituting our control group ($T = 0$).[^1]
 
+The underlying idea is to study the effect of explicit subjective group attachement compared to implicit group attachement on affective polarization. 
+
 [^1]: We omit the prefix quasi- for readability when referring to treatments, controls, and causal terminology. This choice is purely stylistic and does not imply that our design is experimental.
 
-## Empirical Analysis {#sec-analysis}
+### Data {#sec-data}
+
+We analyze data from @hahm2024divided ...
+
+### Independent variables {#sec-iv}
+
+We code...
+
+### Dependent variable {#sec-dv}
+
+Token allocated in the experiment
+
+### Control variables {#sec-dv}
+
+### Causal model
+
+### Statistical model
+
+### Quantities of interest
+
+#### Affective polarization
+
+Measure: 
+  - Explicit partisans: 
+    - (Expected number in tokens allocated | coplayer is copartisan & explicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & explicit partisanship)
+  - Implicit partisans:
+    - (Expected number in tokens allocated | coplayer is copartisan & implicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & implicit partisanship)
+
+ATE = AffPol_Explicit - AffPol_Implicit
+
+#### Ingroup favoritms
+
+Measure: 
+  - Explicit partisans: 
+    - (Expected number in tokens allocated | coplayer is copartisan & explicit partisanship) - (Expected number in tokens allocated | coplayer is nonpartisan (control) & explicit partisanship)
+  - Implicit partisans:
+    - (Expected number in tokens allocated | coplayer is copartisan & implicit partisanship) - (Expected number in tokens allocated | coplayer is nonpartisan (control) & implicit partisanship)
+
+ATE = InFav_Explicit - InFav_Implicit
+
+#### Outgroup derogation
+
+Measure: 
+  - Explicit partisans: 
+    - (Expected number in tokens allocated | coplayer is nonpartisan (control) & explicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & explicit partisanship)
+  - Implicit partisans:
+    - (Expected number in tokens allocated | coplayer is nonpartisan (control) & implicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & implicit partisanship)
+
+ATE = OutDer_Explicit - OutDer_Implicit
+
+## Empirical analysis {#sec-analysis}
 
 We present our findings in three stages. First, we present the distributions of explicit and implicit partisanship across our included country samples. Next, we present the overall average treatment effects of explicit partisanship on our outcomes of interest. Finally, we present cross-country variation of these pooled results to place our results in a comparative perspective.
 
