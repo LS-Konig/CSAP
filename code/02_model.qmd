@@ -1,0 +1,164 @@
+---
+title: |
+  Code Notebook
+subtitle: |
+  How does reported partisan attachement influence affective polarization?: A comparative study of 25 European democracies
+author:
+  - name: Tristan Muno
+    email: tristan.muno@uni-mannheim.de
+    affiliations:
+      - name: University of Mannheim
+        department: School of Social Sciences
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "janitor",
+  "lme4",
+  "brms",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+```{r}
+#| label: load-data
+
+load(
+  here(
+    "data",
+    "02_processed",
+    "eu25games2019.RData"
+  )
+)
+```
+
+# Model Formula
+
+What to model as random slopes, what to model as random intercepts????
+
+```{r}
+#| label: model-formula
+
+formula_base <-
+  # outcome: tokens allocated
+  cj_token ~
+    # main variable of interest
+    der_partisan_type +
+    # partisan relationship variable
+    der_partisan_relationship +
+    # interaction term for conditional effects
+    der_partisan_type *
+      der_partisan_relationship +
+
+    # conjoint controls
+    cj_age_en +
+    cj_class_en +
+    cj_sex_en +
+    cj_reli_en +
+    # only in dictator game: eu pos as additional treatment
+    cj_eupos_shown +
+    # round of game
+    meta_round +
+    # wave of survey
+    meta_wave +
+
+    # random intercept + slope of T, R, and TxR at country level
+    (1 + der_partisan_type * der_partisan_relationship | meta_country) +
+    # random intercept + slope of T at party-within-country level
+    (1 +
+      der_partisan_type * der_partisan_relationship |
+      meta_country:der_partisan_anchor_name) +
+    # respondent random intercept nested in party-within-country
+    (1 | meta_country:der_partisan_anchor_name:meta_pid)
+
+formula_control
+
+```
+
+```{r}
+#| label: code-1
+
+# start your code here
+test <- lmer(
+  formula = formula_base,
+  data = eu25games2019 |>
+    filter(meta_game == "dict" & der_conational == "co-national")
+)
+
+summary(test)
+vcov(test)
+
+
+summary(lmer(
+  formula = cj_token ~ der_partisan_type *
+    der_partisan_relationship +
+    (1 + der_partisan_type | meta_country) +
+    (1 + der_partisan_type | meta_country:der_partisan_anchor_name) +
+    (1 | meta_country:der_partisan_anchor_name:meta_pid),
+  data = eu25games2019 |>
+    filter(meta_game == "trust" & der_conational == "co-national")
+))
+```
+
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
+
+
+  

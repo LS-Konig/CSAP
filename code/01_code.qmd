@@ -350,6 +350,7 @@ labels_der_outpartisan_comb <- eu25games2019 |>
 
 ```{r}
 #| label: fig-impl-expl-distribution
+#| fig-dpi: 500
 
 toplot <- eu25games2019 |>
   select(meta_country, der_partisanship, meta_pid) |>
@@ -391,7 +392,7 @@ ggplot(
   labs(
     x = "Share",
     y = "Country",
-    fill = "Partisanship"
+    fill = "Partisan Type"
   ) +
   theme_pubr()
 ```
@@ -417,9 +418,102 @@ eu25games2019 |>
   adorn_totals()
 ```
 
+# Generate Key Variables in the Framework: Partisan Type (T), Partisan Anchor (A), Relationship Category (R)
+
+## Partisan Type $T$
+
+```{r}
+#| label: partisan-type
+
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    der_partisan_type = case_when(
+      der_partisanship == "1_pid_expl" ~ 1,
+      der_partisanship == "2_pid_impl" ~ 0,
+      .default = NA
+    )
+  )
+
+```
+
+```{r}
+#| label: tbl-partisan-type
+
+eu25games2019 |>
+  tabyl(der_partisan_type) |>
+  adorn_totals() |>
+  adorn_rounding() |>
+  knitr::kable()
+
+```
+
+```{r}
+#| label: tbl-partisan-type-country
+
+eu25games2019 |>
+  tabyl(meta_country, der_partisan_type) |>
+  adorn_totals()
+
+```
+
+## Partisan Anchor $A$
+
+```{r}
+#| label: partisan-anchor
+
+# think of it as partisan ingroup
+
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    der_partisan_anchor = case_when(
+      der_pid == "Party ID reported" ~ ext_q_party_id_pf_name,
+      der_pid == "No Party ID" &
+        der_vote_cat == "Vote reported" ~ der_vote_combined_name
+    )
+  )
+```
+
+```{r}
+#| label: tbl-partisan-anchor
+
+eu25games2019 |>
+  filter(meta_country == "Austria") |>
+  tabyl(der_partisan_anchor_name) |>
+  adorn_totals() |>
+  adorn_rounding()
+```
+
+## Partisan Relationship Category $R$
+
+```{r}
+#| label: partisan-relationship-category
+
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    der_partisan_relationship = case_when(
+      # control group (no partisan cue but still conational)
+      cj_trmnt == "4_somenat" &
+        der_conational == "co-national" ~ "None",
+      # copartisan
+      der_partisan_anchor_name == ext_cj_party_pf_name ~ "Co",
+      # outpartisan
+      der_partisan_anchor_name != ext_cj_party_pf_name ~ "Out"
+    ),
+    der_partisan_relationship = fct_relevel(der_partisan_relationship, "None")
+  )
+```
+
+```{r}
+#| label: tbl-partisan-relationship
+
+eu25games2019 |>
+  tabyl(der_partisan_relationship) |>
+  adorn_totals() |>
+  adorn_rounding()
+```
 
 # Save dataset ready for estimation
-
+  
 ```{r}
 #| label: save-data-2model
 
