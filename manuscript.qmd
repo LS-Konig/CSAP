@@ -38,44 +38,7 @@ geometry:
   - footskip = 20pt
 ---
 
-## 📝 Key Research Notes & Contributions
 
-### 1. Conceptual & Theoretical Contribution
-
--   **Identified Gap:** Existing studies on affective polarization either focus on **explicit partisan subsamples** or use whole samples (e.g., feeling thermometers), failing to analytically distinguish between types of attachment.
--   **Analytical Distinction:** Introduces the distinction between:
-    -   **Explicit Partisans (Treatment,** $T=1$): Those who explicitly report partisan attachment.
-    -   **Implicit Partisans (Control,** $T=0$): Those who report **no** attachment but indicate a vote choice/intention.
-
-------------------------------------------------------------------------
-
-### 2. Empirical Mapping & Research Question
-
--   **Initial Analysis:** Examine the **distribution of explicit and implicit partisans** across 25 EU countries.
--   **Figure 1:** Displays the cross-national distribution, establishing **substantial cross-national variation**.
--   **Core Question:** **Does the explicit vs. implicit partisan distinction *matter* for behavior?** (I.e., what is its causal effect?)
-
-------------------------------------------------------------------------
-
-### 3. Causal & Methodological Framework
-
--   **Causal Objective:** Estimate the **conditional average causal treatment effect (CATE)** of being an Explicit Partisan ($T=1$).
--   **Outcomes (QoIs):**
-    -   Affective Polarization ($Y_C - Y_O$)
-    -   In-group Favoritism ($Y_C - Y_{Non}$)
-    -   Out-group Derogation ($Y_{Non} - Y_O$)
--   **Methodology:** Multilevel Regression Adjustment (Bayesian $brms$) using a **single, combined model** for all token allocations, including:
-    -   **Fixed Effects:** Treatment ($T$), Recipient Type ($R$: Co/Out/Non), and the crucial $\mathbf{T \times R}$ interaction (to directly estimate QoIs).
-    -   **Adjustment:** Control for key covariates ($X$) to satisfy the Conditional Independence Assumption (CIA).
-    -   **Structure:** Accounts for nesting via random effects (Rounds $\rightarrow$ Respondents $\rightarrow$ Parties $\rightarrow$ Countries), specifically including **random slopes for** $T$ at the party level ($\mathbf{1 + T \mid party\_id}$) for heterogeneity control.
-
-------------------------------------------------------------------------
-
-### 4. Results & Findings Presentation
-
--   **Figure 2 (Pooled AMCE):** Presents the **Average Marginal Component Effect (AMCE)** for all three QoIs across both game types (Dictator and Trust Game), summarizing the overall causal contribution of explicit attachment across 25 countries.
--   **Heterogeneity Analysis:** Investigates substantial **country-level variation** in the causal effect.
--   **Figures 3, 4, 5 (Country-Specific Effects):** Disaggregate the treatment effect for Affective Polarization, In-group Favoritism, and Out-group Derogation by country and game type. These figures utilize the estimated **random slopes and intercepts** from the multilevel model to show where the explicit/implicit distinction matters most.
 
 ## Introduction {#sec-introduction}
 
@@ -172,6 +135,12 @@ nested random intercepts at $i$, $p$, and $c$
 and random effects for $p$ and $c$
 
 to account for party level variation in both the general extend of token spending patterns and the specific effect of explicitly feeling attached. and for comparative analyses of country differences in the effects of T 
+
+Dependent Variable: Number of Tokens allocated
+Independent Variable: T (1 = Expl/ 0 = Impl)
+
+random effects: T for parties (heterogenous treatment) nested in countries (comparative analysis)
+random intercepts: respondent nested in parties nested in countries
 
 ### Quantities of interest
 
