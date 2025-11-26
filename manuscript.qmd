@@ -38,7 +38,7 @@ geometry:
   - footskip = 20pt
 ---
 
-
+Respondents vary along two analytically distinct dimensions. First, the partisan type ($T_i$) distinguishes respondents who report subjective partisan attachment (explicit partisans, $T_i=1$) from those who report a vote intention or choice in the absence of attachment (implicit partisans, $T_i = 0$). Second, each respondent is assigned a partisan anchor ($A_i$), defined as the party to which they report either attachment or vote intention. In the conjoint tasks, the party cue of profile $j$ is compared to anchor $A_i$ to generate a partisan relationship category ($R_{ij}∈\{Co,Out,Non\}$). This tripartite structure cleanly separates treatment status, party identity, and respondent–profile relationships, and it allows us to estimate the conditional effect of explicit partisan attachment across parties and countries using a hierarchical model with random effects for respondents, parties, and countries.
 
 ## Introduction {#sec-introduction}
 
@@ -117,7 +117,7 @@ $Y$
 
 ### Causal model
 
-Partianship -> Conjoint_Profiles -> Tokens
+Partisan Type -> Partisan Anchor -> Relationship Category -> Allocation
 
 ### Statistical model
 

@@ -1,0 +1,575 @@
+1. ⭐ Final Three-Layer Terminology Framework (APSR-Ready)
+
+This framework resolves all ambiguity and aligns causal, conceptual, and statistical terminology.
+
+Layer 1 — Partisan Type (Treatment Variable)
+
+Describes how a respondent is partisan.
+
+Explicit Partisan: subjective attachment to a party
+
+Implicit Partisan: vote intention/choice but no attachment
+
+None: no attachment and no vote intention/choice
+
+In causal analyses, the estimand is defined only for:
+
+S={i:Ti∈{0,1}}
+S={i:T
+i
+	​
+
+∈{0,1}}
+
+Notation:
+
+Ti=1
+T
+i
+	​
+
+=1: Explicit
+
+Ti=0
+T
+i
+	​
+
+=0: Implicit
+
+Ti=None
+T
+i
+	​
+
+=None: Excluded from causal model
+
+Layer 2 — Partisan Anchor (Party Identity of Respondent)
+
+Defines to which party the respondent belongs.
+
+The respondent’s party of reference, determined by attachment (explicit) or vote intention/choice (implicit).
+
+Notation:
+
+Ai∈{1,…,P}if Ti∈{0,1}
+A
+i
+	​
+
+∈{1,…,P}if T
+i
+	​
+
+∈{0,1}
+
+Respondents with 
+Ti=None
+T
+i
+	​
+
+=None have no valid anchor and are excluded from causal analysis.
+
+Layer 3 — Partisan Relationship Category (Profile–Respondent Relationship)
+
+Defines how the conjoint profile’s party affiliation relates to the respondent’s anchor.
+
+Co-partisan (profile’s party = 
+Ai
+A
+i
+	​
+
+)
+
+Out-partisan (profile’s party ≠ 
+Ai
+A
+i
+	​
+
+, but is a party in the system)
+
+Non-partisan (profile displays no party)
+
+Notation:
+
+Rij=f(Ai,Zj)∈{Co,Out,Non}
+R
+ij
+	​
+
+=f(A
+i
+	​
+
+,Z
+j
+	​
+
+)∈{Co,Out,Non}
+
+This variable is undefined for respondents with None.
+
+2. ⭐ Terminology Guide Table (Drop into Appendix A)
+Concept	Definition	Notation	Why It’s Distinct
+Partisan Type	Explicit vs implicit vs none	
+Ti
+T
+i
+	​
+
+	Treatment variable
+Partisan Anchor	Respondent’s party identity	
+Ai
+A
+i
+	​
+
+	Groups respondents for hierarchical structure
+Profile Party Cue	Party shown in conjoint	
+Zj
+Z
+j
+	​
+
+	Input into determining relational category
+Partisan Relationship Category	Co/Out/Non relative to anchor	
+Rij
+R
+ij
+	​
+
+	Key moderator for outcome
+Outcome	Tokens allocated	
+Yijr
+Y
+ijr
+	​
+
+	Behavioral measure of affective polarization
+3. ⭐ DAG (ASCII Version + APSR-Style Explanation)
+ASCII DAG
+     Explicit/Implicit
+        Partisan Type (T)
+                |
+                v
+     -----------------------
+     |                     |
+Partisan Anchor (A) ---> Relationship Category (R)
+     |                     |
+     ------- Profile Cue (Z)
+                |
+                v
+            Token Allocation
+                 (Y)
+
+Short Explanatory Text (use in Methods)
+
+The treatment, Partisan Type (
+Ti
+T
+i
+	​
+
+), determines whether a respondent’s political alignment is explicit or implicit. For respondents with a well-defined partisan identity (
+Ti∈{0,1}
+T
+i
+	​
+
+∈{0,1}), this yields a Partisan Anchor (
+Ai
+A
+i
+	​
+
+). The conjoint profile provides a party cue (
+Zj
+Z
+j
+	​
+
+), which jointly with 
+Ai
+A
+i
+	​
+
+ defines the Partisan Relationship Category (
+Rij
+R
+ij
+	​
+
+): co-partisan, out-partisan, or non-partisan. Token allocation (
+Yijr
+Y
+ijr
+	​
+
+) is causally downstream of both 
+Ti
+T
+i
+	​
+
+ and 
+Rij
+R
+ij
+	​
+
+, conditional on covariates and random effects.
+
+4. ⭐ APSR-Ready Rewrite: Theory (only the relevant part)
+
+Partisanship in multi-party systems exhibits two analytically distinct dimensions. The first concerns the type of partisanship a respondent expresses. Some respondents report subjective closeness to a party (explicit partisans), while others report a vote intention or choice in the absence of attachment (implicit partisans). These categories capture different modes of group commitment and are comparable to the distinction between psychological partisanship and expressive alignment.
+
+The second dimension concerns which party a respondent aligns with. All explicit and implicit partisans possess a partisan anchor, the specific party they either feel attached to or intend to support. This yields meaningful within-country heterogeneity because explicit and implicit partisans tend to affiliate with systematically different parties across Europe.
+
+In behavioral tasks where respondents evaluate political out-parties, these two dimensions jointly shape responses. The party displayed in the conjoint profile is matched to the respondent’s anchor to generate a partisan relationship category—co-partisan, out-partisan, or non-partisan—which structure how respondents allocate social and political resources to others.
+
+This tripartite conceptual framework allows us to separate the effect of how respondents are partisan (explicit vs. implicit) from to which party they belong and how the evaluated profile relates to that party. Existing studies typically collapse these distinctions, which risks introducing systematic bias in cross-national work where the prevalence of explicit partisans varies widely. We theorize that explicit partisanship increases affective polarization by strengthening social identity commitment, yielding distinct predictions regarding in-group favoritism and out-group derogation.
+
+5. ⭐ APSR-Ready Rewrite: Research Design (core explanatory paragraphs)
+Sampling and Definition of Analytic Population
+
+Respondents fall into three categories: explicit partisans (who report subjective attachment), implicit partisans (who report vote intention or choice but no attachment), and non-partisans (neither attachment nor vote reporting). Because affective polarization necessarily requires a party anchor to classify co-, out-, or non-partisan profiles, the causal estimand is defined only for respondents with an anchor, i.e. explicit and implicit partisans. Across countries, this analytic population comprises approximately 75–95 percent of respondents. We show in Appendix Figure X that the share of non-partisans varies only modestly across countries and does not correlate systematically with affective polarization outcomes.*
+
+Treatment Definition
+
+The treatment is Partisan Type (
+Ti
+T
+i
+	​
+
+), indicating whether respondent 
+i
+i is an explicit (
+Ti=1
+T
+i
+	​
+
+=1) or implicit (
+Ti=0
+T
+i
+	​
+
+=0) partisan. This classification precedes the conjoint task.
+
+Constructing the Partisan Anchor
+
+Each respondent in the analytic sample has a Partisan Anchor (
+Ai
+A
+i
+	​
+
+), defined as the specific party to which they report attachment (explicit) or which they intend to support (implicit). Anchors vary across respondents within parties and across countries.
+
+Conjoint Design and Partisan Relationship Category
+
+Each conjoint profile contains a party cue (
+Zj
+Z
+j
+	​
+
+). For each respondent–profile pair, we generate the Partisan Relationship Category:
+
+Co-partisan if 
+Zj=Ai
+Z
+j
+	​
+
+=A
+i
+	​
+
+
+Out-partisan if 
+Zj≠Ai
+Z
+j
+	​
+
+
+=A
+i
+	​
+
+, but 
+Zj
+Z
+j
+	​
+
+ is a party
+
+Non-partisan if the profile displays no party
+
+This mapping is mechanical and identical across respondents and countries.
+
+6. ⭐ APSR-Ready Statistical Model Section
+
+Define the outcome:
+
+Yijr=tokens allocated in round r by respondent i to profile j.
+Y
+ijr
+	​
+
+=tokens allocated in round r by respondent i to profile j.
+
+Core fixed effects:
+
+Treatment: 
+Ti
+T
+i
+	​
+
+
+Relationship Category: 
+Rij
+R
+ij
+	​
+
+
+Interaction: 
+Ti×Rij
+T
+i
+	​
+
+×R
+ij
+	​
+
+ (identifies CATE of explicit partisanship for each relationship type)
+
+The full model:
+
+Yijr=α+βTTi+∑k∈{Co,Out,Non}γk1(Rij=k)+∑kδkTi×1(Rij=k)+Xiθ+ui+vAi+wCi+εijr.
+Y
+ijr
+	​
+
+=α+β
+T
+	​
+
+T
+i
+	​
+
++
+k∈{Co,Out,Non}
+∑
+	​
+
+γ
+k
+	​
+
+1(R
+ij
+	​
+
+=k)+
+k
+∑
+	​
+
+δ
+k
+	​
+
+T
+i
+	​
+
+×1(R
+ij
+	​
+
+=k)+X
+i
+	​
+
+θ+u
+i
+	​
+
++v
+A
+i
+	​
+
+	​
+
++w
+C
+i
+	​
+
+	​
+
++ε
+ijr
+	​
+
+.
+
+Random effects:
+
+ui∼N(0,σu2)
+u
+i
+	​
+
+∼N(0,σ
+u
+2
+	​
+
+) respondent intercepts
+
+vAi∼N(0,ΣA)
+v
+A
+i
+	​
+
+	​
+
+∼N(0,Σ
+A
+	​
+
+) party-level intercepts and random slopes for 
+Ti
+T
+i
+	​
+
+
+wCi∼N(0,σC2)
+w
+C
+i
+	​
+
+	​
+
+∼N(0,σ
+C
+2
+	​
+
+) country intercepts
+
+Implementable in brms with:
+
+1 + T | party_id
+1 | respondent_id
+1 | country_id
+
+7. ⭐ Variable Dictionary (Notation)
+Variable	Meaning
+
+Ti
+T
+i
+	​
+
+	Partisan Type (explicit=1, implicit=0)
+
+Ai
+A
+i
+	​
+
+	Partisan Anchor
+
+Zj
+Z
+j
+	​
+
+	Profile party cue
+
+Rij
+R
+ij
+	​
+
+	Relationship category (Co/Out/Non)
+
+Yijr
+Y
+ijr
+	​
+
+	Tokens allocated
+
+Xi
+X
+i
+	​
+
+	Covariate vector
+
+ui
+u
+i
+	​
+
+	Respondent RE
+
+vAi
+v
+A
+i
+	​
+
+	​
+
+	Party RE
+
+wCi
+w
+C
+i
+	​
+
+	​
+
+	Country RE
+8. ⭐ Recommended Figure Labels (APSR style)
+Figure 1
+
+Distribution of Explicit, Implicit, and Non-Partisans across 25 Countries
+
+Figure 2
+
+Pooled Average Marginal Component Effects of Explicit vs. Implicit Partisan Type
+
+Figure 3
+
+Country-Level Estimates of Explicit Partisanship’s Effect on Affective Polarization
+
+Figure 4
+
+Country-Level Effects on In-Group Favoritism
+
+Figure 5
+
+Country-Level Effects on Out-Group Derogation
