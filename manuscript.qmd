@@ -88,9 +88,32 @@ The underlying idea is to study the effect of explicit subjective group attachem
 
 The effect of the partisan-group-relative-variable is conditional on the type of partisanship. The partisan-group-relative-variable is itself a function of assigned partisan ingroup of respondents (by attachement for explicit and by vote intention/choice for implicit) and the displayed party affiliation of the conjoint profile.
 
+Respondents vary along two analytically distinct dimensions. First, the partisan type ($T_i$) distinguishes respondents who report subjective partisan attachment (explicit partisans, $T_i=1$) from those who report a vote intention or choice in the absence of attachment (implicit partisans, $T_i = 0$). Second, each respondent is assigned a partisan anchor ($A_i$), defined as the party to which they report either attachment or vote intention. In the conjoint tasks, the party cue of profile $j$ is compared to anchor $A_i$ to generate a partisan relationship category ($R_{ij}∈\{Co,Out,Non\}$). This tripartite structure cleanly separates treatment status, party identity, and respondent–profile relationships, and it allows us to estimate the conditional effect of explicit partisan attachment across parties and countries using a hierarchical model with random effects for respondents, parties, and countries.
+
 ### Data {#sec-data}
 
 We analyze data from @hahm2024divided ...
+
+### Variables
+
+Following our theoretical framework outlined before, we now operationalize our main variables.
+
+Our main variable of interest is $T_i = \{1, 0\}$, which denotes the *partisan type* of respondent $i$. Values of $T_i = 1$ indicate explicit partisan type, i.e., respondents who reported a feeling of attachement to any political party. $T_i = 0$ marks implicit partisan types: respondents who actively reported not feeling attached to a political party, but expressed a party preference through a vote choice or intention variable.
+
+Next, each respondent is assigned a *partisan anchor* ($A_i$), namely the party respondents indicated to feel attached to or has (intended to) voted for.
+
+We use $Z_ri$ to denote the conjoint profile's cue presented in round $r$ to respondent $i$. These cues include dimension party, age, class, gender, religion, nationality and in case of the dictator game an EU attachement. $Z^{party}_{ri}$ marks the partisan cue, $Z^{other}_{ri}$ all other conjoint cues.
+
+Given we are interested in the partisan effects, we limit observations to conjoint profiles with the nationality attribute fixed to that of the respective country (i.e., "co-national" from respondents' point of view), since there was never a partisan cue for outnationals to exclude implausible scenarios.
+
+Figure X displays the causal data-generating structure. Respondents possess a partisan anchor $A$, defined as the party they feel close to (explicit partisans) or intend to vote for (implicit partisans). Partisan type $T$ (explicit vs. implicit) is only defined for respondents with a partisan anchor and is therefore a child node of $A$. The conjoint design randomizes all profile attributes. The partisan cue $Z^{party} combines with $A$ to produce the partisan relationship category $R=f(A,Z^{party})$, which determines whether the profile is interpreted as co-partisan, out-partisan, or neutral. Other randomized profile cues $Z^{other}$ affect the outcome directly. Token allocations $Y$ are affected by both $R$ and $Z^{other}$, with the effect of $R$ theorized to be conditional on $T$. Because $T$ is observational, we cannot assume conditional independence a priori, hence $C$ denotes potential confounders of both $T$ and $Y$.
+
+To interpret the path $T \rightarrow R \rightarrow Y$ as the conditional causal effect of $T$, we must establish the following assumptions:
+
+SUTVA -> Treatment outcomes are independent of treatment assignment to other units Y_i(1), Y_i(0)
+Conditional Independence -> No confounders influencing T and Y
+Covariate Balance -> $E[X \mid T = 1] = E[X \mid T = 0]$ Comparability of T=1 and T=0 
+Common Support -> for every respondent, there is a positive probability of being assigned to both the treatment and control groups (fulfilled by subset to respondents with partisan anchor)
 
 ### Independent variables {#sec-iv}
 
@@ -101,11 +124,7 @@ Partisanship
 $T = 1$ -> explicit partisanship
 $T = 0$ -> implicit partisanship
 
-Conjoint stimuli
-$Z$
 
-Partisan Group-relative variable (Co-, Out- or Non-partisan)
-$P_g$
 
 ### Dependent variable {#sec-dv}
 
@@ -121,13 +140,54 @@ Partisan Type -> Partisan Anchor -> Relationship Category -> Allocation
 
 ### Statistical model
 
-Let $Y_{ripc}$ be the number of tokens allocated in round $r$ by respondent $i$ of party $p$ in country $c$.
+The unit of observation is the specific profile evaluation (r) by respondent (i) who is nested within their assigned partisan anchor (a), which is itself nested within country (c). Thus, we have observations at Level 1, respondents at Level 2, partisan anchors at Level 3, and countries at Level 4.
+
+Let $Y_{ri}$ be the number of tokens allocated in round $r$ by respondent $i$ of party $p$ in country $c$.
 
 Then, 
 
 $$
-Y_{ripc} = \beta_1 * P_G + \beta_2 * T + \beta_3 * P_G * T
+\begin{aligned}
+Y_{riac} 
+  &= \beta_0 
+   + \beta_1 T_i 
+   + \beta_2 R_{ri} 
+   + \beta_3 \left(T_i \times R_{ri}\right)
+   + \beta_4 Z^{\text{other}}_{ri}
+   + \beta_5 C_i \\
+  &\quad 
+   + u_{i0}            
+   + v_{a0} + v_{aT} T_i   
+   + w_{c0} + w_{cT} T_i   
+   + \varepsilon_{ri}
+\end{aligned}
 $$
+
+with 
+
+$$
+\begin{aligned}
+u_{i0} &\sim \mathcal{N}(0, \sigma_u^2), \\
+\begin{pmatrix}
+v_{a0} \\[4pt]
+v_{aT}
+\end{pmatrix}
+&\sim \mathcal{N}\!\left(
+\begin{pmatrix} 0 \\ 0 \end{pmatrix},
+\Sigma_a
+\right), \\
+\begin{pmatrix}
+w_{c0} \\[4pt]
+w_{cT}
+\end{pmatrix}
+&\sim \mathcal{N}\!\left(
+\begin{pmatrix} 0 \\ 0 \end{pmatrix},
+\Sigma_c
+\right), \\
+\varepsilon_{ri} &\sim \mathcal{N}(0, \sigma^2)
+\end{aligned}
+$$
+
 
 tbd
 
@@ -144,35 +204,70 @@ random intercepts: respondent nested in parties nested in countries
 
 ### Quantities of interest
 
+In the following sections we define our substantive quantities of interest, affective polarization and its subcomponents, ingroup favoritism and outgroup derogation. Our substantive interest concerns the differences in these three measures between implicit and explicit partisan types. In the causal framing, we want to unravel the effect of a hypothetical intervention: If we hold all covariates constant and only change $T$ from $0$ to $1$, how does this impact our quantities of interest? 
+
 #### Affective polarization
 
-Measure: 
-  - Explicit partisans: 
-    - (Expected number in tokens allocated | coplayer is copartisan & explicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & explicit partisanship)
-  - Implicit partisans:
-    - (Expected number in tokens allocated | coplayer is copartisan & implicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & implicit partisanship)
+More precisely, we define affective polarization as the difference in expected token allocated in the conjoint games to co-partisans and out-partisans. This approach follows (?) Wagner (or Reiljan) in that it averages across all outgroups, which is a simplification given we are dealing with multi-party systems. Nevertheless, this (CHECK) yields a conservative measure, and allows for cross-national comparisons, as the number of parties in a given national party system varies, and so does the potential number of political outgroups.
 
-CATE = AffPol_Explicit - AffPol_Implicit
+Formally, we define affective polarization $AP$ as:
+
+$$
+AP = E(Y \mid R = Co) - E(Y \mid R = Out)
+$$
+
+These conditional expectations are further refined to capture the effect of explicit attachement:
+
+$$
+\begin{aligned}
+CATE_{AP} &= AP_{T=1} - AP_{T=0} \\
+          &= [E(Y \mid R = Co, T = 1) - E(Y \mid R = Out,T = 1)] \\
+          &\quad - [E(Y \mid R = Co, T = 0) - E(Y \mid R = Out, T = 0)]
+\end{aligned}
+$$
+
+With the formulated hypothesis above, we posit that $CATE_{AP} > 0$: We expect respondents with explicit partisan type ($T=1$) to exhibit higher levels of affective polarization than implicit types ($T=0$).
 
 #### Ingroup favoritms
 
-Measure: 
-  - Explicit partisans: 
-    - (Expected number in tokens allocated | coplayer is copartisan & explicit partisanship) - (Expected number in tokens allocated | coplayer is nonpartisan (control) & explicit partisanship)
-  - Implicit partisans:
-    - (Expected number in tokens allocated | coplayer is copartisan & implicit partisanship) - (Expected number in tokens allocated | coplayer is nonpartisan (control) & implicit partisanship)
+Do disentangle affective polarization into ingroup favoritism and outgroup derogation, we utilize that the conjoint setup included a neutral control group, in which no partisan cue was displayed ($R = None$). This allows as to estimate the effects of a copartisan cue ($R = Co$) relative to that neutral baseline, conditional on partisan type $T$.
 
-CATE = InFav_Explicit - InFav_Implicit
+Formally, we define ingroup favoritism $IF$ as:
+
+$$
+IF = E(Y \mid R = Co) - E(Y \mid R = None)
+$$
+
+further refining this equation with respect to partisan type $T$, we define our causal estimand as: 
+
+$$
+\begin{aligned}
+CATE_{IF} &= IF_{T=1} - IF_{T=0} \\
+          &= [E(Y \mid R = Co, T = 1) - E(Y \mid R = None,T = 1)] \\
+          &\quad - [E(Y \mid R = Co, T = 0) - E(Y \mid R = None, T = 0)]
+\end{aligned}
+$$
+
 
 #### Outgroup derogation
 
-Measure: 
-  - Explicit partisans: 
-    - (Expected number in tokens allocated | coplayer is nonpartisan (control) & explicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & explicit partisanship)
-  - Implicit partisans:
-    - (Expected number in tokens allocated | coplayer is nonpartisan (control) & implicit partisanship) - (Expected number in tokens allocated | coplayer is outpartisan & implicit partisanship)
+Similarly, the neutral control group ($R = None$) lets us estimate outgroup derogation as the average number in tokens withheld from outpartisans compared to the baseline condition.
 
-CATE = OutDer_Explicit - OutDer_Implicit
+Hence, we formalize outgroup derogation $OR$ as
+
+$$
+OR = E(Y \mid R = None) - E(Y \mid R = Out)
+$$
+
+the subsequent causal estimand is thus
+
+$$
+\begin{aligned}
+CATE_{OR} &= OR_{T=1} - OR_{T=0} \\
+          &= [E(Y \mid R = None, T = 1) - E(Y \mid R = Out,T = 1)] \\
+          &\quad - [E(Y \mid R = None, T = 0) - E(Y \mid R = Out, T = 0)]
+\end{aligned}
+$$
 
 ## Empirical analysis {#sec-analysis}
 
