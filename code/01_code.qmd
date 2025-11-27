@@ -478,7 +478,7 @@ eu25games2019 <- eu25games2019 |>
 
 eu25games2019 |>
   filter(meta_country == "Austria") |>
-  tabyl(der_partisan_anchor_name) |>
+  tabyl(der_partisan_anchor) |>
   adorn_totals() |>
   adorn_rounding()
 ```
@@ -495,9 +495,9 @@ eu25games2019 <- eu25games2019 |>
       cj_trmnt == "4_somenat" &
         der_conational == "co-national" ~ "None",
       # copartisan
-      der_partisan_anchor_name == ext_cj_party_pf_name ~ "Co",
+      der_partisan_anchor == ext_cj_party_pf_name ~ "Co",
       # outpartisan
-      der_partisan_anchor_name != ext_cj_party_pf_name ~ "Out"
+      der_partisan_anchor != ext_cj_party_pf_name ~ "Out"
     ),
     der_partisan_relationship = fct_relevel(der_partisan_relationship, "None")
   )

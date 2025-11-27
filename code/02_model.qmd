@@ -40,6 +40,8 @@ p_required <- c(
   "tidyverse",
   "here",
   "janitor",
+  "dagitty",
+  "ggdag",
   "lme4",
   "brms",
   "sessioninfo"
@@ -63,6 +65,60 @@ load(
     "eu25games2019.RData"
   )
 )
+```
+
+# Model DAG
+
+```{r}
+#| label: fig-dag
+#| fig-dpi: 500
+
+dag <- dagitty(
+  "dag {
+\"Z1\" [pos=\"0, 1\"]
+A [pos=\"0, 2\"]
+C [pos=\"2, 1\"]
+R [pos=\"1 ,1\"]
+T [exposure,pos=\"1 , 2\"]
+Y [outcome,pos=\"1 ,0\"]
+Z [pos=\"0 ,0\"]
+\"Z1\" -> R
+A -> R
+A -> T
+C -> T
+C -> Y
+R -> Y
+T -> R
+Z -> Y
+}"
+)
+
+tidy_dag <- tidy_dagitty(dag)
+
+label_mapping <- tibble(
+  name = c("A", "C", "R", "T", "Y", "Z", "Z1"),
+  new_label = c(
+    "A[i]",
+    "C[i]",
+    "R[r*i]",
+    "T[i]",
+    "Y[ri]",
+    "Z[r]^{other}",
+    "Z[r]^{party}"
+  )
+)
+
+tidy_dag <- tidy_dag |>
+  left_join(
+    label_mapping,
+    by = join_by(name)
+  )
+
+ggdag(tidy_dag) +
+  geom_dag_node() +
+  geom_dag_text(aes(label = new_label), parse = T) +
+  geom_dag_edges() +
+  theme_dag()
 ```
 
 # Model Formula
@@ -133,6 +189,19 @@ summary(lmer(
 ))
 ```
 
+
+
+
+
+
+
+# Model Starting Values
+
+# Model Settings
+
+# Estimation
+
+# Saving
 
 # Session Info
 
