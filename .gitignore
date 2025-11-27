@@ -15,6 +15,7 @@ _publish.yml
 # Rendered Outputs (Ignore all PDF and HTML files)
 *.pdf
 *.html
+*.pptx
 
 # Cache folders and files
 *cache*
