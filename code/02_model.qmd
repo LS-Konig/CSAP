@@ -71,6 +71,7 @@ load(
 
 ```{r}
 #| label: fig-dag
+#| fig-cap: "Directed acyclical graph (DAG) of the causal data-generating process. Respondents have a partisan anchor $A$, representing the party they feel attached to (explicit partisans) or (intend to) vote for (implicit partisans). Partisan type $T$ (explicit vs. implicit) is only defined for respondents with a partisan anchor and is thus a child node of $A$. The conjoint design randomizes all profile attributes $Z$. The partisan profile cue $Z^{party}$ combines with $A$ to generate the partisan relationship category $R = f(A, Z^{party}), which determines whether the profile is interpreted as a co-partisan, out-partisan, or neutral. Other randomized profile cues $Z^{other}$ affect the outcome $Y$ directly. Token allocations $Y$ are influenced by both $R$ and $Z^{other}$, with the effect of $R$ theorized to be conditional on $T$. Because $T$ is observational, potential confounders $C$ may affect both $T$ and $Y$, highlighting the assumptions required for causal interpretation."
 #| fig-dpi: 500
 
 dag <- dagitty(
@@ -166,6 +167,7 @@ formula_control
 
 ```{r}
 #| label: code-1
+#| eval: false
 
 # start your code here
 test <- lmer(
