@@ -78,13 +78,29 @@ depending on literature, additional comparative hypothesis
 
 ## Research design {#sec-design}
 
+This section outlines how we measure affective polarization and its subcomponents, the data we use, and out empirical strategy to estimate the effect of explicit partisanship on our outcomes of interest: affective polarization, ingroup favoritism, and outgroup derogation.
+
+We conceptually frame explicit partisanship as a treatment and implicit partisanship as a control. That is, respondents reporting a subjective attachement to a political party ($T_i = 1$) form the treated group, whereas respondents expressing vote choice without attachement ($T_i = 0) form the comparison group.[^omit-quasi]
+
+[^omit-quasi]: For readability, we omit the prefix "quasi-" when referring to treatment and control, but this does not imply random assignement. Our design remains observational.
+
+The underlying research question is: Does explicit partisan attachement amplify affective polarization relative to implicit partisan attachement?
+
+To approximate causal inference from observational variation, we exploit the following features of the data:
+
+1. Tripartite structure of partisan and profile relationships. Each respondent $i$ is characterized by their *partisan type* ($T_i$) and a *partisan anchor* ($A_i$), which is either the party they feel attached to (explicit partisans, $T_i = 1$) or intend to vote for (implicit partisans, $T_i = 0$). Each conjoint profile presents a party cue ($Z^{party}_{ri}$), which is compared to the respondent's anchor to classify the profile as co-partisan, out-partisan, or neutral ($R_{ri} \in {Co, Out, None}$). This structure separates treatment assignment, i.e., partisan type ($T_i$), respondent identity, i.e., partisan anchor ($A_i$), and profile-level variation ($R_ri$).
+2. Randomized conjoint profiles. The profiles' attributes -- including all non-partusab cues $Z^{other}_{ri}$ -- are randomly assigned. This ensures that observed differences in token allocations across $R_ri$ are attributable to profile characteristics rather than respondent selection.
+3. Hierarchical variation. Respondents are nested within partisan anchors, which are themselves nested within countries. This allows for multilevel modeling that captures heterogeneity at the respondent, party, and country level.
+
+{{< embed code/02_model.qmd#fig-dag >}}
+
 In this section, we situate our measurement approach of affective polarization, present the used data and out empirical strategie to approximate an isolation of the causal effect of *explicit* partisanship on our outcomes of interest: affective polarization, ingroup favoritism and outgroup derogation.
 
 In causal terminology, explicit partisans form our treatment group ($T = 1$), with implicit partisans constituting our control group ($T = 0$).[^1]
 
 The underlying idea is to study the effect of explicit subjective group attachement compared to implicit group attachement on affective polarization. 
 
-[^1]: We omit the prefix quasi- for readability when referring to treatments, controls, and causal terminology. This choice is purely stylistic and does not imply that our design is experimental.
+
 
 The effect of the partisan-group-relative-variable is conditional on the type of partisanship. The partisan-group-relative-variable is itself a function of assigned partisan ingroup of respondents (by attachement for explicit and by vote intention/choice for implicit) and the displayed party affiliation of the conjoint profile.
 
