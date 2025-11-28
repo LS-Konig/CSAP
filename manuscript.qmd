@@ -105,10 +105,11 @@ depending on literature, additional comparative hypothesis
 
 ## Research design {#sec-design}
 
-- Data and experimental setup -> hierarchical data structure
-- Variables -> DAG
+- Data and experimental setup -> waves and survey items -> hierarchical data structure
+- Variables -> DAG -> tripartite structure -> recapture hierarchical structure
 - Causal Assumptions
-- Model
+- Model -> recapture hierarchical structure -> cross level interaction
+- Control Variables? Priors
 - Quantities of Interest: CATE AP, IG, OD
 
 This section outlines how we measure affective polarization and its subcomponents, the data we use, and out empirical strategy to estimate the effect of explicit partisanship on our outcomes of interest: affective polarization, ingroup favoritism, and outgroup derogation.
@@ -125,7 +126,7 @@ To approximate causal inference from observational variation, we exploit the fol
 2. Randomized conjoint profiles. The profiles' attributes -- including all non-partusab cues $Z^{other}_{ri}$ -- are randomly assigned. This ensures that observed differences in token allocations across $R_ri$ are attributable to profile characteristics rather than respondent selection.
 3. Hierarchical variation. Respondents are nested within partisan anchors, which are themselves nested within countries. This allows for multilevel modeling that captures heterogeneity at the respondent, party, and country level.
 
-{{< embed code/02_model.qmd#fig-dag >}}
+{{< embed code/02_model_prep.qmd#fig-dag >}}
 
 In this section, we situate our measurement approach of affective polarization, present the used data and out empirical strategie to approximate an isolation of the causal effect of *explicit* partisanship on our outcomes of interest: affective polarization, ingroup favoritism and outgroup derogation.
 
@@ -189,67 +190,145 @@ Partisan Type -> Partisan Anchor -> Relationship Category -> Allocation
 
 ### Statistical model
 
-The unit of observation is the specific profile evaluation (r) by respondent (i) who is nested within their assigned partisan anchor (a), which is itself nested within country (c). Thus, we have observations at Level 1, respondents at Level 2, partisan anchors at Level 3, and countries at Level 4.
+The unit of analysis is the conjoint *round* $r$, that is, the evaluation of a single conjoint profile within one game. Each profile evaluation $r$ is nested within respondent $i$, who is nested within a partisan anchor $a$ (the respondent’s party of attachment or vote intention), which is nested within country $c$. This yields a four-level hierarchical data structure:  
+**Level 1:** profile evaluations ($r$) →  
+**Level 2:** respondents ($i$) →  
+**Level 3:** partisan anchors ($a$) →  
+**Level 4:** countries ($c$).
 
-Let $Y_{ri}$ be the number of tokens allocated in round $r$ by respondent $i$ of party $p$ in country $c$.
+Respondents vary along two analytically distinct dimensions. First, *partisan type* $(T_i)$ differentiates respondents who report subjective partisan attachment (**explicit partisans**, $T_i = 1$) from those who report a vote intention or vote choice without attachment (**implicit partisans**, $T_i = 0$). Second, each respondent is assigned a *partisan anchor* $(A_i)$, defined as the specific party to which they report either attachment (explicit partisans) or vote intention (implicit partisans).  
 
-Then, 
+In each conjoint round $r$, the party cue displayed in the profile is compared to the respondent’s partisan anchor $A_i$ to generate a *partisan relationship category* $R_{ri} \in \{\text{Co},\text{Out},\text{None}\}$. This tripartite structure --- partisan type, partisan anchor, and respondent-profile relationship --- cleanly separates (1) treatment status, (2) party identity, and (3) the relational meaning of each conjoint profile. It allows us to estimate how explicit partisan attachment conditions sensitivity to partisan cues across respondents, parties, and countries.
 
-$$
-\begin{aligned}
-Y_{riac} 
-  &= \beta_0 
-   + \beta_1 T_i 
-   + \beta_2 R_{ri} 
-   + \beta_3 \left(T_i \times R_{ri}\right)
-   + \beta_4 Z^{\text{other}}_{ri}
-   + \beta_5 C_i \\
-  &\quad 
-   + u_{i0}            
-   + v_{a0} + v_{aT} T_i   
-   + w_{c0} + w_{cT} T_i   
-   + \varepsilon_{ri}
-\end{aligned}
-$$
-
-with 
+Let ($Y_{riac}$) denote the number of tokens allocated by respondent ($i$) (nested in partisan anchor ($a$) and country $c$) in conjoint round ($r$). To estimate how explicit partisan type ($T_i = 1$) modifies the effect of the partisan relationship cue ($R_{ri}$), we specify the following multilevel model:
 
 $$
 \begin{aligned}
-u_{i0} &\sim \mathcal{N}(0, \sigma_u^2), \\
-\begin{pmatrix}
-v_{a0} \\[4pt]
-v_{aT}
-\end{pmatrix}
-&\sim \mathcal{N}\!\left(
-\begin{pmatrix} 0 \\ 0 \end{pmatrix},
-\Sigma_a
-\right), \\
-\begin{pmatrix}
-w_{c0} \\[4pt]
-w_{cT}
-\end{pmatrix}
-&\sim \mathcal{N}\!\left(
-\begin{pmatrix} 0 \\ 0 \end{pmatrix},
-\Sigma_c
-\right), \\
-\varepsilon_{ri} &\sim \mathcal{N}(0, \sigma^2)
+Y_{riac}
+&= \beta_0
+  + \beta_1 T_i
+  + \beta_2 R_{ri}
+  + \beta_3 (T_i \times R_{ri})
+  + \beta_4 Z^{\text{other}}_{ri}
+  + \beta_5 C_i \\
+&\quad
+  + u_{i0} + u_{iR} R_{ri} \\
+&\quad
+  + v_{a0} + v_{aT} T_i + v_{aR} R_{ri} \\
+&\quad
+  + w_{c0} + w_{cT} T_i + w_{cR} R_{ri} \\
+&\quad
+  + \varepsilon_{riac}.
 \end{aligned}
 $$
 
+Random effects are distributed as:
 
-tbd
+$$
+\begin{aligned}
+u_{i0} &\sim \mathcal{N}(0,\sigma^2_{u0}), \\
+u_{iR} &\sim \mathcal{N}(0,\sigma^2_{uR}), \\
+\begin{pmatrix} v_{a0} \\ v_{aT} \\ v_{aR} \end{pmatrix}
+  &\sim \mathcal{N}\!\left(
+    \begin{pmatrix}0\\0\\0\end{pmatrix}, \Sigma_a
+  \right), \\
+\begin{pmatrix} w_{c0} \\ w_{cT} \\ w_{cR} \end{pmatrix}
+  &\sim \mathcal{N}\!\left(
+    \begin{pmatrix}0\\0\\0\end{pmatrix}, \Sigma_c
+  \right), \\
+\varepsilon_{riac} &\sim \mathcal{N}(0,\sigma^2).
+\end{aligned}
+$$
 
-nested random intercepts at $i$, $p$, and $c$
-and random effects for $p$ and $c$
+#### Model structure and justification
 
-to account for party level variation in both the general extend of token spending patterns and the specific effect of explicitly feeling attached. and for comparative analyses of country differences in the effects of T 
+- **Cross-level interaction of theoretical interest.**  
+  The key mechanism is whether explicit partisan types ($T_i == 1$) respond differently to co-, out-, and neutral partisan cues ($R_{ri}$). The fixed-effect interaction $\beta_3(T_i \times R_{ri})$ captures this.
 
-Dependent Variable: Number of Tokens allocated
-Independent Variable: T (1 = Expl/ 0 = Impl)
+- **Random slopes for the lower-level variable ($R_{ri}$).**  
+  Following @heisig2019you, the effect of a Level-1 predictor involved in a cross-level interaction must vary across higher-level units.  
+  - Respondents differ in cue sensitivity → random slope $u_{iR}$.  
+  - Parties differ in partisan–affective structure → random slope $v_{aR}$.  
+  - Countries differ in overall affective polarization → random slope $w_{cR}$.
 
-random effects: T for parties (heterogenous treatment) nested in countries (comparative analysis)
-random intercepts: respondent nested in parties nested in countries
+- **Random slopes for the Level-2 treatment variable ($T_i$).**  
+  The meaning and strength of explicit partisanship vary across parties and countries.  
+  Random slopes $v_{aT}$ and $w_{cT}$ capture heterogeneous treatment effects across political contexts.
+
+- **Nested random intercepts.**  
+  - $u_{i0}$: controls for individual-level variation in baseline generosity.  
+  - $v_{a0}$: captures systematic differences across partisan anchors.  
+  - $w_{c0}$: controls for country-level differences in average allocations.
+
+- **Posterior inference.**  
+  Bayesian estimation (via *brms*) ensures full propagation of uncertainty through the complex multilevel interaction structure and stabilizes the maximal random-effects specification through priors.
+
+In sum, the model explicitly aligns the theoretical structure of partisan cue processing with the methodological requirement to account for heterogeneity in both treatment assignment and cue sensitivity. It treats explicit partisanship as a Level-2 treatment whose effect is allowed to vary across parties and countries, and it captures respondent-, party-, and country-level differences in sensitivity to partisan cues, supporting unbiased estimation of the central causal interaction -- given the causal assumptions hold.
+
+#### Prior specification
+
+- **Approach 1 — Very Weakly Informative Priors (`normal(0, 5)`)**
+
+This approach aims to be conservative, broad, and minimally informative.
+
+**Rationale**
+
+- Token allocations range from **0–10**, so any plausible effect of a predictor—main or interaction—must lie within approximately **–10 to +10**.  
+- A `Normal(0, 5)` prior places ~95% of its probability mass within this range (≈ ±9.8).  
+- This reflects no strong prior beliefs about the size or direction of effects while permitting large shifts if supported by the data.
+
+**Specification**
+
+- **Fixed effects (slopes & interactions):**  
+  - \( \beta_k \sim \text{Normal}(0, 5) \)
+
+- **Intercept:**  
+  - \( \text{Intercept} \sim \text{Normal}(5, 5) \)  
+    (midpoint of 0–10 with substantial uncertainty)
+
+- **Random effect SDs:**  
+  - \( \sigma_{\text{RE}} \sim \text{Student-t}(3, 0, 5) \)
+
+- **Residual SD:**  
+  - \( \sigma \sim \text{Student-t}(3, 0, 5) \)
+
+**Characteristics**
+
+- Extremely permissive (barely regularizing).  
+- Useful when the goal is **maximal conservatism** and **minimal prior influence**.  
+- May yield wider posteriors, more computation difficulty, and greater risk of overfitting with many random effects.
+
+- **Approach 2 — Weakly Informative, Regularizing Priors (recommended)**
+
+Aimed at *constrain-but-not-restrict* modeling: improves stability, avoids implausibly large effects, yet remains substantively uninformative.
+
+**Rationale**
+
+- Shifts of **4+ tokens** (40% of the scale) are already large in practice.  
+- `Normal(0, 2)` limits 95% prior mass to about ±4, which remains wide enough while avoiding unrealistic extremes.  
+- More appropriate for complex hierarchical models with many random slopes.
+
+**Specification**
+
+- **Fixed effects (slopes & interactions):**  
+  - \( \beta_k \sim \text{Normal}(0, 2) \)
+
+- **Intercept:**  
+  - \( \text{Intercept} \sim \text{Normal}(5, 2) \)
+
+- **Random effect SDs:**  
+  - \( \sigma_{\text{RE}} \sim \text{Student-t}(3, 0, 1) \)  
+    or a half-normal(0,1) prior
+
+- **Residual SD:**  
+  - \( \sigma \sim \text{Student-t}(3, 0, 2) \)
+
+**Characteristics**
+
+- Still weakly informative, but more realistic given the bounded 0–10 outcome scale.  
+- Improves convergence and shrinkage in large multilevel structures.  
+- Reduces the probability of implausible prior predictive draws (e.g., \(Y < -10\)).  
+
 
 ### Quantities of interest
 
@@ -323,6 +402,11 @@ $$
 We present our findings in three stages. First, we present the distributions of explicit and implicit partisanship across our included country samples. Next, we present the overall average treatment effects of explicit partisanship on our outcomes of interest. Finally, we present cross-country variation of these pooled results to place our results in a comparative perspective.
 
 {{< embed code/01_code.qmd#fig-impl-expl-distribution >}}
+
+## Robustness
+
+other response family?
+simple ols without any hierarchical structure
 
 ## Conclusion {#sec-conclusion}
 
