@@ -350,6 +350,7 @@ labels_der_outpartisan_comb <- eu25games2019 |>
 
 ```{r}
 #| label: fig-impl-expl-distribution
+#| fig-cap: "Distribution of Explicit, Implicit, and Non-Partisans across 25 Countries"
 #| fig-dpi: 500
 
 toplot <- eu25games2019 |>

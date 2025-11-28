@@ -71,7 +71,7 @@ load(
 
 ```{r}
 #| label: fig-dag
-#| fig-cap: "Directed acyclical graph (DAG) of the causal data-generating process. Respondents have a partisan anchor $A$, representing the party they feel attached to (explicit partisans) or (intend to) vote for (implicit partisans). Partisan type $T$ (explicit vs. implicit) is only defined for respondents with a partisan anchor and is thus a child node of $A$. The conjoint design randomizes all profile attributes $Z$. The partisan profile cue $Z^{party}$ combines with $A$ to generate the partisan relationship category $R = f(A, Z^{party}), which determines whether the profile is interpreted as a co-partisan, out-partisan, or neutral. Other randomized profile cues $Z^{other}$ affect the outcome $Y$ directly. Token allocations $Y$ are influenced by both $R$ and $Z^{other}$, with the effect of $R$ theorized to be conditional on $T$. Because $T$ is observational, potential confounders $C$ may affect both $T$ and $Y$, highlighting the assumptions required for causal interpretation."
+#| fig-cap: "Directed acyclic graph of the causal data-generating process. Respondents have a partisan anchor $A_i$, representing the party they feel attached to (explicit partisans) or intend to vote for (implicit partisans). Partisan type $T_i$ (explicit vs. implicit) is only defined for respondents with a partisan anchor and is therefore a child node of $A_i$. Each conjoint profile $r$ presents randomized attributes: a partisan cue $Z^{party}_r$ and other cues $Z^{other}_r$. The partisan relationship category $R_{ri} = f(A_i, Z^{party}_r)$ determines whether the profile is interpreted as a co-partisan, out-partisan, or neutral. Token allocations $Y_{ri}$ are affected by both $R_{ri}$ and $Z^{other}_r$, with the effect of $R{ri}$ theorized to depend on $T_i$. Because $T_i$ is observational, $C_i$ denotes potential confounders of both $T_i$ and $Y_{ri}$, highlighting the assumptions required for causal interpretation."
 #| fig-dpi: 500
 
 dag <- dagitty(
@@ -128,6 +128,7 @@ What to model as random slopes, what to model as random intercepts????
 
 ```{r}
 #| label: model-formula
+#| eval: false
 
 formula_base <-
   # outcome: tokens allocated
@@ -160,8 +161,6 @@ formula_base <-
       meta_country:der_partisan_anchor_name) +
     # respondent random intercept nested in party-within-country
     (1 | meta_country:der_partisan_anchor_name:meta_pid)
-
-formula_control
 
 ```
 
