@@ -1,6 +1,6 @@
 ---
 title: |
-  How does reported partisan attachement influence affective polarization?
+  How does partisan type influence affective polarization?
 subtitle: |
   A comparative study of 25 European democracies
 abstract: |
@@ -38,9 +38,61 @@ geometry:
   - footskip = 20pt
 ---
 
-Respondents vary along two analytically distinct dimensions. First, the partisan type ($T_i$) distinguishes respondents who report subjective partisan attachment (explicit partisans, $T_i=1$) from those who report a vote intention or choice in the absence of attachment (implicit partisans, $T_i = 0$). Second, each respondent is assigned a partisan anchor ($A_i$), defined as the party to which they report either attachment or vote intention. In the conjoint tasks, the party cue of profile $j$ is compared to anchor $A_i$ to generate a partisan relationship category ($R_{ij}∈\{Co,Out,Non\}$). This tripartite structure cleanly separates treatment status, party identity, and respondent–profile relationships, and it allows us to estimate the conditional effect of explicit partisan attachment across parties and countries using a hierarchical model with random effects for respondents, parties, and countries.
-
 ## Introduction {#sec-introduction}
+
+How does partisan type influence affective polariztion? 
+While the past decade witnessed a sharp increase in publications dedicated to study the causes, consequences, and dynamics of affective polarization, there still remains much ambiguity when it comes to conceptualization and measurement.
+Notably, some conceptual or measurement approaches limit their scope to only a partisan subset of the sample, while other strategies cover a wider range of the sampled electorate.
+Nevertheless, the goal is often times identical: infer about the state or change of affective polarization in a given country's society.
+If however such inferences are based on partisan subsets, inferring statements about that subset to the whole population rests on assumptions about the distribution of that subset in the population.
+In other words, only if the partisan subset a) is large enough to constitute a (sufficiently) large part of the population or b) is representative of that population, one can validly infer from the subsample to the population.
+
+This study aims to address this gap and contribute to the affective polarization literature in multiple ways.
+First, I introduce the concept of *partisan type* to analytically distinguish between *explicit* and *implicit partisans*, enabling affective polarization scholars to better clarify what their sample of study and population of interest is.
+Second, I empirically investigate the relative distributions of partisan types across 25 European multi-party system, finding cross-national variation in the relative shares but surprising consistencies regarding the overall numbers of partisans.
+Third, I employ a causal identification strategy using hierarchical bayesian modelling to approach an answer to the question:
+How would a hypothetical intervention changing a respondent's partisan type impact her affective polarization behavior, holding all other covariates constant?
+Finally, I put things in a comparative perspective by studying cross-national variation in the hypothesized relationship between partisan type and affective polarization outcomes.
+
+From a theoretical perspective, affective polarization emphasizes individuals' identities, their subjective feelings of belonging to a perceived group and the corresponding, emotional, *affective*, mechanisms that subconsciously influence human intergroup behaviors.
+Hence, through this social identity perspective, we expect *explicit* partisan types to show stronger levels of affective polarization.
+The rationale is that explicit reporting of feelt attachement corresponds to stronger group identites, 
+ 
+
+Paragraph on research design (causal strategy)
+
+Paragraph on results
+
+Paragraph on implications (conditional on results)
+
+## Theory
+
+### Lit Review
+
+Aff Pol -> What is it and where it comes from (literature)
+
+The concept of affective polarization, losely defined as the tendency to favor one's own party and disliking other parties, has received considerable attention following @iyengar2012affect's seminal paper. Since then, the social identity framework of political parties has been extended beyond the American case. According to classical social identity approaches,
+
+Aff Pol -> what are causes, consequences, and dynamics (state of research)
+
+Aff Pol Measurement/Conceptual ambiguities (problems)
+
+Aff Pol ambiguities in Multiparty Systems/Comparative analyses specifically and recent trends (problems in comparative research)
+
+### Argument
+
+Concept of partisan type, distinguishing implicit and explicit partisan types, useful for addressing abiguities regarding subsamples and populations of interest.
+
+Social identity theory: explicit types -> reported attachement (subjective belonging) -> indicates group identity -> higher ingroup outgroup mechanism
+
+implicit ones: explicitly report no attachement -> no direct/conscious group attachement -> expressive group preference nevertheless through vote variables -> less polarization
+
+-> HTs
+
+
+
+## Old Introduction
+
 
 Recent advancements in the study of affective polarization point at the importance of clearly defined conceptualization. The seminal work of Iyengar introduced the concept of affective polarization primarily as a contrast to ideological polarization in the debate on political polarization in the US. Since then, a lot of research has been dedicated to studying the causes (why is it a thing), concequences (what does it do or more normatively, why should this be considered a problem or not), and dynamics (how does it change) of affective polarization within and beyond the American case.
 
