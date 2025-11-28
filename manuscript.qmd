@@ -105,6 +105,12 @@ depending on literature, additional comparative hypothesis
 
 ## Research design {#sec-design}
 
+- Data and experimental setup -> hierarchical data structure
+- Variables -> DAG
+- Causal Assumptions
+- Model
+- Quantities of Interest: CATE AP, IG, OD
+
 This section outlines how we measure affective polarization and its subcomponents, the data we use, and out empirical strategy to estimate the effect of explicit partisanship on our outcomes of interest: affective polarization, ingroup favoritism, and outgroup derogation.
 
 We conceptually frame explicit partisanship as a treatment and implicit partisanship as a control. That is, respondents reporting a subjective attachement to a political party ($T_i = 1$) form the treated group, whereas respondents expressing vote choice without attachement ($T_i = 0) form the comparison group.[^omit-quasi]
