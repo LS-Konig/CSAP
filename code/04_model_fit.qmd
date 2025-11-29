@@ -40,9 +40,7 @@ options(width = 80)
 p_required <- c(
   "tidyverse",
   "here",
-  "ggpubr",
   "brms",
-  "tidybayes",
   "sessioninfo"
 )
 packages <- rownames(installed.packages())
@@ -55,13 +53,131 @@ rm(p_required, p_to_install, packages)
 ```
 
 ```{r}
-#| label: load-data
+#| label: load-compiled-models
 
 load(
-  here(
-    "data",
-    "02_processed",
-    "eu25games2019.RData"
-  )
+  here("data", "02_processed", "models", "compile_base_d.RData")
 )
+
+load(
+  here("data", "02_processed", "models", "compile_base_t.RData")
+)
+
+load(
+  here("data", "02_processed", "models", "compile_cov_d.RData")
+)
+
+load(
+  here("data", "02_processed", "models", "compile_cov_t.RData")
+)
+```
+
+
+```{r, message = NA}
+#| label: fit-settings
+Sys.setenv(RSTUDIO = 1)
+
+n_chains <- 4
+n_iter <- 5000
+n_burnin <- 3500
+n_cores <- 4
+```
+
+```{r, message = NA}
+#| label: fit-model-base-d
+
+message(paste("Fitting bfit_base_d at", Sys.time()))
+bfit_base_d <- update(
+  compile_base_d,
+  iter = n_iter,
+  warmup = n_burnin,
+  n_chains = 4,
+  n_cores = 4
+)
+
+message("Saving posterior draws...\n")
+save(
+  bfit_base_d,
+  file = here("data", "03_final", "models", "bfit_base_d.RData")
+)
+```
+
+```{r, message = NA}
+#| label: fit-model-base-t
+
+message(paste("Fitting bfit_base_t at", Sys.time()))
+bfit_base_t <- update(
+  compile_base_t,
+  iter = n_iter,
+  warmup = n_burnin,
+  n_chains = 4,
+  n_cores = 4
+)
+message("Saving posterior draws...\n")
+save(
+  bfit_base_t,
+  file = here("data", "03_final", "models", "bfit_base_t.RData")
+)
+```
+
+```{r, message = NA}
+#| label: fit-model-cov-d
+
+message(paste("Fitting bfit_cov_d at", Sys.time()))
+bfit_cov_d <- update(
+  compile_cov_d,
+  iter = n_iter,
+  warmup = n_burnin,
+  n_chains = 4,
+  n_cores = 4
+)
+message("Saving posterior draws...\n")
+save(
+  bfit_cov_d,
+  file = here("data", "03_final", "models", "bfit_cov_d.RData")
+)
+```
+
+```{r, message = NA}
+#| label: fit-model-cov-t
+
+message(paste("Fitting bfit_cov_t at", Sys.time()))
+bfit_cov_t <- update(
+  compile_cov_t,
+  iter = n_iter,
+  warmup = n_burnin,
+  n_chains = 4,
+  n_cores = 4
+)
+message("Saving posterior draws...\n")
+save(
+  bfit_cov_t,
+  file = here("data", "03_final", "models", "bfit_cov_t.RData")
+)
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
 ```
