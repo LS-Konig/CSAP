@@ -88,11 +88,12 @@ n_cores <- 4
 
 message(paste("Fitting bfit_base_d at", Sys.time()))
 bfit_base_d <- update(
-  compile_base_d,
+  compiled_base_d,
   iter = n_iter,
   warmup = n_burnin,
-  n_chains = 4,
-  n_cores = 4
+  chains = n_chains,
+  cores = n_cores,
+  refresh = 10
 )
 
 message("Saving posterior draws...\n")
@@ -107,11 +108,12 @@ save(
 
 message(paste("Fitting bfit_base_t at", Sys.time()))
 bfit_base_t <- update(
-  compile_base_t,
+  compiled_base_t,
   iter = n_iter,
   warmup = n_burnin,
-  n_chains = 4,
-  n_cores = 4
+  chains = 4,
+  cores = 4,
+  refresh = 10
 )
 message("Saving posterior draws...\n")
 save(
@@ -125,11 +127,12 @@ save(
 
 message(paste("Fitting bfit_cov_d at", Sys.time()))
 bfit_cov_d <- update(
-  compile_cov_d,
+  compiled_cov_d,
   iter = n_iter,
   warmup = n_burnin,
-  n_chains = 4,
-  n_cores = 4
+  chains = 4,
+  cores = 4,
+  refresh = 10
 )
 message("Saving posterior draws...\n")
 save(
@@ -143,11 +146,12 @@ save(
 
 message(paste("Fitting bfit_cov_t at", Sys.time()))
 bfit_cov_t <- update(
-  compile_cov_t,
+  compiled_cov_t,
   iter = n_iter,
   warmup = n_burnin,
-  n_chains = 4,
-  n_cores = 4
+  chains = 4,
+  cores = 4,
+  refresh = 10
 )
 message("Saving posterior draws...\n")
 save(
