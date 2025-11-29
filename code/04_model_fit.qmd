@@ -1,0 +1,67 @@
+---
+title: |
+  Code Notebook
+subtitle: |
+  How does reported partisan attachement influence affective polarization?: A comparative study of 25 European democracies
+author:
+  - name: Tristan Muno
+    email: tristan.muno@uni-mannheim.de
+    affiliations:
+      - name: University of Mannheim
+        department: School of Social Sciences
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "ggpubr",
+  "brms",
+  "tidybayes",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+```{r}
+#| label: load-data
+
+load(
+  here(
+    "data",
+    "02_processed",
+    "eu25games2019.RData"
+  )
+)
+```

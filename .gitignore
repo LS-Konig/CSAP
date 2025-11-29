@@ -20,6 +20,7 @@ _publish.yml
 # Cache folders and files
 *cache*
 *code_files*
+*_files*
 
 # Miscellaneous
 .DS_Store
