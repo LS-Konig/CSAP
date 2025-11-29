@@ -573,3 +573,15 @@ Country-Level Effects on In-Group Favoritism
 Figure 5
 
 Country-Level Effects on Out-Group Derogation
+
+
+
+# FUTURE EXTENSIONS IDEA
+
+-> Correctly recode source country data
+-> systematic dont knows and meaningful values
+-> categorical as factors
+-> numerical as nums
+-> Merge thermo scores
+-> Robustness using Wagner and Reiljan Index Measures
+
