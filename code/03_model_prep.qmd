@@ -171,24 +171,28 @@ bformula_covariates <- bf(formula_base)
 ```{r, message = NA}
 #| label: lme4-fits
 
+message(paste("lme4_fit_dict_base lme4_dict_base at", Sys.time()))
 lme4_fit_dict_base <- lmer(
   formula = formula_base,
   data = df_modelvars |>
     filter(meta_game == "dict")
 )
 
+message(paste("Fitting lme4_fit_trust_base at", Sys.time()))
 lme4_fit_trust_base <- lmer(
   formula = formula_base,
   data = df_modelvars |>
     filter(meta_game == "trust")
 )
 
+message(paste("Fitting lme4_fit_dict_cov at", Sys.time()))
 lme4_fit_dict_cov <- lmer(
   formula = formula_covariates,
   data = df_modelvars |>
     filter(meta_game == "dict")
 )
 
+message(paste("Fitting lme4_fit_trust_cov at", Sys.time()))
 lme4_fit_trust_cov <- lmer(
   formula = formula_covariates,
   data = df_modelvars |>
