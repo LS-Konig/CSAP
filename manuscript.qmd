@@ -149,7 +149,7 @@ To approximate causal inference from observational variation, we exploit the fol
 2. Randomized conjoint profiles. The profiles' attributes -- including all non-partusab cues $Z^{other}_{ri}$ -- are randomly assigned. This ensures that observed differences in token allocations across $R_ri$ are attributable to profile characteristics rather than respondent selection.
 3. Hierarchical variation. Respondents are nested within partisan anchors, which are themselves nested within countries. This allows for multilevel modeling that captures heterogeneity at the respondent, party, and country level.
 
-{{< embed code/02_model_prep.qmd#fig-dag >}}
+{{< embed code/02_descr_anal.qmd#fig-dag >}}
 
 In this section, we situate our measurement approach of affective polarization, present the used data and out empirical strategie to approximate an isolation of the causal effect of *explicit* partisanship on our outcomes of interest: affective polarization, ingroup favoritism and outgroup derogation.
 
