@@ -298,7 +298,7 @@ priors <- c(
 
 # Compile models without sampling
 compiled_base_d <- brm(
-  formula = bf_base_d,
+  formula = bformula_base,
   data = df_modelvars |> filter(meta_game == "dict"),
   family = gaussian(),
   prior = priors,
@@ -311,7 +311,7 @@ compiled_base_d <- brm(
 )
 
 compiled_base_t <- brm(
-  formula = bf_base_t,
+  formula = bformula_base,
   data = df_modelvars |> filter(meta_game == "trust"),
   family = gaussian(),
   prior = priors,
@@ -324,7 +324,7 @@ compiled_base_t <- brm(
 )
 
 compiled_cov_d <- brm(
-  formula = bf_cov_d,
+  formula = bformula_covariates,
   data = df_modelvars |> filter(meta_game == "dict"),
   family = gaussian(),
   prior = priors,
@@ -337,7 +337,7 @@ compiled_cov_d <- brm(
 )
 
 compiled_cov_t <- brm(
-  formula = bf_cov_t,
+  formula = bformula_covariates,
   data = df_modelvars |> filter(meta_game == "trust"),
   family = gaussian(),
   prior = priors,
@@ -370,14 +370,9 @@ save(
 )
 save(
   compiled_cov_t,
-  file = here("data", "02_processed", "models", "compile_cov_d.RData")
+  file = here("data", "02_processed", "models", "compile_cov_t.RData")
 )
 
-# save modeldata
-save(
-  df_modelvars,
-  file = here("data", "02_processed", "df_modeldata.RData")
-)
 ```
 
 # Session Info
