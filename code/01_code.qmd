@@ -387,8 +387,15 @@ ggplot(
   toplot,
   aes(x = n, y = meta_country, fill = der_partisanship2)
 ) +
-  geom_bar(stat = "identity", position = "fill") +
-  scale_fill_viridis_d() +
+  geom_bar(
+    stat = "identity",
+    position = "fill",
+    color = "black",
+    width = 0.75
+  ) +
+  scale_fill_manual(
+    values = c("white", "gray", "black")
+  ) +
   scale_x_continuous(labels = percent) +
   labs(
     x = "Share",
@@ -472,6 +479,20 @@ eu25games2019 <- eu25games2019 |>
         der_vote_cat == "Vote reported" ~ der_vote_combined_name
     )
   )
+
+# how many anchors in data?
+eu25games2019 |>
+  distinct(der_partisan_anchor) |>
+  na.omit() |>
+  nrow()
+
+# same if grouped by country?
+eu25games2019 |>
+  group_by(meta_country) |>
+  distinct(der_partisan_anchor) |>
+  na.omit() |>
+  nrow()
+
 ```
 
 ```{r}
@@ -482,6 +503,14 @@ eu25games2019 |>
   tabyl(der_partisan_anchor) |>
   adorn_totals() |>
   adorn_rounding()
+```
+
+```{r}
+#| label: tbl-partisan-anchor-type
+
+eu25games2019 |>
+  filter(meta_country == "Austria") |>
+  tabyl(der_partisan_anchor, der_partisan_type)
 ```
 
 ## Partisan Relationship Category $R$
@@ -511,6 +540,32 @@ eu25games2019 |>
   tabyl(der_partisan_relationship) |>
   adorn_totals() |>
   adorn_rounding()
+```
+
+
+```{r}
+#| label: tbl-partisan-relationship-type
+
+eu25games2019 |>
+  tabyl(der_partisan_relationship, der_partisan_type)
+```
+
+# More wrangling worth to be saved
+
+```{r}
+#| label: final-wrangling
+
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    meta_game_lab = case_when(
+      meta_game == "dict" ~ "Dictator",
+      meta_game == "trust" ~ "Trust",
+      .default = NA
+    )
+  )
+
+eu25games2019 |>
+  tabyl(meta_game, meta_game_lab)
 ```
 
 # Save dataset ready for estimation
