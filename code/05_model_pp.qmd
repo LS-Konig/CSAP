@@ -41,6 +41,10 @@ p_required <- c(
   "here",
   "brms",
   "broom.mixed",
+  "tidybayes",
+  "ggpubr",
+  "patchwork",
+  "knitr",
   "sessioninfo"
 )
 packages <- rownames(installed.packages())
@@ -61,9 +65,9 @@ load(here("data", "03_final", "models", "bfit_base_d.RData"))
 
 load(here("data", "03_final", "models", "bfit_base_t.RData"))
 
-# load(here("data", "03_final", "models", "bfit_cov_d.RData"))
+load(here("data", "03_final", "models", "bfit_cov_d.RData"))
 
-# load(here("data", "03_final", "models", "bfit_cov_t.RData"))
+load(here("data", "03_final", "models", "bfit_cov_t.RData"))
 
 ```
 
@@ -77,8 +81,11 @@ all_models <- ls(pattern = "^bfit")
 fit_summary_fun <- function(model_name) {
   model_fit <- get(model_name)
 
+  message(paste("Calling summary() on", model_name, "\n"))
+  summary(model_fit, rhat = T, ess = T)
+
   message(paste("Calling broom.mixed::tidy() on", model_name, "\n"))
-  broom.mixed::tidy(model_fit, rhat = T, ess = T) |> print(n = 100)
+  broom.mixed::tidy(model_fit, rhat = T, ess = T) |> kable()
 
   message(paste("Generating traceplots for", model_name, "\n"))
   plot(model_fit, ask = FALSE)
@@ -259,7 +266,7 @@ estimate_evs <- function(bfit_model, newdata_list, re_formula_setting = NULL) {
 }
 ```
 
-### Step 4
+### Step 3
 
 ```{r}
 #| label: tidy-qoi-function
@@ -351,6 +358,8 @@ calculate_qois_tidy <- function(
 
 ```
 
+### Step 4
+
 ```{r}
 #| label: plot-function
 
@@ -359,12 +368,15 @@ calculate_qois_tidy <- function(
 
 #' Generates the ggplot object for the pooled (main) effects.
 #'
+#' This function generates two plots: one for the 6 Expected Values (EVs)
+#' and one combined, faceted plot for the 9 Difference Metrics (AP/IF/OD x Expl/Impl/CATE).
+#'
 #' @param tidybayes_df The output from calculate_qois_tidy() filtered for the "Pooled" analysis.
-#' @return A ggplot object.
+#' @return A list of two ggplot objects: Conditional_Means_Plot and QoI_CATE_Plot.
 plot_pooled_results <- function(tidybayes_df) {
   # 1. Prepare data for the two panels
 
-  # Left Panel: Conditional Means (EVs)
+  # --- Left Panel: Conditional Means (EVs) ---
   ev_data <- tidybayes_df |>
     filter(
       Quantity %in%
@@ -389,7 +401,7 @@ plot_pooled_results <- function(tidybayes_df) {
     ) |>
     select(-Relationship_Code)
 
-  # Right Panel: Polarization/Favoritism/Derogation (AP, IF, OD, CATEs)
+  # --- Right Panel: Polarization/Favoritism/Derogation (AP, IF, OD, CATEs) ---
   qoi_data <- tidybayes_df |>
     filter(
       Quantity %in%
@@ -406,117 +418,315 @@ plot_pooled_results <- function(tidybayes_df) {
         )
     ) |>
     mutate(
-      Metric = case_when(
-        grepl("CATE", Quantity) ~ "CATE",
+      Metric_Code = case_when(
+        grepl("CATE", Quantity) ~ gsub("CATE_", "", Quantity), # e.g., AP, IF, OD
         grepl("AP", Quantity) ~ "AP",
         grepl("IF", Quantity) ~ "IF",
         grepl("OD", Quantity) ~ "OD"
       ),
       Type = case_when(
-        Metric == "CATE" ~ "Causal Effect (CATE)",
-        grepl("Expl", Quantity) ~ "Explicit Partisan",
-        grepl("Impl", Quantity) ~ "Implicit Partisan",
+        grepl("CATE", Quantity) ~ "Conditional Average Treatment Effect",
+        grepl("Expl", Quantity) ~ "Explicit\n(T=1)",
+        grepl("Impl", Quantity) ~ "Implicit\n(T=0)",
         TRUE ~ NA_character_
       )
-    )
-
-  # Function to generate individual facet plots for AP, IF, OD
-  generate_qoi_plot <- function(metric_abbr) {
-    qoi_metric_data <- qoi_data |> filter(Metric == metric_abbr)
-
-    # Calculate order for the plot (CATE first, then Explicit, then Implicit)
-    qoi_metric_data$Plot_Order <- factor(
-      qoi_metric_data$Type,
-      levels = c(
-        "Causal Effect (CATE)",
-        "Explicit Partisan",
-        "Implicit Partisan"
+    ) |>
+    # Convert Metric to clean factor for plotting order
+    mutate(
+      Metric_Name = factor(
+        Metric_Code,
+        levels = c("AP", "IF", "OD"),
+        labels = c(
+          "Affective Polarization (AP)",
+          "Ingroup Favoritism (IF)",
+          "Outgroup Derogation (OD)"
+        )
+      ),
+      # Set plotting order for the y-axis within each facet
+      Plot_Order = factor(
+        Type,
+        levels = c(
+          "Conditional Average Treatment Effect",
+          "Implicit\n(T=0)",
+          "Explicit\n(T=1)"
+        )
       )
     )
 
-    # Determine appropriate title
-    full_name <- switch(
-      metric_abbr,
-      "AP" = "Affective Polarization (AP)",
-      "IF" = "Ingroup Favoritism (IF)",
-      "OD" = "Outgroup Derogation (OD)",
-      metric_abbr
-    )
-
-    # Calculate the range for consistent x-limits across the three plots
-    # Note: We use the range of the whole QoI set for consistent X-axis across AP, IF, OD
-    max_range <- max(abs(qoi_data$Estimate)) * 1.1
-
-    p_right <- ggplot(
-      qoi_metric_data,
-      aes(x = Estimate, y = Plot_Order, fill = Type)
-    ) +
-      stat_halfeyeh(
-        .width = 0.95,
-        point_interval = "median_qi",
-        slab_size = 0.5,
-        linewidth = 1 # line size for the CI interval
-      ) +
-      geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
-      scale_fill_manual(
-        values = c(
-          "Causal Effect (CATE)" = "#0072B2",
-          "Explicit Partisan" = "#E69F00",
-          "Implicit Partisan" = "#56B4E9"
-        ),
-        name = "Group/Effect"
-      ) +
-      labs(
-        title = full_name,
-        y = NULL,
-        x = "Effect Size (Tokens)"
-      ) +
-      coord_cartesian(xlim = c(-max_range, max_range)) +
-      theme_minimal(base_size = 12) +
-      theme(legend.position = "none")
-
-    return(p_right)
-  }
+  # --- PLOT GENERATION ---
 
   # Left panel: Conditional Means (EVs)
-  p_left <- ggplot(
+  p_ev <- ggplot(
     ev_data,
-    aes(x = Estimate, y = Relationship_Type, fill = Partisan_Type)
+    aes(
+      x = Estimate,
+      y = Relationship_Type,
+      fill = Partisan_Type
+    )
   ) +
-    stat_halfeyeh(
-      .width = 0.95,
+    stat_halfeye(
+      .width = c(0.95, 0.99),
       point_interval = "median_qi",
       slab_size = 0.5,
-      linewidth = 1
+      slab_color = "black",
+      point_fill = "white",
+      point_color = "black",
+      shape = 21,
+      stroke = 1.5
     ) +
     facet_wrap(~Partisan_Type, ncol = 1) +
     scale_fill_manual(
       values = c(
-        "Explicit Partisan (T=1)" = "#E69F00",
-        "Implicit Partisan (T=0)" = "#56B4E9"
+        "Explicit\n(T=1)" = "white",
+        "Implicit\n(T=0)" = "grey"
       ),
       name = "Partisan Type"
     ) +
     labs(
-      title = "Conditional Predicted Expected Value (EV)",
       x = "Tokens Allocated (0-10)",
       y = "Relationship Type"
     ) +
-    theme_minimal(base_size = 12) +
+    theme_pubr() +
     theme(
-      legend.position = "bottom",
-      strip.background = element_rect(fill = "grey90", color = "grey50")
+      legend.position = "none",
+      strip.background = element_rect(fill = "grey90", color = "grey50"),
+      aspect.ratio = 1 / 1.618034
     )
 
-  # Right panels: AP, IF, OD
-  p_ap <- generate_qoi_plot("AP")
-  p_if <- generate_qoi_plot("IF")
-  p_od <- generate_qoi_plot("OD")
+  # Right panel: Combined QoI and CATE effects
+  max_range <- max(abs(qoi_data$Estimate)) * 1.1
 
-  # Combine plots using a patchwork-like structure (conceptual, user needs to implement)
-  # For R script output, we return a list of plots.
+  # FIG: AP --------------------------------------------------------------------
+  p_ap_left <- ggplot(
+    qoi_data |>
+      filter(
+        Metric_Code == "AP",
+        Type != "Conditional Average Treatment Effect"
+      ),
+    aes(x = Estimate, y = Plot_Order, fill = Plot_Order)
+  ) +
+    stat_halfeye(
+      .width = c(0.95, 0.99),
+      point_interval = "median_qi",
+      slab_size = 0.5,
+      slab_color = "black",
+      point_fill = "white",
+      point_color = "black",
+      shape = 21,
+      stroke = 1.5
+    ) +
+    scale_fill_manual(
+      values = c(
+        "Explicit\n(T=1)" = "white",
+        "Implicit\n(T=0)" = "#CCCCCC"
+      ),
+      name = "Partisan Type"
+    ) +
+    labs(
+      x = "Affective Polarization (AP)",
+      y = "Partisan Type (T)"
+    ) +
+    theme_pubr() +
+    theme(
+      legend.position = "none",
+      strip.background = element_rect(fill = "grey90", color = "grey50"),
+      aspect.ratio = 1 / 1.618034
+    )
+
+  p_ap_right <- ggplot(
+    qoi_data |>
+      filter(
+        Metric_Code == "AP",
+        Type == "Conditional Average Treatment Effect"
+      ),
+    aes(x = Estimate, y = Plot_Order)
+  ) +
+    stat_halfeye(
+      .width = c(0.95, 0.99),
+      point_interval = "median_qi",
+      slab_size = 0.5,
+      slab_color = "black",
+      slab_fill = "#666666",
+      point_fill = "white",
+      point_color = "black",
+      shape = 21,
+      stroke = 1.5
+    ) +
+    geom_vline(
+      xintercept = 0,
+      linetype = "dashed",
+      linewidth = 1.5
+    ) +
+    labs(
+      x = expression(CATE[AP]),
+      y = " "
+    ) +
+    theme_pubr() +
+    theme(
+      legend.position = "none",
+      strip.background = element_rect(fill = "grey90", color = "grey50"),
+      aspect.ratio = 1.618034,
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+
+  p_ap <- p_ap_left + p_ap_right
+
+  # FIG: IF --------------------------------------------------------------------
+  p_if_left <- ggplot(
+    qoi_data |>
+      filter(
+        Metric_Code == "IF",
+        Type != "Conditional Average Treatment Effect"
+      ),
+    aes(x = Estimate, y = Plot_Order, fill = Plot_Order)
+  ) +
+    stat_halfeye(
+      .width = c(0.95, 0.99),
+      point_interval = "median_qi",
+      slab_size = 0.5,
+      slab_color = "black",
+      point_fill = "white",
+      point_color = "black",
+      shape = 21,
+      stroke = 1.5
+    ) +
+    scale_fill_manual(
+      values = c(
+        "Explicit\n(T=1)" = "white",
+        "Implicit\n(T=0)" = "#CCCCCC"
+      ),
+      name = "Partisan Type"
+    ) +
+    labs(
+      x = "Ingroup Favoritism (IF)",
+      y = "Partisan Type (T)"
+    ) +
+    theme_pubr() +
+    theme(
+      legend.position = "none",
+      strip.background = element_rect(fill = "grey90", color = "grey50"),
+      aspect.ratio = 1 / 1.618034
+    )
+
+  p_if_right <- ggplot(
+    qoi_data |>
+      filter(
+        Metric_Code == "IF",
+        Type == "Conditional Average Treatment Effect"
+      ),
+    aes(x = Estimate, y = Plot_Order)
+  ) +
+    stat_halfeye(
+      .width = c(0.95, 0.99),
+      point_interval = "median_qi",
+      slab_size = 0.5,
+      slab_color = "black",
+      slab_fill = "#666666",
+      point_fill = "white",
+      point_color = "black",
+      shape = 21,
+      stroke = 1.5
+    ) +
+    geom_vline(
+      xintercept = 0,
+      linetype = "dashed",
+      linewidth = 1.5
+    ) +
+    labs(
+      x = expression(CATE[IF]),
+      y = " "
+    ) +
+    theme_pubr() +
+    theme(
+      legend.position = "none",
+      strip.background = element_rect(fill = "grey90", color = "grey50"),
+      aspect.ratio = 1.618034,
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+
+  p_if <- p_if_left + p_if_right
+
+  # FIG: OD --------------------------------------------------------------------
+  p_od_left <- ggplot(
+    qoi_data |>
+      filter(
+        Metric_Code == "OD",
+        Type != "Conditional Average Treatment Effect"
+      ),
+    aes(x = Estimate, y = Plot_Order, fill = Plot_Order)
+  ) +
+    stat_halfeye(
+      .width = c(0.95, 0.99),
+      point_interval = "median_qi",
+      slab_size = 0.5,
+      slab_color = "black",
+      point_fill = "white",
+      point_color = "black",
+      shape = 21,
+      stroke = 1.5
+    ) +
+    scale_fill_manual(
+      values = c(
+        "Explicit\n(T=1)" = "white",
+        "Implicit\n(T=0)" = "#CCCCCC"
+      ),
+      name = "Partisan Type"
+    ) +
+    labs(
+      x = "Outgroup Derogation (OD)",
+      y = "Partisan Type (T)"
+    ) +
+    theme_pubr() +
+    theme(
+      legend.position = "none",
+      strip.background = element_rect(fill = "grey90", color = "grey50"),
+      aspect.ratio = 1 / 1.618034
+    )
+
+  p_od_right <- ggplot(
+    qoi_data |>
+      filter(
+        Metric_Code == "OD",
+        Type == "Conditional Average Treatment Effect"
+      ),
+    aes(x = Estimate, y = Plot_Order)
+  ) +
+    stat_halfeye(
+      .width = c(0.95, 0.99),
+      point_interval = "median_qi",
+      slab_size = 0.5,
+      slab_color = "black",
+      slab_fill = "#666666",
+      point_fill = "white",
+      point_color = "black",
+      shape = 21,
+      stroke = 1.5
+    ) +
+    geom_vline(
+      xintercept = 0,
+      linetype = "dashed",
+      linewidth = 1.5
+    ) +
+    labs(
+      x = expression(CATE[OD]),
+      y = " "
+    ) +
+    theme_pubr() +
+    theme(
+      legend.position = "none",
+      strip.background = element_rect(fill = "grey90", color = "grey50"),
+      aspect.ratio = 1.618034,
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+
+  p_od <- p_od_left + p_od_right
+
+  # Return the two main plots
   return(list(
-    Conditional_Means_Plot = p_left,
+    Conditional_Means_Plot = p_ev,
     AP_Plot = p_ap,
     IF_Plot = p_if,
     OD_Plot = p_od
@@ -524,16 +734,111 @@ plot_pooled_results <- function(tidybayes_df) {
 }
 ```
 
-```{r}
-#| label: testing-ground
+# Run pipelines
+
+## Pooled analyses
+
+### Base model d
+
+```{r, message = NA}
+#| label: analysis-base-d
 
 newdata_base_d <- create_ape_newdata(bfit_base_d)
 
-# test with 1 scenario
-newdata_base_d_T0_RCo <- newdata_base_d[["T0_RCo"]]
-evs_base_d <- estimate_evs(bfit_base_d, newdata_base_d_T0_RCo)
+evs_base_d <- estimate_evs(bfit_base_d, newdata_base_d)
 
+qois_base_d <- calculate_qois_tidy(evs_base_d)
+
+plot_base_d <- plot_pooled_results(qois_base_d)
+
+save(
+  plot_base_d,
+  file = here(
+    "data",
+    "03_final",
+    "plot_base_d.RData"
+  )
+)
 ```
+
+### Base model t
+
+```{r, message = NA}
+#| label: analysis-base-t
+
+newdata_base_t <- create_ape_newdata(bfit_base_t)
+
+evs_base_t <- estimate_evs(bfit_base_t, newdata_base_t)
+
+qois_base_t <- calculate_qois_tidy(evs_base_t)
+
+plot_base_t <- plot_pooled_results(qois_base_t)
+
+save(
+  plot_base_t,
+  file = here(
+    "data",
+    "03_final",
+    "plot_base_t.RData"
+  )
+)
+```
+
+### Cov model d
+
+```{r, message = NA}
+#| label: analysis-cov-d
+
+newdata_base_d <- create_ape_newdata(bfit_base_d)
+
+evs_base_d <- estimate_evs(bfit_base_d, newdata_base_d)
+
+qois_base_d <- calculate_qois_tidy(evs_base_d)
+
+plot_base_d <- plot_pooled_results(qois_base_d)
+
+save(
+  plot_cov_d,
+  file = here(
+    "data",
+    "03_final",
+    "plot_cov_d.RData"
+  )
+)
+```
+
+### Cov model t
+
+```{r, message = NA}
+#| label: analysis-cov-t
+
+newdata_base_t <- create_ape_newdata(bfit_base_t)
+
+evs_base_t <- estimate_evs(bfit_base_t, newdata_base_t)
+
+qois_base_t <- calculate_qois_tidy(evs_base_t)
+
+plot_base_t <- plot_pooled_results(qois_base_t)
+
+save(
+  plot_cov_t,
+  file = here(
+    "data",
+    "03_final",
+    "plot_cov_t.RData"
+  )
+)
+```
+
+## Country analyses
+
+### Base d
+
+### Base t
+
+### Cov d
+
+### Cov t
 
 # Session Info
 
