@@ -1,0 +1,134 @@
+---
+title: |
+  Code Notebook
+subtitle: |
+  How does reported partisan attachement influence affective polarization?: A comparative study of 25 European democracies
+author:
+  - name: Tristan Muno
+    email: tristan.muno@uni-mannheim.de
+    affiliations:
+      - name: University of Mannheim
+        department: School of Social Sciences
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "brms",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+# Load models
+
+```{r}
+#| label: load-models
+
+load(here("data", "03_final", "models", "bfit_base_d.RData"))
+
+```
+
+# Model summary
+
+```{r}
+#| label: model-summary
+
+summary(bfit_base_d)
+
+```
+
+# Expected values simulations
+
+We want for each of the 4 models 6 QoI (24 in total):
+
+EV(Y|co & impl); EV(Y|co &expl)
+EV(Y|out & impl); EV(Y|out &expl)
+EV(Y|none & impl); EV(Y|none &expl)
+
+and then for comparative * 25 countries:
+EV(Y|co & impl & country[i]); EV(Y|co &expl& country[i])
+EV(Y|out & impl& country[i]); EV(Y|out &expl& country[i])
+EV(Y|none & impl& country[i]); EV(Y|none &expl& country[i])
+
+So, it makes most sense to create a function that takes newdata grid as input and outputs EV, ideally with observed values approach.
+
+Pseude-code:
+1. funtion to generate newdata grid, 
+    - input: model (to extract data), T and R value
+    - output newdata grid
+2. function to estimate EVs
+    - input: model (for effects), newdata
+    - output: 6 EV vectors
+3. function to estimate QoIs
+    - input: EV vectors
+    - output: AP (2x), IF (2x), OD (2x), CATE_AP, CATE_IF, CATE_OD
+4- function to ggplot main effects
+    - input: QoIs
+    - output: ggplot object (exact structure tbto)
+
+```{r}
+#| label:
+```
+
+```{r}
+#| label: ev
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
