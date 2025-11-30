@@ -121,7 +121,10 @@ ggdag(tidy_dag) +
   geom_dag_node() +
   geom_dag_text(aes(label = new_label), parse = T) +
   geom_dag_edges() +
-  theme_dag()
+  theme_dag() +
+  theme(
+    aspect.ratio = 1 / 1.618034
+  )
 ```
 
 # Model data
