@@ -196,7 +196,7 @@ create_ape_newdata <- function(
 
 ```
 
-### Step 2
+### Step 2: Draw from posterior EV
 
 ```{r}
 #| label: estimate-evs-function
@@ -266,7 +266,7 @@ estimate_evs <- function(bfit_model, newdata_list, re_formula_setting = NULL) {
 }
 ```
 
-### Step 3
+### Step 3: turn EV into QoIs
 
 ```{r}
 #| label: tidy-qoi-function
@@ -358,7 +358,7 @@ calculate_qois_tidy <- function(
 
 ```
 
-### Step 4
+### Step 4: Plot results
 
 ```{r}
 #| label: plot-function
@@ -759,6 +759,8 @@ save(
     "plot_base_d.RData"
   )
 )
+
+rm(bfit_base_d, newdata_base_d, evs_base_d, qois_base_d, plot_base_d)
 ```
 
 ### Base model t
@@ -782,6 +784,8 @@ save(
     "plot_base_t.RData"
   )
 )
+
+rm(bfit_base_t, newdata_base_t, evs_base_t, qois_base_t, plot_base_t)
 ```
 
 ### Cov model d
@@ -789,13 +793,13 @@ save(
 ```{r, message = NA}
 #| label: analysis-cov-d
 
-newdata_base_d <- create_ape_newdata(bfit_base_d)
+newdata_cov_d <- create_ape_newdata(bfit_cov_d)
 
-evs_base_d <- estimate_evs(bfit_base_d, newdata_base_d)
+evs_cov_d <- estimate_evs(bfit_cov_d, newdata_cov_d)
 
-qois_base_d <- calculate_qois_tidy(evs_base_d)
+qois_cov_d <- calculate_qois_tidy(evs_cov_d)
 
-plot_base_d <- plot_pooled_results(qois_base_d)
+plot_cov_d <- plot_pooled_results(qois_cov_d)
 
 save(
   plot_cov_d,
@@ -805,6 +809,8 @@ save(
     "plot_cov_d.RData"
   )
 )
+
+rm(bfit_cov_d, newdata_cov_d, evs_cov_d, qois_cov_d, plot_cov_d)
 ```
 
 ### Cov model t
@@ -812,13 +818,13 @@ save(
 ```{r, message = NA}
 #| label: analysis-cov-t
 
-newdata_base_t <- create_ape_newdata(bfit_base_t)
+newdata_cov_t <- create_ape_newdata(bfit_cov_t)
 
-evs_base_t <- estimate_evs(bfit_base_t, newdata_base_t)
+evs_cov_t <- estimate_evs(bfit_cov_t, newdata_cov_t)
 
-qois_base_t <- calculate_qois_tidy(evs_base_t)
+qois_cov_t <- calculate_qois_tidy(evs_cov_t)
 
-plot_base_t <- plot_pooled_results(qois_base_t)
+plot_cov_t <- plot_pooled_results(qois_cov_t)
 
 save(
   plot_cov_t,
@@ -828,6 +834,8 @@ save(
     "plot_cov_t.RData"
   )
 )
+
+rm(bfit_cov_t, newdata_cov_t, evs_cov_t, qois_cov_t, plot_cov_t)
 ```
 
 ## Country analyses
