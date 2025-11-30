@@ -461,8 +461,30 @@ We present our findings in three stages. First, we present the distributions of 
 
 {{< embed code/01_code.qmd#fig-impl-expl-distribution >}}
 
+### Pooled analysis
+
+{{< embed code/06_figures.qmd#fig-ap-pooled-cov-d >}}
+
+@fig-ap-pooled-cov-d shows the results for the dictator game
+
+{{< embed code/06_figures.qmd#fig-if-pooled-cov-d >}}
+
+{{< embed code/06_figures.qmd#fig-od-pooled-cov-d >}}
+
+
+
+{{< embed code/06_figures.qmd#fig-ap-pooled-cov-t >}}
+
+{{< embed code/06_figures.qmd#fig-if-pooled-cov-t >}}
+
+{{< embed code/06_figures.qmd#fig-od-pooled-cov-t >}}
+
+### Country analysis
+
+
 ## Robustness
 
+without covariates
 other response family?
 simple ols without any hierarchical structure
 
