@@ -165,7 +165,7 @@ formula_covariates <-
     (1 | meta_pid)
 
 bformula_base <- bf(formula_base)
-bformula_covariates <- bf(formula_base)
+bformula_covariates <- bf(formula_covariates)
 ```
 
 ```{r, message = NA}
