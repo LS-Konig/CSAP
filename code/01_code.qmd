@@ -394,7 +394,7 @@ ggplot(
     width = 0.75
   ) +
   scale_fill_manual(
-    values = c("white", "gray", "black")
+    values = c("white", "#CCCCCC", "black")
   ) +
   scale_x_continuous(labels = percent) +
   labs(
@@ -402,7 +402,10 @@ ggplot(
     y = "Country",
     fill = "Partisan Type"
   ) +
-  theme_pubr()
+  theme_pubr() +
+  theme(
+    aspect.ratio = 1 / 1.618034
+  )
 ```
 
 ```{r}
