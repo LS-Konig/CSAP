@@ -21,6 +21,7 @@ _publish.yml
 *cache*
 *code_files*
 *_files*
+literature
 
 # Miscellaneous
 .DS_Store
