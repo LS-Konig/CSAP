@@ -68,6 +68,76 @@ load(
 ```{r}
 #| label: model-formulas
 
+formula_naive <-
+  # outcome: tokens allocated --------------------------------------------------
+  cj_token ~
+    1 + # global intercept
+
+    # main variables of interest -----------------------------------------------
+    der_partisan_type +
+    der_partisan_relationship +
+    der_partisan_type * der_partisan_relationship +
+
+    # conjoint controls Z ------------------------------------------------------
+    cj_age_en +
+    cj_class_en +
+    cj_sex_en +
+    cj_reli_en +
+    cj_eupos_shown + # eupos trmnt only in dictator
+    meta_round + # round of game
+    meta_wave # wave of survey
+
+
+formula_naive_covariates <-
+  # outcome: tokens allocated --------------------------------------------------
+  cj_token ~
+    1 + # global intercept
+
+    # main variables of interest -----------------------------------------------
+    der_partisan_type +
+    der_partisan_relationship +
+    der_partisan_type * der_partisan_relationship +
+
+    # conjoint controls Z ------------------------------------------------------
+    cj_age_en +
+    cj_class_en +
+    cj_sex_en +
+    cj_reli_en +
+    cj_eupos_shown + # eupos trmnt only in dictator
+    meta_round + # round of game
+    meta_wave + # wave of survey
+
+    # confounding variables C --------------------------------------------------
+    q_lrpos2_z +
+    q_eupos2_z +
+    q_econ_nativism_z +
+    q_cult_nativism_z +
+    q_religion_en +
+    q_satis_demo_country_z +
+    q_understand_nat_pol_z +
+    q_understand_eu_pol_z +
+    q_parties_harm_z +
+    q_officials_talk_action_z +
+    q_politics_good_evil_z +
+    q_people_unaware_z +
+    q_leaders_educated_z +
+    q_expert_decisions_z +
+    q_listen_other_groups_z +
+    q_democracy_compromise_z +
+    q_interest_pol_country_z +
+    q_interest_pol_eu_z +
+    q_edu_z +
+    q_perc_class +
+    q_eval_finance_household_z +
+    q_eval_job_z +
+    q_eval_econ_country_z +
+    q_eval_econ_eur_z +
+    q_gender +
+    q_age_z +
+    q_rural_urban +
+    q_risk_taking_z +
+    q_future_discount_z
+
 formula_base <-
   # outcome: tokens allocated --------------------------------------------------
   cj_token ~
@@ -164,6 +234,8 @@ formula_covariates <-
     # Level 2: Respondent (i) nested in (a:c) - Intercept only
     (1 | meta_pid)
 
+bformula_naive <- bf(formula_naive)
+bformula_naive_covariates <- bf(formula_naive_covariates)
 bformula_base <- bf(formula_base)
 bformula_covariates <- bf(formula_covariates)
 ```
@@ -171,7 +243,38 @@ bformula_covariates <- bf(formula_covariates)
 ```{r, message = NA}
 #| label: lme4-fits
 
-message(paste("lme4_fit_dict_base lme4_dict_base at", Sys.time()))
+## Naive models
+message(paste("Fitting lme4_dict_naive at", Sys.time()))
+lme4_fit_dict_naive <- lmer(
+  formula = formula_naive,
+  data = df_modelvars |>
+    filter(meta_game == "dict")
+)
+
+message(paste("Fitting lme4_fit_trust_naive at", Sys.time()))
+lme4_fit_trust_naive <- lmer(
+  formula = formula_naive,
+  data = df_modelvars |>
+    filter(meta_game == "trust")
+)
+
+## Naive covariate models
+message(paste("Fitting lme4_dict_naive at", Sys.time()))
+lme4_fit_dict_naive_cov <- lmer(
+  formula = formula_naive_covariates,
+  data = df_modelvars |>
+    filter(meta_game == "dict")
+)
+
+message(paste("Fitting lme4_fit_trust_naive at", Sys.time()))
+lme4_fit_trust_naive_cov <- lmer(
+  formula = formula_naive_covariates,
+  data = df_modelvars |>
+    filter(meta_game == "trust")
+)
+
+## BASE MODELS
+message(paste("Fitting lme4_dict_base at", Sys.time()))
 lme4_fit_dict_base <- lmer(
   formula = formula_base,
   data = df_modelvars |>
@@ -185,6 +288,7 @@ lme4_fit_trust_base <- lmer(
     filter(meta_game == "trust")
 )
 
+## Covariate models
 message(paste("Fitting lme4_fit_dict_cov at", Sys.time()))
 lme4_fit_dict_cov <- lmer(
   formula = formula_covariates,
@@ -296,10 +400,10 @@ priors <- c(
   prior(student_t(3, 0, 2), class = "sigma") # residual SD
 )
 
-Compile
-models
-without
-sampling
+# Compile
+# models
+# without
+# sampling
 compiled_base_d <- brm(
   formula = bformula_base,
   data = df_modelvars |> filter(meta_game == "dict"),
