@@ -171,19 +171,19 @@ bformula_covariates <- bf(formula_covariates)
 ```{r, message = NA}
 #| label: lme4-fits
 
-# message(paste("lme4_fit_dict_base lme4_dict_base at", Sys.time()))
-# lme4_fit_dict_base <- lmer(
-#   formula = formula_base,
-#   data = df_modelvars |>
-#     filter(meta_game == "dict")
-# )
+message(paste("lme4_fit_dict_base lme4_dict_base at", Sys.time()))
+lme4_fit_dict_base <- lmer(
+  formula = formula_base,
+  data = df_modelvars |>
+    filter(meta_game == "dict")
+)
 
-# message(paste("Fitting lme4_fit_trust_base at", Sys.time()))
-# lme4_fit_trust_base <- lmer(
-#   formula = formula_base,
-#   data = df_modelvars |>
-#     filter(meta_game == "trust")
-# )
+message(paste("Fitting lme4_fit_trust_base at", Sys.time()))
+lme4_fit_trust_base <- lmer(
+  formula = formula_base,
+  data = df_modelvars |>
+    filter(meta_game == "trust")
+)
 
 message(paste("Fitting lme4_fit_dict_cov at", Sys.time()))
 lme4_fit_dict_cov <- lmer(
@@ -296,32 +296,35 @@ priors <- c(
   prior(student_t(3, 0, 2), class = "sigma") # residual SD
 )
 
-# Compile models without sampling
-# compiled_base_d <- brm(
-#   formula = bformula_base,
-#   data = df_modelvars |> filter(meta_game == "dict"),
-#   family = gaussian(),
-#   prior = priors,
-#   chains = 0,
-#   init = lmer_to_brms_inits(
-#     lme4_fit_dict_base,
-#     noise_sd = 0.001,
-#     n_chains = n_chains
-#   )
-# )
+Compile
+models
+without
+sampling
+compiled_base_d <- brm(
+  formula = bformula_base,
+  data = df_modelvars |> filter(meta_game == "dict"),
+  family = gaussian(),
+  prior = priors,
+  chains = 0,
+  init = lmer_to_brms_inits(
+    lme4_fit_dict_base,
+    noise_sd = 0.001,
+    n_chains = n_chains
+  )
+)
 
-# compiled_base_t <- brm(
-#   formula = bformula_base,
-#   data = df_modelvars |> filter(meta_game == "trust"),
-#   family = gaussian(),
-#   prior = priors,
-#   chains = 0,
-#   init = lmer_to_brms_inits(
-#     lme4_fit_trust_base,
-#     noise_sd = 0.001,
-#     n_chains = n_chains
-#   )
-# )
+compiled_base_t <- brm(
+  formula = bformula_base,
+  data = df_modelvars |> filter(meta_game == "trust"),
+  family = gaussian(),
+  prior = priors,
+  chains = 0,
+  init = lmer_to_brms_inits(
+    lme4_fit_trust_base,
+    noise_sd = 0.001,
+    n_chains = n_chains
+  )
+)
 
 compiled_cov_d <- brm(
   formula = bformula_covariates,
@@ -356,14 +359,14 @@ compiled_cov_t <- brm(
 #| label: save-compiled-models-and-data
 
 # Save compiled objects for later
-# save(
-#   compiled_base_d,
-#   file = here("data", "02_processed", "models", "compile_base_d.RData")
-# )
-# save(
-#   compiled_base_t,
-#   file = here("data", "02_processed", "models", "compile_base_t.RData")
-# )
+save(
+  compiled_base_d,
+  file = here("data", "02_processed", "models", "compile_base_d.RData")
+)
+save(
+  compiled_base_t,
+  file = here("data", "02_processed", "models", "compile_base_t.RData")
+)
 save(
   compiled_cov_d,
   file = here("data", "02_processed", "models", "compile_cov_d.RData")
