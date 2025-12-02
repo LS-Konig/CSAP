@@ -314,72 +314,74 @@ lme4_fit_trust_cov <- lmer(
 #| label: initial-values-function
 
 # Convert lmer object into brms init list
-lmer_to_brms_inits <- function(lmer_model, noise_sd, n_chains) {
+lmer_to_brms_inits <- function(model, noise_sd = 0.001, n_chains = 4) {
   # --- 1. FIXED EFFECTS -------------------------------------------------------
-  fe <- fixef(lmer_model)
+  if (inherits(model, "lmerMod")) {
+    fe <- lme4::fixef(model)
+  } else if (inherits(model, "lm")) {
+    fe <- stats::coef(model)
+  } else {
+    stop("Model must be an lm or lmerMod object.")
+  }
+
   names(fe) <- paste0("b_", names(fe))
 
-  # --- 2. RANDOM EFFECTS ------------------------------------------------------
-  vc <- VarCorr(lmer_model)
+  # --- 2. RANDOM EFFECTS (only for lmer) --------------------------------------
   re_list <- list()
 
-  for (g in names(vc)) {
-    mat <- as.matrix(vc[[g]])
-    sd_vec <- sqrt(diag(mat))
+  if (inherits(model, "lmerMod")) {
+    vc <- VarCorr(model)
 
-    # SDs
-    for (i in seq_along(sd_vec)) {
-      parname <- paste0("sd_", g, "__", colnames(mat)[i])
-      re_list[[parname]] <- sd_vec[i]
-    }
+    for (g in names(vc)) {
+      mat <- as.matrix(vc[[g]])
+      sd_vec <- sqrt(diag(mat))
 
-    # Correlations
-    if (ncol(mat) > 1) {
-      cor_mat <- cov2cor(mat)
-      for (i in 2:ncol(cor_mat)) {
-        for (j in 1:(i - 1)) {
-          parname <- paste0(
-            "cor_",
-            g,
-            "__",
-            colnames(cor_mat)[i],
-            "__",
-            colnames(cor_mat)[j]
-          )
-          re_list[[parname]] <- cor_mat[i, j]
+      # SDs
+      for (i in seq_along(sd_vec)) {
+        parname <- paste0("sd_", g, "__", colnames(mat)[i])
+        re_list[[parname]] <- sd_vec[i]
+      }
+
+      # Correlations
+      if (ncol(mat) > 1) {
+        cor_mat <- cov2cor(mat)
+        for (i in 2:ncol(cor_mat)) {
+          for (j in 1:(i - 1)) {
+            parname <- paste0(
+              "cor_",
+              g,
+              "__",
+              colnames(cor_mat)[i],
+              "__",
+              colnames(cor_mat)[j]
+            )
+            re_list[[parname]] <- cor_mat[i, j]
+          }
         }
       }
     }
   }
 
   # --- 3. RESIDUAL SD ---------------------------------------------------------
-  resid_sd <- sigma(lmer_model)
+  resid_sd <- sigma(model) # works for both lm and lmer
 
-  # --- Base init list (the same for all chains before jittering) ---
+  # --- 4. Base init list ------------------------------------------------------
   base_init <- c(as.list(fe), re_list, list(sigma = resid_sd))
 
-  # --- Helper: add noise ---
+  # --- 5. Jitter helper -------------------------------------------------------
   jitter_list <- function(x, noise_sd) {
     lapply(x, function(v) {
-      if (is.numeric(v)) {
-        return(v + rnorm(1, 0, noise_sd))
-      } else {
-        return(v)
-      }
+      if (is.numeric(v)) v + rnorm(1, 0, noise_sd) else v
     })
   }
 
-  # --- Return nested list: one list of inits per chain ---
-  init_chains <- replicate(
+  # --- 6. Return list of init lists ------------------------------------------
+  replicate(
     n_chains,
     jitter_list(base_init, noise_sd),
     simplify = FALSE
   )
-
-  return(init_chains)
 }
-
-
 ```
 
 # Model Settings
@@ -406,6 +408,62 @@ priors <- c(
 # models
 # without
 # sampling
+
+## NAIVE MODELS
+compiled_naive_d <- brm(
+  formula = bformula_naive,
+  data = df_modelvars |> filter(meta_game == "dict"),
+  family = gaussian(),
+  prior = priors,
+  chains = 0,
+  init = lmer_to_brms_inits(
+    lme4_fit_dict_naive,
+    noise_sd = 0.001,
+    n_chains = n_chains
+  )
+)
+
+compiled_naive_t <- brm(
+  formula = bformula_naive,
+  data = df_modelvars |> filter(meta_game == "trust"),
+  family = gaussian(),
+  prior = priors,
+  chains = 0,
+  init = lmer_to_brms_inits(
+    lme4_fit_trust_naive,
+    noise_sd = 0.001,
+    n_chains = n_chains
+  )
+)
+
+## NAIVE COVARIATE MODELS
+compiled_naive_cov_d <- brm(
+  formula = bformula_naive_covariates,
+  data = df_modelvars |> filter(meta_game == "dict"),
+  family = gaussian(),
+  prior = priors,
+  chains = 0,
+  init = lmer_to_brms_inits(
+    lme4_fit_dict_naive_cov,
+    noise_sd = 0.001,
+    n_chains = n_chains
+  )
+)
+
+compiled_naive_cov_t <- brm(
+  formula = bformula_naive_covariates,
+  data = df_modelvars |> filter(meta_game == "trust"),
+  family = gaussian(),
+  prior = priors,
+  chains = 0,
+  init = lmer_to_brms_inits(
+    lme4_fit_trust_naive_cov,
+    noise_sd = 0.001,
+    n_chains = n_chains
+  )
+)
+
+## BASE MODELS
 compiled_base_d <- brm(
   formula = bformula_base,
   data = df_modelvars |> filter(meta_game == "dict"),
@@ -432,6 +490,8 @@ compiled_base_t <- brm(
   )
 )
 
+
+## COVARIATE MODELS
 compiled_cov_d <- brm(
   formula = bformula_covariates,
   data = df_modelvars |> filter(meta_game == "dict"),
