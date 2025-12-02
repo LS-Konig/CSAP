@@ -582,6 +582,9 @@ Country-Level Effects on Out-Group Derogation
 -> systematic dont knows and meaningful values
 -> categorical as factors
 -> numerical as nums
+
 -> Merge thermo scores
 -> Robustness using Wagner and Reiljan Index Measures
-
+-> different response family 
+-> test with external data source
+-> affect, what about ideology?
