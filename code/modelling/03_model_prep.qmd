@@ -313,25 +313,86 @@ lme4_fit_trust_cov <- lmer(
 ```{r}
 #| label: fit-binomial-glm
 
-# THIS APPROACH NEED FIXING: NOBS IS REDUCED DUE TO COVARIATES IN MODELS
+# hence: take data from fitted lmer object (cov_d and cov_t)
 
-# adjust formula for glm
-binomial_response_d <- df_modelvars |>
-  filter(meta_game == "dict") |>
-  select(cj_token) |>
-  mutate(nontokens = 10 - cj_token)
+# adjust data for glm (two response variables: successes and failures)
+dat_dict_cov <- lme4_fit_dict_cov@frame
 
-binomial_response_t <- df_modelvars |>
-  filter(meta_game == "trust") |>
-  select(cj_token) |>
-  mutate(nontokens = 10 - cj_token)
+dat_dict_cov$binomial_response <- cbind(
+  dat_dict_cov$cj_token,
+  10 - dat_dict_cov$cj_token
+)
+
+# adjust model formula
+formula_binomial_cov <-
+  # outcome: tokens allocated --------------------------------------------------
+  binomial_response ~
+    1 + # global intercept
+
+    # main variables of interest -----------------------------------------------
+    der_partisan_type +
+    der_partisan_relationship +
+    der_partisan_type * der_partisan_relationship +
+
+    # conjoint controls Z ------------------------------------------------------
+    cj_age_en +
+    cj_class_en +
+    cj_sex_en +
+    cj_reli_en +
+    cj_eupos_shown + # eupos trmnt only in dictator
+    meta_round + # round of game
+    meta_wave + # wave of survey
+
+    # confounding variables C --------------------------------------------------
+    q_lrpos2_z +
+    q_eupos2_z +
+    q_econ_nativism_z +
+    q_cult_nativism_z +
+    q_religion_en +
+    q_satis_demo_country_z +
+    q_understand_nat_pol_z +
+    q_understand_eu_pol_z +
+    q_parties_harm_z +
+    q_officials_talk_action_z +
+    q_politics_good_evil_z +
+    q_people_unaware_z +
+    q_leaders_educated_z +
+    q_expert_decisions_z +
+    q_listen_other_groups_z +
+    q_democracy_compromise_z +
+    q_interest_pol_country_z +
+    q_interest_pol_eu_z +
+    q_edu_z +
+    q_perc_class +
+    q_eval_finance_household_z +
+    q_eval_job_z +
+    q_eval_econ_country_z +
+    q_eval_econ_eur_z +
+    q_gender +
+    q_age_z +
+    q_rural_urban +
+    q_risk_taking_z +
+    q_future_discount_z +
+
+    # random intercept and slope components ------------------------------------
+    # Level 4: Country (c) - Correlated Intercept and Slopes
+    (1 + der_partisan_type + der_partisan_relationship | meta_country) +
+
+    # Level 3: Partisan Anchor (a) nested in Country (c) - Correlated Intercept and Slopes
+    (1 +
+      der_partisan_type +
+      der_partisan_relationship |
+      meta_country:der_partisan_anchor) +
+
+    # Level 2: Respondent (i) nested in (a:c) - Intercept only
+    (1 | meta_pid)
 
 
 message(paste("Fitting glmer at", Sys.time()))
 glmer_fit_dict_cov <- glmer(
-  formula = formula_covariates,
-  data = df_modelvars |>
-    filter(meta_game == "cov")
+  formula = formula_binomial_cov,
+  data = dat_dict_cov,
+  family = binomial(link = "logit")
 )
 ```
 
