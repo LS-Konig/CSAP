@@ -240,19 +240,21 @@ bformula_base <- bf(formula_base)
 bformula_covariates <- bf(formula_covariates)
 ```
 
+# lme4 starting values
+
 ```{r, message = NA}
 #| label: lme4-fits
 
 ## Naive models
-message(paste("Fitting lme4_dict_naive at", Sys.time()))
-lme4_fit_dict_naive <- lmer(
+message(paste("Fitting lm_dict_naive at", Sys.time()))
+lm_fit_dict_naive <- lm(
   formula = formula_naive,
   data = df_modelvars |>
     filter(meta_game == "dict")
 )
 
-message(paste("Fitting lme4_fit_trust_naive at", Sys.time()))
-lme4_fit_trust_naive <- lmer(
+message(paste("Fitting lm_fit_trust_naive at", Sys.time()))
+lm_fit_trust_naive <- lm(
   formula = formula_naive,
   data = df_modelvars |>
     filter(meta_game == "trust")
