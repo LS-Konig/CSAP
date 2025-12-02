@@ -308,6 +308,34 @@ lme4_fit_trust_cov <- lmer(
 ```
 
 
+# GLM binomial starting values
+
+```{r}
+#| label: fit-binomial-glm
+
+# THIS APPROACH NEED FIXING: NOBS IS REDUCED DUE TO COVARIATES IN MODELS
+
+# adjust formula for glm
+binomial_response_d <- df_modelvars |>
+  filter(meta_game == "dict") |>
+  select(cj_token) |>
+  mutate(nontokens = 10 - cj_token)
+
+binomial_response_t <- df_modelvars |>
+  filter(meta_game == "trust") |>
+  select(cj_token) |>
+  mutate(nontokens = 10 - cj_token)
+
+
+message(paste("Fitting glmer at", Sys.time()))
+glmer_fit_dict_cov <- glmer(
+  formula = formula_covariates,
+  data = df_modelvars |>
+    filter(meta_game == "cov")
+)
+```
+
+
 # Model Starting Values
 
 ```{r, message = NA}
