@@ -525,6 +525,27 @@ compiled_cov_t <- brm(
 #| label: save-compiled-models-and-data
 
 # Save compiled objects for later
+
+save(
+  compiled_naive_d,
+  file = here("data", "02_processed", "models", "compiled_naive_d.RData")
+)
+
+save(
+  compiled_naive_t,
+  file = here("data", "02_processed", "models", "compiled_naive_t.RData")
+)
+
+save(
+  compiled_naive_cov_d,
+  file = here("data", "02_processed", "models", "compiled_naive_cov_d.RData")
+)
+
+save(
+  compiled_naive_cov_t,
+  file = here("data", "02_processed", "models", "compiled_naive_cov_t.RData")
+)
+
 save(
   compiled_base_d,
   file = here("data", "02_processed", "models", "compile_base_d.RData")
