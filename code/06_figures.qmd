@@ -16,7 +16,7 @@ format:
     toc: true
     code-fold: true
     code-tools: true
-    embed-resources: true
+    embed-resources: false
 execute:
   echo: true
   warning: true
@@ -39,6 +39,8 @@ start_time <- Sys.time()
 p_required <- c(
   "tidyverse",
   "here",
+  "ggpubr",
+  "gridExtra",
   "sessioninfo"
 )
 packages <- rownames(installed.packages())
@@ -62,6 +64,15 @@ load(here("data", "03_final", "plot_base_t.RData"))
 load(here("data", "03_final", "plot_cov_d.RData"))
 
 load(here("data", "03_final", "plot_cov_t.RData"))
+
+
+load(here("data", "03_final", "plot_country_base_d.RData"))
+
+load(here("data", "03_final", "plot_country_base_t.RData"))
+
+load(here("data", "03_final", "plot_country_cov_d.RData"))
+
+load(here("data", "03_final", "plot_country_cov_t.RData"))
 ```
 
 # Figures
@@ -69,105 +80,127 @@ load(here("data", "03_final", "plot_cov_t.RData"))
 ## Base dictator game model
 
 ```{r}
-#| label: fig-ap-pooled-base-d
-#| fig-cap: "A title"
+#| label: fig-pooled-base-d
+#| fig-cap: "Combined figure"
 #| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
 
-plot_base_d[["AP_Plot"]]
-```
+ggarrange(
+  plot_base_d[["AP_Plot"]],
+  plot_base_d[["IF_Plot"]],
+  plot_base_d[["OD_Plot"]],
+  nrow = 3
+)
 
-```{r}
-#| label: fig-if-pooled-base-d
-#| fig-cap: "A title"
-#| fig-dpi: 500
-
-plot_base_d[["IF_Plot"]]
-```
-
-```{r}
-#| label: fig-od-pooled-base-d
-#| fig-cap: "A title"
-#| fig-dpi: 500
-
-plot_base_d[["OD_Plot"]]
 ```
 
 ## Base trust game model
 
 ```{r}
-#| label: fig-ap-pooled-base-t
-#| fig-cap: "A title"
+#| label: fig-pooled-base-t
+#| fig-cap: "Combined figure"
 #| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
 
-plot_base_t[["AP_Plot"]]
-```
+ggarrange(
+  plot_base_t[["AP_Plot"]],
+  plot_base_t[["IF_Plot"]],
+  plot_base_t[["OD_Plot"]],
+  nrow = 3
+)
 
-```{r}
-#| label: fig-if-pooled-base-t
-#| fig-cap: "A title"
-#| fig-dpi: 500
-
-plot_base_t[["IF_Plot"]]
-```
-
-```{r}
-#| label: fig-od-pooled-base-t
-#| fig-cap: "A title"
-#| fig-dpi: 500
-
-plot_base_t[["OD_Plot"]]
 ```
 
 ## Covariate dictator model
 
 ```{r}
-#| label: fig-ap-pooled-cov-d
-#| fig-cap: "A title"
+#| label: fig-pooled-cov-d
+#| fig-cap: "Combined figure"
 #| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
 
-plot_cov_d[["AP_Plot"]]
-```
+ggarrange(
+  plot_cov_d[["AP_Plot"]],
+  plot_cov_d[["IF_Plot"]],
+  plot_cov_d[["OD_Plot"]],
+  nrow = 3
+)
 
-```{r}
-#| label: fig-if-pooled-cov-d
-#| fig-cap: "A title"
-#| fig-dpi: 500
-
-plot_cov_d[["IF_Plot"]]
-```
-
-```{r}
-#| label: fig-od-pooled-cov-d
-#| fig-cap: "A title"
-#| fig-dpi: 500
-
-plot_cov_d[["OD_Plot"]]
 ```
 
 ## Covariate trust model
 
 ```{r}
-#| label: fig-ap-pooled-cov-t
-#| fig-cap: "A title"
+#| label: fig-pooled-cov-t
+#| fig-cap: "Combined figure"
 #| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
 
-plot_cov_t[["AP_Plot"]]
+ggarrange(
+  plot_cov_t[["AP_Plot"]],
+  plot_cov_t[["IF_Plot"]],
+  plot_cov_t[["OD_Plot"]],
+  nrow = 3
+)
+
 ```
 
-```{r}
-#| label: fig-if-pooled-cov-t
-#| fig-cap: "A title"
-#| fig-dpi: 500
+### Country figures
 
-plot_cov_t[["IF_Plot"]]
+## Base dictator game model
+
+```{r}
+#| label: fig-country-base-d
+#| fig-cap: "Combined figure"
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
+
+plot_country_base_d
+
 ```
 
-```{r}
-#| label: fig-od-pooled-cov-t
-#| fig-cap: "A title"
-#| fig-dpi: 500
+## Base trust game model
 
-plot_cov_t[["OD_Plot"]]
+```{r}
+#| label: fig-country-base-t
+#| fig-cap: "Combined figure"
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
+
+plot_country_base_t
+
+```
+
+## Covariate dictator model
+
+```{r}
+#| label: fig-country-cov-d
+#| fig-cap: "Combined figure"
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
+
+plot_country_cov_d
+
+```
+
+## Covariate trust model
+
+```{r}
+#| label: fig-country-cov-t
+#| fig-cap: "Combined figure"
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
+
+plot_country_cov_t
+
 ```
 
 # Session Info
