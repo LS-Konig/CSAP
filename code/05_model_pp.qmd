@@ -146,17 +146,38 @@ Following conceptual observed
 
 #' Creates the required 'newdata' grid for the Observed Value Approach (APE)
 #'
-#' Generates 6 copies of the original data, fixing the focal covariates
-#' (Partisan Type T and Partisan Relationship R) in each copy.
+#' Generates 6 copies of the original data (all combinations of Partisan Type T
+#' and Partisan Relationship R). The function can operate in two modes:
 #'
-#' @param bfit_model The fitted brms model object.
+#' **(1) Pooled Mode (default)**
+#' Returns 6 tibbles, each containing the *full dataset* with T and R set to one
+#' of the 6 focal combinations.
+#'
+#' **(2) Country-Specific Mode (`by_country = TRUE`)**
+#' Automatically splits the model data by country and returns a nested list:
+#' `newdata_list[["CountryName"]][["T1_RCo"]]`, each containing a *country-specific*
+#' subset of the original data with T and R fixed to the focal values.
+#'
+#' This structure is designed for `brms::epred()` calls for either pooled or
+#' country-level APE computation.
+#'
+#' @param bfit_model The fitted brms model object (must contain the model data).
 #' @param focal_T Vector of T values (e.g., c(0, 1)).
 #' @param focal_R Vector of R factor levels (e.g., c("Co", "Out", "None")).
-#' @return A named list of 6 tibbles (N rows each), ready for separate epred() calls.
+#' @param by_country Logical. If TRUE, produces newdata grids for each country separately.
+#' @param country_var Character. Name of the country variable in the data (default `"country"`).
+#'
+#' @return
+#' - If `by_country = FALSE`: A list of 6 tibbles (full data each).
+#' - If `by_country = TRUE`: A nested list of lists:
+#'     `list[["Country"]][["T_val_R_val"]] = tibble`.
+#' @export
 create_ape_newdata <- function(
   bfit_model,
   focal_T = c(0, 1),
-  focal_R = c("Co", "Out", "None")
+  focal_R = c("Co", "Out", "None"),
+  by_country = FALSE,
+  country_var = "country"
 ) {
   original_data <- bfit_model[["data"]] |> as_tibble()
 
@@ -168,30 +189,71 @@ create_ape_newdata <- function(
     )
   }
 
+  # All 6 T × R combinations
   focal_combinations <- expand_grid(T_val = focal_T, R_val = focal_R)
-  newdata_list <- list()
 
-  for (i in 1:nrow(focal_combinations)) {
-    T_set <- focal_combinations$T_val[i]
-    R_set <- focal_combinations$R_val[i]
+  # ----------------------------------------------------------------------
+  # OPTION 1: POOLED ANALYSIS (default)
+  # ----------------------------------------------------------------------
+  if (!by_country) {
+    newdata_list <- list()
 
-    new_df <- original_data |>
-      mutate(
-        # Set the focal T value (Partisan Type) for ALL observations
-        der_partisan_type = T_set,
+    for (i in 1:nrow(focal_combinations)) {
+      T_set <- focal_combinations$T_val[i]
+      R_set <- focal_combinations$R_val[i]
 
-        # Set the focal R value (Partisan Relationship) for ALL observations
-        der_partisan_relationship = factor(R_set, levels = R_levels)
-      )
+      new_df <- original_data |>
+        mutate(
+          der_partisan_type = T_set,
+          der_partisan_relationship = factor(R_set, levels = R_levels)
+        )
 
-    # Use condition_id as the list name
-    condition_id <- paste0("T", T_set, "_R", R_set)
+      condition_id <- paste0("T", T_set, "_R", R_set)
+      newdata_list[[condition_id]] <- new_df
+    }
 
-    newdata_list[[condition_id]] <- new_df
+    return(newdata_list)
   }
 
-  # Return the named list of 6 individual data frames
-  return(newdata_list)
+  # ----------------------------------------------------------------------
+  # OPTION 2: COUNTRY-SPECIFIC ANALYSIS
+  # ----------------------------------------------------------------------
+  if (!country_var %in% names(original_data)) {
+    stop(paste0(
+      "Country variable '",
+      country_var,
+      "' not found in model data."
+    ))
+  }
+
+  country_values <- unique(original_data[[country_var]])
+
+  newdata_country_list <- list()
+
+  for (country in country_values) {
+    data_country <- original_data |>
+      filter(.data[[country_var]] == country)
+
+    country_list <- list()
+
+    for (i in 1:nrow(focal_combinations)) {
+      T_set <- focal_combinations$T_val[i]
+      R_set <- focal_combinations$R_val[i]
+
+      new_df <- data_country |>
+        mutate(
+          der_partisan_type = T_set,
+          der_partisan_relationship = factor(R_set, levels = R_levels)
+        )
+
+      condition_id <- paste0("T", T_set, "_R", R_set)
+      country_list[[condition_id]] <- new_df
+    }
+
+    newdata_country_list[[as.character(country)]] <- country_list
+  }
+
+  return(newdata_country_list)
 }
 
 ```
@@ -204,65 +266,97 @@ create_ape_newdata <- function(
 # 2. Function to estimate Expected Values (EVs) using epred()
 # -----------------------------------------------------------
 
-#' Estimates Expected Values (EVs) by running epred() separately for each T x R scenario.
+#' Estimates Expected Values (EVs) for each T × R scenario using posterior_epred().
 #'
 #' @param bfit_model The fitted brms model object.
-#' @param newdata_list The named list of 6 data frames created by create_ape_newdata().
-#' @param re_formula_setting Use NULL for pooled APE (marginalizing REs) or
-#'        TRUE for conditional APE (including REs for country/anchor).
-#' @return A named list of 6 posterior matrices, each [Draws x N], or NULL if epred fails.
-estimate_evs <- function(bfit_model, newdata_list, re_formula_setting = NULL) {
-  n_scen <- newdata_list |> length()
+#' @param newdata_list Either:
+#'        - pooled mode: list of 6 data frames
+#'        - country mode: nested list like list[["Country"]][["Scenario"]] = df
+#' @param mode Either "pooled" or "country".
+#' @param re_formula_setting Passed to posterior_epred(); NULL = marginal REs,
+#'        TRUE = include REs, NA = ignore all REs, or a formula.
+#'
+#' @return A list containing:
+#'   - epreds_list: list (pooled) or nested list (countries → scenarios)
+#'   - N_obs: number of observations (single value for pooled; vector for country mode)
+#' @export
+estimate_evs <- function(
+  bfit_model,
+  newdata_list,
+  mode = c("pooled", "country"),
+  re_formula_setting = NULL
+) {
+  # Ensure mode is correctly chosen
+  mode <- match.arg(mode)
 
-  message(paste0(
-    "Running posterior_epred() for: ",
-    deparse(substitute(bfit_model)),
-    "; separately for ",
-    n_scen,
-    " scenarios with re_formula = ",
-    deparse(substitute(re_formula_setting))
-  ))
+  message("Running estimate_evs() in mode: ", toupper(mode))
 
-  epreds_list <- map(names(newdata_list), function(cond_name) {
-    df <- newdata_list[[cond_name]]
-
-    # Calculate the posterior expected values
-    epreds_matrix <- tryCatch(
-      {
-        posterior_epred(
-          bfit_model,
-          newdata = df,
-          re_formula = re_formula_setting
-        )
-      },
+  # ---------------------------------------------------------
+  # Helper: Safe posterior_epred wrapper
+  # ---------------------------------------------------------
+  run_one_epred <- function(df, cond_name, country = NULL) {
+    tryCatch(
+      posterior_epred(
+        bfit_model,
+        newdata = df,
+        re_formula = re_formula_setting
+      ),
       error = function(e) {
-        warning(paste(
-          "posterior_epred() failed for condition",
-          cond_name,
-          ". Error:",
-          e$message
-        ))
+        prefix <- if (is.null(country)) {
+          paste("epred failed in pooled scenario", cond_name)
+        } else {
+          paste("epred failed for", country, "scenario", cond_name)
+        }
+        warning(prefix, " — ", e$message)
         return(NULL)
       }
     )
-
-    return(epreds_matrix)
-  }) |>
-    set_names(names(newdata_list))
-
-  # Check if any epred failed
-  if (any(map_lgl(epreds_list, is.null))) {
-    warning("One or more epred calls failed. Check warnings above.")
-    return(NULL)
   }
 
-  # N = Original number of observations (used for checks in calling script)
-  N <- nrow(bfit_model[["data"]])
+  # ---------------------------------------------------------
+  # MODE 1 → COUNTRY-SPECIFIC (nested list)
+  # ---------------------------------------------------------
+  if (mode == "country") {
+    country_names <- names(newdata_list)
+    result_nested <- list()
+    N_per_country <- c()
 
-  return(list(
-    epreds_list = epreds_list,
-    N_obs = N
-  ))
+    for (ct in country_names) {
+      scenarios <- names(newdata_list[[ct]])
+      result_nested[[ct]] <- list()
+
+      # number of rows per scenario (should all be identical)
+      N_per_country[ct] <- nrow(newdata_list[[ct]][[1]])
+
+      for (sc in scenarios) {
+        df <- newdata_list[[ct]][[sc]]
+        result_nested[[ct]][[sc]] <- run_one_epred(df, sc, ct)
+      }
+    }
+
+    return(list(
+      epreds_list = result_nested,
+      N_obs = N_per_country
+    ))
+  }
+
+  # ---------------------------------------------------------
+  # MODE 2 → POOLED (flat list of 6 dfs)
+  # ---------------------------------------------------------
+  if (mode == "pooled") {
+    scenario_names <- names(newdata_list)
+
+    epreds_list <- map(scenario_names, function(sc) {
+      df <- newdata_list[[sc]]
+      run_one_epred(df, sc, country = NULL)
+    }) |>
+      set_names(scenario_names)
+
+    return(list(
+      epreds_list = epreds_list,
+      N_obs = nrow(bfit_model$data)
+    ))
+  }
 }
 ```
 
@@ -555,7 +649,7 @@ plot_pooled_results <- function(tidybayes_df) {
     geom_vline(
       xintercept = 0,
       linetype = "dashed",
-      linewidth = 1.5
+      linewidth = 1
     ) +
     labs(
       x = expression(CATE[AP]),
@@ -734,6 +828,206 @@ plot_pooled_results <- function(tidybayes_df) {
 }
 ```
 
+
+### Step 5: Country analyses
+
+```{r}
+#| label: country-analysis-fun
+
+# 5. Function to run country-specific QoI analysis with full QoIs
+# ----------------------------------------------------------------
+
+#' Calculates AP, IF, OD, and CATE QoIs for each country using nested epred output.
+#'
+#' Expects epred_result from estimate_evs() in country-mode:
+#'   epred_result$epreds_list[["Austria"]][["T1_RCo"]] = epred matrix
+#'
+#' @param bfit_model The fitted brms model object (metadata only).
+#' @param epred_result Output from estimate_evs() with nested epreds_list.
+#'
+#' @return A tidy tibble of QoI estimates for all countries combined.
+run_country_analysis <- function(bfit_model, epred_result) {
+  epreds_nested <- epred_result$epreds_list
+
+  if (!is.list(epreds_nested) || !is.list(epreds_nested[[1]])) {
+    stop("epred_result does not contain nested country-specific epreds_list.")
+  }
+
+  country_names <- names(epreds_nested)
+  message(
+    "Starting country-specific analysis for ",
+    length(country_names),
+    " countries."
+  )
+
+  # Function to compute full QoIs from epred matrices for one country
+  compute_qois <- function(epreds_scen_list, country_name) {
+    # --- Step A: calculate APEs (rowMeans) for each scenario ---
+    ape_posteriors <- purrr::map(names(epreds_scen_list), function(scen) {
+      mat <- epreds_scen_list[[scen]]
+      if (!is.matrix(mat)) {
+        stop("Scenario epred is not a matrix")
+      }
+      rowMeans(mat) # mean across columns (observations) per draw
+    }) |>
+      set_names(names(epreds_scen_list)) |>
+      as_tibble()
+
+    # --- Step B: Calculate AP, IF, OD, and CATEs ---
+    AP_T1 <- ape_posteriors$T1_RCo - ape_posteriors$T1_ROut
+    AP_T0 <- ape_posteriors$T0_RCo - ape_posteriors$T0_ROut
+    IF_T1 <- ape_posteriors$T1_RCo - ape_posteriors$T1_RNone
+    IF_T0 <- ape_posteriors$T0_RCo - ape_posteriors$T0_RNone
+    OD_T1 <- ape_posteriors$T1_RNone - ape_posteriors$T1_ROut
+    OD_T0 <- ape_posteriors$T0_RNone - ape_posteriors$T0_ROut
+    CATE_AP <- AP_T1 - AP_T0
+    CATE_IF <- IF_T1 - IF_T0
+    CATE_OD <- OD_T1 - OD_T0
+
+    # --- Step C: Combine to tidy long format ---
+    all_qois_wide <- ape_posteriors |>
+      add_column(
+        AP_Expl = AP_T1,
+        AP_Impl = AP_T0,
+        IF_Expl = IF_T1,
+        IF_Impl = IF_T0,
+        OD_Expl = OD_T1,
+        OD_Impl = OD_T0,
+        CATE_AP = CATE_AP,
+        CATE_IF = CATE_IF,
+        CATE_OD = CATE_OD
+      ) |>
+      mutate(.draw = 1:n(), Analysis = country_name)
+
+    qois_tidy <- all_qois_wide |>
+      pivot_longer(
+        cols = -c(.draw, Analysis),
+        names_to = "Quantity",
+        values_to = "Estimate"
+      )
+
+    return(qois_tidy)
+  }
+
+  # --- Loop over countries ---
+  all_country_qois <- purrr::map(country_names, function(ct) {
+    ct_epreds <- epreds_nested[[ct]]
+    if (!all(map_lgl(ct_epreds, is.matrix))) {
+      warning("Invalid epred structure for country: ", ct)
+      return(NULL)
+    }
+    compute_qois(ct_epreds, ct)
+  }) |>
+    bind_rows()
+
+  if (nrow(all_country_qois) == 0) {
+    stop("Country analysis resulted in an empty output tibble.")
+  }
+
+  return(all_country_qois)
+}
+```
+
+### Step 6: Country result plots
+
+```{r}
+#| label: country-plots-fun
+
+# 6. Function to plot cross-country CATE results
+# ----------------------------------------------
+
+plot_country_results <- function(country_qois_df) {
+  cate_data <- country_qois_df |>
+    filter(Quantity %in% c("CATE_AP", "CATE_IF", "CATE_OD")) |>
+    mutate(
+      Metric_Code = case_when(
+        Quantity == "CATE_AP" ~ "Affective Polarization (CATE)",
+        Quantity == "CATE_IF" ~ "Ingroup Favoritism (CATE)",
+        Quantity == "CATE_OD" ~ "Outgroup Derogation (CATE)"
+      ),
+      Country = factor(Analysis)
+    )
+
+  CATE_COLOR <- "#666666"
+  LINE_COLOR <- "black"
+
+  # p_country_cate <- ggplot(
+  #   cate_data,
+  #   aes(
+  #     x = Estimate,
+  #     y = forcats::fct_reorder(Country, Estimate, .fun = median),
+  #     fill = CATE_COLOR,
+  #     color = LINE_COLOR
+  #   )
+  # ) +
+  #   stat_pointintervalh(
+  #     .width = c(0.95, 0.99),
+  #     point_size = 3,
+  #     fatten_point = 2,
+  #     shape = 21,
+  #     stroke = 1.5,
+  #     point_fill = "white"
+  #   ) +
+  #   scale_fill_identity() +
+  #   scale_color_identity() +
+  #   geom_vline(
+  #     xintercept = 0,
+  #     linetype = "dashed",
+  #     color = "red",
+  #     linewidth = 0.8
+  #   ) +
+  #   facet_wrap(~Metric_Code, ncol = 3, scales = "free_y") +
+  #   labs(
+  #     x = "Conditional Average Treatment Effect (CATE) Size (Tokens)",
+  #     y = "Country"
+  #   ) +
+  #   theme_pubr() +
+  #   theme(
+  #     legend.position = "none",
+  #     strip.background = element_rect(fill = "grey90", color = "grey50"),
+  #     strip.text = element_text(face = "bold")
+  #   )
+
+  p_country_cate <- ggplot(
+    cate_data,
+    aes(
+      x = Estimate,
+      y = forcats::fct_reorder(Country, Estimate, .fun = median),
+      fill = CATE_COLOR,
+      color = LINE_COLOR
+    )
+  ) +
+    stat_halfeye(
+      .width = c(0.95, 0.99),
+      point_interval = "median_qi",
+      slab_size = 0.5,
+      slab_color = "black",
+      slab_fill = "#666666",
+      point_fill = "white",
+      point_color = "black",
+      shape = 21,
+      stroke = 1.5
+    ) +
+    geom_vline(
+      xintercept = 0,
+      linetype = "dashed",
+      linewidth = 1
+    ) +
+    labs(
+      x = expression(CATE[AP]),
+      y = " "
+    ) +
+    theme_pubr() +
+    theme(
+      legend.position = "none",
+      strip.background = element_rect(fill = "grey90", color = "grey50")
+    ) +
+    facet_wrap(~Metric_Code, ncol = 3, scales = "free_y")
+
+  return(p_country_cate)
+}
+```
+
 # Run pipelines
 
 ## Pooled analyses
@@ -745,7 +1039,7 @@ plot_pooled_results <- function(tidybayes_df) {
 
 newdata_base_d <- create_ape_newdata(bfit_base_d)
 
-evs_base_d <- estimate_evs(bfit_base_d, newdata_base_d)
+evs_base_d <- estimate_evs(bfit_base_d, newdata_base_d, re_formula_setting = NA)
 
 qois_base_d <- calculate_qois_tidy(evs_base_d)
 
@@ -760,7 +1054,7 @@ save(
   )
 )
 
-rm(bfit_base_d, newdata_base_d, evs_base_d, qois_base_d, plot_base_d)
+rm(evs_base_d, qois_base_d, plot_base_d)
 ```
 
 ### Base model t
@@ -770,7 +1064,7 @@ rm(bfit_base_d, newdata_base_d, evs_base_d, qois_base_d, plot_base_d)
 
 newdata_base_t <- create_ape_newdata(bfit_base_t)
 
-evs_base_t <- estimate_evs(bfit_base_t, newdata_base_t)
+evs_base_t <- estimate_evs(bfit_base_t, newdata_base_t, re_formula_setting = NA)
 
 qois_base_t <- calculate_qois_tidy(evs_base_t)
 
@@ -785,7 +1079,7 @@ save(
   )
 )
 
-rm(bfit_base_t, newdata_base_t, evs_base_t, qois_base_t, plot_base_t)
+rm(evs_base_t, qois_base_t, plot_base_t)
 ```
 
 ### Cov model d
@@ -795,7 +1089,7 @@ rm(bfit_base_t, newdata_base_t, evs_base_t, qois_base_t, plot_base_t)
 
 newdata_cov_d <- create_ape_newdata(bfit_cov_d)
 
-evs_cov_d <- estimate_evs(bfit_cov_d, newdata_cov_d)
+evs_cov_d <- estimate_evs(bfit_cov_d, newdata_cov_d, re_formula_setting = NA)
 
 qois_cov_d <- calculate_qois_tidy(evs_cov_d)
 
@@ -810,7 +1104,7 @@ save(
   )
 )
 
-rm(bfit_cov_d, newdata_cov_d, evs_cov_d, qois_cov_d, plot_cov_d)
+rm(evs_cov_d, qois_cov_d, plot_cov_d)
 ```
 
 ### Cov model t
@@ -820,7 +1114,7 @@ rm(bfit_cov_d, newdata_cov_d, evs_cov_d, qois_cov_d, plot_cov_d)
 
 newdata_cov_t <- create_ape_newdata(bfit_cov_t)
 
-evs_cov_t <- estimate_evs(bfit_cov_t, newdata_cov_t)
+evs_cov_t <- estimate_evs(bfit_cov_t, newdata_cov_t, re_formula_setting = NA)
 
 qois_cov_t <- calculate_qois_tidy(evs_cov_t)
 
@@ -835,18 +1129,167 @@ save(
   )
 )
 
-rm(bfit_cov_t, newdata_cov_t, evs_cov_t, qois_cov_t, plot_cov_t)
+rm(evs_cov_t, qois_cov_t, plot_cov_t)
 ```
 
 ## Country analyses
 
 ### Base d
 
+```{r, message = T}
+#| label: analysis-country-base-d
+
+newdata_country_base_d <- create_ape_newdata(
+  bfit_model = bfit_base_d,
+  by_country = TRUE,
+  country_var = "meta_country"
+)
+
+evs_country_base_d <- estimate_evs(
+  bfit_base_d,
+  newdata_country_base_d,
+  mode = "country",
+  re_formula_setting = NULL
+)
+
+qois_country_base_d <- run_country_analysis(
+  bfit_base_d,
+  evs_country_base_d
+)
+
+plot_country_base_d <- plot_country_results(
+  qois_country_base_d
+)
+
+save(
+  plot_country_base_d,
+  file = here(
+    "data",
+    "03_final",
+    "plot_country_base_d.RData"
+  )
+)
+
+rm(evs_country_base_d, qois_country_base_d, plot_country_base_d)
+```
+
 ### Base t
+
+```{r, message = T}
+#| label: analysis-country-base-t
+
+newdata_country_base_t <- create_ape_newdata(
+  bfit_model = bfit_base_t,
+  by_country = TRUE,
+  country_var = "meta_country"
+)
+
+evs_country_base_t <- estimate_evs(
+  bfit_base_t,
+  newdata_country_base_t,
+  mode = "country",
+  re_formula_setting = NULL
+)
+
+qois_country_base_t <- run_country_analysis(
+  bfit_base_t,
+  evs_country_base_t
+)
+
+plot_country_base_t <- plot_country_results(
+  qois_country_base_t
+)
+
+save(
+  plot_country_base_t,
+  file = here(
+    "data",
+    "03_final",
+    "plot_country_base_t.RData"
+  )
+)
+
+rm(evs_country_base_t, qois_country_base_t, plot_country_base_t)
+```
 
 ### Cov d
 
+```{r, message = T}
+#| label: analysis-country-cov-d
+
+newdata_country_cov_d <- create_ape_newdata(
+  bfit_model = bfit_cov_d,
+  by_country = TRUE,
+  country_var = "meta_country"
+)
+
+evs_country_cov_d <- estimate_evs(
+  bfit_cov_d,
+  newdata_country_cov_d,
+  mode = "country",
+  re_formula_setting = NULL
+)
+
+qois_country_cov_d <- run_country_analysis(
+  bfit_cov_d,
+  evs_country_cov_d
+)
+
+plot_country_cov_d <- plot_country_results(
+  qois_country_cov_d
+)
+
+save(
+  plot_country_cov_d,
+  file = here(
+    "data",
+    "03_final",
+    "plot_country_cov_d.RData"
+  )
+)
+
+rm(evs_country_cov_d, qois_country_cov_d, plot_country_cov_d)
+```
+
 ### Cov t
+
+```{r, message = T}
+#| label: analysis-country-cov-t
+
+newdata_country_cov_t <- create_ape_newdata(
+  bfit_model = bfit_cov_t,
+  by_country = TRUE,
+  country_var = "meta_country"
+)
+
+evs_country_cov_t <- estimate_evs(
+  bfit_cov_t,
+  newdata_country_cov_t,
+  mode = "country",
+  re_formula_setting = NULL
+)
+
+qois_country_cov_t <- run_country_analysis(
+  bfit_cov_t,
+  evs_country_cov_t
+)
+
+plot_country_cov_t <- plot_country_results(
+  qois_country_cov_t
+)
+
+
+save(
+  plot_country_cov_t,
+  file = here(
+    "data",
+    "03_final",
+    "plot_country_cov_t.RData"
+  )
+)
+
+rm(evs_country_cov_t, qois_country_cov_t, plot_country_cov_t)
+```
 
 # Session Info
 
