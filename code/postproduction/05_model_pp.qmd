@@ -40,10 +40,10 @@ p_required <- c(
   "tidyverse",
   "here",
   "brms",
+  "performance",
   "broom.mixed",
   "tidybayes",
   "ggpubr",
-  "patchwork",
   "knitr",
   "sessioninfo"
 )
@@ -933,10 +933,10 @@ run_country_analysis <- function(bfit_model, epred_result) {
 ```{r}
 #| label: country-plots-fun
 
-# 6. Function to plot cross-country CATE results
-# ----------------------------------------------
-
 plot_country_results <- function(country_qois_df) {
+  # ===============================
+  # 1. Prepare CATE data (unchanged)
+  # ===============================
   cate_data <- country_qois_df |>
     filter(Quantity %in% c("CATE_AP", "CATE_IF", "CATE_OD")) |>
     mutate(
@@ -948,53 +948,16 @@ plot_country_results <- function(country_qois_df) {
       Country = factor(Analysis)
     )
 
-  CATE_COLOR <- "#666666"
-  LINE_COLOR <- "black"
-
-  # p_country_cate <- ggplot(
-  #   cate_data,
-  #   aes(
-  #     x = Estimate,
-  #     y = forcats::fct_reorder(Country, Estimate, .fun = median),
-  #     fill = CATE_COLOR,
-  #     color = LINE_COLOR
-  #   )
-  # ) +
-  #   stat_pointintervalh(
-  #     .width = c(0.95, 0.99),
-  #     point_size = 3,
-  #     fatten_point = 2,
-  #     shape = 21,
-  #     stroke = 1.5,
-  #     point_fill = "white"
-  #   ) +
-  #   scale_fill_identity() +
-  #   scale_color_identity() +
-  #   geom_vline(
-  #     xintercept = 0,
-  #     linetype = "dashed",
-  #     color = "red",
-  #     linewidth = 0.8
-  #   ) +
-  #   facet_wrap(~Metric_Code, ncol = 3, scales = "free_y") +
-  #   labs(
-  #     x = "Conditional Average Treatment Effect (CATE) Size (Tokens)",
-  #     y = "Country"
-  #   ) +
-  #   theme_pubr() +
-  #   theme(
-  #     legend.position = "none",
-  #     strip.background = element_rect(fill = "grey90", color = "grey50"),
-  #     strip.text = element_text(face = "bold")
-  #   )
-
+  # -------------------------------
+  # Combined CATE Plot Across Countries (current behavior)
+  # -------------------------------
   p_country_cate <- ggplot(
     cate_data,
     aes(
       x = Estimate,
       y = forcats::fct_reorder(Country, Estimate, .fun = median),
-      fill = CATE_COLOR,
-      color = LINE_COLOR
+      fill = "#666666",
+      color = "black"
     )
   ) +
     stat_halfeye(
@@ -1014,8 +977,8 @@ plot_country_results <- function(country_qois_df) {
       linewidth = 1
     ) +
     labs(
-      x = expression(CATE[AP]),
-      y = " "
+      x = "Conditional Average Treatment Effect (CATE) Size (Tokens)",
+      y = "Country"
     ) +
     theme_pubr() +
     theme(
@@ -1024,8 +987,94 @@ plot_country_results <- function(country_qois_df) {
     ) +
     facet_wrap(~Metric_Code, ncol = 3, scales = "free_y")
 
-  return(p_country_cate)
+  # =======================================================
+  # 2. Generate EV plots for each country (NEW)
+  #    Mirrors pooled AP/IF/OD EV logic
+  # =======================================================
+
+  ev_data <- country_qois_df |>
+    filter(
+      Quantity %in%
+        c("T1_RCo", "T0_RCo", "T1_ROut", "T0_ROut", "T1_RNone", "T0_RNone")
+    ) |>
+    separate_wider_delim(
+      Quantity,
+      delim = "_",
+      names = c("Partisan_Type", "Relationship_Code")
+    ) |>
+    mutate(
+      Partisan_Type = factor(
+        Partisan_Type,
+        levels = c("T1", "T0"),
+        labels = c("Explicit Partisan (T=1)", "Implicit Partisan (T=0)")
+      ),
+      Relationship_Type = factor(
+        Relationship_Code,
+        levels = c("RCo", "ROut", "RNone"),
+        labels = c("Co-Partisan", "Out-Partisan", "Neutral")
+      ),
+      Country = Analysis
+    ) |>
+    select(-Relationship_Code)
+
+  # ------------------------------------
+  # Function to produce one-country EV plot
+  # ------------------------------------
+  make_country_ev_plot <- function(df_country) {
+    ggplot(
+      df_country,
+      aes(x = Estimate, y = Relationship_Type, fill = Partisan_Type)
+    ) +
+      stat_halfeye(
+        .width = c(0.95, 0.99),
+        point_interval = "median_qi",
+        slab_size = 0.5,
+        slab_color = "black",
+        point_fill = "white",
+        point_color = "black",
+        shape = 21,
+        stroke = 1.5
+      ) +
+      facet_wrap(~Partisan_Type, ncol = 1) +
+      scale_fill_manual(
+        values = c(
+          "Explicit Partisan (T=1)" = "white",
+          "Implicit Partisan (T=0)" = "grey"
+        )
+      ) +
+      labs(
+        x = "Tokens Allocated (0–10)",
+        y = "Relationship Type",
+        title = unique(df_country$Country)
+      ) +
+      theme_pubr() +
+      scale_x_continuous(limits = c(2.5, 5)) +
+      theme(
+        legend.position = "none",
+        strip.background = element_rect(fill = "grey90", color = "grey50"),
+        aspect.ratio = 1 / 1.618034
+      )
+  }
+
+  # ----------------------
+  # Build list of per-country plots
+  # ----------------------
+  country_list <- split(ev_data, ev_data$Country)
+
+  ev_plots <- lapply(country_list, make_country_ev_plot)
+  names(ev_plots) <- names(country_list)
+
+  # ============================================
+  # 3. Return list containing:
+  #    - combined CATE plot
+  #    - per-country EV plots
+  # ============================================
+  return(list(
+    Country_CATE_Plot = p_country_cate,
+    Country_EVs = ev_plots
+  ))
 }
+
 ```
 
 # Run pipelines
@@ -1050,6 +1099,7 @@ save(
   file = here(
     "data",
     "03_final",
+    "plots",
     "plot_base_d.RData"
   )
 )
@@ -1075,6 +1125,7 @@ save(
   file = here(
     "data",
     "03_final",
+    "plots",
     "plot_base_t.RData"
   )
 )
@@ -1100,6 +1151,7 @@ save(
   file = here(
     "data",
     "03_final",
+    "plots",
     "plot_cov_d.RData"
   )
 )
@@ -1125,6 +1177,7 @@ save(
   file = here(
     "data",
     "03_final",
+    "plots",
     "plot_cov_t.RData"
   )
 )
@@ -1166,7 +1219,18 @@ save(
   file = here(
     "data",
     "03_final",
+    "plots",
     "plot_country_base_d.RData"
+  )
+)
+
+save(
+  qois_country_base_d,
+  file = here(
+    "data",
+    "03_final",
+    "qois",
+    "qois_country_base_d"
   )
 )
 
@@ -1205,7 +1269,18 @@ save(
   file = here(
     "data",
     "03_final",
+    "plots",
     "plot_country_base_t.RData"
+  )
+)
+
+save(
+  qois_country_base_t,
+  file = here(
+    "data",
+    "03_final",
+    "qois",
+    "qois_country_base_t"
   )
 )
 
@@ -1244,7 +1319,18 @@ save(
   file = here(
     "data",
     "03_final",
+    "plots",
     "plot_country_cov_d.RData"
+  )
+)
+
+save(
+  qois_country_cov_d,
+  file = here(
+    "data",
+    "03_final",
+    "qois",
+    "qois_country_cov_d"
   )
 )
 
@@ -1284,7 +1370,18 @@ save(
   file = here(
     "data",
     "03_final",
+    "plots",
     "plot_country_cov_t.RData"
+  )
+)
+
+save(
+  qois_country_cov_t,
+  file = here(
+    "data",
+    "03_final",
+    "qois",
+    "qois_country_cov_t"
   )
 )
 

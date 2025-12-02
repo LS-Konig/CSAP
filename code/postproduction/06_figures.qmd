@@ -57,22 +57,22 @@ rm(p_required, p_to_install, packages)
 ```{r}
 #| label: load-models
 
-load(here("data", "03_final", "plot_base_d.RData"))
+load(here("data", "03_final", "plots", "plot_base_d.RData"))
 
-load(here("data", "03_final", "plot_base_t.RData"))
+load(here("data", "03_final", "plots", "plot_base_t.RData"))
 
-load(here("data", "03_final", "plot_cov_d.RData"))
+load(here("data", "03_final", "plots", "plot_cov_d.RData"))
 
-load(here("data", "03_final", "plot_cov_t.RData"))
+load(here("data", "03_final", "plots", "plot_cov_t.RData"))
 
 
-load(here("data", "03_final", "plot_country_base_d.RData"))
+load(here("data", "03_final", "plots", "plot_country_base_d.RData"))
 
-load(here("data", "03_final", "plot_country_base_t.RData"))
+load(here("data", "03_final", "plots", "plot_country_base_t.RData"))
 
-load(here("data", "03_final", "plot_country_cov_d.RData"))
+load(here("data", "03_final", "plots", "plot_country_cov_d.RData"))
 
-load(here("data", "03_final", "plot_country_cov_t.RData"))
+load(here("data", "03_final", "plots", "plot_country_cov_t.RData"))
 ```
 
 # Figures
