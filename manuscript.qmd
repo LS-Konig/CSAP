@@ -47,15 +47,28 @@ geometry:
 
 ## Introduction {#sec-introduction}
 
-How does partisan type influence affective polariztion? While the past decade witnessed a sharp increase in publications dedicated to study the causes, consequences, and dynamics of affective polarization, there still remains much ambiguity when it comes to conceptualization and measurement. Notably, some conceptual or measurement approaches limit their scope to only a partisan subset of the sample, while other strategies cover a wider range of the sampled electorate. Nevertheless, the goal is often times identical: infer about the state or change of affective polarization in a given country's society. If however such inferences are based on partisan subsets, inferring statements about that subset to the whole population rest on assumptions about the distribution of that subset in the population. In other words, only if the partisan subset a) is large enough to constitute a (sufficiently) large part of the population or b) is representative of that population, one can validly infer from the subsample to the population.
+How does partisan type influence affective polarization?
+Despite rapid growth in the study of affective polarization over the past decade, important ambiguity remains in how scholars conceptualize and measure the phenomenon. 
+Existing approaches differ markedly in the populations they target: some measure affective polarization only among self-identified partisans, while others attempt to capture partisan affect across the broader electorate.
+Yet the goal of these studies is often the same—drawing inferences about the level or trajectory of affective polarization in a given society.
+When measures rely on partisan subsamples, however, their generalizability rests on strong and typically untested assumptions about who counts as a partisan and whether that subset is sufficiently large or representative of the population.
+In short, inferences about societies often hinge on implicit assumptions about the structure of partisanship.
 
-This study aims to address this gap and contribute to the affective polarization literature in multiple ways. First, I introduce the concept of *partisan type* to analytically distinguish between *explicit* and *implicit partisans*, enabling affective polarization scholars to better clarify what their sample of study and population of interest is. Second, I empirically investigate the relative distributions of partisan types across 25 European multi-party system, finding cross-national variation in the relative shares but surprising consistencies regarding the overall numbers of partisans. Third, I employ a causal identification strategy using hierarchical bayesian modelling to approach an answer to the question: How would a hypothetical intervention changing a respondent's partisan type impact her affective polarization behavior, holding all other covariates constant? Finally, I put things in a comparative perspective by studying cross-national variation in the hypothesized relationship between partisan type and affective polarization outcomes.
+This study addresses this conceptual and empirical gap by clarifying who is included in the study of affective polarization and why that choice matters.
+Building on existing distinctions between partisan identifiers and those who merely express vote preferences—as discussed in prior work on implicit partisanship and partisan closeness—I introduce the concept of partisan type to analytically distinguish between explicit and implicit partisans.
+This refinement does not claim to invent a new category; rather, it systematizes and extends existing conceptual debates in a way that is more suitable for multiparty European democracies, where levels of reported partisan identification tend to be lower and more heterogeneous than in the United States.
 
-From a theoretical perspective, affective polarization emphasizes individuals' identities, their subjective feelings of belonging to a perceived group and the corresponding, emotional, *affective*, mechanisms that subconsciously influence human intergroup behaviors. Hence, through this social identity perspective, we expect *explicit* partisan types to show stronger levels of affective polarization. The rationale is that explicit reporting of feelt attachement corresponds to stronger group identites,
+Empirically, I map the distribution of partisan types across 25 European multiparty systems, documenting substantial cross-national variation in the relative shares of explicit and implicit partisans but a striking consistency in the overall prevalence of partisanship.
+I then move beyond descriptive patterns to ask a causal question: How would individuals’ affective polarization shift if, hypothetically, their partisan type changed?
+To approximate this hypothetical intervention, I employ hierarchical Bayesian models that leverage a unique conjoint design and the multilevel structure of the data.
+This framework allows me to estimate how explicit versus implicit partisan attachment conditions responsiveness to partisan cues, while accounting for confounding individual, party, and country-level factors.
 
-Paragraph on research design (causal strategy)
+Theoretically, affective polarization centers on subjective group identities and the affective mechanisms through which individuals form in-group attachments and out-group antagonisms.
+From a social identity perspective, explicit partisans—those who report subjective attachment—should exhibit stronger affective polarization than implicit partisans, who choose a party but deny feeling close to it.
+Explicit identification signals stronger group identity and should therefore amplify both positive affect toward in-groups and negative affect toward out-groups.
 
-Paragraph on results
+Finally, I place these results in comparative perspective, assessing whether the relationship between partisan type and affective polarization varies across national contexts.
+Although theories of party system fragmentation, political culture, and mobilization suggest plausible cross-country differences, the findings indicate a remarkably consistent pattern across all 25 democracies studied.
 
 Paragraph on implications (conditional on results)
 
