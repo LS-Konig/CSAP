@@ -247,14 +247,14 @@ bformula_covariates <- bf(formula_covariates)
 
 ## Naive models
 message(paste("Fitting lm_dict_naive at", Sys.time()))
-lm_fit_dict_naive <- lm(
+lme4_fit_dict_naive <- lm(
   formula = formula_naive,
   data = df_modelvars |>
     filter(meta_game == "dict")
 )
 
 message(paste("Fitting lm_fit_trust_naive at", Sys.time()))
-lm_fit_trust_naive <- lm(
+lme4_fit_trust_naive <- lm(
   formula = formula_naive,
   data = df_modelvars |>
     filter(meta_game == "trust")
@@ -262,14 +262,14 @@ lm_fit_trust_naive <- lm(
 
 ## Naive covariate models
 message(paste("Fitting lme4_dict_naive at", Sys.time()))
-lme4_fit_dict_naive_cov <- lmer(
+lme4_fit_dict_naive_cov <- lm(
   formula = formula_naive_covariates,
   data = df_modelvars |>
     filter(meta_game == "dict")
 )
 
 message(paste("Fitting lme4_fit_trust_naive at", Sys.time()))
-lme4_fit_trust_naive_cov <- lmer(
+lme4_fit_trust_naive_cov <- lm(
   formula = formula_naive_covariates,
   data = df_modelvars |>
     filter(meta_game == "trust")
@@ -307,94 +307,6 @@ lme4_fit_trust_cov <- lmer(
 
 ```
 
-
-# GLM binomial starting values
-
-```{r}
-#| label: fit-binomial-glm
-
-# hence: take data from fitted lmer object (cov_d and cov_t)
-
-# adjust data for glm (two response variables: successes and failures)
-dat_dict_cov <- lme4_fit_dict_cov@frame
-
-dat_dict_cov$binomial_response <- cbind(
-  dat_dict_cov$cj_token,
-  10 - dat_dict_cov$cj_token
-)
-
-# adjust model formula
-formula_binomial_cov <-
-  # outcome: tokens allocated --------------------------------------------------
-  binomial_response ~
-    1 + # global intercept
-
-    # main variables of interest -----------------------------------------------
-    der_partisan_type +
-    der_partisan_relationship +
-    der_partisan_type * der_partisan_relationship +
-
-    # conjoint controls Z ------------------------------------------------------
-    cj_age_en +
-    cj_class_en +
-    cj_sex_en +
-    cj_reli_en +
-    cj_eupos_shown + # eupos trmnt only in dictator
-    meta_round + # round of game
-    meta_wave + # wave of survey
-
-    # confounding variables C --------------------------------------------------
-    q_lrpos2_z +
-    q_eupos2_z +
-    q_econ_nativism_z +
-    q_cult_nativism_z +
-    q_religion_en +
-    q_satis_demo_country_z +
-    q_understand_nat_pol_z +
-    q_understand_eu_pol_z +
-    q_parties_harm_z +
-    q_officials_talk_action_z +
-    q_politics_good_evil_z +
-    q_people_unaware_z +
-    q_leaders_educated_z +
-    q_expert_decisions_z +
-    q_listen_other_groups_z +
-    q_democracy_compromise_z +
-    q_interest_pol_country_z +
-    q_interest_pol_eu_z +
-    q_edu_z +
-    q_perc_class +
-    q_eval_finance_household_z +
-    q_eval_job_z +
-    q_eval_econ_country_z +
-    q_eval_econ_eur_z +
-    q_gender +
-    q_age_z +
-    q_rural_urban +
-    q_risk_taking_z +
-    q_future_discount_z +
-
-    # random intercept and slope components ------------------------------------
-    # Level 4: Country (c) - Correlated Intercept and Slopes
-    (1 + der_partisan_type + der_partisan_relationship | meta_country) +
-
-    # Level 3: Partisan Anchor (a) nested in Country (c) - Correlated Intercept and Slopes
-    (1 +
-      der_partisan_type +
-      der_partisan_relationship |
-      meta_country:der_partisan_anchor) +
-
-    # Level 2: Respondent (i) nested in (a:c) - Intercept only
-    (1 | meta_pid)
-
-
-message(paste("Fitting glmer at", Sys.time()))
-glmer_fit_dict_cov <- glmer(
-  formula = formula_binomial_cov,
-  data = dat_dict_cov,
-  family = binomial(link = "logit")
-)
-```
 
 
 # Model Starting Values
@@ -493,6 +405,12 @@ priors <- c(
   prior(student_t(3, 0, 2), class = "sigma") # residual SD
 )
 
+priors_naive <- c(
+  prior(normal(0, 2), class = "b"), # fixed slopes
+  prior(normal(5, 2), class = "Intercept"), # global intercept
+  prior(student_t(3, 0, 2), class = "sigma") # residual SD
+)
+
 # Compile
 # models
 # without
@@ -503,7 +421,7 @@ compiled_naive_d <- brm(
   formula = bformula_naive,
   data = df_modelvars |> filter(meta_game == "dict"),
   family = gaussian(),
-  prior = priors,
+  prior = priors_naive,
   chains = 0,
   init = lmer_to_brms_inits(
     lme4_fit_dict_naive,
@@ -516,7 +434,7 @@ compiled_naive_t <- brm(
   formula = bformula_naive,
   data = df_modelvars |> filter(meta_game == "trust"),
   family = gaussian(),
-  prior = priors,
+  prior = priors_naive,
   chains = 0,
   init = lmer_to_brms_inits(
     lme4_fit_trust_naive,
@@ -530,7 +448,7 @@ compiled_naive_cov_d <- brm(
   formula = bformula_naive_covariates,
   data = df_modelvars |> filter(meta_game == "dict"),
   family = gaussian(),
-  prior = priors,
+  prior = priors_naive,
   chains = 0,
   init = lmer_to_brms_inits(
     lme4_fit_dict_naive_cov,
@@ -543,7 +461,7 @@ compiled_naive_cov_t <- brm(
   formula = bformula_naive_covariates,
   data = df_modelvars |> filter(meta_game == "trust"),
   family = gaussian(),
-  prior = priors,
+  prior = priors_naive,
   chains = 0,
   init = lmer_to_brms_inits(
     lme4_fit_trust_naive_cov,
@@ -607,6 +525,8 @@ compiled_cov_t <- brm(
   )
 )
 ```
+
+
 
 # Saving
 
