@@ -161,13 +161,51 @@ $H_3:$ Explicit partisans show stronger
 
 ## Research design {#sec-design}
 
+In this section, we present our empirical strategy employed to identify the effect of partisan type on AP.
+First, we present the dataset and explain the experimental setup and its advantage for measuring AP.
+Next, we outline the main variables of interest along with a DAG to illustrate our causal model of the data generating process.
+We then discuss the assumptions necessary for causal inference given the observational nature of our data, before we present the statistical model.
+Finally, we explain how we derive our key quantities of interest.
+
+### Data and experimental setup
+
+To examine the effects of partisan type on AP, we reanalyze data from @hahm2024divided, who fielded a cross-national conjoint survey experiment fielded in 25 European Union member states in 2019.[^countries]
+Data collection was conducted by Dynata (formerly SSI) in two waves between the end of May and mid-August.
+The samples of around 1,200 respondents per country (29,827 respondents in total) are broadly representative to the national populations with respect to key demographic variables.
+We provide a detailed listing of summary statistics in table XX of the appendix. 
+
+[^countries]: The countries covered are all EU member states (which included the UK at the time of data collection) except for Luxembourg, Malta and Cyprus.
+
+The survey experiment consisted of dictator and trust games.
+The dicator game aims at measuring unidirectional solidarity (one-shot game), whereas the trust game introduces reciprocity to the setting.[^games]
+In each game, respondents were presented a fictional co-player with randomized attributes age, gender, class, religion, nationality and partisanship.
+Every respondent played each game three times.
+The unit of analysis is thus one round played in the conjoint games.
+
+[^games]: Detailed information, instruction wording and an exemplarory profile are presented in the appendix.
+
+This yields a nested data structure, with multiple rounds per respondent, multiple respondents per party, multiple parties (and respondents) per country.
+We thus opt for hierarchical modelling, more on that in section stat model.
+
+Utilizing the behavioral games for measuring affective polarization comes with several methodological advantages.
+First, the experimental design is better suited to capture horizontal AP among partisans [@areal2024verticalvshorizontal].
+In contrast, studies that use observational measures, e.g. in the form of like/dislike scales or feeling thermometers, fail to disentangle horizontal from vertical polarization that captures (dis)like of party elites [@druckman2019we].
+Second, the presence of a neutral control group condition in which case no partisan affiliation was presented allows us to identify the causal sub-components of AP --- ingroup favoritism (IF) directed at co-partisans and outgroup derogation (OD) targeted at out-partisans --- by estimating the causal effect of a displayed attribute on the number of tokens assigned by respondents [@hainmueller2014causal].
+Third, respondents may hold multiple identities that potentially vary in their relevance and significance for their in-group and out-group evaluations.
+The conjoint analysis accounts for other societal divides and avoids biased estimates by providing randomized cues on different attribute dimensions.
+This enables us to break down composite treatment effects and to isolate the specific effects of each attribute dimension, addressing the problems of "aliasing" [@hainmueller2014causal] and "masking" [@bansak2021conjoint], which require the inclusion of a number of relevant attributes [@dafoe2018information].[^aliasing]
+Finally, due to random variation of multiple attributes, conjoint analysis is considered less susceptible to social desirability bias than other survey methods [@horiuchi2022does].
+
+[^aliasing]: Naturally, a conjoint design can only include a limited set of attributes and therefore cannot preclude all forms of aliasing. We make no claim to exhaustiveness. Nonetheless, by randomizing several plausibly correlated characteristics (e.g., age, gender), the design reduces the risk that inferences about partisanship simply reflect respondents' assumptions about the social composition of party supporters. In this respect, it is considerably less susceptible to the confounding that affects like/dislike scales or feeling thermometers, which cannot separately identify the effect of partisanship from correlated beliefs about associated social groups.
+
+
 -   Data and experimental setup
     -   explain setup
     -   introduce hierarchical data structure
     -   advantages for measuring AP (vertical, druckman etc)
 -   Variables
     -   DV: Tokens
-    -   IVs: Deriavtion and tripartite structure
+    -   IVs: Deriavtion and tripartite structure, AP measure (average across outgroups)
     -   DAG: summary of DGP -\> hierarchical?
     -   Covariates
 -   Causal assumptions:
@@ -190,7 +228,11 @@ $H_3:$ Explicit partisans show stronger
 
 ### The effect of partisan type on affective polarization in Europe
 
+#### Dictataor game
+
 Pooled results dict -\> figure 1
+
+#### Trust game
 
 Pooled results trust -\> figure 2
 
