@@ -169,60 +169,63 @@ Finally, we explain how we derive our key quantities of interest.
 
 ### Data and experimental setup
 
-To examine the effects of partisan type on AP, we reanalyze data from @hahm2024divided, who fielded a cross-national conjoint survey experiment fielded in 25 European Union member states in 2019.[^countries]
-Data collection was conducted by Dynata (formerly SSI) in two waves between the end of May and mid-August.
-The samples of around 1,200 respondents per country (29,827 respondents in total) are broadly representative to the national populations with respect to key demographic variables.
-We provide a detailed listing of summary statistics in table XX of the appendix. 
+To evaluate how different partisan type influences AP, we reanalyze the cross-national conjoint experiment conducted by @hahm2024divided.
+The study was fielded by Dynata (formerly SSI) in 25 EU member states between late May and mid-August 2019.[^countries] National samples consist of approximately 1,200 respondents per country (29,827 in total) drawn to be broadly representative on key sociodemographic dimensions.
+Summary statistics are presented in table XX in the appendix.
 
 [^countries]: The countries covered are all EU member states (which included the UK at the time of data collection) except for Luxembourg, Malta and Cyprus.
 
-The survey experiment consisted of dictator and trust games.
-The dicator game aims at measuring unidirectional solidarity (one-shot game), whereas the trust game introduces reciprocity to the setting.[^games]
-In each game, respondents were presented a fictional co-player with randomized attributes age, gender, class, religion, nationality and partisanship.
-Every respondent played each game three times.
-The unit of analysis is thus one round played in the conjoint games.
+The experiment comprised two behavioral games: a dictator game measuring unilateral prosociality and a trust game introducing reciprocal incentives.[^games]
+In each round, respondents interacted with a hypothetical partner whose attributes --- age, gender, class, religion, nationality, and partisanship --- were independently randomized.
+Each respondent completed three rounds of each game, yielding six observations per participant.
+Our unit of analysis is thus a single game round. The resulting data are inherently nested: multiple rounds within respondents, respondents nested within party affiliations, and respondents and parties clustered within countries.
+We therefore rely on hierarchical models, as we describe in the next section statistical model in more detail.
 
 [^games]: Detailed information, instruction wording and an exemplarory profile are presented in the appendix.
 
-This yields a nested data structure, with multiple rounds per respondent, multiple respondents per party, multiple parties (and respondents) per country.
-We thus opt for hierarchical modelling, more on that in section stat model.
+These behavioral measures offer several advantages for studying affective polarization.
+First, the design is explicitly suited to assessing *horizontal* AP among mass partisans [@areal2024verticalvshorizontal].
+Common observational indicators --- such as like/dislike scales or feeling thermometers --- conflate horizontal evaluations of fellow citizens with *vertical* attitudes toward party elites, limiting their interpretability [@druckman2019we].
+Second, the inclusion of a nonpartisan baseline condition enables us to causally decompose AP into its constituent mechanisms: ingroup favoritism (IF) toward co-partisans and outgroup derogation (OD) toward rival partisans.
+We estimate these components using standard conjoint estimands that capture the average marginal effect of each attribute on token allocations [@hainmueller2014causal].
 
-Utilizing the behavioral games for measuring affective polarization comes with several methodological advantages.
-First, the experimental design is better suited to capture horizontal AP among partisans [@areal2024verticalvshorizontal].
-In contrast, studies that use observational measures, e.g. in the form of like/dislike scales or feeling thermometers, fail to disentangle horizontal from vertical polarization that captures (dis)like of party elites [@druckman2019we].
-Second, the presence of a neutral control group condition in which case no partisan affiliation was presented allows us to identify the causal sub-components of AP --- ingroup favoritism (IF) directed at co-partisans and outgroup derogation (OD) targeted at out-partisans --- by estimating the causal effect of a displayed attribute on the number of tokens assigned by respondents [@hainmueller2014causal].
-Third, respondents may hold multiple identities that potentially vary in their relevance and significance for their in-group and out-group evaluations.
-The conjoint analysis accounts for other societal divides and avoids biased estimates by providing randomized cues on different attribute dimensions.
-This enables us to break down composite treatment effects and to isolate the specific effects of each attribute dimension, addressing the problems of "aliasing" [@hainmueller2014causal] and "masking" [@bansak2021conjoint], which require the inclusion of a number of relevant attributes [@dafoe2018information].[^aliasing]
-Finally, due to random variation of multiple attributes, conjoint analysis is considered less susceptible to social desirability bias than other survey methods [@horiuchi2022does].
+Third, respondents hold multiple, potentially cross-cutting social identities [@roccas2002social].
+The randomized conjoint design mitigates bias arising from such heterogeneity by independently varying several attributes that may otherwise be confounded with partisan cues.
+This feature allows us to isolate the specific effect of partisanship and reduces the risks of "aliasing" [@hainmueller2014causal] and "masking" [@bansak2021conjoint] that arise when omitted attributes correlate with treatment dimensions [@dafoe2018information].[^aliasing] 
+Finally, by embedding partisan information among multiple randomized cues, conjoint tasks are less susceptible to social desirability pressures compared to direct survey questions [@horiuchi2022does].
 
 [^aliasing]: Naturally, a conjoint design can only include a limited set of attributes and therefore cannot preclude all forms of aliasing. We make no claim to exhaustiveness. Nonetheless, by randomizing several plausibly correlated characteristics (e.g., age, gender), the design reduces the risk that inferences about partisanship simply reflect respondents' assumptions about the social composition of party supporters. In this respect, it is considerably less susceptible to the confounding that affects like/dislike scales or feeling thermometers, which cannot separately identify the effect of partisanship from correlated beliefs about associated social groups.
 
 
--   Data and experimental setup
-    -   explain setup
-    -   introduce hierarchical data structure
-    -   advantages for measuring AP (vertical, druckman etc)
+### Construction of Main Variables
+
+We construct our main variables of interest following a tripartite framework to ensure consistency and clarity with regards to party-related variables.
+Starting of, we define $T_i$ as the *partisan type* of respondent $i$.
+If respondent $i$ reported a party to which she feels attached to and thus is an *explicit* partisan, we define $T_i = 1$ , conversely $T_i = 0$ for *implicit* partisans, i.e. if respondent $i$ indicated no partisan attachement, but reported a vote preference.
+We term the party itself that was reported by respondents *partisan anchor* $A_i$.
+In the experiment, each conjoint profile in round $r$ presents a party cue ($Z^{party}_{ri}$), which is compared to the respondent's anchor to classify the profile as co-partisan, out-partisan, or neutral ($R_{ri} \in {Co, Out, None}$).
+This approach corresponds to the average across out-groups operationalization and constitutes a significant simplification of multi-party contexts.
+We nevertheless opt for this measure as it provides a consistent and systematic coding that allows comparability across contexts.
+
 -   Variables
     -   DV: Tokens
     -   IVs: Deriavtion and tripartite structure, AP measure (average across outgroups)
     -   DAG: summary of DGP -\> hierarchical?
     -   Covariates
+
 -   Causal assumptions:
     -   To interpret effect as causal, which assumptions need to hold?
     -   What are the implications of violating them?
     -   goal: approximate the hypothetical intervention effect, if one changed a person from implicit to explicit
+
 -   Statistical model
     -   main model: cov-models (RE and Covariates, as specified)
-    -   gaussian and binomial (i.e. 4 models)
-    -   loo test (2x 1v1)
-    -   then chose better fitting model
-    -   then for robustness: comparison of model fit to base model (RE but no Covariates, test if subset due to covariates changes results) and naive (no RE structure)
+
 -   Quantities of interest
     -   Conditional EV, AP, IF, OD
     -   CATE as first differences
 
-{{< embed code/02_descr_anal.qmd#fig-dag >}}
+{{< embed code/preparation/02_descr_anal.qmd#fig-dag >}}
 
 ## Empirical analysis
 
@@ -269,7 +272,7 @@ To approximate causal inference from observational variation, we exploit the fol
 2.  Randomized conjoint profiles. The profiles' attributes -- including all non-partusab cues $Z^{other}_{ri}$ -- are randomly assigned. This ensures that observed differences in token allocations across $R_ri$ are attributable to profile characteristics rather than respondent selection.
 3.  Hierarchical variation. Respondents are nested within partisan anchors, which are themselves nested within countries. This allows for multilevel modeling that captures heterogeneity at the respondent, party, and country level.
 
-{{< embed code/02_descr_anal.qmd#fig-dag >}}
+{{< embed code/preparation/02_descr_anal.qmd#fig-dag >}}
 
 In this section, we situate our measurement approach of affective polarization, present the used data and out empirical strategie to approximate an isolation of the causal effect of *explicit* partisanship on our outcomes of interest: affective polarization, ingroup favoritism and outgroup derogation.
 
@@ -564,19 +567,19 @@ By focusing on expected values, or marginal means, we also ensure our substantiv
 
 We present our findings in three stages. First, we present the distributions of explicit and implicit partisanship across our included country samples. Next, we present the overall average treatment effects of explicit partisanship on our outcomes of interest. Finally, we present cross-country variation of these pooled results to place our results in a comparative perspective.
 
-{{< embed code/01_wrangling.qmd#fig-impl-expl-distribution >}}
+{{< embed code/preparation/01_wrangling.qmd#fig-impl-expl-distribution >}}
 
 ### Pooled analysis
 
 #### Dictator game
 
-{{< embed code/06_figures.qmd#fig-pooled-cov-d >}}
+{{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-d >}}
 
 @fig-pooled-cov-d shows the results for the dictator game
 
 #### Trust game
 
-{{< embed code/06_figures.qmd#fig-pooled-cov-t >}}
+{{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-t >}}
 
 ### Country analysis
 
@@ -593,12 +596,44 @@ We present our findings in three stages. First, we present the distributions of 
 
 ## Appendix {.appendix}
 
-### Sample descriptives
+### Sample descriptives {.appendix}
 
-### Experimental setup
+Age by Country
+Gender by Country
 
-### Distribution of Y
+### Experimental setup {.appendix}
 
-### Distribution of T and R
+Before the behavioral games, @hahm2024divided presented respondents a short background information overview and instructions.
+For the dictator game, these were:
+*This game is played by pairs of individuals.*
+*Each pair is made up of a Player 1 and a Player 2.*
+*Each player will have some information about the other player, but you will not be told who the other players are during or after the experiment.*
+*The game is conducted as follows: A sum of 10 tokens will be provisionally allocated to Player 1 at the start of each round.*
+*Player 1 will then decide how much of the 10 tokens to offer to Player 2.*
+*Player 1 could give some, all, or none of the 10 tokens.*
+*Player 1 keeps all tokens not given to Player 2.*
+*Player 2 gets to keep all the tokens Player 1 offers.*
+*You will play this game three times with three different people.*
+In the trust game, the provided information and instruction were:
+*This game is played by pairs of individuals.*
+*Each pair is made up of a Player 1 and a Player 2.*
+*Each player will have some information about the other player, but you will not be told who the other players are during or after the experiment.*
+*Each player will receive 10 tokens.*
+*Player 1 then has the opportunity to give a portion of his or her 10 tokens to Player 2.*
+*Player 1 could give some, all, or none of the 10 tokens.*
+*Whatever amount Player 1 decides to give to Player 2 will be tripled before it is passed on to Player 2.*
+*Player 2 then has the option of returning any portion of this tripled amount to Player 1.*
+*Then, the game is over.*
+*Player 1 receives whatever he or she keeps from the original 10 tokens, plus anything returned to him or her by Player 2. Player 2 receives their original 10 tokens, plus whatever he or she keeps after returning any portion of the tripled amount to Player 1.*
+*You will play this game three times, with three different people.*
+*The more tokens you obtain, the more successful you will be.*
 
-### Robustness
+In both games respondents were shown a tabular overview of Player 2 after the instructions. @fig-example-profile shows an example of such a profile along with the interface respondents were provided to assign the 10 tokens. Each round, a new profile was displayed to respondents.
+
+![Example of potential co-player profile.](images/cj-example-profile.png){#fig-example-profile}
+
+### Distribution of Y {.appendix}
+
+### Distribution of T and R {.appendix}
+
+### Robustness {.appendix}
