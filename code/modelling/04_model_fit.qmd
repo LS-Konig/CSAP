@@ -56,6 +56,22 @@ rm(p_required, p_to_install, packages)
 #| label: load-compiled-models
 
 load(
+  here("data", "02_processed", "models", "compiled_naive_d.RData")
+)
+
+load(
+  here("data", "02_processed", "models", "compiled_naive_t.RData")
+)
+
+load(
+  here("data", "02_processed", "models", "compiled_naive_cov_d.RData")
+)
+
+load(
+  here("data", "02_processed", "models", "compiled_naive_cov_t.RData")
+)
+
+load(
   here("data", "02_processed", "models", "compile_base_d.RData")
 )
 
@@ -82,6 +98,86 @@ n_iter <- 5000
 n_burnin <- 3500
 n_cores <- 4
 ```
+
+
+```{r, message = NA}
+#| label: fit-model-naive-d
+
+message(paste("Fitting bfit_naive_d at", Sys.time()))
+bfit_naive_d <- update(
+  compiled_naive_d,
+  iter = n_iter,
+  warmup = n_burnin,
+  chains = n_chains,
+  cores = n_cores
+)
+
+message("Saving posterior draws...\n")
+save(
+  bfit_naive_d,
+  file = here("data", "03_final", "models", "bfit_naive_d.RData")
+)
+```
+
+```{r, message = NA}
+#| label: fit-model-naive-t
+
+message(paste("Fitting bfit_naive_t at", Sys.time()))
+bfit_naive_t <- update(
+  compiled_naive_t,
+  iter = n_iter,
+  warmup = n_burnin,
+  chains = n_chains,
+  cores = n_cores
+)
+
+message("Saving posterior draws...\n")
+save(
+  bfit_naive_d,
+  file = here("data", "03_final", "models", "bfit_naive_t.RData")
+)
+```
+
+```{r, message = NA}
+#| label: fit-model-naive-cov-d
+
+message(paste("Fitting bfit_naive_cov_d at", Sys.time()))
+bfit_naive_cov_d <- update(
+  compiled_naive_cov_d,
+  iter = n_iter,
+  warmup = n_burnin,
+  chains = n_chains,
+  cores = n_cores,
+  refresh = 10
+)
+
+message("Saving posterior draws...\n")
+save(
+  bfit_naive_cov_d,
+  file = here("data", "03_final", "models", "bfit_naive_cov_d.RData")
+)
+```
+
+```{r, message = NA}
+#| label: fit-model-naive-cov-t
+
+message(paste("Fitting bfit_naive_cov_t at", Sys.time()))
+bfit_naive_cov_t <- update(
+  compiled_naive_cov_t,
+  iter = n_iter,
+  warmup = n_burnin,
+  chains = n_chains,
+  cores = n_cores,
+  refresh = 10
+)
+
+message("Saving posterior draws...\n")
+save(
+  bfit_naive_cov_t,
+  file = here("data", "03_final", "models", "bfit_naive_cov_t.RData")
+)
+```
+
 
 ```{r, message = NA}
 #| label: fit-model-base-d
@@ -126,6 +222,7 @@ save(
 
 ```{r, message = NA}
 #| label: fit-model-cov-d
+#| eval: false
 
 message(paste("Fitting bfit_cov_d at", Sys.time()))
 bfit_cov_d <- update(
@@ -145,6 +242,7 @@ save(
 
 ```{r, message = NA}
 #| label: fit-model-cov-t
+#| eval: false
 
 message(paste("Fitting bfit_cov_t at", Sys.time()))
 bfit_cov_t <- update(
