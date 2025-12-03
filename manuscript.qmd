@@ -125,12 +125,18 @@ These literatures discuss components of identity but do not systematize how *sub
 
 Because identifiers vary dramatically across countries, restricting measures to identifiers creates conceptual and inferential instability.
 
-### Introducting *Partisan Type*_ Explicit vs Implicit Partisanship
+### Introducting *Partisan Type* Explicit vs Implicit Partisanship
 
 Building on insights from the U.S. literature on implicit vs explicit identity, I refine this distinction for comparative multiparty settings by distinguishing between:
   - *explicit partisans*: respondents reporting subjective partisan attachement
-  - *implicit partisans*: respondents who express a vote choce but explicitly deny attachement
+  - *implicit partisans*: respondents who explicitly deny attachement but still express a preference (e.g. in vote choice or other items)
+In literature this sometimes is referred to as partisan leaners, but I think this concept of partisan type is useful to systematically and analytically combine the related thoughts of leaners, closeness and identity.  
+I also contest that it is more accurate in that identity itself is a complex concept, and my proposal incorporates the notion that partisan leaners do in fact identify to some degree with the party, even if potentially less than explicit identifiers.
+Still, this captures a nuanced understanding that there are differing degrees of identification with a party, and explicitly reporting subjective attachement is just one of them.
+I have to acknowledge that many survey in fact have more comlex sets of items to capture partisan identities using follow up question, which allows for identification of partisan leaners.
+Yet and to the best of our knowledge, no study has investigated whether explicit partisans differ systematically from those stating they do not feel attached with respect to AP in multiparty systems. 
 This distinction is conceptually simple but substantively important for AP reseach in multiparty systems because sample restrictions imply different populations of inference. Yet no comparative study systematically evaluates: (1) whether these types differ in their affective responses, and (2) how their prevalence varies across countries.
+Whether these theoretical considerations come with empirical implicatios is subject of this study.
 
 ### Why partisan type should matter for affective polarization
 
@@ -192,7 +198,9 @@ Pooled results trust -\> figure 2
 
 Country CATE results -\> No, identical across countries
 
-Country EV results -\> Slight shifts in general baseline of tokens, but pattern remains constant
+Given the striking similarity across countries, we present the expected values for the partisan relationship categories by type as well:
+
+Country EV results -\> Observable shifts in general baseline of tokens, but patterns themselves remains constant
 
 -\> While we hypothesized that the effect of explicit partisan attachment might vary by national political context (e.g., party system fragmentation or political culture), our results show a highly consistent pattern. The Conditional Average Treatment Effect (CATE) of explicit partisanship on affective polarization is statistically indistinguishable across all 25 countries, a finding corroborated by the extremely low variance observed in the country-level random slopes for the Partisan Type×Partisan Relationship interaction term (SD\<0.11).
 
