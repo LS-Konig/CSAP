@@ -55,8 +55,8 @@ When measures rely on partisan subsamples, however, their generalizability rests
 In short, inferences about societies often hinge on implicit assumptions about the structure of partisanship.
 
 This study addresses this conceptual and empirical gap by clarifying who is included in the study of affective polarization and why that choice matters.
-Building on existing distinctions between partisan identifiers and those who merely express vote preferences—as discussed in prior work on implicit partisanship and partisan closeness—I introduce the concept of partisan type to analytically distinguish between explicit and implicit partisans.
-This refinement does not claim to invent a new category; rather, it systematizes and extends existing conceptual debates in a way that is more suitable for multiparty European democracies, where levels of reported partisan identification tend to be lower and more heterogeneous than in the United States.
+Building on existing distinctions between partisan identifiers and those who merely express vote preferences --- as discussed in prior work on implicit partisanship and partisan closeness --- I introduce the concept of partisan type to analytically distinguish between explicit and implicit partisans.
+This refinement systematizes and extends existing conceptual debates in a way that is more suitable for multiparty European democracies, where levels of reported partisan identification tend to be lower and more heterogeneous than in the United States.
 
 Empirically, I map the distribution of partisan types across 25 European multiparty systems, documenting substantial cross-national variation in the relative shares of explicit and implicit partisans but a striking consistency in the overall prevalence of partisanship.
 I then move beyond descriptive patterns to ask a causal question: How would individuals’ affective polarization shift if, hypothetically, their partisan type changed?
