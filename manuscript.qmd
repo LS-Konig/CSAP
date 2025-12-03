@@ -47,24 +47,11 @@ geometry:
 
 ## Introduction {#sec-introduction}
 
-How does partisan type influence affective polariztion? 
-While the past decade witnessed a sharp increase in publications dedicated to study the causes, consequences, and dynamics of affective polarization, there still remains much ambiguity when it comes to conceptualization and measurement.
-Notably, some conceptual or measurement approaches limit their scope to only a partisan subset of the sample, while other strategies cover a wider range of the sampled electorate.
-Nevertheless, the goal is often times identical: infer about the state or change of affective polarization in a given country's society.
-If however such inferences are based on partisan subsets, inferring statements about that subset to the whole population rest on assumptions about the distribution of that subset in the population.
-In other words, only if the partisan subset a) is large enough to constitute a (sufficiently) large part of the population or b) is representative of that population, one can validly infer from the subsample to the population.
+How does partisan type influence affective polariztion? While the past decade witnessed a sharp increase in publications dedicated to study the causes, consequences, and dynamics of affective polarization, there still remains much ambiguity when it comes to conceptualization and measurement. Notably, some conceptual or measurement approaches limit their scope to only a partisan subset of the sample, while other strategies cover a wider range of the sampled electorate. Nevertheless, the goal is often times identical: infer about the state or change of affective polarization in a given country's society. If however such inferences are based on partisan subsets, inferring statements about that subset to the whole population rest on assumptions about the distribution of that subset in the population. In other words, only if the partisan subset a) is large enough to constitute a (sufficiently) large part of the population or b) is representative of that population, one can validly infer from the subsample to the population.
 
-This study aims to address this gap and contribute to the affective polarization literature in multiple ways.
-First, I introduce the concept of *partisan type* to analytically distinguish between *explicit* and *implicit partisans*, enabling affective polarization scholars to better clarify what their sample of study and population of interest is.
-Second, I empirically investigate the relative distributions of partisan types across 25 European multi-party system, finding cross-national variation in the relative shares but surprising consistencies regarding the overall numbers of partisans.
-Third, I employ a causal identification strategy using hierarchical bayesian modelling to approach an answer to the question:
-How would a hypothetical intervention changing a respondent's partisan type impact her affective polarization behavior, holding all other covariates constant?
-Finally, I put things in a comparative perspective by studying cross-national variation in the hypothesized relationship between partisan type and affective polarization outcomes.
+This study aims to address this gap and contribute to the affective polarization literature in multiple ways. First, I introduce the concept of *partisan type* to analytically distinguish between *explicit* and *implicit partisans*, enabling affective polarization scholars to better clarify what their sample of study and population of interest is. Second, I empirically investigate the relative distributions of partisan types across 25 European multi-party system, finding cross-national variation in the relative shares but surprising consistencies regarding the overall numbers of partisans. Third, I employ a causal identification strategy using hierarchical bayesian modelling to approach an answer to the question: How would a hypothetical intervention changing a respondent's partisan type impact her affective polarization behavior, holding all other covariates constant? Finally, I put things in a comparative perspective by studying cross-national variation in the hypothesized relationship between partisan type and affective polarization outcomes.
 
-From a theoretical perspective, affective polarization emphasizes individuals' identities, their subjective feelings of belonging to a perceived group and the corresponding, emotional, *affective*, mechanisms that subconsciously influence human intergroup behaviors.
-Hence, through this social identity perspective, we expect *explicit* partisan types to show stronger levels of affective polarization.
-The rationale is that explicit reporting of feelt attachement corresponds to stronger group identites, 
- 
+From a theoretical perspective, affective polarization emphasizes individuals' identities, their subjective feelings of belonging to a perceived group and the corresponding, emotional, *affective*, mechanisms that subconsciously influence human intergroup behaviors. Hence, through this social identity perspective, we expect *explicit* partisan types to show stronger levels of affective polarization. The rationale is that explicit reporting of feelt attachement corresponds to stronger group identites,
 
 Paragraph on research design (causal strategy)
 
@@ -72,97 +59,125 @@ Paragraph on results
 
 Paragraph on implications (conditional on results)
 
-If implicit partisans polarized too -> suggests social identity mechanism despite clear rejection of subjective attachement -> identity complex
+If implicit partisans polarized too -\> suggests social identity mechanism despite clear rejection of subjective attachement -\> identity complex
 
-Differences -> approaches like @hahm2024divided less suited to infer about state of polarization in a given country context
+Differences -\> approaches like @hahm2024divided less suited to infer about state of polarization in a given country context
 
 ## Theory {#sec-theory}
 
-- surge in AP studies
-  - Partisanship as social identity
-  - causes, conequenes, dynamics
-  - US centered in the beginning
+-   surge in AP studies
+Drawing on social identity (SIT) and self-categorization theory (SCT), the study of affective polarization (AP) has gained considereable attention in the recent decade since @iyengar2012affect's seminal paper establishing the affective perspective on polarization.
+In general terms, AP refers to the tendency of humans to exhibit warmer feelings towards members of their own, perceived group (in-group favoritism), while disliking those perceived as belonging to another group (out-group derogation).
+While fundamentally a universal human phenomenon, the recent surge in publications in the political and social sciences is mostly focussing on AP in the context of political or politically salient group identities, the most important of which is partisanship.
 
-- Refinement of AP in multiparty system context
-  - AP inherently multidimensional (even in simple US case IF and OD)
-  - @campos2025new further refines AP
-  - with multiple parties, what is ingroup? what is outgroup? Reiljan API, Wagner AP and multiple ingroup model as solutions
-  - but these measures differ in terms of whether they restrict the sample (e.g. Reiljan) or not
-  - little systematic research (exception: Wagner)
-
-- Contribution: 
-  - Partisan type to clearly distinguish identifiers from non-identifier: explicit and implicit partisans
-  - this aligns with @elliott2024like discussion about the partisanship
-  - reality even more complex, ignoring formal partisan membership, only distinguishes explicit reported subjective attachement vs clear rejection of such an attachement
-  - empirical study of differences between the two types across 25 EU countries
-
-- Expectation:
-  - Social Identity Theory framework of AP:
-    - Explicit partisans feel stronger group attachement
-    - thus more polarized
-    - given their reported attachement to the group:
-    - higher IF
-    - and given the literature on threat and group status:
-    - higher OD
+-   Partisanship as social identity
+Unlike earlier accounts of partisanship as a rational, preference and ideology based choice -- the *instrumental* model of partisanship --, the SIT perspective boosted the *expressive* model of partisanship, conceptualizing it as an identity.
+Research further distinguished expressive partisanship into *positive* and *negative* partisan identities.
+Former captures a citizen's identification *with* a certain political party, whereas the latter in contrast refers to a citizen's identification *against* a party, as not being part of that group.
 
 
 
+-   causes, conequenes, dynamics
+
+-   US centered in the beginning
+
+-   Refinement of AP in multiparty system context
+
+    -   AP inherently multidimensional (even in simple US case IF and OD)
+    -   @campos2025new further refines AP
+    -   with multiple parties, what is ingroup? what is outgroup? Reiljan API, Wagner AP and multiple ingroup model as solutions
+    -   but these measures differ in terms of whether they restrict the sample (e.g. Reiljan) or not
+    -   little systematic research (exception: Wagner)
+
+-   Contribution:
+
+    -   Partisan type to clearly distinguish identifiers from non-identifier: explicit and implicit partisans
+    -   this aligns with @elliott2024like discussion about the partisanship
+    -   reality even more complex, ignoring formal partisan membership, only distinguishes explicit reported subjective attachement vs clear rejection of such an attachement
+    -   empirical study of differences between the two types across 25 EU countries
+
+-   Expectation:
+
+    -   Social Identity Theory framework of AP:
+        -   Explicit partisans feel stronger group attachement
+        -   thus more polarized
+        -   given their reported attachement to the group:
+        -   higher IF
+        -   and given the literature on threat and group status:
+        -   higher OD
 
 ## Research design {#sec-design}
 
-- Data and experimental setup
-  - explain setup
-  - introduce hierarchical data structure
-
-- Variables
-  - DV: Tokens
-  - IVs: Deriavtion and tripartite structure
-  - DAG: summary of DGP
-  - Covariates
-
-- Causal assumptions:
-  - To interpret effect as causal, which assumptions need to hold?
-  - What are the implications of violating them?
-  - goal: approximate the hypothetical intervention effect, if one changed a person from implicit to explicit 
-
-- Statistical model
-
-- Quantities of interest
+-   Data and experimental setup
+    -   explain setup
+    -   introduce hierarchical data structure
+-   Variables
+    -   DV: Tokens
+    -   IVs: Deriavtion and tripartite structure
+    -   DAG: summary of DGP -\> hierarchical?
+    -   Covariates
+-   Causal assumptions:
+    -   To interpret effect as causal, which assumptions need to hold?
+    -   What are the implications of violating them?
+    -   goal: approximate the hypothetical intervention effect, if one changed a person from implicit to explicit
+-   Statistical model
+    -   main model: cov-models (RE and Covariates, as specified)
+    -   gaussian and binomial (i.e. 4 models)
+    -   loo test (2x 1v1)
+    -   then chose better fitting model
+    -   then for robustness: comparison of model fit to base model (RE but no Covariates, test if subset due to covariates changes results) and naive (no RE structure)
+-   Quantities of interest
+    -   Conditional EV, AP, IF, OD
+    -   CATE as first differences
 
 {{< embed code/02_descr_anal.qmd#fig-dag >}}
 
+## Empirical analysis
+
+### The effect of partisan type on affective polarization in Europe
+
+Pooled results dict -\> figure 1
+
+Pooled results trust -\> figure 2
+
+### Is there context-specific variation?
+
+Country CATE results -\> No, identical across countries
+
+Country EV results -\> Slight shifts in general baseline of tokens, but pattern remains constant
+
+-\> While we hypothesized that the effect of explicit partisan attachment might vary by national political context (e.g., party system fragmentation or political culture), our results show a highly consistent pattern. The Conditional Average Treatment Effect (CATE) of explicit partisanship on affective polarization is statistically indistinguishable across all 25 countries, a finding corroborated by the extremely low variance observed in the country-level random slopes for the Partisan Type×Partisan Relationship interaction term (SD\<0.11).
+
 ## Old
 
-- Data and experimental setup -> waves and survey items -> hierarchical data structure
-- Variables -> DAG -> tripartite structure -> recapture hierarchical structure
-- Causal Assumptions
-- Model -> recapture hierarchical structure -> cross level interaction
-- Control Variables? Priors
-- Quantities of Interest: CATE AP, IG, OD
+-   Data and experimental setup -\> waves and survey items -\> hierarchical data structure
+-   Variables -\> DAG -\> tripartite structure -\> recapture hierarchical structure
+-   Causal Assumptions
+-   Model -\> recapture hierarchical structure -\> cross level interaction
+-   Control Variables? Priors
+-   Quantities of Interest: CATE AP, IG, OD
 
 This section outlines how we measure affective polarization and its subcomponents, the data we use, and out empirical strategy to estimate the effect of explicit partisanship on our outcomes of interest: affective polarization, ingroup favoritism, and outgroup derogation.
 
-We conceptually frame explicit partisanship as a treatment and implicit partisanship as a control. That is, respondents reporting a subjective attachement to a political party ($T_i = 1$) form the treated group, whereas respondents expressing vote choice without attachement ($T_i = 0) form the comparison group.[^omit-quasi]
+We conceptually frame explicit partisanship as a treatment and implicit partisanship as a control. That is, respondents reporting a subjective attachement to a political party ($T_i = 1$) form the treated group, whereas respondents expressing vote choice without attachement (\$T_i = 0) form the comparison group.[^1]
 
-[^omit-quasi]: For readability, we omit the prefix "quasi-" when referring to treatment and control, but this does not imply random assignement. Our design remains observational.
+[^1]: For readability, we omit the prefix "quasi-" when referring to treatment and control, but this does not imply random assignement. Our design remains observational.
 
 The underlying research question is: Does explicit partisan attachement amplify affective polarization relative to implicit partisan attachement?
 
 To approximate causal inference from observational variation, we exploit the following features of the data:
 
-1. Tripartite structure of partisan and profile relationships. Each respondent $i$ is characterized by their *partisan type* ($T_i$) and a *partisan anchor* ($A_i$), which is either the party they feel attached to (explicit partisans, $T_i = 1$) or intend to vote for (implicit partisans, $T_i = 0$). Each conjoint profile presents a party cue ($Z^{party}_{ri}$), which is compared to the respondent's anchor to classify the profile as co-partisan, out-partisan, or neutral ($R_{ri} \in {Co, Out, None}$). This structure separates treatment assignment, i.e., partisan type ($T_i$), respondent identity, i.e., partisan anchor ($A_i$), and profile-level variation ($R_ri$).
-2. Randomized conjoint profiles. The profiles' attributes -- including all non-partusab cues $Z^{other}_{ri}$ -- are randomly assigned. This ensures that observed differences in token allocations across $R_ri$ are attributable to profile characteristics rather than respondent selection.
-3. Hierarchical variation. Respondents are nested within partisan anchors, which are themselves nested within countries. This allows for multilevel modeling that captures heterogeneity at the respondent, party, and country level.
+1.  Tripartite structure of partisan and profile relationships. Each respondent $i$ is characterized by their *partisan type* ($T_i$) and a *partisan anchor* ($A_i$), which is either the party they feel attached to (explicit partisans, $T_i = 1$) or intend to vote for (implicit partisans, $T_i = 0$). Each conjoint profile presents a party cue ($Z^{party}_{ri}$), which is compared to the respondent's anchor to classify the profile as co-partisan, out-partisan, or neutral ($R_{ri} \in {Co, Out, None}$). This structure separates treatment assignment, i.e., partisan type ($T_i$), respondent identity, i.e., partisan anchor ($A_i$), and profile-level variation ($R_ri$).
+2.  Randomized conjoint profiles. The profiles' attributes -- including all non-partusab cues $Z^{other}_{ri}$ -- are randomly assigned. This ensures that observed differences in token allocations across $R_ri$ are attributable to profile characteristics rather than respondent selection.
+3.  Hierarchical variation. Respondents are nested within partisan anchors, which are themselves nested within countries. This allows for multilevel modeling that captures heterogeneity at the respondent, party, and country level.
 
 {{< embed code/02_descr_anal.qmd#fig-dag >}}
 
 In this section, we situate our measurement approach of affective polarization, present the used data and out empirical strategie to approximate an isolation of the causal effect of *explicit* partisanship on our outcomes of interest: affective polarization, ingroup favoritism and outgroup derogation.
 
-In causal terminology, explicit partisans form our treatment group ($T = 1$), with implicit partisans constituting our control group ($T = 0$).[^1]
+In causal terminology, explicit partisans form our treatment group ($T = 1$), with implicit partisans constituting our control group ($T = 0$).\[\^1\]
 
-The underlying idea is to study the effect of explicit subjective group attachement compared to implicit group attachement on affective polarization. 
-
-
+The underlying idea is to study the effect of explicit subjective group attachement compared to implicit group attachement on affective polarization.
 
 The effect of the partisan-group-relative-variable is conditional on the type of partisanship. The partisan-group-relative-variable is itself a function of assigned partisan ingroup of respondents (by attachement for explicit and by vote intention/choice for implicit) and the displayed party affiliation of the conjoint profile.
 
@@ -184,14 +199,11 @@ We use $Z_ri$ to denote the conjoint profile's cue presented in round $r$ to res
 
 Given we are interested in the partisan effects, we limit observations to conjoint profiles with the nationality attribute fixed to that of the respective country (i.e., "co-national" from respondents' point of view), since there was never a partisan cue for outnationals to exclude implausible scenarios.
 
-Figure X displays the causal data-generating structure. Respondents possess a partisan anchor $A$, defined as the party they feel close to (explicit partisans) or intend to vote for (implicit partisans). Partisan type $T$ (explicit vs. implicit) is only defined for respondents with a partisan anchor and is therefore a child node of $A$. The conjoint design randomizes all profile attributes. The partisan cue $Z^{party} combines with $A$ to produce the partisan relationship category $R=f(A,Z^{party})$, which determines whether the profile is interpreted as co-partisan, out-partisan, or neutral. Other randomized profile cues $Z^{other}$ affect the outcome directly. Token allocations $Y$ are affected by both $R$ and $Z^{other}$, with the effect of $R$ theorized to be conditional on $T$. Because $T$ is observational, we cannot assume conditional independence a priori, hence $C$ denotes potential confounders of both $T$ and $Y$.
+Figure X displays the causal data-generating structure. Respondents possess a partisan anchor $A$, defined as the party they feel close to (explicit partisans) or intend to vote for (implicit partisans). Partisan type $T$ (explicit vs. implicit) is only defined for respondents with a partisan anchor and is therefore a child node of $A$. The conjoint design randomizes all profile attributes. The partisan cue \$Z\^{party} combines with $A$ to produce the partisan relationship category $R=f(A,Z^{party})$, which determines whether the profile is interpreted as co-partisan, out-partisan, or neutral. Other randomized profile cues $Z^{other}$ affect the outcome directly. Token allocations $Y$ are affected by both $R$ and $Z^{other}$, with the effect of $R$ theorized to be conditional on $T$. Because $T$ is observational, we cannot assume conditional independence a priori, hence $C$ denotes potential confounders of both $T$ and $Y$.
 
 To interpret the path $T \rightarrow R \rightarrow Y$ as the conditional causal effect of $T$, we must establish the following assumptions:
 
-SUTVA -> Treatment outcomes are independent of treatment assignment to other units Y_i(1), Y_i(0)
-Conditional Independence -> No confounders influencing T and Y
-Covariate Balance -> $E[X \mid T = 1] = E[X \mid T = 0]$ Comparability of T=1 and T=0 
-Common Support -> for every respondent, there is a positive probability of being assigned to both the treatment and control groups (fulfilled by subset to respondents with partisan anchor)
+SUTVA -\> Treatment outcomes are independent of treatment assignment to other units Y_i(1), Y_i(0) Conditional Independence -\> No confounders influencing T and Y Covariate Balance -\> $E[X \mid T = 1] = E[X \mid T = 0]$ Comparability of T=1 and T=0 Common Support -\> for every respondent, there is a positive probability of being assigned to both the treatment and control groups (fulfilled by subset to respondents with partisan anchor)
 
 ### Independent variables {#sec-iv}
 
@@ -199,10 +211,7 @@ We code...
 
 Partisanship
 
-$T = 1$ -> explicit partisanship
-$T = 0$ -> implicit partisanship
-
-
+$T = 1$ -\> explicit partisanship $T = 0$ -\> implicit partisanship
 
 ### Dependent variable {#sec-dv}
 
@@ -218,20 +227,20 @@ Although the goal of completely including all covariates is untestable, we try t
 
 Given the observational nature of the partisan type variable (Ti​), we employ a comprehensive set of control variables (Ci​) to fulfill the Conditional Independence Assumption and minimize confounding. This set includes standard demographic and socioeconomic characteristics (e.g., age, gender, education, economic perception), core ideological positions (Left-Right, EU position, nativism), and specific psychological traits. Critically, we include a detailed battery of items measuring Anti-System and Populist Attitudes alongside general political efficacy. This rigorous control strategy ensures we isolate the treatment effect—the conditioning impact of explicit subjective attachment on affective polarization—from alternative explanations driven by generalized political engagement or anti-establishment resentment common to the implicit partisan group.
 
-Because the inclusion of that many covariates reduces the amount of observations due to noise and missing values in the data, I estimate a base model with only experimental controls and a covariate model, which includes the above mentioned variables. The purpose is to ensure substantive interpretation is not sensitive on differing datasets depending on the covariate specification. On the other hand, the inclusion of this many covariates aims at blocking any backdoor paths between Z and Y, accounting for selection effects of Z and consequently improving the comparability between treatment groups. 
+Because the inclusion of that many covariates reduces the amount of observations due to noise and missing values in the data, I estimate a base model with only experimental controls and a covariate model, which includes the above mentioned variables. The purpose is to ensure substantive interpretation is not sensitive on differing datasets depending on the covariate specification. On the other hand, the inclusion of this many covariates aims at blocking any backdoor paths between Z and Y, accounting for selection effects of Z and consequently improving the comparability between treatment groups.
 
-I include all covariates for which the number of NAs is < 10000.
+I include all covariates for which the number of NAs is \< 10000.
 
 ### Causal model
 
-Partisan Type -> Partisan Anchor -> Relationship Category -> Allocation
+Partisan Type -\> Partisan Anchor -\> Relationship Category -\> Allocation
 
 ### Statistical model
 
-The unit of analysis is the conjoint round $r$, i.e., the evaluation of a single conjoint profile within one game. Each profile evaluation $r$ is nested within respondent $i$, who is nested within a partisan anchor $a$ (the respondent’s party of attachment or vote intention), which is nested within country $c$. This yields a four-level hierarchical data structure:  
-**Level 1:** profile evaluations ($r$) →  
-**Level 2:** respondents ($i$) →  
-**Level 3:** partisan anchors ($a$) →  
+The unit of analysis is the conjoint round $r$, i.e., the evaluation of a single conjoint profile within one game. Each profile evaluation $r$ is nested within respondent $i$, who is nested within a partisan anchor $a$ (the respondent’s party of attachment or vote intention), which is nested within country $c$. This yields a four-level hierarchical data structure:\
+**Level 1:** profile evaluations ($r$) →\
+**Level 2:** respondents ($i$) →\
+**Level 3:** partisan anchors ($a$) →\
 **Level 4:** countries ($c$).
 
 Respondents vary along two analytically distinct dimensions. First, partisan type $T_i$ differentiates respondents who report subjective partisan attachment (explicit partisans, $T_i = 1$) from those who report a vote intention or vote choice without attachment (implicit partisans, $T_i = 0$). Second, each respondent is assigned a partisan anchor $A_i$, defined as the specific party to which they report either attachment (explicit partisans) or vote intention (implicit partisans).
@@ -302,98 +311,92 @@ Both $\Sigma_a$ and $\Sigma_c$ are full $3 \times 3$ covariance matrices, so int
 
 #### Model structure and justification
 
-**Cross-level interaction of substantive interest.**  
+**Cross-level interaction of substantive interest.**\
 The main theoretical question is whether explicit partisan attachment ($T_i = 1$) alters responsiveness to co-, out-, and neutral partisan cues ($R_{ri}$). The fixed-effect interaction $\beta_3 (T_i \times R_{ri})$ estimates this conditional effect at the population (grand-mean) level.
 
-**Random slopes for higher-level variation in cue sensitivity.**  
+**Random slopes for higher-level variation in cue sensitivity.**\
 The effect of the Level-1 cue $R_{ri}$ is allowed to vary across partisan anchors and across countries (random slopes $v_{aR}$ and $w_{cR}$), which captures heterogeneity in cue sensitivity that is plausibly organized by party identity and national political context. Similarly, the Level-2 treatment $T_i$ is allowed to vary across anchors and countries (random slopes $v_{aT}$ and $w_{cT}$), reflecting that the meaning and strength of explicit partisanship differ across parties and national settings.
 
-**Respondent-level variation and identification.**  
+**Respondent-level variation and identification.**\
 Respondents vary in baseline generosity and provide multiple conjoint rounds; this is modeled with a respondent random intercept $u_{i0}$. We did not include a respondent-level random slope for $R_{ri}$ because there is insufficient within-respondent variation in the relationship variable to estimate it reliably. Put differently, many respondents do not experience enough co/out/none combinations across rounds for stable respondent-specific slope estimates. Omitting a respondent-level slope implies that heterogeneity in cue sensitivity is captured at the partisan-anchor and country levels rather than at the individual level.
 
-**Implications of omitting respondent-level random slopes.**  
+**Implications of omitting respondent-level random slopes.**\
 Omitting $u_{iR}$ means the model does not estimate idiosyncratic respondent-level deviations from the average relationship effect. If relevant individual-level heterogeneity were present but unmodeled, the estimated higher-level variances (in $\Sigma_a$ and $\Sigma_c$) or residual variance could absorb some of that heterogeneity. Given the data limitation (low within-respondent variation), estimating $u_{iR}$ would be poorly identified and could destabilize inference; the chosen specification therefore balances theoretical desiderata and empirical identifiability.
 
-**Correlated random effects and partial pooling.**  
+**Correlated random effects and partial pooling.**\
 Correlated intercepts and slopes at the anchor and country levels allow partial pooling of treatment and cue effects, borrowing strength across units while permitting systematic contextual differences. This stabilizes estimates of heterogeneous treatment effects and aligns with the hypothesis that both party identity and national context shape partisan cue effects.
 
-**Estimation.**  
+**Estimation.**\
 Models were estimated in a Bayesian framework (via *brms*), which propagates uncertainty through the multilevel interaction structure and regularizes the maximal random-effects specification through priors.
 
-In sum, the estimated model aligns the theoretical structure of partisan cue processing with a multilevel design that  
-(i) treats explicit partisanship as a Level-2 treatment whose effect can vary across parties and countries,  
-(ii) captures heterogeneity in cue sensitivity at the partisan-anchor and country levels, and  
+In sum, the estimated model aligns the theoretical structure of partisan cue processing with a multilevel design that\
+(i) treats explicit partisanship as a Level-2 treatment whose effect can vary across parties and countries,\
+(ii) captures heterogeneity in cue sensitivity at the partisan-anchor and country levels, and\
 (iii) models respondent-level repeated measures via random intercepts while avoiding poorly identified respondent-level random slopes given the observed within-respondent variation.
-
 
 #### Prior specification
 
-- **Approach 1 — Very Weakly Informative Priors (`normal(0, 5)`)**
+-   **Approach 1 — Very Weakly Informative Priors (`normal(0, 5)`)**
 
 This approach aims to be conservative, broad, and minimally informative.
 
 **Rationale**
 
-- Token allocations range from **0–10**, so any plausible effect of a predictor—main or interaction—must lie within approximately **–10 to +10**.  
-- A `Normal(0, 5)` prior places ~95% of its probability mass within this range (≈ ±9.8).  
-- This reflects no strong prior beliefs about the size or direction of effects while permitting large shifts if supported by the data.
+-   Token allocations range from **0–10**, so any plausible effect of a predictor—main or interaction—must lie within approximately **–10 to +10**.\
+-   A `Normal(0, 5)` prior places \~95% of its probability mass within this range (≈ ±9.8).\
+-   This reflects no strong prior beliefs about the size or direction of effects while permitting large shifts if supported by the data.
 
 **Specification**
 
-- **Fixed effects (slopes & interactions):**  
-  - \( \beta_k \sim \text{Normal}(0, 5) \)
-
-- **Intercept:**  
-  - \( \text{Intercept} \sim \text{Normal}(5, 5) \)  
-    (midpoint of 0–10 with substantial uncertainty)
-
-- **Random effect SDs:**  
-  - \( \sigma_{\text{RE}} \sim \text{Student-t}(3, 0, 5) \)
-
-- **Residual SD:**  
-  - \( \sigma \sim \text{Student-t}(3, 0, 5) \)
+-   **Fixed effects (slopes & interactions):**
+    -   ( \beta\_k \sim \text{Normal}(0, 5) )
+-   **Intercept:**
+    -   ( \text{Intercept} \sim \text{Normal}(5, 5) )\
+        (midpoint of 0–10 with substantial uncertainty)
+-   **Random effect SDs:**
+    -   ( \sigma\_{\text{RE}} \sim \text{Student-t}(3, 0, 5) )
+-   **Residual SD:**
+    -   ( \sigma \sim \text{Student-t}(3, 0, 5) )
 
 **Characteristics**
 
-- Extremely permissive (barely regularizing).  
-- Useful when the goal is **maximal conservatism** and **minimal prior influence**.  
-- May yield wider posteriors, more computation difficulty, and greater risk of overfitting with many random effects.
+-   Extremely permissive (barely regularizing).\
 
-- **Approach 2 — Weakly Informative, Regularizing Priors (recommended)**
+-   Useful when the goal is **maximal conservatism** and **minimal prior influence**.\
+
+-   May yield wider posteriors, more computation difficulty, and greater risk of overfitting with many random effects.
+
+-   **Approach 2 — Weakly Informative, Regularizing Priors (recommended)**
 
 Aimed at *constrain-but-not-restrict* modeling: improves stability, avoids implausibly large effects, yet remains substantively uninformative.
 
 **Rationale**
 
-- Shifts of **4+ tokens** (40% of the scale) are already large in practice.  
-- `Normal(0, 2)` limits 95% prior mass to about ±4, which remains wide enough while avoiding unrealistic extremes.  
-- More appropriate for complex hierarchical models with many random slopes.
+-   Shifts of **4+ tokens** (40% of the scale) are already large in practice.\
+-   `Normal(0, 2)` limits 95% prior mass to about ±4, which remains wide enough while avoiding unrealistic extremes.\
+-   More appropriate for complex hierarchical models with many random slopes.
 
 **Specification**
 
-- **Fixed effects (slopes & interactions):**  
-  - \( \beta_k \sim \text{Normal}(0, 2) \)
-
-- **Intercept:**  
-  - \( \text{Intercept} \sim \text{Normal}(5, 2) \)
-
-- **Random effect SDs:**  
-  - \( \sigma_{\text{RE}} \sim \text{Student-t}(3, 0, 1) \)  
-    or a half-normal(0,1) prior
-
-- **Residual SD:**  
-  - \( \sigma \sim \text{Student-t}(3, 0, 2) \)
+-   **Fixed effects (slopes & interactions):**
+    -   ( \beta\_k \sim \text{Normal}(0, 2) )
+-   **Intercept:**
+    -   ( \text{Intercept} \sim \text{Normal}(5, 2) )
+-   **Random effect SDs:**
+    -   ( \sigma\_{\text{RE}} \sim \text{Student-t}(3, 0, 1) )\
+        or a half-normal(0,1) prior
+-   **Residual SD:**
+    -   ( \sigma \sim \text{Student-t}(3, 0, 2) )
 
 **Characteristics**
 
-- Still weakly informative, but more realistic given the bounded 0–10 outcome scale.  
-- Improves convergence and shrinkage in large multilevel structures.  
-- Reduces the probability of implausible prior predictive draws (e.g., \(Y < -10\)).  
-
+-   Still weakly informative, but more realistic given the bounded 0–10 outcome scale.\
+-   Improves convergence and shrinkage in large multilevel structures.\
+-   Reduces the probability of implausible prior predictive draws (e.g., (Y \< -10)).
 
 ### Quantities of interest
 
-In the following sections we define our substantive quantities of interest, affective polarization and its subcomponents, ingroup favoritism and outgroup derogation. Our substantive interest concerns the differences in these three measures between implicit and explicit partisan types. In the causal framing, we want to unravel the effect of a hypothetical intervention: If we hold all covariates constant and only change $T$ from $0$ to $1$, how does this impact our quantities of interest? 
+In the following sections we define our substantive quantities of interest, affective polarization and its subcomponents, ingroup favoritism and outgroup derogation. Our substantive interest concerns the differences in these three measures between implicit and explicit partisan types. In the causal framing, we want to unravel the effect of a hypothetical intervention: If we hold all covariates constant and only change $T$ from $0$ to $1$, how does this impact our quantities of interest?
 
 #### Affective polarization
 
@@ -427,7 +430,7 @@ $$
 IF = E(Y \mid R = Co) - E(Y \mid R = None)
 $$
 
-further refining this equation with respect to partisan type $T$, we define our causal estimand as: 
+further refining this equation with respect to partisan type $T$, we define our causal estimand as:
 
 $$
 \begin{aligned}
@@ -436,7 +439,6 @@ CATE_{IF} &= IF_{T=1} - IF_{T=0} \\
           &\quad - [E(Y \mid R = Co, T = 0) - E(Y \mid R = None, T = 0)]
 \end{aligned}
 $$
-
 
 #### Outgroup derogation
 
@@ -458,13 +460,13 @@ CATE_{OR} &= OR_{T=1} - OR_{T=0} \\
 \end{aligned}
 $$
 
-By focusing on expected values, or marginal means, we also ensure our substantive results are not dependent on the choice of reference categories [@leeper2020measuring]. 
+By focusing on expected values, or marginal means, we also ensure our substantive results are not dependent on the choice of reference categories [@leeper2020measuring].
 
 ## Empirical analysis {#sec-analysis}
 
 We present our findings in three stages. First, we present the distributions of explicit and implicit partisanship across our included country samples. Next, we present the overall average treatment effects of explicit partisanship on our outcomes of interest. Finally, we present cross-country variation of these pooled results to place our results in a comparative perspective.
 
-{{< embed code/01_code.qmd#fig-impl-expl-distribution >}}
+{{< embed code/01_wrangling.qmd#fig-impl-expl-distribution >}}
 
 ### Pooled analysis
 
@@ -480,12 +482,7 @@ We present our findings in three stages. First, we present the distributions of 
 
 ### Country analysis
 
-
 ## Robustness
-
-without covariates
-other response family?
-simple ols without any hierarchical structure
 
 ## Conclusion {#sec-conclusion}
 
@@ -497,3 +494,13 @@ simple ols without any hierarchical structure
 :::
 
 ## Appendix {.appendix}
+
+### Sample descriptives
+
+### Experimental setup
+
+### Distribution of Y
+
+### Distribution of T and R
+
+### Robustness
