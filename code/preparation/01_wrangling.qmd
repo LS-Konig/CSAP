@@ -348,9 +348,9 @@ labels_der_outpartisan_comb <- eu25games2019 |>
 
 ## Implicit vs explicit partisans distributions
 
-```{r}
+```{r, dev='ragg_png'}
 #| label: fig-impl-expl-distribution
-#| fig-cap: "Distribution of Explicit, Implicit, and Non-Partisans across 25 Countries"
+#| fig-cap: "Distribution of partisan types, by country. Stacked horizontal bars show the within-country share (\\%) of three partisan types: explicit partisans (respondents who reported a subjective attachement to a party, $T_i=1$), implicit partisans (respondents who reported no attachement but did report a vote preference or intention, $T_i=0$), and respondents who reported neither (none, $T_i = \\emptyset$). Percentages sum to 100\\% within each country, with country samples containing about $1,200$ respondents each (detailed numbers are reported in appendix section X)."
 #| fig-dpi: 500
 
 toplot <- eu25games2019 |>
@@ -394,13 +394,18 @@ ggplot(
     width = 0.75
   ) +
   scale_fill_manual(
-    values = c("white", "#CCCCCC", "black")
+    values = c("white", "#CCCCCC", "black"),
+    labels = c(
+      bquote("Explicit (" * italic(T)[i] == 1 * ")"),
+      bquote("Implicit (" * italic(T)[i] == 0 * ")"),
+      expression(paste("None (", italic(T)[i] == phantom(0) * "\u2205", ")"))
+    )
   ) +
   scale_x_continuous(labels = percent) +
   labs(
     x = "Share",
     y = "Country",
-    fill = "Partisan Type"
+    fill = bquote("Partisan Type (" * italic(T)[i] * ")")
   ) +
   theme_pubr() +
   theme(
