@@ -59,17 +59,17 @@ rm(p_required, p_to_install, packages)
 ```{r}
 #| label: load-models
 
-load(here("data", "03_final", "models", "bfit_naive_d.RData"))
+# load(here("data", "03_final", "models", "bfit_naive_d.RData"))
 
-load(here("data", "03_final", "models", "bfit_naive_t.RData"))
+# load(here("data", "03_final", "models", "bfit_naive_t.RData"))
 
-load(here("data", "03_final", "models", "bfit_naive_cov_d.RData"))
+# load(here("data", "03_final", "models", "bfit_naive_cov_d.RData"))
 
-load(here("data", "03_final", "models", "bfit_naive_cov_t.RData"))
+# load(here("data", "03_final", "models", "bfit_naive_cov_t.RData"))
 
-load(here("data", "03_final", "models", "bfit_base_d.RData"))
+# load(here("data", "03_final", "models", "bfit_base_d.RData"))
 
-load(here("data", "03_final", "models", "bfit_base_t.RData"))
+# load(here("data", "03_final", "models", "bfit_base_t.RData"))
 
 load(here("data", "03_final", "models", "bfit_cov_d.RData"))
 
@@ -987,10 +987,8 @@ plot_country_results <- function(country_qois_df) {
     )
 
   # =======================================================
-  # 2. Generate EV plots for each country (NEW)
-  #    Mirrors pooled AP/IF/OD EV logic
+  # 2. Generate EV data
   # =======================================================
-
   ev_data <- country_qois_df |>
     filter(
       Quantity %in%
@@ -1010,7 +1008,7 @@ plot_country_results <- function(country_qois_df) {
       Relationship_Type = factor(
         Relationship_Code,
         levels = c("RCo", "ROut", "RNone"),
-        labels = c("Co-Partisan", "Out-Partisan", "Neutral")
+        labels = c("Co", "Out", "None")
       ),
       Country = Analysis
     ) |>
@@ -1034,7 +1032,7 @@ plot_country_results <- function(country_qois_df) {
         shape = 21,
         stroke = 1.5
       ) +
-      facet_wrap(~Partisan_Type, ncol = 1) +
+      facet_wrap(~Partisan_Type, ncol = 2) +
       scale_fill_manual(
         values = c(
           "Explicit Partisan (T=1)" = "white",
@@ -1042,8 +1040,8 @@ plot_country_results <- function(country_qois_df) {
         )
       ) +
       labs(
-        x = "Tokens Allocated (0–10)",
-        y = "Relationship Type",
+        x = expression(E(Y)),
+        y = expression(R[ij]),
         title = unique(df_country$Country)
       ) +
       theme_pubr() +
@@ -1063,17 +1061,61 @@ plot_country_results <- function(country_qois_df) {
   ev_plots <- lapply(country_list, make_country_ev_plot)
   names(ev_plots) <- names(country_list)
 
+  # ============================================================
+  # 3. NEW: Combined EV Plot (Option A recommended layout)
+  # ============================================================
+  make_combined_ev_plot <- function(ev_data) {
+    ggplot(
+      ev_data,
+      aes(
+        x = Estimate,
+        y = forcats::fct_reorder(Country, Estimate, .fun = median),
+        fill = Relationship_Type
+      )
+    ) +
+      stat_halfeye(
+        .width = c(0.95, 0.99),
+        point_interval = "median_qi",
+        slab_size = 0.5,
+        point_fill = "white",
+        point_color = "black",
+        shape = 21,
+        stroke = 1.5
+      ) +
+      facet_wrap(
+        ~Partisan_Type,
+        ncol = 2,
+        labeller = label_wrap_gen(15)
+      ) +
+      scale_fill_manual(
+        values = c("Co" = "grey10", "Out" = "grey70", "None" = "grey40")
+      ) +
+      labs(
+        x = expression(E(Y)),
+        y = "Country",
+        fill = expression(R[ij])
+      ) +
+      scale_x_continuous(limits = c(2.2, 5)) +
+      theme_pubr() +
+      theme(
+        legend.position = "right",
+        strip.background = element_rect(fill = "grey90", color = "grey50"),
+        strip.text = element_text(face = "bold"),
+        axis.text.y = element_text(size = 8)
+      )
+  }
+
+  combined_ev_plot <- make_combined_ev_plot(ev_data)
+
   # ============================================
-  # 3. Return list containing:
-  #    - combined CATE plot
-  #    - per-country EV plots
+  # 4. Return list
   # ============================================
   return(list(
     Country_CATE_Plot = p_country_cate,
-    Country_EVs = ev_plots
+    Country_EVs = ev_plots,
+    Combined_Country_EV_Plot = combined_ev_plot
   ))
 }
-
 ```
 
 # Run pipelines
@@ -1084,6 +1126,7 @@ plot_country_results <- function(country_qois_df) {
 
 ```{r, message = NA}
 #| label: analysis-base-d
+#| eval: false
 
 newdata_base_d <- create_ape_newdata(bfit_base_d)
 
@@ -1120,6 +1163,7 @@ rm(evs_base_d, qois_base_d, plot_base_d)
 
 ```{r, message = NA}
 #| label: analysis-base-t
+#| eval: false
 
 newdata_base_t <- create_ape_newdata(bfit_base_t)
 
@@ -1230,6 +1274,7 @@ rm(evs_cov_t, qois_cov_t, plot_cov_t)
 
 ```{r, message = T}
 #| label: analysis-country-base-d
+#| eval: false
 
 newdata_country_base_d <- create_ape_newdata(
   bfit_model = bfit_base_d,
@@ -1280,6 +1325,7 @@ rm(evs_country_base_d, qois_country_base_d, plot_country_base_d)
 
 ```{r, message = T}
 #| label: analysis-country-base-t
+#| eval: false
 
 newdata_country_base_t <- create_ape_newdata(
   bfit_model = bfit_base_t,
