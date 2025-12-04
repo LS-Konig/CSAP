@@ -75,7 +75,7 @@ load(here("data", "03_final", "plots", "plot_country_cov_d.RData"))
 load(here("data", "03_final", "plots", "plot_country_cov_t.RData"))
 ```
 
-# Figures
+# Pooled figures
 
 ## Base dictator game model
 
@@ -149,57 +149,57 @@ ggarrange(
 
 ```
 
-### Country figures
+# Country figures
 
 ## Base dictator game model
 
 ```{r}
-#| label: fig-country-base-d
+#| label: fig-country-base-d-cate
 #| fig-cap: "Combined figure"
 #| fig-dpi: 500
 #| fig-width: 6.3
 #| fig-height: 9
 
-plot_country_base_d
+plot_country_base_d$Country_CATE_Plot
 
 ```
 
 ## Base trust game model
 
 ```{r}
-#| label: fig-country-base-t
+#| label: fig-country-base-t-cate
 #| fig-cap: "Combined figure"
 #| fig-dpi: 500
 #| fig-width: 6.3
 #| fig-height: 9
 
-plot_country_base_t
+plot_country_base_t$Country_CATE_Plot
 
 ```
 
 ## Covariate dictator model
 
 ```{r}
-#| label: fig-country-cov-d
+#| label: fig-country-cov-d-cate
 #| fig-cap: "Combined figure"
 #| fig-dpi: 500
 #| fig-width: 6.3
 #| fig-height: 9
 
-plot_country_cov_d
+plot_country_cov_d$Country_CATE_Plot
 
 ```
 
 ## Covariate trust model
 
 ```{r}
-#| label: fig-country-cov-t
+#| label: fig-country-cov-t-cate
 #| fig-cap: "Combined figure"
 #| fig-dpi: 500
 #| fig-width: 6.3
 #| fig-height: 9
 
-plot_country_cov_t
+plot_country_cov_t$Country_CATE_Plot
 
 ```
 
