@@ -264,10 +264,13 @@ Country CATE results -\> No, identical across countries
 
 Given the striking similarity across countries, we present the expected values for the partisan relationship categories by type as well:
 
-
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-t-cate >}}
 
 Country EV results -\> Observable shifts in general baseline of tokens, but patterns themselves remains constant
+
+{{< embed code/postproduction/06_figures.qmd#fig-country-cov-d-ev >}}
+
+{{< embed code/postproduction/06_figures.qmd#fig-country-cov-t-ev >}}
 
 -\> While we hypothesized that the effect of explicit partisan attachment might vary by national political context (e.g., party system fragmentation or political culture), our results show a highly consistent pattern. The Conditional Average Treatment Effect (CATE) of explicit partisanship on affective polarization is statistically indistinguishable across all 25 countries, a finding corroborated by the extremely low variance observed in the country-level random slopes for the Partisan Type×Partisan Relationship interaction term (SD\<0.11).
 
