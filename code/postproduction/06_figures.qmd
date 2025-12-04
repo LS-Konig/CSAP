@@ -151,7 +151,9 @@ ggarrange(
 
 # Country figures
 
-## Base dictator game model
+## CATE Figures
+
+### Base dictator game model
 
 ```{r}
 #| label: fig-country-base-d-cate
@@ -164,7 +166,7 @@ plot_country_base_d$Country_CATE_Plot
 
 ```
 
-## Base trust game model
+### Base trust game model
 
 ```{r}
 #| label: fig-country-base-t-cate
@@ -177,7 +179,7 @@ plot_country_base_t$Country_CATE_Plot
 
 ```
 
-## Covariate dictator model
+### Covariate dictator model
 
 ```{r}
 #| label: fig-country-cov-d-cate
@@ -186,11 +188,12 @@ plot_country_base_t$Country_CATE_Plot
 #| fig-width: 6.3
 #| fig-height: 9
 
-plot_country_cov_d$Country_CATE_Plot
+plot_country_cov_d$Country_CATE_Plot +
+  labs(x = "")
 
 ```
 
-## Covariate trust model
+### Covariate trust model
 
 ```{r}
 #| label: fig-country-cov-t-cate
@@ -199,7 +202,62 @@ plot_country_cov_d$Country_CATE_Plot
 #| fig-width: 6.3
 #| fig-height: 9
 
-plot_country_cov_t$Country_CATE_Plot
+plot_country_cov_t$Country_CATE_Plot +
+  labs(x = "")
+
+```
+
+## EV Figures
+
+### Base dictator game model
+
+```{r}
+#| label: fig-country-base-d-ev
+#| fig-cap: "Combined figure"
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
+
+plot_country_base_d
+
+```
+
+### Base trust game model
+
+```{r}
+#| label: fig-country-base-t-ev
+#| fig-cap: "Combined figure"
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
+
+plot_country_base_t
+
+```
+
+### Covariate dictator model
+
+```{r}
+#| label: fig-country-cov-d-ev
+#| fig-cap: "Expected values for the dictator game by country."
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
+
+plot_country_cov_d$Combined_Country_EV_Plot
+
+```
+
+### Covariate trust model
+
+```{r}
+#| label: fig-country-cov-t-ev
+#| fig-cap: "Expected values of for the trust game by country."
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 9
+
+plot_country_cov_t$Combined_Country_EV_Plot
 
 ```
 
