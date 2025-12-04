@@ -42,6 +42,7 @@ p_required <- c(
   "brms",
   "tidybayes",
   "ggpubr",
+  "patchwork",
   "sessioninfo"
 )
 packages <- rownames(installed.packages())
@@ -441,9 +442,9 @@ calculate_qois_tidy <- function(
 #' @param tidybayes_df The output from calculate_qois_tidy() filtered for the "Pooled" analysis.
 #' @return A list of two ggplot objects: Conditional_Means_Plot and QoI_CATE_Plot.
 plot_pooled_results <- function(tidybayes_df) {
-  # 1. Prepare data for the two panels
+  # 1. Prepare data for the two panels & EV
 
-  # --- Left Panel: Conditional Means (EVs) ---
+  # ---  Conditional Means (EVs) ---
   ev_data <- tidybayes_df |>
     filter(
       Quantity %in%
@@ -468,7 +469,7 @@ plot_pooled_results <- function(tidybayes_df) {
     ) |>
     select(-Relationship_Code)
 
-  # --- Right Panel: Polarization/Favoritism/Derogation (AP, IF, OD, CATEs) ---
+  # --- Main Figure: Polarization/Favoritism/Derogation (AP, IF, OD, CATEs) ---
   qoi_data <- tidybayes_df |>
     filter(
       Quantity %in%
@@ -628,13 +629,20 @@ plot_pooled_results <- function(tidybayes_df) {
       x = expression(CATE[AP]),
       y = " "
     ) +
+    scale_x_continuous(
+      limits = c(-0.5, 0.5)
+    ) +
     theme_pubr() +
     theme(
       legend.position = "none",
       strip.background = element_rect(fill = "grey90", color = "grey50"),
       aspect.ratio = 1.618034,
       axis.text.y = element_blank(),
-      axis.ticks.y = element_blank()
+      axis.ticks.y = element_blank(),
+      axis.text.x = element_text(
+        angle = 45,
+        hjust = 1
+      )
     )
 
   p_ap <- p_ap_left + p_ap_right
@@ -704,13 +712,20 @@ plot_pooled_results <- function(tidybayes_df) {
       x = expression(CATE[IF]),
       y = " "
     ) +
+    scale_x_continuous(
+      limits = c(-0.5, 0.5)
+    ) +
     theme_pubr() +
     theme(
       legend.position = "none",
       strip.background = element_rect(fill = "grey90", color = "grey50"),
       aspect.ratio = 1.618034,
       axis.text.y = element_blank(),
-      axis.ticks.y = element_blank()
+      axis.ticks.y = element_blank(),
+      axis.text.x = element_text(
+        angle = 45,
+        hjust = 1
+      )
     )
 
   p_if <- p_if_left + p_if_right
@@ -780,13 +795,20 @@ plot_pooled_results <- function(tidybayes_df) {
       x = expression(CATE[OD]),
       y = " "
     ) +
+    scale_x_continuous(
+      limits = c(-0.5, 0.5)
+    ) +
     theme_pubr() +
     theme(
       legend.position = "none",
       strip.background = element_rect(fill = "grey90", color = "grey50"),
       aspect.ratio = 1.618034,
       axis.text.y = element_blank(),
-      axis.ticks.y = element_blank()
+      axis.ticks.y = element_blank(),
+      axis.text.x = element_text(
+        angle = 45,
+        hjust = 1
+      )
     )
 
   p_od <- p_od_left + p_od_right
@@ -928,16 +950,13 @@ plot_country_results <- function(country_qois_df) {
     cate_data,
     aes(
       x = Estimate,
-      y = forcats::fct_reorder(Country, Estimate, .fun = median),
-      fill = "#666666",
-      color = "black"
+      y = forcats::fct_reorder(Country, Estimate, .fun = median)
     )
   ) +
     stat_halfeye(
       .width = c(0.95, 0.99),
       point_interval = "median_qi",
-      slab_size = 0.5,
-      slab_color = "black",
+      slab_size = 0.3,
       slab_fill = "#666666",
       point_fill = "white",
       point_color = "black",
@@ -955,9 +974,17 @@ plot_country_results <- function(country_qois_df) {
     ) +
     theme_pubr() +
     theme(
-      legend.position = "none"
+      legend.position = "none",
+      axis.text.x = element_text(
+        angle = 45,
+        hjust = 1
+      )
     ) +
-    facet_wrap(~Metric_Code, ncol = 3)
+    facet_wrap(
+      ~Metric_Code,
+      ncol = 3,
+      labeller = label_bquote(CATE[.(Metric_Code)])
+    )
 
   # =======================================================
   # 2. Generate EV plots for each country (NEW)
@@ -1076,6 +1103,16 @@ save(
   )
 )
 
+save(
+  qois_base_d,
+  file = here(
+    "data",
+    "03_final",
+    "qois",
+    "qois_base_d.RData"
+  )
+)
+
 rm(evs_base_d, qois_base_d, plot_base_d)
 ```
 
@@ -1098,6 +1135,16 @@ save(
     "data",
     "03_final",
     "plots",
+    "plot_base_t.RData"
+  )
+)
+
+save(
+  plot_base_t,
+  file = here(
+    "data",
+    "03_final",
+    "qois",
     "plot_base_t.RData"
   )
 )
@@ -1128,6 +1175,16 @@ save(
   )
 )
 
+save(
+  qois_cov_d,
+  file = here(
+    "data",
+    "03_final",
+    "qois",
+    "qois_cov_d.RData"
+  )
+)
+
 rm(evs_cov_d, qois_cov_d, plot_cov_d)
 ```
 
@@ -1151,6 +1208,16 @@ save(
     "03_final",
     "plots",
     "plot_cov_t.RData"
+  )
+)
+
+save(
+  qois_cov_t,
+  file = here(
+    "data",
+    "03_final",
+    "qois",
+    "qois_cov_t.RData"
   )
 )
 
