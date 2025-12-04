@@ -133,7 +133,7 @@ bfit_naive_t <- update(
 
 message("Saving posterior draws...\n")
 save(
-  bfit_naive_d,
+  bfit_naive_t,
   file = here("data", "03_final", "models", "bfit_naive_t.RData")
 )
 ```
