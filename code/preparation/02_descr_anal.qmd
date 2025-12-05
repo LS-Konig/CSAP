@@ -73,8 +73,9 @@ load(
 
 ```{r}
 #| label: fig-dag
-#| fig-cap: "Directed acyclic graph of the causal data-generating process. Respondents have a partisan anchor $A_i$, representing the party they feel attached to (explicit partisans) or intend to vote for (implicit partisans). Partisan type $T_i$ (explicit vs. implicit) is only defined for respondents with a partisan anchor and is therefore a child node of $A_i$. Each conjoint profile $r$ presents randomized attributes: a partisan cue $Z^{party}_r$ and other cues $Z^{other}_r$. The partisan relationship category $R_{ri} = f(A_i, Z^{party}_r)$ determines whether the profile is interpreted as a co-partisan, out-partisan, or neutral. Token allocations $Y_{ri}$ are affected by both $R_{ri}$ and $Z^{other}_r$, with the effect of $R{ri}$ theorized to depend on $T_i$. Because $T_i$ is observational, $C_i$ denotes potential confounders of both $T_i$ and $Y_{ri}$, highlighting the assumptions required for causal interpretation."
+#| fig-cap: "Directed acyclic graph of the causal data-generating process. Respondents have a partisan anchor $A_i$, representing the party they feel attached to (explicit partisans) or intend to vote for (implicit partisans). Partisan type $T_i$ (explicit vs. implicit) is only defined for respondents with a partisan anchor and is therefore a child node of $A_i$. Each conjoint profile shown in round $r$ presents randomized attributes: a partisan cue $Z^{party}_r$ and other attributes $Z^{other}_r$. The partisan-relationship variable $R_{ri} = f(A_i, Z^{party}_r)$ determines whether the profile is interpreted as a co-partisan, out-partisan, or neutral for respondent $i$. Token allocations $Y_{riac}$ are affected by both $R_{ri}$ and $Z^{other}_r$, with the effect of $R_{ri}$ theorized to depend on $T_i$. Because $T_i$ is observational, $C_i$ denotes potential confounders of both $T_i$ and $Y_{ri}$, highlighting the assumptions required for causal interpretation."
 #| fig-dpi: 500
+#| fig-width: 4.8
 
 dag <- dagitty(
   "dag {
@@ -101,13 +102,13 @@ tidy_dag <- tidy_dagitty(dag)
 label_mapping <- tibble(
   name = c("A", "C", "R", "T", "Y", "Z", "Z1"),
   new_label = c(
-    "A[i]",
-    "C[i]",
-    "R[r*i]",
-    "T[i]",
-    "Y[ri]",
-    "Z[r]^{other}",
-    "Z[r]^{party}"
+    "italic(A[i])", # partisan anchor of respondent i
+    "italic(C[i])", # respondent confounders
+    "italic(R[ri])", # relationship (round r, respondent i)
+    "italic(T[i])", # partisan type of respondent i
+    "italic(Y[riac])", # tokens (r,i,a,c)
+    "italic(Z[r]^{other})", # other randomized cues (round r)
+    "italic(Z[r]^{party})" # party cue shown in round r
   )
 )
 

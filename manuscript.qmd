@@ -24,6 +24,7 @@ format:
       text: |
         \usepackage{setspace}
         \setlength{\parindent}{15pt}
+        \usepackage[font=footnotesize]{caption}
 execute:
   echo: false
   warning: false
@@ -207,6 +208,8 @@ We term the party itself that was reported by respondents *partisan anchor* $A_i
 In the experiment, each conjoint profile in round $r$ presents a party cue ($Z^{party}_{ri}$), which is compared to the respondent's anchor to classify the profile as co-partisan, out-partisan, or neutral ($R_{ri} \in {Co, Out, None}$).
 This approach corresponds to the average across out-groups operationalization and constitutes a significant simplification of multi-party contexts.
 We nevertheless opt for this measure as it provides a consistent and systematic coding that allows comparability across contexts.
+
+We are thus interested in the causal chain that links T -> R -> Y in the DAG shown in @fig-dag
 
 -   Variables
     -   DV: Tokens
