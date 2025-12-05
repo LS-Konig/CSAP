@@ -166,8 +166,8 @@ $H_3:$ Explicit partisans show stronger
 In this section, we present our empirical strategy employed to identify the effect of partisan type on AP.
 First, we present the dataset and explain the experimental setup and its advantage for measuring AP.
 Next, we outline the main variables of interest along with a DAG to illustrate our causal model of the data generating process.
-We then discuss the assumptions necessary for causal inference given the observational nature of our data, before we present the statistical model.
-Finally, we explain how we derive our key quantities of interest.
+We then present our statistical model specification and our included set of covariates, before we explain how we derive our key quantities of interest.
+Finally, we list the assumptions necessary for causal interpretation and situate our design and modelling strategy, highlighting strengths and remaining limitations. 
 
 ### Data and experimental setup
 
@@ -203,33 +203,211 @@ Finally, by embedding partisan information among multiple randomized cues, conjo
 
 We construct our main variables of interest following a tripartite framework to ensure consistency and clarity with regards to party-related variables.
 Starting of, we define $T_i$ as the *partisan type* of respondent $i$.
-If respondent $i$ reported a party to which she feels attached to and thus is an *explicit* partisan, we define $T_i = 1$ , conversely $T_i = 0$ for *implicit* partisans, i.e. if respondent $i$ indicated no partisan attachement, but reported a vote preference.
+If respondent $i$ reported a party to which she feels attached to and is thus considered an *explicit* partisan, we define $T_i = 1$ , conversely $T_i = 0$ for *implicit* partisans, i.e. if respondent $i$ indicated no partisan attachement, but reported a vote preference.
 We term the party itself that was reported by respondents *partisan anchor* $A_i$.
 In the experiment, each conjoint profile in round $r$ presents a party cue ($Z^{party}_{ri}$), which is compared to the respondent's anchor to classify the profile as co-partisan, out-partisan, or neutral ($R_{ri} \in {Co, Out, None}$).
 This approach corresponds to the average across out-groups operationalization and constitutes a significant simplification of multi-party contexts.
 We nevertheless opt for this measure as it provides a consistent and systematic coding that allows comparability across contexts.
 
-We are thus interested in the causal chain that links T -> R -> Y in the DAG shown in @fig-dag
+We conceptually frame explicit partisanship as a treatment and implicit partisanship as a control.
+That is, respondents reporting a subjective attachement to a political party ($T_i = 1$) form the treated group, whereas respondents expressing vote choice without attachement ($T_i = 0$) form the comparison group.[^1]
+The underlying research question is: Does explicit partisan attachement amplify affective polarization relative to implicit partisan attachement?
+Or in causal terminology, how would a hypothetical intervention, changing T from 0 to 1 change affective polarization, holding other factors constant?
 
--   Variables
-    -   DV: Tokens
-    -   IVs: Deriavtion and tripartite structure, AP measure (average across outgroups)
-    -   DAG: summary of DGP -\> hierarchical?
-    -   Covariates
+[^1]: For readability, we omit the prefix "quasi-" when referring to treatment and control, but this does not imply random assignement. Our design remains observational.
 
--   Causal assumptions:
-    -   To interpret effect as causal, which assumptions need to hold?
-    -   What are the implications of violating them?
-    -   goal: approximate the hypothetical intervention effect, if one changed a person from implicit to explicit
+@fig-dag illustrates the underlying causal data generating process as a directed acyclical graph (DAG).
+As outlined above, respondents report a partisan anchor $A$.
+Partisan type $T$ is only defined for the subset of respondents that either explicitly or implicitly report a party, and is thus presented as a child node of $A$.
+In each round $r$ of the conjoint games, respondents are presented various conjoint attributes or cues, denoted by $Z_r$.
+The partisan cue $Z^{party}_r$ and respondents' partisan anchors $A_i$ jointly determine the coding of the partisan relationship category: $f:(A_i, Z_r^{party} \mapsto R_{ij} \in \{\text{Co}, \text{Out}, \text{None}\})$.
+The dependent variable is the outcome of the games, i.e., the number of tokens allocated in round $r$ by respondent $i$ of party $a$ from country $c$, which we denote as $Y_riac$.
+Token allocations $Y$ are affected by both R and Z^other, with the effect of R theorized to be conditional on T.
+Because T is observational, we cannot assume conditional independence a priori, hence C denotes potential individual level confounders of both T and Y.
+Graphically, we are thus interested in the causal chain linking $T \to R \to Y$, which is the path from top to bottom in the center of @fig-dag.
 
--   Statistical model
-    -   main model: cov-models (RE and Covariates, as specified)
+{{< embed code/preparation/02_descr_anal.qmd#fig-dag >}}
+
+### Model specification and control variables
+
+Given the hierarchical structure of the data, we choose a respective multilevel strategy.
+The fundamental unit of analysis is one round played in the conjoint game, denoted by $r$.
+Each profile evaluation in round $r$ is nested within the respondent level $i$, who played three rounds of each game.
+Respondents themselves are nested in partisan anchors $a$, which are nested within country $c$.
+This yields a four-level hierarchical structure:
+
+Level 1: conjoint round ($r$) $\mapsto$ Level 2: respondents ($i$) $\mapsto$ Level 3: partisan anchors ($a$) $\mapsto$ Level 4: countries ($c$).
+
+Therefore, let $Y_{riac}$ denote the number of tokens allocated in round $r$ by respondent $i$ of party $a$ from country $c$.
+To estimate how explicit partisan type ($T_i = 1$) modifies the effect of the partisan relationship category $R_{ri}$, we specify the following systematic component of our hierarchical model:
+
+$$
+\begin{aligned}
+Y_{riac}
+&= \beta_0
+  + \beta_1 T_i
+  + \beta_2 R_{ri}
+  + \beta_3 (T_i \times R_{ri})
+  + \beta_4 Z^{\text{other}}_{ri}
+  + \beta_5 C_i \\
+&\quad
+  + u_{i0} \\
+&\quad
+  + v_{a0} + v_{aT} T_i + v_{aR} R_{ri} \\
+&\quad
+  + w_{c0} + w_{cT} T_i + w_{cR} R_{ri} \\
+&\quad
+  + \varepsilon_{riac}
+\end{aligned}
+$$
+
+Random effects are modeled as multivariate normal with correlated intercepts and slopes at the partisan-anchor and country levels:
+
+$$
+u_{i0} \sim \mathcal{N}(0, \sigma^2_{u0}),
+$$
+
+$$
+\begin{pmatrix}
+v_{a0} \\ v_{aT} \\ v_{aR}
+\end{pmatrix}
+\sim
+\mathcal{N}\!\left(
+\begin{pmatrix}
+0 \\ 0 \\ 0
+\end{pmatrix},
+\Sigma_a
+\right),
+$$
+
+$$
+\begin{pmatrix}
+w_{c0} \\ w_{cT} \\ w_{cR}
+\end{pmatrix}
+\sim
+\mathcal{N}\!\left(
+\begin{pmatrix}
+0 \\ 0 \\ 0
+\end{pmatrix},
+\Sigma_c
+\right),
+$$
+
+$$
+\varepsilon_{riac} \sim \mathcal{N}(0, \sigma^2).
+$$
+
+Both $\Sigma_a$ and $\Sigma_c$ are full $3 \times 3$ covariance matrices, so intercepts and slopes are estimated as correlated at the partisan-anchor and country levels.
+
+Regarding stochastic component of our model, we assume $Y_riac $  
+
+
+**Cross-level interaction of substantive interest.**\
+The main theoretical question is whether explicit partisan attachment ($T_i = 1$) alters responsiveness to co-, out-, and neutral partisan cues ($R_{ri}$). The fixed-effect interaction $\beta_3 (T_i \times R_{ri})$ estimates this conditional effect at the population (grand-mean) level.
+
+**Random slopes for higher-level variation in cue sensitivity.**\
+The effect of the Level-1 cue $R_{ri}$ is allowed to vary across partisan anchors and across countries (random slopes $v_{aR}$ and $w_{cR}$), which captures heterogeneity in cue sensitivity that is plausibly organized by party identity and national political context. Similarly, the Level-2 treatment $T_i$ is allowed to vary across anchors and countries (random slopes $v_{aT}$ and $w_{cT}$), reflecting that the meaning and strength of explicit partisanship differ across parties and national settings.
+
+**Respondent-level variation and identification.**\
+Respondents vary in baseline generosity and provide multiple conjoint rounds; this is modeled with a respondent random intercept $u_{i0}$. We did not include a respondent-level random slope for $R_{ri}$ because there is insufficient within-respondent variation in the relationship variable to estimate it reliably. Put differently, many respondents do not experience enough co/out/none combinations across rounds for stable respondent-specific slope estimates. Omitting a respondent-level slope implies that heterogeneity in cue sensitivity is captured at the partisan-anchor and country levels rather than at the individual level.
+
+**Implications of omitting respondent-level random slopes.**\
+Omitting $u_{iR}$ means the model does not estimate idiosyncratic respondent-level deviations from the average relationship effect. If relevant individual-level heterogeneity were present but unmodeled, the estimated higher-level variances (in $\Sigma_a$ and $\Sigma_c$) or residual variance could absorb some of that heterogeneity. Given the data limitation (low within-respondent variation), estimating $u_{iR}$ would be poorly identified and could destabilize inference; the chosen specification therefore balances theoretical desiderata and empirical identifiability.
+
+**Correlated random effects and partial pooling.**\
+Correlated intercepts and slopes at the anchor and country levels allow partial pooling of treatment and cue effects, borrowing strength across units while permitting systematic contextual differences. This stabilizes estimates of heterogeneous treatment effects and aligns with the hypothesis that both party identity and national context shape partisan cue effects.
+
+**Estimation.**\
+Models were estimated in a Bayesian framework (via *brms*), which propagates uncertainty through the multilevel interaction structure and regularizes the maximal random-effects specification through priors.
+
+In sum, the estimated model aligns the theoretical structure of partisan cue processing with a multilevel design that\
+(i) treats explicit partisanship as a Level-2 treatment whose effect can vary across parties and countries,\
+(ii) captures heterogeneity in cue sensitivity at the partisan-anchor and country levels, and\
+(iii) models respondent-level repeated measures via random intercepts while avoiding poorly identified respondent-level random slopes given the observed within-respondent variation.
+
+Aimed at *constrain-but-not-restrict* modeling: improves stability, avoids implausibly large effects, yet remains substantively uninformative.
+
+**Rationale**
+
+-   Shifts of **4+ tokens** (40% of the scale) are already large in practice.\
+-   `Normal(0, 2)` limits 95% prior mass to about ±4, which remains wide enough while avoiding unrealistic extremes.\
+-   More appropriate for complex hierarchical models with many random slopes.
+
+**Specification**
+
+-   **Fixed effects (slopes & interactions):**
+    -   ( \beta\_k \sim \text{Normal}(0, 2) )
+-   **Intercept:**
+    -   ( \text{Intercept} \sim \text{Normal}(5, 2) )
+-   **Random effect SDs:**
+    -   ( \sigma\_{\text{RE}} \sim \text{Student-t}(3, 0, 1) )\
+        or a half-normal(0,1) prior
+-   **Residual SD:**
+    -   ( \sigma \sim \text{Student-t}(3, 0, 2) )
+
+**Characteristics**
+
+-   Still weakly informative, but more realistic given the bounded 0–10 outcome scale.\
+-   Improves convergence and shrinkage in large multilevel structures.\
+-   Reduces the probability of implausible prior predictive draws (e.g., (Y \< -10)).
+
+
+### Quantities of interest
 
 -   Quantities of interest
     -   Conditional EV, AP, IF, OD
     -   CATE as first differences
 
-{{< embed code/preparation/02_descr_anal.qmd#fig-dag >}}
+### Control variables
+
+
+
+### Causal assumptions
+
+Our design treats explicit partisanship ($T=1$) as the treatment and implicit partisanship ($T=0$) as the comparison condition.
+The conjoint experiment provides strong design-based leverage: all profile attributes ($Z$), including the partisan cue and the order of attributes, are randomized in each round.
+Because the respondent-profile relationship $R_ri$ is a deterministic function of a randomized cue and the respondent's anchor $A$, the profile-level variation that drives AP, IF, and OD is as-if random.
+Consequently, the effect of $R$ (and of other randomized attributes) on $Y_{riac}$ are causally identified by design.
+The conditioning of partisan type is estimated via the interaction $T \times R$.
+Here, identification relies on an observational assumption: conditional independence of T given the covariates C and higher-level structure.
+Our multilevel Bayesian model encodes this strategy: respondent random intercepts account for stable individual differences, random slopes for T and R at the party anchor and country level allow heterogenous effects and partial pooling across parties and contexts.
+All reported estimands are obtained via g-computation (observed values approach), averaging posterior expected valus over the empirical distribution of covariates and grouping units.
+
+- SUTVA
+We assume no interference across respondents and a well-defined treatment.
+The survey is individual and anonymous, so cross-respondent spillovers are unlikely.
+Within-respondent dependence across rounds is mitigated by randomized profiles and modeled with respondent intercepts.
+Treatment consistency is addressed by a precise coding of T and by allowing its effect to vary across parties and countries.
+
+- Conditional independence (ignorability) for T
+Given our covariates C, and conditioning on partisan anchor and country via random effects, assignment to T is assumed independent of potential outcomes.
+Randomization of Z ensures identification of R's effects, the contrast across T relies on this ignorability assumption.
+
+- Covariate balance
+The distributions of observed covariates should be comparable across T=1 and T=0. 
+Assessement of covariates based on table XX in the appendix yields a good overall balance between the subgroups.
+Furthermore, we stabilize estimation through hierarchical partial pooling, which reduces model variance but does ot itself render the design randomized.
+
+- Common support (overlap)
+For observed covariate combinations, both partisan types should occur with positive probability.
+
+Although violations of SUTVA could bias our estimates and cannot be fully outruled, we view large violations as unlikely, given randomization of conjoint cues and order as well as the inclusion of respondent intercept.
+The chief threat is residual confounding of T and Y: unmeasured factors might affect both selection into explicit and implicit partisanship and allocation patterns, thereby biasing our CATEs for AP, IF and OD.
+Remaining imbalance would increase model dependence.
+Limited overlap within specific parties or countries would shift identification onto parametric assumptions and cross-unit pooling.
+We mitigate these risks with an extensive covariate set (section XX) and the inclusion of country- and party-varying slopes for T and R.
+In the Bayesian framework, uncertainty from estimation and pooling is propagates via the posterior, but uncertainty from identification assumption is not "averaged out".
+Consequently, our inferences are model-based and assumption-conditional.
+
+We are confident in the internal validity of profile-level effects (R and Z) and of derived quantities (AP, IF, OD) within a given T, because they rest on random assignement of Z.
+The contrast between explicit and implicit partisans (CATEs) is more assumption-intensive.
+Our modeling strategy -- rich controls, hierarchical partial pooling across partisan anchors and countries, and g-computation -- substantially reduces, but cannot eliminate, the possibility of unobserved confounding or limited support in some contexts.
+We therefore report uncertainty transparently and qualify causal language accordingly.
+
+Our goal is to approximate the hypothetical intervention effect: how AP, IF, and OD would change if a respondent's partisan type were shifted from implicit (T=0) to explicit (T=1), holding other factors constant.
+Because T is observational, this interpretation is valid under the assumptions presented above.
+We state these limitations explicitly and present the resulting estimates as the best model-based causal approximation permitted by the data and design.
+
 
 ## Empirical analysis
 

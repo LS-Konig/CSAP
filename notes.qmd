@@ -574,6 +574,109 @@ Figure 5
 
 Country-Level Effects on Out-Group Derogation
 
+# AI ideas
+
+## Why pooled models and simulated country results
+
+That is a very common and critical question for multilevel models in comparative research. Your robust response should emphasize the statistical, theoretical, and inferential advantages of using a single pooled multilevel model (PMM) over running separate models for each country.
+
+Here is a structured argument you can use:
+🛡️ Response: Why a Pooled Multilevel Model is Superior
+
+The core of your argument rests on the principle of partial pooling and the goal of establishing a universal mechanism that is only allowed to vary, rather than forced to be re-estimated independently.
+1. Statistical Efficiency: Partial Pooling (Shrinkage)
+
+The single multilevel model is statistically more efficient and produces better estimates, especially for countries with small sample sizes or rare partisan anchor groups.
+
+    Borrowing Strength: In the PMM, the estimate for a parameter (like a country's average CATE) is a weighted average between the country's specific data and the grand mean across all countries. This is called partial pooling or shrinkage. .
+
+    Stabilized Estimates: Countries with less data or high within-country variability (e.g., small N for a specific partisan anchor) see their estimates "shrunk" more toward the global mean, preventing unstable, extreme, or poorly identified estimates. Countries with lots of data contribute more to their own estimates and to the global mean.
+
+    Separate Models: Running 25 separate OLS/Regression models for each country would treat each country as an island, resulting in no pooling. This leads to high uncertainty and potentially unreliable estimates, particularly for the countries whose CATEs are small or non-significant due to sampling variability.
+
+2. Theoretical Coherence and Generalizability
+
+Your goal is to test a universal theory about the psychological effect of explicit attachment versus implicit attachment.
+
+    Testing Heterogeneity: The PMM is designed explicitly to estimate heterogeneity (i.e., the country random slopes, wc⋅​) while retaining a single, interpretable grand mean (the fixed effect CATE). This allows you to quantify how much the CATE varies across countries (which you found to be very little, SD<0.11) versus simply concluding the CATE is present or absent in individual country tests.
+
+    Unified Inference: The PMM allows for a single, unified inference about the primary research question: Does the explicit attachment effect exist on average across these contexts? Separately running 25 models would give 25 separate, non-comparable inferences.
+
+3. Model Structure and Identification
+
+Your model's complexity is only identifiable because of the PMM structure.
+
+    Hierarchical Structure: Your model has four nested levels (Profile → Respondent → Anchor → Country). Running separate country models would eliminate the Country level and require collapsing the Anchor level, sacrificing a crucial aspect of your causal theory about how the effect is structured within party identity.
+
+    Anchor Level (The Key): The Anchor-within-Country level (meta_country:der_partisan_anchor) is critical to your theory. By nesting the anchor variance within the country, the PMM efficiently estimates variation at 372 party-anchor levels, which would be impossible to coordinate across 25 separate models. The PMM stabilizes these Anchor-level estimates by borrowing strength across the 25 countries.
+
+4. Direct Support from Empirical Results
+
+Crucially, your results directly vindicate the use of the PMM.
+
+    Empirical Consistency: Since your country-specific CATEs are nearly identical, this provides strong empirical evidence that the variation across countries is minimal and not substantively significant. This consistency validates the PMM's assumption of a single, universal mechanism.
+
+    The Reviewer's Flaw: If the reviewer had been correct, the Country Random Slope SDs would have been large, leading to highly heterogeneous CATE plots. Since the SDs are tiny, running 25 separate models would simply recover the same CATE result but with higher estimation error and wider credible intervals for all countries.
+
+    In summary: "We used the pooled multilevel model because our research aims to estimate the population-average causal effect (CATE) while allowing for context-specific variation. The PMM leverages partial pooling for statistical efficiency, provides a direct test of heterogeneity via random slopes, and preserves the essential four-level hierarchical structure of our data, all of which would be lost in running separate, less stable country-by-country regressions."
+
+We used the pooled multilevel model because our research aims to estimate the population-average causal effect (CATE) while allowing for context-specific variation. The PMM leverages partial pooling for statistical efficiency, provides a direct test of heterogeneity via random slopes, and preserves the essential four-level hierarchical structure of our data, all of which would be lost in running separate, less stable country-by-country regressions.
+
+
+# Statistical model section
+
+
+Model specification and estimation
+
+We model the data in their natural hierarchical structure. The unit of analysis is a single profile evaluation in round r of a game. Profile evaluations r are nested within respondents i, respondents are grouped by partisan anchors a (the party to which they report attachment or vote intention), and anchors are nested within countries c. This yields a four‑level structure: Level 1 (round r) → Level 2 (respondent i) → Level 3 (anchor a) → Level 4 (country c). Let Y{riac} denote the number of tokens allocated (0–10) in round r by respondent i with anchor a in country c. Respondent partisan type is Ti ∈ {0,1} (implicit vs. explicit). Each profile displays randomized attributes Zr, including a randomized partisan cue Z^{party}r and other randomized cues Z^{other}{ri}; attribute order is randomized as well. The respondent–profile partisan relationship R{ri} ∈ {Co, Out, None} is a deterministic function of the respondent’s anchor and the profile’s partisan cue, R{ri} = f(Ai, Z^{party}r). We also include a vector of respondent‑level covariates Ci measured prior to the games.
+
+Systematic component. To estimate how explicit partisan type conditions responsiveness to partisan cues, we specify the following multilevel model with a cross‑level interaction between Ti and R{ri} and random effects at the respondent, anchor, and country levels:
+$$
+\begin{aligned}
+Y_{riac}
+&= \beta_0
+  + \beta1 Ti
+  + \beta2 R{ri}
+  + \beta3 \big(Ti \times R_{ri}\big)
+  + \beta4 Z^{\text{other}}{ri}
+  + \beta5 Ci \\
+&\quad
+  + u_{i0} \\
+&\quad
+  + v{a0} + v{aT}\, Ti + v{aR}\, R_{ri} \\
+&\quad
+  + w{c0} + w{cT}\, Ti + w{cR}\, R_{ri} \\
+&\quad
+  + \varepsilon_{riac} .
+\end{aligned}
+Stochasticcomponent.WeassumeaGaussianlikelihoodfortheboundedbutapproximatelycontinuoustokenoutcomeandmodelrandomeffectsasmultivariatenormalwithcorrelatedinterceptsandslopesattheanchorandcountrylevels:
+
+Stochastic component. We assume a Gaussian likelihood for the bounded but approximately continuous token outcome and model random effects as multivariate normal with correlated intercepts and slopes at the anchor and country levels:
+Stochasticcomponent.WeassumeaGaussianlikelihoodfortheboundedbutapproximatelycontinuoustokenoutcomeandmodelrandomeffectsasmultivariatenormalwithcorrelatedinterceptsandslopesattheanchorandcountrylevels:
+\varepsilon_{riac} \sim \mathcal{N}(0,\sigma^2), \quad
+u{i0} \sim \mathcal{N}(0,\sigma^2{u0}),
+
+
+\begin{pmatrix}
+v{a0} \\ v{aT} \\ v_{aR}
+\end{pmatrix}
+\sim \mathcal{N}\!\left(
+\begin{pmatrix}0\\0\\0\end{pmatrix},\, \Sigma_a
+\right), \quad
+\begin{pmatrix}
+w{c0} \\ w{cT} \\ w_{cR}
+\end{pmatrix}
+\sim \mathcal{N}\!\left(
+\begin{pmatrix}0\\0\\0\end{pmatrix},\, \Sigma_c
+\right),
+$$
+where both \(\Sigmaa\) and \(\Sigmac\) are unrestricted 3×3 covariance matrices, allowing intercepts and slopes to be correlated within anchors and within countries.
+
+Substantive interpretation and design choices. The interaction \(\beta3 (Ti \times R{ri})\) is the key parameter: it captures how explicit partisan attachment (Ti = 1) conditions sensitivity to co‑, out‑, and neutral partisan cues (R{ri}). Because profile attributes (including the partisan cue and attribute order) are randomized, R{ri} varies as‑if at random within respondents conditional on Ai, which supports causal interpretation of cue effects within each partisan type. We allow the effect of R{ri} to vary across anchors and across countries (random slopes \(v{aR}, w{cR}\)) to capture heterogeneity plausibly structured by party identity and national context. Similarly, the effect of Ti is allowed to vary across anchors and countries (\(v{aT}, w{cT}\)), reflecting that the meaning and strength of explicit attachment differ across parties and settings. Respondent‑level heterogeneity in baseline generosity is captured by the random intercept \(u{i0}\). We do not include a respondent‑level random slope for R_{ri}: within‑respondent variation in the relationship categories is too limited to identify respondent‑specific cue sensitivities reliably. Omitting this slope shifts heterogeneity in cue sensitivity to the anchor and country levels; any residual individual‑level variation is absorbed by higher‑level variances and the residual variance. Correlated random effects at the anchor and country levels enable partial pooling of intercepts and slopes, stabilizing estimates of heterogeneous treatment and cue effects while preserving systematic contextual differences.
+
+Bayesian estimation, implementation, and priors. We estimate the model in a Bayesian framework using MCMC as implemented in brms (Stan). This choice has three advantages: (i) it propagates uncertainty through the full multilevel interaction structure; (ii) it regularizes a relatively rich random‑effects specification through weakly informative priors; and (iii) it facilitates g‑computation to obtain expected outcomes and derived estimands (e.g., AP, IF, OD) under fixed values of T and R while averaging over the empirical distribution of other covariates. Unless stated otherwise, fixed effects (including interactions) receive weakly informative Normal(0, 2) priors, which concentrate 95% prior mass within ±4 tokens—wide on a 0–10 scale yet excluding implausibly large shifts. The intercept receives a Normal(5, 2) prior, centered at the mid‑scale with moderate uncertainty. Standard deviations of random effects use half‑Student‑t(3, 0, 1) priors (or equivalently Student‑t(3, 0, 1) on the positive reals), and residual SD σ\sigmaσ uses a Student‑t(3, 0, 2) prior. Correlation matrices for \(\Sigmaa\) and \(\Sigmac\) are assigned LKJ(η\etaη) priors with η=2\eta=2η=2, mildly favoring weaker correlations while allowing the data to inform their magnitude. Computation uses multiple chains with adequate warm‑up; convergence is assessed via R^<1.01\hat{R} < 1.01R^<1.01, bulk/tail effective sample sizes, and absence of divergent transitions under conservative adapt‑delta settings. We conduct prior‑ and posterior‑predictive checks to examine scale fit and tail behavior, and we report sensitivity to broader/narrower priors in the appendix.
+
+Interpretation and scope. The randomized conjoint design secures internal validity for profile‑level effects (R{ri} and other Z attributes) within partisan types. The contrast across partisan types (moderation by Ti) remains observational and is identified under adjustment for C_i and the multilevel structure; our hierarchical specification (anchor‑ and country‑varying slopes) and weakly informative priors stabilize these comparisons while transparently reflecting remaining uncertainty in the posterior.
 
 
 # FUTURE EXTENSIONS IDEA
