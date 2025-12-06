@@ -172,7 +172,8 @@ Finally, we enumerate the assumptions required for causal interpretataion and si
 ### Data and experimental setup
 
 To evaluate how different partisan type influences AP, we reanalyze the cross-national conjoint experiment conducted by @hahm2024divided.
-The study was fielded by Dynata (formerly SSI) in 25 EU member states between late May and mid-August 2019.[^countries] National samples consist of approximately 1,200 respondents per country (29,827 in total) drawn to be broadly representative on key sociodemographic dimensions.
+The study was fielded by Dynata (formerly SSI) in 25 EU member states between late May and mid-August 2019.[^countries] 
+National samples consist of approximately 1,200 respondents per country (29,827 in total) drawn to be broadly representative on key sociodemographic dimensions.
 Summary statistics are presented in table XX in the appendix.
 
 [^countries]: The countries covered are all EU member states (which included the UK at the time of data collection) except for Luxembourg, Malta and Cyprus.
@@ -199,7 +200,7 @@ Finally, by embedding partisan information among multiple randomized cues, conjo
 [^aliasing]: Naturally, a conjoint design can only include a limited set of attributes and therefore cannot preclude all forms of aliasing. We make no claim to exhaustiveness. Nonetheless, by randomizing several plausibly correlated characteristics (e.g., age, gender), the design reduces the risk that inferences about partisanship simply reflect respondents' assumptions about the social composition of party supporters. In this respect, it is considerably less susceptible to the confounding that affects like/dislike scales or feeling thermometers, which cannot separately identify the effect of partisanship from correlated beliefs about associated social groups.
 
 
-### Construction of Main Variables
+### Construction of main variables
 
 We construct our main variables of interest following a tripartite framework to ensure consistency and clarity with regards to party-related variables.
 Starting of, we define $T_i$ as the *partisan type* of respondent $i$.
