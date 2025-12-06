@@ -166,7 +166,7 @@ $H_3:$ Explicit partisans show stronger
 In this section, we present our empirical strategy employed to identify the effect of partisan type on AP.
 First, we present the dataset and explain the experimental setup and its advantage for measuring AP.
 Next, we outline the main variables of interest along with a DAG to illustrate our causal model of the data generating process.
-We then present our statistical model specification and our included set of covariates, before we explain how we derive our key quantities of interest.
+We then present our statistical model specification and explain how we derive our key quantities of interest, before we justify our included set of covariates.
 Finally, we list the assumptions necessary for causal interpretation and situate our design and modelling strategy, highlighting strengths and remaining limitations. 
 
 ### Data and experimental setup
@@ -228,7 +228,7 @@ Graphically, we are thus interested in the causal chain linking $T \to R \to Y$,
 
 {{< embed code/preparation/02_descr_anal.qmd#fig-dag >}}
 
-### Model specification and control variables
+### Model specification
 
 We model the data in their natural hierarchical structure.
 The unit of analysis is a single conjoint profile evaluation in round $r$ of a game.
@@ -343,13 +343,83 @@ The randomized conjoint design secures internal validity for profile‑level eff
 
 ### Quantities of interest
 
--   Quantities of interest
-    -   Conditional EV, AP, IF, OD
-    -   CATE as first differences
+In the following sections we define our substantive quantities of interest, affective polarization and its subcomponents, ingroup favoritism and outgroup derogation. Our substantive interest concerns the differences in these three measures between implicit and explicit partisan types. In the causal framing, we want to unravel the effect of a hypothetical intervention: If we hold all covariates constant and only change $T$ from $0$ to $1$, how does this impact our quantities of interest?
+
+#### Affective polarization
+
+More precisely, we define affective polarization as the difference in expected token allocated in the conjoint games to co-partisans and out-partisans. This approach follows (?) Wagner (or Reiljan) in that it averages across all outgroups, which is a simplification given we are dealing with multi-party systems. Nevertheless, this (CHECK) yields a conservative measure, and allows for cross-national comparisons, as the number of parties in a given national party system varies, and so does the potential number of political outgroups.
+
+Formally, we define affective polarization $AP$ as:
+
+$$
+AP = E(Y \mid R = Co) - E(Y \mid R = Out)
+$$
+
+These conditional expectations are further refined to capture the effect of explicit attachement:
+
+$$
+\begin{aligned}
+CATE_{AP} &= AP_{T=1} - AP_{T=0} \\
+          &= [E(Y \mid R = Co, T = 1) - E(Y \mid R = Out,T = 1)] \\
+          &\quad - [E(Y \mid R = Co, T = 0) - E(Y \mid R = Out, T = 0)]
+\end{aligned}
+$$
+
+With the formulated hypothesis above, we posit that $CATE_{AP} > 0$: We expect respondents with explicit partisan type ($T=1$) to exhibit higher levels of affective polarization than implicit types ($T=0$).
+
+#### Ingroup favoritms
+
+Do disentangle affective polarization into ingroup favoritism and outgroup derogation, we utilize that the conjoint setup included a neutral control group, in which no partisan cue was displayed ($R = None$). This allows as to estimate the effects of a copartisan cue ($R = Co$) relative to that neutral baseline, conditional on partisan type $T$.
+
+Formally, we define ingroup favoritism $IF$ as:
+
+$$
+IF = E(Y \mid R = Co) - E(Y \mid R = None)
+$$
+
+further refining this equation with respect to partisan type $T$, we define our causal estimand as:
+
+$$
+\begin{aligned}
+CATE_{IF} &= IF_{T=1} - IF_{T=0} \\
+          &= [E(Y \mid R = Co, T = 1) - E(Y \mid R = None,T = 1)] \\
+          &\quad - [E(Y \mid R = Co, T = 0) - E(Y \mid R = None, T = 0)]
+\end{aligned}
+$$
+
+#### Outgroup derogation
+
+Similarly, the neutral control group ($R = None$) lets us estimate outgroup derogation as the average number in tokens withheld from outpartisans compared to the baseline condition.
+
+Hence, we formalize outgroup derogation $OR$ as
+
+$$
+OR = E(Y \mid R = None) - E(Y \mid R = Out)
+$$
+
+the subsequent causal estimand is thus
+
+$$
+\begin{aligned}
+CATE_{OR} &= OR_{T=1} - OR_{T=0} \\
+          &= [E(Y \mid R = None, T = 1) - E(Y \mid R = Out,T = 1)] \\
+          &\quad - [E(Y \mid R = None, T = 0) - E(Y \mid R = Out, T = 0)]
+\end{aligned}
+$$
+
+By focusing on expected values, or marginal means, we also ensure our substantive results are not dependent on the choice of reference categories [@leeper2020measuring].
 
 ### Control variables
 
-
+To block potential backdoor paths between partisan type and allocation behavior, we include a comprehensive set of individual level covariates capturing the main dimensions that could jointly predict explicit partisan attachement and generosity in experimental settings.
+First, we control for sociodemographic characteristics such as age, gender, education, class, religious affiliation, and urban-rural residence.
+Second, we include respondents' political orientations and ideological predispositions, including left-right self-placement, cultural and economic nativism, EU attitudes, and satisfaction with democracy.
+Third, we adjust for political interest, engagement, and knowledge.
+Fourth, we incorporate attitudes toward parties, elites, and democratic processes, capturing orientations toward the political system that might shape both group attachement and intergroup behavior.
+Finally, I include economic evaluations and behavioral dispositions (risk-taking and future discounting) to account for contextual and psychological traits related to baseline generosity.
+Together, these covariates represent plausibly relevant confounders and help approximate conditional independence between partisan type and the outcome of interest.
+A full list of covariate distributions by partisan type is presented in @tbl-covariate-distr, indicating well balanced treatment and comparison groups.
+English translated question wordings are provided in the appendix as well.
 
 ### Causal assumptions
 
@@ -811,6 +881,14 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 
 ### Distribution of Y {.appendix}
 
+{{< embed code/preparation/02_descr_anal.qmd#fig-distr-y >}}
+
 ### Distribution of T and R {.appendix}
+
+{{< embed code/preparation/02_descr_anal.qmd#tbl-t-r-distr >}}
+
+### Distribution of Covariates by T
+
+{{< embed code/preparation/02_descr_anal.qmd#tbl-covariate-distr >}}
 
 ### Robustness {.appendix}
