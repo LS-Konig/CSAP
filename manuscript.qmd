@@ -230,16 +230,16 @@ Graphically, we are thus interested in the causal chain linking $T \to R \to Y$,
 
 ### Model specification and control variables
 
-Given the hierarchical structure of the data, we choose a respective multilevel strategy.
-The fundamental unit of analysis is one round played in the conjoint game, denoted by $r$.
-Each profile evaluation in round $r$ is nested within the respondent level $i$, who played three rounds of each game.
-Respondents themselves are nested in partisan anchors $a$, which are nested within country $c$.
-This yields a four-level hierarchical structure:
+We model the data in their natural hierarchical structure.
+The unit of analysis is a single conjoint profile evaluation in round $r$ of a game.
+Profile evaluations $r$ are nested within respondents $i$, respondents are grouped by partisan anchors $a$ (the party to which they report attachement or vote intention), and anchors are nested within countries $c$.
+This yields a four-level structure: Level 1 (round $r$) $\mapsto$ Level 2 (respondent $i$) $\mapsto$ Level 3 (anchor a) $\mapsto$ Level 4 (country c).
+Let $Y_{riac}$ denote the number of tokens allocated (0-10) in round $r$ by respondent $i$ with partisan anchor $a$ in country $c$.
+Respondent partisan type if $T_i \in \{0,1\}$ (implicit vs explicit.)
+The respondent-profile partisan relationship $R_{ri} \in \{\text{Co, Out, None}\}$ is a deterministic function of the respondent's anchor and the profiles partisan cue.
+$Z_{r}^{other}$ denotes the vector of all other conjoint attributes, $C_i$ constitutes a vector of respondent-level covariates, which we will present in more detail in a later section.
 
-Level 1: conjoint round ($r$) $\mapsto$ Level 2: respondents ($i$) $\mapsto$ Level 3: partisan anchors ($a$) $\mapsto$ Level 4: countries ($c$).
-
-Therefore, let $Y_{riac}$ denote the number of tokens allocated in round $r$ by respondent $i$ of party $a$ from country $c$.
-To estimate how explicit partisan type ($T_i = 1$) modifies the effect of the partisan relationship category $R_{ri}$, we specify the following systematic component of our hierarchical model:
+To estimate how explicit partisan type conditions responsiveness to partisan cues, we specify a multilevel model with a cross-level interaction between $T_i$ and $R_{ri}$ and random effects at the respondent, anchor, and country levels as presented in @eq-model-sys.
 
 $$
 \begin{aligned}
@@ -259,13 +259,20 @@ Y_{riac}
 &\quad
   + \varepsilon_{riac}
 \end{aligned}
-$$
+$$ {#eq-model-sys}
 
-Random effects are modeled as multivariate normal with correlated intercepts and slopes at the partisan-anchor and country levels:
+We assume a Gaussian likelihood for the bounded but approximately continuous token outcome.
+This will allow as to interpret effects on the original token allocation scale.
+
+Further, we assume random intercepts at the respondent level to be normally distributed (@eq-resp-int).
 
 $$
-u_{i0} \sim \mathcal{N}(0, \sigma^2_{u0}),
-$$
+u_{i0} \sim \mathcal{N}(0, \sigma^2_{u0})
+$$ {#eq-resp-int}
+
+To account for heterogenous treatment effects, we include a random intercept term and random slopes for $T$ and $R$ at the party level.
+We assume these random effects to be normally distributed (@eq-re-anchor) and allowe intercepts and slopes to be correlated within partisan anchors.
+
 
 $$
 \begin{pmatrix}
@@ -278,7 +285,9 @@ v_{a0} \\ v_{aT} \\ v_{aR}
 \end{pmatrix},
 \Sigma_a
 \right),
-$$
+$$ {#eq-re-anchor}
+
+Similarly, to examine context specific variation across countries, we include random intercepts and again random slopes for T and R at the country level (@eq-re-country).
 
 $$
 \begin{pmatrix}
@@ -291,65 +300,45 @@ w_{c0} \\ w_{cT} \\ w_{cR}
 \end{pmatrix},
 \Sigma_c
 \right),
-$$
-
-$$
-\varepsilon_{riac} \sim \mathcal{N}(0, \sigma^2).
-$$
+$$ {#eq-re-country}
 
 Both $\Sigma_a$ and $\Sigma_c$ are full $3 \times 3$ covariance matrices, so intercepts and slopes are estimated as correlated at the partisan-anchor and country levels.
 
-Regarding stochastic component of our model, we assume $Y_riac $  
+Finally, we assume normally distributed residuals (@eq-error).
 
+$$
+\varepsilon_{riac} \sim \mathcal{N}(0, \sigma^2).
+$$ {#eq-error}
 
-**Cross-level interaction of substantive interest.**\
-The main theoretical question is whether explicit partisan attachment ($T_i = 1$) alters responsiveness to co-, out-, and neutral partisan cues ($R_{ri}$). The fixed-effect interaction $\beta_3 (T_i \times R_{ri})$ estimates this conditional effect at the population (grand-mean) level.
+The interaction $\beta_3(T_i \times R_{ri})$ is the key parameter: it captures how explicit partisan type ($T_i = 1$) conditions the sensitivity to co-, out- and nonpartisan cues ($R_{ri}).
+Because profile attributes (including the partisan cue and attribute order) are randomized, $R_{ri}$ varies as-if at random within respondents conditional on $A_i$, which supports causal interpretation of cue effects within each partisn type.
+We allow the effect of $R_{ri}$ to vary across partisan anchors ($v_{aR}$) and across countries ($w_{cR}$) to capture heterogeneity plausibly structured by party and national context.
+Put differently, the extent of AP and its subcomponent likely varies to some degree from party to party as well as between countries.
+The random slopes for $R_{ri}$ aim to account for this potential variation.
+Similarly, the effect of $T_i$ is allowed to vary across partisan anchors ($v_{aT}$) and countries ($w_{cT}$), reflecting that the meaning and strength of explicit attachement differ across parties and settings.
+Respondent-level heterogeneity in baseline generosity is captured by the random intercept $u_{i0}$.
+We do not include a respondent-level random slope for the lower level variable of the cross-level interaction term $R_{ri}$ [@heisig2019you], as within-respondent variation in the relationship categories is too limited to identify respondent-specific cue sensitivities reliably.
+Omitting this slope shifts heterogeneity in cue sensitivity to the anchor and country levels, any residual individual-level variation is absorbed by higher-level variances and the residual variance.
+Correlated random effects at the anchor and country levels enable partial pooling of intercepts and slopes, stabilizing the estimates of heterogeneous treatment and cue effects while preserving systematic contextual differences.
 
-**Random slopes for higher-level variation in cue sensitivity.**\
-The effect of the Level-1 cue $R_{ri}$ is allowed to vary across partisan anchors and across countries (random slopes $v_{aR}$ and $w_{cR}$), which captures heterogeneity in cue sensitivity that is plausibly organized by party identity and national political context. Similarly, the Level-2 treatment $T_i$ is allowed to vary across anchors and countries (random slopes $v_{aT}$ and $w_{cT}$), reflecting that the meaning and strength of explicit partisanship differ across parties and national settings.
+We estimate the model in a Bayesian framework using Markov Chain Monte Carlo (MCMC) simulation implemented in Stan [@rstan] via the `brms` package in R [@burkner2017brms; @burkner2017advanced; @burkner2021bayesian].
+This approach propagates uncertainty through the multilevel interaction structure and regularizes the maximal random-effects specification through priors.
+We choose weakly informative priors for all our model parameters, which remain wide enough to cover plausible parameter values while avoiding the introduction of unrealistic extremes, a strategy particularly appropriate for complex hierarchical models with many random slopes.
 
-**Respondent-level variation and identification.**\
-Respondents vary in baseline generosity and provide multiple conjoint rounds; this is modeled with a respondent random intercept $u_{i0}$. We did not include a respondent-level random slope for $R_{ri}$ because there is insufficient within-respondent variation in the relationship variable to estimate it reliably. Put differently, many respondents do not experience enough co/out/none combinations across rounds for stable respondent-specific slope estimates. Omitting a respondent-level slope implies that heterogeneity in cue sensitivity is captured at the partisan-anchor and country levels rather than at the individual level.
-
-**Implications of omitting respondent-level random slopes.**\
-Omitting $u_{iR}$ means the model does not estimate idiosyncratic respondent-level deviations from the average relationship effect. If relevant individual-level heterogeneity were present but unmodeled, the estimated higher-level variances (in $\Sigma_a$ and $\Sigma_c$) or residual variance could absorb some of that heterogeneity. Given the data limitation (low within-respondent variation), estimating $u_{iR}$ would be poorly identified and could destabilize inference; the chosen specification therefore balances theoretical desiderata and empirical identifiability.
-
-**Correlated random effects and partial pooling.**\
-Correlated intercepts and slopes at the anchor and country levels allow partial pooling of treatment and cue effects, borrowing strength across units while permitting systematic contextual differences. This stabilizes estimates of heterogeneous treatment effects and aligns with the hypothesis that both party identity and national context shape partisan cue effects.
-
-**Estimation.**\
-Models were estimated in a Bayesian framework (via *brms*), which propagates uncertainty through the multilevel interaction structure and regularizes the maximal random-effects specification through priors.
-
-In sum, the estimated model aligns the theoretical structure of partisan cue processing with a multilevel design that\
-(i) treats explicit partisanship as a Level-2 treatment whose effect can vary across parties and countries,\
-(ii) captures heterogeneity in cue sensitivity at the partisan-anchor and country levels, and\
-(iii) models respondent-level repeated measures via random intercepts while avoiding poorly identified respondent-level random slopes given the observed within-respondent variation.
-
-Aimed at *constrain-but-not-restrict* modeling: improves stability, avoids implausibly large effects, yet remains substantively uninformative.
-
-**Rationale**
-
--   Shifts of **4+ tokens** (40% of the scale) are already large in practice.\
--   `Normal(0, 2)` limits 95% prior mass to about ±4, which remains wide enough while avoiding unrealistic extremes.\
--   More appropriate for complex hierarchical models with many random slopes.
-
-**Specification**
-
--   **Fixed effects (slopes & interactions):**
-    -   ( \beta\_k \sim \text{Normal}(0, 2) )
--   **Intercept:**
-    -   ( \text{Intercept} \sim \text{Normal}(5, 2) )
--   **Random effect SDs:**
-    -   ( \sigma\_{\text{RE}} \sim \text{Student-t}(3, 0, 1) )\
-        or a half-normal(0,1) prior
--   **Residual SD:**
-    -   ( \sigma \sim \text{Student-t}(3, 0, 2) )
-
-**Characteristics**
-
--   Still weakly informative, but more realistic given the bounded 0–10 outcome scale.\
--   Improves convergence and shrinkage in large multilevel structures.\
--   Reduces the probability of implausible prior predictive draws (e.g., (Y \< -10)).
+Our prior choices are designed to be weakly informative while reflecting the bounded 0-10 outcome scale of $Y_{riac}$.
+This specification improves model convergence, enhances shrinkage in large multilevel structures, and significantly reduces the probability of implausible prior predictive draws (e.g., $Y > 10$).
+We specify a Normal(0, 2) prior for all fixed-effect parameters ($\beta_k$).
+This choice centers the prior distribution on zero (no effect) and limits 95\% of the prior mass to approximately +-4.
+A shift of 4 tokens (40% os the scale) can be considered large given the findings of @hahm2024divided, making this a sufficiently wide but constrained prior.
+The model intercept is assigned a Normal(5, 2) prior.
+This is centered at the middle of the token scale, 5, with a standard deviation of 2, reflecting mdoerate uncertainty around the central tendency of the outcome variable.
+For the standard deviations of the random effects ($\sigma_{RE}$), we utilize a sstudent-t(3, 0, 1) prior.
+The student's t-distribution is preferred here as it is only defined for positive values and has heavier tails than the normal distribution, allowing for a small probability of larger standard deviation estimates, which aids in regularization.
+The residual standard deviation $\sigma$ is assigned a student-t(3, 0, 2) prior.
+This specification is similar to the random effects but allows for a larger expected overall noise in the mode, with the scale parameter set to 2.
+The full prior specification ensures that while the priors remain weakly informative, they are more realistic given the constaints of the outcome scale, with the scale parameter set to 2.
+ 
+The randomized conjoint design secures internal validity for profile‑level effects (R{ri} and other Z attributes) within partisan types. The contrast across partisan types (moderation by Ti) remains observational and is identified under adjustment for C_i and the multilevel structure; our hierarchical specification (anchor‑ and country‑varying slopes) and weakly informative priors stabilize these comparisons while transparently reflecting remaining uncertainty in the posterior.
 
 
 ### Quantities of interest
