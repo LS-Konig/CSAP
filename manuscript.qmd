@@ -169,38 +169,39 @@ We then outline the key variables of interest and present a directed acyclical g
 Next, we specify the statistical model and explain how we obtain the quantities of interest, followed by a justification of our covariate set.
 Finally, we enumerate the assumptions required for causal interpretataion and situate our design and modeling strategy within the broader literature, highlighting both strengths and its remaining limitations.
 
-### Data and experimental setup
+### Data and experimental setup {#sec-data}
 
-To evaluate how different partisan type influences AP, we reanalyze the cross-national conjoint experiment conducted by @hahm2024divided.
+To evaluate how different partisan types influence AP, we reanalyze the cross-national conjoint experiment conducted by @hahm2024divided.
 The study was fielded by Dynata (formerly SSI) in 25 EU member states between late May and mid-August 2019.[^countries] 
-National samples consist of approximately 1,200 respondents per country (29,827 in total) drawn to be broadly representative on key sociodemographic dimensions.
-Summary statistics are presented in table XX in the appendix.
+National samples consist of approximately 1,200 respondents per country (29,827 in total), drawn to be broadly representative on key sociodemographic dimensions.
+Summary statistics appear in table XX in the appendix.
 
-[^countries]: The countries covered are all EU member states (which included the UK at the time of data collection) except for Luxembourg, Malta and Cyprus.
+[^countries]: The countries covered are all EU member states (which included the UK at the time of data collection) except Luxembourg, Malta and Cyprus.
 
-The experiment comprised two behavioral games: a dictator game measuring unilateral prosociality and a trust game introducing reciprocal incentives.[^games]
+The experiment comprised two behavioral games: a dictator game capturing unilateral prosociality and a trust game introducing reciprocal incentives.[^games]
 In each round, respondents interacted with a hypothetical partner whose attributes --- age, gender, class, religion, nationality, and partisanship --- were independently randomized.
 Each respondent completed three rounds of each game, yielding six observations per participant.
-Our unit of analysis is thus a single game round. The resulting data are inherently nested: multiple rounds within respondents, respondents nested within party affiliations, and respondents and parties clustered within countries.
-We therefore rely on hierarchical models, as we describe in the next section statistical model in more detail.
+Our unit of analysis is thus a single game round.
+The resulting data are inherently nested: multiple rounds within respondents, respondents nested within party affiliations, and respondents and parties clustered within countries.
+We therefore rely on hierarchical models, described in detail in the section @sec-model.
 
-[^games]: Detailed information, instruction wording and an exemplarory profile are presented in the appendix.
+[^games]: Detailed information, instruction wording and an exemplary profile are presented in the appendix.
 
 These behavioral measures offer several advantages for studying affective polarization.
 First, the design is explicitly suited to assessing *horizontal* AP among mass partisans [@areal2024verticalvshorizontal].
-Common observational indicators --- such as like/dislike scales or feeling thermometers --- conflate horizontal evaluations of fellow citizens with *vertical* attitudes toward party elites, limiting their interpretability [@druckman2019we].
-Second, the inclusion of a nonpartisan baseline condition enables us to causally decompose AP into its constituent mechanisms: ingroup favoritism (IF) toward co-partisans and outgroup derogation (OD) toward rival partisans.
+Common observational indicators --- such as like/dislike scales or feeling thermometers --- conflate horizontal evaluations of fellow citizens with *vertical* evaluations of party elites, thereby limiting their interpretability [@druckman2019we].
+Second, the inclusion of a nonpartisan baseline condition enables us to causally decompose AP into its constituent components: ingroup favoritism (IF) toward co-partisans and outgroup derogation (OD) toward rival partisans.
 We estimate these components using standard conjoint estimands that capture the average marginal effect of each attribute on token allocations [@hainmueller2014causal].
 
 Third, respondents hold multiple, potentially cross-cutting social identities [@roccas2002social].
-The randomized conjoint design mitigates bias arising from such heterogeneity by independently varying several attributes that may otherwise be confounded with partisan cues.
-This feature allows us to isolate the specific effect of partisanship and reduces the risks of "aliasing" [@hainmueller2014causal] and "masking" [@bansak2021conjoint] that arise when omitted attributes correlate with treatment dimensions [@dafoe2018information].[^aliasing] 
-Finally, by embedding partisan information among multiple randomized cues, conjoint tasks are less susceptible to social desirability pressures compared to direct survey questions [@horiuchi2022does].
+The randomized conjoint design mitigates bias arising from such heterogeneity by independently varying several attributes that might otherwise be confounded with partisan cues.
+This feature allows us to isolate the specific effect of partisanship and reduces the risks of "aliasing" [@hainmueller2014causal] and "masking" [@bansak2021conjoint], which occur when omitted attributes correlate with treatment dimensions [@dafoe2018information].[^aliasing] 
+Finally, by embedding partisan information among multiple randomized cues, conjoint tasks are less susceptible to social desirability pressures than direct survey questions [@horiuchi2022does].
 
-[^aliasing]: Naturally, a conjoint design can only include a limited set of attributes and therefore cannot preclude all forms of aliasing. We make no claim to exhaustiveness. Nonetheless, by randomizing several plausibly correlated characteristics (e.g., age, gender), the design reduces the risk that inferences about partisanship simply reflect respondents' assumptions about the social composition of party supporters. In this respect, it is considerably less susceptible to the confounding that affects like/dislike scales or feeling thermometers, which cannot separately identify the effect of partisanship from correlated beliefs about associated social groups.
+[^aliasing]: Naturally, a conjoint design can only include a limited set of attributes and therefore cannot preclude all forms of aliasing; we make no claim to exhaustiveness. Nonetheless, by randomizing several plausibly correlated characteristics (e.g., age, gender), the design reduces the risk that inferences about partisanship merely reflect respondents' assumptions about the social composition of party supporters. In this respect, it is substantially less susceptible to the confounding that affects like/dislike scales or feeling thermometers, which cannot disentangle the effect of partisanship from correlated beliefs about associated social groups.
 
 
-### Construction of main variables
+### Construction of main variables {#sec-vars}
 
 We construct our main variables of interest following a tripartite framework to ensure consistency and clarity with regards to party-related variables.
 Starting of, we define $T_i$ as the *partisan type* of respondent $i$.
@@ -229,7 +230,7 @@ Graphically, we are thus interested in the causal chain linking $T \to R \to Y$,
 
 {{< embed code/preparation/02_descr_anal.qmd#fig-dag >}}
 
-### Model specification
+### Model specification {#sec-model}
 
 We model the data in their natural hierarchical structure.
 The unit of analysis is a single conjoint profile evaluation in round $r$ of a game.
