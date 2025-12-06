@@ -20,6 +20,7 @@ date-format: MMMM D, YYYY
 format:
   wordcount-pdf:
     toc: false
+    toc-depth: 3
     include-in-header:
       text: |
         \usepackage{setspace}
@@ -155,7 +156,7 @@ Whether these theoretical considerations come with empirical implicatios is subj
 
 If implicit partisans are similarly polarized as explicit ones, this suggest AP is not simply a byproduct of subjective attachement, but that a broader identity or heuristic mechanism.
 
-### Hypotheses
+### Hypotheses {#sec-ht}
 
 $H_1:$ Explicit partisans exhibit higher affective polarization than implicit partisans.
 $H_2:$ Explicit partisans show greater in-group favoritism than implicit partisans.
@@ -334,7 +335,7 @@ The correlated random-effects structure enables partial pooling, stabilizing het
 We estimate the model in a Bayesian framework via Markov Chain Monte Carlo (MCMC) simulation implemented in Stan [@rstan] using the `brms` package in R [@burkner2017brms; @burkner2017advanced; @burkner2021bayesian].
 This approach propagates uncertainty through the multilevel interaction structure and regularizes the maximal random-effects specification through priors.
 Our priors are weakly informative and tailored to the 0-10 outcome scale.
-Fixed-effect parameters ($\beta_k$) receive $\mathcal{N}(0, 2)$ priors, which center effects at zero while constraining 95\% of prior mass to approximately $\pm 4$ tokens --- a substantively large shift (40\% of the scale) given the findings of @hahm2024divided.
+Fixed-effect parameters ($\beta_k$) receive $\mathcal{N}(0, 2)$ priors, which center effects at zero while constraining 95\% of prior mass to approximately $\pm 4$ tokens --- a substantively large shift (40\% of the scale) given the initial findings of @hahm2024divided.
 The model intercept receives a $\mathcal{N}(5, 2)$ prior centered at the midpoint of the token scale.
 Standard deviations of the random effects $\sigma_{RE}$ are assigned $\text{student-}t(3, 0, 1)$ priors, which are defined on the positive domain and have heavier tails, allowing for the possibility of larger group-level variability.
 The residual standard deviation $\sigma$ is assigned a $\text{student-}t(3, 0, 2)$ prior.
@@ -345,73 +346,70 @@ The contrast across partisan types (i.e, the effect of $R$ conditional on $T$) r
 Our hierarchical specification -- allowing anchor- and country-varying slopes -- and weakly informative priors stabilize these comparisons while transparently reflecting remaining uncertainty in the posterior.
 
 
-### Quantities of interest
+### Quantities of interest: AP, IF and OD {#sec-qoi}
 
-In the following sections we define our substantive quantities of interest, affective polarization and its subcomponents, ingroup favoritism and outgroup derogation. Our substantive interest concerns the differences in these three measures between implicit and explicit partisan types. In the causal framing, we want to unravel the effect of a hypothetical intervention: If we hold all covariates constant and only change $T$ from $0$ to $1$, how does this impact our quantities of interest?
+In this section we define our three substantive quantities of interest --- AP and its two constituent components, IF and OD.
+Our empirical focus lies in comparing these measures across implicit and explicit partisan types.
+Framed causally, we aim to recover the effect of a hypothetical intervention: holding all covariates constant, how do these quantities of interest change when $T$ is set from $0$ (implicit type) to $1$ (explicit type)?
 
-#### Affective polarization
-
-More precisely, we define affective polarization as the difference in expected token allocated in the conjoint games to co-partisans and out-partisans. This approach follows (?) Wagner (or Reiljan) in that it averages across all outgroups, which is a simplification given we are dealing with multi-party systems. Nevertheless, this (CHECK) yields a conservative measure, and allows for cross-national comparisons, as the number of parties in a given national party system varies, and so does the potential number of political outgroups.
-
-Formally, we define affective polarization $AP$ as:
+We conceptualize affective polarization as the difference in the expected number of tokens allocated to co-partisans versus out-partisans in the conjoint games.
+This follows the approach used in prior work (CHECK Wagner Reiljan), which averages across all political outgroups --- a simplification in multi-party systems but one that yields a conservative measure and facilitates cross-national comparison, as both the number of viable parties and the size of the outgroup set vary across countries. Formally, we define affective polarization $AP$ as:
 
 $$
 AP = E(Y \mid R = Co) - E(Y \mid R = Out)
-$$
+$$ {#eq-ap}
 
-These conditional expectations are further refined to capture the effect of explicit attachement:
+\noindent To incorporate partisan type, we refine these conditional expectations as:
 
+\singlespacing
 $$
 \begin{aligned}
 CATE_{AP} &= AP_{T=1} - AP_{T=0} \\
           &= [E(Y \mid R = Co, T = 1) - E(Y \mid R = Out,T = 1)] \\
           &\quad - [E(Y \mid R = Co, T = 0) - E(Y \mid R = Out, T = 0)]
 \end{aligned}
-$$
+$$ {#eq-cateap}
+\doublespacing
 
-With the formulated hypothesis above, we posit that $CATE_{AP} > 0$: We expect respondents with explicit partisan type ($T=1$) to exhibit higher levels of affective polarization than implicit types ($T=0$).
-
-#### Ingroup favoritms
-
-Do disentangle affective polarization into ingroup favoritism and outgroup derogation, we utilize that the conjoint setup included a neutral control group, in which no partisan cue was displayed ($R = None$). This allows as to estimate the effects of a copartisan cue ($R = Co$) relative to that neutral baseline, conditional on partisan type $T$.
-
-Formally, we define ingroup favoritism $IF$ as:
+To disentangle AP into its components, we exploit the neutral control condition in the conjoint experiment, in which no partisan cue was displayed ($R = \text{None}$). 
+This allows us to estimate the extent to which co-partisanship increases token allocations relative to a neutral baseline, conditional on $T$. We define ingroup favoritism $IF$ as:
 
 $$
 IF = E(Y \mid R = Co) - E(Y \mid R = None)
-$$
+$$ {#eq-if}
 
-further refining this equation with respect to partisan type $T$, we define our causal estimand as:
+\noindent Refining this with respect to partisan type yields the causal estimand:
 
+\singlespacing
 $$
 \begin{aligned}
 CATE_{IF} &= IF_{T=1} - IF_{T=0} \\
           &= [E(Y \mid R = Co, T = 1) - E(Y \mid R = None,T = 1)] \\
           &\quad - [E(Y \mid R = Co, T = 0) - E(Y \mid R = None, T = 0)]
 \end{aligned}
-$$
+$$ {#eq-cateif}
+\doublespacing
 
-#### Outgroup derogation
-
-Similarly, the neutral control group ($R = None$) lets us estimate outgroup derogation as the average number in tokens withheld from outpartisans compared to the baseline condition.
-
-Hence, we formalize outgroup derogation $OR$ as
+The same neutral condition ($R = \text{None}$) also enables estimation of outgroup derogation as the reduction in tokens allocated to out-partisans compared to the baseline. Outgroup derogation $OD$ is defined as:
 
 $$
-OR = E(Y \mid R = None) - E(Y \mid R = Out)
-$$
+OD = E(Y \mid R = None) - E(Y \mid R = Out)
+$$ {#eq-od}
 
-the subsequent causal estimand is thus
+\noindent The corresponding causal estimand is:
 
+\singlespacing
 $$
 \begin{aligned}
-CATE_{OR} &= OR_{T=1} - OR_{T=0} \\
+CATE_{OD} &= OD_{T=1} - OD_{T=0} \\
           &= [E(Y \mid R = None, T = 1) - E(Y \mid R = Out,T = 1)] \\
           &\quad - [E(Y \mid R = None, T = 0) - E(Y \mid R = Out, T = 0)]
 \end{aligned}
-$$
+$$ {#eq-cateod}
+\doublespacing
 
-By focusing on expected values, or marginal means, we also ensure our substantive results are not dependent on the choice of reference categories [@leeper2020measuring].
+By focusing on expected values (marginal means), we ensure that our substantive results do not depend on arbitrary choices of reference categories [@leeper2020measuring]. Consistent with our hypotheses stated in @sec-ht, we expect all $CATE_{AP, IF, OD} > 0$: respondents with explicit partisan attachements ($T=1$) should display higher affective polarization than implicit types ($T=0$), caused simoultaneously by higher degrees of IF as well as stronger OD.
+
 
 ### Control variables {#sec-covariates}
 
