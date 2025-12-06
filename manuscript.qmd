@@ -209,7 +209,8 @@ If respondent $i$ reported a party to which she feels attached to and is thus co
 Conversely, we set $T_i = 0$ for *implicit* partisans, i.e., respondent $i$ who indicated no partisan attachement but reported a vote preference.
 We term the party reported by respondents *partisan anchor* $A_i$.[^anchor]
 
-[^anchor]: We chose the term *partisan anchor* to emphasize this variable encompasses not only explicit identifiers, in which case partisan ingroup would be the established term in the literature, as was the case in the study of @hahm2024divided. At the same time, since implicit partisans denied feeling attached to a political party, we do not want to use social identity group terminology in this case either.
+[^anchor]: We use the term *partisan anchor* to denote the party reference point reported by respondents, regardless of whether they express subjective attachment to that party. For explicit partisans, this anchor corresponds to the conventional *partisan ingroup* in the literature (as in @hahm2024divided). For implicit partisans, however, respondents explicitly deny a felt attachment, making social-identity terminology inappropriate. The term *anchor* therefore provides a neutral label that applies consistently across both groups.
+
 
 In the experiment, each conjoint profile in round $r$ contains a randomized party cue ($Z^{party}_{r}$).
 We compare this cue to the respondent's anchor to classify the *partisan relationship* $R_{ri}$ as co-partisan, out-partisan, or neutral ($R_{ri} \in \{Co, Out, None\}$).
