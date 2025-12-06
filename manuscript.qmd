@@ -163,11 +163,11 @@ $H_3:$ Explicit partisans show stronger
 
 ## Research design {#sec-design}
 
-In this section, we present our empirical strategy employed to identify the effect of partisan type on AP.
-First, we present the dataset and explain the experimental setup and its advantage for measuring AP.
-Next, we outline the main variables of interest along with a DAG to illustrate our causal model of the data generating process.
-We then present our statistical model specification and explain how we derive our key quantities of interest, before we justify our included set of covariates.
-Finally, we list the assumptions necessary for causal interpretation and situate our design and modelling strategy, highlighting strengths and remaining limitations. 
+In this section, we detail our empirical strategy for identifying the effect of partisan type on AP.
+We begin by introducing the dataset and describing the experimental design, emphasizing its advantages for measuring AP.
+We then outline the key variables of interest and present a directed acyclical graph (DAG) that summarizes our causal model of the data-generating process.
+Next, we specify the statistical model and explain how we obtain the quantities of interest, followed by a justification of our covariate set.
+Finally, we enumerate the assumptions required for causal interpretataion and situate our design and modeling strategy within the broader literature, highlighting both strengths and its remaining limitations.
 
 ### Data and experimental setup
 
