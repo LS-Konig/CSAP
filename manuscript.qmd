@@ -203,30 +203,37 @@ Finally, by embedding partisan information among multiple randomized cues, conjo
 
 ### Construction of main variables {#sec-vars}
 
-We construct our main variables of interest following a tripartite framework to ensure consistency and clarity with regards to party-related variables.
-Starting of, we define $T_i$ as the *partisan type* of respondent $i$.
-If respondent $i$ reported a party to which she feels attached to and is thus considered an *explicit* partisan, we define $T_i = 1$ , conversely $T_i = 0$ for *implicit* partisans, i.e. if respondent $i$ indicated no partisan attachement, but reported a vote preference.
-We term the party itself that was reported by respondents *partisan anchor* $A_i$.
-In the experiment, each conjoint profile in round $r$ presents a party cue ($Z^{party}_{ri}$), which is compared to the respondent's anchor to classify the profile as co-partisan, out-partisan, or neutral ($R_{ri} \in {Co, Out, None}$).
-This approach corresponds to the average across out-groups operationalization and constitutes a significant simplification of multi-party contexts.
-We nevertheless opt for this measure as it provides a consistent and systematic coding that allows comparability across contexts.
+We construct our main variables of interest following a tripartite framework to ensure conceptual coherence and terminological consistency in all party-related measures.
+First, we define $T_i$ as the *partisan type* of respondent $i$.
+If respondent $i$ reported a party to which she feels attached to and is thus considered an *explicit* partisan, we define $T_i = 1$ . 
+Conversely, we set $T_i = 0$ for *implicit* partisans, i.e., respondent $i$ who indicated no partisan attachement but reported a vote preference.
+We term the party reported by respondents *partisan anchor* $A_i$.[^anchor]
 
-We conceptually frame explicit partisanship as a treatment and implicit partisanship as a control.
-That is, respondents reporting a subjective attachement to a political party ($T_i = 1$) form the treated group, whereas respondents expressing vote choice without attachement ($T_i = 0$) form the comparison group.[^1]
+[^anchor]: We chose the term *partisan anchor* to emphasize this variable encompasses not only explicit identifiers, in which case partisan ingroup would be the established term in the literature, as was the case in the study of @hahm2024divided. At the same time, since implicit partisans denied feeling attached to a political party, we do not want to use social identity group terminology in this case either.
+
+In the experiment, each conjoint profile in round $r$ contains a randomized party cue ($Z^{party}_{r}$).
+We compare this cue to the respondent's anchor to classify the *partisan relationship* $R_{ri}$ as co-partisan, out-partisan, or neutral ($R_{ri} \in {Co, Out, None}$).
+This coding corresponds to the "average across out-groups" operationalization and offers a tractable strategy for multi-party contexts, although it constitutes a substantial reduction of real-world complexity in multi-party systems.
+We adopt this measure as it provides a uniform and comparable classification scheme across countries.
+
+We conceptually frame explicit partisanship as the treatment and implicit partisanship as a control.
+Respondents reporting a subjective attachement to a political party ($T_i = 1$) thus form the treated group, whereas respondents expressing vote choice without attachement ($T_i = 0$) constitute the comparison group.[^quasi]
 The underlying research question is: Does explicit partisan attachement amplify affective polarization relative to implicit partisan attachement?
-Or in causal terminology, how would a hypothetical intervention, changing T from 0 to 1 change affective polarization, holding other factors constant?
+In causal terms, we ask how a hypothetical intervention shifting $T$ from 0 to 1 would change affective polarization, holding other factors constant.
 
-[^1]: For readability, we omit the prefix "quasi-" when referring to treatment and control, but this does not imply random assignement. Our design remains observational.
+[^quasi]: For readability, we omit the prefix "quasi-" when referring to treatment and control, without implying random assignement. Our design remains observational with respect to our treatment of interest, partisan type $T$.
 
-@fig-dag illustrates the underlying causal data generating process as a directed acyclical graph (DAG).
-As outlined above, respondents report a partisan anchor $A$.
-Partisan type $T$ is only defined for the subset of respondents that either explicitly or implicitly report a party, and is thus presented as a child node of $A$.
-In each round $r$ of the conjoint games, respondents are presented various conjoint attributes or cues, denoted by $Z_r$.
-The partisan cue $Z^{party}_r$ and respondents' partisan anchors $A_i$ jointly determine the coding of the partisan relationship category: $f:(A_i, Z_r^{party} \mapsto R_{ij} \in \{\text{Co}, \text{Out}, \text{None}\})$.
-The dependent variable is the outcome of the games, i.e., the number of tokens allocated in round $r$ by respondent $i$ of party $a$ from country $c$, which we denote as $Y_riac$.
-Token allocations $Y$ are affected by both R and Z^other, with the effect of R theorized to be conditional on T.
-Because T is observational, we cannot assume conditional independence a priori, hence C denotes potential individual level confounders of both T and Y.
-Graphically, we are thus interested in the causal chain linking $T \to R \to Y$, which is the path from top to bottom in the center of @fig-dag.
+@fig-dag depicts the underlying causal data-generating process as a directed acyclical graph (DAG).
+As noted above, respondents report a partisan anchor $A$.
+Partisan type $T$ is defined only for the subset of respondents who either explicitly or implicitly report a party and therefore appears as a child node of $A$.
+In each round $r$ of the conjoint games, respondents receive a set of conjoint attributes, denoted by $Z_r$.
+The partisan cue $Z_r^{\text{party}}$ and respondents' anchors $A_i$ jointly determine the partisan relationship category via the mapping $f:(A_i, Z_r^{\text{party}} \mapsto R_{ij} \in \{\text{Co}, \text{Out}, \text{None}\})$.
+
+The dependen variable $Y_{riac}$ is the token allocation made in round $r$ by respondent $i$ with anchor $a$ from country $c$.
+Token allocations $Y$ are affected by both $R$ and $Z_r^{\text{other}}$, with the effect of $R$ theorized to be moderated by $T$.
+Because $T$ is observational, we cannot assume conditional independence.
+We therefore include $C$ to capture individual-level confounders affecting both $T$ and $Y$.
+Graphically, our substantive interest lies in the causal chain $T \to R \to Y$, represented as the central vertical path in @fig-dag.
 
 {{< embed code/preparation/02_descr_anal.qmd#fig-dag >}}
 
