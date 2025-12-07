@@ -574,7 +574,29 @@ AP (row 1):
     - more uncertainty for implicit (wider distribution) due to less cases
     - but consistent (with 99\% certainty between 0.68 and 1.15 token, given the data)
 
+IF (row  2):
+  - Numbers:
+  - explicit partisans:
+    - median IF 0.541
+    - ci95: 0.456-627
+    - ci99: 0.427-0.657
+  - implicit partisans:
+    - median IF 0.447
+    - ci95: 0.260-0.638
+    - ci99: 0.201-0.7
+  - CATE_IF:
+    - median: 0.0931
+    - ci95: -0.101-0.285
+    - ci99: -0.160-0.342
+    - Pr(>0): 83.1\%
 
+- Interpretation:
+  - Difference slightly more pronounced: 83\% certainty of CATE_IF > 0 (given the data)
+  - aligns with expectation
+  - but small difference, 77\% of mass > 0 and < 0.25 (given the data)
+  - but: overall confident signal of pronounced IF among implicit partisans in dictator game
+
+OD (row 3):
 
 
 #### Trust game
