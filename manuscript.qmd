@@ -700,16 +700,29 @@ Preliminary conclusion pooled results of both games:
 
 ### Is there context-specific variation?
 
+@fig-country-cov-d show the country specific CATEs for the dictator game.
+
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-d-cate >}}
+
+
+- Identical across all countries
+- Correspond to pooled CATEs
+- If true, suggests no cross-national variation in effect of partian type on AP, IF, and OD
+
+@fig-country-cov-t show the country specific CATEs for the trust game.
+
+same for the trust game:
+- Identical across all countries
+- Correspond to pooled CATEs
+- If true, suggests no cross-national variation in effect of partian type on AP, IF, and OD
 
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-t-cate >}}
 
-Country CATE results -\> No, identical across countries
-Dictator game: slight tendency towards hypothesized higher AP of expl (XY\%)
+because this feels fishy, and to confidently claim there actually isn't a difference in the partisan type's meaning for AP, IF or OD across countries, we further present the conditional expected values on the basis of which we constructed our substantive QoIs. 
 
-Given the striking similarity across countries, we present the expected values for the partisan relationship categories by type as well:
+@fig-country-cov-d-ev show the country specific EVs by relationship and type.
 
-Country EV results -\> Observable shifts in general baseline of tokens, but patterns themselves remains constant
+Now the pattern clearly shows cross-national variation both in terms of baseline token spending (as measured by the tokens to "None"), as well as in terms of AP and its components, which can now be visually inspected (AP as distance between light and dark shaded posteriors, IF as distance between dark shaded and middle shaded posteriors and OD as distance between middle shaded and light shaded posteriors).
 
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-d-ev >}}
 
