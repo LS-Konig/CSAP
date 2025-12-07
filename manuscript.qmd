@@ -668,24 +668,35 @@ IF (row  2):
 OD (row 3):
   - Numbers:
   - explicit partisans:
-    - median OD 0.453
-    - ci95: 0.363-0.541
-    - ci99: 0.334-0.574
+    - median OD 0.456
+    - ci95: 0.375-0.533
+    - ci99: 0.354-0.558
   - implicit partisans:
-    - median OD 0.480
-    - ci95: 0.353-0.603
-    - ci99: 0.313-0.635
+    - median OD 0.332
+    - ci95: 0.211-0.455
+    - ci99: 0.168-0.496
   - CATE_OD:
-    - median: -0.027
-    - ci95: -0.155-0.0963
-    - ci99: -0.191-0.138
-    - Pr(>0): 33.4\%
-    - Pr(<0): 66.6\%
+    - median: 0.124
+    - ci95: -0.008-0.257
+    - ci99: -0.046-0.294
+    - Pr(>0): 96.6\%
 
  - Interpretation:
-  - CATE suggests no difference
-  - median OD estimate even larger for implicit, contrary to theoretical expectation, but no certain systematic difference
-  - still pronounced OD by implicit partisans
+  - CATE suggests systematically higher OD of explicit compared to implicit partisans
+  - with 96.6\% certainty, CATE > 0 given the data
+  - median CATE suggests roughly 0.12 token less for outpartisans in the trust game by explicit types relative to implicit
+  - aligns with hypothesis
+  - but again, pronounced and substantial evidence for OD by implicit types
+
+Trust game results serve as reminder that similar levels of AP can arise by symmetrical differences in IF and OD.
+Thus importance to disentangle both components when comparing subgroups' AP.
+
+Preliminary conclusion pooled results of both games:
+- contrary to the expectations, little evidence of systematically higher AP (or IF and OD) among explicit partisans.
+- sometimes direction matches expectation (e.g dictator: CATE_AP, CATE_IF; trust: CATE_OD), but lot of uncertainty remains
+- sometimes even opposite tendency (e.g. dictator: CATE_OD; trust: CATE_IF)
+- no agreement across games -> further supports interpretation of no systematic differences across implicit and explicit types
+- findings provide strong evidence that implicit partisans, despite reporting no attachement to a political party, show similar AP levels, contrary to hypotheses
 
 ### Is there context-specific variation?
 
