@@ -162,7 +162,7 @@ $H_1:$ Explicit partisans exhibit higher affective polarization than implicit pa
 $H_2:$ Explicit partisans show greater in-group favoritism than implicit partisans.
 $H_3:$ Explicit partisans show stronger
 
-## Research design {#sec-design}
+## Research Design {#sec-design}
 
 In this section, we detail our empirical strategy for identifying the effect of partisan type on AP.
 We begin by introducing the dataset and describing the experimental design, emphasizing its advantages for measuring AP.
@@ -170,7 +170,7 @@ We then outline the key variables of interest and present a directed acyclical g
 Next, we specify the statistical model and explain how we obtain the quantities of interest, followed by a justification of our covariate set.
 Finally, we enumerate the assumptions required for causal interpretation and situate our design and modeling strategy within the broader literature, highlighting both strengths and its remaining limitations.
 
-### Data and experimental setup {#sec-data}
+### Data and Experimental Design {#sec-data}
 
 To evaluate how different partisan types influence AP, we reanalyze the cross-national conjoint experiment conducted by @hahm2024divided.
 The study was fielded by Dynata (formerly SSI) in 25 EU member states between late May and mid-August 2019.[^countries] 
@@ -202,7 +202,7 @@ Finally, by embedding partisan information among multiple randomized cues, conjo
 [^aliasing]: Naturally, a conjoint design can only include a limited set of attributes and therefore cannot preclude all forms of aliasing; we make no claim to exhaustiveness. Nonetheless, by randomizing several plausibly correlated characteristics (e.g., age, gender), the design reduces the risk that inferences about partisanship merely reflect respondents' assumptions about the social composition of party supporters. In this respect, it is substantially less susceptible to the confounding that affects like/dislike scales or feeling thermometers, which cannot disentangle the effect of partisanship from correlated beliefs about associated social groups.
 
 
-### Construction of main variables {#sec-vars}
+### Measurement and Variable Construction {#sec-vars}
 
 We construct our main variables of interest following a tripartite framework to ensure conceptual coherence and terminological consistency in all party-related measures.
 First, we define $T_i$ as the *partisan type* of respondent $i$.
@@ -211,7 +211,6 @@ Conversely, we set $T_i = 0$ for *implicit* partisans, i.e., respondent $i$ who 
 We term the party reported by respondents *partisan anchor* $A_i$.[^anchor]
 
 [^anchor]: We use the term *partisan anchor* to denote the party reference point reported by respondents, regardless of whether they express subjective attachment to that party. For explicit partisans, this anchor corresponds to the conventional *partisan ingroup* in the literature (as in @hahm2024divided). For implicit partisans, however, respondents explicitly deny a felt attachment, making social-identity terminology inappropriate. The term *anchor* therefore provides a neutral label that applies consistently across both groups.
-
 
 In the experiment, each conjoint profile in round $r$ contains a randomized party cue ($Z^{party}_{r}$).
 We compare this cue to the respondent's anchor to classify the *partisan relationship* $R_{ri}$ as co-partisan, out-partisan, or neutral ($R_{ri} \in \{Co, Out, None\}$).
@@ -239,7 +238,7 @@ Graphically, our substantive interest lies in the causal chain $T \to R \to Y$, 
 
 {{< embed code/preparation/02_descr_anal.qmd#fig-dag >}}
 
-### Model specification {#sec-model}
+### Model Specification and Estimation {#sec-model}
 
 We model the data in their natural hierarchical structure.
 The unit of analysis is a single conjoint profile evaluation in round $r$ of a game.
@@ -276,7 +275,12 @@ Y_{riac}
 $$ {#eq-model-sys}
 \doublespacing
 
-\noindent We assume a Gaussian likelihood for the bounded but approximately continuous token outcome, allowing effects to be interpreted on the original allocation scale. Respondent-level random intercepts are assumed to follow a normal distribution (@eq-resp-int):
+\noindent We assume a Gaussian likelihood for the bounded (0-10, see @fig-distr-y in the appendix) token allocation.
+While the discrete nature and strict bounds of the outcome violate the technical assumptions of the Gaussian family (as the distribution is constrained and not continuous), the approach is justified by its focus on the marginal means effects ($AP$, $IF$, $OD$).
+The estimator for the regression coefficients derived from this likelihood family is mathematically equivalent to the Ordinary Least Squares (OLS) estimator under fixed effects and Normal errors [@wooldridge2010econometric].
+Crucially, the OLS estimator provides unbiased and consistent estimates of the conditional mean $E(Y \mid X)$ under large samples, even when the residuals are non-Normal or heteroskedastic, relying on asymptotic properties [@white1980heteroskedasticity].
+This pragmatic choice allows for directly interpretable coefficients on the original token allocation scale, avoiding the complexity of nonlinear link functions required by models such.
+Furthermore, the inclusion of a rich covariate set and the respondent-level random intercept ($u_{i0}$) helps to absorv substantial structured variance, mitigating the severity of residual non-Normality that often arises from bounding effects. Respondent-level random intercepts are assumed to follow a normal distribution (@eq-resp-int):
 
 $$
 u_{i0} \sim \mathcal{N}(0, \sigma^2_{u0})
@@ -346,7 +350,7 @@ The contrast across partisan types (i.e, the effect of $R$ conditional on $T$) r
 Our hierarchical specification -- allowing anchor- and country-varying slopes -- and weakly informative priors stabilize these comparisons while transparently reflecting remaining uncertainty in the posterior.
 
 
-### Quantities of interest: AP, IF and OD {#sec-qoi}
+### Quantities of Interest: AP, IF and OD {#sec-qoi}
 
 In this section we define our three substantive quantities of interest --- AP and its two constituent components, IF and OD.
 Our empirical focus lies in comparing these measures across implicit and explicit partisan types.
@@ -411,7 +415,7 @@ $$ {#eq-cateod}
 By focusing on expected values (marginal means), we ensure that our substantive results do not depend on arbitrary choices of reference categories [@leeper2020measuring]. Consistent with our hypotheses stated in @sec-ht, we expect all $CATE_{AP, IF, OD} > 0$: respondents with explicit partisan attachements ($T=1$) should display higher affective polarization than implicit types ($T=0$), caused simoultaneously by higher degrees of IF as well as stronger OD.
 
 
-### Control variables {#sec-covariates}
+### Covariates and Confounder Adjustment {#sec-covariates}
 
 To block potential backdoor paths between partisan type and allocation behavior ($C_i$ in @fig-dag), we adjust for a comprehensive set of individual-level covariates capturing the principal dimensions that may jointly predict explicit partisan attachement and prosocial behavior in experimental settings.
 
@@ -423,7 +427,7 @@ Finally, we include economic evaluations and behavioral despositions (risk-takin
 
 Together, these covariates represent substantively plausible confounders and help approximate conditional independence between partisan type and the outcome of interest. Summary statistics for all covariates by partisan type appear in @tbl-covariate-distr, and English-language questionnaire items are provided in the appendix.
 
-### Causal Assumptions and Identification Strategy
+### Identification Strategy and Causal Assumptions
 
 Our empirical strategy aims to estimate the causal effect of explicit partisan type ($T=1$) relative to implicit partisan type ($T=0$) on affective polarization (AP, IF, OD).
 The identification approach combines strong internal validity provided by the conjoint experiment for the profile attributes ($Z$) with an extensive model-based adjustmend strategy for the observed contrast across partisan types ($T$).
