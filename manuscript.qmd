@@ -472,7 +472,7 @@ We deploy a multilevel strategy that leverages the repeated-measures design to c
 The inclusion of a respondent-level random intercept acts as a powerfull control for all stable, time-invariant, unobserved individual characteristics (e.g., latent personality traits, baseline generosity, or stable intensity of social identity) that may affect both selection into $T$ and the outcome $Y$.
 This leverage is fundamental to our observational identification strategy.
 
-2. Partisan anchor-level adjustment ($v_{a0}, v_{aT}, $v_aR}$):
+2. Partisan anchor-level adjustment ($v_{a0}, v_{aT}, v_{aR}$):
 The random effects at the partisan anchor level account for unobserved confounding systematic across party lines.
 They absorb average unobserved differences (e.g., party organizational culture or ideological uniformity) that influence both the propensity for explicit attachement ($T$) and baseline prosocioality ($Y$).
 The random slopes for $T$ and $R$ further allow the confounding or effect size to vary by party.
