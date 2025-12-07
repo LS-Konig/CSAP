@@ -578,7 +578,7 @@ IF (row  2):
   - Numbers:
   - explicit partisans:
     - median IF 0.541
-    - ci95: 0.456-627
+    - ci95: 0.456-0.627
     - ci99: 0.427-0.657
   - implicit partisans:
     - median IF 0.447
@@ -597,11 +597,95 @@ IF (row  2):
   - but: overall confident signal of pronounced IF among implicit partisans in dictator game
 
 OD (row 3):
+  - Numbers:
+  - explicit partisans:
+    - median OD 0.453
+    - ci95: 0.363-0.541
+    - ci99: 0.334-0.574
+  - implicit partisans:
+    - median OD 0.480
+    - ci95: 0.353-0.603
+    - ci99: 0.313-0.635
+  - CATE_OD:
+    - median: -0.027
+    - ci95: -0.155-0.0963
+    - ci99: -0.191-0.138
+    - Pr(>0): 33.4\%
+    - Pr(<0): 66.6\%
 
+ - Interpretation:
+  - CATE suggests no difference
+  - median OD estimate even larger for implicit, contrary to theoretical expectation, but no certain systematic difference
+  - still pronounced OD by implicit partisans
 
 #### Trust game
 
 {{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-t >}}
+
+@fig-pooled-cov-t show the pooled results for the trust game.
+
+AP (row 1):
+- Numbers:
+  - explicit partisans:
+    - median AP 1.08 token
+    - ci95: 0.998-1.17
+    - ci99: 0.968-1.19
+  - implicit partisans:
+    - median AP 1.08
+    - ci95: 0.885-1.26
+    - ci99: 0.831-1.31
+  - CATE_AP:
+    - median: 0.00497 (basically 0)
+    - ci95: -0.174-0.191
+    - ci99: -0.226-0.252
+    - Pr(>0): 51.9\%
+
+- Interpretation:
+  - Overall AP basically identical across implicit and explicit partisans,
+  as nearly perfectly symmetric CATE distribution around 0 demonstrates
+  - Larger uncertainties for implicit, but tendency the same
+
+IF (row  2):
+  - Numbers:
+  - explicit partisans:
+    - median IF 0.625
+    - ci95: 0.532-0.723
+    - ci99: 0.501-0.756
+  - implicit partisans:
+    - median IF 0.745
+    - ci95: 0.529-0.945
+    - ci99: 0.471-1.01
+  - CATE_IF:
+    - median: -0.121
+    - ci95: -0.319-0.09
+    - ci99: -0.375-0.158
+    - Pr(<0): 86.4\%
+
+- Interpretation:
+  - Contrary to theoretical expectation, data suggest tendency of implicit partisans to exhibit higher IF in trust game, as with 86.4\% certainty CATE < 0
+  - wider posterior again indicating less observation for implicit types, but still evidence for pronounced IF of implicit types 
+
+OD (row 3):
+  - Numbers:
+  - explicit partisans:
+    - median OD 0.453
+    - ci95: 0.363-0.541
+    - ci99: 0.334-0.574
+  - implicit partisans:
+    - median OD 0.480
+    - ci95: 0.353-0.603
+    - ci99: 0.313-0.635
+  - CATE_OD:
+    - median: -0.027
+    - ci95: -0.155-0.0963
+    - ci99: -0.191-0.138
+    - Pr(>0): 33.4\%
+    - Pr(<0): 66.6\%
+
+ - Interpretation:
+  - CATE suggests no difference
+  - median OD estimate even larger for implicit, contrary to theoretical expectation, but no certain systematic difference
+  - still pronounced OD by implicit partisans
 
 ### Is there context-specific variation?
 
