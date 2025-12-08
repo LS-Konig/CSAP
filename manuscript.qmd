@@ -84,83 +84,49 @@ geometry:
 
 ## Theory {#sec-theory}
 
-### Affective polarization and its identity foundations
+1. Background: Affective polarization as multidimensional
+  - Rapid expansion since @iyengar2012affect -> many measures, many conceptualizations
+  - @campos2025new: AP is not a single latent construct; different measures capture different processes (emotional, social, behavioral)
+  - In behavioral AP (allocations), identity may be only one pathway
 
--   surge in AP studies Drawing on social identity (SIT) and self-categorization theory (SCT), the study of affective polarization (AP) has gained considereable attention in the recent decade since @iyengar2012affect's seminal paper establishing the affective perspective on polarization.
-In general terms, AP refers to the tendency of humans to exhibit warmer feelings towards members of their own, perceived group (in-group favoritism), while disliking those perceived as belonging to another group (out-group derogation).
-While fundamentally a universal human phenomenon, the recent surge in publications in the political and social sciences is mostly focussing on AP in the context of political or politically salient group identities, the most important of which is partisanship.
+2. Partisanship as social identity
+  - Classic social identity theory expectations:
+    - Explicit identifiers -> stronger ingroup favoritism and outgroup derogation
+  - Expressive vs instrumental models: identity vs policy alignment
+  - BUT: identity strength, closeness, leaners, latent identity all complicacte the picture
 
--   Briefly summarise AP's rise since @iyengar2012affect
+3. Measurement problem: Who counts as a partisan?
+  - In multiparty settings, \% identifiers varies dramatically (40-80\% in our data)
+  - Restricting samples to identifiers implicitly changes the population of inference
+  - Eurobarometer and national surveys often capture attachement differently -> conceptual instability
 
--   Define AP as ingrou favoritism + outgroup derogation
+4. Introducing "partisan type"
+  - Grabs the core idea from U.S. leaners literature, but generalizes it for multiparty contexts
+  - Explicit partisans: report attachement
+  - Implicit partisans: deny attachement but express a partisan anchor via intended/reported vote
+  - Rationale:
+    - Vote anchor = behavioral signal of group alignment
+    - Subjective attachement = psychological signal
+    - These need not coincide
 
--   Emphasize the identity mechanism at the core of AP (SIT & SCT)
+5. Why partisan type should matter (theoretical expectation)
+  - Strong identity pathway: explicit identifiers shoullds exhibit more IF and OD
+  - Mechanisms: categorization -> group affect -> threat -> exclusivity -> discrimination
 
--   Hightlight that AP is a general identity phenomenon, but political identities have become the central focus
+6. Why partisan type may not matter (alternative pathways)
+  - Identity loyalty vs substantive alignment produce observationally equivalent behaviors [@orr2023affective]
+  - Vote choice carries information about:
+    - Ideology
+    - Issue positions
+    - Social composition of supporters
+    - Expected norms of reciprocity
+  - Thus implicit partisans may activate the same heuristics as explicit identifiers even without subjective attachement
 
-### Partisanship as social identity
-
--   Partisanship as social identity Unlike earlier accounts of partisanship as a rational, preference and ideology based choice -- the *instrumental* model of partisanship --, the SIT perspective boosted the *expressive* model of partisanship, conceptualizing it as an identity.
-Research further distinguished expressive partisanship into *positive* and *negative* partisan identities.
-Former captures a citizen's identification *with* a certain political party, whereas the latter in contrast refers to a citizen's identification *against* a party, as not being part of that group.
-
--   Contrast instrumental (Downs) vs expressive/social-identity-based partisanship
-
--   Introduce positive and negative partisan identity
-
--   Note the emergin literature distinguishing:
-
-    -   identifiers vs non-identifiers
-    -   closeness vs identification
-    -   identity strength
-    -   implicit identity activation
-
-These literatures discuss components of identity but do not systematize how *subjective attachement* vs *non-attachement* affects AP in multiparty contexts.
-
-### The measurement problem: Who counts as a partisan?
-
--   AP measures in multiparty contexts differ fundamentally in whose feelings are measured
-    -   Reiljan's API: identifiers only
-    -   Wagner's API: whole electorate
-    -   Multiple-ingroup models
--   These choices implicitly assume something about:
-    -   The scope of partisanship
-    -   the population of inference
-    -   the comparability of AP levels across systems
-
-Because identifiers vary dramatically across countries, restricting measures to identifiers creates conceptual and inferential instability.
-
-### Introducting *Partisan Type* Explicit vs Implicit Partisanship
-
-Building on insights from the U.S. literature on implicit vs explicit identity, I refine this distinction for comparative multiparty settings by distinguishing between: - *explicit partisans*: respondents reporting subjective partisan attachement - *implicit partisans*: respondents who explicitly deny attachement but still express a preference (e.g. in vote choice or other items).
-In literature this sometimes is referred to as partisan leaners, but I think this concept of partisan type is useful to systematically and analytically combine the related thoughts of leaners, closeness and identity.
-I also contest that it is more accurate in that identity itself is a complex concept, and my proposal incorporates the notion that partisan leaners do in fact identify to some degree with the party, even if potentially less than explicit identifiers.
-Still, this captures a nuanced understanding that there are differing degrees of identification with a party, and explicitly reporting subjective attachement is just one of them.
-I have to acknowledge that many survey in fact have more comlex sets of items to capture partisan identities using follow up question, which allows for identification of partisan leaners.
-Yet and to the best of our knowledge, no study has investigated whether explicit partisans differ systematically from those stating they do not feel attached with respect to AP in multiparty systems.
-This distinction is conceptually simple but substantively important for AP reseach in multiparty systems because sample restrictions imply different populations of inference.
-Yet no comparative study systematically evaluates: (1) whether these types differ in their affective responses, and (2) how their prevalence varies across countries. Whether these theoretical considerations come with empirical implicatios is subject of this study.
-
-### Why partisan type should matter for affective polarization
-
--   Explicit partisans -\> stronger identification -\> stronger AP
--   Mechanisms:
-    -   motivates social categorization
-    -   group-based affect
-    -   perceived threat
-    -   reinforcement through party system cues
--   Implicit partisans -\> weaker group attachement but still possess:
-    -   directional preferences
-    -   political predispositions
-    -   potential latent identity
-
-If implicit partisans are similarly polarized as explicit ones, this suggest AP is not simply a byproduct of subjective attachement, but that a broader identity or heuristic mechanism.
-
-### Hypotheses {#sec-ht}
-
-$H_1:$ Explicit partisans exhibit higher affective polarization than implicit partisans.
-$H_2:$ Explicit partisans show greater in-group favoritism than implicit partisans. 
-$H_3:$ Explicit partisans show stronger
+7. Hypotheses
+  - H1: Explicit > implicit in AP
+  - H2: Explicit > implicit in IF
+  - H3: Explicit > implicit in OD
+  - Note: These hypotheses represent the identity-centered expectation, but competing accounts (multidimensional AP, cue-based reasoning, normative expectations) predict null differences
 
 ## Research Design {#sec-design}
 
