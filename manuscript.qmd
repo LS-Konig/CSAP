@@ -481,108 +481,42 @@ We thus present the resulting estimates as the best model-based causal approxima
 
 ## Empirical analysis
 
-We present our results in the following structure.
+We organize the presentation of results in two steps.
+We begin with pooled analyses based on posterior expected values generated from the fitted hierarchical model.
+These expected values are computed for prespecified combinations of respondent's partisan type (T=0 implicit, T=1 explicit) and partisan relationship category (R = Co, Out, None) in a given game round, averaging over the empirical distribution of covariates and integrating over respondent random effects.
+From these expected values, we derive the three substantive quantities of interest --- affective polarization (AP), ingroup favoritism (IF), and outgroup derogation (OD) --- for each value of T.
+The difference between the quantities under explicit and implicit partisanship yields the CATE for each QoI.
 
-In pooled analysis:
-  the rows correspond the respective quantities of interest (AP, IF, OD)
-  the left column shows posterior estimates of QoIs
-  the right column shows respective CATE
+The pooled results sections display, for each QoI, the posterior distributions for explicit and implicit partisans (left panels) alongside the posterior distributions of the corresponding CATE (right panels).
+All panelds include density estimated and posterior medians with 95\% and 99\% credible intervals.
 
-each panel visualises the posterior density, posterior median, 95 and 99\% credible intervals
+We then turn to country-specific analyses, where we recompute expected values separately within each national subsample (again averaging over that country's empirical covariate distribution, this time incorporating random effects).
+Because the resulting CATEs show little cross-national variation, we additionally report the underlying country-level expected values for each relationship category.
+These reveal substantial heterogeneity in the levels of AP, even as the implicit-explicit comparison remains consistently close to zero across countries.
 
-In country specific analysis:
-  - Three columns for CATEs of respective QoIs
-  - Countries on y axis
-
-due to no variation in CATEs, we further present:
-  - expected values by R and T
-  - left column T=1 right column T=0
-  - y axis country
-  - x axis E(Y)
-  - visualisation of posterior density, posterior median, 95 and 99\% credible interals
-
-everything separately for dictator and trust game
-
-for reference: an effect of 1 token amounts to 42.55% of standard deviation in the dictator game.
-
-for reference: an effect of 1 token amounts to 40.16% of standard deviation in the trust game.
+All results are presented separately for the dictator and trust games.
+For scale reference, a one-token difference corresponds to 42.6\% of a standard deviation in the dictator game and 40.2\% in the trust game.
 
 ### The effect of partisan type on affective polarization in Europe
 
 #### Dictator game
 
+Figure @fig-pooled-cov-d presents the pooled results for the dictator game. Three clear findings emerge.
+
 {{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-d >}}
 
 @fig-pooled-cov-d show the pooled results for the dictator game.
 
-AP (row 1):
-- Numbers:
-  - explicit partisans:
-    - median AP 0.99 token
-    - ci95: 0.905-1.08
-    - ci99: 0.874-1.11
-  - implicit partisans:
-    - median AP 0.928
-    - ci95: 0.746-1.10
-    - ci99: 0.684-1.15
-  - CATE_AP:
-    - median: 0.0669
-    - ci95: -0.105-0.244
-    - ci99: -0.157-0.299
-    - Pr(>0): 77.6\%
+First, both explicit and implicit partisans exhibit substantial levels of affective polarization.
+Explicit partisans allocate nearly one additional token to co-partisans relative to out-partisans (median AP = 0.99, 95% CrI: 0.91–1.08, 99% CrI: 0.87–1.11). Strikingly, implicit partisans — respondents who do not report a felt attachment to any party — display almost the same degree of in-group favoritism (median AP = 0.93, 95% CrI: 0.75–1.10, 99% CrI: 0.68–1.15). The posterior CATE is small (median = 0.07) and highly uncertain (95% CrI: –0.11 to 0.24). The posterior probability that explicit partisans polarize more than implicit partisans is 77.6%, but over two-thirds of the posterior mass lies below 0.1. Substantively, this indicates little systematic difference between the two groups. The more notable result is that individuals without a stated partisan identity nonetheless display robust and precisely estimated affective preferences, despite smaller sample size generating wider posteriors.
 
-- Interpretation:
-  - Little evidence of higher AP in dictator game between of explicit partisans: median higher
-    - Posterior CATE: given the data, with 77.6\% certainty is there a positive CATE (which would correspond to the theorized expectation)
-    - but even then only minor magnitude, 2/3 posterior density mass concentrated below 0.1
-    - suggests little to no systematic differences
-  - substantially more interesting, implicit partisans show similar level of AP despite reporting no felt attachement to any party
-    - more uncertainty for implicit (wider distribution) due to less cases
-    - but consistent (with 99\% certainty between 0.68 and 1.15 token, given the data)
+Second, interpersonal favoritism (IF) shows a somewhat clearer, but still modest, separation between explicit and implicit partisans.
+Explicit partisans allocate more tokens to co-partisans in interpersonal (non-competitive) contexts (median IF = 0.54, 95% CrI: 0.46–0.63). Implicit partisans again display a comparably strong tendency (median IF = 0.45, 95% CrI: 0.26–0.64). The CATE suggests slightly stronger favoritism among explicit partisans (median = 0.09), with an 83.1% posterior probability that the effect is positive. Yet the magnitude remains small: 77% of the posterior mass lies between 0 and 0.25 tokens. The key insight is that implicit partisans engage in meaningful interpersonal discrimination, even in settings that do not directly invoke partisan conflict.
 
-IF (row  2):
-  - Numbers:
-  - explicit partisans:
-    - median IF 0.541
-    - ci95: 0.456-0.627
-    - ci99: 0.427-0.657
-  - implicit partisans:
-    - median IF 0.447
-    - ci95: 0.260-0.638
-    - ci99: 0.201-0.7
-  - CATE_IF:
-    - median: 0.0931
-    - ci95: -0.101-0.285
-    - ci99: -0.160-0.342
-    - Pr(>0): 83.1\%
+Third, we find no systematic difference between explicit and implicit partisans in out-party derogation (OD).
+Explicit partisans withhold roughly 0.45 tokens from out-partisans (95% CrI: 0.36–0.54), while implicit partisans display very similar patterns (median OD = 0.48, 95% CrI: 0.35–0.60). The CATE centers at zero (median = –0.03, 95% CrI: –0.16 to 0.10), and the posterior assigns 66.6% probability to a negative effect. Although the median suggests marginally stronger derogation among implicit partisans, the credible intervals clearly rule out any systematic difference. The substantive conclusion is that implicit partisans derogate out-partisans to the same extent as explicit identifiers, reinforcing the broader pattern from AP and IF.
 
-- Interpretation:
-  - Difference slightly more pronounced: 83\% certainty of CATE_IF > 0 (given the data)
-  - aligns with expectation
-  - but small difference, 77\% of mass > 0 and < 0.25 (given the data)
-  - but: overall confident signal of pronounced IF among implicit partisans in dictator game
-
-OD (row 3):
-  - Numbers:
-  - explicit partisans:
-    - median OD 0.453
-    - ci95: 0.363-0.541
-    - ci99: 0.334-0.574
-  - implicit partisans:
-    - median OD 0.480
-    - ci95: 0.353-0.603
-    - ci99: 0.313-0.635
-  - CATE_OD:
-    - median: -0.027
-    - ci95: -0.155-0.0963
-    - ci99: -0.191-0.138
-    - Pr(>0): 33.4\%
-    - Pr(<0): 66.6\%
-
- - Interpretation:
-  - CATE suggests no difference
-  - median OD estimate even larger for implicit, contrary to theoretical expectation, but no certain systematic difference
-  - still pronounced OD by implicit partisans
+Taken together, the pooled dictator-game results show that implicit partisans—despite reporting no subjective attachment to any party—display levels of affective bias that are nearly indistinguishable from those of explicit partisans. The small and uncertain CATEs suggest that the behavioral expression of partisan affinity is only weakly tied to self-reported partisan identity. Instead, partisan type appears to shape the certainty with which biases are expressed rather than their magnitude.
 
 #### Trust game
 
