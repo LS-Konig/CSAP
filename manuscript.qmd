@@ -562,48 +562,49 @@ Aggregate AP can mask compensating differences in IF and OD.
 As observed here, similar levels of AP can arise from distinct combinations of its components, potentially obscuring theoretically relevant heterogeneity.
 Analyses relying solely on co-partisan versus out-partisan contrasts may therefore miss meaningful variation in the underlying mechanisms of affective polarization.
 
-### Is there context-specific variation?
+### Do explicit and implicit partisans differ across countries?
 
-@fig-country-cov-d-cate show the country specific CATEs for the dictator game.
+We next examine whether the effect of partisan type varies across national contexts.
+If the causal influence of explicit identity depends on characteristics such as party-system structure, political culture, or the salience of partisan conflict, we would expect meaningfull cross-country variation in the Conditional Average Treatment Effect (CATE).
+
+@fig-country-cov-d-cate presents the country-specific CATE estimates for the dictator game.
+Strikingly, each country's posterior distribution is nearly identical to the pooled estimate.
+No country exhibits a directional deviation, and the uncertainty intervals overlap almost perfectly.
+The trust-game results in @fig-country-cov-t-cate replicate this pattern: the country-level CATEs again mirror the pooled contrasts, with no systematic cross-national dispersion.
+
+Such uniformity initially raises the concern that partial pooling or model specification might have obscured meaningful heterogeneity.
+To address this, we turn to the conditional expected values (EVs) that underpin the QoIs and their respective CATEs and examine the underlying behavioral patterns directly.
 
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-d-cate >}}
 
-
-- Identical across all countries
-- Correspond to pooled CATEs
-- If true, suggests no cross-national variation in effect of partian type on AP, IF, and OD
-
-@fig-country-cov-t-cate show the country specific CATEs for the trust game.
-
-same for the trust game:
-- Identical across all countries
-- Correspond to pooled CATEs
-- If true, suggests no cross-national variation in effect of partian type on AP, IF, and OD
-
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-t-cate >}}
 
-because this feels fishy, and to confidently claim there actually isn't a difference in the partisan type's meaning for AP, IF or OD across countries, we further present the conditional expected values on the basis of which we constructed our substantive QoIs. 
 
-@fig-country-cov-d-ev show the country specific EVs by relationship and type in the dictator game.
+In the dictator game (@fig-country-cov-d-ev), clear cross-national differences emerge when comparing across rows.
+Countries vary in baseline giving (as indicated by contributions to "None") and in the magnitude of affective polarization and its components (visible as the relative distances between the shaded posteriors associated with co-partisan, neutral, and out-partisan recipients).
+These differences demonstrate that the model is not surpressing genuine cross-country variation: respondents in some contexts exhibit more AP, IF, or OD than those in others.
 
-Now the pattern clearly shows cross-national variation (i.e. comparing rows) both in terms of baseline token spending (as measured by the tokens to "None"), as well as in terms of AP and its components, which can now be visually inspected (AP as distance between light and dark shaded posteriors, IF as distance between dark shaded and middle shaded posteriors and OD as distance between middle shaded and light shaded posteriors).
+However, when comparing across partisan types within each country (the two columns in each panel), the expected valzes are virtually indistinguishable.
+In every case, implicit and explicit partisans display the same pattern of allocations, differing mainy in posterior precision (implicit types tend to have wider distributions) rather than in their locations.
+For example, Ireland exhibits lower overall AP than Spain, but this holds for both implicit and explicit partisans.
+The same cross-national ordering --- and the same within-country equality --- appears throughout the sample.
+This symmetry explains why the CATEs are identical across countries: while countries differ in how much partisans discriminate, they do not differ in how much *additional* discrimination is associated with explicit identification.
 
-However, when comparing columns displaying the posterior expected values by partisan type, there appears no difference in any of the included countries.
-
-For instance, whereas the figure suggests less AP in Ireland than in Spain for instance, the pattern is identical irrespective of partisan type --- implicit partisans from Ireland show less AP than those from Spain --- which explains the identical CATEs across countries.
-
-Differences mainly concern uncertainties, i.e., wider distributions for implicit partisans, but the relative patterns are consistent.
+The trust-game EVs in @fig-country-cov-t-ev reinforce this conclusion.
+Again substantial between-country variation is visible across rows, in both aggregate AP and the composition of IF and OD.
+Yet within each country, implicit and explicit identifiers behave nearly identically, with differences emerging only in the variance of the posterior distributions.
+The absence of divergence across partisan types is consistent and systematic.
 
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-d-ev >}}
 
-@fig-country-cov-t-ev show the country specific EVs by relationship and type in the trust game.
-
-The trust game figure confirms this conclusion.
-Though there are between-country differences visible across rows, comparing types across columns yield identical patterns, differing only in the spread, i.e., uncertainty, of the posteriors, not in their relative locations.  
-
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-t-ev >}}
 
-While we hypothesized that the effect of explicit partisan attachment might vary by national political context (e.g., party system fragmentation or political culture), our results show a highly consistent pattern. The Conditional Average Treatment Effect (CATE) of explicit partisanship on affective polarization is statistically indistinguishable across all 25 countries, a finding corroborated by the extremely low variance observed in the country-level random slopes for the Partisan Type×Partisan Relationship interaction term (SD\<0.11).
+Taken together, the country-level analyses provide strong evidence that the causal effect of shifting from implicit to explicit partisan type is negligible in every national context examined.
+Although countries differ in their overall levels of allocative and reciprocal discrimination, the *difference between partisan types* is remarkably stable and effectively zero across all 25 settings.
+This conclusion is further supported by the hierachical model: the estimated variance of the country-level random slopes for the $T \times R$ interaction is extremely small (SD < 0.11), indicating minimal cross-national dispersion in the causal effect.
+
+In sum, while affective polarization itself varies meaningfully across Europe, the behavioral consequences of explicit versus implicit partisan identification do not.
+Implicit identification appears sufficient to generate the levels of AP observed in each country, and making partisanship explicit adds little --- if anything --- to the discriminatory behaviors captured in either experimental task.
 
 ## Robustness
 
