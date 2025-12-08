@@ -47,38 +47,40 @@ geometry:
 
 ## Introduction {#sec-introduction}
 
-How does partisan type shape affective polarization?
-Despite an extensive and rapidly growing literature on affective polarization (AP), fundamental ambiguity remains regarding who is—and is not—the population of inference in many studies.
-A substantial portion of existing measures and designs implicitly restrict the analytical sample to partisan identifiers, while others include all respondents regardless of their subjective partisan attachment.
-Yet both strategies aim to make claims about the state or trajectory of affective polarization in a society.
-When inferences are drawn exclusively from partisan subsamples, valid population-level generalizations hinge on strong assumptions about the size and representativeness of that subset.
-Only when partisan identifiers (a) comprise a sufficiently large share of the electorate or (b) accurately represent non-identifiers can such extrapolations hold.
+1. Problem statement
+  - AP is widely studies, but who counts as a partisan varies dramatically across studies
+  - Many AP measures implicitly restrict inferene to explicit partisans (PID identifiers), while others include the entire electorate
+  - In multiparty Europe, the prevelance of identifiers varies sharply -> population of inference becomes unstable
 
-This study addresses these conceptual and empirical gaps by introducing partisan type as an analytically distinct dimension that separates explicit partisans --- those who report subjective attachment to a party --- from implicit partisans—those who express a vote preference but explicitly reject partisan attachment.
-While prior work in the U.S. context [e.g., @theodoridis2017me; @elliott2024like] has theorized differences between identification, closeness, and related constructs, the distinction has rarely been leveraged to assess the population of inference in comparative studies of AP, nor systematically examined in multiparty systems.
+2. Conceptual motivation
+  - The literature increasingly views AP as multidimensional
+  - Theories of social identity expect explicit identifiers to polarize more, but identity alone may not drive AP [@orr2023affective]
+  - Hence: Is explicit subjective attachement actually the driver of behaviroal AP?
 
-I make four contributions.
-First, I refine the conceptual foundations of affective polarization by clarifying how different partisan types map onto populations of inference, a distinction particularly crucial in European multiparty contexts where the prevalence and meaning of partisan identifiers vary widely.
-Second, I provide the first cross-national empirical assessment of the distribution of partisan types across 25 European democracies.
-Third, using hierarchical Bayesian models, I estimate the causal effect of partisan type on affective polarization: How would AP change if a respondent’s partisan type were (hypothetically) shifted from implicit to explicit, holding all else constant? 
-Finally, I place these results in comparative perspective, assessing whether the relationship between partisan type and AP varies across national contexts.
+3. Key innovation:
+  - Introduce partisan type = explicit vs implicit partisans (vote anchor without felt attachement)
+  - Future-proof, generalizable concept beyond U.S. "leaners"
+  - Clarifies measurement and inference in multiparty contexts
 
-The theoretical expectation follows directly from social identity theory: because affective polarization operates through group-based identity and subjective attachment, explicit partisans should display stronger in-group favoritism and more pronounced out-group derogation than implicit partisans.
-The key question is whether this mechanism is exclusive to explicit identifiers or whether—even in the absence of subjective attachment—implicit partisans also exhibit affective polarization, implying a deeper and more complex identity process.
+4. Research questions
+  - Do explicit and implicit partisans differ in affective polarization, ingroup favoritism, and outgroup derogation?
+  - Does partisan type moderate responses to randomized partisan cues?
+  - Does this vary cross-nationally?
 
-tba: results Although theories of party system fragmentation, political culture, and mobilization suggest plausible cross-country differences, the findings indicate a remarkably consistent pattern across all 25 democracies studied.
+5. Summary of approach
+  - Reanalysis of 25 country conjoint experiment (29,000 respondents)
+  - Profile randomization gives causal leverage on AP (within-type)
+  - Bayesian multilevel model estimate the CATE(TxR) contrast
 
-Paragraph on implications (conditional on results)
+6. Central empirical takeaway
+  - Explicit attachement adds little to no additional AP in either dictator or trust games
+  - Implicit partisns behave equally polarized despite denying subjective attachement
+  - Striking cross-national consistency
 
-If implicit partisans polarized too -\> suggests social identity mechanism despite clear rejection of subjective attachement -\> identity complex
-
-Differences -\> approaches like @hahm2024divided less suited to infer about state of polarization in a given country context
-
-Pooled results show no substantial difference in the estimated levels of AP between implicit and explicit partisans.
-
-However, there seems to be differences in the composition
-
-Given the similarities in affective polarization behavior, I conclude that partisan identity goes beyond the reporting of an subjective attachement to a political party, or that this survey item is not ideal for capturing partisan identities.
+7. Contribution statement
+  - Measurement: demonstrates that restricting AP analyses to identifiers is unnecessary and potentially distorting
+  - Theory: shows the limits of identity-only accounts; supports multidimensional and cue-driven models of AP
+  - Comparative inference: partisan anchors, not explicit identity, capture the behaviorally relevant component of partisanship across Europe
 
 ## Theory {#sec-theory}
 
