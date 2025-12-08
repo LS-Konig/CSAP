@@ -539,9 +539,44 @@ We next examine whether this pattern extends to the trust game, where reciprocal
 
 #### Trust game {.unnumbered}
 
+
+@fig-pooled-cov-t presents the ppooled results for the trust game.
+Across all three quantities of interest, the substantive pattern closely mirrors the dictator-game findings: explicit and implicit partisans exhibit similar levels of AP and its components, with posterior contrasts tightly centered near zero.
+
 {{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-t >}}
 
-@fig-pooled-cov-t show the pooled results for the trust game.
+We begin with AP (top row of @fig-pooled-cov-t).
+Both partisan types show virtually identical AP in the trust game.
+Explicit partisans allocate, on average, 1.08 additional tokens to co-partisans relative to out-partisans (median AP 1.08; 95\% CI: 1.00-1.17).
+Implicit partisans display the same magnitude of AP, albeit with greater uncertainty (median = 1.08; 95\% CI 0.89-1.26).
+Consequently, the posterior CATE is almost perfectly symmetrical distributed around zero (median = 0, 95\% CI: -0.17-0.19), with the posterior probability that explicit partisans polarize more hovering at chance level (Pr(CATE_AP > 0) = 52\%).
+Although uncertainty is larger for implicit partisans --- refleceting their smaller effective sample size --- the central tendency is nearly indistinguishable across types.
+In short, explicit attachement does not meaningfully amplify AP in the trust game.
+
+Turning to ingroup favoritism (middle row in @@fig-pooled-cov-t), implicit partisans exhibit --- if anything --- a slightly stronger ingroup premium than explicit identifiers.
+Explicit partisns reward co-partisans by 0.63 tokens relative to neutral partners (95\% CI: 0.53-0.72), whereas implicit partisans display a median IF of 0.75 tokens (95\% CI: 0.53-0.95).
+The resulting CATE is negative (median = -0.12; 95\% CI: -0.32 to 0.09), and the posterior mass places substantial probability on implicit partisans showing greater IF (Pr(CATE_IF)<0=0.86).
+Although the credible intervals remain wide, the modal pattern runs counter to the identity-centered hypothesis (H2): self-reported attachement does not increase IF and may, if anything, be associated with a modest reduction.
+
+Finally, outgroup derogation (bottom row) yields the strongest evidence in favor of a partisan-type difference as hypothesized.
+Explicit partisans withhold on average 0.46 tokens from out-partisans relative to neutral partners (95\% CI: 0.38-0.53), whereas implicit partisans exhibit slightly weaker derogation (median = 0.33, 95\% CI: 0.21-0.46).
+The CATE is positive (median = 0.12, 95\% CI: -0.01 to 0.26), and the posterior probability that explicit identifiers derogate outpartisans more is very high (Pr(CATE_OD > 0) = 0.97).
+Thus, among the three components, OD most closely aligns with the theoretical expectation (H3) based on the trust game results.
+However, the magnitude remains small, and implicit partisans still exhibit substantively meaningful derogation, indicating that explicit attachement is not necessary for discriminatory behavior to emerge in a reciprocal context.
+
+Taken together, the trust-game results reinforce --- and help clarify --- the broader pattern emergin across both experimental tasks.
+Contrary to our formulated expectations, we find little evidence that explicit partisans systematically exhibit higher AP or stronger IF or OD tendencies than implicit partisans.
+Although certain contrasts align with the directional predictions of our hypotheses (e.g., CATE_AP and CATE_IF in the dictator game; CATE_OD in the trust game), the associated uncertainty remains substantial.
+In other cases the tendencies run counter to our initial expectations (e.g., CATE_OD in dictator game, CATE_IF in the trust game).
+Most importantly, the sign and magnitude of the CATEs do not consistently replicate across the two behavioral contexts.
+This lack of cross-game convergence provides strong evidence against the claim that explicit partisan attachement reliably amplifies discriminatory behavior in the context of AP.
+Instead, the pooled findings point to a more robust conclusion: individuals who report *no* subjective attachement to any political party nonetheless display levels of AP --- and its ingroup and outgroup components --- that closely mirror those of explicit partisans.
+Far from reflecting a weaker or normatively inert form of partisanship, implicit identification appears sufficient to generate meaningful partisan discrimination in both allocative and reciprocal settings.
+
+The trust-game results also underscore a broader measurement implication.
+Similar aggregate levels of affective polarization can emerge from offsetting patterns of ingroup favoritism and outgroup derogation, as seen in the symmetric tendencies across partisan types.
+This reinforces the importance of analytically disentangling these components when comparing subgroups’ AP, as the aggregate measure alone can obscure theoretically meaningful differences.
+
 
 AP (row 1):
 - Numbers:
