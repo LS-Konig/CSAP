@@ -711,6 +711,50 @@ While we hypothesized that the effect of explicit partisan attachment might vary
 
 ## Conclusion {#sec-conclusion}
 
+1. Recap of main empirical finding
+  - Across 25 European democracies, and two behavioral games,
+    -> explicit partisan attachement does not meaningfully amplify affective polarization
+  - CATEs extremely small, posterior mass near zero, often symmetric
+  - Implicit partisans exhibit robust AP (IF and OD) despite rejecting attachement
+
+2. Implication 1: Measurement and inference
+  - Widespread practice of including leaners / vote anchor respondents is justified for behavioral AP
+  - Measuring relying *only* on identifiers risk selecting a shrinking subgroup in many countries
+  - Partisan type clarifies when populations of inference shift
+
+3. Implication 2: Theory of partisan identity
+  - Explicit identity (PID attachement item) captures only one dimension of partisan identity
+  - Behavioral AP seems driven by latent identity, behavioral anchoring, and cue-based expectations more than by self-reported identity intensity
+  - Supports @orr2023affective view:
+    - identity-like behaviors need not come from identity strensght
+  - Supports @campos2025new view:
+    - AP is multidimensional; behavioral AP does not cleanly map onto subjective identification
+
+4. Implication 3: Comparative politics
+  - Cross-national consistency is notable: the meaning of explicit identification differs across countries, yet its *conditional effect on AP* is remarkably stable
+  - Suggests a general mechanism of partisan cue processing operating across democracies
+  - Highlights how multi-party systems structure partisan identity differently from U.S. two-party contexts
+
+5. Methodological implications
+  - Conjoint experiments allow decomposing AP into IF and OD
+  - Design shows how randomization of cues + hierarchical modeling yields strong causal leverage
+  - Provides a model for how to estimate AP with heterogeneous partisanship structures
+
+6. Limitations
+  - Behavioral AP not equal to all AP (thermometers, social distance, elite affect may differ)
+  - Single-item PID measure may be noisy; multiple-item batteries could refine type definitions
+  - Cross-sectional study; identity formation dynamics remain open
+
+7. Future research avenues
+  - Test whether partisan type matters more for elite evaluations or symbolic identity
+  - Explore interactions with ideological extremety or policy sophistication
+  - Examine whether partisan type moderates responses to elite cues (vs mass cues)
+
+8. Concluding statement
+  - Partisan identity is real, but not reducible to reported subjective attachement alone
+  - Implicit partisanship --- the behavioral anchor --- carries enough informational and social content to generate the same AP behaviors as explicit identity
+  - This challenges identity-only explanations and strengthens the case for multidimensional- cue-driven models of AP in comparative politics.
+
 \singlespacing
 
 ## References
