@@ -175,7 +175,7 @@ Finally, we enumerate the assumptions required for causal interpretation and sit
 
 To evaluate how different partisan types influence AP, we reanalyze the cross-national conjoint experiment conducted by @hahm2024divided.
 The study was fielded by Dynata (formerly SSI) in 25 EU member states between late May and mid-August 2019.[^1]
-National samples consist of approximately 1,200 respondents per country (29,827 in total), drawn to be broadly representative on key sociodemographic dimensions. 
+National samples consist of approximately 1,100 respondents per country (29,827 in total), drawn to be broadly representative on key sociodemographic dimensions. 
 Summary statistics appear in table XX in the appendix.
 
 [^1]: The countries covered are all EU member states (which included the UK at the time of data collection) except Luxembourg, Malta and Cyprus.
@@ -700,7 +700,7 @@ Preliminary conclusion pooled results of both games:
 
 ### Is there context-specific variation?
 
-@fig-country-cov-d show the country specific CATEs for the dictator game.
+@fig-country-cov-d-cate show the country specific CATEs for the dictator game.
 
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-d-cate >}}
 
@@ -709,7 +709,7 @@ Preliminary conclusion pooled results of both games:
 - Correspond to pooled CATEs
 - If true, suggests no cross-national variation in effect of partian type on AP, IF, and OD
 
-@fig-country-cov-t show the country specific CATEs for the trust game.
+@fig-country-cov-t-cate show the country specific CATEs for the trust game.
 
 same for the trust game:
 - Identical across all countries
@@ -755,6 +755,8 @@ While we hypothesized that the effect of explicit partisan attachment might vary
 ## Appendix {.appendix}
 
 ### Sample descriptives {.appendix}
+
+{{< embed code/preparation/02_descr_anal.qmd#tbl-nresp-country-age >}}
 
 Age by Country Gender by Country
 
