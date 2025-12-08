@@ -4,14 +4,12 @@ title: |
 subtitle: |
   A comparative study of 25 European democracies
 abstract: |
-  This study introduces the concept of partisan *type*, which distinguishies *explicit* partisans -- respondents who explicitly report attachement to a political party -- from *implicit* partisans, namely respondents who explicitly report no attachement, but still express a partisan preference in standard voting items.
-  Existing studies on affective polarization often use measures that either restrict analyses to the former type or combine both when trying to infer the state of affective polarization in a given context.
-  This study explores empirically if there are systematic differences between explicit and implicit partisans regarding their affective polarization behavior, reanalyzing experimental data from 25 European multi-party systems.
-  Results show that 1) shares of explicit partisans vary from 45% to 85%,
-  2) implicit partisans show almost identical levels of affective polarization,
-  3) lower levels of IF and OD
-  4) this holds across countries.
-  The implications are that scholars need to carefully consider what their population of interest is when measuring affective polarization, as context-specific differences in the relative distributions of partisan types may yield biased inferences about the state or dynamic of polarization in a given society. 
+  Affective polarization (AP) is increasingly viewed as multidimensional, yet many studies restrict inference to explicit partisans who report subjective attachement.
+  In multiparty systems, many politically engaged citizens do not identify with any party, raising the question of whether explicit attachement is necessary for partisan bias.
+  I introduce partisan type --- explicit versus implicit partisans (non-identifiers with clear vote anchors) --- and test whether it conditions AP.
+  Using a conjoint experiment fielded in 25 European democracies (N~29,800), I combine randomized partisan cues with Bayesian models to estimate AP and its components in two behavioral games.
+  Across both, explicit and implicit partisans display nearly identical ingroup favoritism and outgroup derogation, with conditional effects centered near zero and consistent across countries.
+  These findings imply that self-reported attachement adds little behavioral discriminatory content beyond partisan anchoring, supporting recent arguments that identity and substantive pathways yield similar partisan behaviros and clarifying AP measurement in multiparty contexts. 
 author: "Tristan Muno^[University of Mannheim; Mail: tristan.muno@uni-mannheim.de]"
 thanks: |
    You can add acknowledgements here. Wordcount: {{< words-body >}}.
