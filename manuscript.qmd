@@ -190,7 +190,7 @@ To evaluate the scope conditions of our design and to clarify the population of 
 Two features of these descriptive patterns are substantively important.
 First, the proportion of nonpartisans is remarkably stable across countries (ranging mostly between 10 and 15\%, least in Estonia (6\%), most in Croatia (23\%)), suggesting that the exclusion of this group --- required for treatment consistency in our design --- does not introduce systematic cross-national biases in the analytical sample.
 Second, and more consequential for our theoretical claims, the balance between explicit and implicit partisans varies dramatically across national contexts.
-In some electorates, explicit identifiers constitute the clear majority of partisans (e.g. strongest case being Denmark with 85\% explicit partisans), in others, implicit partisans are equally or even more prevalent (e.g. in Latvia both explicit and implicit partisans account for 45\% of respondents).
+In some electorates, explicit identifiers constitute the clear majority of partisans (e.g. strongest case being Denmark with 85\% explicit partisans), in others, implicit partisans are equally prevalent (e.g. in Latvia both explicit and implicit partisans account for 45\% of respondents).
 This heterogeneity underscores the need for a comparative framework capable of assessing whether implicit and explicit partisans differ systematically in their affective responses.
 In short, the figure motivates both the internal validity of our sample restriction and the broader comparative question that animates the study: whether distinct partisan types, whose prevalence differs markedly across countries, exhibit different patterns of affective polarization.
 
@@ -198,7 +198,7 @@ In short, the figure motivates both the internal validity of our sample restrict
 
 In the experiment, each conjoint profile in round $r$ contains a randomized party cue ($Z^{party}_{r}$).
 We compare this cue to the respondent's anchor to classify the *partisan relationship* $R_{ri}$ as co-partisan, out-partisan, or neutral ($R_{ri} \in \{Co, Out, None\}$).
-This coding corresponds to the "average across out-groups" operationalization and offers a tractable strategy for multi-party contexts, although it constitutes a substantial reduction of real-world complexity in multi-party systems.
+This coding corresponds to the "average across out-groups" operationalization and offers a tractable strategy for multi-party contexts, although it constitutes a substantial reduction of the inherent complexity of AP in multi-party systems [@rollicke2023polarisation].
 We adopt this measure as it provides a uniform and comparable classification scheme across countries.
 
 We conceptually frame explicit partisanship as the treatment and implicit partisanship as a control.
@@ -326,8 +326,9 @@ This approach propagates uncertainty through the multilevel interaction structur
 Our priors are weakly informative and tailored to the 0-10 outcome scale.
 Fixed-effect parameters ($\beta_k$) receive $\mathcal{N}(0, 2)$ priors, which center effects at zero while constraining 95\% of prior mass to approximately $\pm 4$ tokens --- a substantively large shift (40\% of the scale) given the initial findings of @hahm2024divided.
 The model intercept receives a $\mathcal{N}(5, 2)$ prior centered at the midpoint of the token scale.
-Standard deviations of the random effects $\sigma_{RE}$ are assigned $\text{student-}t(3, 0, 1)$ priors, which are defined on the positive domain and have heavier tails, allowing for the possibility of larger group-level variability.
-The residual standard deviation $\sigma$ is assigned a $\text{student-}t(3, 0, 2)$ prior.
+Standard deviations of the random effects $\sigma_{RE}$ are assigned $\text{Half-student-}t(3, 0, 1)$ priors.
+This distribution is defined exclusively on the positive domain ($[0, \infty)$) and has heavier tails compared to the Half-Normal distribution, allowing for the possibility of larger group-level variability while still shrinking effects towards zero.
+The residual standard deviation $\sigma$ is assigned a $\text{Half-student-}t(3, 0, 2)$ prior.
 These priors improve convergance, facilitate shrinkage in a high-dimensional multilevel structure, and reduce the probability of implausible prior-predictive draws (e.g., $Y > 10$).
 
 The randomized conjoint design secures internal validity for profile-level effects ($R_{ri}$ and other $Z$ attributes) within partisan types.
@@ -488,9 +489,9 @@ From these expected values, we derive the three substantive quantities of intere
 The difference between the quantities under explicit and implicit partisanship yields the CATE for each QoI.
 
 The pooled results sections display, for each QoI, the posterior distributions for explicit and implicit partisans (left panels) alongside the posterior distributions of the corresponding CATE (right panels).
-All panelds include density estimated and posterior medians with 95\% and 99\% credible intervals.
+All panels visualise full posterior densities along with respective medians, 95\% and 99\% credible intervals.
 
-We then turn to country-specific analyses, where we recompute expected values separately within each national subsample (again averaging over that country's empirical covariate distribution, this time incorporating random effects).
+We then turn to country-specific analyses, where we recompute expected values separately within each national subsample (again averaging over that country's empirical covariate distribution, but this time incorporating random effects).
 Because the resulting CATEs show little cross-national variation, we additionally report the underlying country-level expected values for each relationship category.
 These reveal substantial heterogeneity in the levels of AP, even as the implicit-explicit comparison remains consistently close to zero across countries.
 
@@ -499,26 +500,40 @@ For scale reference, a one-token difference corresponds to 42.6\% of a standard 
 
 ### The effect of partisan type on affective polarization in Europe
 
-#### Dictator game
+#### Dictator game {.unnumbered}
 
-Figure @fig-pooled-cov-d presents the pooled results for the dictator game. Three clear findings emerge.
+@fig-pooled-cov-d presents the pooled results for the dictator game. Three clear findings emerge.
 
 {{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-d >}}
 
-@fig-pooled-cov-d show the pooled results for the dictator game.
-
 First, both explicit and implicit partisans exhibit substantial levels of affective polarization.
-Explicit partisans allocate nearly one additional token to co-partisans relative to out-partisans (median AP = 0.99, 95% CrI: 0.91–1.08, 99% CrI: 0.87–1.11). Strikingly, implicit partisans — respondents who do not report a felt attachment to any party — display almost the same degree of in-group favoritism (median AP = 0.93, 95% CrI: 0.75–1.10, 99% CrI: 0.68–1.15). The posterior CATE is small (median = 0.07) and highly uncertain (95% CrI: –0.11 to 0.24). The posterior probability that explicit partisans polarize more than implicit partisans is 77.6%, but over two-thirds of the posterior mass lies below 0.1. Substantively, this indicates little systematic difference between the two groups. The more notable result is that individuals without a stated partisan identity nonetheless display robust and precisely estimated affective preferences, despite smaller sample size generating wider posteriors.
+Explicit partisans allocate nearly one additional token to co-partisans relative to out-partisans (median AP = 0.99, 95% CI: 0.91–1.08, 99% CI: 0.87–1.11).
+Strikingly, implicit partisans --- respondents who do not report a felt attachment to any party --- display almost the same degree of in-group favoritism (median AP = 0.93, 95% CrI: 0.75–1.10, 99% CrI: 0.68–1.15).
+The posterior CATE is small (median = 0.07) and highly uncertain (95% CI: –0.11 to 0.24).
+Given the data, the posterior probability that explicit partisans polarize more than implicit partisans is 77.6%.
+Though the direction is in line with the hypothesised relationship, over two-thirds of the posterior mass on the positive domain lies below 0.1.
+Substantively, we interpret this as little to no systematic difference between the two groups, given the data.
+The more notable result is that individuals without a stated partisan identity nonetheless display robust and precisely estimated AP, despite larger uncertainties due to smaller sample size.
 
 Second, interpersonal favoritism (IF) shows a somewhat clearer, but still modest, separation between explicit and implicit partisans.
-Explicit partisans allocate more tokens to co-partisans in interpersonal (non-competitive) contexts (median IF = 0.54, 95% CrI: 0.46–0.63). Implicit partisans again display a comparably strong tendency (median IF = 0.45, 95% CrI: 0.26–0.64). The CATE suggests slightly stronger favoritism among explicit partisans (median = 0.09), with an 83.1% posterior probability that the effect is positive. Yet the magnitude remains small: 77% of the posterior mass lies between 0 and 0.25 tokens. The key insight is that implicit partisans engage in meaningful interpersonal discrimination, even in settings that do not directly invoke partisan conflict.
+Explicit partisans allocate more tokens to co-partisans (median IF = 0.54, 95% CrI: 0.46–0.63).
+Implicit partisans again display a comparably strong tendency (median IF = 0.45, 95% CrI: 0.26–0.64).
+The CATE suggests slightly stronger favoritism among explicit partisans (median = 0.09), with an 83.1% posterior probability that the effect is positive.
+Yet the magnitude remains small: 77% of the posterior mass lies between 0 and 0.25 tokens.
+The key insight is that implicit partisans engage in meaningful ingroup favoritism, despite denying a subjective attachement to the respective partisan anchor.
 
 Third, we find no systematic difference between explicit and implicit partisans in out-party derogation (OD).
-Explicit partisans withhold roughly 0.45 tokens from out-partisans (95% CrI: 0.36–0.54), while implicit partisans display very similar patterns (median OD = 0.48, 95% CrI: 0.35–0.60). The CATE centers at zero (median = –0.03, 95% CrI: –0.16 to 0.10), and the posterior assigns 66.6% probability to a negative effect. Although the median suggests marginally stronger derogation among implicit partisans, the credible intervals clearly rule out any systematic difference. The substantive conclusion is that implicit partisans derogate out-partisans to the same extent as explicit identifiers, reinforcing the broader pattern from AP and IF.
+Explicit partisans withhold roughly 0.45 tokens from out-partisans (95% CrI: 0.36–0.54), while implicit partisans display very similar patterns (median OD = 0.48, 95% CrI: 0.35–0.60).
+The CATE centers at zero (median = –0.03, 95% CrI: –0.16 to 0.10), and the posterior assigns 66.6% probability to a negative effect.
+Although the median suggests marginally stronger derogation among implicit partisans, which would contradict our hypothesis, the credible intervals clearly rule out any systematic difference.
+The substantive conclusion is that implicit partisans derogate out-partisans roughly to the same extent as explicit identifiers, reinforcing the broader pattern from AP and IF.
 
-Taken together, the pooled dictator-game results show that implicit partisans—despite reporting no subjective attachment to any party—display levels of affective bias that are nearly indistinguishable from those of explicit partisans. The small and uncertain CATEs suggest that the behavioral expression of partisan affinity is only weakly tied to self-reported partisan identity. Instead, partisan type appears to shape the certainty with which biases are expressed rather than their magnitude.
+Taken together, the pooled dictator-game results show that implicit partisans --- despite reporting no subjective attachment to any party --- display levels of affective bias that are nearly indistinguishable from those of explicit partisans.
+The small and uncertain CATEs suggest that the behavioral expression of AP is only weakly tied to self-reported partisan identity.
+Consequently, this would suggest either a small additional effect of expressive partisan identity on AP, or at least that self-reported attachement adds little to the behavioral dynamics of AP.
+We now turn to the results of the trust game to examine if the findings from the dictator game hold there too. 
 
-#### Trust game
+#### Trust game {.unnumbered}
 
 {{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-t >}}
 
@@ -700,9 +715,11 @@ While we hypothesized that the effect of explicit partisan attachment might vary
 
 ### Sample descriptives {.appendix}
 
-{{< embed code/preparation/02_descr_anal.qmd#tbl-nresp-country-age >}}
+{{< embed code/preparation/02_descr_anal.qmd#tbl-nresp-country >}}
 
-Age by Country Gender by Country
+
+{{< embed code/preparation/02_descr_anal.qmd#tbl-nresp-country-gender >}}
+
 
 ### Experimental setup {.appendix}
 
