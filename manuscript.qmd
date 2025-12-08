@@ -502,36 +502,40 @@ For scale reference, a one-token difference corresponds to 42.6\% of a standard 
 
 #### Dictator game {.unnumbered}
 
-@fig-pooled-cov-d presents the pooled results for the dictator game. Three clear findings emerge.
+@fig-pooled-cov-d presents the pooled dictator-game results. 
+Taken together, they yield three core findings regarding the effect of partisan type on affective polarization and its constituent components.
 
 {{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-d >}}
 
-First, both explicit and implicit partisans exhibit substantial levels of affective polarization.
-Explicit partisans allocate nearly one additional token to co-partisans relative to out-partisans (median AP = 0.99, 95% CI: 0.91–1.08, 99% CI: 0.87–1.11).
-Strikingly, implicit partisans --- respondents who do not report a felt attachment to any party --- display almost the same degree of in-group favoritism (median AP = 0.93, 95% CrI: 0.75–1.10, 99% CrI: 0.68–1.15).
-The posterior CATE is small (median = 0.07) and highly uncertain (95% CI: –0.11 to 0.24).
-Given the data, the posterior probability that explicit partisans polarize more than implicit partisans is 77.6%.
-Though the direction is in line with the hypothesised relationship, over two-thirds of the posterior mass on the positive domain lies below 0.1.
-Substantively, we interpret this as little to no systematic difference between the two groups, given the data.
-The more notable result is that individuals without a stated partisan identity nonetheless display robust and precisely estimated AP, despite larger uncertainties due to smaller sample size.
+First, explicit and implicit partisan types exhibit substantive and statistically precise AP, with only minimal differences between them (top left panel in @fig-pooled-cov-d).
+Explicit partisans allocate nearly one additional token to co-partisans relative to out-partisans (median AP = 0.99, 95\% CI: 0.91-1.08).
+Implicit partisans --- those who deny feeling attached to any party but nevertheless possess a clear partian anchor --- display almost the same pattern (median AP = 0.93, 95\% CI: 0.75-1.10).
+Consequently, the posterior distribution of the CATE is tightly centered near zero (median = 0.07; 95\% CI: -0.11 to 0.24, top right panel in @fig-pooled-cov-d).
+Given the data, there is a 78\% probability that explicit partisans polarize more than implicit partisans, but most of that probability mass falls below substantively meaningful magnitudes (over two-thirds below 0.1 tokens).
+Put differently, although the sign of the effect aligns with the identity-centered hypothesis (H1), the Bayesian evidence conveys considerable uncertainty.
+The more striking observation is the magnitude of AP among implicit partisans: despite denying explicit attachement, they express robust, tighly estimated partisan discrimination, indicating that subjective identification (or reporting thereof) is not necessary for behavioral AP to materialize.
 
-Second, interpersonal favoritism (IF) shows a somewhat clearer, but still modest, separation between explicit and implicit partisans.
-Explicit partisans allocate more tokens to co-partisans (median IF = 0.54, 95% CrI: 0.46–0.63).
-Implicit partisans again display a comparably strong tendency (median IF = 0.45, 95% CrI: 0.26–0.64).
-The CATE suggests slightly stronger favoritism among explicit partisans (median = 0.09), with an 83.1% posterior probability that the effect is positive.
-Yet the magnitude remains small: 77% of the posterior mass lies between 0 and 0.25 tokens.
-The key insight is that implicit partisans engage in meaningful ingroup favoritism, despite denying a subjective attachement to the respective partisan anchor.
+Second, ingroup favoritism (IF) reveals a slightly clearer but still mdoest difference between partisan types (center left panel of @fig-pooled-cov-d).
+Explicit partisans show a subtantial tendency to reward co-partisans over neutral partners in the dictator game (median IF = 0.54, 95\% CI: 0.46-0.63).
+Implicit partisans display a closely comparable pattern (median = 0.45, 95\% CI: 0.26-0.64).
+The posterior CATE again indicates only a -- if at all -- small difference, with an 83\% posterior probability that explicit types engage in stronger IF and roughly three quarters of that lying in the range of 0 to 0.25 tokens.
+From a Bayesian perspective, this means that while the direction is more consistent with H2 than was the case for H1 (as expressed by Pr(CATE_IF > 0) = 83\% compared to Pr(CATE_AP > 0) = 78\%), the remaining uncertainty deny interpretation of a systematic difference in underlying IF.
+Importantly, implicit partisans exhibit substantively meaningful ingroup favoritism, despite not reporting a felt bond to the party that serves as their anchor --- an observation consistent with multidimensional accounts of partisanship that emphasize cue-based or behavioral pathways.
 
-Third, we find no systematic difference between explicit and implicit partisans in out-party derogation (OD).
-Explicit partisans withhold roughly 0.45 tokens from out-partisans (95% CrI: 0.36–0.54), while implicit partisans display very similar patterns (median OD = 0.48, 95% CrI: 0.35–0.60).
-The CATE centers at zero (median = –0.03, 95% CrI: –0.16 to 0.10), and the posterior assigns 66.6% probability to a negative effect.
-Although the median suggests marginally stronger derogation among implicit partisans, which would contradict our hypothesis, the credible intervals clearly rule out any systematic difference.
-The substantive conclusion is that implicit partisans derogate out-partisans roughly to the same extent as explicit identifiers, reinforcing the broader pattern from AP and IF.
+Third, outgroup derogation (bottom row of @fig-pooled-cov-d) shows the strongest evidence of no systematic differences between partisan types in the dictator game.
+On average, explicit partisans withhold 0.45 tokens from out-partisans (95\% CI: 0.36-0.54), while implicit counterparts display nearly identical behavior (median OD = 0.48, 95\% CI: 0.35-0.60).
+The CATE centers even stronger around zero compared to before (median = -0.03, 95\% CI: -0.16 to 0.10).
+This time the median tendency is even contrary to the theorized direction: given the data, there is a 67\% probability that implicit partisans derogate outpartisans slightly more.
+But with once more large remaining uncertainties, the data are fully consistent with equivalent levels of OD across partisan types.
+We interpret this as evidence against H3, suggesting no systematic difference in OD between partisan types in the dictator game.
 
-Taken together, the pooled dictator-game results show that implicit partisans --- despite reporting no subjective attachment to any party --- display levels of affective bias that are nearly indistinguishable from those of explicit partisans.
-The small and uncertain CATEs suggest that the behavioral expression of AP is only weakly tied to self-reported partisan identity.
-Consequently, this would suggest either a small additional effect of expressive partisan identity on AP, or at least that self-reported attachement adds little to the behavioral dynamics of AP.
-We now turn to the results of the trust game to examine if the findings from the dictator game hold there too. 
+Taken together, the pooled dictator-game results offer a clear conclusion: implicit partisans behave almost indistinguishably from explicit partisans in their allocation decisions toward co- and out-partisans.
+The relevant Bayesian evidence --- posterior medians near zero, wide but symmetric CATE distributions, and probability masses concentrated around substantively trivial values --- indicates that any additional behavioral content generated by explicit subjective attachement is, at best, minimal.
+
+In this game, the behavioral expression of partisan bias appears to stem from partisnship as anchoring or categorization rather than from self-reported identity.
+This aligns with theoretical accounts emphasizing substantive, informational, or norm-based pathways to AP, and challenges the expectation that explicit identity alone should amplify discriminatory behavior.
+
+We next examine whether this pattern extends to the trust game, where reciprocal structure may alter the relative contribution of ingroup and outgroup components.
 
 #### Trust game {.unnumbered}
 
