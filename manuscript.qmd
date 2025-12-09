@@ -49,7 +49,7 @@ geometry:
 
 1. Problem statement
   - AP is widely studies, but who counts as a partisan varies dramatically across studies
-  - Many AP measures implicitly restrict inferene to explicit partisans (PID identifiers), while others include the entire electorate
+  - Many AP measures implicitly restrict inference to explicit partisans (PID identifiers), while others include the entire electorate
   - In multiparty Europe, the prevelance of identifiers varies sharply -> population of inference becomes unstable
 
 2. Conceptual motivation
@@ -87,6 +87,7 @@ geometry:
 1. Background: Affective polarization as multidimensional
   - Rapid expansion since @iyengar2012affect -> many measures, many conceptualizations
   - @campos2025new: AP is not a single latent construct; different measures capture different processes (emotional, social, behavioral)
+  - This multidimensionality implies that explicit identity might shape some AP measures (thermometers) but not others (allocations, reciprocity), as noted by Campos et al.
   - In behavioral AP (allocations), identity may be only one pathway
 
 2. Partisanship as social identity
@@ -94,11 +95,13 @@ geometry:
     - Explicit identifiers -> stronger ingroup favoritism and outgroup derogation
   - Expressive vs instrumental models: identity vs policy alignment
   - BUT: identity strength, closeness, leaners, latent identity all complicacte the picture
+  - Classic social identity theory predicts explicit identifiers should discriminate more. Yet much recent work questions whether explicit identification is the operative causal mechanism behind AP (Orr; Campos et al.).
 
 3. Measurement problem: Who counts as a partisan?
   - In multiparty settings, \% identifiers varies dramatically (40-80\% in our data)
   - Restricting samples to identifiers implicitly changes the population of inference
   - Eurobarometer and national surveys often capture attachement differently -> conceptual instability
+  - The instability of identification rates across Europe raises a deeper question: Is explicit identity actually the behaviorally relevant mechanism, or merely a noisy psychological self-report?
 
 4. Introducing "partisan type"
   - Grabs the core idea from U.S. leaners literature, but generalizes it for multiparty contexts
@@ -108,10 +111,13 @@ geometry:
     - Vote anchor = behavioral signal of group alignment
     - Subjective attachement = psychological signal
     - These need not coincide
+  - In multiparty systems, categorization may occur through anchors, not identities.
+Partisan type therefore captures a theoretically meaningful distinction: explicit identity vs. implicit categorization.
 
 5. Why partisan type should matter (theoretical expectation)
   - Strong identity pathway: explicit identifiers shoullds exhibit more IF and OD
   - Mechanisms: categorization -> group affect -> threat -> exclusivity -> discrimination
+  - Identity accounts assume that explicit identifiers possess stronger affective ties to the ingroup → more IF and more OD.
 
 6. Why partisan type may not matter (alternative pathways)
   - Identity loyalty vs substantive alignment produce observationally equivalent behaviors [@orr2023affective]
@@ -121,12 +127,19 @@ geometry:
     - Social composition of supporters
     - Expected norms of reciprocity
   - Thus implicit partisans may activate the same heuristics as explicit identifiers even without subjective attachement
+  - Orr (2023) demonstrates that identity loyalty and substantive disagreement can both produce AP, implying that explicit identity is not necessary.
+  - Campos et al. (2025) shows that behavioral AP may arise through categorization, norms, or perceived ideological distance, none of which require explicit identification.
 
 7. Hypotheses
-  - H1: Explicit > implicit in AP
-  - H2: Explicit > implicit in IF
-  - H3: Explicit > implicit in OD
-  - Note: These hypotheses represent the identity-centered expectation, but competing accounts (multidimensional AP, cue-based reasoning, normative expectations) predict null differences
+  - H1 (Affective Polarization): Explicit partisans will exhibit higher affective polarization (larger Co–Out difference) than implicit partisans.
+(Identity-centered expectation: stronger subjective attachment → stronger group affect → stronger behavioral AP.)
+  - H2 (Ingroup Favoritism): Explicit partisans will reward co-partisans more strongly than implicit partisans.
+(Identity-centered expectation: felt attachment increases positive affect toward ingroup.)
+  - H3 (Outgroup Derogation): Explicit partisans will penalize out-partisans more strongly than implicit partisans.
+(Identity-centered expectation: felt attachment increases perceived threat and derogation.)
+  - These hypotheses reflect the social identity pathway.
+  - Competing accounts — emphasizing substantive disagreement, cue-driven categorization, ideological distance, or behavioral norms — predict minimal or no difference between explicit and implicit types.
+  - Testing these competing expectations is central to adjudicating theoretical accounts of AP.
 
 ## Research Design {#sec-design}
 
@@ -262,8 +275,8 @@ $$ {#eq-model-sys}
 While the discrete nature and strict bounds of the outcome violate the technical assumptions of the Gaussian family (as the distribution is constrained and not continuous), the approach is justified by its focus on the marginal means effects ($AP$, $IF$, $OD$).
 The estimator for the regression coefficients derived from this likelihood family is mathematically equivalent to the Ordinary Least Squares (OLS) estimator under fixed effects and Normal errors [@wooldridge2010econometric].
 Crucially, the OLS estimator provides unbiased and consistent estimates of the conditional mean $E(Y \mid X)$ under large samples, even when the residuals are non-Normal or heteroskedastic, relying on asymptotic properties [@white1980heteroskedasticity].
-This pragmatic choice allows for directly interpretable coefficients on the original token allocation scale, avoiding the complexity of nonlinear link functions required by models such.
-Furthermore, the inclusion of a rich covariate set and the respondent-level random intercept ($u_{i0}$) helps to absorv substantial structured variance, mitigating the severity of residual non-Normality that often arises from bounding effects.
+This pragmatic choice allows for directly interpretable coefficients on the original token allocation scale, avoiding the complexity of nonlinear link functions.
+Furthermore, the inclusion of a rich covariate set and the respondent-level random intercept ($u_{i0}$) helps to absorb substantial structured variance, mitigating the severity of residual non-Normality that often arises from bounding effects.
 Respondent-level random intercepts are assumed to follow a normal distribution (@eq-resp-int):
 
 $$
@@ -329,7 +342,7 @@ The model intercept receives a $\mathcal{N}(5, 2)$ prior centered at the midpoin
 Standard deviations of the random effects $\sigma_{RE}$ are assigned $\text{Half-student-}t(3, 0, 1)$ priors.
 This distribution is defined exclusively on the positive domain ($[0, \infty)$) and has heavier tails compared to the Half-Normal distribution, allowing for the possibility of larger group-level variability while still shrinking effects towards zero.
 The residual standard deviation $\sigma$ is assigned a $\text{Half-student-}t(3, 0, 2)$ prior.
-These priors improve convergance, facilitate shrinkage in a high-dimensional multilevel structure, and reduce the probability of implausible prior-predictive draws (e.g., $Y > 10$).
+These priors improve convergence, facilitate shrinkage in a high-dimensional multilevel structure, and reduce the probability of implausible prior-predictive draws (e.g., $Y > 10$).
 
 The randomized conjoint design secures internal validity for profile-level effects ($R_{ri}$ and other $Z$ attributes) within partisan types.
 The contrast across partisan types (i.e, the effect of $R$ conditional on $T$) remains observational and is identified under adjustmend for $C_i$ and the multilevel structure.
@@ -472,7 +485,7 @@ This accounts for country-specific factors (e.g., general political climate, ins
 Our hierachical Bayesian model encodes this strategy.
 All reported estimands are obtained via g-computaion (observed-values approach), averaging posterior expectations over the empirical covariate distribution and relevant grouping units, which propagates uncertainty through the entire multilevel structure.
 
-We are confident in the internal validity of profile-level effects ($R$ and other $Z$ attributes) and of the derived quantities ($AP$, $IF$, $OD$) conditional on $T$. as these rely on random assignement of $Z$.
+We are confident in the internal validity of profile-level effects ($R$ and other $Z$ attributes) and of the derived quantities ($AP$, $IF$, $OD$) conditional on $T$, as these rely on random assignement of $Z$.
 The contrast between explicit and implicit partisans --- the $CATE$s --- is necessarily more assumption-intensive.
 Our modeling strategy, combining rich covariate adjustment and hierarchical partial pooling, substanially reduces, though cannot eliminate, the possibility of unobserved confounding.
 
@@ -503,7 +516,7 @@ For scale reference, a one-token difference corresponds to 42.6\% of a standard 
 #### Dictator game {.unnumbered}
 
 @fig-pooled-cov-d displays the pooled dictator-game estimates.
-Interpreted within the causal framework introduced above --- where the estimand approximates the effect of a hypothetical intervention shifting individuals from implicit to explicit partisanship --- the findings indicate that such an intervention would have, at most, minimal consequences for allocative discrimination.
+Interpreted within the causal framework introduced above --- where the estimand approximates the effect of a hypothetical intervention shifting individuals' partisan type from implicit to explicit --- the findings indicate that such an intervention would have, at most, minimal consequences for allocative discrimination.
 
 {{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-d >}}
 
@@ -584,7 +597,7 @@ In the dictator game (@fig-country-cov-d-ev), clear cross-national differences e
 Countries vary in baseline giving (as indicated by contributions to "None") and in the magnitude of affective polarization and its components (visible as the relative distances between the shaded posteriors associated with co-partisan, neutral, and out-partisan recipients).
 These differences demonstrate that the model is not surpressing genuine cross-country variation: respondents in some contexts exhibit more AP, IF, or OD than those in others.
 
-However, when comparing across partisan types within each country (the two columns in each panel), the expected valzes are virtually indistinguishable.
+However, when comparing across partisan types within each country (the two columns in each panel), the expected values are virtually indistinguishable.
 In every case, implicit and explicit partisans display the same pattern of allocations, differing mainy in posterior precision (implicit types tend to have wider distributions) rather than in their locations.
 For example, Ireland exhibits lower overall AP than Spain, but this holds for both implicit and explicit partisans.
 The same cross-national ordering --- and the same within-country equality --- appears throughout the sample.
