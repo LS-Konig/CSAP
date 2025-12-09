@@ -80,17 +80,43 @@ geometry:
   - The concept of AP was introduced and popularized in mass politics by Iyengar et al. (2012), but theory and measurement have since diversified: AP includes feelings towards parties, perceptions of social distance, and behavioral discrimination (thermometer vs allocations). (Iyengar et al. 2012; Iyengar & Westwood 2015; Campos & Federico 2025)
   - The Campos 2025 emphasizes that different subdimensions (e.g. othering, aversion, moralization) predict distinct consequences; this motivates separating behavioral AP (our focus) from evaluative measures (Finkel et al. 2020; Campos & Federico 2025)
 
+With his seminal paper titled "Affect, not ideology", @iyengar2012affect shifted debates among scholars about the (existence), degree and extent of political polarization in the American public from focussing on ideological, substantive policy disagreements to a more social, emotional (i.e. *affective*) based phenomenon of polarization: the tendency of partisans to like/prefer individuals from their own party, whilest disliking/discriminating those from the other party.
+Since then, a great number of studies have been dedicated studying the causes, why this phenomenon occurs, its consequences, what does it do, and its dynamics (how does it develop, how does it change conditional on other factors), mostly focussed on the US context but also increasingly in Europe and around the world.
+This rise in literature has led to an extensive coverage of contexts, in which the general AP phenomenon can be observed, but at the cost of conceptual and measurement ambiguities, with different measurement approaches yielding conceptual consequences about the *nature* of AP under study.
+Consequently, theories and measurement of AP have been continuously refined, distinguishing between *who* is polarized (or who counts as partisan?), against whom polarization is directed at (vertically toward citizens vs horizontally towards parties, the latter can be even further refined into parties and leaders), how to adjust for the inherently more complicated party systems outside the US without its two-party system providing a clear ingroup/outgroup symmetry, all while trying to capture which of these forms come with serious consequences for the health(s) of democracies, and which concerns may be exaggerated.
+Most recently, @campos2025new proposed a new framework accounting for the inherent multidimensionality of AP, conceptualizing it as consisting out of three main dimensions, othering, aversion, and moralization, each of which constitutes "a general interrelated set of beliefs about the out-party, the in-party, and the relationship between the two", along with a new measurement strategy to capture those subdimensions empirically.
+Thus, while there is substantial agreement about the empirical presence of AP, the fundamental causes as well as the normative implications remain subject to debate. 
+
+
 2. Paragraph 2 -- Social identity theory and political identity
   - Social identity theory predicts that stronger felt attachment yields greater ingroup favoritism and outgroup derogation --- a behavioral pattern observed in political contexts (Huddy, Mason & Aarøe 2015; Mason 2018). (Tajfel & Turner 1979; Brewer 1999; Huddy et al. 2015)
   - Applied to partisanship, this yields the identity-centered expectation: explicit identifiers should respond more strongly to partisan cues in behavioral tasks (Huddy et al. 2015; Mason 2018)
 
+AP has been predominantly studies through the lense of social identity theory (SIT).
+According to SIT, people that identify with a given group form so called ingroup favoritism (IF) -- corresponding to the already mentioned tendency of preferring, in whatever way, members of the own group.
+Convertly, other groups and their constituent members, are more likely perceived as threats or competitors, giving rise to outgroup derogation (OD).
+Foundational social psychology research demonstrated that these mechanisms even are at play for seemingly arbitrary group boundaries, suggesting these are universally embedded human phenomena that evolved through our evolution as group living beings, the so called tribalism account of AP.
+Given the seemingly universal coverage of SIT, political science scholars usually restrict AP to the group phenomena related to *political* identities in the widest sense.
+A prominent, identity-driven notion of a cause or at least driver of AP is Mason's concept of social sorting.
+With people holding multiple group identities, the amount of aligned and cross-cutting identities influences overall homogeneity perceptions of groups, and the alignment of usually unpolitical identites along a political, e.g. partisan, identity can further intensify intergroup conflict.  
+
+
 3. Paragraph 3 -- Limits of identity: substance, loyalty, and inferential updating
-  - However, severak recent studies show that when respondents learn a party label they update beliefs about policy positions, making it difficult to isolate identity per se from substantive inferences (Dafoe, Zhang & Caughey 2018; Orr et al. 2023). (Dafoe et al. 2018; Orr et al. 2023)
+  - However, several recent studies show that when respondents learn a party label they update beliefs about policy positions, making it difficult to isolate identity per se from substantive inferences (Dafoe, Zhang & Caughey 2018; Orr et al. 2023). (Dafoe et al. 2018; Orr et al. 2023)
   - Orr et al explicitly demonstrate that manipulations intended to vary identity often change perceived policy agreement, and that policy agreement often explains affective responses more than identity/loyalty (Orr et al. 2023)
+
+Yet, despite the clear dominance of social identity accounts in the study of AP, several recent studies question the explanatory power of group identity for AP alone, highlighting again the importance of ideology or substantive disagreements.
+Whereas Dias and Lelkes argue for a dominance of identity over ideology, Orr argue the opposite.
+Crucially, @orr2023affective demonstrate that AP measures, though they can serve as empirical manifestations of the underlying AP phenomenon, cannot disentangle if those phenomena arise due to (perceived) identity or (perceived) ideology.
+Both could trigger the same behaviors, in the extreme case even rendering their outcomes observationally equivalent.
+Even in randomized experimental tasks like trust games that have been employed to study AP, causally disentangling IF and OD, it is impossible to tell whether the partisan cue presented in experiments *causes* behavioral changes because respondents perceive that profile as an identifying member of that party, or whether they perceive the partisan cue as a heuristic for ideological and substantive policy positions.
 
 4. Paragraph 4 -- Categorization, anchors, and minimal-group effects
   - Psychological categorization and minimal-group logic imply that simply anchoring a person to a party or vote cue can trigger group-based behavior even without subjective attachment (Sherif et al. 1961; Cikara & Van Bavel 2014)
   - Vote anchors convey ideology, social composition, and reciprocity expectations; if respondents use these heuristics, implicit partisans will behave like explicit ones
+
+This is further complicated by minimal-group accounts that posit simply anchoring a person to a party or vote cue can trigger group-based behavior even without subjective attachment.
+According to this logic, respondents may show similar intergroup behaviors, even without actively identifying with that group (which also puts into question what it even means to identify).
 
 5. Paragraph 5 -- Measurement problem and comparative complications
   - In multiparty Europe, self-reported attachment rates vary dramatically across countries and surveys, so restricting inference to explicit identifiers changes the estimand and the population --- undermining cross-national comparability (Reiljan 2020; Wagner 2021)
