@@ -120,14 +120,27 @@ To the best of our knowledge, no existing work has systematically examined wheth
 Conceptually, partisan type is narrower and more precise than “supporters” --- a category that encompasses both explicit and implicit types --- and avoids conflating subjective attachment with mere behavioral or expressive alignment.
 By providing a simple but theoretically granular distinction that can be applied across party systems, partisan type clarifies scholars’ population of inference --- whether the focus is on identifiers (*explicit partisans*) or on the broader electorate (*explicit and implicit* partisans) --- and thereby strengthens the analytical foundations for comparative research on affective polarization.
 
+The distinction between explicit and implicit partisans provides a direct empirical test of two competing explanations for affective polarization.
+The identity-centered account holds that subjective partisan attachment is a unique psychological force: explicit identifiers should react more strongly to partisan cues because identity heightens ingroup affect, perceived threat, and willingness to derogate outgroups.
+Under this view --- the party-over-policy hypothesis --- explicit partisanship should magnify all components of AP.
+In contrast, the substance/categorization account posits that partisan labels convey ideological, social, and normative information that suffices to generate discriminatory behavior even without felt attachment.
+This policy-over-party hypothesis predicts that implicit partisans, despite denying attachment, will discriminate to the same extent as explicit identifiers because categorization and inferred policy alignment --- not subjective identity --- drive affective and behavioral responses.
+Our contribution is to adjudicate directly between these two explanations by comparing explicit and implicit partisans in identical behavioral settings across 25 multiparty systems.
 
+Formally, these competing logics yield different hypotheses regarding the extent to which partisan types differ in their AP behaviors. 
+If explicit attachement exerts an independent identity effect, then the party-over-policy hypothesis would predict:
 
-6. Paragraph 6 -- Introducing partisan type: definition and theoretical utility
-  - We define partisan type as a binary classification: explicit partisan (report felt attachement) vs implicit partisans (deny attachment but report a party anchor through vote items). This generalizes U.S. "leaners" to multiparty settings and separates behavioral anchors from subjective identity (Keith et al. 1992; Klar & Krupnikov 2016) [@hawkins2012motivated; @theodoridis2017me; @petrocik2009measuring; @elliott2024like; @kinder2017neither; @klar2016independent; @fowler2023moderates]
-  - The partisan-type distinction allows us to test whether subjective attachment causally magnifies AP (identity mechanism) or whether anchors/cues and inferred policy suffice (substance/categorization mechanism) (Orr et al. 2023; Campos & Federico 2025)
-  - The underlying rationale is that partisan type captures varying degrees of identity or attachement: those that explicitly report to feel attached to a party can be plausibly attributed as identifying with that party. In contrast, this is less clear for respondents who deny feelings of attachement in the very same question. Still, by reporting a vote preference in other items of a survey, they still reveal their most liked (or least disliked) party. But should one call these respondents *identifiers* then? They did neglegt feeling attached, so they are at most implicit identifiers.
-  @huddy2018expressive
-  - We view this conceptual extension as benfitial for several reasons: it clearly distinguished respondents who report feeling attached and who deny feeling attached. At the same time, it differs from the established notion of party supporters in that supporters circumpass both implicit and explicit types in our sense, thus constituting a superset. It does not say anything about nominal partisan membership, which is a different topic, though it likely correlates with subjective attachement, i.e., explicit partisanship. And we find it more accurate than the term "leaners", which reflects a US centric concept, in which there is a clearly established concept of "independents" in the metaphorical center and two clear poles, to which individuals might "lean" despite considering themselves non-partisan. Consequently, the notion of partisan types logically captures the meaning of leaners, extending and generalizing it to European contexts. Also, it helps scholars to clearly state what their population of interest is when studying AP: partisan identifiers or the broad electorate/population?.
+- **H1a**: Explicit partisans exhibit *greater* affective polarization than implicit partisans.
+- **H2a**: Explicit partisans show *greater* ingroup favoritism than implicit partisans.
+- **H3a**: Explicit partisans express *greater* outgroup derogation than implicit partisans. 
+
+Conversely, if the policy-over-party mechanism holds and partisan cues and inferred ideological (dis)agreement would be sufficient to generate AP absent reported attachement, the following empirical implications should hold:
+
+- **H1b**: Explicit and implicit partisans do not differ in affective polarization.
+- **H2b**: Explicit and implicit partisans do not differ in ingroup favoritism.
+- **H3b**: Explicit and implicit partisans do not differ in outgroup derogation.
+
+Together, these hypotheses allow us to distinguish whether behavioral AP in multiparty systems reflects the unique psychological force of explicit partisan identity (H1a–H3a) or whether partisan anchoring and cue-driven inferences alone are sufficient to reproduce AP’s behavioral signature (H1b–H3b).
 
 7. Paragraph 7 Mechanisms: why ecplicit might amplify AP
   - If explicit attachment constitutes a stronger psychological tie, it shoulds increase ingroup positive affect, perceived threat from rivals, and endorsemment of exclusionary norms --- producing higher IF and OD (Huddy et al. 2015; Kalmoe & Mason 2022)
@@ -138,6 +151,14 @@ By providing a simple but theoretically granular distinction that can be applied
   -  Hypotheses and competing expectations
   - Identity-centered hypotheses (H1-H3): explicit > implicit for AP, IF and OD, respectively (Tajfel & Turner 1979; Huddy et al. 2015)
   - Competing hypothesis (substance/categorization): no meaningful explicit > implicit gap; implicit identity (as expressed through revealed vote preference) alone suffice to generate behavioral AP (Orr et al. 2023; Campos & Federico 2025)
+  - party-over-policy HTs:
+    - H1a: explicit > implicit in AP Affpol
+    - H2a: explicit > implicit in IF ingroup favoritism
+    - H3a: explicit > implicit in OD ourgoupt derogation
+  - policy-over-party HTs:
+    - H1a: explicit = implicit in AP Affpol
+    - H2a: explicit = implicit in IF ingroup favoritism
+    - H3a: explicit = implicit in OD ourgoupt derogation
 
 8. Paragraph 8 -- Empirical leverage and identification strategy (link to model)
   - Our design uses within-respondent randomization of profile cues (conjoint) to secure causal identification of profile-level effects, and hierarchical Bayesian models with g-computation to estimate the observational contrast across partisan types while adjusting for covariates and clustering; this matches the logic required to adjudicate identity vs substance
