@@ -76,21 +76,29 @@ geometry:
 
 ## Theory {#sec-theory}
 
+#### The Rise of Affective Polarization {.unnumbered}
+
 With *Affect, Not Ideology*, @iyengar2012affect shifted longstanding debates about polarization away from substantive policy disagreement [@poole1984polarization; @mccarty2006polarized; @fiorina2006culture; @fiorina2008polarization; @fiorina2008political; @abramowitz2006exploring; @abramowitz2008ispolarization; @abramowitz2010thedisappearing] toward a more social and emotional understanding of partisan conflict, emphasizing that partisans increasingly favor their own side while disliking or discriminating against the opposing party [@iyengar2015fear; @iyengar2019origins; @IyengarWagner2025Conceptualizing].
 This reconceptualization catalyzed a vast research program investigating the drivers of affective polarization [@iyengar2019origins; @hobolt2024polarizing; @bail2018exposure; @dias2022nature; @orr2020policy; @rogowski2016ideology; @levendusky2013partisan; @mason2015disrespectfully; @mason2016acrosscutting; @mason2018ideologues; @tornberg2022digital; @luttig2017authoritarianism; @luttig2018prejudiced], its social, political, and economic consequences [@diermeier2019partisan; @berntzen2023consequencesofaffective; @mcconnell2018economic; @jenke2024affective; @kingzette2021affective; @huber2017political; @mcconnell2018economic; @broockman2023doesaffective; @lee2022social; @lee2025hate; @graham2020democracy], its temporal evolution [@iyengar2012affect; @iyengar2018strengthening; @iyengar2019origins], and possible interventions to reduce it [@adams2023can; @kalla2022voter; @levendusky2018americans; @druckman2023does; @mernyk2022correcting].
 Initially focused on the American case, scholars have increasingly studied AP in Europe [@wagner2021affective; @reiljan2020fear; @hahm2024divided] and comparative contexts worldwide [@reiljan2024patterns; @torcal2023affective; @ferreira2024affective; @garzia2023affective; @boxell2024cross; @gidrom2020american].
 Yet the rapid expansion of this literature, while demonstrating the broad reach of AP, has also generated conceptual and measurement ambiguities, as different operationalizations capture distinct facets of the phenomenon and yield divergent conclusions about its underlying nature [@campos2025new; @bakker2024putting; @CarlinLove2025Measuring; @IyengarWagner2025Conceptualizing]
 This led scholars to refine theories of AP by clarifying who counts as partisan, distinguishing between horizontal hostility toward citizens and vertical hostility toward elites [@klar2018affective; @areal2024verticalvshorizontal; @druckman2019we], with the latter further differentiated into leader and party AP [@reiljan2024patterns], and addressing the added complexity of multiparty systems where ingroup and outgroup boundaries are less symmetric [@rollicke2023polarisation; @TorcalComellas2025Operationalizing].
 
+#### Conceptual and Measurement Ambiguities {.unnumbered}
+
 These debates intersect with normative concerns about which forms of AP pose tangible risks to democratic norms [@moore2020exaggerated; @mernyk2022correcting; @berntzen2023consequencesofaffective; @kingzette2021affective] and which fears may be overstated [@voelkel2023interventions; @westwood2022current; @westwood2022reply].
 Most recently, @campos2025new proposed a multidimensional framework conceptualizing AP as comprising interrelated dimensions of othering, aversion, and moralization [see also @finkel2020political], accompanied by measurement strategies tailored to each subdimension.
 This refinement is normatively consequential because different facets of AP vary substantially in their links to democratic erosion and political violence [@Berntzen2025PoliticalViolence; @berntzen2023consequencesofaffective; @kalmoe2022radical; @moore2020exaggerated].
 Thus, although there is broad consensus that AP is empirically widespread, its fundamental sources and normative implications remain contested [@westwood2022current; @kalmoe2022aholistic; @broockman2023doesaffective], motivating the need for more precise distinctions in theory and measurement --- including the role of different forms of partisanship, which is the focus of this paper.
 
+#### Identity-Based Mechanisms of Partisan Behavior {.unnumbered}
+
 Social identity theory (SIT) provides the dominant framework for interpreting AP in political contexts.
 Classic work shows that group identification generates predictable patterns of ingroup favoritism and outgroup derogation—even when group boundaries are minimal or arbitrary [@tajfel1971social; @tajfel1974social; @tajfel1979integrative; @tajfel2004thesocial; @sherif1961intergroup; @allport1954thenature; @brewer1999psychology].
 Applied to politics, these mechanisms imply that stronger partisan attachment should heighten discriminatory behavior toward partisan targets [@huddy2015expressive; @mason2013therise; @iyengar2015fear].
 Contemporary accounts, such as the social-sorting perspective, further argue that when multiple social identities align with partisanship, partisan identity becomes more salient and conflictual, intensifying these behavioral tendencies [@greene1999understanding; @huddy2013group; @huddy2015expressive; @huddy2017political; @huddy2018expressive; @west2022partisanship; @mason2013therise; @mason2015disrespectfully; @mason2016acrosscutting; @mason2018ideologues; @mason2018one; @mason2018uncivil; @roccas2002social].
+
+#### Substantive Inference and the Limits of Identity-Only Explanations {.unnumbered}
 
 Despite the prominence of identity-based explanations for affective polarization, a growing body of work questions whether partisan identity alone drives discriminatory behavior, highlighting instead the role of ideological and substantive inferences [@bougher2017correlates; @webster2017ideological; @orr2020policy].
 When individuals encounter a party label, they routinely update beliefs about policy positions, group norms, and social composition, making it difficult to isolate the behavioral effects of identity per se from those of inferred agreement [@dafoe2018information; @orr2023affective].
@@ -100,14 +108,18 @@ This inferential entanglement extends even to behavioral experiments designed to
 Minimal-group and categorization research further complicates attribution by demonstrating that even arbitrary or shallow group boundaries can generate intergroup bias without subjective attachment [@sherif1961intergroup; @tajfel1974social], suggesting that simply anchoring individuals to a party or vote choice may be sufficient to trigger partisan discrimination.
 Collectively, these insights crystallize a persistent “chicken-or-the-egg” problem: does partisan identity shape citizens’ policy perceptions and preferences [@dias2025american], or do shared preferences and ideological affinities generate the sense of partisan identity that AP research often treats as fundamental [@dias2022nature; @orr2023affective]?
 
+#### Comparative Challenges in Multiparty Systems {.unnumbered}
+
 A further challenge arises when shifting from the U.S. two-party context to the multiparty systems that characterize most European democracies, where the structure of partisan competition renders the study of affective polarization substantially more complex [@rollicke2023polarisation; @wagner2021affective].
-Existing solutions vary widely: some approaches average evaluations across all out-parties, implicitly assuming a single ingroup [@reiljan2020fear; @hahm2024divided], others measure the overall dispersion of like–dislike scores within a party system @wagner2021affective, and still others incorporate the possibility of multiple ingroups or broader ideological blocs [@kekkonen2021affective; @kekkonen2022puzzles; @bantel2023camps].
+Existing solutions vary widely: some approaches average evaluations across all out-parties, implicitly assuming a single ingroup [@reiljan2020fear; @hahm2024divided], others measure the overall dispersion of like–dislike scores within a party system @wagner2021affective, and still others incorporate the possibility of multiple ingroups or broader ideological blocs [@kekkonen2021affective; @kekkonen2022puzzles; @bantel2023camps; @reiljan2021ideological].
 Yet these conceptual refinements underscore a deeper problem: measurement choices concerning who counts as a partisan --- and thus who is included in the analysis --- carry major implications for comparative inference [@garzia2023affective].
 In Europe, rates of self-reported partisan attachment vary dramatically across countries and surveys, meaning that restricting analyses to explicit identifiers changes both the estimand and the population of interest, thereby undermining cross-national comparability.
 Even the most widely used European AP measures --- @reiljan2020fear AP index and @wagner2021affective's spread measure --- differ precisely in how they operationalize the in-party, with the former focusing on reported identifiers and the latter encompassing the whole electorate.
 Because most studies aim to draw conclusions about the population-level state or trajectory of AP, inference based solely on partisan subsamples is valid only if identifiers constitute a sufficiently large share of the electorate or accurately represent non-identifiers—conditions that rarely hold, given that the proportion of identifiers ranges from roughly 40% to 80% in our data.
 These complications are heightened in contexts where the “poles of polarization” are less clearly structured than in the American two-party system [@rothers2025poles].
 Unsurprisingly, scholars increasingly emphasize that conceptualization and measurement design strongly shape substantive conclusions about AP, strengthening the case for developing more generalizable frameworks --- such as partisan-type distinctions --- that travel across party systems [@campos2025new; @CarlinLove2025Measuring; @IyengarWagner2025Conceptualizing; @TorcalComellas2025Operationalizing]
+
+#### A Generalizable Distinction: Explicit vs. Implicit Partisans {.unnumbered}
 
 To address these conceptual and comparative limitations, we introduce a generalizable distinction between *explicit* and *implicit* partisans --- what we term *partisan type*.
 Explicit partisans are individuals who report a felt attachment to a party, whereas implicit partisans are those who deny such attachment yet nevertheless express a partisan preference through loser-follow-up items or vote-choice questions.
@@ -118,7 +130,9 @@ In multiparty Europe --- where voters confront multiple ideological camps rather
 The theoretical utility of partisan type lies in its ability to adjudicate between identity-based and substance-based mechanisms of affective polarization: if explicit partisans exhibit stronger discriminatory behavior than implicit partisans, this pattern would support identity-centered accounts, whereas similar behavior across types would indicate that partisan cues, ideological inferences, or categorization dynamics alone suffice to generate AP in the absence of reported attachment [@orr2023affective].
 To the best of our knowledge, no existing work has systematically examined whether behavioral manifestations of AP differ between explicit and implicit partisans.
 Conceptually, partisan type is narrower and more precise than “supporters” --- a category that encompasses both explicit and implicit types --- and avoids conflating subjective attachment with mere behavioral or expressive alignment.
-By providing a simple but theoretically granular distinction that can be applied across party systems, partisan type clarifies scholars’ population of inference --- whether the focus is on identifiers (*explicit partisans*) or on the broader electorate (*explicit and implicit* partisans) --- and thereby strengthens the analytical foundations for comparative research on affective polarization.
+By providing a simple but theoretically granular distinction that can be applied across party systems, partisan type clarifies scholars’ population of inference --- whether the focus is on identifiers (explicit partisans *only*) or on the broader electorate (explicit *and* implicit partisans) --- and thereby strengthens the analytical foundations for comparative research on affective polarization.
+
+#### Hypotheses: Behavioral Expectations Across Partisan Types {.unnumbered}
 
 The distinction between explicit and implicit partisans provides a direct empirical test of two competing explanations for affective polarization.
 The identity-centered account holds that subjective partisan attachment is a unique psychological force: explicit identifiers should react more strongly to partisan cues because identity heightens ingroup affect, perceived threat, and willingness to derogate outgroups.
@@ -136,39 +150,22 @@ If explicit attachement exerts an independent identity effect, then the party-ov
 
 Conversely, if the policy-over-party mechanism holds and partisan cues and inferred ideological (dis)agreement would be sufficient to generate AP absent reported attachement, the following empirical implications should hold:
 
-- **H1b**: Explicit and implicit partisans do not differ in affective polarization.
-- **H2b**: Explicit and implicit partisans do not differ in ingroup favoritism.
-- **H3b**: Explicit and implicit partisans do not differ in outgroup derogation.
+- **H1b**: Explicit and implicit partisans *do not* differ in affective polarization.
+- **H2b**: Explicit and implicit partisans *do not* differ in ingroup favoritism.
+- **H3b**: Explicit and implicit partisans *do not* differ in outgroup derogation.
+
+#### Empirical Leverage and Theoretical Contribution {.unnumbered}
 
 Together, these hypotheses allow us to distinguish whether behavioral AP in multiparty systems reflects the unique psychological force of explicit partisan identity (H1a–H3a) or whether partisan anchoring and cue-driven inferences alone are sufficient to reproduce AP’s behavioral signature (H1b–H3b).
-
-7. Paragraph 7 Mechanisms: why ecplicit might amplify AP
-  - If explicit attachment constitutes a stronger psychological tie, it shoulds increase ingroup positive affect, perceived threat from rivals, and endorsemment of exclusionary norms --- producing higher IF and OD (Huddy et al. 2015; Kalmoe & Mason 2022)
-  - party-over-policy hypothesis 
-  - Mechanisms: why implicit may be sufficient
-  - Conversely, parties deliver information about ideology and social signals; respondents may use these as efficient heuristics to evaluate targets, producing the same behavioral discrimination without subjective attachement. Orr’s evidence that policy inferences mediate apparent identity effects supports this pathway. (Orr et al. 2023; Dafoe et al. 2018)
-  - policy-over-party hypothesis
-  -  Hypotheses and competing expectations
-  - Identity-centered hypotheses (H1-H3): explicit > implicit for AP, IF and OD, respectively (Tajfel & Turner 1979; Huddy et al. 2015)
-  - Competing hypothesis (substance/categorization): no meaningful explicit > implicit gap; implicit identity (as expressed through revealed vote preference) alone suffice to generate behavioral AP (Orr et al. 2023; Campos & Federico 2025)
-  - party-over-policy HTs:
-    - H1a: explicit > implicit in AP Affpol
-    - H2a: explicit > implicit in IF ingroup favoritism
-    - H3a: explicit > implicit in OD ourgoupt derogation
-  - policy-over-party HTs:
-    - H1a: explicit = implicit in AP Affpol
-    - H2a: explicit = implicit in IF ingroup favoritism
-    - H3a: explicit = implicit in OD ourgoupt derogation
-
-8. Paragraph 8 -- Empirical leverage and identification strategy (link to model)
-  - Our design uses within-respondent randomization of profile cues (conjoint) to secure causal identification of profile-level effects, and hierarchical Bayesian models with g-computation to estimate the observational contrast across partisan types while adjusting for covariates and clustering; this matches the logic required to adjudicate identity vs substance
-  - Though we cannot disentangle the identity and substance effects connected to the experimental party cues, our design allows to study if and how explicit subjective attachement, which often serves as a measure for identity, impacts AP behavior in Europe.
-
-9. Paragraph 9 -- Theoretical contribution
-  - Thus we contribute to the literature by (i) proposing partisan type (explicit vs implicit) as a conceptual refinement of partisanship that helps to clarify the population of interest in empirical AP studies, generalizing the "leaners" logic from US literature to European cases and beyond, (ii) examining the cross-national variation in the relative shares of partisan types, and (iii) empirically isolating the effect of *explicit* partisanship, i.e., a clearly reported subjective attachement, an expressive identity, on the behavioral manifestations of AP.
-  - If explicit types display higher AP, this would confirm (or at least strengthen) identity centeres accounts (party-over-policy)
-  - If explicit types display similar or identical levels of AP, this would imply that reporting a felt attachement does not add much on its own --- a tendence that would support the policy-over-party view 
-  - This refines Orr's critique and Campos multidimensional framework by showing which AP dimensions are (and are not) identity driven
+Our empirical strategy is designed to leverage these competing mechanisms while remaining clear about the boundaries of what can be identified.
+By using a conjoint experiment with within-respondent randomization of partisan cues, we secure causal identification of how individuals respond to profiles labeled with ingroup or outgroup party information, independent of respondent characteristics.
+We then pair this with hierarchical Bayesian models and g-computation to estimate the observational contrast between explicit and implicit partisans while adjusting for covariates and country-level clustering—precisely the combination required to adjudicate whether subjective attachment magnifies behavioral AP or whether partisan anchors alone suffice.
+Although our design cannot fully decompose the identity and substantive components embedded in the party cues themselves, it allows us to test a question that prior work has not: whether explicitly reported partisan attachment—often used as a proxy for identity—adds distinct behavioral content beyond what is already induced by partisan categorization and policy inference.
+In doing so, we contribute to the literature in three main ways.
+First, we introduce partisan type as a conceptual refinement that clarifies the population of inference in empirical AP research, extending the logic of U.S. “leaners” and implicit partisan identity to multiparty systems. Second, we document substantial cross-national variation in the prevalence of explicit and implicit types, underscoring the measurement heterogeneity that complicates comparative claims about identity-driven polarization. 
+Third, we isolate the behavioral consequences of explicit attachment across two games and 25 countries, allowing us to evaluate directly whether explicit partisanship amplifies affective polarization.
+If explicit types exhibit stronger ingroup favoritism and outgroup derogation, this would bolster identity-centered, party-over-policy accounts; if they behave similarly to implicit types, this would imply that reporting a felt attachment adds little beyond the informational and categorization processes captured by policy-over-party perspectives.
+In either case, our results speak directly to ongoing debates about the mechanisms underlying AP and refine both @orr2023affective's critique and the multidimensional framework of @campos2025new by identifying which behavioral components of AP are --- and are not --- meaningfully shaped by subjective partisan identity.
 
 
 
@@ -242,7 +239,7 @@ In short, the figure motivates both the internal validity of our sample restrict
 
 In the experiment, each conjoint profile in round $r$ contains a randomized party cue ($Z^{party}_{r}$).
 We compare this cue to the respondent's anchor to classify the *partisan relationship* $R_{ri}$ as co-partisan, out-partisan, or neutral ($R_{ri} \in \{Co, Out, None\}$).
-This coding corresponds to the "average across out-groups" operationalization and offers a tractable strategy for multi-party contexts, although it constitutes a substantial reduction of the inherent complexity of AP in multi-party systems [@rollicke2023polarisation].
+This coding corresponds to the average across out-groups operationalization [@reiljan2020fear] and offers a tractable strategy for multi-party contexts, although it constitutes a substantial reduction of the inherent complexity of AP in multi-party systems [@rollicke2023polarisation].
 We adopt this measure as it provides a uniform and comparable classification scheme across countries.
 
 We conceptually frame explicit partisanship as the treatment and implicit partisanship as a control.
@@ -547,30 +544,32 @@ For scale reference, a one-token difference corresponds to 42.6\% of a standard 
 #### Dictator game {.unnumbered}
 
 @fig-pooled-cov-d displays the pooled dictator-game estimates.
-Interpreted within the causal framework introduced above --- where the estimand approximates the effect of a hypothetical intervention shifting individuals' partisan type from implicit to explicit --- the findings indicate that such an intervention would have, at most, minimal consequences for allocative discrimination.
+Interpreted within the causal framework introduced above --- where the CATE approximates the effect of a hypothetical intervention shifting individuals from *implicit* ($T=0$) to *explicit* ($T=1$) partisan type --- the findings suggest that such an intervention would have, at most, minimal consequences for allocative discrimination.
 
 {{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-d >}}
 
 The overall AP contrast is highly similar across partisan types.
 Explicit identifiers allocate on average 0.99 tokens more to co-partisans than to out-partisans (median AP = 0.99; 95\% CrI: 0.91, 1.08), virtually matching the behavior of implicit partisans (0.93; 95\% CrI: 0.75, 1.10).
 The estimated causal effect is therefore small (CATE = 0.07; 95\% CrI: -0.11, 0.24), with roughly three-quarters of its posterior mass concentrated below 0.1 tokens.
-Although the mode of the posterior aligns with H1, the uncertainty dominates, and the key empirical signal is the strength of AP among implicit partisans: even in the absence of self-reported attachement, they display clear and precisely estimated discriminatory allocations.
+Although the direction of the posterior mode is consistent with H1a (stronger AP among explicit identifiers), the uncertainty dominates, and the key empirical signal is the strength of AP among implicit partisans.
+Even without self-reported attachment, they display clear and precisely estimated discriminatory allocations --- consistent with H1b, the hypothesis that categorization alone suffices to generate behavioral AP.
 
 A similar pattern appears for ingroup favoritism.
 Explicit partisans show a strong tendency to reward co-partisans relative to neutral alters (median IF = 0.54; 95\% CrI: 0.46, 0.63), and implicit partisans exhibit a nearly equivalent tendency (median = 0.45; 95\% CrI: 0.26, 0.64).
 The corresponding causal contrast again remains modest (CATE = 0.09; 95\% CrI: -0.10, 0.25).
 The posterior probability that explicit identifiers would show stronger IF under the hypothetical intervention is 83\%, but the implied effect sizes are substantively negligible.
-As with AP, implicit partisanship alone suffices to generate meaningful levels of IF, consistent with accounts of partisanship as a cue-based or behavioral orientation rather than purely a self-ascribed identity alone.
+Thus, despite the slight directional tendency, the evidence aligns more closely with H2b (no discernible amplification from explicit identity) than with H2a.
 
 Outgroup derogation yields the clearest indication of equivalence.
 Explicit partisans withhold 0.45 tokens from out-partisans (95\% CrI: 0.36, 0.54), nearly identical to implicit partisans (0.48; 95\% CrI: 0.35, 0.60).
 The causal effect is essentially null (CATE = -0.03; 95\% CrI: -0.16, 0.10).
-The posterior even places slightly more mass on implicit partisans derogating somewhat more (Pr(CATE < 0) = 0.67), though again the magnitudes are trivial.
-These results do not support H3.
+If anything, the posterior slightly favors greater derogation among implicit partisans (Pr(CATE < 0) = 0.67), though again the magnitudes are trivial.
+These results directly contradict H3a and instead support H3b, which posits no additional derogatory behavior from explicit identity.
 
 Viewed jointly, the dictator-game evidence suggests that explicitly endorsing a partisan identity adds little to the behavioral AP dynamics already present among implicit partisans.
-Posterior medians close to zero, symmetric uncertainty, and concentration around substantively small effects all imply that --- under the intervention logic motivating our design --- explicit identification does not meaningfully amplify partisan discrimination.
-Instead, the behavioral expression of AP appears grounded in categorization and anchoring, aligning with theoretical accounts emphasizing informational or norm-based pathways rather than subjective self-placement. We next examine whether this pattern extends to the trust game, where reciprocal structure may alter the relative contribution of ingroup and outgroup components.
+Posterior medians near zero, symmetric uncertainty, and concentration around substantively small effects all indicate that --- under the intervention logic motivating our estimand --- explicit identification does not meaningfully amplify partisan discrimination.
+Instead, the behavioral expression of AP appears grounded in categorization and partisan anchoring, consistent with theoretical accounts that emphasize informational or norm-based mechanisms rather than subjective self-placement.
+We next examine whether this pattern extends to the trust game, where reciprocal structure may alter the relative contribution of ingroup and outgroup components.
 
 #### Trust game {.unnumbered}
 
@@ -582,24 +581,26 @@ Relative to the dictator game, the trust game produces (i) no directional signal
 
 For AP, explicit and implicit partisans behave indistinguishably: both allocate 1.08 tokens more to co-partisans (explicit 95\% CrI: 1.00, 1.17; implicit 95\% CrI: 0.89, 1.26).
 The estimated causal contrast is centered exactly at zero (CATE = 0.00; 95\% CrI: -0.17, 0.19), producing a posterior split nearly evenly around the null.
-This stands in contrast to the slight directional tendency observed in the dictator game and offers no evidence for H1 in the reciprocal context.
+This offers no support for H1a in the reciprocal context and is consistent with H1b.
 
 Ingroup favoritism, by contrast, exhibits a modest reversal.
 Explicit identifiers reward co-partisans by 0.63 tokens (95\% CrI: 0.53, 0.72), whereas implicit identifiers display a slightly larger premium (0.75; 95\% CrI: 0.53, 0.95).
-The resulting causal estimate is negative (CATE = -0.12; 95\% CrI: -0.32, 0.09), with the posterior assigning a probability of 0.86 to implicit partisans favoring co-partisans more strongly.
-Although the effect remains small, its direction differs from the dictator-game pattern, suggesting that reciprocal incentives condition the distribution of group-based benefits differently across partisan types.
+The resulting causal estimate is negative (CATE = -0.12; 95\% CrI: -0.32, 0.09), with the posterior assigning a probability of 0.86 to implicit partisans favoring co-partisans *more* strongly.
+Although small, this direction reverses the dictator-game tendency and suggests that reciprocal incentives can alter the structure of group-based benefits.
+The evidence therefore contradicts H2a and aligns with H2b.
 
 Outgroup derogation provides the most supportive trust-game evidence for the hypothesized influence of explicit identification.
 Explicit partisans withhold 0.46 tokens (95\% CrI: 0.38, 0.53) from out-partisans, compared with 0.33 among implicit partisans (95\% CrI: 0.21, 0.46).
-The estimated causal contrast is positive (CATE = 0.12; 95\% CrI: -0.01, 0.26), and the posterior probability that explicit identifiers derogate more is 0.97.
-Even here, however, the substantive magnitude remains limited, and implicit partisans still exhibit meaningful OD.
+The causal contrast is positive (CATE = 0.12; 95\% CrI: -0.01, 0.26), and the posterior probability that explicit identifiers derogate more is 97\%.
+This is the clearest instance in which results align with H3a.
+Yet even here, the substantive magnitude remains limited, and implicit partisans still exhibit meaningful OD; the evidence is supportive but not decisive.
 
-Synthesizing across both games, the evidence consistently indicates that explicit self-reported partisanship exerts only small, uncertain, and context-dependent causal effects on discriminatory AP behaviors.
-In several cases the directional tendency aligns with theoretical expectations; in others it reverses; and in no instance does the estimated effect approach a substantially large magnitude within conventional ranges of certainty.
-The lack of cross-game convergence is particularly informative: behaviors attributed to explicit partisan identity do not replicate across allocative and reciprocal environments, undermining the expectation that subjective attachement reliably intensifies partisan discrimination.
+Synthesizing across both games, the findings consistently indicate that explicit self-reported partisanship exerts only small, uncertain, and context-dependent causal effects on discriminatory AP behaviors.
+In several cases the directional tendency aligns with the party-over-policy expectations (H1a–H3a), in others it reverses, and in no instance does the estimated effect approach a substantially large magnitude or produce strong posterior certainty.
+The lack of convergence across the two behavioral tasks is particularly informative: behaviors attributed to explicit partisan identity do not replicate consistently across allocative and reciprocal environments, undermining the identity-first expectation that subjective attachment reliably intensifies partisan discrimination.
 
 Instead, the pooled findings point to a robust conclusion: individuals who decline to label themselves as partisans nonetheless exhibit levels of AP --- including both favoritism and derogation --- that closely match those of explicit partisans.
-Implicit identification alone suffices to produce substantial partisan bias in both behavioral contexts under study.
+Implicit identification alone appears sufficient to generate substantial partisan bias in both behavioral contexts under study, as posited by the cue-based and categorization pathways underlying H1b–H3b.
 
 Finally, the trust-game evidence underscores a key measurement implication.
 Aggregate AP can mask compensating differences in IF and OD.
@@ -609,7 +610,7 @@ Analyses relying solely on co-partisan versus out-partisan contrasts may therefo
 ### Do explicit and implicit partisans differ across countries?
 
 We next examine whether the effect of partisan type varies across national contexts.
-If the causal influence of explicit identity depends on characteristics such as party-system structure, political culture, or the salience of partisan conflict, we would expect meaningfull cross-country variation in the Conditional Average Treatment Effect (CATE).
+If the causal influence of explicit identity depends on characteristics such as party-system structure, political culture, or the salience of partisan conflict, we would expect meaningfull cross-country variation in the CATE --- especially under hypotheses H1a–H3a.
 
 @fig-country-cov-d-cate presents the country-specific CATE estimates for the dictator game.
 Strikingly, each country's posterior distribution is nearly identical to the pooled estimate.
@@ -635,9 +636,9 @@ The same cross-national ordering --- and the same within-country equality --- ap
 This symmetry explains why the CATEs are identical across countries: while countries differ in how much partisans discriminate, they do not differ in how much *additional* discrimination is associated with explicit identification.
 
 The trust-game EVs in @fig-country-cov-t-ev reinforce this conclusion.
-Again substantial between-country variation is visible across rows, in both aggregate AP and the composition of IF and OD.
-Yet within each country, implicit and explicit identifiers behave nearly identically, with differences emerging only in the variance of the posterior distributions.
-The absence of divergence across partisan types is consistent and systematic.
+Again, countries differ substantially in aggregate AP and in the composition of IF and OD.
+Yet within each country, implicit and explicit identifiers behave nearly identically, with differences emerging only in the variance of their posterior distributions.
+The consistency of this pattern across all 25 countries mirrors the pooled estimates.
 
 {{< embed code/postproduction/06_figures.qmd#fig-country-cov-d-ev >}}
 
@@ -645,59 +646,47 @@ The absence of divergence across partisan types is consistent and systematic.
 
 Taken together, the country-level analyses provide strong evidence that the causal effect of shifting from implicit to explicit partisan type is negligible in every national context examined.
 Although countries differ in their overall levels of allocative and reciprocal discrimination, the *difference between partisan types* is remarkably stable and effectively zero across all 25 settings.
-This conclusion is further supported by the hierachical model: the estimated variance of the country-level random slopes for the $T \times R$ interaction is extremely small (SD < 0.11), indicating minimal cross-national dispersion in the causal effect.
+This conclusion is further supported by the hierarchical model: the estimated country-level standard deviation of the partisan-type slope is very small (dictator game: SD ≈ 0.05; trust game: SD ≈ 0.09), indicating minimal cross-national dispersion in the implicit–explicit contrast.
 
 In sum, while affective polarization itself varies meaningfully across Europe, the behavioral consequences of explicit versus implicit partisan identification do not.
-Implicit identification appears sufficient to generate the levels of AP observed in each country, and making partisanship explicit adds little --- if anything --- to the discriminatory behaviors captured in either experimental task.
+Implicit identification appears sufficient to generate the levels of AP observed in each country, and making partisanship explicit adds little --- if anything --- to the discriminatory behaviors captured in either experimental task, consistent with the cue-based expectations embodied in H1b–H3b rather than the identity-intensification predictions of H1a–H3a.
 
 ## Robustness
 
 ## Conclusion {#sec-conclusion}
 
-1. Recap of main empirical finding
-  - Across 25 European democracies, and two behavioral games,
-    -> explicit partisan attachement does not meaningfully amplify affective polarization
-  - CATEs extremely small, posterior mass near zero, often symmetric
-  - Implicit partisans exhibit robust AP (IF and OD) despite rejecting attachement
+This paper asked whether explicit partisan attachment meaningfully conditions affective polarization in European multiparty systems.
+Using two behavioral games and a hierarchical reanalysis of a large cross-national conjoint experiment, the evidence points to a consistent answer: across 25 democracies, explicit identifiers do not discriminate more strongly than implicit partisans.
+Conditional average treatment effects are extremely small, posterior mass is tightly concentrated near zero, and the sign of the effect varies across settings and behavioral components.
+In contrast, implicit partisans --- citizens who reject subjective attachment yet reveal a clear partisan anchor --- exhibit robust ingroup favoritism and outgroup derogation in both games. Behavioral AP thus arises reliably even absent self-reported identity.
 
-2. Implication 1: Measurement and inference
-  - Widespread practice of including leaners / vote anchor respondents is justified for behavioral AP
-  - Measuring relying *only* on identifiers risk selecting a shrinking subgroup in many countries
-  - Partisan type clarifies when populations of inference shift
+These findings carry several implications.
+First, for measurement and inference, they justify the widespread practice in comparative research of treating vote-anchored respondents and identifiers jointly when estimating behavioral AP.
+Restricting analyses to explicit identifiers risks selecting a shrinking and cross-nationally unstable subgroup, thereby shifting the population of inference in ways that are rarely acknowledged.
+Distinguishing partisan type helps clarify when such shifts occur and provides a generalizable framework for comparative AP measurement.
 
-3. Implication 2: Theory of partisan identity
-  - Explicit identity (PID attachement item) captures only one dimension of partisan identity
-  - Behavioral AP seems driven by latent identity, behavioral anchoring, and cue-based expectations more than by self-reported identity intensity
-  - Supports @orr2023affective view:
-    - identity-like behaviors need not come from identity strensght
-  - Supports @campos2025new view:
-    - AP is multidimensional; behavioral AP does not cleanly map onto subjective identification
+Second, the results speak to theories of partisan identity.
+The standard PID attachment item captures only one dimension of partisanship and appears only weakly related to discriminatory behavior in these tasks.
+Consistent with recent multidimensional and cue-based theories, behavioral AP in Europe seems to emerge primarily from latent identity, categorization, and substantive inferences that respondents draw from party labels—not from the strength of self-reported attachment.
+Identity-like behaviors do not presuppose identity-strength, and behavioral forms of AP do not map cleanly onto subjective identification.
 
-4. Implication 3: Comparative politics
-  - Cross-national consistency is notable: the meaning of explicit identification differs across countries, yet its *conditional effect on AP* is remarkably stable
-  - Suggests a general mechanism of partisan cue processing operating across democracies
-  - Highlights how multi-party systems structure partisan identity differently from U.S. two-party contexts
+Third, the cross-national consistency of the null effect is itself noteworthy.
+The meaning of explicit identification, and the prevalence of identifiers, vary widely across European electorates, yet the conditional effect of explicit identity on AP is remarkably stable: near zero in every country.
+This pattern suggests a broadly shared mechanism of partisan cue processing that operates similarly across party systems and underscores how multiparty environments structure partisan identity differently than the two-party U.S. context.
 
-5. Methodological implications
-  - Conjoint experiments allow decomposing AP into IF and OD
-  - Design shows how randomization of cues + hierarchical modeling yields strong causal leverage
-  - Provides a model for how to estimate AP with heterogeneous partisanship structures
+Methodologically, the study demonstrates how conjoint experiments combined with Bayesian hierarchical modeling enable researchers to decompose AP into ingroup and outgroup components while accommodating heterogeneous partisan structures.
+This design yields strong causal leverage on cue effects and provides a template for estimating AP in comparative settings where the meaning of “partisan” varies.
 
-6. Limitations
-  - Behavioral AP not equal to other AP measures, and although we believe the behavioral measure provides a solid foundation for measuring AP, other measures might yield different results (thermometers, social distance, elite affect may differ)
-  - Single-item PID measure may be noisy; multiple-item batteries could refine type definitions
-  - Cross-sectional study; identity formation dynamics remain open
-  - We interpret our main results (absence of systematic effect of explicit identity) as evidence against the party-over-policy hypothesis and for the policy-over-party hypothesis. However, this rests on the assumption that the survey item asking for felt attachement truly corresponds to respondent's self-concept.
+At the same time, limitations remain.
+Behavioral AP captures only one dimension of a broader construct and it remains to be seen if our findings hold for other indicators, e.g. thermometer ratings, social distance, or elite-focused affect, which may lead to different conclusions.
+The single-item PID measure is noisy, and richer batteries could sharpen the definition of partisan types.
+Our design is cross-sectional and cannot adjudicate the dynamics of identity formation.
+Finally, our interpretation --- that the absence of explicit-identity effects supports a policy-over-party rather than party-over-policy mechanism --- rests on the assumption that the attachment item accurately captures respondents’ self-concepts, an assumption that may not hold uniformly across contexts.
 
-7. Future research avenues
-  - Test whether finding holds for other operationalizations
-  - Explore interactions with ideological extremety or policy sophistication
-  - Examine whether partisan type moderates responses to elite cues (vs mass cues)
-
-8. Concluding statement
-  - Partisan identity is real, but not reducible to reported subjective attachement alone
-  - Implicit partisanship --- the behavioral anchor --- carries enough informational and social content to generate the same AP behaviors as explicit identity
-  - This challenges identity-only explanations and strengthens the case for multidimensional- cue-driven models of AP in comparative politics.
+These caveats notwithstanding, the central conclusion is clear.
+Partisan identity is real, but it is not reducible to reported subjective attachment.
+Implicit partisanship—the behavioral anchor that shapes categorization and substantive expectations—carries sufficient informational and social content to generate the same discriminatory behaviors as explicit identity.
+This challenges identity-only accounts of affective polarization and strengthens the case for multidimensional, cue-driven models of partisan behavior in comparative politics.
 
 \singlespacing
 
@@ -737,3 +726,227 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 {{< embed code/preparation/02_descr_anal.qmd#tbl-covariate-distr >}}
 
 ### Robustness {.appendix}
+
+### Model summaries {.appendix}
+
+\tiny
+```
+> summary(bfit_cov_d)
+Warning message:
+There were 2 divergent transitions after warmup. Increasing adapt_delta above 0.8 may help. See http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup 
+ Family: gaussian 
+  Links: mu = identity 
+Formula: cj_token ~ 1 + der_partisan_type + der_partisan_relationship + der_partisan_type * der_partisan_relationship + cj_age_en + cj_class_en + cj_sex_en + cj_reli_en + cj_eupos_shown + meta_round + meta_wave + q_lrpos2_z + q_eupos2_z + q_econ_nativism_z + q_cult_nativism_z + q_religion_en + q_satis_demo_country_z + q_understand_nat_pol_z + q_understand_eu_pol_z + q_parties_harm_z + q_officials_talk_action_z + q_politics_good_evil_z + q_people_unaware_z + q_leaders_educated_z + q_expert_decisions_z + q_listen_other_groups_z + q_democracy_compromise_z + q_interest_pol_country_z + q_interest_pol_eu_z + q_edu_z + q_perc_class + q_eval_finance_household_z + q_eval_job_z + q_eval_econ_country_z + q_eval_econ_eur_z + q_gender + q_age_z + q_rural_urban + q_risk_taking_z + q_future_discount_z + (1 + der_partisan_type + der_partisan_relationship | meta_country) + (1 + der_partisan_type + der_partisan_relationship | meta_country:der_partisan_anchor) + (1 | meta_pid) 
+   Data: filter(df_modelvars, meta_game == "dict") (Number of observations: 38240) 
+  Draws: 4 chains, each with iter = 5000; warmup = 3500; thin = 1;
+         total post-warmup draws = 6000
+
+Multilevel Hyperparameters:
+~meta_country (Number of levels: 25) 
+                                                              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(Intercept)                                                     0.16      0.04     0.08     0.26 1.00     2222     2350
+sd(der_partisan_type)                                             0.05      0.04     0.00     0.14 1.01     1134     2373
+sd(der_partisan_relationshipCo)                                   0.08      0.05     0.01     0.19 1.00     1286     2177
+sd(der_partisan_relationshipOut)                                  0.11      0.05     0.02     0.21 1.00     1104     1236
+cor(Intercept,der_partisan_type)                                  0.08      0.43    -0.74     0.83 1.00     4580     4130
+cor(Intercept,der_partisan_relationshipCo)                       -0.04      0.38    -0.73     0.72 1.00     3858     4390
+cor(der_partisan_type,der_partisan_relationshipCo)               -0.08      0.44    -0.82     0.76 1.00     2176     4056
+cor(Intercept,der_partisan_relationshipOut)                      -0.22      0.34    -0.77     0.53 1.00     2722     3023
+cor(der_partisan_type,der_partisan_relationshipOut)               0.01      0.43    -0.79     0.79 1.00     1330     2686
+cor(der_partisan_relationshipCo,der_partisan_relationshipOut)    -0.10      0.41    -0.83     0.68 1.00     1705     2922
+
+~meta_country:der_partisan_anchor (Number of levels: 372) 
+                                                              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(Intercept)                                                     0.05      0.03     0.00     0.13 1.00     1618     2605
+sd(der_partisan_type)                                             0.06      0.04     0.00     0.16 1.01      580     1834
+sd(der_partisan_relationshipCo)                                   0.16      0.05     0.06     0.25 1.01      692     1126
+sd(der_partisan_relationshipOut)                                  0.15      0.04     0.08     0.22 1.00      648     1324
+cor(Intercept,der_partisan_type)                                 -0.15      0.46    -0.88     0.76 1.00     1010     2258
+cor(Intercept,der_partisan_relationshipCo)                        0.10      0.42    -0.73     0.82 1.01      392      738
+cor(der_partisan_type,der_partisan_relationshipCo)               -0.08      0.41    -0.79     0.75 1.01      487     1139
+cor(Intercept,der_partisan_relationshipOut)                      -0.03      0.44    -0.80     0.79 1.02      247      748
+cor(der_partisan_type,der_partisan_relationshipOut)               0.16      0.39    -0.63     0.84 1.01      400      931
+cor(der_partisan_relationshipCo,der_partisan_relationshipOut)     0.10      0.31    -0.57     0.63 1.01      749     1733
+
+~meta_pid (Number of levels: 18142) 
+              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(Intercept)     1.41      0.01     1.38     1.44 1.00     1853     3054
+
+Regression Coefficients:
+                                               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept                                          3.82      0.10     3.63     4.01 1.00     3117     4327
+der_partisan_type                                  0.01      0.06    -0.12     0.12 1.00     2847     3740
+der_partisan_relationshipCo                        0.45      0.10     0.26     0.64 1.00     3198     3716
+der_partisan_relationshipOut                      -0.48      0.06    -0.60    -0.35 1.00     3326     3846
+cj_age_en30                                        0.09      0.03     0.03     0.16 1.00     4269     4299
+cj_age_en42                                        0.09      0.03     0.02     0.15 1.00     3920     4967
+cj_age_en53                                        0.08      0.03     0.02     0.15 1.00     4157     4678
+cj_age_en65                                        0.05      0.03    -0.01     0.11 1.00     4010     4219
+cj_class_en2_low_class                            -0.03      0.03    -0.08     0.02 1.00     6013     4958
+cj_class_en3_high_class                           -0.15      0.03    -0.20    -0.10 1.00     6008     4686
+cj_sex_en2_male                                   -0.07      0.02    -0.11    -0.03 1.00     7335     5089
+cj_reli_en2_catholic                              -0.06      0.03    -0.11     0.00 1.00     5269     4773
+cj_reli_en3_protestant                            -0.15      0.03    -0.21    -0.09 1.00     5033     4654
+cj_reli_en4_muslim                                -0.60      0.03    -0.66    -0.55 1.00     5148     4447
+cj_eupos_shown                                    -0.07      0.03    -0.12    -0.02 1.00     6785     4736
+meta_round2                                        0.02      0.02    -0.03     0.06 1.00     7217     5160
+meta_round3                                        0.10      0.02     0.05     0.14 1.00     7282     4561
+meta_wave                                          0.02      0.03    -0.04     0.08 1.00     3530     3915
+q_lrpos2_z                                        -0.07      0.02    -0.10    -0.03 1.00     3431     4583
+q_eupos2_z                                         0.09      0.02     0.06     0.13 1.00     3445     4103
+q_econ_nativism_z                                  0.01      0.02    -0.04     0.06 1.00     3104     4239
+q_cult_nativism_z                                 -0.04      0.02    -0.09     0.00 1.00     3079     3851
+q_religion_ennoreligion                           -0.12      0.04    -0.20    -0.05 1.00     3041     4119
+q_religion_enprotstnt                             -0.08      0.06    -0.20     0.04 1.00     3210     4060
+q_religion_enotherreligion                        -0.02      0.05    -0.12     0.07 1.00     3148     3767
+q_religion_enmuslim                                0.15      0.17    -0.19     0.48 1.00     3294     4268
+q_satis_demo_country_z                            -0.05      0.02    -0.09    -0.02 1.00     2944     3946
+q_understand_nat_pol_z                            -0.08      0.02    -0.12    -0.04 1.00     3274     4243
+q_understand_eu_pol_z                             -0.02      0.02    -0.06     0.01 1.00     3088     3747
+q_parties_harm_z                                  -0.02      0.02    -0.06     0.02 1.00     3234     4185
+q_officials_talk_action_z                         -0.05      0.02    -0.09    -0.02 1.00     3313     4115
+q_politics_good_evil_z                             0.03      0.02     0.00     0.06 1.00     3501     4341
+q_people_unaware_z                                -0.01      0.02    -0.04     0.03 1.00     3161     3800
+q_leaders_educated_z                              -0.09      0.02    -0.13    -0.06 1.00     3010     3740
+q_expert_decisions_z                               0.06      0.02     0.03     0.10 1.00     3458     4393
+q_listen_other_groups_z                           -0.02      0.02    -0.06     0.02 1.00     3315     4305
+q_democracy_compromise_z                           0.02      0.02    -0.02     0.06 1.00     3380     4198
+q_interest_pol_country_z                          -0.08      0.02    -0.13    -0.04 1.00     2929     4020
+q_interest_pol_eu_z                                0.11      0.02     0.07     0.16 1.00     2971     4051
+q_edu_z                                           -0.01      0.02    -0.04     0.02 1.00     3518     4168
+q_perc_classLowermiddleclass                      -0.09      0.05    -0.18     0.00 1.00     2966     4099
+q_perc_classMiddleclass                           -0.09      0.04    -0.17    -0.02 1.00     2722     3527
+q_perc_classUppermiddleclass                      -0.19      0.06    -0.30    -0.07 1.00     2769     3539
+q_perc_classUpperclass                            -0.35      0.12    -0.58    -0.13 1.00     3342     4489
+q_eval_finance_household_z                         0.01      0.02    -0.04     0.05 1.00     2834     3654
+q_eval_job_z                                      -0.03      0.02    -0.06     0.01 1.00     3100     4097
+q_eval_econ_country_z                             -0.04      0.02    -0.07    -0.00 1.00     3343     4439
+q_eval_econ_eur_z                                  0.01      0.02    -0.03     0.04 1.00     3370     4321
+q_genderFemale                                    -0.06      0.03    -0.12    -0.00 1.00     3336     4106
+q_genderOther                                      0.19      0.40    -0.60     0.98 1.00     3889     4328
+q_age_z                                           -0.16      0.02    -0.19    -0.13 1.00     3417     3580
+q_rural_urbanSmallormiddlesizedtown                0.01      0.04    -0.06     0.09 1.00     3107     3734
+q_rural_urbanLargetown                            -0.00      0.04    -0.08     0.07 1.00     3367     3925
+q_risk_taking_z                                    0.04      0.02     0.01     0.07 1.00     3656     4337
+q_future_discount_z                                0.04      0.02     0.01     0.07 1.00     3364     4050
+der_partisan_type:der_partisan_relationshipCo      0.09      0.10    -0.10     0.29 1.00     3108     3867
+der_partisan_type:der_partisan_relationshipOut     0.03      0.06    -0.10     0.16 1.00     3282     4009
+
+Further Distributional Parameters:
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sigma     1.74      0.01     1.73     1.76 1.00     2917     4009
+
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+
+
+```
+> summary(bfit_cov_t)
+ Family: gaussian 
+  Links: mu = identity 
+Formula: cj_token ~ 1 + der_partisan_type + der_partisan_relationship + der_partisan_type * der_partisan_relationship + cj_age_en + cj_class_en + cj_sex_en + cj_reli_en + cj_eupos_shown + meta_round + meta_wave + q_lrpos2_z + q_eupos2_z + q_econ_nativism_z + q_cult_nativism_z + q_religion_en + q_satis_demo_country_z + q_understand_nat_pol_z + q_understand_eu_pol_z + q_parties_harm_z + q_officials_talk_action_z + q_politics_good_evil_z + q_people_unaware_z + q_leaders_educated_z + q_expert_decisions_z + q_listen_other_groups_z + q_democracy_compromise_z + q_interest_pol_country_z + q_interest_pol_eu_z + q_edu_z + q_perc_class + q_eval_finance_household_z + q_eval_job_z + q_eval_econ_country_z + q_eval_econ_eur_z + q_gender + q_age_z + q_rural_urban + q_risk_taking_z + q_future_discount_z + (1 + der_partisan_type + der_partisan_relationship | meta_country) + (1 + der_partisan_type + der_partisan_relationship | meta_country:der_partisan_anchor) + (1 | meta_pid) 
+   Data: filter(df_modelvars, meta_game == "trust") (Number of observations: 38222) 
+  Draws: 4 chains, each with iter = 5000; warmup = 3500; thin = 1;
+         total post-warmup draws = 6000
+
+Multilevel Hyperparameters:
+~meta_country (Number of levels: 25) 
+                                                              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(Intercept)                                                     0.14      0.05     0.03     0.24 1.01      644      349
+sd(der_partisan_type)                                             0.09      0.05     0.00     0.20 1.00      566     1630
+sd(der_partisan_relationshipCo)                                   0.09      0.05     0.01     0.20 1.01      963     1888
+sd(der_partisan_relationshipOut)                                  0.04      0.03     0.00     0.11 1.00     2053     2325
+cor(Intercept,der_partisan_type)                                 -0.08      0.41    -0.78     0.75 1.00     2006     3058
+cor(Intercept,der_partisan_relationshipCo)                       -0.21      0.39    -0.84     0.64 1.00     2186     3221
+cor(der_partisan_type,der_partisan_relationshipCo)               -0.23      0.43    -0.88     0.68 1.00     1585     2755
+cor(Intercept,der_partisan_relationshipOut)                      -0.03      0.44    -0.81     0.79 1.00     4695     3964
+cor(der_partisan_type,der_partisan_relationshipOut)               0.02      0.45    -0.82     0.83 1.00     4005     4544
+cor(der_partisan_relationshipCo,der_partisan_relationshipOut)     0.03      0.44    -0.79     0.81 1.00     4428     5014
+
+~meta_country:der_partisan_anchor (Number of levels: 371) 
+                                                              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(Intercept)                                                     0.13      0.06     0.01     0.24 1.02      394      881
+sd(der_partisan_type)                                             0.09      0.06     0.00     0.22 1.01      348      561
+sd(der_partisan_relationshipCo)                                   0.28      0.05     0.18     0.36 1.01      578     1309
+sd(der_partisan_relationshipOut)                                  0.11      0.05     0.01     0.21 1.01      453      872
+cor(Intercept,der_partisan_type)                                 -0.08      0.44    -0.82     0.78 1.00      983     2076
+cor(Intercept,der_partisan_relationshipCo)                       -0.08      0.35    -0.71     0.68 1.02      136      247
+cor(der_partisan_type,der_partisan_relationshipCo)               -0.27      0.40    -0.87     0.63 1.01      166      417
+cor(Intercept,der_partisan_relationshipOut)                       0.01      0.39    -0.69     0.78 1.00      984     2081
+cor(der_partisan_type,der_partisan_relationshipOut)              -0.10      0.43    -0.83     0.76 1.00      507     1602
+cor(der_partisan_relationshipCo,der_partisan_relationshipOut)    -0.15      0.34    -0.80     0.50 1.00      910     2170
+
+~meta_pid (Number of levels: 18165) 
+              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(Intercept)     1.59      0.01     1.56     1.62 1.00     1784     3258
+
+Regression Coefficients:
+                                               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept                                          3.97      0.10     3.78     4.17 1.00     2426     3857
+der_partisan_type                                  0.05      0.07    -0.09     0.18 1.00     1888     3041
+der_partisan_relationshipCo                        0.74      0.11     0.53     0.95 1.00     2293     3494
+der_partisan_relationshipOut                      -0.33      0.06    -0.45    -0.21 1.00     2268     3707
+cj_age_en30                                        0.08      0.04     0.01     0.15 1.00     3139     4331
+cj_age_en42                                        0.14      0.03     0.07     0.20 1.00     3137     4344
+cj_age_en53                                        0.07      0.03     0.01     0.14 1.00     3227     4407
+cj_age_en65                                        0.01      0.04    -0.06     0.08 1.00     3131     3720
+cj_class_en2_low_class                            -0.03      0.03    -0.08     0.02 1.00     4084     4348
+cj_class_en3_high_class                           -0.16      0.03    -0.22    -0.11 1.00     3463     3574
+cj_sex_en2_male                                   -0.10      0.02    -0.14    -0.06 1.00     4513     4366
+cj_reli_en2_catholic                              -0.01      0.03    -0.07     0.05 1.00     3403     3960
+cj_reli_en3_protestant                            -0.10      0.03    -0.16    -0.04 1.00     3283     4137
+cj_reli_en4_muslim                                -0.65      0.03    -0.71    -0.59 1.00     3085     4099
+cj_eupos_shown                                    -0.12      0.03    -0.17    -0.07 1.00     4926     4149
+meta_round2                                       -0.02      0.02    -0.06     0.03 1.00     5395     4580
+meta_round3                                        0.02      0.02    -0.03     0.06 1.00     5366     4530
+meta_wave                                          0.03      0.03    -0.04     0.09 1.00     2272     4021
+q_lrpos2_z                                        -0.04      0.02    -0.08    -0.01 1.00     2051     3205
+q_eupos2_z                                         0.07      0.02     0.03     0.11 1.00     2454     3639
+q_econ_nativism_z                                  0.03      0.03    -0.02     0.09 1.01     1922     2904
+q_cult_nativism_z                                 -0.07      0.03    -0.13    -0.02 1.00     1961     2878
+q_religion_ennoreligion                           -0.07      0.04    -0.14     0.01 1.00     2025     2619
+q_religion_enprotstnt                             -0.03      0.07    -0.15     0.10 1.00     2009     3234
+q_religion_enotherreligion                        -0.06      0.06    -0.17     0.05 1.01     1655     2797
+q_religion_enmuslim                                0.20      0.19    -0.16     0.56 1.00     2399     3519
+q_satis_demo_country_z                            -0.09      0.02    -0.12    -0.05 1.00     2350     3623
+q_understand_nat_pol_z                            -0.10      0.02    -0.13    -0.06 1.00     2420     3481
+q_understand_eu_pol_z                             -0.04      0.02    -0.08    -0.00 1.00     2164     3416
+q_parties_harm_z                                  -0.01      0.02    -0.05     0.02 1.00     2401     3948
+q_officials_talk_action_z                         -0.06      0.02    -0.10    -0.02 1.00     2405     3542
+q_politics_good_evil_z                             0.03      0.02    -0.00     0.07 1.00     2356     3706
+q_people_unaware_z                                 0.01      0.02    -0.03     0.04 1.00     2349     3350
+q_leaders_educated_z                              -0.07      0.02    -0.11    -0.03 1.00     2438     3441
+q_expert_decisions_z                               0.08      0.02     0.04     0.11 1.00     2611     3444
+q_listen_other_groups_z                           -0.02      0.02    -0.06     0.02 1.00     2544     3492
+q_democracy_compromise_z                           0.02      0.02    -0.02     0.06 1.00     2408     3596
+q_interest_pol_country_z                          -0.07      0.03    -0.12    -0.02 1.00     2363     3698
+q_interest_pol_eu_z                                0.11      0.03     0.06     0.16 1.00     2409     3529
+q_edu_z                                            0.03      0.02    -0.01     0.06 1.00     2275     3179
+q_perc_classLowermiddleclass                      -0.10      0.05    -0.20    -0.01 1.00     2003     3571
+q_perc_classMiddleclass                           -0.08      0.04    -0.16     0.01 1.00     1657     3409
+q_perc_classUppermiddleclass                      -0.06      0.06    -0.18     0.07 1.00     1729     2715
+q_perc_classUpperclass                            -0.22      0.13    -0.47     0.03 1.00     2240     3758
+q_eval_finance_household_z                        -0.00      0.02    -0.04     0.04 1.00     2023     3187
+q_eval_job_z                                      -0.00      0.02    -0.04     0.04 1.00     2278     3941
+q_eval_econ_country_z                             -0.05      0.02    -0.09    -0.01 1.00     1972     3582
+q_eval_econ_eur_z                                  0.01      0.02    -0.02     0.05 1.00     2241     3759
+q_genderFemale                                    -0.24      0.03    -0.30    -0.17 1.00     2615     3460
+q_genderOther                                     -0.04      0.41    -0.85     0.76 1.00     2456     2967
+q_age_z                                           -0.16      0.02    -0.19    -0.13 1.00     2470     3631
+q_rural_urbanSmallormiddlesizedtown               -0.02      0.04    -0.10     0.06 1.00     2213     3505
+q_rural_urbanLargetown                            -0.07      0.04    -0.15     0.02 1.00     2111     3597
+q_risk_taking_z                                    0.05      0.02     0.01     0.08 1.00     2255     3409
+q_future_discount_z                                0.05      0.02     0.02     0.09 1.00     2441     3034
+der_partisan_type:der_partisan_relationshipCo     -0.12      0.11    -0.32     0.09 1.00     2384     3561
+der_partisan_type:der_partisan_relationshipOut    -0.12      0.07    -0.26     0.01 1.00     2285     3241
+
+Further Distributional Parameters:
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sigma     1.79      0.01     1.78     1.81 1.00     2420     3524
+
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+``` 
