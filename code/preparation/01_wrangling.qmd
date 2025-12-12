@@ -350,7 +350,7 @@ labels_der_outpartisan_comb <- eu25games2019 |>
 
 ```{r, dev='ragg_png'}
 #| label: fig-impl-expl-distribution
-#| fig-cap: "Distribution of partisan types, by country. Stacked horizontal bars show the within-country share (\\%) of three partisan types: explicit partisans (respondents who reported a subjective attachement to a party, $T_i=1$), implicit partisans (respondents who reported no attachement but did report a vote preference or intention, $T_i=0$), and respondents who reported neither (none, $T_i = \\emptyset$). Percentages sum to 100\\% within each country, with country samples containing about $1,200$ respondents each (detailed numbers are reported in appendix section X)."
+#| fig-cap: "Distribution of partisan types, by country. Stacked horizontal bars show the within-country share (\\%) of three partisan types: explicit partisans (respondents who reported a subjective attachement to a party, $T_i=1$), implicit partisans (respondents who reported no attachement but did report a vote preference or intention, $T_i=0$), and respondents who reported neither (none, $T_i = \\emptyset$). Percentages sum to 100\\% within each country, with country samples containing about $1,100$ respondents each (detailed numbers are reported in appendix section X)."
 #| fig-dpi: 500
 
 toplot <- eu25games2019 |>
