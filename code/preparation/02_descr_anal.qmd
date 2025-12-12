@@ -69,6 +69,36 @@ load(
 )
 ```
 
+# Table respondents by country
+
+```{r}
+#| label: tbl-nresp-country
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  tabyl(
+    meta_country
+  ) |>
+  adorn_rounding(2) |>
+  adorn_totals() |>
+  knitr::kable(col.names = c("Country", "N", "Percent"))
+```
+
+# Table respondents by country and gender
+
+```{r}
+#| label: tbl-nresp-country-gender
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  tabyl(
+    meta_country,
+    q_gender
+  ) |>
+  adorn_totals() |>
+  knitr::kable()
+```
+
 # Model DAG
 
 ```{r}
@@ -449,6 +479,18 @@ modelvars_labels <- c(
 
 ```{r}
 #| label: fig-distr-y
+#| fig-dpi: 500
+#| fig-cap: "Distribution of token allocation (Y) by game. Dictator game: $Mean = 3.41$, $median = 4$, $SD = 2.35$. Trust game: $Mean = 3.48$, $median = 4$, $SD = 2.49$"
+#| fig-pos: H
+
+summary_stats <- df_modelvars %>%
+  group_by(meta_game_lab) %>%
+  summarise(
+    mean_token = mean(cj_token, na.rm = TRUE),
+    median_token = median(cj_token, na.rm = TRUE),
+    sd_token = sd(cj_token, na.rm = TRUE)
+  )
+
 
 df_modelvars |>
   select(cj_token, meta_game_lab) |>
@@ -478,8 +520,11 @@ df_modelvars |>
 # Distribution of partisan type $T$ and relationship category $R$
 
 ```{r}
+#| label: tbl-t-r-distr
+
 df_modelvars |>
-  tabyl(der_partisan_type, der_partisan_relationship)
+  tabyl(der_partisan_type, der_partisan_relationship) |>
+  gt()
 ```
 
 # Covariate Distributions
@@ -488,7 +533,6 @@ df_modelvars |>
 #| label: tbl-covariate-distr
 
 df_modelvars |>
-  filter(meta_game == "trust") |>
   select(
     der_partisan_type,
     ends_with("_z"),
@@ -498,7 +542,31 @@ df_modelvars |>
     q_gender
   ) |>
   tbl_summary(
-    by = der_partisan_type
+    by = der_partisan_type,
+    missing = "no",
+    type = list(
+      q_econ_nativism_z ~ "continuous",
+      q_cult_nativism_z ~ "continuous",
+      q_satis_demo_country_z ~ "continuous",
+      q_understand_nat_pol_z ~ "continuous",
+      q_understand_eu_pol_z ~ "continuous",
+      q_parties_harm_z ~ "continuous",
+      q_officials_talk_action_z ~ "continuous",
+      q_politics_good_evil_z ~ "continuous",
+      q_people_unaware_z ~ "continuous",
+      q_leaders_educated_z ~ "continuous",
+      q_expert_decisions_z ~ "continuous",
+      q_listen_other_groups_z ~ "continuous",
+      q_democracy_compromise_z ~ "continuous",
+      q_interest_pol_country_z ~ "continuous",
+      q_interest_pol_eu_z ~ "continuous",
+      q_eval_finance_household_z ~ "continuous",
+      q_eval_job_z ~ "continuous",
+      q_eval_econ_country_z ~ "continuous",
+      q_eval_econ_eur_z ~ "continuous",
+      q_risk_taking_z ~ "continuous",
+      q_future_discount_z ~ "continuous"
+    )
   ) |>
   modify_header(label = "**Variable**") |>
   as_gt() |>
