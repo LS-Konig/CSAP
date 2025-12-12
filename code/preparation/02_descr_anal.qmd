@@ -73,6 +73,7 @@ load(
 
 ```{r}
 #| label: tbl-nresp-country
+#| tbl-cap: "Sample composition by country. Numbers denote respondents."
 
 eu25games2019 |>
   distinct(meta_pid, .keep_all = T) |>
@@ -88,6 +89,7 @@ eu25games2019 |>
 
 ```{r}
 #| label: tbl-nresp-country-gender
+#| tbl-cap: "Sample composition by country and gender. Numbers denote respondents."
 
 eu25games2019 |>
   distinct(meta_pid, .keep_all = T) |>
@@ -96,7 +98,43 @@ eu25games2019 |>
     q_gender
   ) |>
   adorn_totals() |>
-  knitr::kable()
+  knitr::kable(
+    col.names = c("Country", "Male", "Female", "Other")
+  )
+```
+
+# Table respondents by country and age group
+
+```{r}
+#| label: tbl-nresp-country-agegroup
+#| tbl-cap: "Sample composition by country and age group. Numbers denote respondents."
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = TRUE) |>
+  group_by(meta_country) |>
+  summarise(
+    `18-25` = sum(q_age >= 18 & q_age <= 25, na.rm = T),
+    `26-35` = sum(q_age >= 26 & q_age <= 35, na.rm = T),
+    `36-45` = sum(q_age >= 36 & q_age <= 45, na.rm = T),
+    `46-55` = sum(q_age >= 46 & q_age <= 55, na.rm = T),
+    `56-65` = sum(q_age >= 56 & q_age <= 65, na.rm = T),
+    `66-75` = sum(q_age >= 66 & q_age <= 75, na.rm = T),
+    `>76` = sum(q_age >= 76, na.rm = T)
+  ) |>
+  adorn_totals() |>
+  knitr::kable(
+    col.names = c(
+      "Country",
+      "18 to 25",
+      "26 to 35",
+      "36 to 45",
+      "46 to 55",
+      "56 to 65",
+      "66 to 75",
+      "> 75"
+    )
+  )
+
 ```
 
 # Model DAG
