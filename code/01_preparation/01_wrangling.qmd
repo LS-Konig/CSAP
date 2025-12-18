@@ -431,8 +431,8 @@ flowchart TD
     C --> F(No Vote <br> N = 1,030)
     C --> G(Vote <br> N = 16,917)
 
-    G --> H(Same as PID <br> 13,220)
-    G --> I(Diff from PID <br> 3,697)
+    G --> H(Same as PID <br> N = 13,220)
+    G --> I(Diff from PID <br> N = 3,697)
 ```
 
 ## Figures
@@ -683,6 +683,35 @@ token_means <- eu25games2019 |>
   ) |>
   ungroup()
 
+token_means_pooled <- eu25games2019 |>
+  filter(meta_game == "dict") |>
+  filter(
+    !der_outpartisan_comb %in%
+      c(
+        "97_eunat_expl",
+        "97_eunat_impl",
+        "98_outnat_expl",
+        "98_outnat_impl",
+        "99_outnatEU_nopid",
+        "99_outnat_nopid"
+      ) &
+      !is.na(der_outpartisan_comb)
+  ) |>
+  group_by(der_outpartisan_comb) |>
+  summarise(
+    m = mean(cj_token),
+    s = sd(cj_token),
+    n = n()
+  ) |>
+  ungroup()
+
+token_means_pooled <- token_means_pooled |>
+  mutate(meta_country = "Pooled") |>
+  select(meta_country, der_outpartisan_comb, m, s, n)
+
+token_means <- token_means |>
+  bind_rows(token_means_pooled)
+
 
 qoi_bycountry <- token_means |>
   group_by(meta_country) |>
@@ -819,19 +848,20 @@ tidy_qoi <- qoi_bycountry |>
     starts_with("CI_")
   )
 
-# 1. Prepare the data for plotting
-plot_data <- tidy_qoi |>
-  # Create a single factor combining country and condition for the Y-axis
-  mutate(
-    # Combine country and pid_type into one label (e.g., "Austria | explicit")
-    country_condition = factor(paste(meta_country, pid_type, sep = " | ")),
 
-    # Use fct_inorder to maintain the logical order (country-by-country)
-    # Then fct_rev reverses the entire factor so the first country appears at the top of the Y-axis
-    country_condition = fct_rev(fct_inorder(country_condition))
-  ) |>
-  # Optional: Clean up diff_type for better facet labels
+plot_data <- tidy_qoi |>
   mutate(
+    country_condition = paste(meta_country, pid_type, sep = " | "),
+    country_condition = fct_inorder(country_condition)
+  ) |>
+  mutate(
+    # extract pooled levels
+    country_condition = fct_relevel(
+      country_condition,
+      grep("^Pooled \\|", levels(country_condition), value = TRUE),
+      after = Inf # use 0 for top, Inf for bottom
+    ),
+    country_condition = fct_rev(country_condition),
     diff_type = factor(diff_type, levels = c("IF", "OD", "AP"))
   )
 
@@ -874,15 +904,18 @@ ggplot(
   ) +
   theme_pubr() +
   scale_color_manual(
-    values = rep(
-      c(
-        "#648FFF",
-        "#DC267F",
-        "#785EF0",
-        "#FE6100",
-        "#FFB000"
+    values = c(
+      rep(
+        c(
+          "#648FFF",
+          "#DC267F",
+          "#785EF0",
+          "#FE6100",
+          "#FFB000"
+        ),
+        5
       ),
-      5
+      "black"
     )
   ) +
   theme(
