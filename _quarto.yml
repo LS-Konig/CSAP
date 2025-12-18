@@ -1,0 +1,39 @@
+project:
+  type: manuscript
+
+manuscript:
+  notebooks:
+    - notebook: code/01_preparation/01_wrangling.qmd
+    - notebook: code/01_preparation/02_descr_anal.qmd
+
+format:
+  html:
+    citeproc: false
+    filters:
+      - at: pre-quarto
+        path: _extensions/andrewheiss/wordcount/citeproc.lua
+      - at: pre-quarto
+        path: _extensions/andrewheiss/wordcount/wordcount.lua
+    toc: true
+  pdf:
+    toc: false
+    toc-depth: 3
+    include-in-header:
+      text: |
+        \usepackage{setspace}
+        \setlength{\parindent}{15pt}
+        \usepackage[font=footnotesize]{caption}
+    thanks: |
+      Space for acknowledgements.
+      Wordcount: {{< words-body >}}.
+    papersize: a4
+    fontsize: 12pt
+    linestretch: 2
+    geometry:
+      - top = 2cm
+      - bottom = 2cm
+      - left = 2.5cm
+      - right = 2.5cm
+      - footskip = 20pt
+  docx: default
+  jats: default
