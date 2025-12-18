@@ -1,0 +1,137 @@
+---
+title: |
+  How does partisan type influence affective polarization?
+subtitle: |
+  A comparative study of 25 European democracies
+abstract: |
+  Space for an abstract. 
+author:
+  - name: Tristan Muno
+    orcid: 0009-0002-3078-8436
+    email: tristan.muno@uni-mannheim.de
+    affiliations: 
+      - name: University of Mannheim
+        address: A 5, 6 – Raum A 351
+        city: Mannheim
+        state: BW
+        postal-code: 68159
+  - name: Thomas König
+    orcid: 0000-0002-1797-6662
+    email: koenig@uni-mannheim.de
+    affiliations: 
+      - name: University of Mannheim
+        address: A 5, 6 – Raum A 353
+        city: Mannheim
+        state: BW
+        postal-code: 68159 
+date: last-modified
+date-format: MMMM D, YYYY
+execute:
+  echo: false
+  warning: false
+  eval: true
+  include: true
+  cache: true
+bibliography: references.bib
+biblio-style: apsr
+link-citations: true
+number-sections: true
+---
+
+## Exploratory figures
+
+{{< embed code/01_preparation/01_wrangling.qmd#fig-impl-expl-distribution >}}
+
+{{< embed code/01_preparation/01_wrangling.qmd#fig-exploratory-country-anal-dict >}}
+
+{{< embed code/01_preparation/01_wrangling.qmd#fig-exploratory-country-anal-trust >}}
+
+\singlespacing
+
+## Data
+
+We use data from @hahm2024divided.
+@achen2016democracy is another reference.
+
+## References
+
+::: {#refs}
+:::
+
+## Appendix {.appendix}
+
+### Sample descriptives {.appendix}
+
+{{< embed code/01_preparation/02_descr_anal.qmd#tbl-nresp-country >}}
+
+{{< embed code/01_preparation/02_descr_anal.qmd#tbl-nresp-country-gender >}}
+
+{{< embed code/01_preparation/02_descr_anal.qmd#tbl-nresp-country-agegroup >}}
+
+
+### Experimental setup {.appendix}
+
+Before the behavioral games, @hahm2024divided presented respondents a short background information overview and instructions. For the dictator game, these were: *This game is played by pairs of individuals.* *Each pair is made up of a Player 1 and a Player 2.* *Each player will have some information about the other player, but you will not be told who the other players are during or after the experiment.* *The game is conducted as follows: A sum of 10 tokens will be provisionally allocated to Player 1 at the start of each round.* *Player 1 will then decide how much of the 10 tokens to offer to Player 2.* *Player 1 could give some, all, or none of the 10 tokens.* *Player 1 keeps all tokens not given to Player 2.* *Player 2 gets to keep all the tokens Player 1 offers.* *You will play this game three times with three different people.* In the trust game, the provided information and instruction were: *This game is played by pairs of individuals.* *Each pair is made up of a Player 1 and a Player 2.* *Each player will have some information about the other player, but you will not be told who the other players are during or after the experiment.* *Each player will receive 10 tokens.* *Player 1 then has the opportunity to give a portion of his or her 10 tokens to Player 2.* *Player 1 could give some, all, or none of the 10 tokens.* *Whatever amount Player 1 decides to give to Player 2 will be tripled before it is passed on to Player 2.* *Player 2 then has the option of returning any portion of this tripled amount to Player 1.* *Then, the game is over.* *Player 1 receives whatever he or she keeps from the original 10 tokens, plus anything returned to him or her by Player 2. Player 2 receives their original 10 tokens, plus whatever he or she keeps after returning any portion of the tripled amount to Player 1.* *You will play this game three times, with three different people.* *The more tokens you obtain, the more successful you will be.*
+
+In both games respondents were shown a tabular overview of Player 2 after the instructions. @fig-example-profile shows an example of such a profile along with the interface respondents were provided to assign the 10 tokens. Each round, a new profile was displayed to respondents.
+
+![Example of potential co-player profile.](images/cj-example-profile.png){#fig-example-profile}
+
+### Distribution of Y {.appendix}
+
+{{< embed code/01_preparation/02_descr_anal.qmd#fig-distr-y >}}
+
+### Distribution of T and R {.appendix}
+
+{{< embed code/01_preparation/02_descr_anal.qmd#tbl-t-r-distr >}}
+
+### Distribution of Covariates by T
+
+{{< embed code/01_preparation/02_descr_anal.qmd#tbl-covariate-distr >}}
+
+### Robustness {.appendix}
+
+## Eidesstattliche Erklärung -- Statutory Declaration {.unlisted .unnumbered}
+
+\noindent Hiermit versichere ich, dass diese Arbeit von mir persönlich verfasst ist
+und dass ich keinerlei fremde Hilfe in Anspruch genommen habe. Ebenso
+versichere ich, dass diese Arbeit oder Teile daraus weder von mir selbst
+noch von anderen als Leistungsnachweise andernorts eingereicht wurden.
+Wörtliche oder sinngemäße Übernahmen aus anderen Schriften und
+Veröffentlichungen in gedruckter oder elektronischer Form sind
+gekennzeichnet. Sämtliche Sekundärliteratur und sonstige Quellen sind
+nachgewiesen und in der Bibliographie aufgeführt. Das Gleiche gilt für
+graphische Darstellungen und Bilder sowie für alle Internet-Quellen. Ich
+bin ferner damit einverstanden, dass meine Arbeit zum Zwecke eines
+Plagiatsabgleichs in elektronischer Form anonymisiert versendet und
+gespeichert werden kann. Mir ist bekannt, dass von der Korrektur der
+Arbeit abgesehen und die Prüfungsleistung mit „nicht ausreichend“
+bewertet werden kann, wenn die Erklärung nicht erteilt wird.
+
+
+\noindent I hereby declare that the paper presented is my own work and that I have
+not called upon the help of a third party. In addition, I affirm that neither I
+nor anybody else has submitted this paper or parts of it to obtain credits
+elsewhere before. I have clearly marked and acknowledged all quotations
+or references that have been taken from the works of other. All secondary
+literature and other sources are marked and listed in the bibliography. The
+same applies to all charts, diagrams and illustrations as well as to all Internet
+sources. Moreover, I consent to my paper being electronically stores and
+sent anonymously in order to be checked for plagiarism. I am aware that
+the paper cannot be evaluated and may be graded “failed” (“nicht
+                                                           ausreichend”) if the declaration is not made.
+
+```{=latex}
+\vspace{2cm}
+\noindent
+\parbox{5cm}{
+  \hrulefill\\
+  Place, Date
+}
+\hfill
+\parbox{5cm}{
+  \hrulefill\\
+  Signature
+}
+```
+
