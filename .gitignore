@@ -11,6 +11,7 @@ _extensions/
 _freeze/
 _publish.yml
 **/.ipynb_checkpoints/
+/_manuscript
 
 # Rendered Outputs (Ignore all PDF and HTML files)
 *.pdf
@@ -27,3 +28,5 @@ literature
 .DS_Store
 Thumbs.db
 
+
+/.quarto/
