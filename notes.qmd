@@ -649,13 +649,15 @@ Y_{riac}
 &\quad
   + \varepsilon_{riac} .
 \end{aligned}
+$$
 Stochasticcomponent.WeassumeaGaussianlikelihoodfortheboundedbutapproximatelycontinuoustokenoutcomeandmodelrandomeffectsasmultivariatenormalwithcorrelatedinterceptsandslopesattheanchorandcountrylevels:
 
 Stochastic component. We assume a Gaussian likelihood for the bounded but approximately continuous token outcome and model random effects as multivariate normal with correlated intercepts and slopes at the anchor and country levels:
 Stochasticcomponent.WeassumeaGaussianlikelihoodfortheboundedbutapproximatelycontinuoustokenoutcomeandmodelrandomeffectsasmultivariatenormalwithcorrelatedinterceptsandslopesattheanchorandcountrylevels:
+
+$$
 \varepsilon_{riac} \sim \mathcal{N}(0,\sigma^2), \quad
 u{i0} \sim \mathcal{N}(0,\sigma^2{u0}),
-
 
 \begin{pmatrix}
 v{a0} \\ v{aT} \\ v_{aR}
@@ -679,6 +681,240 @@ Bayesian estimation, implementation, and priors. We estimate the model in a Baye
 Interpretation and scope. The randomized conjoint design secures internal validity for profile‑level effects (R{ri} and other Z attributes) within partisan types. The contrast across partisan types (moderation by Ti) remains observational and is identified under adjustment for C_i and the multilevel structure; our hierarchical specification (anchor‑ and country‑varying slopes) and weakly informative priors stabilize these comparisons while transparently reflecting remaining uncertainty in the posterior.
 
 
+# 7.12.
+
+now another question:
+
+I initially had in mind of structuring the consequent results section like this:
+
+We present our findings in three stages. First, we present the distributions of explicit and implicit partisanship across our included country samples. Next, we present the overall average treatment effects of explicit partisanship on our outcomes of interest. Finally, we present cross-country variation of these pooled results to place our results in a comparative perspective.
+
+but now I kind of tend toward presenting the shares of types by country earlier in the researc hdesign, since it a) shows the shares of well-defined types (explicit and implicit types) and the nonpartisans which are omitted for the analysis (in line with treatment consistency).
+
+What do you think would be best? This figure also motivates well that the realtive distributions of explicit vs implicit partisans varies substantially across countries, while the share of undefinable nonpartisans is relatively stable across countries
+ChatGPT:
+
+Here is the way APSR reviewers will think about this, and the clean recommendation that follows.
+
+✔️ Core question
+
+Should the distribution of partisan types (explicit, implicit, nonpartisan) appear in the Results section or earlier in the Research Design?
+
+Short answer:
+Place it earlier, in the Research Design.
+This strengthens conceptual clarity and causal identification, and avoids breaking the flow of your results narrative.
+
+✔️ Why this belongs in the Research Design
+1. It defines the analytic sample (treatment consistency).
+
+Your coding of explicit vs implicit vs nonpartisans determines who enters the analytic sample.
+APSR reviewers expect transparency about exclusion rules before the results.
+
+Placing this in the results can look like “exploration” rather than a principled design choice.
+
+2. It is sample description, not a result.
+
+Sample composition (shares of implicit vs explicit) is not an empirical finding about behavior — it is descriptive design information about:
+
+who the treatment applies to
+
+why the sample is restricted
+
+how many respondents fall into well-defined categories
+
+This is classic Research Design material.
+
+3. It clarifies the conceptual validity of the treatment.
+
+Showing the distribution of types by country before estimating treatment effects demonstrates:
+
+that T is well defined (implicit vs explicit)
+
+that nonpartisans are a distinct, “undefined” category rightfully excluded
+
+that the “treatment” has meaningful variation across contexts (important for CATE estimation)
+
+This strengthens your causal interpretation.
+
+4. It motivates the modeling strategy.
+
+Your multilevel model treats partisan anchors nested in countries and allows random slopes for 
+T
+T.
+Showing that the supply of explicit vs implicit types differs by country allows the reader to understand why you allow country-level variation in the treatment effect.
+
+This is a perfect bridge between variable construction and model specification.
+
+✔️ Implication for the Results section
+
+By moving the distribution figure earlier:
+
+The Results section becomes cleaner, focusing on effects, not sample composition.
+
+You avoid repeating background material that the reader needs to understand the estimands.
+
+You can begin the Results with your core contrasts (ATEs, AP/IF/OD differences) without detours.
+
+A strong APSR Results section begins with substantive outcomes, not sample description.
+
+✔️ Recommended structure (optimal)
+In the Research Design (after "Construction of Main Variables")
+
+Add a short subsection:
+
+Distribution of Partisan Types Across Countries
+
+Include the figure showing shares of:
+
+explicit partisans
+
+implicit partisans
+
+nonpartisans (excluded from analysis)
+
+Explain:
+
+nonpartisans are omitted for treatment consistency
+
+explicit vs implicit proportions vary substantially by country
+
+this motivates allowing random slopes on 
+T
+T at anchor and country levels
+
+but the share of nonpartisans is relatively stable (validating exclusion)
+
+This is concise and conceptually clean.
+
+Then in the Results section
+
+Start directly with:
+
+Main Effects of Partisan Type on AP, IF, and OD
+
+Mechanisms / Decomposition (IF, OD)
+
+Cross-country variation of effects
+
+No need to revisit sample composition.
+
+✔️ Final Recommendation
+
+Move the distribution of partisan types into the Research Design.
+It strengthens conceptual clarity, improves causal justification, motivates the modeling strategy, and avoids diluting the Results section.
+
+If you want, I can draft the exact 2–3 paragraph text for that new subsection in concise APSR tone.
+
+# EMP ANAL
+
+Empirical analysis
+
+We present the results in two steps. First, we report pooled analyses based on posterior expected values obtained from the hierarchical model. For each game round, we compute expected allocations for prespecified combinations of partisan type (
+T=0
+T=0 implicit, 
+T=1
+T=1 explicit) and relationship category (
+R∈{Co,Out,None}
+R∈{Co,Out,None}), averaging over the empirical distribution of covariates and integrating over all random effects. From these expected values, we derive the three quantities of interest—affective polarization (AP), ingroup favoritism (IF), and outgroup derogation (OD)—for each partisan type. The difference between explicit and implicit partisans yields the corresponding CATE. The pooled figures display, for each quantity, the posterior densities for explicit and implicit partisans (left panels) and the posterior density of the CATE (right panels), including medians and 95%/99% credible intervals.
+
+Second, we report country-specific analyses, recomputing expected values within each national subsample (again averaging over that country’s covariate distribution, but this time including random effects). Although the resulting CATEs show little cross-national variation, the underlying country-level expected values vary considerably, especially for AP. These reveal substantial heterogeneity in the levels of partisan discrimination even as the implicit–explicit contrast remains consistently close to zero across countries. Results are presented separately for the dictator and trust games. For scale reference, a one-token difference corresponds to 42.6% of a standard deviation in the dictator game and 40.2% in the trust game.
+
+The effect of partisan type on affective polarization in Europe
+Dictator game {.unnumbered}
+
+Figure @fig-pooled-cov-d presents the pooled dictator-game results. Three findings stand out.
+
+{{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-d >}}
+
+First, explicit and implicit partisans exhibit similarly large and precisely estimated affective polarization. Explicit partisans allocate nearly one token more to co-partisans than to out-partisans (median AP = 0.99; 95% CI: 0.91–1.08). Implicit partisans—despite denying subjective attachment—display almost the same level (median = 0.93; 95% CI: 0.75–1.10). The resulting CATE centers tightly near zero (median = 0.07; 95% CI: –0.11–0.24). The posterior probability that explicit partisans polarize more is 0.78, but most of that mass lies below substantively meaningful magnitudes (over two-thirds below 0.1 tokens). Although the sign comports with H1, the overall Bayesian evidence is equivocal. More striking is the magnitude of AP among implicit identifiers: despite reporting no attachment, they display clear, tightly estimated partisan discrimination, suggesting that subjective identification—or the reporting of it—is not required for behavioral AP.
+
+Second, ingroup favoritism shows a slightly clearer, though still modest, difference. Explicit partisans reward co-partisans over neutral partners by 0.54 tokens (95% CI: 0.46–0.63); implicit partisans show a similar premium (median = 0.45; 95% CI: 0.26–0.64). The CATE again indicates only a small effect, with an 83% probability that explicit partisans favor their ingroup more, roughly three-quarters of this mass falling between 0 and 0.25 tokens. While this directional tendency is closer to H2 than the AP results (Pr
+>
+>0 = 0.83 vs. 0.78), the remaining uncertainty precludes interpreting it as a systematic difference. As with AP, implicit partisans nevertheless exhibit substantively meaningful IF, consistent with multidimensional accounts of partisanship emphasizing cue-based or behavioral pathways.
+
+Third, outgroup derogation reveals the strongest evidence of no systematic difference between partisan types. Explicit partisans withhold 0.45 tokens from out-partisans (95% CI: 0.36–0.54), and implicit partisans show nearly the same level (median = 0.48; 95% CI: 0.35–0.60). The CATE is tightly concentrated around zero (median = –0.03; 95% CI: –0.16–0.10). The posterior even favors slightly greater derogation among implicit partisans (Pr
+>
+>0 = 0.33), though with considerable uncertainty. These results provide clear evidence against H3 in the dictator game.
+
+Overall, the pooled dictator-game results indicate that implicit partisans behave almost indistinguishably from explicit partisans in allocations toward co- and out-partisans. The CATEs are uniformly small, symmetric, and concentrated around substantively trivial values. Any behavioral content added by explicit subjective attachment is minimal at best. In this allocative context, partisan discrimination appears to stem primarily from categorization or anchoring rather than from self-reported identity. We next examine whether reciprocal incentives in the trust game alter these patterns.
+
+Taken together, the pooled dictator-game results indicate that implicit partisans behave much like explicit partisans in their allocations toward co- and out-partisans. Although some contrasts display weak alignment with the theoretical expectations (a slight positive tendency for AP and IF; a slight negative tendency for OD), all three CATEs are small and uncertain, with most posterior mass concentrated near substantively negligible values. In this allocative setting, explicit subjective attachment adds little to the behavioral expression of partisan bias.
+
+Trust game {.unnumbered}
+
+Figure @fig-pooled-cov-t displays the pooled trust-game results. While these data ultimately point toward the same overarching conclusion as the dictator game—namely, limited evidence for systematic differences between partisan types—the patterns of the three components differ notably across the two games. In contrast to the dictator game, the trust game generates (i) no directional tendency at all for AP, (ii) a reversed directional tendency for IF, and (iii) the strongest evidence in favor of the theoretical expectation for OD.
+
+{{< embed code/postproduction/06_figures.qmd#fig-pooled-cov-t >}}
+
+We begin with affective polarization (top row). In the trust game, explicit and implicit partisans exhibit virtually identical AP. Both groups discriminate in favor of co-partisans by 1.08 tokens on average (explicit median = 1.08; 95% CI: 1.00–1.17; implicit median = 1.08; 95% CI: 0.89–1.26). The resulting contrast displays no directional signal whatsoever: the CATE is centered exactly at zero (median = 0; 95% CI: –0.17–0.19), and the probability that explicit identifiers polarize more is essentially 0.5. Unlike in the dictator game, where the posterior leaned slightly in the theorized direction, the trust-game evidence is textbook symmetric, offering no support—positive or negative—for H1.
+
+Turning to ingroup favoritism (middle row), the trust game yields a modest directional shift opposite to the identity-based expectation. Explicit partisans reward co-partisans by 0.63 tokens (95% CI: 0.53–0.72), whereas implicit partisans display a somewhat larger premium (median = 0.75; 95% CI: 0.53–0.95). The CATE is therefore negative (median = –0.12; 95% CI: –0.32–0.09), and the posterior assigns an 86% probability that implicit partisans engage in stronger IF. In the dictator game, the directional signal (albeit weak) aligned with H2; here it is reversed. This contrast underscores that reciprocal incentives reshape the relative contribution of ingroup benefits across partisan types, even if the magnitude remains modest.
+
+Finally, outgroup derogation (bottom row) provides the clearest trust-game evidence consistent with theory. Explicit partisans withhold 0.46 tokens from out-partisans (95% CI: 0.38–0.53), compared to 0.33 among implicit partisans (95% CI: 0.21–0.46). The CATE is positive (median = 0.12; 95% CI: –0.01–0.26), and the posterior probability that explicit partisans derogate more is very high (0.97). Importantly, this is the only component across both games where the posterior concentrates strongly in the theorized direction—though even here, the effect remains substantively small, and implicit partisans still exhibit meaningful derogation.
+
+Taken together, the trust-game data produce a pattern that is not simply a replication of the dictator-game results. AP shows no directional difference (versus a slight positive tendency in the dictator game); IF reverses direction (versus a slight positive tendency previously); and OD exhibits the most systematic alignment with theoretical expectations (versus no alignment in the dictator game). Despite these divergences in directional tendencies, all three contrasts remain small, and none offer compelling evidence for systematic behavioral differences between explicit and implicit identifiers. The absence of cross-game convergence in the signs of the CATEs further strengthens the inference that explicit partisan attachment does not reliably amplify discriminatory behavior.
+
+# 19:17
+
+Revised Pooled Results Section (APSR-Style, with Modest Causal Language)
+The effect of partisan type on affective polarization in Europe
+Dictator game
+
+Figure X presents the pooled dictator–game estimates. Together, they yield three central conclusions about how partisan type causally affects affective polarization (AP) and its components.
+
+First, both explicit and implicit partisans exhibit clear and precisely estimated AP, and the difference between them is negligible (top-left panel of Fig. X).
+Explicit partisans allocate 0.99 tokens more to co-partisans than to out-partisans (posterior median; 95% CrI: 0.91, 1.08).
+Implicit partisans—those who deny feeling attached to any party but possess a stable partisan anchor—display almost the same causal effect (0.93; 95% CrI: 0.75, 1.10).
+The CATE—the causal effect of explicit versus implicit partisan type on AP—is tightly centered on zero (0.07; 95% CrI: –0.11, 0.24; top-right panel).
+The posterior probability that explicit identifiers polarize more is 0.78, but nearly all of that mass lies below substantively meaningful magnitudes (over two-thirds below 0.1 tokens).
+
+Thus, although the sign aligns with the identity-centered expectation (H1), the Bayesian evidence indicates substantial uncertainty. The more striking pattern is the magnitude of AP among implicit partisans: despite denying attachment, they display robust and precisely estimated discrimination. This suggests that self-reported identity is not required for the causal expression of AP in allocative settings.
+
+Second, ingroup favoritism (IF) shows a slightly clearer—though still modest—difference (middle-left panel).
+Explicit partisans reward co-partisans by 0.54 tokens (95% CrI: 0.46, 0.63), compared with 0.45 among implicit partisans (95% CrI: 0.26, 0.64).
+The corresponding CATE again indicates at most a small causal effect (0.09; 95% CrI: –0.10, 0.25) and a posterior probability of 0.83 that explicit partisans engage in stronger IF.
+
+From a Bayesian perspective, the directional evidence is somewhat more consistent with H2 than for AP, but the posterior mass remains concentrated near zero. Importantly, implicit partisans nonetheless express meaningful IF, consistent with multidimensional accounts in which identity-like behavior can emerge through cue-based, motivational, or categorization pathways.
+
+Third, outgroup derogation (OD) provides the strongest evidence of no systematic causal difference between partisan types (bottom row).
+Explicit partisans withhold 0.45 tokens from out-partisans (95% CrI: 0.36, 0.54), while implicit partisans withhold 0.48 (95% CrI: 0.35, 0.60).
+The CATE is centered even more tightly on zero (–0.03; 95% CrI: –0.16, 0.10).
+The posterior probability that implicit partisans derogate more is 0.67, but again the mass is heavily concentrated on substantively trivial differences.
+
+This constitutes Bayesian evidence against H3: explicit partisans do not causally derogate out-partisans more strongly than implicit partisans in this setting.
+
+Taken together, the pooled dictator-game results provide a consistent picture: implicit partisans behave almost identically to explicit partisans in their causal treatment of co- and out-partisans. Posterior medians near zero, symmetric CATE distributions, and probability mass concentrated around substantively minimal values all point toward the same conclusion.
+
+In this task, the behavioral expression of partisan bias appears to flow from partisan anchoring or categorization itself, not from explicit subjective attachment. This aligns with theories emphasizing informational, associative, or norm-based pathways to AP and challenges the assumption that explicit identity should meaningfully amplify discriminatory behavior.
+
+We next examine whether these conclusions extend to the trust game, where reciprocity may alter the relative contribution of ingroup and outgroup components.
+
+Trust game
+
+Figure Y displays the pooled trust-game results. While these data ultimately reinforce the broader conclusion from the dictator game—namely, limited evidence that explicit partisanship causally increases discrimination—the patterns for the three components differ across the two tasks. Relative to the dictator game, the trust game exhibits (i) no directional tendency for AP, (ii) a reversed directional tendency for IF, and (iii) the strongest evidence in favor of the theoretical expectation for OD.
+
+We begin with AP (top row).
+In the trust game, explicit and implicit partisans exhibit virtually identical causal AP effects:
+explicit partisans 1.08 (95% CrI: 1.00, 1.17); implicit partisans 1.08 (95% CrI: 0.89, 1.26).
+The resulting causal contrast shows no directional signal whatsoever: the CATE is centered at zero (0.00; 95% CrI: –0.17, 0.19), and the posterior probability that explicit partisans polarize more is 0.50, equivalent to random chance. Unlike in the dictator game, the posterior here is textbook symmetric, providing no support for H1.
+
+Turning to IF (middle row), the trust game yields a modest directional shift opposite the identity-based hypothesis.
+Explicit partisans reward co-partisans by 0.63 tokens (95% CrI: 0.53, 0.72), while implicit partisans show a somewhat larger premium of 0.75 (95% CrI: 0.53, 0.95).
+The CATE is therefore negative (–0.12; 95% CrI: –0.32, 0.09) and the posterior probability that implicit partisans engage in stronger IF is 0.86.
+This reversal indicates that reciprocal structure influences the relative expression of ingroup preferences, even if the magnitude of the causal effect remains modest.
+
+Finally, OD (bottom row) provides the clearest trust-game evidence consistent with theory.
+Explicit partisans withhold 0.46 tokens (95% CrI: 0.38, 0.53) from out-partisans, compared to 0.33 among implicit partisans (95% CrI: 0.21, 0.46).
+The CATE is positive (0.12; 95% CrI: –0.01, 0.26), and the posterior probability that explicit identifiers derogate more is 0.97.
+This is the only instance across both games where the posterior places substantial mass in the theorized direction—though again, the magnitude is substantively small, and implicit partisans still express meaningful OD.
+
+To summarize, the trust-game results reinforce the broader conclusion: explicit subjective attachment does not reliably amplify partisan discrimination. Some contrasts align directionally with the hypotheses (AP and IF in the dictator game; OD in the trust game), but these tendencies are small and uncertain. Others run counter to expectations (OD in the dictator game; IF in the trust game). Crucially, signs and magnitudes do not replicate across behavioral contexts, providing strong evidence against the claim that explicit attachment systematically enhances discriminatory behavior.
+
+Instead, the pooled findings suggest that implicit identification is sufficient to produce substantial AP, IF, and OD, across both allocative and reciprocal environments.
+
+Finally, the trust-game results underscore a broader measurement implication: similar aggregate AP can arise from offsetting patterns of ingroup favoritism and outgroup derogation. As seen here, such offsets may occur symmetrically across subgroups, potentially suppressing theoretically meaningful differences in underlying mechanisms. Analyses relying solely on aggregate co-partisan versus out-partisan contrasts thus risk obscuring heterogeneity in the components that jointly produce AP.
+
+
 # FUTURE EXTENSIONS IDEA
 
 -> Correctly recode source country data
@@ -691,3 +927,17 @@ Interpretation and scope. The randomized conjoint design secures internal validi
 -> different response family 
 -> test with external data source
 -> affect, what about ideology?
+
+-> Add ROPE/equivalence analysis and report thresholds in methods.
+-> Add sensitivity analyses (covariate sets, matching/IPW).
+-> Add heterogeneity checks (pre-specified list).
+-> Add placebo/falsification tests.
+-> Add minimal detectable effect/power diagnostics.
+-> Tighten contribution paragraph and conclusion language to emphasize measurement + theory + method.
+-> Add a short “limitations and generalizability” paragraph: experiments measure horizontal AP in conjoint tasks — may not generalize to all AP measures.
+
+
+-> Literature:
+	- expressive vs instrumental partisanship
+	- party-over-policy/expressive/SIT
+	- explicit vs implicit identity

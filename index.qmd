@@ -5,53 +5,37 @@ subtitle: |
   A comparative study of 25 European democracies
 abstract: |
   Space for an abstract. 
-author:
-  - name: Tristan Muno
-    orcid: 0009-0002-3078-8436
-    email: tristan.muno@uni-mannheim.de
-    affiliations: 
-      - name: University of Mannheim
-        address: A 5, 6 – Raum A 351
-        city: Mannheim
-        state: BW
-        postal-code: 68159
-  - name: Thomas König
-    orcid: 0000-0002-1797-6662
-    email: koenig@uni-mannheim.de
-    affiliations: 
-      - name: University of Mannheim
-        address: A 5, 6 – Raum A 353
-        city: Mannheim
-        state: BW
-        postal-code: 68159 
-date: last-modified
-date-format: MMMM D, YYYY
 execute:
   echo: false
   warning: false
   eval: true
   include: true
   cache: true
-bibliography: references.bib
-biblio-style: apsr
-link-citations: true
-number-sections: true
+draft: true
+draft-mode: visible
 ---
+
+## Roadmap
+
+Explore variation across three main dimensions:
+
+1. Operationalization: Ingroup via explicit attachement (identity) vs vote intention/choice
+2. Measurement: Behavior vs Attitude
+3. External validity: Cross-national variability 
 
 ## Exploratory figures
 
-{{< embed code/01_preparation/01_wrangling.qmd#fig-impl-expl-distribution >}}
+{{< embed code/01_prep/01_wrangling.qmd#fig-impl-expl-distribution >}}
 
-{{< embed code/01_preparation/01_wrangling.qmd#fig-exploratory-country-anal-dict >}}
+{{< embed code/01_prep/01_wrangling.qmd#fig-exploratory-country-anal-dict >}}
 
-{{< embed code/01_preparation/01_wrangling.qmd#fig-exploratory-country-anal-trust >}}
+{{< embed code/01_prep/01_wrangling.qmd#fig-exploratory-country-anal-trust >}} 
 
 \singlespacing
 
 ## Data
 
 We use data from @hahm2024divided.
-@achen2016democracy is another reference.
 
 ## References
 
@@ -62,11 +46,11 @@ We use data from @hahm2024divided.
 
 ### Sample descriptives {.appendix}
 
-{{< embed code/01_preparation/02_descr_anal.qmd#tbl-nresp-country >}}
+{{< embed code/01_prep/02_descr_anal.qmd#tbl-nresp-country >}}
 
-{{< embed code/01_preparation/02_descr_anal.qmd#tbl-nresp-country-gender >}}
+{{< embed code/01_prep/02_descr_anal.qmd#tbl-nresp-country-gender >}}
 
-{{< embed code/01_preparation/02_descr_anal.qmd#tbl-nresp-country-agegroup >}}
+{{< embed code/01_prep/02_descr_anal.qmd#tbl-nresp-country-agegroup >}}
 
 
 ### Experimental setup {.appendix}
@@ -79,15 +63,15 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 
 ### Distribution of Y {.appendix}
 
-{{< embed code/01_preparation/02_descr_anal.qmd#fig-distr-y >}}
+{{< embed code/01_prep/02_descr_anal.qmd#fig-distr-y >}}
 
 ### Distribution of T and R {.appendix}
 
-{{< embed code/01_preparation/02_descr_anal.qmd#tbl-t-r-distr >}}
+{{< embed code/01_prep/02_descr_anal.qmd#tbl-t-r-distr >}}
 
 ### Distribution of Covariates by T
 
-{{< embed code/01_preparation/02_descr_anal.qmd#tbl-covariate-distr >}}
+{{< embed code/01_prep/02_descr_anal.qmd#tbl-covariate-distr >}}
 
 ### Robustness {.appendix}
 

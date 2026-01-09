@@ -3,8 +3,37 @@ project:
 
 manuscript:
   notebooks:
-    - notebook: code/01_preparation/01_wrangling.qmd
-    - notebook: code/01_preparation/02_descr_anal.qmd
+    - notebook: code/01_prep/01_wrangling.qmd
+    - notebook: code/01_prep/02_descr_anal.qmd
+  code-links: binder
+
+
+author:
+  - name: Tristan Muno
+    orcid: 0009-0002-3078-8436
+    email: tristan.muno@uni-mannheim.de
+    affiliations: 
+      - name: University of Mannheim
+        address: A 5, 6 – Raum A 351
+        city: Mannheim
+        state: BW
+        postal-code: 68159
+  - name: Thomas König
+    orcid: 0000-0002-1797-6662
+    email: koenig@uni-mannheim.de
+    affiliations: 
+      - name: University of Mannheim
+        address: A 5, 6 – Raum A 353
+        city: Mannheim
+        state: BW
+        postal-code: 68159 
+
+bibliography: references.bib
+biblio-style: apsr
+link-citations: true
+number-sections: true
+date: last-modified
+date-format: MMMM D, YYYY
 
 format:
   html:

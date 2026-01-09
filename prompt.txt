@@ -1,0 +1,47 @@
+can you improve this next subsection only in terms of language (to not change the content) so it is high level academic publication precide, formal, analytic, consistent APSR language? Make sure it fits with the previous subsections you edited so far.
+
+### Causal assumptions
+
+Our design treats explicit partisanship ($T=1$) as the treatment and implicit partisanship ($T=0$) as the comparison condition.
+The conjoint experiment provides strong design-based leverage: all profile attributes ($Z$), including the partisan cue and the order of attributes, are randomized in each round.
+Because the respondent-profile relationship $R_ri$ is a deterministic function of a randomized cue and the respondent's anchor $A$, the profile-level variation that drives AP, IF, and OD is as-if random.
+Consequently, the effect of $R$ (and of other randomized attributes) on $Y_{riac}$ are causally identified by design.
+The conditioning of partisan type is estimated via the interaction $T \times R$.
+Here, identification relies on an observational assumption: conditional independence of T given the covariates C and higher-level structure.
+Our multilevel Bayesian model encodes this strategy: respondent random intercepts account for stable individual differences, random slopes for T and R at the party anchor and country level allow heterogenous effects and partial pooling across parties and contexts.
+All reported estimands are obtained via g-computation (observed values approach), averaging posterior expected valus over the empirical distribution of covariates and grouping units.
+
+- SUTVA
+We assume no interference across respondents and a well-defined treatment.
+The survey is individual and anonymous, so cross-respondent spillovers are unlikely.
+Within-respondent dependence across rounds is mitigated by randomized profiles and modeled with respondent intercepts.
+Treatment consistency is addressed by a precise coding of T and by allowing its effect to vary across parties and countries.
+
+- Conditional independence (ignorability) for T
+Given our covariates C, and conditioning on partisan anchor and country via random effects, assignment to T is assumed independent of potential outcomes.
+Randomization of Z ensures identification of R's effects, the contrast across T relies on this ignorability assumption.
+
+- Covariate balance
+The distributions of observed covariates should be comparable across T=1 and T=0. 
+Assessement of covariates based on table XX in the appendix yields a good overall balance between the subgroups.
+Furthermore, we stabilize estimation through hierarchical partial pooling, which reduces model variance but does ot itself render the design randomized.
+
+- Common support (overlap)
+For observed covariate combinations, both partisan types should occur with positive probability.
+
+Although violations of SUTVA could bias our estimates and cannot be fully outruled, we view large violations as unlikely, given randomization of conjoint cues and order as well as the inclusion of respondent intercept.
+The chief threat is residual confounding of T and Y: unmeasured factors might affect both selection into explicit and implicit partisanship and allocation patterns, thereby biasing our CATEs for AP, IF and OD.
+Remaining imbalance would increase model dependence.
+Limited overlap within specific parties or countries would shift identification onto parametric assumptions and cross-unit pooling.
+We mitigate these risks with an extensive covariate set (section XX) and the inclusion of country- and party-varying slopes for T and R.
+In the Bayesian framework, uncertainty from estimation and pooling is propagates via the posterior, but uncertainty from identification assumption is not "averaged out".
+Consequently, our inferences are model-based and assumption-conditional.
+
+We are confident in the internal validity of profile-level effects (R and Z) and of derived quantities (AP, IF, OD) within a given T, because they rest on random assignement of Z.
+The contrast between explicit and implicit partisans (CATEs) is more assumption-intensive.
+Our modeling strategy -- rich controls, hierarchical partial pooling across partisan anchors and countries, and g-computation -- substantially reduces, but cannot eliminate, the possibility of unobserved confounding or limited support in some contexts.
+We therefore report uncertainty transparently and qualify causal language accordingly.
+
+Our goal is to approximate the hypothetical intervention effect: how AP, IF, and OD would change if a respondent's partisan type were shifted from implicit (T=0) to explicit (T=1), holding other factors constant.
+Because T is observational, this interpretation is valid under the assumptions presented above.
+We state these limitations explicitly and present the resulting estimates as the best model-based causal approximation permitted by the data and design.

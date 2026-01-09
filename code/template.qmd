@@ -3,12 +3,6 @@ title: |
   Code Notebook
 subtitle: |
   How does reported partisan attachement influence affective polarization?: A comparative study of 25 European democracies
-author:
-  - name: Tristan Muno
-    email: tristan.muno@uni-mannheim.de
-    affiliations:
-      - name: University of Mannheim
-        department: School of Social Sciences
 date: last-modified
 date-format: MMMM D, YYYY
 format:
@@ -78,8 +72,12 @@ end_time <- Sys.time()
 
 rendering_time <- end_time - start_time
 
-message(paste("Document rendered in:", round(as.numeric(rendering_time, units = "secs"), 2), "seconds.
-"))
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
 ```
 
 
