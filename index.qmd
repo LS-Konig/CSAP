@@ -23,6 +23,18 @@ Explore variation across three main dimensions:
 2. Measurement: Behavior vs Attitude
 3. External validity: Cross-national variability 
 
+
+
+## Total Sample  
+
+2x2 Correlation Matrix
+
+                Opinion
+              V  |   I
+          V      |
+Behavior ----------------
+          I      |
+
 ## Exploratory figures
 
 {{< embed code/01_prep/01_wrangling.qmd#fig-impl-expl-distribution >}}
