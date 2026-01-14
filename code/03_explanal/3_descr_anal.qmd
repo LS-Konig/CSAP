@@ -1,0 +1,1790 @@
+---
+title: |
+  Code Notebook 3
+subtitle: |
+  Exploratory Analyses
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "janitor",
+  "knitr",
+  "dagitty",
+  "ggdag",
+  "ggpubr",
+  "gtsummary",
+  "gt",
+  "scales",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+```{r}
+#| label: load-data
+
+eu25games2019 <- readRDS(
+  file = here(
+    "data",
+    "03_final",
+    "eu25games2019.rds"
+  )
+)
+```
+
+# Distribution of implicit and explicit partisans pooled and across countries
+
+```{r}
+#| label: tbl-distr-partyid-pooled
+#| tbl-cap: "Distribution of reported partisan attachement (*explicit partisan identity*) in the pooled sample."
+
+eu25games2019 |>
+  tabyl(der_pid) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+```{r}
+#| label: tbl-distr-vote-pooled
+#| tbl-cap: "Distribution of reported vote intention and choice (*implicit partisan identity*) in the pooled sample."
+
+eu25games2019 |>
+  tabyl(der_vote_cat) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+
+```{r}
+#| label: tbl-cross-vote-pid-pooled
+#| tbl-cap: "Distribution of explicit and implicit partisan identities in the pooled sample."
+
+eu25games2019 |>
+  tabyl(der_pid, der_vote_cat) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+```{r}
+#| label: tbl-distr-partyid-country
+#| tbl-cap: "Distribution of reported partisan attachement (*explicit partisan identity*) by country."
+
+eu25games2019 |>
+  tabyl(meta_country, der_pid) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+```{r}
+#| label: tbl-distr-vote-country
+#| tbl-cap: "Distribution of reported vote intention and choice (*implicit partisan identity*) in the pooled sample."
+
+eu25games2019 |>
+  tabyl(der_vote_cat, meta_country) |>
+  adorn_totals() |>
+  kable(
+    digits = 2,
+    booktabs = T
+  )
+
+```
+
+
+```{r}
+#| label: tbl-cross-vote-pid-country
+#| tbl-cap: "Distribution of explicit and implicit partisan identities by country."
+
+eu25games2019 |>
+  tabyl(der_pid, der_vote_cat, meta_country) |>
+  adorn_totals()
+
+```
+
+# Overview of data distribution
+
+Respondents -> Party ID -> Vote report
+
+In words, respondents either report a partisan identity (i.e., a felt attachement to a political party) or they deny the presence of such feelings.
+
+## The number of respondents
+
+```{r}
+#| label: tbl-n-resp
+
+eu25games2019 |>
+  distinct(meta_pid) |>
+  nrow()
+```
+
+## The numer of respondents reporting PID vs not
+
+```{r}
+#| label: tbl-n-resp-pid
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  count(der_pid)
+```
+
+## The number of non-identifiers who report a vote (vs not)
+
+```{r}
+#| label: tbl-n-resp-nopid-vote
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  filter(der_pid == "No Party ID") |>
+  count(der_vote_cat)
+```
+
+## The number of identifiers who report a vote (vs not)
+
+```{r}
+#| label: tbl-n-resp-pid-vote
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  filter(der_pid == "Party ID reported") |>
+  count(der_vote_cat)
+```
+
+## The number of identifiers who reported vote identical to PID
+
+```{r}
+#| label: tbl-n-resp-pid-vote-same
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  filter(der_pid == "Party ID reported") |>
+  mutate(
+    pid_equal_vote_name = if_else(
+      der_vote_combined_name == ext_q_party_id_pf_name,
+      1,
+      0
+    )
+  ) |>
+  count(pid_equal_vote_name)
+
+# but accounting for unknown and dont-know answers yields
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  filter(
+    der_pid == "Party ID reported",
+    der_vote_combined_name != "unknown",
+    der_vote_combined_name != "dont-know"
+  ) |>
+  mutate(
+    pid_equal_vote_name = if_else(
+      der_vote_combined_name == ext_q_party_id_pf_name,
+      1,
+      0
+    ),
+    pid_equal_vote_id = if_else(
+      der_vote_combined_id == ext_q_party_id_pf_id,
+      1,
+      0
+    )
+  ) |>
+  count(pid_equal_vote_name, pid_equal_vote_id)
+
+
+```
+
+
+```{r}
+#| label: tbl-pid-vote-corr2
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  filter(der_pid == "Party ID reported") |>
+  mutate(
+    pid_equal_vote_id = if_else(
+      der_vote_combined_id == ext_q_party_id_pf_id,
+      1,
+      0
+    )
+  ) |>
+  count(pid_equal_vote_id)
+```
+
+```{r}
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    pid_equal_vote_id = case_when(
+      der_pid == "Party ID reported" &
+        der_vote_cat == "Vote reported" &
+        der_vote_combined_id == ext_q_party_id_pf_id ~ 1,
+      der_pid == "Party ID reported" &
+        der_vote_cat == "Vote reported" &
+        der_vote_combined_id != ext_q_party_id_pf_id ~ 0,
+      .default = NA
+    ),
+    pid_equal_vote_name = case_when(
+      der_pid == "Party ID reported" &
+        der_vote_cat == "Vote reported" &
+        der_vote_combined_name == ext_q_party_id_pf_name ~ 1,
+      der_pid == "Party ID reported" &
+        der_vote_cat == "Vote reported" &
+        der_vote_combined_name != ext_q_party_id_pf_name ~ 0,
+      .default = NA
+    )
+  )
+
+# manually recode some instances where the casewhen check above yielded different but inspection revealed its basically the same party
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    # New column using case_when for manual line-by-line recoding
+    pid_equal_vote_name2 = case_when(
+      # Case 1: Party names are already identical (from pid_equal_vote_name = 1)
+      pid_equal_vote_name == 1 ~ 1,
+
+      # Case 2: Polish Koalicja Obywatelska (PO, SLD, Spring, PSL, Nowoczesna)
+      pid_equal_vote_name == 0 &
+        ext_q_party_id_pf_name %in%
+          c(
+            "Platforma Obywatelska",
+            "Sojusz Lewicy Demokratycznej",
+            "Spring",
+            "Polskie Stronnictwo Ludowe",
+            "Nowoczesna"
+          ) &
+        der_vote_combined_name == "Koalicja Obywatelska" ~ 1,
+
+      # Case 3: Spanish Unidas Podemos (Podemos, Izquierda Unida)
+      pid_equal_vote_name == 0 &
+        ext_q_party_id_pf_name %in%
+          c(
+            "Podemos",
+            "Izquierda Unida"
+          ) &
+        der_vote_combined_name == "Unidas Podemos" ~ 1,
+
+      # Case 4: Dutch ChristenUnie — SGP
+      pid_equal_vote_name == 0 &
+        ext_q_party_id_pf_name %in%
+          c(
+            "ChristenUnie",
+            "Staatkundig Gereformeerde Partij"
+          ) &
+        der_vote_combined_name ==
+          "ChristenUnie — Staatkundig Gereformeerde Partij" ~ 1,
+
+      # Case 5: Hungarian Fidesz — KDNP (using grepl for robustness against long name)
+      pid_equal_vote_name == 0 &
+        ext_q_party_id_pf_name %in%
+          c(
+            "Fidesz — Magyar Polgári Szövetség",
+            "Kereszténydemokrata Néppárt"
+          ) &
+        grepl(
+          "Fidesz — KDNP pártszövetség",
+          der_vote_combined_name,
+          fixed = TRUE
+        ) ~ 1,
+
+      # Case 6: Polish Konfederacja Wolność i Niepodległość (KNP, KORWiN, Kukiz'15)
+      pid_equal_vote_name == 0 &
+        ext_q_party_id_pf_name %in%
+          c(
+            "Kongres Nowej Prawicy",
+            "Koalicja Odnowy Rzeczypospolitej Wolność i Nadzieja KORWiN",
+            "Kukiz'15"
+          ) &
+        der_vote_combined_name == "Konfederacja Wolność i Niepodległość" ~ 1,
+
+      # Case 7: Latvian Attīstībai/Par!
+      pid_equal_vote_name == 0 &
+        ext_q_party_id_pf_name == "Kustība Par!" &
+        der_vote_combined_name == "Attīstībai/Par!" ~ 1,
+
+      # Case 8: French LREM/Renaissance
+      pid_equal_vote_name == 0 &
+        ext_q_party_id_pf_name == "Mouvement démocrate" &
+        der_vote_combined_name == "La République En Marche! / Renaissance" ~ 1,
+
+      # Case 9: Catalan JxCat (Partit Demòcrata Europeu Català)
+      pid_equal_vote_name == 0 &
+        ext_q_party_id_pf_name == "Partit Demòcrata Europeu Català" &
+        der_vote_combined_name ==
+          "Junts per Catalunya — Partit Demòcrata Europeu Català" ~ 1,
+
+      # Default: All other cases (where pid_equal_vote_name was 0 and no manual case matched)
+      TRUE ~ pid_equal_vote_name
+    )
+  )
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  count(pid_equal_vote_name2)
+```
+
+## Schematic overview
+
+```{mermaid}
+flowchart TD
+    A(Respondents <br> N = 29,827) --> B(No Party ID <br> N = 10,880) 
+    A(Respondents <br> N = 29,827) --> C(Party ID <br> N = 18,357)
+
+    B --> D(No Vote <br> N = 3,900)
+    B --> E(Vote <br> N = 6,234)
+
+    C --> F(No Vote <br> N = 1,030)
+    C --> G(Vote <br> N = 16,917)
+
+    G --> H(Same as PID <br> N = 13,220)
+    G --> I(Diff from PID <br> N = 3,697)
+```
+
+## Figures
+
+```{r}
+#| label: fig-distr-partisans
+#| fig-cap: "Distribution of Reported Partisan Affiliation and Vote Choice/Intention across included European countries."
+
+df_reshaped <- eu25games2019 |>
+  group_by(meta_country, der_nopid, der_vote_cat) |>
+  count() |>
+  ungroup()
+
+df_reshaped
+
+total_counts <- df_reshaped |>
+  group_by(meta_country, der_nopid) |>
+  summarise(n = sum(n), .groups = "drop") |>
+  mutate(
+    nopid2 = if_else(der_nopid == 1, "No PID", "PID"),
+    toprint = paste0(
+      nopid2,
+      "\n",
+      as.character(n)
+    ),
+    toprint2 = as.character(n)
+  )
+
+ggplot(df_reshaped, aes(x = as.factor(der_nopid), y = n, fill = der_vote_cat)) +
+  geom_col() +
+  geom_text(
+    data = total_counts,
+    aes(label = toprint2, fill = "black"),
+    vjust = if_else(
+      total_counts$der_nopid == 1,
+      0,
+      1
+    ),
+    size = 3
+  ) +
+  facet_wrap(~meta_country) +
+  labs(y = "N", x = "") +
+  scale_x_discrete(labels = c("0" = "PID", "1" = "No PID")) +
+  scale_fill_manual(
+    values = c(
+      "Don't know" = "darkgray",
+      "NA" = "black",
+      "Other" = "orange",
+      "Vote reported" = "gold"
+    )
+  ) +
+  theme_pubr()
+```
+
+## Implicit vs explicit partisans distributions
+
+```{r, dev='ragg_png'}
+#| label: fig-impl-expl-distribution
+#| fig-cap: "Distribution of partisan types, by country. Stacked horizontal bars show the within-country share (\\%) of three partisan types: explicit partisans (respondents who reported a subjective attachement to a party, $T_i=1$), implicit partisans (respondents who reported no attachement but did report a vote preference or intention, $T_i=0$), and respondents who reported neither (none, $T_i = \\emptyset$). Percentages sum to 100\\% within each country, with country samples containing about $1,100$ respondents each (detailed numbers are reported in appendix section X)."
+#| fig-dpi: 500
+
+toplot <- eu25games2019 |>
+  select(meta_country, der_partisanship, meta_pid) |>
+  distinct(meta_pid, .keep_all = T) |>
+  filter(!is.na(der_partisanship)) |>
+  group_by(meta_country) |>
+  count(der_partisanship) |>
+  mutate(
+    total_n = sum(n),
+    prop = n / total_n
+  ) |>
+  ungroup()
+
+expl_prop <- toplot |>
+  filter(der_partisanship == "1_pid_expl") |>
+  select(meta_country, expl_prop = prop)
+
+toplot <- toplot |>
+  left_join(
+    expl_prop,
+    by = join_by(meta_country)
+  ) |>
+  mutate(
+    meta_country = fct_reorder(meta_country, expl_prop),
+    der_partisanship2 = case_when(
+      der_partisanship == "1_pid_expl" ~ "Explicit",
+      der_partisanship == "2_pid_impl" ~ "Implicit",
+      der_partisanship == "3_nopid" ~ "None"
+    )
+  )
+
+ggplot(
+  toplot,
+  aes(x = n, y = meta_country, fill = der_partisanship2)
+) +
+  geom_bar(
+    stat = "identity",
+    position = "fill",
+    color = "black",
+    width = 0.75
+  ) +
+  scale_fill_manual(
+    values = c("white", "#CCCCCC", "black"),
+    labels = c(
+      bquote("Explicit (" * italic(T)[i] == 1 * ")"),
+      bquote("Implicit (" * italic(T)[i] == 0 * ")"),
+      expression(paste("None (", italic(T)[i] == phantom(0) * "\u2205", ")"))
+    )
+  ) +
+  scale_x_continuous(labels = percent) +
+  labs(
+    x = "Share",
+    y = "Country",
+    fill = bquote("Partisan Type (" * italic(T)[i] * ")")
+  ) +
+  theme_pubr() +
+  theme(
+    aspect.ratio = 1 / 1.618034
+  )
+```
+
+# Exploratory analysis of country specific ingroup and outgroup dynamics by partisan type
+
+```{r}
+#| label: fig-exploratory-country-anal-dict
+#| fig-cap: "Exploratory token allocation behavior by country and pid type in the dictator game: ingroup favoritism, outgroup derogation and affective polarization. The figure shows mean differences in token allocation with 95\\% confidence intervals. IF = mean(token2co) - mean(token2control), OD = mean(token2control) - mean(token2out), AP = mean(token2co) - mean(token2out)"
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 7.8
+#| fig-pos : H
+
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    cj_token_logged = log(cj_token + 1)
+  )
+
+token_means <- eu25games2019 |>
+  filter(meta_game == "dict") |>
+  filter(
+    !der_outpartisan_comb %in%
+      c(
+        "97_eunat_expl",
+        "97_eunat_impl",
+        "98_outnat_expl",
+        "98_outnat_impl",
+        "99_outnatEU_nopid",
+        "99_outnat_nopid"
+      ) &
+      !is.na(der_outpartisan_comb)
+  ) |>
+  group_by(meta_country, der_outpartisan_comb) |>
+  summarise(
+    m = mean(cj_token_logged),
+    s = sd(cj_token_logged),
+    n = n()
+  ) |>
+  ungroup()
+
+token_means_pooled <- eu25games2019 |>
+  filter(meta_game == "dict") |>
+  filter(
+    !der_outpartisan_comb %in%
+      c(
+        "97_eunat_expl",
+        "97_eunat_impl",
+        "98_outnat_expl",
+        "98_outnat_impl",
+        "99_outnatEU_nopid",
+        "99_outnat_nopid"
+      ) &
+      !is.na(der_outpartisan_comb)
+  ) |>
+  group_by(der_outpartisan_comb) |>
+  summarise(
+    m = mean(cj_token_logged),
+    s = sd(cj_token_logged),
+    n = n()
+  ) |>
+  ungroup()
+
+token_means_pooled <- token_means_pooled |>
+  mutate(meta_country = "Pooled") |>
+  select(meta_country, der_outpartisan_comb, m, s, n)
+
+token_means <- token_means |>
+  bind_rows(token_means_pooled)
+
+
+qoi_bycountry <- token_means |>
+  group_by(meta_country) |>
+  summarise(
+    # Explicit Conditions (expl_Type_Stat)
+
+    # IF_expl: Difference (2 - 1)
+    expl_IF_diff = m[der_outpartisan_comb == "2_co_expl"] -
+      m[der_outpartisan_comb == "1_control_expl"],
+    expl_IF_SE = sqrt(
+      (s[der_outpartisan_comb == "2_co_expl"]^2 /
+        n[der_outpartisan_comb == "2_co_expl"]) +
+        (s[der_outpartisan_comb == "1_control_expl"]^2 /
+          n[der_outpartisan_comb == "1_control_expl"])
+    ),
+    expl_IF_CI_LOWER = expl_IF_diff - 1.96 * expl_IF_SE,
+    expl_IF_CI_UPPER = expl_IF_diff + 1.96 * expl_IF_SE,
+
+    # OD_expl: Difference (1 - 3)
+    expl_OD_diff = m[der_outpartisan_comb == "1_control_expl"] -
+      m[der_outpartisan_comb == "3_out_expl"],
+    expl_OD_SE = sqrt(
+      (s[der_outpartisan_comb == "1_control_expl"]^2 /
+        n[der_outpartisan_comb == "1_control_expl"]) +
+        (s[der_outpartisan_comb == "3_out_expl"]^2 /
+          n[der_outpartisan_comb == "3_out_expl"])
+    ),
+    expl_OD_CI_LOWER = expl_OD_diff - 1.96 * expl_OD_SE,
+    expl_OD_CI_UPPER = expl_OD_diff + 1.96 * expl_OD_SE,
+
+    # AP_expl: Difference (2 - 3)
+    expl_AP_diff = m[der_outpartisan_comb == "2_co_expl"] -
+      m[der_outpartisan_comb == "3_out_expl"],
+    expl_AP_SE = sqrt(
+      (s[der_outpartisan_comb == "2_co_expl"]^2 /
+        n[der_outpartisan_comb == "2_co_expl"]) +
+        (s[der_outpartisan_comb == "3_out_expl"]^2 /
+          n[der_outpartisan_comb == "3_out_expl"])
+    ),
+    expl_AP_CI_LOWER = expl_AP_diff - 1.96 * expl_AP_SE,
+    expl_AP_CI_UPPER = expl_AP_diff + 1.96 * expl_AP_SE,
+
+    # Implicit Conditions (impl_Type_Stat)
+
+    # IF_impl: Difference (5 - 4)
+    impl_IF_diff = m[der_outpartisan_comb == "5_co_impl"] -
+      m[der_outpartisan_comb == "4_control_impl"],
+    impl_IF_SE = sqrt(
+      (s[der_outpartisan_comb == "5_co_impl"]^2 /
+        n[der_outpartisan_comb == "5_co_impl"]) +
+        (s[der_outpartisan_comb == "4_control_impl"]^2 /
+          n[der_outpartisan_comb == "4_control_impl"])
+    ),
+    impl_IF_CI_LOWER = impl_IF_diff - 1.96 * impl_IF_SE,
+    impl_IF_CI_UPPER = impl_IF_diff + 1.96 * impl_IF_SE,
+
+    # OD_impl: Difference (4 - 6)
+    impl_OD_diff = m[der_outpartisan_comb == "4_control_impl"] -
+      m[der_outpartisan_comb == "6_out_impl"],
+    impl_OD_SE = sqrt(
+      (s[der_outpartisan_comb == "4_control_impl"]^2 /
+        n[der_outpartisan_comb == "4_control_impl"]) +
+        (s[der_outpartisan_comb == "6_out_impl"]^2 /
+          n[der_outpartisan_comb == "6_out_impl"])
+    ),
+    impl_OD_CI_LOWER = impl_OD_diff - 1.96 * impl_OD_SE,
+    impl_OD_CI_UPPER = impl_OD_diff + 1.96 * impl_OD_SE,
+
+    # AP_impl: Difference (5 - 6)
+    impl_AP_diff = m[der_outpartisan_comb == "5_co_impl"] -
+      m[der_outpartisan_comb == "6_out_impl"],
+    impl_AP_SE = sqrt(
+      (s[der_outpartisan_comb == "5_co_impl"]^2 /
+        n[der_outpartisan_comb == "5_co_impl"]) +
+        (s[der_outpartisan_comb == "6_out_impl"]^2 /
+          n[der_outpartisan_comb == "6_out_impl"])
+    ),
+    impl_AP_CI_LOWER = impl_AP_diff - 1.96 * impl_AP_SE,
+    impl_AP_CI_UPPER = impl_AP_diff + 1.96 * impl_AP_SE,
+
+    # None Condition (none_Type_Stat)
+
+    # OD_none: Difference (7 - 8)
+    none_OD_diff = m[der_outpartisan_comb == "7_control_nopid"] -
+      m[der_outpartisan_comb == "8_ptycue_nopid"],
+    none_OD_SE = sqrt(
+      (s[der_outpartisan_comb == "7_control_nopid"]^2 /
+        n[der_outpartisan_comb == "7_control_nopid"]) +
+        (s[der_outpartisan_comb == "8_ptycue_nopid"]^2 /
+          n[der_outpartisan_comb == "8_ptycue_nopid"])
+    ),
+    none_OD_CI_LOWER = none_OD_diff - 1.96 * none_OD_SE,
+    none_OD_CI_UPPER = none_OD_diff + 1.96 * none_OD_SE
+  )
+
+
+tidy_qoi <- qoi_bycountry |>
+  # 1. Pivot the data from wide to long format
+  pivot_longer(
+    # Select all columns except the grouping variable
+    cols = -meta_country,
+
+    # 2. Split the column names into three parts: Condition, Type, and Value
+    names_to = c("pid_type_raw", "diff_type", ".value"),
+
+    # 3. Define the pattern for separation (Condition_Type_Statistic)
+    names_pattern = "(expl|impl|none)_([A-Z]+)_(diff|SE|CI_LOWER|CI_UPPER)$"
+    # Explanation:
+    # (expl|impl|none) -> Captures the Condition into 'pid_type_raw'
+    # ([A-Z]+)         -> Captures the Type (IF, OD, AP) into 'diff_type'
+    # (diff|SE|CI_LOWER|CI_UPPER) -> Captures the Statistic into '.value' (creating columns diff, SE, CI_LOWER, CI_UPPER)
+  ) |>
+
+  # 4. Clean up the pid_type and rename the 'diff' column
+  mutate(
+    pid_type = case_match(
+      pid_type_raw,
+      "expl" ~ "explicit",
+      "impl" ~ "implicit",
+      "none" ~ "none"
+    )
+  ) |>
+  rename(
+    Difference = diff
+  ) |>
+
+  # 5. Select and reorder final columns for readability
+  select(
+    meta_country,
+    pid_type,
+    diff_type,
+    Difference,
+    SE,
+    starts_with("CI_")
+  )
+
+
+plot_data <- tidy_qoi |>
+  mutate(
+    country_condition = paste(meta_country, pid_type, sep = " | "),
+    country_condition = fct_inorder(country_condition)
+  ) |>
+  mutate(
+    # extract pooled levels
+    country_condition = fct_relevel(
+      country_condition,
+      grep("^Pooled \\|", levels(country_condition), value = TRUE),
+      after = Inf # use 0 for top, Inf for bottom
+    ),
+    country_condition = fct_rev(country_condition),
+    diff_type = factor(diff_type, levels = c("IF", "OD", "AP"))
+  )
+
+
+# 2. Create the Plot
+ggplot(
+  plot_data,
+  aes(
+    y = country_condition,
+    x = Difference,
+    shape = pid_type,
+    color = meta_country
+  )
+) +
+
+  # Add the vertical line at zero (to check for significance)
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red", alpha = 0.6) +
+
+  # Add the Confidence Intervals (horizontal error bars)
+  geom_errorbarh(
+    aes(xmin = CI_LOWER, xmax = CI_UPPER),
+    height = 0.2,
+    linewidth = 0.5
+  ) +
+
+  # Add the point estimate
+  geom_point(size = 2.5) +
+
+  # Crucial Step: Facet the plot horizontally by the Difference Type (IF, OD, AP)
+  facet_wrap(
+    ~diff_type,
+    ncol = 3,
+    scales = "free_x" # Allow x-axis to scale independently for each difference type
+  ) +
+
+  # Labels and theming
+  labs(
+    y = "Country | PID Type",
+    x = "Mean Difference (Point Estimate with 95% CI)"
+  ) +
+  theme_pubr() +
+  scale_color_manual(
+    values = c(
+      rep(
+        c(
+          "#648FFF",
+          "#DC267F",
+          "#785EF0",
+          "#FE6100",
+          "#FFB000"
+        ),
+        5
+      ),
+      "black"
+    )
+  ) +
+  theme(
+    # Reduce font size for Y-axis labels if they are too long
+    axis.text.y = element_text(size = 8, hjust = 0),
+    # Ensure facet titles are clear
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+
+```{r}
+#| label: fig-exploratory-country-anal-trust
+#| fig-cap: "Exploratory token allocation behavior by country and pid type in the trust game: ingroup favoritism, outgroup derogation and affective polarization. The figure shows mean differences in token allocation with 95\\% confidence intervals. IF = mean(token2co) - mean(token2control), OD = mean(token2control) - mean(token2out), AP = mean(token2co) - mean(token2out)"
+#| fig-dpi: 500
+#| fig-width: 6.3
+#| fig-height: 7.8
+#| fig-pos : H
+
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    cj_token_logged = log(cj_token + 1)
+  )
+
+token_means <- eu25games2019 |>
+  filter(meta_game == "trust") |>
+  filter(
+    !der_outpartisan_comb %in%
+      c(
+        "97_eunat_expl",
+        "97_eunat_impl",
+        "98_outnat_expl",
+        "98_outnat_impl",
+        "99_outnatEU_nopid",
+        "99_outnat_nopid"
+      ) &
+      !is.na(der_outpartisan_comb)
+  ) |>
+  group_by(meta_country, der_outpartisan_comb) |>
+  summarise(
+    m = mean(cj_token_logged),
+    s = sd(cj_token_logged),
+    n = n()
+  ) |>
+  ungroup()
+
+
+qoi_bycountry <- token_means |>
+  group_by(meta_country) |>
+  summarise(
+    # Explicit Conditions (expl_Type_Stat)
+
+    # IF_expl: Difference (2 - 1)
+    expl_IF_diff = m[der_outpartisan_comb == "2_co_expl"] -
+      m[der_outpartisan_comb == "1_control_expl"],
+    expl_IF_SE = sqrt(
+      (s[der_outpartisan_comb == "2_co_expl"]^2 /
+        n[der_outpartisan_comb == "2_co_expl"]) +
+        (s[der_outpartisan_comb == "1_control_expl"]^2 /
+          n[der_outpartisan_comb == "1_control_expl"])
+    ),
+    expl_IF_CI_LOWER = expl_IF_diff - 1.96 * expl_IF_SE,
+    expl_IF_CI_UPPER = expl_IF_diff + 1.96 * expl_IF_SE,
+
+    # OD_expl: Difference (1 - 3)
+    expl_OD_diff = m[der_outpartisan_comb == "1_control_expl"] -
+      m[der_outpartisan_comb == "3_out_expl"],
+    expl_OD_SE = sqrt(
+      (s[der_outpartisan_comb == "1_control_expl"]^2 /
+        n[der_outpartisan_comb == "1_control_expl"]) +
+        (s[der_outpartisan_comb == "3_out_expl"]^2 /
+          n[der_outpartisan_comb == "3_out_expl"])
+    ),
+    expl_OD_CI_LOWER = expl_OD_diff - 1.96 * expl_OD_SE,
+    expl_OD_CI_UPPER = expl_OD_diff + 1.96 * expl_OD_SE,
+
+    # AP_expl: Difference (2 - 3)
+    expl_AP_diff = m[der_outpartisan_comb == "2_co_expl"] -
+      m[der_outpartisan_comb == "3_out_expl"],
+    expl_AP_SE = sqrt(
+      (s[der_outpartisan_comb == "2_co_expl"]^2 /
+        n[der_outpartisan_comb == "2_co_expl"]) +
+        (s[der_outpartisan_comb == "3_out_expl"]^2 /
+          n[der_outpartisan_comb == "3_out_expl"])
+    ),
+    expl_AP_CI_LOWER = expl_AP_diff - 1.96 * expl_AP_SE,
+    expl_AP_CI_UPPER = expl_AP_diff + 1.96 * expl_AP_SE,
+
+    # Implicit Conditions (impl_Type_Stat)
+
+    # IF_impl: Difference (5 - 4)
+    impl_IF_diff = m[der_outpartisan_comb == "5_co_impl"] -
+      m[der_outpartisan_comb == "4_control_impl"],
+    impl_IF_SE = sqrt(
+      (s[der_outpartisan_comb == "5_co_impl"]^2 /
+        n[der_outpartisan_comb == "5_co_impl"]) +
+        (s[der_outpartisan_comb == "4_control_impl"]^2 /
+          n[der_outpartisan_comb == "4_control_impl"])
+    ),
+    impl_IF_CI_LOWER = impl_IF_diff - 1.96 * impl_IF_SE,
+    impl_IF_CI_UPPER = impl_IF_diff + 1.96 * impl_IF_SE,
+
+    # OD_impl: Difference (4 - 6)
+    impl_OD_diff = m[der_outpartisan_comb == "4_control_impl"] -
+      m[der_outpartisan_comb == "6_out_impl"],
+    impl_OD_SE = sqrt(
+      (s[der_outpartisan_comb == "4_control_impl"]^2 /
+        n[der_outpartisan_comb == "4_control_impl"]) +
+        (s[der_outpartisan_comb == "6_out_impl"]^2 /
+          n[der_outpartisan_comb == "6_out_impl"])
+    ),
+    impl_OD_CI_LOWER = impl_OD_diff - 1.96 * impl_OD_SE,
+    impl_OD_CI_UPPER = impl_OD_diff + 1.96 * impl_OD_SE,
+
+    # AP_impl: Difference (5 - 6)
+    impl_AP_diff = m[der_outpartisan_comb == "5_co_impl"] -
+      m[der_outpartisan_comb == "6_out_impl"],
+    impl_AP_SE = sqrt(
+      (s[der_outpartisan_comb == "5_co_impl"]^2 /
+        n[der_outpartisan_comb == "5_co_impl"]) +
+        (s[der_outpartisan_comb == "6_out_impl"]^2 /
+          n[der_outpartisan_comb == "6_out_impl"])
+    ),
+    impl_AP_CI_LOWER = impl_AP_diff - 1.96 * impl_AP_SE,
+    impl_AP_CI_UPPER = impl_AP_diff + 1.96 * impl_AP_SE,
+
+    # None Condition (none_Type_Stat)
+
+    # OD_none: Difference (7 - 8)
+    none_OD_diff = m[der_outpartisan_comb == "7_control_nopid"] -
+      m[der_outpartisan_comb == "8_ptycue_nopid"],
+    none_OD_SE = sqrt(
+      (s[der_outpartisan_comb == "7_control_nopid"]^2 /
+        n[der_outpartisan_comb == "7_control_nopid"]) +
+        (s[der_outpartisan_comb == "8_ptycue_nopid"]^2 /
+          n[der_outpartisan_comb == "8_ptycue_nopid"])
+    ),
+    none_OD_CI_LOWER = none_OD_diff - 1.96 * none_OD_SE,
+    none_OD_CI_UPPER = none_OD_diff + 1.96 * none_OD_SE
+  )
+
+
+tidy_qoi <- qoi_bycountry |>
+  # 1. Pivot the data from wide to long format
+  pivot_longer(
+    # Select all columns except the grouping variable
+    cols = -meta_country,
+
+    # 2. Split the column names into three parts: Condition, Type, and Value
+    names_to = c("pid_type_raw", "diff_type", ".value"),
+
+    # 3. Define the pattern for separation (Condition_Type_Statistic)
+    names_pattern = "(expl|impl|none)_([A-Z]+)_(diff|SE|CI_LOWER|CI_UPPER)$"
+    # Explanation:
+    # (expl|impl|none) -> Captures the Condition into 'pid_type_raw'
+    # ([A-Z]+)         -> Captures the Type (IF, OD, AP) into 'diff_type'
+    # (diff|SE|CI_LOWER|CI_UPPER) -> Captures the Statistic into '.value' (creating columns diff, SE, CI_LOWER, CI_UPPER)
+  ) |>
+
+  # 4. Clean up the pid_type and rename the 'diff' column
+  mutate(
+    pid_type = case_match(
+      pid_type_raw,
+      "expl" ~ "explicit",
+      "impl" ~ "implicit",
+      "none" ~ "none"
+    )
+  ) |>
+  rename(
+    Difference = diff
+  ) |>
+
+  # 5. Select and reorder final columns for readability
+  select(
+    meta_country,
+    pid_type,
+    diff_type,
+    Difference,
+    SE,
+    starts_with("CI_")
+  )
+
+# 1. Prepare the data for plotting
+plot_data <- tidy_qoi |>
+  # Create a single factor combining country and condition for the Y-axis
+  mutate(
+    # Combine country and pid_type into one label (e.g., "Austria | explicit")
+    country_condition = factor(paste(meta_country, pid_type, sep = " | ")),
+
+    # Use fct_inorder to maintain the logical order (country-by-country)
+    # Then fct_rev reverses the entire factor so the first country appears at the top of the Y-axis
+    country_condition = fct_rev(fct_inorder(country_condition))
+  ) |>
+  # Optional: Clean up diff_type for better facet labels
+  mutate(
+    diff_type = factor(diff_type, levels = c("IF", "OD", "AP"))
+  )
+
+
+# 2. Create the Plot
+ggplot(
+  plot_data,
+  aes(
+    y = country_condition,
+    x = Difference,
+    shape = pid_type,
+    color = meta_country
+  )
+) +
+
+  # Add the vertical line at zero (to check for significance)
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red", alpha = 0.6) +
+
+  # Add the Confidence Intervals (horizontal error bars)
+  geom_errorbarh(
+    aes(xmin = CI_LOWER, xmax = CI_UPPER),
+    height = 0.2,
+    linewidth = 0.5
+  ) +
+
+  # Add the point estimate
+  geom_point(size = 2.5) +
+
+  # Crucial Step: Facet the plot horizontally by the Difference Type (IF, OD, AP)
+  facet_wrap(
+    ~diff_type,
+    ncol = 3,
+    scales = "free_x" # Allow x-axis to scale independently for each difference type
+  ) +
+
+  # Labels and theming
+  labs(
+    y = "Country | PID Type",
+    x = "Mean Difference (Point Estimate with 95% CI)"
+  ) +
+  theme_pubr() +
+  scale_color_manual(
+    values = rep(
+      c(
+        "#648FFF",
+        "#DC267F",
+        "#785EF0",
+        "#FE6100",
+        "#FFB000"
+      ),
+      5
+    )
+  ) +
+  theme(
+    # Reduce font size for Y-axis labels if they are too long
+    axis.text.y = element_text(size = 8, hjust = 0),
+    # Ensure facet titles are clear
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+
+
+```{r}
+#| label: distr-expl-impl
+
+eu25games2019 |>
+  tabyl(der_partisanship) |>
+  adorn_totals()
+
+eu25games2019 |>
+  tabyl(der_outpartisan_comb) |>
+  adorn_totals()
+
+```
+
+```{r}
+#| label: distr-expl-impl-country
+
+eu25games2019 |>
+  tabyl(der_outpartisan_comb, meta_country) |>
+  adorn_totals()
+```
+
+```{r}
+#| label: tbl-partisan-type
+
+eu25games2019 |>
+  tabyl(der_partisan_type) |>
+  adorn_totals() |>
+  adorn_rounding() |>
+  knitr::kable()
+
+```
+
+```{r}
+#| label: tbl-partisan-type-country
+
+eu25games2019 |>
+  tabyl(meta_country, der_partisan_type) |>
+  adorn_totals()
+
+```
+
+```{r}
+#| label: tbl-partisan-anchor
+
+eu25games2019 |>
+  filter(meta_country == "Austria") |>
+  tabyl(der_partisan_anchor) |>
+  adorn_totals() |>
+  adorn_rounding()
+```
+
+```{r}
+#| label: tbl-partisan-anchor-type
+
+eu25games2019 |>
+  filter(meta_country == "Austria") |>
+  tabyl(der_partisan_anchor, der_partisan_type)
+```
+
+```{r}
+#| label: tbl-partisan-relationship
+
+eu25games2019 |>
+  tabyl(der_partisan_relationship) |>
+  adorn_totals() |>
+  adorn_rounding()
+```
+
+
+```{r}
+#| label: tbl-partisan-relationship-type
+
+eu25games2019 |>
+  tabyl(der_partisan_relationship, der_partisan_type)
+```
+
+# Aggregated AP: Token Allocation
+
+```{r}
+#| label: total-sample-ap-cj
+
+pooled_ap_cj <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type)
+  ) |>
+  group_by(der_partisan_type, der_partisan_relationship) |>
+  summarise(
+    mean = mean(cj_token),
+    sd = sd(cj_token),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = c(mean, sd, n)
+  ) |>
+  mutate(
+    diff_mean = mean_Co - mean_Out,
+    se_diff = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ci_low = diff_mean - 1.96 * se_diff,
+    ci_high = diff_mean + 1.96 * se_diff
+  )
+
+
+total_pooled_ap_cj <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type)
+  ) |>
+  group_by(der_partisan_relationship) |>
+  summarise(
+    mean = mean(cj_token),
+    sd = sd(cj_token),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = c(mean, sd, n)
+  ) |>
+  mutate(
+    diff_mean = mean_Co - mean_Out,
+    se_diff = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ci_low = diff_mean - 1.96 * se_diff,
+    ci_high = diff_mean + 1.96 * se_diff
+  ) |>
+  mutate(der_partisan_type = "Total")
+
+```
+
+# Aggregated AP: Thermometer Scores
+
+There are three main operationalization strategies applied in European AP studies: Reiljan's API, Wagner's mean distance and Wagner's average spread.
+
+**Affective Polarization Index** (Reiljan 2020):
+
+$$
+\text{API} = \sum_{n=1}^{N} \left[ \sum_{\substack{m = 1\\ m \neq n}}^{N} \left( (Like_n - Like_m) \times \left(\frac{\text{Vote share}_{m}}{1 - \text{Vote share}_{n}} \right) \right) \times \text{Vote share}_n \right]
+$$
+
+
+
+```{r}
+#| label: total-sample-ap-thermo
+
+# Reiljan API unweighted
+
+# thermo coparty indicator
+eu25games2019 <- eu25games2019 |>
+  mutate(
+    thermo_co = case_when(
+      ext_q_thermo_1_pf_name == der_partisan_anchor ~ 1,
+      ext_q_thermo_2_pf_name == der_partisan_anchor ~ 2,
+      ext_q_thermo_3_pf_name == der_partisan_anchor ~ 3,
+      ext_q_thermo_4_pf_name == der_partisan_anchor ~ 4,
+      ext_q_thermo_5_pf_name == der_partisan_anchor ~ 5,
+      ext_q_thermo_6_pf_name == der_partisan_anchor ~ 6,
+      .default = NA
+    )
+  )
+
+eu25games2019 |>
+  select(starts_with("q_thermo_")) |>
+  select(-ends_with("party")) |>
+  rowwise()
+
+```
+
+# DESCRIPTIVE SUMMARY STATISTICS
+
+# Table respondents by country
+
+```{r}
+#| label: tbl-nresp-country
+#| tbl-cap: "Sample composition by country. Numbers denote respondents."
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  tabyl(
+    meta_country
+  ) |>
+  adorn_rounding(2) |>
+  adorn_totals() |>
+  knitr::kable(col.names = c("Country", "N", "Percent"))
+```
+
+# Table respondents by country and gender
+
+```{r}
+#| label: tbl-nresp-country-gender
+#| tbl-cap: "Sample composition by country and gender. Numbers denote respondents."
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = T) |>
+  tabyl(
+    meta_country,
+    q_gender
+  ) |>
+  adorn_totals() |>
+  knitr::kable(
+    col.names = c("Country", "Male", "Female", "Other")
+  )
+```
+
+# Table respondents by country and age group
+
+```{r}
+#| label: tbl-nresp-country-agegroup
+#| tbl-cap: "Sample composition by country and age group. Numbers denote respondents."
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = TRUE) |>
+  group_by(meta_country) |>
+  summarise(
+    `18-25` = sum(q_age >= 18 & q_age <= 25, na.rm = T),
+    `26-35` = sum(q_age >= 26 & q_age <= 35, na.rm = T),
+    `36-45` = sum(q_age >= 36 & q_age <= 45, na.rm = T),
+    `46-55` = sum(q_age >= 46 & q_age <= 55, na.rm = T),
+    `56-65` = sum(q_age >= 56 & q_age <= 65, na.rm = T),
+    `66-75` = sum(q_age >= 66 & q_age <= 75, na.rm = T),
+    `>76` = sum(q_age >= 76, na.rm = T)
+  ) |>
+  adorn_totals() |>
+  knitr::kable(
+    col.names = c(
+      "Country",
+      "18 to 25",
+      "26 to 35",
+      "36 to 45",
+      "46 to 55",
+      "56 to 65",
+      "66 to 75",
+      "> 75"
+    )
+  )
+
+```
+
+# Model DAG
+
+```{r}
+#| label: fig-dag
+#| fig-cap: "Directed acyclic graph of the causal data-generating process. Respondents have a partisan anchor $A_i$, representing the party they feel attached to (explicit partisans) or intend to vote for (implicit partisans). Partisan type $T_i$ (explicit vs. implicit) is only defined for respondents with a partisan anchor and is therefore a child node of $A_i$. Each conjoint profile shown in round $r$ presents randomized attributes: a partisan cue $Z^{party}_r$ and other attributes $Z^{other}_r$. The partisan-relationship variable $R_{ri} = f(A_i, Z^{party}_r)$ determines whether the profile is interpreted as a co-partisan, out-partisan, or neutral for respondent $i$. Token allocations $Y_{riac}$ are affected by both $R_{ri}$ and $Z^{other}_r$, with the effect of $R_{ri}$ theorized to depend on $T_i$. Because $T_i$ is observational, $C_i$ denotes potential confounders of both $T_i$ and $Y_{ri}$, highlighting the assumptions required for causal interpretation."
+#| fig-dpi: 500
+#| fig-width: 4.8
+
+dag <- dagitty(
+  "dag {
+\"Z1\" [pos=\"0, 1\"]
+A [pos=\"0, 2\"]
+C [pos=\"2, 1\"]
+R [pos=\"1 ,1\"]
+T [exposure,pos=\"1 , 2\"]
+Y [outcome,pos=\"1 ,0\"]
+Z [pos=\"0 ,0\"]
+\"Z1\" -> R
+A -> R
+A -> T
+C -> T
+C -> Y
+R -> Y
+T -> R
+Z -> Y
+}"
+)
+
+tidy_dag <- tidy_dagitty(dag)
+
+label_mapping <- tibble(
+  name = c("A", "C", "R", "T", "Y", "Z", "Z1"),
+  new_label = c(
+    "italic(A[i])", # partisan anchor of respondent i
+    "italic(C[i])", # respondent confounders
+    "italic(R[ri])", # relationship (round r, respondent i)
+    "italic(T[i])", # partisan type of respondent i
+    "italic(Y[riac])", # tokens (r,i,a,c)
+    "italic(Z[r]^{other})", # other randomized cues (round r)
+    "italic(Z[r]^{party})" # party cue shown in round r
+  )
+)
+
+tidy_dag <- tidy_dag |>
+  left_join(
+    label_mapping,
+    by = join_by(name)
+  )
+
+ggdag(tidy_dag) +
+  geom_dag_node() +
+  geom_dag_text(aes(label = new_label), parse = T) +
+  geom_dag_edges() +
+  theme_dag() +
+  theme(
+    aspect.ratio = 1 / 1.618034
+  )
+```
+
+# Model data
+
+```{r}
+#| label: model-data
+
+df_modelvars <- eu25games2019 |>
+  filter(
+    der_conational == "co-national",
+    !is.na(der_partisan_type)
+  ) |>
+  select(
+    # outcome Y
+    cj_token,
+    # vars of interest
+    der_partisan_type, # T
+    der_partisan_relationship, # R
+    # identifiers/hierarchical groupings
+    meta_pid,
+    der_partisan_anchor,
+    meta_country,
+    # game variables
+    meta_game,
+    meta_game_lab,
+    # conjoint controls Z
+    meta_round,
+    meta_wave,
+    cj_age_en,
+    cj_reli_en,
+    cj_class_en,
+    cj_sex_en,
+    cj_eupos_shown,
+    # =========================================================================
+    # COVARIATES (C) FOR CAUSAL ISOLATION
+    # =========================================================================
+
+    # --- BLOCK 1: Fundamental Political Identity and Ideology (Core Drivers of T & Y) ---
+    q_lrpos2, # Left-Right ideological self-placement (Controls for core political position)
+    q_eupos2, # EU integration position (Controls for major second dimension position)
+    q_econ_nativism, # Attitudes towards economic nativism (Controls for key sociotropic threat perception)
+    q_cult_nativism, # Attitudes towards cultural nativism (Controls for key sociotropic identity boundary)
+    q_religion_en, # Respondent's religious affiliation (Controls for a major social cleavage/identity)
+
+    # --- BLOCK 2: Anti-System & Populist Attitudes (CRUCIAL CONFOUNDERS for T) ---
+    # These variables control for system-level dissatisfaction/cynicism that pushes
+    # individuals to reject EXPLICIT partisan identity (T=0) while also driving Y.
+    q_satis_demo_country, # Satisfaction with democracy in the country (System trust)
+    q_understand_nat_pol, # Political efficacy (national level)
+    q_nat_politicians_care, # Political responsiveness (national level)
+    q_nat_public_say, # Political efficacy (national level)
+    q_understand_eu_pol, # Political efficacy (EU level)
+    q_eu_politicians_care, # Political responsiveness (EU level)
+    q_eu_public_say, # Political efficacy (EU level)
+    q_parties_harm, # Anti-party sentiment ("Parties do more harm than good")
+    q_officials_talk_action, # Anti-elitism ("Officials talk too much")
+    q_prefer_citizen_rep, # People-centrism ("Prefer citizens to politicians")
+    q_people_make_decisions, # People-centrism ("People, not politicians, should decide")
+    q_politicians_follow_people, # People-centrism ("Politicians must follow the people's will")
+    q_politics_good_evil, # Manichaean worldview ("Politics is good vs. evil")
+    q_people_unaware, # System cynicism ("People are unaware")
+    q_leaders_educated, # Anti-populism (Elitism)
+    q_expert_decisions, # Anti-populism (Expert governance)
+    q_listen_other_groups, # Tolerance/Pluralism
+    q_democracy_compromise, # Tolerance/Pluralism
+
+    # --- BLOCK 3: Political Engagement & General Identity (Predictors of T and Y) ---
+    q_attach_country, # Emotional attachment to one's country
+    q_attach_eu, # Emotional attachment to the EU
+    q_attach_eur, # Emotional attachment to Europe
+    q_interest_pol_country, # Political engagement (national)
+    q_interest_pol_eu, # Political engagement (EU)
+    q_election_importance, # Political engagement (election importance)
+
+    # --- BLOCK 4: Socioeconomic Status (SES) and Economic Context (Background Predictors) ---
+    q_edu, # Education level
+    q_perc_class, # Subjective social class
+    q_eval_finance_household, # Micro-level economic evaluation
+    q_eval_job, # Job/Employment evaluation
+    q_eval_econ_country, # Macro-level economic evaluation (country)
+    q_eval_econ_eur, # Macro-level economic evaluation (Europe)
+
+    # --- BLOCK 5: Demographics and Fixed Traits (General Controls) ---
+    q_gender, # Respondent's gender
+    q_age, # Respondent's age
+    q_rural_urban, # Residence setting
+    q_risk_taking, # General propensity for risk-taking behavior
+    q_future_discount # Patience/future discounting trait
+  )
+
+
+na_counts_modelvars1 <- df_modelvars |>
+  # 1. Summarise: Calculate the sum of NAs for every column.
+  summarise(across(
+    .cols = everything(),
+    .fns = ~ sum(is.na(.)),
+    .names = "na_count_{.col}" # Temporarily rename columns for pivot
+  )) |>
+
+  # 2. Pivot: Convert the wide one-row summary into a tall, two-column table.
+  pivot_longer(
+    cols = everything(),
+    names_to = "Variable",
+    values_to = "NA_Count"
+  ) |>
+
+  # 3. Clean: Remove the temporary prefix for cleaner variable names.
+  mutate(Variable = str_remove(Variable, "na_count_")) |>
+
+  # 4. Arrange: Sort the result to see the variables with the most NAs first.
+  arrange(desc(NA_Count))
+
+
+# Remove variables with too many NAs (>10k)
+df_modelvars <- df_modelvars |>
+  select(
+    -q_nat_politicians_care,
+    -q_nat_public_say,
+    -q_eu_politicians_care,
+    -q_eu_public_say,
+    -q_prefer_citizen_rep,
+    -q_people_make_decisions,
+    -q_politicians_follow_people,
+    -q_attach_country,
+    -q_attach_eu,
+    -q_attach_eur,
+    -q_election_importance
+  )
+
+# Recode dont know answers correctly
+df_modelvars <- df_modelvars |>
+  mutate(
+    q_satis_demo_country = case_when(
+      q_satis_demo_country == 5 | q_satis_demo_country == 6 ~ NA,
+      .default = q_satis_demo_country
+    ),
+    q_perc_class = if_else(
+      q_perc_class == 6,
+      NA,
+      q_perc_class
+    ),
+    q_eval_finance_household = if_else(
+      q_eval_finance_household == 6,
+      NA,
+      q_eval_finance_household
+    ),
+    q_eval_job = if_else(
+      q_eval_job == 6,
+      NA,
+      q_eval_job
+    ),
+    q_eval_econ_country = if_else(
+      q_eval_econ_country == 6,
+      NA,
+      q_eval_econ_country
+    ),
+    q_eval_econ_eur = if_else(
+      q_eval_econ_eur == 6,
+      NA,
+      q_eval_econ_eur
+    ),
+    q_rural_urban = if_else(
+      q_rural_urban == 4,
+      NA,
+      q_rural_urban
+    )
+  )
+
+# Categeorical to factors
+df_modelvars <- df_modelvars |>
+  mutate(
+    # categorical to factors
+    q_perc_class = factor(
+      q_perc_class,
+      levels = c(1, 2, 3, 4, 5),
+      labels = c(
+        "Working class",
+        "Lower middle class",
+        "Middle class",
+        "Upper middle class",
+        "Upper class"
+      )
+    ),
+    q_rural_urban = factor(
+      q_rural_urban,
+      levels = c(1, 2, 3),
+      labels = c(
+        "Rural area or village",
+        "Small or middle sized town",
+        "Large town"
+      )
+    ),
+    q_gender = factor(
+      q_gender,
+      levels = c(1, 2, 3),
+      labels = c("Male", "Female", "Other")
+    ),
+    q_religion_en = as_factor(q_religion_en)
+  )
+
+# standardize survey scales
+df_modelvars <- df_modelvars |>
+  mutate(
+    across(
+      .cols = c(
+        q_lrpos2,
+        q_eupos2,
+        q_econ_nativism,
+        q_cult_nativism,
+        q_satis_demo_country,
+        q_understand_nat_pol,
+        q_understand_eu_pol,
+        q_parties_harm,
+        q_officials_talk_action,
+        q_politics_good_evil,
+        q_people_unaware,
+        q_leaders_educated,
+        q_expert_decisions,
+        q_listen_other_groups,
+        q_democracy_compromise,
+        q_interest_pol_country,
+        q_interest_pol_eu,
+        q_eval_finance_household,
+        q_eval_job,
+        q_eval_econ_country,
+        q_eval_econ_eur,
+        q_risk_taking,
+        q_future_discount,
+        q_edu,
+        q_age
+      ), # List all continuous variables to standardize
+      .fns = ~ scale(.)[, 1], # Apply the scale() function
+      .names = "{.col}_z" # Name the new standardized columns with a '_z' suffix
+    )
+  )
+
+# Check again how missings have changed
+na_counts_modelvars2 <- df_modelvars |>
+  # 1. Summarise: Calculate the sum of NAs for every column.
+  summarise(across(
+    .cols = everything(),
+    .fns = ~ sum(is.na(.)),
+    .names = "na_count_{.col}" # Temporarily rename columns for pivot
+  )) |>
+
+  # 2. Pivot: Convert the wide one-row summary into a tall, two-column table.
+  pivot_longer(
+    cols = everything(),
+    names_to = "Variable",
+    values_to = "NA_Count"
+  ) |>
+
+  # 3. Clean: Remove the temporary prefix for cleaner variable names.
+  mutate(Variable = str_remove(Variable, "na_count_")) |>
+
+  # 4. Arrange: Sort the result to see the variables with the most NAs first.
+  arrange(desc(NA_Count))
+
+# Global variable mapping and final df for modelling
+df_modelvars <- df_modelvars |>
+  select(
+    starts_with("cj_"),
+    starts_with("der_"),
+    starts_with("meta_"),
+    ends_with("_z"),
+    q_religion_en,
+    q_perc_class,
+    q_rural_urban,
+    q_gender
+  )
+
+modelvars_labels <- c(
+  "Token" = "cj_token",
+  "Conj. Age" = "cj_age_en",
+  "Conj. Religion" = "cj_reli_en",
+  "Conj. Class" = "cj_class_en",
+  "Conj. Gender" = "cj_sex_en",
+  "Conj. EU" = "cj_eupos_shown",
+  "Type" = "der_partisan_type",
+  "Relationship" = "der_partisan_relationship",
+  "Anchor" = "der_partisan_anchor",
+  "Resp. ID" = "meta_pid",
+  "Country" = "meta_country",
+  "Game" = "meta_game_lab",
+  "Round" = "meta_round",
+  "Wave" = "meta_wave",
+  "LR Pos" = "q_lrpos2_z",
+  "EU Pos" = "q_eupos2_z",
+  "Econ. Nativism" = "q_econ_nativism_z",
+  "Cult. Nativism" = "q_cult_nativism_z",
+  "Satis. Democ." = "q_satis_demo_country_z",
+  "Understand Nat. Pol." = "q_understand_nat_pol_z",
+  "Understand EU Pol." = "q_understand_eu_pol_z",
+  "Parties Harm" = "q_parties_harm_z",
+  "Officials Talk/Action" = "q_officials_talk_action_z",
+  "Politics Good/Evil" = "q_politics_good_evil_z",
+  "People Unaware" = "q_people_unaware_z",
+  "Leaders Educated" = "q_leaders_educated_z",
+  "Expert Decisions" = "q_expert_decisions_z",
+  "Listen Other Groups" = "q_listen_other_groups_z",
+  "Democ. Compromise" = "q_democracy_compromise_z",
+  "Interest Nat. Pol." = "q_interest_pol_country_z",
+  "Interest EU Pol." = "q_interest_pol_eu_z",
+  "Eval. HH Finance" = "q_eval_finance_household_z",
+  "Eval. Job" = "q_eval_job_z",
+  "Eval. Nat. Econ." = "q_eval_econ_country_z",
+  "Eval. Eur. Econ." = "q_eval_econ_eur_z",
+  "Risk Taking" = "q_risk_taking_z",
+  "Future Discount" = "q_future_discount_z",
+  "Education (Z)" = "q_edu_z",
+  "Age (Z)" = "q_age_z",
+  "Religion" = "q_religion_en",
+  "Perc. Class" = "q_perc_class",
+  "Rural/Urban" = "q_rural_urban",
+  "Gender" = "q_gender"
+)
+
+```
+
+# Distribution of DV
+
+```{r}
+#| label: fig-distr-y
+#| fig-dpi: 500
+#| fig-cap: "Distribution of token allocation (Y) by game. Dictator game: $Mean = 3.41$, $median = 4$, $SD = 2.35$. Trust game: $Mean = 3.48$, $median = 4$, $SD = 2.49$"
+#| fig-pos: H
+
+summary_stats <- df_modelvars %>%
+  group_by(meta_game_lab) %>%
+  summarise(
+    mean_token = mean(cj_token, na.rm = TRUE),
+    median_token = median(cj_token, na.rm = TRUE),
+    sd_token = sd(cj_token, na.rm = TRUE)
+  )
+
+
+df_modelvars |>
+  select(cj_token, meta_game_lab) |>
+  ggplot(
+    aes(x = log(cj_token + 1), fill = meta_game_lab)
+  ) +
+  geom_histogram(
+    position = position_dodge(),
+    color = "black"
+  ) +
+  # scale_x_continuous(
+  #   breaks = 0:10,
+  #   labels = 0:10
+  # ) +
+  scale_fill_manual(
+    values = c("white", "gray")
+  ) +
+  labs(
+    x = "Tokens allocated (Y)",
+    y = "N",
+    fill = "Conjoint Game"
+  ) +
+  ggpubr::theme_pubr()
+
+```
+
+# Distribution of partisan type $T$ and relationship category $R$
+
+```{r}
+#| label: tbl-t-r-distr
+
+df_modelvars |>
+  tabyl(der_partisan_type, der_partisan_relationship) |>
+  gt()
+```
+
+# Covariate Distributions
+
+```{r}
+#| label: tbl-covariate-distr
+
+df_modelvars |>
+  select(
+    der_partisan_type,
+    ends_with("_z"),
+    q_religion_en,
+    q_perc_class,
+    q_rural_urban,
+    q_gender
+  ) |>
+  tbl_summary(
+    by = der_partisan_type,
+    missing = "no",
+    type = list(
+      q_econ_nativism_z ~ "continuous",
+      q_cult_nativism_z ~ "continuous",
+      q_satis_demo_country_z ~ "continuous",
+      q_understand_nat_pol_z ~ "continuous",
+      q_understand_eu_pol_z ~ "continuous",
+      q_parties_harm_z ~ "continuous",
+      q_officials_talk_action_z ~ "continuous",
+      q_politics_good_evil_z ~ "continuous",
+      q_people_unaware_z ~ "continuous",
+      q_leaders_educated_z ~ "continuous",
+      q_expert_decisions_z ~ "continuous",
+      q_listen_other_groups_z ~ "continuous",
+      q_democracy_compromise_z ~ "continuous",
+      q_interest_pol_country_z ~ "continuous",
+      q_interest_pol_eu_z ~ "continuous",
+      q_eval_finance_household_z ~ "continuous",
+      q_eval_job_z ~ "continuous",
+      q_eval_econ_country_z ~ "continuous",
+      q_eval_econ_eur_z ~ "continuous",
+      q_risk_taking_z ~ "continuous",
+      q_future_discount_z ~ "continuous"
+    )
+  ) |>
+  modify_header(label = "**Variable**") |>
+  as_gt() |>
+  tab_options(table.font.size = 10)
+
+```
+
+
+# Saving
+
+```{r, message = NA}
+#| label: save-data4model
+
+# save modeldata
+save(
+  df_modelvars,
+  file = here("data", "02_processed", "df_modeldata.RData")
+)
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
+
+
+  
