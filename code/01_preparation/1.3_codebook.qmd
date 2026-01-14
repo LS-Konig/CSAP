@@ -1,0 +1,836 @@
+---
+title: |
+  Code Notebook 1.3
+subtitle: |
+  Codebook of EU25 Games Dataset
+author:
+  - name: Tristan Muno
+    email: tristan.muno@uni-mannheim.de
+    affiliations:
+      - name: University of Mannheim
+        department: School of Social Sciences
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Codebook Creation
+
+This code produces the codebook of the `eu25games2019.RData` (`code/01_preparation/codebook.doxc`), including all Question wordings and raw answer codings.
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "codebookr",
+  "labelled",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+# Codebook
+
+```{r}
+#| label: load-data
+
+# Load Data
+eu25games2019 <- readRDS(
+  here(
+    "data",
+    "02_processed",
+    "data",
+    "eu25games2019_2.rds"
+  )
+)
+```
+
+```{r}
+#| label: variable-labels-wording
+
+# for overview
+# eu25games2019 |> glimpse()
+
+# add question wordings
+var_label(eu25games2019$meta_country_abbr) <- "Survey Country Abbreviation"
+var_label(eu25games2019$meta_country) <- "Survey Country"
+var_label(eu25games2019$meta_part) <- "Survey Wave (1 and 2)"
+var_label(eu25games2019$meta_pid) <- "Persistent Identifier"
+var_label(eu25games2019$meta_psid) <- "Another Persistent Identifier"
+var_label(eu25games2019$meta_game) <- "Behavioral Conjoint Game"
+var_label(eu25games2019$meta_round) <- "Round of Game"
+var_label(eu25games2019$cj_trmnt) <- "Treatment Condition in Conjoint Game"
+var_label(eu25games2019$cj_token) <- "Number of Tokens Allocated in Game"
+var_label(eu25games2019$cj_party) <- "Party Displayed in Conjoint Game"
+var_label(
+  eu25games2019$cj_eupos
+) <- "EU Citizen Identity Displayed in Conjoint Game"
+var_label(
+  eu25games2019$cj_nationality
+) <- "Nationality Displayed in Conjoint Game"
+var_label(
+  eu25games2019$cj_religion
+) <- "Religion Displayed in Conjoint Game"
+var_label(
+  eu25games2019$cj_age
+) <- "Age Displayed in Conjoint Game"
+var_label(
+  eu25games2019$cj_sex
+) <- "Sex Displayed in Conjoint Game"
+var_label(
+  eu25games2019$cj_class
+) <- "Class Displayed in Conjoint Game"
+var_label(
+  eu25games2019$cj_reli_en
+) <- "Religion Displayed in Conjoint Game (English)"
+var_label(
+  eu25games2019$cj_sex_en
+) <- "Sex Displayed in Conjoint Game (English)"
+var_label(
+  eu25games2019$cj_class_en
+) <- "Class Displayed in Conjoint Game (English)"
+var_label(
+  eu25games2019$cj_age_en
+) <- "Age Displayed in Conjoint Game (English)"
+var_label(
+  eu25games2019$cj_eu_pro
+) <- "Dummy Variable if Conjoint Profile was Pro EU"
+var_label(
+  eu25games2019$cj_eupos_shown
+) <- "Dummy Variable if EU Citizen Identity was Displayed in Conjoint Profile"
+var_label(
+  eu25games2019$cj_pid_shown
+) <- "Dummy Variable if Partisanship was Displayed in Conjoin Profile"
+var_label(
+  eu25games2019$der_co_partisan
+) <- "Dummy Variable if Conjoint Game was Played with Out-Partisan"
+var_label(
+  eu25games2019$der_out_partisan
+) <- "Dummy Variable if Conjoint Game was Played with Out-Partisan"
+var_label(
+  eu25games2019$der_conational
+) <- "Dummy Variable if Conjoint Game was Played with Co-National"
+var_label(
+  eu25games2019$der_outpartisan
+) <- "Factor Variable Storing Co-/Out-Partisan Status"
+var_label(
+  eu25games2019$der_outpartisan2
+) <- "Factor Variable Storing Co-/Out-Partisan Status"
+var_label(
+  eu25games2019$der_outattach1
+) <- "Factor Variable Storing Co-/Out-EU Identity Status"
+var_label(
+  eu25games2019$der_outattach2
+) <- "Factor Variable Storing Co-/Out-EU Identity Status"
+var_label(
+  eu25games2019$der_outattach3
+) <- "Factor Variable Storing Co-/Out-EU Identity Status"
+var_label(
+  eu25games2019$meta_wave
+) <- "Survey Wave"
+var_label(
+  eu25games2019$meta_startdate
+) <- "Timestamp for Start of Survey"
+var_label(
+  eu25games2019$meta_enddate
+) <- "Timestamp for End of Survey"
+var_label(
+  eu25games2019$meta_date
+) <- "Date of Survey Completion"
+var_label(
+  eu25games2019$meta_status
+) <- "Survey Status"
+var_label(
+  eu25games2019$meta_ipaddress
+) <- "Respondent IP Address"
+var_label(
+  eu25games2019$meta_progress
+) <- "Survey Completion Progress Percentage"
+var_label(
+  eu25games2019$meta_duration_seconds
+) <- "Survey Duration in Seconds"
+var_label(
+  eu25games2019$meta_finished
+) <- "Dummy Variable if Survey was Finished"
+var_label(
+  eu25games2019$meta_responseid
+) <- "Unique Survey Response ID"
+var_label(
+  eu25games2019$meta_latitude
+) <- "Geocoded Latitude of Respondent"
+var_label(
+  eu25games2019$meta_longitude
+) <- "Geocoded Longitude of Respondent"
+var_label(
+  eu25games2019$meta_distchannel
+) <- "Distribution Channel of Survey"
+var_label(
+  eu25games2019$meta_lang
+) <- "Survey Language Code"
+var_label(
+  eu25games2019$meta_attrorder_cj
+) <- "Attribute Order Shown in Conjoint Game"
+var_label(
+  eu25games2019$q_attcheck
+) <- "Q8 We appreciate your participation in this survey. We value your time and effort. However, we have to make sure that our data are valid and accurate. Specifically, we are interested in whether you actually take the time to read instructions closely; if not, our data based on your responses will be invalid. In order to demonstrate that you have read instructions, please ignore the next question, and simply write \"I read the instructions \" in the box labeled \"Others\". Thank you very much."
+var_label(
+  eu25games2019$q_gender
+) <- "Q2 Please indicate your gender. (1 = Male, 2 = Female, 3 = Other)"
+var_label(
+  eu25games2019$q_age
+) <- "Q3 How old are you?"
+var_label(
+  eu25games2019$q_nationality
+) <- "Q4 What is your nationality? Please tell me the country(ies) that applies(y)"
+var_label(
+  eu25games2019$q_nationality_other
+) <- "Q4 Respondent Nationality (If 'Other' was selected)"
+var_label(
+  eu25games2019$q_attach_country
+) <- "Q5 Please tell me how attached you feel to Ireland (1 very attached - 5 not attached at all)"
+var_label(
+  eu25games2019$q_attach_eu
+) <- "Q5 Please tell me how attached you feel to the European Union (1 very attached - 5 not attached at all)"
+var_label(
+  eu25games2019$q_attach_eur
+) <- "Q5 Please tell me how attached you feel to Europe (1 very attached - 5 not attached at all)"
+var_label(
+  eu25games2019$q_religion
+) <- "Q6 Do you consider yourself to be...?"
+var_label(
+  eu25games2019$q_religion_other
+) <- "Q6 Respondent Religion (If 'Other' was selected)"
+var_label(
+  eu25games2019$q_perc_class
+) <- "Q7 Do you see yourself and your household belonging to...?"
+var_label(
+  eu25games2019$q_eupos_7scale
+) <- "Q20/Q27/Q41 Some people say that European integration should be pushed further. Others say it already has gone too far. What is your opinion? Please indicate your views using a scale from 1 to 7, where '1' means European integration \"has already gone too far\" and '7' means it \"should be pushed further\". What number on this scale best describes your position?"
+var_label(
+  eu25games2019$q_understand_eu_pol
+) <- "Q21/Q28/Q35 Please tell me to what extent you agree or disagree with each of the following statements. I can understand and evaluate important political questions about the EU. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_eu_politicians_care
+) <- "Q21/Q28/Q35 Please tell me to what extent you agree or disagree with each of the following statements. The politicians in the EU care about what people like me think. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_eu_public_say
+) <- "Q21/Q28/Q35 Please tell me to what extent you agree or disagree with each of the following statements. People like me don't have any say about what the EU does. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_politicians_follow_people
+) <- "Q22/Q29/Q36 Please indicate how much you agree with each of the following statements. The politicians should follow the will of the people. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_people_make_decisions
+) <- "Q22/Q29/Q36 Please indicate how much you agree with each of the following statements. The people, and not politicians, should make our most important policy decisions. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_prefer_citizen_rep
+) <- "Q22/Q29/Q36 Please indicate how much you agree with each of the following statements. I would rather be represented by a citizen thatn by a specialized politician. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_officials_talk_action
+) <- "Q22/Q29/Q36 Please indicate how much you agree with each of the following statements. Elected officials talk too much and take too little action. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_politics_good_evil
+) <- "Q22/Q29/Q36 Please indicate how much you agree with each of the following statements. Politics is ultimately a struggle between good and evil. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_political_compromise
+) <- "Q22/Q29/Q36 Please indicate how much you agree with each of the following statements. What people call \"compromise\" in politics is really just selling out on one's principles. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_democracy_compromise
+) <- "Q23/Q30/Q37 Please indicate how much you agree with each of the following statements. In a democracy it is important to make compromises among differing viewpoints. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_listen_other_groups
+) <- "Q23/Q30/Q37 Please indicate how much you agree with each of the following statements. It is important to listen to the opinion of other groups. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_expert_decisions
+) <- "Q23/Q30/Q37 Please indicate how much you agree with each of the following statements. Our country would run better if political decisions were left up to experts instead of politicians and citizens. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_leaders_educated
+) <- "Q23/Q30/Q37 Please indicate how much you agree with each of the following statements. The leaders of our country should be more educated and skilled than ordinary citizens. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_parties_harm
+) <- "Q23/Q30/Q37 Please indicate how much you agree with each of the following statements. Political parties do more harm than good to society. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_people_unaware
+) <- "Q23/Q30/Q37 Please indicate how much you agree with each of the following statements. Ordinary people don't know what policies are good for them. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_eu_long_term
+) <- "Q24/Q31/Q38 In thinking about the European Union (EU) and its decisions more generally, some people argue that it should act upon its long-term goals without pandering to the demand of the people. On the other hand, others argue that the EU should listen to the demand of people, rather than to act upon its long-term goals. When it comes to the question of whether the EU should act upon its long-term goals or it should listen to the demand of the people, what is your opinion? The EU should act upon its long-term goals. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_eu_listen_people
+) <- "Q24/Q31/Q38 In thinking about the European Union (EU) and its decisions more generally, some people argue that it should act upon its long-term goals without pandering to the demand of the people. On the other hand, others argue that the EU should listen to the demand of people, rather than to act upon its long-term goals. When it comes to the question of whether the EU should act upon its long-term goals or it should listen to the demand of the people, what is your opinion? The EU should listen to the demand of the people. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_eu_impact_econ
+) <- "Q25/Q32/Q39 Could you tell me whether you think that the EU has a rather positive or rather negative effect on each of the following domains? Ireland's economy (1 very positive - 5 very negative)"
+var_label(
+  eu25games2019$q_eu_impact_cult
+) <- "Q25/Q32/Q39 Could you tell me whether you think that the EU has a rather positive or rather negative effect on each of the following domains? Our culture and identity (1 very positive - 5 very negative)"
+var_label(
+  eu25games2019$q_eu_impact_polstatus
+) <- "Q25/Q32/Q39 Could you tell me whether you think that the EU has a rather positive or rather negative effect on each of the following domains? Ireland's political status and influence (1 very positive - 5 very negative)"
+var_label(
+  eu25games2019$q_eu_disagree_dissolve
+) <- "Q26/Q33/Q40 Please tell me to what extent you agree or disagree with each of the following statements. If the EU started making a lot of decisions that most people disagreed with, it might be better to do away with the EU altogether. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_eu_satisfaction
+) <- "Q26/Q33/Q40 Please tell me to what extent you agree or disagree with each of the following statements. I am satisfied with the performance of the EU. (1 strongly disagree - 7 strongly agree)"
+var_label(
+  eu25games2019$q_eupos_7scale_3
+) <- "Q34/Q41 When it comes to the question of whether European integration should be pushed further or it already has gone too far, what is your opinion? Please indicate your views using a scale from 1 to 11, where '1' means European integration \" has already gone too far \" and '11' means it \"should be pushed further\". (1 European integration has already gone too far - 7 European integration should be pushed further)"
+var_label(
+  eu25games2019$q_voting_likelihood
+) <- "Q42 On Friday, 24 May 2019, the European election takes place. All citizens of the European Union elect the members of the European Parliament. While a lot of people vote, others do not manage to vote or do not participate in elections for other reasons. How likely is it that you will vote in the upcoming election? (1 I am not eligible to vote 2 Certain not to vote 3 Not likely to vote 4 Might vote 5 Likely to vote 6 Certain to vote 7 Have already voted 8 Don't know)"
+var_label(
+  eu25games2019$q_confirm_voted
+) <- "Q43 Just to be clear, we are recording that you already voted in the election that is scheduled to take place on Friday, 24 May 2019. Is that right? (1 Yes, I voted 0 No, I have not voted)"
+var_label(
+  eu25games2019$q_voted_party
+) <- "Q44/Q54 Which party did you give your 1st preference vote to in this election?"
+var_label(
+  eu25games2019$q_voted_party_other
+) <- "Q44/Q54 Which party did you give your 1st preference vote to in this election: Other"
+var_label(
+  eu25games2019$q_vote_intention
+) <- "Q45 Which party will you give your 1st preference vote in this election?"
+var_label(
+  eu25games2019$q_vote_intention_other
+) <- "Q45 Which party will you give your 1st preference vote in this election: Other"
+var_label(
+  eu25games2019$q_vote_intention_hypo
+) <- "Q46 Just assuming you were going to vote in the election, which party would you give your 1st preference vote?"
+var_label(
+  eu25games2019$q_vote_intention_hypo_other
+) <- "Q46 Just assuming you were going to vote in the election, which party would you give your 1st preference vote: Other"
+var_label(
+  eu25games2019$q_election_challenge_polgroups
+) <- "Q49 What is your opinion? How likely do you think the upcoming elections will challenge the existing political groups and members of the European Parliament? (1 Very likely - 5 Not at all likely)"
+var_label(
+  eu25games2019$q_election_impact_eu
+) <- "Q49 What is your opinion? How likely do you think the upcoming elections will play a big role in shaping the European Parliament and the EU's next five years? (1 Very likely - 5 Not at all likely)"
+var_label(
+  eu25games2019$q_election_importance
+) <- "Q50 How important is the outcome of the upcoming election to you personally? (1 Very important - 5 Not important at all)"
+var_label(
+  eu25games2019$q_voted_party_2014
+) <- "Q51/Q56 This question is about the previous European Parliament elections that were held five years ago. Which party did you give your 1st preference vote in the previous European Parliament elections in 2014?"
+var_label(
+  eu25games2019$q_voted_party_2014_other
+) <- "Q51/Q56 This question is about the previous European Parliament elections that were held five years ago. Which party did you give your 1st preference vote in the previous European Parliament elections in 2014: Other"
+var_label(
+  eu25games2019$q_party_id
+) <- "Q52 Do you consider yourself to be close to any particular political party? If so, which party do you feel close to?"
+var_label(
+  eu25games2019$q_party_id_other
+) <- "Q52 Do you consider yourself to be close to any particular political party? If so, which party do you feel close to: Other"
+var_label(
+  eu25games2019$q_eu_news_tv_days
+) <- "Q197 How many days per week, on average, do you use the following media or other resources to follow news about the EU and European politics? Television (incl. broadcaster player) (1 Less than 1 day per week 2 1 day 3 2 days 4 3 days 5 4 days 6 5 days 7 6 days 8 7 days)"
+var_label(
+  eu25games2019$q_eu_news_newspaper_days
+) <- "Q197 How many days per week, on average, do you use the following media or other resources to follow news about the EU and European politics? Newspaper (incl. web offerings) (1 Less than 1 day per week 2 1 day 3 2 days 4 3 days 5 4 days 6 5 days 7 6 days 8 7 days)"
+var_label(
+  eu25games2019$q_eu_news_radio_days
+) <- "Q197 How many days per week, on average, do you use the following media or other resources to follow news about the EU and European politics? Radio (incl. web radio) (1 Less than 1 day per week 2 1 day 3 2 days 4 3 days 5 4 days 6 5 days 7 6 days 8 7 days)"
+var_label(
+  eu25games2019$q_eu_news_socialmedia_days
+) <- "Q197 How many days per week, on average, do you use the following media or other resources to follow news about the EU and European politics? Social media (such as Facebook, Twitter) (1 Less than 1 day per week 2 1 day 3 2 days 4 3 days 5 4 days 6 5 days 7 6 days 8 7 days)"
+var_label(
+  eu25games2019$q_eu_news_internet_days
+) <- "Q197 How many days per week, on average, do you use the following media or other resources to follow news about the EU and European politics? Other Internet sources (such as e-mail provider, Blog) (1 Less than 1 day per week 2 1 day 3 2 days 4 3 days 5 4 days 6 5 days 7 6 days 8 7 days)"
+var_label(
+  eu25games2019$q_eu_news_personal_days
+) <- "Q197 How many days per week, on average, do you use the following media or other resources to follow news about the EU and European politics? Personal conversations (1 Less than 1 day per week 2 1 day 3 2 days 4 3 days 5 4 days 6 5 days 7 6 days 8 7 days)"
+var_label(
+  eu25games2019$q_eu_news_other_days
+) <- "Q197 How many days per week, on average, do you use the following media or other resources to follow news about the EU and European politics? Other: specify (1 Less than 1 day per week 2 1 day 3 2 days 4 3 days 5 4 days 6 5 days 7 6 days 8 7 days)"
+var_label(
+  eu25games2019$q_eu_news_other
+) <- "Q197 How many days per week, on average, do you use the following media or other resources to follow news about the EU and European politics: Other"
+var_label(
+  eu25games2019$q_eu_campaign_sources
+) <- "Q198 From which of the following sources have you heard anything about the upcoming European election campaign? Please indicate all that apply. / Q199 On Friday, May 24 2019, the European elections were held. People use a variety of methods to gather and share information about political candidates, campaigns or political issues. Please tell us if you have done the following during the election campaign. Please indicate all that apply."
+var_label(
+  eu25games2019$q_eu_campaign_sources_other
+) <- "Q198 From which of the following sources have you heard anything about the upcoming European election campaign? Please indicate all that apply: Other / Q199 On Friday, May 24 2019, the European elections were held. People use a variety of methods to gather and share information about political candidates, campaigns or political issues. Please tell us if you have done the following during the election campaign. Please indicate all that apply: Other"
+var_label(
+  eu25games2019$q_cjeu_bias
+) <- "Q214 In thinking about the Court of Justice of the European Union's (CJEU) decisions more generally, some people argue that it tends to favor actions taken by the European Commission at the expense of parties or groups that are opposed to the European Commission. Others contend that the CJEU tends to protect parties or groups that are opposed to the European Commission even if it means striking down actions taken by the European Commission. Which comes closest to your view? (1 The Court of Justice of the European Union tends to favor actions taken by the Commission 2 The Court of Justice of the European Union tends to protect opposing groups 3 Don't know)"
+var_label(
+  eu25games2019$q_cjeu_disagree_dissolve
+) <- "Q215/Q203 Please tell me to what extent you agree or disagree with each of the following statements. If the Court of Justice of the European Union (CJEU) started making a lot of decisions that most people disagreed with, it might be better to do away with the CJEU altogether (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_cjeu_satisfaction
+) <- "Q215/Q203 Please tell me to what extent you agree or disagree with each of the following statements. I am satisfied with the performance of the Court of Justice of the EU (CJEU) (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_eval_econ_eur
+) <- "Q216/Q219 How would you judge the current situation in each of the following? The situation of the European economy (1 Very good - 5 Very bad 6 Don't Know)"
+var_label(
+  eu25games2019$q_eval_econ_country
+) <- "Q216/Q219 How would you judge the current situation in each of the following? The situation of the [COUNTRY] economy (1 Very good - 5 Very bad 6 Don't Know)"
+var_label(
+  eu25games2019$q_eval_finance_household
+) <- "Q216/Q219 How would you judge the current situation in each of the following? The financial situation of your household (1 Very good - 5 Very bad 6 Don't Know)"
+var_label(
+  eu25games2019$q_eval_job
+) <- "Q216/Q219 How would you judge the current situation in each of the following? Your personal job situation (1 Very good - 5 Very bad 6 Don't Know)"
+var_label(
+  eu25games2019$q_satis_demo_country
+) <- "Q217/Q221 On the whole, are you very satisfied, fairly satisfied, not very satisfied or not at all satisfied with the way democracy works in [COUNTRY]? And how about the way democracy works in the EU? In [COUNTRY] (1 Very satisfied - 4 Not at all satisfied 5 Don't know)"
+var_label(
+  eu25games2019$q_satis_demo_eu
+) <- "Q217/Q221 On the whole, are you very satisfied, fairly satisfied, not very satisfied or not at all satisfied with the way democracy works in [COUNTRY]? And how about the way democracy works in the EU? In the European Union (1 Very satisfied - 4 Not at all satisfied 5 Don't know)"
+var_label(
+  eu25games2019$q_interest_pol_country
+) <- "Q222/Q229 Please tell me to what extent you agree or disagree with each of the following statements. I am very interested in political issues in [COUNTRY] (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_interest_pol_eu
+) <- "Q222/Q229 Please tell me to what extent you agree or disagree with each of the following statements. I am very interested in European politics (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_econ_nativism
+) <- "Q223/Q230 Please tell me to what extent you agree or disagree with each of the following statements. It is generally bad for [COUNTRY]'s economy if people from other countries come to live here (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_cult_nativism
+) <- "Q223/Q230 Please tell me to what extent you agree or disagree with each of the following statements. [COUNTRY]'s cultural life will be generally undermined if people from other countries come to live here (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_factcheck_ep_reps
+) <- "Q224 For each of the following statements about the EU, could you please tell me whether you think it is true or false. If you don't know, just say so and we will skip to the next. Each Member State elects the same number of representatives to the European Parliament (1 True 2 False 3 Don't Know)"
+var_label(
+  eu25games2019$q_factcheck_ec_pres
+) <- "Q224 For each of the following statements about the EU, could you please tell me whether you think it is true or false. If you don't know, just say so and we will skip to the next. Antonio Tajani is the current President of the European Commission (1 True 2 False 3 Don't Know)"
+var_label(
+  eu25games2019$q_factcheck_council_pres
+) <- "Q224 For each of the following statements about the EU, could you please tell me whether you think it is true or false. If you don't know, just say so and we will skip to the next. The presidency of the Council of the European Union is currently held by Romania (1 True 2 False 3 Don't Know)"
+var_label(
+  eu25games2019$q_factcheck_courts
+) <- "Q224 For each of the following statements about the EU, could you please tell me whether you think it is true or false. If you don't know, just say so and we will skip to the next. Only national courts have a say in determining whether a national law or pratice is compatible with EU law (1 True 2 False 3 Don't Know)"
+var_label(
+  eu25games2019$q_informed_ec
+) <- "Q225/Q232 I would like to ask you a question about certain institutions. For each of the following institutions, do you consider that you are very well, fairly well, fairly badly or very badly informed about it? European Commission (1 Very well informed - 7 Very badly informed)"
+var_label(
+  eu25games2019$q_informed_council
+) <- "Q225/Q232 I would like to ask you a question about certain institutions. For each of the following institutions, do you consider that you are very well, fairly well, fairly badly or very badly informed about it? Council of the European Union (1 Very well informed - 7 Very badly informed)"
+var_label(
+  eu25games2019$q_informed_ep
+) <- "Q225/Q232 I would like to ask you a question about certain institutions. For each of the following institutions, do you consider that you are very well, fairly well, fairly badly or very badly informed about it? European Parliament (1 Very well informed - 7 Very badly informed)"
+var_label(
+  eu25games2019$q_informed_cjeu
+) <- "Q225/Q232 I would like to ask you a question about certain institutions. For each of the following institutions, do you consider that you are very well, fairly well, fairly badly or very badly informed about it? Court of Justice of the European Union (1 Very well informed - 7 Very badly informed)"
+var_label(
+  eu25games2019$q_trust_ec
+) <- "Q226/Q233 For each of the following institutions, please tell me if you tend to trust it or tend not to trust it. European Commission (1 Tend to trust - 7 Tend not to trust)"
+var_label(
+  eu25games2019$q_trust_council
+) <- "Q226/Q233 For each of the following institutions, please tell me if you tend to trust it or tend not to trust it. Council of the European Union (1 Tend to trust - 7 Tend not to trust)"
+var_label(
+  eu25games2019$q_trust_ep
+) <- "Q226/Q233 For each of the following institutions, please tell me if you tend to trust it or tend not to trust it. European Parliament (1 Tend to trust - 7 Tend not to trust)"
+var_label(
+  eu25games2019$q_trust_cjeu
+) <- "Q226/Q233 For each of the following institutions, please tell me if you tend to trust it or tend not to trust it. Court of Justice of the European Union (1 Tend to trust - 7 Tend not to trust)"
+var_label(
+  eu25games2019$q_risk_taking
+) <- "Q227/Q234 Please tell me, in general, how willing or unwilling you are to take risks. Please use a scale from 1 to 7, where 1 means you are ”completely unwilling to take risks” and a 7 means you are ”very willing to take risks”. You can also use any numbers between 1 [sic!] and 11 [sic!] to indicate where you fall on the scale."
+var_label(
+  eu25games2019$q_future_discount
+) <- "Q228/Q235 We now ask for your willingness to or unwillingness you are to give up something that is beneficial for you today in order to benefit more from that in the future. Please again indicate your answer on a scale from 1 to 7, where 1 means you are ”completely unwilling to do so” and a 7 means you are ”very willing to do so”. You can also use any numbers between 1 and 7 to indicate where you fall on the scale."
+var_label(
+  eu25games2019$q_lrpos
+) <- "Q236 In politics, people often talk about \"left\" and \"right.\" When you use this scale from 1 to 11, where would you locate yourself, where 1 means \"left\" and 11 means \"right?\" (1 Left 11 Right 12 Don't Know)"
+var_label(
+  eu25games2019$q_lrpos_ec
+) <- "Q238 When you use this scale from 1 to 11, how would you describe the political viewpoint of the following European bodies today, where 1 means \"left\" and 11 means \"right?\" European Commission (1 Left 11 Right 12 Don't know)"
+var_label(
+  eu25games2019$q_lrpos_council
+) <- "Q238 When you use this scale from 1 to 11, how would you describe the political viewpoint of the following European bodies today, where 1 means \"left\" and 11 means \"right?\" Council of the European Union (1 Left 11 Right 12 Don't know)"
+var_label(
+  eu25games2019$q_age_at_edu_stop_other
+) <- "Q243 How old were you when you stopped full-time education: Other"
+var_label(
+  eu25games2019$q_lrpos_ep
+) <- "Q238 When you use this scale from 1 to 11, how would you describe the political viewpoint of the following European bodies today, where 1 means \"left\" and 11 means \"right?\" European Parliament (1 Left 11 Right 12 Don't know)"
+var_label(
+  eu25games2019$q_lrpos_cjeu
+) <- "Q238 When you use this scale from 1 to 11, how would you describe the political viewpoint of the following European bodies today, where 1 means \"left\" and 11 means \"right?\" Court of Justice of the European Union (1 Left 11 Right 12 Don't know)"
+var_label(
+  eu25games2019$q_understand_nat_pol
+) <- "Q239 Please tell me to what extent you agree or disagree with each of the following statements. I can understand and evaluate important political issues about [COUNTRY] (1 Strongly disagree - 7 Strongly Agree)"
+var_label(
+  eu25games2019$q_nat_politicians_care
+) <- "Q239 Please tell me to what extent you agree or disagree with each of the following statements. The politicians in [COUNTRY] care about what people like me think (1 Strongly disagree - 7 Strongly Agree)"
+var_label(
+  eu25games2019$q_nat_public_say
+) <- "Q239 Please tell me to what extent you agree or disagree with each of the following statements. People like me don't have any say about what the [COUNTRY] government does (1 Strongly disagree - 7 Strongly Agree)"
+var_label(
+  eu25games2019$q_eupos
+) <- "Q240 Some people are extremely opposed to European integration. Suppose these people are located at 1. Others are extremely in favor of European integration. Suppose these people are located at 11. And others have views in between. Where would you place yourself on this scale? (1 Extremely opposed - 11 Extremely in favor 12 Don't know)"
+var_label(
+  eu25games2019$q_eupos_ec
+) <- "Q242 When you use this scale from 1 to 11, how would you describe the political viewpoint of
+the following European bodies today, where 1 means \"being extremely opposed to European integration \" and 11 means \" being extremely in favor of European integration\"? European Commission (1 Extremely opposed to European integration - 11 Extremely in favor of European integration 12 Don't know)"
+var_label(
+  eu25games2019$q_eupos_council
+) <- "Q242 When you use this scale from 1 to 11, how would you describe the political viewpoint of
+the following European bodies today, where 1 means \"being extremely opposed to European integration \" and 11 means \" being extremely in favor of European integration\"? Council of the European Union (1 Extremely opposed to European integration - 11 Extremely in favor of European integration 12 Don't know)"
+var_label(
+  eu25games2019$q_eupos_ep
+) <- "Q242 When you use this scale from 1 to 11, how would you describe the political viewpoint of
+the following European bodies today, where 1 means \"being extremely opposed to European integration \" and 11 means \" being extremely in favor of European integration\"? European Parliament (1 Extremely opposed to European integration - 11 Extremely in favor of European integration 12 Don't know)"
+var_label(
+  eu25games2019$q_eupos_cjeu
+) <- "Q242 When you use this scale from 1 to 11, how would you describe the political viewpoint of
+the following European bodies today, where 1 means \"being extremely opposed to European integration \" and 11 means \" being extremely in favor of European integration\"? Court of Justice of the European Union (1 Extremely opposed to European integration - 11 Extremely in favor of European integration 12 Don't know)"
+var_label(
+  eu25games2019$q_age_at_edu_stop
+) <- "Q243 How old were you when you stopped full-time education?"
+var_label(
+  eu25games2019$q_rural_urban
+) <- "Q244 Would you say you live in a...? (1 Rural area or village 2 Small or middle sized town 3 Large town 4 Don't know)"
+var_label(
+  eu25games2019$q_postal_code
+) <- "Q245 Please indicate some information we need for statistical purposes. What is your postal code?"
+var_label(
+  eu25games2019$q_region
+) <- "Q246 Region"
+var_label(
+  eu25games2019$q_current_occupation
+) <- "Q247 What is your current occupation?"
+var_label(
+  eu25games2019$q_last_occupation
+) <- "Q248 Did you do any paid work in the past? What was your last occupation?"
+var_label(
+  eu25games2019$q_vote
+) <- "Q53 European Parliament elections were held on Friday, 24 May 2019. For one reason or another, some people in Ireland did not vote in these elections. A lot of people were not able to vote because they were sick, or they just didn't have time. (1 I was not eligible to vote 2 I did not vote (in this election in May) 3 I thought about voting this time, but didn't 4 I usually vote, but didn't this time 5 I am sure I voted)"
+var_label(
+  eu25games2019$q_voted_party_hypo
+) <- "Q55 Just assuming you had voted in the election, which party would you have voted for?"
+var_label(
+  eu25games2019$q_voted_party_hypo_other
+) <- "Q55 Just assuming you had voted in the election, which party would you have voted for: Other"
+var_label(
+  eu25games2019$q_eu_campaign_participation
+) <- "Q200 We find that many people participate in politics in other ways besides voting. They support a candidate, political party, or political issue in various ways. Please tell us if you have done the following during the election campaign. Please indicate all that apply"
+var_label(
+  eu25games2019$q_eu_campaign_participation_other
+) <- "Q200 We find that many people participate in politics in other ways besides voting. They support a candidate, political party, or political issue in various ways. Please tell us if you have done the following during the election campaign: Other"
+var_label(
+  eu25games2019$q_cjeu_disagree_dissolve2
+) <- "Q206 Please tell me to what extent you agree or disagree with each of the following statements. If the Court of Justice of the European Union (CJEU) started making a lot of decisions that most people disagreed with, it might be better to do away with the CJEU altogether (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_cjeu_satisfaction2
+) <- "Q206 Please tell me to what extent you agree or disagree with each of the following statements. I am satisfied with the performance of the Court of Justics of the EU (CJEU) (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_cjeu_tendeny
+) <- "Q208 In thinking about the Court of Justice of the European Union's (CJEU) decisions more generally, some people argue that it tends to favor actions taken by the European Commission at the expense of parties or groups that are opposed to the European Commission. Others contend that the CJEU tends to protect parties or groups that are opposed to the European Commission even if it means striking down actions taken by the European Commission. Which comes closest to your view? (1 The Court of Justice of the European Union tends to favor actions taken by the Commission 2 The Court of Justice of the European Union tends to protect opposing group 3 Don't know)"
+var_label(
+  eu25games2019$q_cjeu_disagree_dissolve3
+) <- "Q209 Please tell me to what extent you agree or disagree with each of the following statements. If the Court of Justice of the European Union (CJEU) started making a lot of decisions that most people disagreed with, it might be better to do away with the CJEU altogether (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_cjeu_satisfaction3
+) <- "Q209 Please tell me to what extent you agree or disagree with each of the following statements. I am satisfied with the performance of the Court of Justice of the EU (CJEU) (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_cjeu_disagree_dissolve4
+) <- "Q211 Please tell me to what extent you agree or disagree with each of the following statements. If the Court of Justice of the European Union (CJEU) started making a lot of decisions that most people disagreed with, it might be better to do away with the CJEU altogether (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_cjeu_satisfaction4
+) <- "Q211 Please tell me to what extent you agree or disagree with each of the following statements. I am satisfied with the performance of the Court of Justice of the EU (CJEU) (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_cjeu_tendency2
+) <- "Q208 In thinking about the Court of Justice of the European Union's (CJEU) decisions more generally, some people argue that it tends to favor actions taken by the European Commission at the expense of parties or groups that are opposed to the European Commission. Others contend that the CJEU tends to protect parties or groups that are opposed to the European Commission even if it means striking down actions taken by the European Commission. Which comes closest to your view? (1 The Court of Justice of the European Union tends to favor actions taken by the Commission 2 The Court of Justice of the European Union tends to protect opposing group 3 Don't know)"
+var_label(
+  eu25games2019$q_tolerate_different_ideas
+) <- "Q218 Please tell me to what extent you agree or disagree with each of the following statements. Society should have to put up with those who have political ideas that are very different from the majority (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_order_over_freedom
+) <- "Q218 Please tell me to what extent you agree or disagree with each of the following statements. It is better to live in an orderly society than to allow people so much freedom that they can become disruptive (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_disobey_unjust_laws
+) <- "Q218 Please tell me to what extent you agree or disagree with each of the following statements. It is not necessary to obey a law you consider unjust (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_disobey_gov_laws
+) <- "Q218 Please tell me to what extent you agree or disagree with each of the following statements. It is not necessary to obey the laws of a government I did not vote for (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_immediate_over_legal
+) <- "Q218 Please tell me to what extent you agree or disagree with each of the following statements. Sometimes it might be better to ignore the law and solve problems immediately rather than wait for a legal solution (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_gov_bend_laws
+) <- "Q218 Please tell me to what extent you agree or disagree with each of the following statements. The government should have some ability to bend the law in order to solve pressing social and political problems (1 Strongly disagree - 7 Strongly agree)"
+var_label(
+  eu25games2019$q_global_bad_econ_country
+) <- "Q220 You may have heard of globalisation, that is the general opening-up of all economies, which leads to the creation of a world-wide market. Please tell me to what extent you agree or disagree with each of the following statements. Globalisation is a generally bad thing for [COUNTRY]'s economy. (1 Strongly disagree - 7 Strongly agree 8 Don't know)"
+var_label(
+  eu25games2019$q_global_bad_cult
+) <- "Q220 You may have heard of globalisation, that is the general opening-up of all economies, which leads to the creation of a world-wide market. Please tell me to what extent you agree or disagree with each of the following statements. Globalisation is a generally bad thing for our culture and identity. (1 Strongly disagree - 7 Strongly agree 8 Don't know)"
+var_label(
+  eu25games2019$q_global_less_say
+) <- "Q220 You may have heard of globalisation, that is the general opening-up of all economies, which leads to the creation of a world-wide market. Please tell me to what extent you agree or disagree with each of the following statements. Globalisation does not give people like me a say in politics. (1 Strongly disagree - 7 Strongly agree 8 Don't know)"
+var_label(
+  eu25games2019$q_global_less_gov_control
+) <- "Q220 You may have heard of globalisation, that is the general opening-up of all economies, which leads to the creation of a world-wide market. Please tell me to what extent you agree or disagree with each of the following statements. Globalisation takes away control from the [COUNTRY] government. (1 Strongly disagree - 7 Strongly agree 8 Don't know)"
+var_label(
+  eu25games2019$q_factcheck_council
+) <- "Q231 For each of the following statements about the EU, could you please tell me whether you think it is true or false. If you don't know, just say so and we will skip to the next. The European Council is officially called the Council of the European Union (1 True 2 False 3 Don't know)"
+var_label(
+  eu25games2019$q_factcheck_ep
+) <- "Q231 For each of the following statements about the EU, could you please tell me whether you think it is true or false. If you don't know, just say so and we will skip to the next. There are 1125 members in the European parliament (1 True 2 False 3 Don't know)"
+var_label(
+  eu25games2019$q_factcheck_cjeu_pres
+) <- "Q231 For each of the following statements about the EU, could you please tell me whether you think it is true or false. If you don't know, just say so and we will skip to the next. Vassilios Skouris is the current President of the Court of Justice of the European Union (1 True 2 False 3 Don't know)"
+var_label(
+  eu25games2019$q_factcheck_euro_area
+) <- "Q231 For each of the following statements about the EU, could you please tell me whether you think it is true or false. If you don't know, just say so and we will skip to the next. The Euro area currently consists of 19 Member States (1 True 2 False 3 Don't know)"
+var_label(
+  eu25games2019$ext_cj_party_pf_name
+) <- "Partyfacts Name of Displayed Conjoint Party"
+var_label(
+  eu25games2019$ext_cj_party_pf_id
+) <- "Partyfacts ID of Displayed Conjoint Party"
+var_label(
+  eu25games2019$ext_q_party_id_pf_name
+) <- "Partyfacts Name of Reported Partisan Attachement"
+var_label(
+  eu25games2019$ext_q_party_id_pf_id
+) <- "Partyfacts ID of Reported Partisan Attachement"
+# var_label(
+#   eu25games2019$ext_q_party_id_other_pf_name
+# ) <- "Partyfacts Name of Reported Partisan Attachement"
+# var_label(
+#   eu25games2019$ext_q_party_id_other_pf_id
+# ) <- "Partyfacts ID of Reported Partisan Attachement"
+var_label(
+  eu25games2019$ext_q_vote_intention_pf_name
+) <- "Partyfacts Name of Reported Vote Intention"
+var_label(
+  eu25games2019$ext_q_vote_intention_pf_id
+) <- "Partyfacts ID of Reported Vote Intention"
+var_label(
+  eu25games2019$ext_q_vote_intention_hypo_pf_name
+) <- "Partyfacts Name of Reported Hypothetical Vote Intention"
+var_label(
+  eu25games2019$ext_q_vote_intention_hypo_pf_id
+) <- "Partyfacts ID of Reported Hypothetical Vote Intention"
+# var_label(
+#   eu25games2019$ext_q_vote_intention_hypo_other_pf_name
+# ) <- "Partyfacts Name of Reported Hypothetical Vote Intention"
+# var_label(
+#   eu25games2019$ext_q_vote_intention_hypo_other_pf_id
+# ) <- "Partyfacts ID of Reported Hypothetical Vote Intention"
+# var_label(
+#   eu25games2019$ext_q_vote_intention_other_pf_name
+# ) <- "Partyfacts Name of Reported Hypothetical Vote Intention"
+# var_label(
+#   eu25games2019$ext_q_vote_intention_other_pf_id
+# ) <- "Partyfacts ID of Reported Hypothetical Vote Intention"
+var_label(
+  eu25games2019$ext_q_voted_party_pf_name
+) <- "Partyfacts Name of Reported Vote Choice"
+var_label(
+  eu25games2019$ext_q_voted_party_pf_id
+) <- "Partyfacts ID of Reported Vote Choice"
+var_label(
+  eu25games2019$ext_q_voted_party_2014_pf_name
+) <- "Partyfacts Name of Reported 2014 Vote Choice"
+var_label(
+  eu25games2019$ext_q_voted_party_2014_pf_id
+) <- "Partyfacts ID of Reported 2014 Vote Choice"
+# var_label(
+#   eu25games2019$ext_q_voted_party_2014_other_pf_name
+# ) <- "Partyfacts Name of Reported 2014 Vote Choice"
+# var_label(
+#   eu25games2019$ext_q_voted_party_2014_other_pf_id
+# ) <- "Partyfacts ID of Reported 2014 Vote Choice"
+var_label(
+  eu25games2019$q_thermo_1
+) <- "Q196 We would like to get your feelings toward some political parties and political leaders in the news these days. Below there is a list of parties and people. I'd like you to rate them using something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees mean that you feel favorable and warm toward the party or person. Ratings between 0 degrees and 50 degrees mean that you don't feel favorable toward the party or person and that you don't care too much for that party or person. You would rate the political party or the person at the 50 degree mark if you don't feel particularly warm or cold toward the person."
+
+var_label(
+  eu25games2019$q_thermo_2
+) <- "Q196 We would like to get your feelings toward some political parties and political leaders in the news these days. Below there is a list of parties and people. I'd like you to rate them using something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees mean that you feel favorable and warm toward the party or person. Ratings between 0 degrees and 50 degrees mean that you don't feel favorable toward the party or person and that you don't care too much for that party or person. You would rate the political party or the person at the 50 degree mark if you don't feel particularly warm or cold toward the person."
+
+var_label(
+  eu25games2019$q_thermo_3
+) <- "Q196 We would like to get your feelings toward some political parties and political leaders in the news these days. Below there is a list of parties and people. I'd like you to rate them using something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees mean that you feel favorable and warm toward the party or person. Ratings between 0 degrees and 50 degrees mean that you don't feel favorable toward the party or person and that you don't care too much for that party or person. You would rate the political party or the person at the 50 degree mark if you don't feel particularly warm or cold toward the person."
+
+var_label(
+  eu25games2019$q_thermo_4
+) <- "Q196 We would like to get your feelings toward some political parties and political leaders in the news these days. Below there is a list of parties and people. I'd like you to rate them using something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees mean that you feel favorable and warm toward the party or person. Ratings between 0 degrees and 50 degrees mean that you don't feel favorable toward the party or person and that you don't care too much for that party or person. You would rate the political party or the person at the 50 degree mark if you don't feel particularly warm or cold toward the person."
+
+var_label(
+  eu25games2019$q_thermo_5
+) <- "Q196 We would like to get your feelings toward some political parties and political leaders in the news these days. Below there is a list of parties and people. I'd like you to rate them using something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees mean that you feel favorable and warm toward the party or person. Ratings between 0 degrees and 50 degrees mean that you don't feel favorable toward the party or person and that you don't care too much for that party or person. You would rate the political party or the person at the 50 degree mark if you don't feel particularly warm or cold toward the person."
+
+var_label(
+  eu25games2019$q_thermo_6
+) <- "Q196 We would like to get your feelings toward some political parties and political leaders in the news these days. Below there is a list of parties and people. I'd like you to rate them using something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees mean that you feel favorable and warm toward the party or person. Ratings between 0 degrees and 50 degrees mean that you don't feel favorable toward the party or person and that you don't care too much for that party or person. You would rate the political party or the person at the 50 degree mark if you don't feel particularly warm or cold toward the person."
+
+var_label(
+  eu25games2019$q_thermo_1_party
+) <- "Party evaluated in `q_thermo_1`"
+
+var_label(
+  eu25games2019$q_thermo_2_party
+) <- "Party evaluated in `q_thermo_2`"
+
+var_label(
+  eu25games2019$q_thermo_3_party
+) <- "Party evaluated in `q_thermo_3`"
+
+var_label(
+  eu25games2019$q_thermo_4_party
+) <- "Party evaluated in `q_thermo_4`"
+
+var_label(
+  eu25games2019$q_thermo_5_party
+) <- "Party evaluated in `q_thermo_5`"
+
+var_label(
+  eu25games2019$q_thermo_6_party
+) <- "Party evaluated in `q_thermo_6`"
+
+var_label(
+  eu25games2019$ext_q_thermo_1_pf_name
+) <- "Partyfacts name of party evaluated in `q_thermo_1`"
+
+var_label(
+  eu25games2019$ext_q_thermo_2_pf_name
+) <- "Partyfacts name of party evaluated in `q_thermo_2`"
+
+var_label(
+  eu25games2019$ext_q_thermo_3_pf_name
+) <- "Partyfacts name of party evaluated in `q_thermo_3`"
+
+var_label(
+  eu25games2019$ext_q_thermo_4_pf_name
+) <- "Partyfacts name of party evaluated in `q_thermo_4`"
+
+var_label(
+  eu25games2019$ext_q_thermo_5_pf_name
+) <- "Partyfacts name of party evaluated in `q_thermo_5`"
+
+var_label(
+  eu25games2019$ext_q_thermo_6_pf_name
+) <- "Partyfacts name of party evaluated in `q_thermo_6`"
+
+var_label(
+  eu25games2019$ext_q_thermo_1_pf_id
+) <- "Partyfacts ID of party evaluated in `q_thermo_1`"
+
+var_label(
+  eu25games2019$ext_q_thermo_2_pf_id
+) <- "Partyfacts ID of party evaluated in `q_thermo_2`"
+
+var_label(
+  eu25games2019$ext_q_thermo_3_pf_id
+) <- "Partyfacts ID of party evaluated in `q_thermo_3`"
+
+var_label(
+  eu25games2019$ext_q_thermo_4_pf_id
+) <- "Partyfacts ID of party evaluated in `q_thermo_4`"
+
+var_label(
+  eu25games2019$ext_q_thermo_5_pf_id
+) <- "Partyfacts ID of party evaluated in `q_thermo_5`"
+
+var_label(
+  eu25games2019$ext_q_thermo_6_pf_id
+) <- "Partyfacts ID of party evaluated in `q_thermo_6`"
+```
+
+```{r}
+#| label: value-labels
+```
+
+# Codebook
+
+```{r}
+#| label: codebook
+
+codebook <- codebook(eu25games2019)
+
+print(codebook, "eu25games2019_codebook.docx")
+
+# move codebook to data folder
+file.copy(
+  from = here(
+    "code",
+    "01_preparation",
+    "eu25games2019_codebook.docx"
+  ),
+  to = here(
+    "data",
+    "02_processed",
+    "data"
+  )
+)
+
+file.remove(
+  here(
+    "code",
+    "01_preparation",
+    "eu25games2019_codebook.docx"
+  )
+)
+```
+
+```{r}
+saveRDS(
+  eu25games2019,
+  file = here(
+    "data",
+    "02_processed",
+    "data",
+    "eu25games2019_3.rds"
+  )
+)
+```
+
+# Session Info
+  
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
