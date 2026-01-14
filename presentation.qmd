@@ -9,7 +9,7 @@ format:
     embed-resources: true
     theme: theme.scss
     slideNumber: true
-    footer:  Tristan Muno   -- {{< meta date >}} --  How does reported partisan attachement influence affective polarization? 
+    footer:  Tristan Muno and Thomas König   -- {{< meta date >}} --  How does reported partisan attachement influence affective polarization? 
     logo:  ./images/uma_ss.png 
 editor: visual
 preview-links: true
