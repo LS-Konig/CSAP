@@ -3,10 +3,11 @@ project:
 
 manuscript:
   notebooks:
-    - notebook: code/01_prep/01_wrangling.qmd
-    - notebook: code/01_prep/02_descr_anal.qmd
+    - notebook: code/03_explanal/3_descr_anal.qmd
   code-links: binder
 
+execute: 
+  freeze: auto
 
 author:
   - name: Tristan Muno

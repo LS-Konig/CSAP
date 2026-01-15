@@ -15,39 +15,65 @@ draft: true
 draft-mode: visible
 ---
 
+We term identifiers, non-identifiers, and non-partisans.
+
+
 ## Roadmap
 
-Explore variation across three main dimensions:
+This study examines variation in affective polarization (AP) along **three analytically distinct dimensions**:
 
-1. Operationalization: Ingroup via explicit attachement (identity) vs vote intention/choice
-2. Measurement: Behavior vs Attitude
-3. External validity: Cross-national variability 
+1. **Operationalization of partisanship**  
+   Ingroup defined via **explicit partisan attachment** (identity-based) versus **vote intention/choice** (behavioral anchoring)
+
+2. **Measurement of polarization**  
+   **Attitudinal polarization** (thermometer-based measures) versus **behavioral polarization** (conjoint outcomes)
+
+3. **External validity and scope conditions**  
+   Cross-national variation in the prevalence and distribution of partisan types across European democracies
+
+---
+
+## Empirical strategy
+
+### 1. Aggregate (European-level) patterns
+
+First, we establish **European-level benchmarks** of affective polarization, conditioning on **partisan status** and **measurement strategy**.
+
+- Outcome: Affective polarization  
+- X-axis: Magnitude of AP  
+- Y-axis: Measurement type (API, Wagner MD, CJ-based AP)  
+- Shape / color: Partisan type (explicit partisan, implicit partisan, nonpartisan)
+
+**Measurement logic**:
+
+- **API and CJ-based AP** rely on *identity-based ingroup–outgroup definitions* and allow direct comparison between **attitudinal** and **behavioral** polarization.
+- **Wagner’s measures** capture *perceived system-level affective differentiation* and uniquely allow inclusion of **nonpartisans**, providing a non-partisan baseline against which partisan polarization can be evaluated.
+
+This step clarifies whether differences across partisan types reflect:
+- ingroup bias,
+- behavioral discrimination,
+- or broader differences in perceived affective structure.
+
+### 2. Comparative analysis: cross-national variation
+
+Second, we examine how these patterns **vary across countries**.
+
+- Compare the magnitude and dispersion of AP by partisan type within countries  
+- Assess whether identity-based and system-level polarization align or diverge cross-nationally  
+- Evaluate how the **distribution of partisan types** conditions observed levels of affective polarization
+
+This step establishes the **external validity** of the individual-level findings and identifies contextual heterogeneity across European party systems.
 
 
-
-## Total Sample  
-
-2x2 Correlation Matrix
-
-                Opinion
-              V  |   I
-          V      |
-Behavior ----------------
-          I      |
-
-## Exploratory figures
-
-{{< embed code/02 >}}
-
-{{< embed code/01_prep/01_wrangling.qmd#fig-exploratory-country-anal-dict >}}
-
-{{< embed code/01_prep/01_wrangling.qmd#fig-exploratory-country-anal-trust >}} 
-
-\singlespacing
+{{< embed code/03_explanal/3_descr_anal.qmd#fig-impl-expl-distribution >}}
 
 ## Data
 
 We use data from @hahm2024divided.
+
+## Limitations
+
+Our findings remain limited due to the cross-national nature of our data.
 
 ## References
 
@@ -58,11 +84,11 @@ We use data from @hahm2024divided.
 
 ### Sample descriptives {.appendix}
 
-{{< embed code/01_prep/02_descr_anal.qmd#tbl-nresp-country >}}
+{{< embed code/03_explanal/3_descr_anal.qmd#tbl-nresp-country >}}
 
-{{< embed code/01_prep/02_descr_anal.qmd#tbl-nresp-country-gender >}}
+{{< embed code/03_explanal/3_descr_anal.qmd#tbl-nresp-country-gender >}}
 
-{{< embed code/01_prep/02_descr_anal.qmd#tbl-nresp-country-agegroup >}}
+{{< embed code/03_explanal/3_descr_anal.qmd#tbl-nresp-country-agegroup >}}
 
 
 ### Experimental setup {.appendix}
@@ -75,15 +101,15 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 
 ### Distribution of Y {.appendix}
 
-{{< embed code/01_prep/02_descr_anal.qmd#fig-distr-y >}}
+{{< embed code/03_explanal/3_descr_anal.qmd#fig-distr-y >}}
 
 ### Distribution of T and R {.appendix}
 
-{{< embed code/01_prep/02_descr_anal.qmd#tbl-t-r-distr >}}
+{{< embed code/03_explanal/3_descr_anal.qmd#tbl-t-r-distr >}}
 
 ### Distribution of Covariates by T
 
-{{< embed code/01_prep/02_descr_anal.qmd#tbl-covariate-distr >}}
+{{< embed code/03_explanal/3_descr_anal.qmd#tbl-covariate-distr >}}
 
 ### Robustness {.appendix}
 

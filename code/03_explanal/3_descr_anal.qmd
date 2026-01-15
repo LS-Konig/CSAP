@@ -1179,10 +1179,10 @@ There are three main operationalization strategies applied in European AP studie
 
 I am starting simple, with unweighted variants of all three, beginning with Reiljan's API.
 
-
-
 ```{r}
 #| label: total-sample-reiljan-api
+
+# turn thermoscores to long format
 thermo_long <- eu25games2019 |>
   select(
     meta_pid,
@@ -1214,7 +1214,7 @@ thermo_long <- eu25games2019 |>
   filter(!is.na(thermo_score), !is.na(thermo_party)) |>
   mutate(thermo_score = thermo_score / 10)
 
-
+# calculate individual level AP
 api_individual <- thermo_long |>
   mutate(
     ingroup = thermo_party == der_partisan_anchor
@@ -1223,8 +1223,7 @@ api_individual <- thermo_long |>
   summarise(
     mean_Co = mean(thermo_score[ingroup], na.rm = TRUE),
     mean_Out = mean(thermo_score[!ingroup], na.rm = TRUE),
-    sd_Co = sd(thermo_score[ingroup], na.rm = TRUE),
-    sd_Out = sd(thermo_score[!ingroup], na.rm = TRUE),
+    api = mean_Co - mean_Out,
     n_Co = sum(ingroup),
     n_Out = sum(!ingroup),
     .groups = "drop"
@@ -1235,47 +1234,46 @@ api_individual <- thermo_long |>
 pooled_ap_thermo <- api_individual |>
   group_by(der_partisan_type) |>
   summarise(
-    mean_Co = mean(mean_Co),
-    mean_Out = mean(mean_Out),
-    sd_Co = sd(mean_Co),
-    sd_Out = sd(mean_Out),
-    n_Co = sum(n_Co),
-    n_Out = sum(n_Out),
+    diff_mean = mean(api),
+    sd_diff = sd(api),
+    n_diff = n(),
+    se_diff = sd_diff / sqrt(n_diff),
+    ci_low = diff_mean - 1.96 * se_diff,
+    ci_high = diff_mean + 1.96 * se_diff,
     .groups = "drop"
   ) |>
   mutate(
-    diff_mean = mean_Co - mean_Out,
-    se_diff = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
-    ci_low = diff_mean - 1.96 * se_diff,
-    ci_high = diff_mean + 1.96 * se_diff,
+    measure = "Thermometer",
+    index = "API",
     der_partisan_type = case_when(
       der_partisan_type == 1 ~ "Explicit",
-      der_partisan_type == 0 ~ "Implicit"
-    ),
-    measure = "Thermometer",
-    index = "API"
+      der_partisan_type == 0 ~ "Implicit",
+      .default = NA
+    )
   )
+
 
 total_ap_thermo <- api_individual |>
   summarise(
-    mean_Co = mean(mean_Co),
-    mean_Out = mean(mean_Out),
-    sd_Co = sd(mean_Co),
-    sd_Out = sd(mean_Out),
-    n_Co = sum(n_Co),
-    n_Out = sum(n_Out)
-  ) |>
-  mutate(
-    diff_mean = mean_Co - mean_Out,
-    se_diff = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    diff_mean = mean(api),
+    sd_diff = sd(api),
+    n_diff = n(),
+    se_diff = sd_diff / sqrt(n_diff),
     ci_low = diff_mean - 1.96 * se_diff,
     ci_high = diff_mean + 1.96 * se_diff,
-    der_partisan_type = "Total",
-    measure = "Thermometer",
-    index = "API"
-  )
+    .groups = "drop"
+  ) |>
+  mutate(der_partisan_type = "Total") |>
+  relocate(der_partisan_type, .before = diff_mean)
 
 pooled_ap_thermo <- bind_rows(pooled_ap_thermo, total_ap_thermo)
+
+```
+
+# Figure
+
+```{r}
+#| label: fig-eu25-ap-comparison
 
 ```
 
