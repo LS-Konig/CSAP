@@ -74,7 +74,13 @@ Wagner Spread of Scores
 
 We compare the levels across identifiers, voters (without identity) and nonpartisans (Wagner)
 
+# Party sizes (for weighting)
 
+What to use, empirical distributions in sample (id/vote?) or electoral vote share in 2019?
+
+```{r}
+#| label: party-shares
+```
 
 
 
