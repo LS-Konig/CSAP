@@ -1,0 +1,357 @@
+---
+title: |
+  Code Notebook 3.2
+subtitle: |
+  AP Measures
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+# Load Data
+
+```{r}
+#| label: load-data
+
+eu25games2019 <- readRDS(
+  file = here(
+    "data",
+    "03_final",
+    "eu25games2019.rds"
+  )
+)
+```
+
+# Overview of Measures
+
+For our behavioral experiment, we conceptually draw from Reiljan's API.
+Formally, we define AP as the difference in tokens allocated to the ingroup, minus the average number of tokens allocated to all outgroups. 
+
+Weighted and unweighted
+
+For the thermometer score, we calculate three measures, each weighted and unweighted:
+
+Reiljan API
+Wagner Mean Distance
+Wagner Spread of Scores
+
+We compare the levels across identifiers, voters (without identity) and nonpartisans (Wagner)
+
+
+
+
+
+# Aggregated AP: Token Allocation
+
+```{r}
+#| label: total-sample-ap-cj
+
+pooled_ap_cj <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type)
+  ) |>
+  group_by(der_partisan_type, der_partisan_relationship) |>
+  summarise(
+    mean = mean(cj_token),
+    sd = sd(cj_token),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = c(mean, sd, n)
+  ) |>
+  mutate(
+    diff_mean = mean_Co - mean_Out,
+    se_diff = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ci_low = diff_mean - 1.96 * se_diff,
+    ci_high = diff_mean + 1.96 * se_diff,
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      .default = NA
+    )
+  )
+
+
+total_pooled_ap_cj <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type)
+  ) |>
+  group_by(der_partisan_relationship) |>
+  summarise(
+    mean = mean(cj_token),
+    sd = sd(cj_token),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = c(mean, sd, n)
+  ) |>
+  mutate(
+    diff_mean = mean_Co - mean_Out,
+    se_diff = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ci_low = diff_mean - 1.96 * se_diff,
+    ci_high = diff_mean + 1.96 * se_diff
+  ) |>
+  mutate(der_partisan_type = "Total") |>
+  relocate(der_partisan_type, .before = mean_Co)
+
+pooled_ap_cj <- pooled_ap_cj |>
+  bind_rows(total_pooled_ap_cj) |>
+  mutate(measure = "Token")
+```
+
+# Aggregated AP: Thermometer Scores
+
+There are three main operationalization strategies applied in European AP studies: Reiljan's API, Wagner's mean distance and Wagner's average spread.
+
+I am starting simple, with unweighted variants of all three, beginning with Reiljan's API.
+
+```{r}
+#| label: total-sample-reiljan-api
+
+# turn thermoscores to long format
+thermo_long <- eu25games2019 |>
+  select(
+    meta_pid,
+    der_partisan_type,
+    der_partisan_anchor,
+    starts_with("q_thermo_"),
+    starts_with("ext_q_thermo_")
+  ) |>
+  pivot_longer(
+    cols = matches("^q_thermo_[0-9]+$"),
+    names_to = "thermo_slot",
+    values_to = "thermo_score"
+  ) |>
+  pivot_longer(
+    cols = matches("^ext_q_thermo_[0-9]+_pf_name$"),
+    names_to = "party_slot",
+    values_to = "thermo_party"
+  ) |>
+  filter(
+    str_extract(thermo_slot, "[0-9]+") == str_extract(party_slot, "[0-9]+")
+  ) |>
+  select(
+    meta_pid,
+    der_partisan_type,
+    der_partisan_anchor,
+    thermo_party,
+    thermo_score
+  ) |>
+  filter(!is.na(thermo_score), !is.na(thermo_party)) |>
+  mutate(thermo_score = thermo_score / 10)
+
+# calculate individual level AP
+api_individual <- thermo_long |>
+  mutate(
+    ingroup = thermo_party == der_partisan_anchor
+  ) |>
+  group_by(meta_pid, der_partisan_type) |>
+  summarise(
+    mean_Co = mean(thermo_score[ingroup], na.rm = TRUE),
+    mean_Out = mean(thermo_score[!ingroup], na.rm = TRUE),
+    api = mean_Co - mean_Out,
+    n_Co = sum(ingroup),
+    n_Out = sum(!ingroup),
+    .groups = "drop"
+  ) |>
+  filter(n_Co > 0, n_Out > 0)
+
+
+pooled_ap_thermo <- api_individual |>
+  group_by(der_partisan_type) |>
+  summarise(
+    diff_mean = mean(api),
+    sd_diff = sd(api),
+    n_diff = n(),
+    se_diff = sd_diff / sqrt(n_diff),
+    ci_low = diff_mean - 1.96 * se_diff,
+    ci_high = diff_mean + 1.96 * se_diff,
+    .groups = "drop"
+  ) |>
+  mutate(
+    measure = "Thermometer",
+    index = "API",
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      .default = NA
+    )
+  )
+
+
+total_ap_thermo <- api_individual |>
+  summarise(
+    diff_mean = mean(api),
+    sd_diff = sd(api),
+    n_diff = n(),
+    se_diff = sd_diff / sqrt(n_diff),
+    ci_low = diff_mean - 1.96 * se_diff,
+    ci_high = diff_mean + 1.96 * se_diff,
+    .groups = "drop"
+  ) |>
+  mutate(der_partisan_type = "Total") |>
+  relocate(der_partisan_type, .before = diff_mean)
+
+pooled_ap_thermo <- bind_rows(pooled_ap_thermo, total_ap_thermo)
+
+```
+
+
+```{r}
+#| label: total-sample-wagner-mean-distance
+
+# calculate individual level AP
+meandist_individual <- thermo_long |>
+  group_by(meta_pid, der_partisan_type) |>
+  summarise(
+    mean_like = mean(thermo_score, na.rm = TRUE),
+    ap = sqrt(mean((thermo_score - mean_like)^2, na.rm = TRUE)),
+    .groups = "drop"
+  )
+
+
+pooled_meandist_thermo <- meandist_individual |>
+  group_by(der_partisan_type) |>
+  summarise(
+    diff_mean = mean(ap),
+    sd_diff = sd(ap),
+    n_diff = n(),
+    se_diff = sd_diff / sqrt(n_diff),
+    ci_low = diff_mean - 1.96 * se_diff,
+    ci_high = diff_mean + 1.96 * se_diff,
+    .groups = "drop"
+  ) |>
+  mutate(
+    measure = "Thermometer",
+    index = "Mean Distance",
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      .default = NA
+    )
+  )
+
+
+total_meandist_thermo <- meandist_individual |>
+  summarise(
+    diff_mean = mean(ap),
+    sd_diff = sd(ap),
+    n_diff = n(),
+    se_diff = sd_diff / sqrt(n_diff),
+    ci_low = diff_mean - 1.96 * se_diff,
+    ci_high = diff_mean + 1.96 * se_diff,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = "Total",
+    measure = "Thermometer",
+    index = "Mean Distance",
+  ) |>
+  relocate(der_partisan_type, .before = diff_mean)
+
+pooled_ap_thermo <- bind_rows(pooled_ap_thermo, total_ap_thermo)
+
+```
+
+
+```{r}
+#| label: total-sample-wagner-spread
+
+spread_individual <- thermo_long |>
+  group_by(meta_pid, der_partisan_type) |>
+  summarise(
+    likemax = max(thermo_score, na.rm = TRUE),
+    spread = sqrt(mean(
+      (thermo_score[thermo_score != likemax] - likemax)^2,
+      na.rm = TRUE
+    ))
+  )
+
+```
+
+
+# Figure
+
+```{r}
+#| label: fig-eu25-ap-comparison
+
+```
+
+The full **Affective Polarization Index** (Reiljan 2020):
+
+$$
+\text{API} = \sum_{n=1}^{N} \left[ \sum_{\substack{m = 1\\ m \neq n}}^{N} \left( (Like_n - Like_m) \times \left(\frac{\text{Vote share}_{m}}{1 - \text{Vote share}_{n}} \right) \right) \times \text{Vote share}_n \right]
+$$
+
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
+
+
+  

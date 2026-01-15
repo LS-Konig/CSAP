@@ -65,11 +65,17 @@ Second, we examine how these patterns **vary across countries**.
 This step establishes the **external validity** of the individual-level findings and identifies contextual heterogeneity across European party systems.
 
 
-{{< embed code/03_explanal/3_descr_anal.qmd#fig-impl-expl-distribution >}}
+{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
 
 ## Data
 
 We use data from @hahm2024divided.
+
+## Measurement
+
+We compare several measurement strategies frequently employed in the context of multi-party systems.
+
+For our behavioral experiment, we conceptually follow Reiljan's API
 
 ## Limitations
 
@@ -84,11 +90,11 @@ Our findings remain limited due to the cross-national nature of our data.
 
 ### Sample descriptives {.appendix}
 
-{{< embed code/03_explanal/3_descr_anal.qmd#tbl-nresp-country >}}
+{{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-nresp-country >}}
 
-{{< embed code/03_explanal/3_descr_anal.qmd#tbl-nresp-country-gender >}}
+{{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-nresp-country-gender >}}
 
-{{< embed code/03_explanal/3_descr_anal.qmd#tbl-nresp-country-agegroup >}}
+{{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-nresp-country-agegroup >}}
 
 
 ### Experimental setup {.appendix}
@@ -101,15 +107,15 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 
 ### Distribution of Y {.appendix}
 
-{{< embed code/03_explanal/3_descr_anal.qmd#fig-distr-y >}}
+{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-distr-y >}}
 
 ### Distribution of T and R {.appendix}
 
-{{< embed code/03_explanal/3_descr_anal.qmd#tbl-t-r-distr >}}
+{{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-t-r-distr >}}
 
 ### Distribution of Covariates by T
 
-{{< embed code/03_explanal/3_descr_anal.qmd#tbl-covariate-distr >}}
+{{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-covariate-distr >}}
 
 ### Robustness {.appendix}
 
