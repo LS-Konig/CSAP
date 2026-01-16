@@ -212,7 +212,7 @@ polarization?\thanks{Space for acknowledgements. Wordcount: .}}
 \makeatother
 \subtitle{A comparative study of 25 European democracies}
 \author{Tristan Muno \and Thomas König}
-\date{January 9, 2026}
+\date{January 16, 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
@@ -221,29 +221,100 @@ Space for an abstract.
 
 
 \setstretch{2}
+We term identifiers, non-identifiers, and non-partisans.
+
 \section{Roadmap}\label{roadmap}
 
-Explore variation across three main dimensions:
+This study examines variation in affective polarization (AP) along
+\textbf{three analytically distinct dimensions}:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\tightlist
 \item
-  Operationalization: Ingroup via explicit attachement (identity) vs
-  vote intention/choice
+  \textbf{Operationalization of partisanship}\\
+  Ingroup defined via \textbf{explicit partisan attachment}
+  (identity-based) versus \textbf{vote intention/choice} (behavioral
+  anchoring)
 \item
-  Measurement: Behavior vs Attitude
+  \textbf{Measurement of polarization}\\
+  \textbf{Attitudinal polarization} (thermometer-based measures) versus
+  \textbf{behavioral polarization} (conjoint outcomes)
 \item
-  External validity: Cross-national variability
+  \textbf{External validity and scope conditions}\\
+  Cross-national variation in the prevalence and distribution of
+  partisan types across European democracies
 \end{enumerate}
 
-\section{Exploratory figures}\label{exploratory-figures}
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Empirical strategy}\label{empirical-strategy}
+
+\subsection{1. Aggregate (European-level)
+patterns}\label{aggregate-european-level-patterns}
+
+First, we establish \textbf{European-level benchmarks} of affective
+polarization, conditioning on \textbf{partisan status} and
+\textbf{measurement strategy}.
+
+\begin{itemize}
+\tightlist
+\item
+  Outcome: Affective polarization\\
+\item
+  X-axis: Magnitude of AP\\
+\item
+  Y-axis: Measurement type (API, Wagner MD, CJ-based AP)\\
+\item
+  Shape / color: Partisan type (explicit partisan, implicit partisan,
+  nonpartisan)
+\end{itemize}
+
+\textbf{Measurement logic}:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{API and CJ-based AP} rely on \emph{identity-based
+  ingroup--outgroup definitions} and allow direct comparison between
+  \textbf{attitudinal} and \textbf{behavioral} polarization.
+\item
+  \textbf{Wagner's measures} capture \emph{perceived system-level
+  affective differentiation} and uniquely allow inclusion of
+  \textbf{nonpartisans}, providing a non-partisan baseline against which
+  partisan polarization can be evaluated.
+\end{itemize}
+
+This step clarifies whether differences across partisan types reflect: -
+ingroup bias, - behavioral discrimination, - or broader differences in
+perceived affective structure.
+
+\subsection{2. Comparative analysis: cross-national
+variation}\label{comparative-analysis-cross-national-variation}
+
+Second, we examine how these patterns \textbf{vary across countries}.
+
+\begin{itemize}
+\tightlist
+\item
+  Compare the magnitude and dispersion of AP by partisan type within
+  countries\\
+\item
+  Assess whether identity-based and system-level polarization align or
+  diverge cross-nationally\\
+\item
+  Evaluate how the \textbf{distribution of partisan types} conditions
+  observed levels of affective polarization
+\end{itemize}
+
+This step establishes the \textbf{external validity} of the
+individual-level findings and identifies contextual heterogeneity across
+European party systems.
 
 \begin{figure}[H]
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-01_prep-01_wrangling-fig-impl-expl-distribution-output-1.png}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.1_descr_anal-fig-impl-expl-distribution-output-1.png}}
 
 }
 
@@ -260,59 +331,62 @@ respondents each (detailed numbers are reported in appendix section X).}
 \end{figure}%
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/01_prep/01_wrangling-preview.html\#cell-fig-impl-expl-distribution}{CSAP
-Code Notebook 01}}
-
-\begin{figure}[H]
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-01_prep-01_wrangling-fig-exploratory-country-anal-dict-output-2.png}}
-
-}
-
-\caption{\label{fig-exploratory-country-anal-dict}Exploratory token
-allocation behavior by country and pid type in the dictator game:
-ingroup favoritism, outgroup derogation and affective polarization. The
-figure shows mean differences in token allocation with 95\% confidence
-intervals. IF = mean(token2co) - mean(token2control), OD =
-mean(token2control) - mean(token2out), AP = mean(token2co) -
-mean(token2out)}
-
-\end{figure}%
-
-\textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/01_prep/01_wrangling-preview.html\#cell-fig-exploratory-country-anal-dict}{CSAP
-Code Notebook 01}}
-
-\begin{figure}[H]
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-01_prep-01_wrangling-fig-exploratory-country-anal-trust-output-2.png}}
-
-}
-
-\caption{\label{fig-exploratory-country-anal-trust}Exploratory token
-allocation behavior by country and pid type in the trust game: ingroup
-favoritism, outgroup derogation and affective polarization. The figure
-shows mean differences in token allocation with 95\% confidence
-intervals. IF = mean(token2co) - mean(token2control), OD =
-mean(token2control) - mean(token2out), AP = mean(token2co) -
-mean(token2out)}
-
-\end{figure}%
-
-\textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/01_prep/01_wrangling-preview.html\#cell-fig-exploratory-country-anal-trust}{CSAP
-Code Notebook 01}}
-
-\singlespacing
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-fig-impl-expl-distribution}{Code
+Notebook 3.1}}
 
 \section{Data}\label{data}
 
 We use data from Hahm, Hilpert, and König
 (\citeproc{ref-hahm2024divided}{2024}).
+
+\section{Measurement}\label{measurement}
+
+We compare several measurement strategies frequently employed in the
+context of multi-party systems.
+
+For our behavioral experiment, we conceptually follow Reiljan's API
+
+\section{Results}\label{results}
+
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.2_ap_measures-fig-eu25-ap-output-1.png}}
+
+}
+
+\caption{\label{fig-eu25-ap}Affective Polarization in EU25 (2019). Note:
+1) Explicit: Reported Attachement; Implicit: Denied Attachement but
+Reported Vote; Total: All Partisans (Expl. and Impl.). 2) Errorbars
+represent 95\% CI. 3) Weighted estimates and errorbars are based on
+empirical distribution of reported votes in our data. 4) Behavioral
+Scale (Token): -10 (10 Token allocated to Out-Party and none to
+Co-Party) to +10 (10 Token allocated to Co-party and 0 to Out-Party);
+Attitudinal Scale (Thermo): -10 (Thermoscore 10 for Out-Party and 0 for
+Co-Party) to +10 (Thermoscore 10 for Co-Party and 0 for Out-Party).}
+
+\end{figure}%
+
+\textsubscript{Source:
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-eu25-ap}{Code
+Notebook 3.2}}
+
+\section{Limitations}\label{limitations}
+
+Our findings remain limited due to the cross-national nature of our
+data.
+
+When weighting affective polarization by party size to estimate country
+--- or Europe-level scores, this procedure implicitly assumes that the
+probability of any individual encountering and correctly identifying
+another partisan is proportional to the size of parties' electorates. In
+practice, structural factors may violate this assumption: for example,
+partisans of smaller or more radical challenger parties may be more
+salient or more easily recognized, such that their social visibility
+exceeds their electoral share. Consequently, weighted estimates may
+over- or understate true horizontal affective polarization in contexts
+where partisan recognition is systematically biased.
 
 \section{References}\label{references}
 
@@ -373,8 +447,8 @@ Total & 29827 & 0.99 \\
 \end{longtable}
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/01_prep/02_descr_anal-preview.html\#cell-tbl-nresp-country}{CSAP
-Code Notebook 02}}
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-tbl-nresp-country}{Code
+Notebook 3.1}}
 
 \begin{longtable}[]{@{}lrrr@{}}
 
@@ -419,8 +493,8 @@ Total & 14386 & 15399 & 42 \\
 \end{longtable}
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/01_prep/02_descr_anal-preview.html\#cell-tbl-nresp-country-gender}{CSAP
-Code Notebook 02}}
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-tbl-nresp-country-gender}{Code
+Notebook 3.1}}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1974}}
@@ -489,8 +563,8 @@ Total & 3022 & 5251 & 5921 & 6338 & 6310 & 2650 & 21 \\
 \end{longtable}
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/01_prep/02_descr_anal-preview.html\#cell-tbl-nresp-country-agegroup}{CSAP
-Code Notebook 02}}
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-tbl-nresp-country-agegroup}{Code
+Notebook 3.1}}
 
 \subsection{Experimental setup}\label{experimental-setup}
 
@@ -551,7 +625,7 @@ profile.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-01_prep-02_descr_anal-fig-distr-y-output-2.png}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.1_descr_anal-fig-distr-y-output-2.png}}
 
 }
 
@@ -562,8 +636,8 @@ Trust game: \(Mean = 3.48\), \(median = 4\), \(SD = 2.49\)}
 \end{figure}%
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/01_prep/02_descr_anal-preview.html\#cell-fig-distr-y}{CSAP
-Code Notebook 02}}
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-fig-distr-y}{Code
+Notebook 3.1}}
 
 \subsection{Distribution of T and R}\label{distribution-of-t-and-r}
 
@@ -585,8 +659,8 @@ der\_partisan\_type & None & Co & Out \\
 \end{longtable}
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/01_prep/02_descr_anal-preview.html\#cell-tbl-t-r-distr}{CSAP
-Code Notebook 02}}
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-tbl-t-r-distr}{Code
+Notebook 3.1}}
 
 \subsection{Distribution of Covariates by
 T}\label{distribution-of-covariates-by-t}
@@ -693,8 +767,8 @@ q\_gender & \begin{minipage}[t]{\linewidth}\raggedright
 \end{longtable}
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/01_prep/02_descr_anal-preview.html\#cell-tbl-covariate-distr}{CSAP
-Code Notebook 02}}
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-tbl-covariate-distr}{Code
+Notebook 3.1}}
 
 \subsection{Robustness}\label{robustness}
 
