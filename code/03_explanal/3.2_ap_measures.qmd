@@ -655,8 +655,8 @@ ggplot(
   aes(
     x = ap,
     y = der_partisan_type,
-    color = factor(weighted),
-    shape = measurement
+    shape = factor(weighted),
+    color = measurement
   )
 ) +
   # 1) Points nudged based on weight
@@ -668,24 +668,21 @@ ggplot(
   geom_errorbar(
     aes(
       xmin = ci_low,
-      xmax = ci_high,
-      linetype = factor(weighted)
+      xmax = ci_high
     ),
     position = position_nudge(y = ifelse(toplot$weighted == 1, 0.1, -0.1)),
     width = 0.1
   ) +
-  scale_linetype_manual(values = c(`0` = "dotted", `1` = "solid")) +
-
-  # 3) Labels
   labs(
     y = "Sample",
     x = "AP",
-    linetype = "Party Weight",
-    color = "Party Weight",
-    shape = "Measurement"
+    shape = "Party Weight",
+    color = "Measurement"
   ) +
-
-  # 4) Theme with golden ratio aspect
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
   theme_pubr() +
   theme(aspect.ratio = 1 / 1.618)
 
