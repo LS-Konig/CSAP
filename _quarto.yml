@@ -66,4 +66,3 @@ format:
       - right = 2.5cm
       - footskip = 20pt
   docx: default
-  jats: default
