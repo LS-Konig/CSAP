@@ -77,9 +77,16 @@ We compare several measurement strategies frequently employed in the context of 
 
 For our behavioral experiment, we conceptually follow Reiljan's API
 
+
+## Results
+
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap >}}
+
 ## Limitations
 
 Our findings remain limited due to the cross-national nature of our data.
+
+When weighting affective polarization by party size to estimate country --- or Europe-level scores, this procedure implicitly assumes that the probability of any individual encountering and correctly identifying another partisan is proportional to the size of parties' electorates. In practice, structural factors may violate this assumption: for example, partisans of smaller or more radical challenger parties may be more salient or more easily recognized, such that their social visibility exceeds their electoral share. Consequently, weighted estimates may over- or understate true horizontal affective polarization in contexts where partisan recognition is systematically biased.
 
 ## References
 
