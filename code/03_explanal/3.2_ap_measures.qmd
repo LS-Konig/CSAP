@@ -76,18 +76,107 @@ We compare the levels across identifiers, voters (without identity) and nonparti
 
 # Party sizes (for weighting)
 
-What to use, empirical distributions in sample (id/vote?) or electoral vote share in 2019?
+What to use, empirical distributions in sample (id/vote?) or electoral vote share in 2019? Both?
 
 ```{r}
-#| label: party-shares
+#| label: party-shares-vote-variable
+
+# relative (reported) vote shares
+votes_per_country <- eu25games2019 |>
+  select(
+    meta_country,
+    meta_pid,
+    der_vote_combined_name
+  ) |>
+  distinct(meta_pid, .keep_all = T) |>
+  filter(
+    der_vote_combined_name != "dont-know" &
+      der_vote_combined_name != "other"
+  ) |>
+  group_by(meta_country, der_vote_combined_name) |>
+  count(der_vote_combined_name) |>
+  ungroup() |>
+  group_by(meta_country) |>
+  summarise(
+    abs_vote = sum(n)
+  )
+
+votes_per_party <- eu25games2019 |>
+  select(
+    meta_country,
+    meta_pid,
+    der_vote_combined_name
+  ) |>
+  distinct(meta_pid, .keep_all = T) |>
+  filter(
+    der_vote_combined_name != "dont-know" &
+      der_vote_combined_name != "other"
+  ) |>
+  group_by(meta_country, der_vote_combined_name) |>
+  count(der_vote_combined_name) |>
+  ungroup()
+
+votes_per_party <- votes_per_party |>
+  left_join(
+    votes_per_country,
+    by = join_by(meta_country)
+  )
+
+votes_per_party <- votes_per_party |>
+  mutate(
+    der_anchor_vote_share = n / abs_vote
+  )
+
+eu25games2019 <- eu25games2019 |>
+  left_join(
+    (votes_per_party |>
+      select(
+        der_vote_combined_name,
+        der_anchor_vote_share
+      )),
+    by = join_by(der_partisan_anchor == der_vote_combined_name)
+  )
 ```
 
+# Target Table
 
+What I want is a tibble in the format
+
+| Measurement | measure | weighted | der_partisan_type | ap | ci_low | ci_high | 
+|:--|:--------|:---------|:------------------|---:|-------:|--------:|
+| Behavioral | API | N | Explicit | X | X | X |
+| Behavioral | API  | N | Implicit | X | X | X |
+| Behavioral | API  | N | Total | X | X | X |
+| Behavioral | API  | Y | Explicit | X | X | X |
+| Behavioral | API  | Y | Implicit | X | X | X |
+| Behavioral | API  | Y | Total | X | X | X |
+| Attitudinal | API  | N | Explicit | X | X | X |
+| Attitudinal | API  | N | Implicit | X | X | X |
+| Attitudinal | API  | N | Total | X | X | X |
+| Attitudinal | API  | Y | Explicit | X | X | X |
+| Attitudinal | API  | Y | Implicit | X | X | X |
+| Attitudinal | API  | Y | Total | X | X | X |
+| Attitudinal | Mean Dist. | N | Explicit | X | X | X |
+| Attitudinal | Mean Dist. | N | Implicit | X | X | X |
+| Attitudinal | Mean Dist. | N | None | X | X | X |
+| Attitudinal | Mean Dist. | N | Total | X | X | X |
+| Attitudinal | Mean Dist. | Y | Explicit | X | X | X |
+| Attitudinal | Mean Dist. | Y | Implicit | X | X | X |
+| Attitudinal | Mean Dist. | Y | None | X | X | X |
+| Attitudinal | Mean Dist. | Y | Total | X | X | X |
+| Attitudinal | Spread | N | Explicit | X | X | X |
+| Attitudinal | Spread | N | Implicit | X | X | X |
+| Attitudinal | Spread | N | None | X | X | X |
+| Attitudinal | Spread | N | Total | X | X | X |
+| Attitudinal | Spread | Y | Explicit | X | X | X |
+| Attitudinal | Spread | Y | Implicit | X | X | X |
+| Attitudinal | Spread | Y | None | X | X | X |
+| Attitudinal | Spread | Y | Total | X | X | X |
 
 # Aggregated AP: Token Allocation
 
 ```{r}
-#| label: total-sample-ap-cj
+#| label: total-sample-ap-cj-unweighted
 
 pooled_ap_cj <- eu25games2019 |>
   filter(
@@ -106,8 +195,8 @@ pooled_ap_cj <- eu25games2019 |>
     values_from = c(mean, sd, n)
   ) |>
   mutate(
-    diff_mean = mean_Co - mean_Out,
-    se_diff = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ap = mean_Co - mean_Out,
+    se = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
     ci_low = diff_mean - 1.96 * se_diff,
     ci_high = diff_mean + 1.96 * se_diff,
     der_partisan_type = case_when(
@@ -135,8 +224,8 @@ total_pooled_ap_cj <- eu25games2019 |>
     values_from = c(mean, sd, n)
   ) |>
   mutate(
-    diff_mean = mean_Co - mean_Out,
-    se_diff = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ap = mean_Co - mean_Out,
+    se = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
     ci_low = diff_mean - 1.96 * se_diff,
     ci_high = diff_mean + 1.96 * se_diff
   ) |>
@@ -146,7 +235,109 @@ total_pooled_ap_cj <- eu25games2019 |>
 pooled_ap_cj <- pooled_ap_cj |>
   bind_rows(total_pooled_ap_cj) |>
   mutate(measure = "Token")
+
+pooled_ap_cj <- pooled_ap_cj |>
+  select(
+    der_partisan_type,
+    ap = diff_mean,
+    ci_low,
+    ci_high
+  ) |>
+  mutate(
+    measurement = "Behavioral",
+    measure = "API",
+    outcome = "Token",
+    weighted = 0,
+  )
 ```
+
+```{r}
+#| label: total-sample-ap-cj-weighted
+
+pooled_ap_cj_weighted <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type)
+  ) |>
+  group_by(der_partisan_type, der_partisan_relationship) |>
+  summarise(
+    mean = weighted.mean(cj_token, w = der_anchor_vote_share, na.rm = TRUE),
+    sd = sqrt(weighted.mean(
+      (cj_token -
+        weighted.mean(cj_token, w = der_anchor_vote_share, na.rm = TRUE))^2,
+      w = der_anchor_vote_share,
+      na.rm = TRUE
+    )),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = c(mean, sd, n)
+  ) |>
+  mutate(
+    ap = mean_Co - mean_Out,
+    se = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      TRUE ~ NA_character_
+    )
+  )
+
+
+total_pooled_ap_cj_weighted <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type)
+  ) |>
+  summarise(
+    mean_Co = weighted.mean(
+      cj_token[der_partisan_relationship == "Co"],
+      w = der_anchor_vote_share[der_partisan_relationship == "Co"],
+      na.rm = TRUE
+    ),
+    mean_Out = weighted.mean(
+      cj_token[der_partisan_relationship == "Out"],
+      w = der_anchor_vote_share[der_partisan_relationship == "Out"],
+      na.rm = TRUE
+    ),
+    sd_Co = sqrt(weighted.mean(
+      (cj_token[der_partisan_relationship == "Co"] - mean_Co)^2,
+      w = der_anchor_vote_share[der_partisan_relationship == "Co"],
+      na.rm = TRUE
+    )),
+    sd_Out = sqrt(weighted.mean(
+      (cj_token[der_partisan_relationship == "Out"] - mean_Out)^2,
+      w = der_anchor_vote_share[der_partisan_relationship == "Out"],
+      na.rm = TRUE
+    )),
+    n_Co = sum(der_partisan_relationship == "Co"),
+    n_Out = sum(der_partisan_relationship == "Out")
+  ) |>
+  mutate(
+    ap = mean_Co - mean_Out,
+    se = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    der_partisan_type = "Total"
+  )
+
+pooled_ap_cj_weighted <- bind_rows(
+  pooled_ap_cj_weighted,
+  total_pooled_ap_cj_weighted
+) |>
+  mutate(
+    measurement = "Behavioral",
+    measure = "API",
+    outcome = "Token",
+    weighted = 1
+  )
+
+```
+
 
 # Aggregated AP: Thermometer Scores
 
