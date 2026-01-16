@@ -641,7 +641,7 @@ Weighting affective polarization by parties' electoral size increases uncertaint
 
 ```{r}
 #| label: fig-eu25-ap
-#| fig-cap: "Affective Polarization in EU25 (2019). Note: 1) Explicit: Reported Attachement; Implicit: Denied Attachement but Reported Vote; Total: All Partisans (Expl. and Impl.). 2) Errorbars represent 95\% CI. 3) Weighted estimates and errorbars are based on empirical distribution of reported votes in our data. 4) Behavioral Scale (Token): -10 (10 Token allocated to Out-Party and none to Co-Party) to +10 (10 Token allocated to Co-party and 0 to Out-Party); Attitudinal Scale (Thermo): -10 (Thermoscore 10 for Out-Party and 0 for Co-Party) to +10 (Thermoscore 10 for Co-Party and 0 for Out-Party)."
+#| fig-cap: "Affective Polarization in EU25 (2019). Note: 1) Explicit: Reported Attachement; Implicit: Denied Attachement but Reported Vote; Total: All Partisans (Expl. and Impl.). 2) Errorbars represent 95\\% CI. 3) Weighted estimates and errorbars are based on empirical distribution of reported votes in our data. 4) Behavioral Scale (Token): -10 (10 Token allocated to Out-Party and none to Co-Party) to +10 (10 Token allocated to Co-party and 0 to Out-Party); Attitudinal Scale (Thermo): -10 (Thermoscore 10 for Out-Party and 0 for Co-Party) to +10 (Thermoscore 10 for Co-Party and 0 for Out-Party)."
 #| fig-dpi: 500
 #| fig-pos : H
 
