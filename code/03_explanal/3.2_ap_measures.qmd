@@ -34,6 +34,7 @@ options(width = 80)
 p_required <- c(
   "tidyverse",
   "here",
+  "ggpubr", # theme_pubr()
   "sessioninfo"
 )
 packages <- rownames(installed.packages())
@@ -343,6 +344,9 @@ ap_europe <- ap_country_weighted |>
       der_partisan_type == 0 ~ "Implicit",
       .default = NA
     )
+  ) |>
+  select(
+    -se
   )
 
 # Again for total AP (no distinguishing type) ----------------------------------
@@ -411,16 +415,13 @@ pooled_ap_cj <- pooled_ap_cj |>
 
 # Aggregated AP: Thermometer Scores
 
-There are three main operationalization strategies applied in European AP studies: Reiljan's API, Wagner's mean distance and Wagner's average spread.
-
-I am starting simple, with unweighted variants of all three, beginning with Reiljan's API.
-
 ```{r}
-#| label: eu25-reiljan-api
+#| label: thermometer-long-format
 
 # turn thermoscores to long format
 thermo_long <- eu25games2019 |>
   select(
+    meta_country,
     meta_pid,
     der_partisan_type,
     der_partisan_anchor,
@@ -441,6 +442,7 @@ thermo_long <- eu25games2019 |>
     str_extract(thermo_slot, "[0-9]+") == str_extract(party_slot, "[0-9]+")
   ) |>
   select(
+    meta_country,
     meta_pid,
     der_partisan_type,
     der_partisan_anchor,
@@ -449,6 +451,14 @@ thermo_long <- eu25games2019 |>
   ) |>
   filter(!is.na(thermo_score), !is.na(thermo_party)) |>
   mutate(thermo_score = thermo_score / 10)
+```
+
+There are three main operationalization strategies applied in European AP studies: Reiljan's API, Wagner's mean distance and Wagner's average spread.
+
+## API
+
+```{r}
+#| label: eu25-reiljan-api
 
 # calculate individual level AP
 api_individual <- thermo_long |>
@@ -519,6 +529,169 @@ pooled_ap_thermo <- bind_rows(pooled_ap_thermo, total_ap_thermo) |>
 
 ```
 
+```{r}
+#| label: eu25-reiljan-api-weighted
+
+api_party <- thermo_long |>
+  filter(!is.na(der_partisan_type)) |>
+  mutate(ingroup = thermo_party == der_partisan_anchor) |>
+  group_by(meta_country, der_partisan_type, der_partisan_anchor) |>
+  summarise(
+    mean_Co = mean(thermo_score[ingroup], na.rm = TRUE),
+    mean_Out = mean(thermo_score[!ingroup], na.rm = TRUE),
+    ap_party = mean_Co - mean_Out,
+    .groups = "drop"
+  )
+
+api_party <- api_party |>
+  left_join(
+    votes_per_party |>
+      select(
+        der_vote_combined_name,
+        der_anchor_vote_share
+      ),
+    by = join_by(
+      der_partisan_anchor == der_vote_combined_name
+    )
+  )
+
+ap_country_weighted <- api_party |>
+  group_by(meta_country, der_partisan_type) |>
+  summarise(
+    ap_country = sum(ap_party * der_anchor_vote_share, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+ap_europe_weighted <- ap_country_weighted |>
+  group_by(der_partisan_type) |>
+  summarise(
+    ap = mean(ap_country),
+    se = sd(ap_country) / sqrt(n()),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "API",
+    outcome = "Thermo Score",
+    weighted = 1,
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit"
+    )
+  ) |>
+  select(-se)
+
+# For all partisans combined ---------------------------------------------------
+api_party_total <- api_party |>
+  group_by(meta_country, der_partisan_anchor) |>
+  summarise(
+    ap_party_total = mean(ap_party, na.rm = TRUE), # collapse across types
+    .groups = "drop"
+  )
+
+ap_country_weighted_total <- api_party_total |>
+  left_join(
+    votes_per_party |>
+      select(
+        der_vote_combined_name,
+        der_anchor_vote_share
+      ),
+    by = join_by(
+      der_partisan_anchor == der_vote_combined_name
+    )
+  ) |>
+  group_by(meta_country) |>
+  summarise(
+    ap_country = sum(ap_party_total * der_anchor_vote_share, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+ap_europe_weighted_total <- ap_country_weighted_total |>
+  summarise(
+    ap = mean(ap_country),
+    se = sd(ap_country) / sqrt(n()),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "API",
+    outcome = "Thermo Score",
+    weighted = 1,
+    der_partisan_type = "Total"
+  ) |>
+  select(-se)
+
+
+pooled_ap_thermo_weighted <- bind_rows(
+  ap_europe_weighted,
+  ap_europe_weighted_total
+)
+
+pooled_ap_thermo <- pooled_ap_thermo |>
+  bind_rows(pooled_ap_thermo_weighted)
+```
+
+## Preliminary Figure
+
+Weighting affective polarization by parties' electoral size increases uncertainty when the underlying measure is noisy. For thermometer-based (attitudinal) AP, upweighting small or under-sampled parties amplifies individual-level variability, producing slightly wider confidence intervals. Behavioral token allocations are lower-variance, so weighting has little effect on their uncertainty.
+
+```{r}
+#| label: fig-eu25-ap
+#| fig-cap: "Affective Polarization in EU25 (2019). Note: 1) Explicit: Reported Attachement; Implicit: Denied Attachement but Reported Vote; Total: All Partisans (Expl. and Impl.). 2) Errorbars represent 95\% CI. 3) Weighted estimates and errorbars are based on empirical distribution of reported votes in our data. 4) Behavioral Scale (Token): -10 (10 Token allocated to Out-Party and none to Co-Party) to +10 (10 Token allocated to Co-party and 0 to Out-Party); Attitudinal Scale (Thermo): -10 (Thermoscore 10 for Out-Party and 0 for Co-Party) to +10 (Thermoscore 10 for Co-Party and 0 for Out-Party)."
+#| fig-dpi: 500
+#| fig-pos : H
+
+toplot <- bind_rows(
+  pooled_ap_cj,
+  pooled_ap_thermo
+)
+
+ggplot(
+  toplot,
+  aes(
+    x = ap,
+    y = der_partisan_type,
+    color = factor(weighted),
+    shape = measurement
+  )
+) +
+  # 1) Points nudged based on weight
+  geom_point(
+    position = position_nudge(y = ifelse(toplot$weighted == 1, 0.1, -0.1))
+  ) +
+
+  # 2) Error bars nudged the same way and linetype depending on weight
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high,
+      linetype = factor(weighted)
+    ),
+    position = position_nudge(y = ifelse(toplot$weighted == 1, 0.1, -0.1)),
+    width = 0.1
+  ) +
+  scale_linetype_manual(values = c(`0` = "dotted", `1` = "solid")) +
+
+  # 3) Labels
+  labs(
+    y = "Sample",
+    x = "AP",
+    linetype = "Party Weight",
+    color = "Party Weight",
+    shape = "Measurement"
+  ) +
+
+  # 4) Theme with golden ratio aspect
+  theme_pubr() +
+  theme(aspect.ratio = 1 / 1.618)
+
+```
+
+... to be continued with Wagners measures
 
 ```{r}
 #| label: total-sample-wagner-mean-distance
