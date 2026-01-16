@@ -282,7 +282,7 @@ $$ {#eq-eu25-ap-europe}
 
 
 ```{r}
-#| label: total-sample-ap-cj-weighted
+#| label: eu25-ap-cj-weighted
 
 ap_country_party <- eu25games2019 |>
   filter(
@@ -345,8 +345,67 @@ ap_europe <- ap_country_weighted |>
     )
   )
 
+# Again for total AP (no distinguishing type) ----------------------------------
+ap_country_party_total <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type),
+    !is.na(der_anchor_vote_share)
+  ) |>
+  group_by(
+    meta_country,
+    der_partisan_anchor,
+    der_partisan_relationship
+  ) |>
+  summarise(
+    mean = mean(cj_token),
+    .groups = "drop"
+  ) |>
+  pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = mean
+  ) |>
+  mutate(
+    ap_party = Co - Out
+  )
+
+ap_country_weighted_total <- eu25games2019 |>
+  distinct(
+    meta_country,
+    der_partisan_anchor,
+    der_anchor_vote_share
+  ) |>
+  right_join(
+    ap_country_party_total,
+    by = c("meta_country", "der_partisan_anchor")
+  ) |>
+  group_by(meta_country) |>
+  summarise(
+    ap_country = sum(ap_party * der_anchor_vote_share, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+ap_europe_total <- ap_country_weighted_total |>
+  summarise(
+    ap = mean(ap_country),
+    se = sd(ap_country) / sqrt(n()),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    measurement = "Behavioral",
+    measure = "API",
+    outcome = "Token",
+    weighted = 1,
+    der_partisan_type = "Total"
+  ) |>
+  select(
+    -se
+  )
+
 pooled_ap_cj <- pooled_ap_cj |>
-  bind_rows(ap_europe)
+  bind_rows(ap_europe, ap_europe_total)
 ```
 
 
@@ -357,7 +416,7 @@ There are three main operationalization strategies applied in European AP studie
 I am starting simple, with unweighted variants of all three, beginning with Reiljan's API.
 
 ```{r}
-#| label: total-sample-reiljan-api
+#| label: eu25-reiljan-api
 
 # turn thermoscores to long format
 thermo_long <- eu25games2019 |>
@@ -411,17 +470,19 @@ api_individual <- thermo_long |>
 pooled_ap_thermo <- api_individual |>
   group_by(der_partisan_type) |>
   summarise(
-    diff_mean = mean(api),
-    sd_diff = sd(api),
-    n_diff = n(),
-    se_diff = sd_diff / sqrt(n_diff),
-    ci_low = diff_mean - 1.96 * se_diff,
-    ci_high = diff_mean + 1.96 * se_diff,
+    ap = mean(api),
+    sd_ap = sd(api),
+    n_ap = n(),
+    se_ap = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se_ap,
+    ci_high = ap + 1.96 * se_ap,
     .groups = "drop"
   ) |>
   mutate(
-    measure = "Thermometer",
-    index = "API",
+    measurement = "Attitudinal",
+    measure = "API",
+    outcome = "Thermo Score",
+    weighted = 0,
     der_partisan_type = case_when(
       der_partisan_type == 1 ~ "Explicit",
       der_partisan_type == 0 ~ "Implicit",
@@ -432,18 +493,29 @@ pooled_ap_thermo <- api_individual |>
 
 total_ap_thermo <- api_individual |>
   summarise(
-    diff_mean = mean(api),
-    sd_diff = sd(api),
-    n_diff = n(),
-    se_diff = sd_diff / sqrt(n_diff),
-    ci_low = diff_mean - 1.96 * se_diff,
-    ci_high = diff_mean + 1.96 * se_diff,
+    ap = mean(api),
+    sd_ap = sd(api),
+    n_ap = n(),
+    se_ap = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se_ap,
+    ci_high = ap + 1.96 * se_ap,
     .groups = "drop"
   ) |>
-  mutate(der_partisan_type = "Total") |>
-  relocate(der_partisan_type, .before = diff_mean)
+  mutate(
+    measurement = "Attitudinal",
+    measure = "API",
+    outcome = "Thermo Score",
+    weighted = 0,
+    der_partisan_type = "Total"
+  ) |>
+  relocate(der_partisan_type, .before = ap)
 
-pooled_ap_thermo <- bind_rows(pooled_ap_thermo, total_ap_thermo)
+pooled_ap_thermo <- bind_rows(pooled_ap_thermo, total_ap_thermo) |>
+  select(
+    -sd_ap,
+    -n_ap,
+    -se_ap
+  )
 
 ```
 
@@ -465,11 +537,11 @@ pooled_meandist_thermo <- meandist_individual |>
   group_by(der_partisan_type) |>
   summarise(
     diff_mean = mean(ap),
-    sd_diff = sd(ap),
-    n_diff = n(),
-    se_diff = sd_diff / sqrt(n_diff),
-    ci_low = diff_mean - 1.96 * se_diff,
-    ci_high = diff_mean + 1.96 * se_diff,
+    sd_ap = sd(ap),
+    n_ap = n(),
+    se_ap = sd_ap / sqrt(n_ap),
+    ci_low = diff_mean - 1.96 * se_ap,
+    ci_high = diff_mean + 1.96 * se_ap,
     .groups = "drop"
   ) |>
   mutate(
