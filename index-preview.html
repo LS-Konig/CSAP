@@ -7,7 +7,7 @@
 
     <meta name="author" content="Tristan Muno">
     <meta name="author" content="Thomas König">
-    <meta name="dcterms.date" content="2026-01-16">
+    <meta name="dcterms.date" content="2026-01-27">
 
     <title>How does partisan type influence affective polarization?</title>
     <style>
@@ -193,10 +193,10 @@
 ">
 <meta name="citation_author" content="Tristan Muno">
 <meta name="citation_author" content="Thomas König">
-<meta name="citation_publication_date" content="2026-01-16">
-<meta name="citation_cover_date" content="2026-01-16">
+<meta name="citation_publication_date" content="2026-01-27">
+<meta name="citation_cover_date" content="2026-01-27">
 <meta name="citation_year" content="2026">
-<meta name="citation_online_date" content="2026-01-16">
+<meta name="citation_online_date" content="2026-01-27">
 <meta name="citation_language" content="en">
 <meta name="citation_reference" content="citation_title=Political Leaders and Democratic Elections;,citation_editor=Kees Aarts;,citation_editor=André Blais;,citation_editor=Hermann Schmitt;,citation_publication_date=2013;,citation_cover_date=2013;,citation_year=2013;">
 <meta name="citation_reference" content="citation_title=Exploring the bases of partisanship in the american electorate: Social identity vs. ideology;,citation_author=Alan I. Abramowitz;,citation_author=Kyle L. Saunders;,citation_publication_date=2006;,citation_cover_date=2006;,citation_year=2006;,citation_issue=2;,citation_doi=10.1177/106591290605900201;,citation_volume=59;,citation_journal_title=Political Research Quarterly;,citation_publisher=Sage Publications Sage CA: Thousand Oaks, CA;">
@@ -621,7 +621,7 @@
                 <div>
             <div class="quarto-title-meta-heading">Published</div>
             <div class="quarto-title-meta-contents">
-              <p class="date">January 16, 2026</p>
+              <p class="date">January 27, 2026</p>
             </div>
           </div>
           
@@ -808,56 +808,81 @@ Figure&nbsp;1: Distribution of partisan types, by country. Stacked horizontal ba
 </section>
 <section id="results" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="results"><span class="header-section-number">5</span> Results</h2>
-<div class="quarto-embed-nb-cell" data-notebook="C:\R\research\CSAP\code\03_explanal\3.2_ap_measures.qmd" data-notebook-title="Code Notebook 3.2" data-notebook-cellid="cell-fig-eu25-ap">
-<div class="cell-container"><div class="cell-decorator"><pre>In [2]:</pre></div><div id="cell-fig-eu25-ap" class="cell" data-fig-dpi="500">
+<div class="quarto-embed-nb-cell" data-notebook="C:\R\research\CSAP\code\03_explanal\3.2_ap_measures.qmd" data-notebook-title="Code Notebook 3.2" data-notebook-cellid="cell-fig-eu25-ap-comparison">
+<div class="cell-container"><div class="cell-decorator"><pre>In [2]:</pre></div><div id="cell-fig-eu25-ap-comparison" class="cell" data-fig-dpi="500">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>toplot <span class="op">&lt;-</span> bind_rows(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  pooled_ap_cj,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  pooled_ap_thermo</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>ggplot(</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  toplot,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  aes(</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> ap,</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> der_partisan_type,</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    shape <span class="op">=</span> factor(weighted),</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> measurement</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>) <span class="op">+</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 1) Points nudged based on weight</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  geom_point(</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    position <span class="op">=</span> position_nudge(y <span class="op">=</span> ifelse(toplot$weighted <span class="op">==</span> <span class="dv">1</span>, <span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.1</span>))</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2) Error bars nudged the same way and linetype depending on weight</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  geom_errorbar(</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    aes(</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>      xmin <span class="op">=</span> ci_low,</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>      xmax <span class="op">=</span> ci_high</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    position <span class="op">=</span> position_nudge(y <span class="op">=</span> ifelse(toplot$weighted <span class="op">==</span> <span class="dv">1</span>, <span class="fl">0.1</span>, <span class="op">-</span><span class="fl">0.1</span>)),</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    width <span class="op">=</span> <span class="fl">0.1</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  labs(</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"Sample"</span>,</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"AP"</span>,</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    shape <span class="op">=</span> <span class="st">"Party Weight"</span>,</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"Measurement"</span></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  geom_vline(</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    xintercept <span class="op">=</span> <span class="dv">0</span>,</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    linetype <span class="op">=</span> <span class="st">"dashed"</span></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  theme_pubr() <span class="op">+</span></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  theme(aspect.ratio <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> <span class="fl">1.618</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># minor adjustments for plotting</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>nudge_map <span class="op">&lt;-</span> c(</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Explicit"</span> <span class="op">=</span> <span class="fl">0.20</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Implicit"</span> <span class="op">=</span> <span class="fl">0.07</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Total"</span> <span class="op">=</span> <span class="op">-</span><span class="fl">0.07</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Non-Partisan"</span> <span class="op">=</span> <span class="op">-</span><span class="fl">0.20</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>toplot <span class="op">&lt;-</span> toplot <span class="op">|&gt;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> factor(</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>      paste(measurement, measure),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      levels <span class="op">=</span> rev(c(</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Behavioral API"</span>,</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Attitudinal API"</span>,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Attitudinal Distance"</span>,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Attitudinal Spread"</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>      ))</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    nudge_y <span class="op">=</span> nudge_map[der_partisan_type]</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>toplot2 <span class="op">&lt;-</span> toplot <span class="op">|&gt;</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(weighted <span class="op">==</span> <span class="dv">1</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>ggplot(</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  toplot2,</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  aes(</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> ap,</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> y,</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    shape <span class="op">=</span> der_partisan_type,</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> der_partisan_type</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>) <span class="op">+</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 1) Points nudged based on weight</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>  geom_point(</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    position <span class="op">=</span> position_nudge(y <span class="op">=</span> toplot2$nudge_y)</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2) Error bars nudged the same way and linetype depending on weight</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  geom_errorbar(</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    aes(</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>      xmin <span class="op">=</span> ci_low,</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>      xmax <span class="op">=</span> ci_high</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    position <span class="op">=</span> position_nudge(y <span class="op">=</span> toplot2$nudge_y),</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    width <span class="op">=</span> <span class="fl">0.1</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>  geom_vline(</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    xintercept <span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    linetype <span class="op">=</span> <span class="st">"dashed"</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>  labs(</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">""</span>,</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"AP"</span>,</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    shape <span class="op">=</span> <span class="st">"Partisan Type"</span>,</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"Partisan Type"</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>  theme_pubr() <span class="op">+</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>  theme(aspect.ratio <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> <span class="fl">1.618</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<div id="fig-eu25-ap" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H">
+<div id="fig-eu25-ap-comparison" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H">
 <figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-eu25-ap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="">
-<a href="index_files/figure-html/code-03_explanal-3.2_ap_measures-fig-eu25-ap-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Affective Polarization in EU25 (2019). Note: 1) Explicit: Reported Attachement; Implicit: Denied Attachement but Reported Vote; Total: All Partisans (Expl. and Impl.). 2) Errorbars represent 95% CI. 3) Weighted estimates and errorbars are based on empirical distribution of reported votes in our data. 4) Behavioral Scale (Token): -10 (10 Token allocated to Out-Party and none to Co-Party) to +10 (10 Token allocated to Co-party and 0 to Out-Party); Attitudinal Scale (Thermo): -10 (Thermoscore 10 for Out-Party and 0 for Co-Party) to +10 (Thermoscore 10 for Co-Party and 0 for Out-Party)."><img src="index_files/figure-html/code-03_explanal-3.2_ap_measures-fig-eu25-ap-output-1.png" class="img-fluid figure-img" data-fig-pos="H"></a>
+<div aria-describedby="fig-eu25-ap-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="">
+<a href="index_files/figure-html/code-03_explanal-3.2_ap_measures-fig-eu25-ap-comparison-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Comparison of Behavioral and Attitudinal Affective Polarization in the EU25. This figure displays aggregated affective polarization (AP) scores across four different operationalizations, categorized by partisan attachment type. Behavioral API (Token) measures the difference in expected token allocations between co-partisans and out-partisans in a conjoint game. Attitudinal API represents Reiljan (2020)’s index, calculated as the distance between in-group and average out-group thermometer scores. Attitudinal Distance and Spread follow Wagner (2021) metrics, capturing the root mean square distance from the most-liked party and the overall standard deviation of party evaluations, respectively. All estimates are weighted by party vote shares within each country to reflect national party system compositions and then averaged across 25 European countries. To ensure comparability, attitudinal thermometer scores (originally 0–100) have been rescaled to a 0–10 range to match the behavioral token scale. Explicit partisans are those reporting a psychological attachment to a party; Implicit partisans are those denying attachment but reporting a vote choice; Total represents all individuals with a partisan anchor; and Non-Partisans represent respondents without a reported party anchor. Error bars indicate 95% confidence intervals based on cross-national variance."><img src="index_files/figure-html/code-03_explanal-3.2_ap_measures-fig-eu25-ap-comparison-output-1.png" class="img-fluid figure-img" data-fig-pos="H"></a>
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-eu25-ap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Affective Polarization in EU25 (2019). Note: 1) Explicit: Reported Attachement; Implicit: Denied Attachement but Reported Vote; Total: All Partisans (Expl. and Impl.). 2) Errorbars represent 95% CI. 3) Weighted estimates and errorbars are based on empirical distribution of reported votes in our data. 4) Behavioral Scale (Token): -10 (10 Token allocated to Out-Party and none to Co-Party) to +10 (10 Token allocated to Co-party and 0 to Out-Party); Attitudinal Scale (Thermo): -10 (Thermoscore 10 for Out-Party and 0 for Co-Party) to +10 (Thermoscore 10 for Co-Party and 0 for Out-Party).
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-eu25-ap-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Comparison of Behavioral and Attitudinal Affective Polarization in the EU25. This figure displays aggregated affective polarization (AP) scores across four different operationalizations, categorized by partisan attachment type. Behavioral API (Token) measures the difference in expected token allocations between co-partisans and out-partisans in a conjoint game. Attitudinal API represents <span class="citation" data-cites="reiljan2020fear">Reiljan (<a href="#ref-reiljan2020fear" role="doc-biblioref">2020</a>)</span>’s index, calculated as the distance between in-group and average out-group thermometer scores. Attitudinal Distance and Spread follow <span class="citation" data-cites="wagner2021affective">Wagner (<a href="#ref-wagner2021affective" role="doc-biblioref">2021</a>)</span> metrics, capturing the root mean square distance from the most-liked party and the overall standard deviation of party evaluations, respectively. All estimates are weighted by party vote shares within each country to reflect national party system compositions and then averaged across 25 European countries. To ensure comparability, attitudinal thermometer scores (originally 0–100) have been rescaled to a 0–10 range to match the behavioral token scale. Explicit partisans are those reporting a psychological attachment to a party; Implicit partisans are those denying attachment but reporting a vote choice; Total represents all individuals with a partisan anchor; and Non-Partisans represent respondents without a reported party anchor. Error bars indicate 95% confidence intervals based on cross-national variance.
 </figcaption>
 </figure>
 </div>
@@ -875,6 +900,12 @@ Figure&nbsp;2: Affective Polarization in EU25 (2019). Note: 1) Explicit: Reporte
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-hahm2024divided" class="csl-entry" role="listitem">
 Hahm, Hyeonho, David Hilpert, and Thomas König. 2024. <span>“Divided We Unite: The Nature of Partyism and the Role of Coalition Partnership in Europe.”</span> <em>American Political Science Review</em> 118 (1): 69–87. <a href="https://doi.org/10.1017/S0003055423000266">https://doi.org/10.1017/S0003055423000266</a>.
+</div>
+<div id="ref-reiljan2020fear" class="csl-entry" role="listitem">
+Reiljan, Andres. 2020. <span>“<span>‘Fear and Loathing Across Party Lines’</span>(also) in Europe: Affective Polarisation in European Party Systems.”</span> <em>European Journal of Political Research</em> 59 (2): 376–96. <a href="https://doi.org/10.1111/1475-6765.12351">https://doi.org/10.1111/1475-6765.12351</a>.
+</div>
+<div id="ref-wagner2021affective" class="csl-entry" role="listitem">
+Wagner, Markus. 2021. <span>“Affective Polarization in Multiparty Systems.”</span> <em>Electoral Studies</em> 69: 102199. <a href="https://doi.org/10.1016/j.electstud.2020.102199">https://doi.org/10.1016/j.electstud.2020.102199</a>.
 </div>
 </div>
 </section>

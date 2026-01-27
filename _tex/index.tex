@@ -212,7 +212,7 @@ polarization?\thanks{Space for acknowledgements. Wordcount: .}}
 \makeatother
 \subtitle{A comparative study of 25 European democracies}
 \author{Tristan Muno \and Thomas König}
-\date{January 16, 2026}
+\date{January 27, 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
@@ -352,24 +352,37 @@ For our behavioral experiment, we conceptually follow Reiljan's API
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.2_ap_measures-fig-eu25-ap-output-1.png}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.2_ap_measures-fig-eu25-ap-comparison-output-1.png}}
 
 }
 
-\caption{\label{fig-eu25-ap}Affective Polarization in EU25 (2019). Note:
-1) Explicit: Reported Attachement; Implicit: Denied Attachement but
-Reported Vote; Total: All Partisans (Expl. and Impl.). 2) Errorbars
-represent 95\% CI. 3) Weighted estimates and errorbars are based on
-empirical distribution of reported votes in our data. 4) Behavioral
-Scale (Token): -10 (10 Token allocated to Out-Party and none to
-Co-Party) to +10 (10 Token allocated to Co-party and 0 to Out-Party);
-Attitudinal Scale (Thermo): -10 (Thermoscore 10 for Out-Party and 0 for
-Co-Party) to +10 (Thermoscore 10 for Co-Party and 0 for Out-Party).}
+\caption{\label{fig-eu25-ap-comparison}Comparison of Behavioral and
+Attitudinal Affective Polarization in the EU25. This figure displays
+aggregated affective polarization (AP) scores across four different
+operationalizations, categorized by partisan attachment type. Behavioral
+API (Token) measures the difference in expected token allocations
+between co-partisans and out-partisans in a conjoint game. Attitudinal
+API represents Reiljan (\citeproc{ref-reiljan2020fear}{2020})'s index,
+calculated as the distance between in-group and average out-group
+thermometer scores. Attitudinal Distance and Spread follow Wagner
+(\citeproc{ref-wagner2021affective}{2021}) metrics, capturing the root
+mean square distance from the most-liked party and the overall standard
+deviation of party evaluations, respectively. All estimates are weighted
+by party vote shares within each country to reflect national party
+system compositions and then averaged across 25 European countries. To
+ensure comparability, attitudinal thermometer scores (originally 0--100)
+have been rescaled to a 0--10 range to match the behavioral token scale.
+Explicit partisans are those reporting a psychological attachment to a
+party; Implicit partisans are those denying attachment but reporting a
+vote choice; Total represents all individuals with a partisan anchor;
+and Non-Partisans represent respondents without a reported party anchor.
+Error bars indicate 95\% confidence intervals based on cross-national
+variance.}
 
 \end{figure}%
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-eu25-ap}{Code
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-eu25-ap-comparison}{Code
 Notebook 3.2}}
 
 \section{Limitations}\label{limitations}
@@ -397,6 +410,17 @@ Hahm, Hyeonho, David Hilpert, and Thomas König. 2024. {``Divided We
 Unite: The Nature of Partyism and the Role of Coalition Partnership in
 Europe.''} \emph{American Political Science Review} 118 (1): 69--87.
 \url{https://doi.org/10.1017/S0003055423000266}.
+
+\bibitem[\citeproctext]{ref-reiljan2020fear}
+Reiljan, Andres. 2020. {``{`Fear and Loathing Across Party Lines'}(also)
+in Europe: Affective Polarisation in European Party Systems.''}
+\emph{European Journal of Political Research} 59 (2): 376--96.
+\url{https://doi.org/10.1111/1475-6765.12351}.
+
+\bibitem[\citeproctext]{ref-wagner2021affective}
+Wagner, Markus. 2021. {``Affective Polarization in Multiparty
+Systems.''} \emph{Electoral Studies} 69: 102199.
+\url{https://doi.org/10.1016/j.electstud.2020.102199}.
 
 \end{CSLReferences}
 

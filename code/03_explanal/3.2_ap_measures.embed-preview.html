@@ -57,7 +57,27 @@
       @media screen {
       pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
       }
-    </style>
+      /* CSS for citations */
+      div.csl-bib-body { }
+      div.csl-entry {
+        clear: both;
+        margin-bottom: 0em;
+      }
+      .hanging-indent div.csl-entry {
+        margin-left:2em;
+        text-indent:-2em;
+      }
+      div.csl-left-margin {
+        min-width:2em;
+        float:left;
+      }
+      div.csl-right-inline {
+        margin-left:2em;
+        padding-left:1em;
+      }
+      div.csl-indent {
+        margin-left: 2em;
+      }    </style>
 
     <style>
       body.hypothesis-enabled #quarto-embed-header {
@@ -244,6 +264,8 @@
   <ul class="collapse">
   <li><a href="#api" id="toc-api" class="nav-link" data-scroll-target="#api"><span class="header-section-number">7.1</span> API</a></li>
   <li><a href="#preliminary-figure" id="toc-preliminary-figure" class="nav-link" data-scroll-target="#preliminary-figure"><span class="header-section-number">7.2</span> Preliminary Figure</a></li>
+  <li><a href="#spread-of-like-dislike-scores" id="toc-spread-of-like-dislike-scores" class="nav-link" data-scroll-target="#spread-of-like-dislike-scores"><span class="header-section-number">7.3</span> Spread of like-dislike scores</a></li>
+  <li><a href="#mean-distance-from-the-most-liked-party" id="toc-mean-distance-from-the-most-liked-party" class="nav-link" data-scroll-target="#mean-distance-from-the-most-liked-party"><span class="header-section-number">7.4</span> Mean distance from the most-liked party</a></li>
   </ul></li>
   <li><a href="#figure" id="toc-figure" class="nav-link" data-scroll-target="#figure"><span class="header-section-number">8</span> Figure</a></li>
   <li><a href="#session-info" id="toc-session-info" class="nav-link" data-scroll-target="#session-info"><span class="header-section-number">9</span> Session Info</a></li>
@@ -933,6 +955,10 @@ w_{pc}
 <p>There are three main operationalization strategies applied in European AP studies: Reiljan’s API, Wagner’s mean distance and Wagner’s average spread.</p>
 <section id="api" class="level2" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="api"><span class="header-section-number">7.1</span> API</h2>
+<p>The full <strong>Affective Polarization Index</strong> (Reiljan 2020):</p>
+<p><span class="math display">\[
+\text{API} = \sum_{n=1}^{N} \left[ \sum_{\substack{m = 1\\ m \neq n}}^{N} \left( (Like_n - Like_m) \times \left(\frac{\text{Vote share}_{m}}{1 - \text{Vote share}_{n}} \right) \right) \times \text{Vote share}_n \right]
+\]</span></p>
 <div class="cell-container"><div class="cell-decorator"><pre>In [7]:</pre></div><div id="eu25-reiljan-api" class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate individual level AP</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>api_individual <span class="op">&lt;-</span> thermo_long <span class="op">|&gt;</span></span>
@@ -1163,90 +1189,428 @@ Figure&nbsp;1: Affective Polarization in EU25 (2019). Note: 1) Explicit: Reporte
 </div>
 </div></div>
 <p>… to be continued with Wagners measures</p>
-<div class="cell-container"><div class="cell-decorator"><pre>In [10]:</pre></div><div id="total-sample-wagner-mean-distance" class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate individual level AP</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>meandist_individual <span class="op">&lt;-</span> thermo_long <span class="op">|&gt;</span></span>
+</section>
+<section id="spread-of-like-dislike-scores" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="spread-of-like-dislike-scores"><span class="header-section-number">7.3</span> Spread of like-dislike scores</h2>
+<p>[I]t is the average absolute party like-dislike difference relative to each respondent’s average party like-dislike score</p>
+<p><span class="math display">\[
+\text{Spread}_i = \sqrt{ \frac{ \sum_{p=1}^{P} ( \text{like}_{ip} - \overline{\text{like}}_{i})^2 } {n_p}}
+\]</span></p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [10]:</pre></div><div id="eu25-wagner-spread" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate Spread per respondent</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>api_spread_individual <span class="op">&lt;-</span> thermo_long <span class="op">|&gt;</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  group_by(meta_pid, der_partisan_type) <span class="op">|&gt;</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    mean_like <span class="op">=</span> mean(thermo_score, na.rm <span class="op">=</span> TRUE),</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    ap <span class="op">=</span> sqrt(mean((thermo_score <span class="op">-</span> mean_like)<span class="op">^</span><span class="dv">2</span>, na.rm <span class="op">=</span> TRUE)),</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>pooled_meandist_thermo <span class="op">&lt;-</span> meandist_individual <span class="op">|&gt;</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  group_by(der_partisan_type) <span class="op">|&gt;</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    diff_mean <span class="op">=</span> mean(ap),</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    sd_ap <span class="op">=</span> sd(ap),</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    n_ap <span class="op">=</span> n(),</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    se_ap <span class="op">=</span> sd_ap <span class="op">/</span> sqrt(n_ap),</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> diff_mean <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> diff_mean <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    measure <span class="op">=</span> <span class="st">"Thermometer"</span>,</span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    index <span class="op">=</span> <span class="st">"Mean Distance"</span>,</span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    der_partisan_type <span class="op">=</span> case_when(</span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">1</span> <span class="op">~</span> <span class="st">"Explicit"</span>,</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">0</span> <span class="op">~</span> <span class="st">"Implicit"</span>,</span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>      .default <span class="op">=</span> NA</span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Wagner's Spread is the standard deviation of all party evaluations for individual i</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    spread_score <span class="op">=</span> sd(thermo_score, na.rm <span class="op">=</span> TRUE),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    n_parties <span class="op">=</span> n(),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Filter for respondents who rated at least 2 parties</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(n_parties <span class="op">&gt;=</span> <span class="dv">2</span>, <span class="op">!</span><span class="kw">is</span>.na(spread_score))</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate by Partisan Type</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>pooled_ap_spread <span class="op">&lt;-</span> api_spread_individual <span class="op">|&gt;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  group_by(der_partisan_type) <span class="op">|&gt;</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    ap <span class="op">=</span> mean(spread_score),</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    sd_ap <span class="op">=</span> sd(spread_score),</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    n_ap <span class="op">=</span> n(),</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    se_ap <span class="op">=</span> sd_ap <span class="op">/</span> sqrt(n_ap),</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> ap <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> ap <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    der_partisan_type <span class="op">=</span> case_when(</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">1</span> <span class="op">~</span> <span class="st">"Explicit"</span>,</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">0</span> <span class="op">~</span> <span class="st">"Implicit"</span>,</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>      <span class="kw">is</span>.na(der_partisan_type) <span class="op">~</span> <span class="st">"Non-Partisan"</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>total_meandist_thermo <span class="op">&lt;-</span> meandist_individual <span class="op">|&gt;</span></span>
-<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
-<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    diff_mean <span class="op">=</span> mean(ap),</span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    sd_diff <span class="op">=</span> sd(ap),</span>
-<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    n_diff <span class="op">=</span> n(),</span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    se_diff <span class="op">=</span> sd_diff <span class="op">/</span> sqrt(n_diff),</span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> diff_mean <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se_diff,</span>
-<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> diff_mean <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se_diff,</span>
-<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
-<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
-<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
-<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>    der_partisan_type <span class="op">=</span> <span class="st">"Total"</span>,</span>
-<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>    measure <span class="op">=</span> <span class="st">"Thermometer"</span>,</span>
-<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>    index <span class="op">=</span> <span class="st">"Mean Distance"</span>,</span>
-<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>  relocate(der_partisan_type, .before <span class="op">=</span> diff_mean)</span>
-<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>pooled_ap_thermo <span class="op">&lt;-</span> bind_rows(pooled_ap_thermo, total_ap_thermo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate for Total</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>total_ap_spread <span class="op">&lt;-</span> api_spread_individual <span class="op">|&gt;</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    ap <span class="op">=</span> mean(spread_score),</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    sd_ap <span class="op">=</span> sd(spread_score),</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    n_ap <span class="op">=</span> n(),</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>    se_ap <span class="op">=</span> sd_ap <span class="op">/</span> sqrt(n_ap),</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> ap <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> ap <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>  mutate(der_partisan_type <span class="op">=</span> <span class="st">"Total"</span>)</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine and format for toplot</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>pooled_ap_spread <span class="op">&lt;-</span> bind_rows(pooled_ap_spread, total_ap_spread) <span class="op">|&gt;</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>    measurement <span class="op">=</span> <span class="st">"Attitudinal"</span>,</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>    measure <span class="op">=</span> <span class="st">"Spread"</span>,</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>    outcome <span class="op">=</span> <span class="st">"Thermo Score"</span>,</span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>    weighted <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>  select(</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>    der_partisan_type,</span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>    ap,</span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>    ci_low,</span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>    ci_high,</span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>    measurement,</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>    measure,</span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>    outcome,</span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>    weighted</span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a>pooled_ap_thermo <span class="op">&lt;-</span> pooled_ap_thermo <span class="op">|&gt;</span></span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a>  bind_rows(pooled_ap_spread)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div>
-<div class="cell-container"><div class="cell-decorator"><pre>In [11]:</pre></div><div id="total-sample-wagner-spread" class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spread_individual <span class="op">&lt;-</span> thermo_long <span class="op">|&gt;</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  group_by(meta_pid, der_partisan_type) <span class="op">|&gt;</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    likemax <span class="op">=</span> <span class="bu">max</span>(thermo_score, na.rm <span class="op">=</span> TRUE),</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    spread <span class="op">=</span> sqrt(mean(</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>      (thermo_score[thermo_score <span class="op">!=</span> likemax] <span class="op">-</span> likemax)<span class="op">^</span><span class="dv">2</span>,</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>      na.rm <span class="op">=</span> TRUE</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    ))</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'meta_pid'. You can override using the
-`.groups` argument.</code></pre>
-</div>
+<p>The Weighted Affective Polarization (WAP) equation for parties <span class="math inline">\(j\)</span> and voter <span class="math inline">\(i\)</span> is:</p>
+<p><span class="math display">\[
+\text{Spread}_i = \sqrt{ \sum_{p=1}^{P} v_p ( \text{like}_{ip} - \overline{\text{like}}_{i})^2 }
+\]</span></p>
+<p><span class="math inline">\(v_p\)</span> is the vote share of each party, measured as a proportion with a range from 0 to 1. The mean affect should itself be weighted by party size and is calculated as:</p>
+<p><span class="math display">\[
+\overline{like}_i = \sum_{p=1}^{p} ( v_p * \text{like}_{ip})
+\]</span></p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [11]:</pre></div><div id="eu25-wagner-spread-weighted" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Attach party vote shares (v_p) to every evaluation</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>thermo_weighted_ind <span class="op">&lt;-</span> thermo_long <span class="op">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  left_join(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    votes_per_party <span class="op">|&gt;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      select(meta_country, der_vote_combined_name, v_p <span class="op">=</span> der_anchor_vote_share),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    by <span class="op">=</span> c(<span class="st">"meta_country"</span>, <span class="st">"thermo_party"</span> <span class="op">=</span> <span class="st">"der_vote_combined_name"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(<span class="op">!</span><span class="kw">is</span>.na(v_p), <span class="op">!</span><span class="kw">is</span>.na(thermo_score))</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Calculate Individual Weighted Spread using your formulas</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>api_spread_weighted_ind <span class="op">&lt;-</span> thermo_weighted_ind <span class="op">|&gt;</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  group_by(meta_pid, der_partisan_type, meta_country) <span class="op">|&gt;</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Formula: Mean like = sum(v_p * like)</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Note: sum(v_p) might be &lt; 1 if not all parties were rated, so we normalize</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    w_sum_v <span class="op">=</span> <span class="bu">sum</span>(v_p),</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    weighted_mean <span class="op">=</span> <span class="bu">sum</span>(v_p <span class="op">*</span> thermo_score) <span class="op">/</span> w_sum_v,</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Formula: Spread = sqrt( sum( v_p * (like - mean)^2 ) )</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Again, normalizing by sum(v_p) ensures the weighted variance is scale-correct</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    spread_score <span class="op">=</span> sqrt(<span class="bu">sum</span>(v_p <span class="op">*</span> (thermo_score <span class="op">-</span> weighted_mean)<span class="op">^</span><span class="dv">2</span>) <span class="op">/</span> w_sum_v),</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    n_parties <span class="op">=</span> n(),</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(n_parties <span class="op">&gt;=</span> <span class="dv">2</span>)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Aggregate for the European Level (Country-Averaging)</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co"># We aggregate to country first to ensure each country contributes equally</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>ap_country_spread_w <span class="op">&lt;-</span> api_spread_weighted_ind <span class="op">|&gt;</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>  group_by(meta_country, der_partisan_type) <span class="op">|&gt;</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>  summarise(ap_country <span class="op">=</span> mean(spread_score), .groups <span class="op">=</span> <span class="st">"drop"</span>)</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Final European Scores</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>ap_europe_spread_weighted <span class="op">&lt;-</span> ap_country_spread_w <span class="op">|&gt;</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  group_by(der_partisan_type) <span class="op">|&gt;</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>    ap <span class="op">=</span> mean(ap_country),</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    se <span class="op">=</span> sd(ap_country) <span class="op">/</span> sqrt(n()),</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> ap <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se,</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> ap <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se,</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>    der_partisan_type <span class="op">=</span> case_when(</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">1</span> <span class="op">~</span> <span class="st">"Explicit"</span>,</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">0</span> <span class="op">~</span> <span class="st">"Implicit"</span>,</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>      <span class="kw">is</span>.na(der_partisan_type) <span class="op">~</span> <span class="st">"Non-Partisan"</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Total Weighted Score (including everyone)</span></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>total_ap_spread_weighted <span class="op">&lt;-</span> ap_country_spread_w <span class="op">|&gt;</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>  group_by(meta_country) <span class="op">|&gt;</span></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>  summarise(ap_country_total <span class="op">=</span> mean(ap_country), .groups <span class="op">=</span> <span class="st">"drop"</span>) <span class="op">|&gt;</span></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>    ap <span class="op">=</span> mean(ap_country_total),</span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>    se <span class="op">=</span> sd(ap_country_total) <span class="op">/</span> sqrt(n()),</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> ap <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se,</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> ap <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>  mutate(der_partisan_type <span class="op">=</span> <span class="st">"Total"</span>)</span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine for toplot</span></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>pooled_ap_spread_weighted <span class="op">&lt;-</span> bind_rows(</span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>  ap_europe_spread_weighted,</span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>  total_ap_spread_weighted</span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>) <span class="op">|&gt;</span></span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>    measurement <span class="op">=</span> <span class="st">"Attitudinal"</span>,</span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>    measure <span class="op">=</span> <span class="st">"Spread"</span>,</span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>    outcome <span class="op">=</span> <span class="st">"Thermo Score"</span>,</span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>    weighted <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>  select(<span class="op">-</span>se)</span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>pooled_ap_thermo <span class="op">&lt;-</span> pooled_ap_thermo <span class="op">|&gt;</span></span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>  bind_rows(pooled_ap_spread_weighted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
+</section>
+<section id="mean-distance-from-the-most-liked-party" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="mean-distance-from-the-most-liked-party"><span class="header-section-number">7.4</span> Mean distance from the most-liked party</h2>
+<p>This ‘mean-distance’ measure captures how much lower on average an individual’s affect for other parties is. Hence, this measure assumes positive identification with one party as the key aspect of affect patterns.</p>
+<p><span class="math display">\[
+\text{Distance}_i = \sqrt{ \frac{ \sum_{p=1}^{P} (\text{like}_{ip} - \text{like}_{max,i})^2 }{n_p} }
+\]</span></p>
+<p>This time, <span class="math inline">\(n\)</span> is the number of parties without the most-liked party. <span class="math inline">\(\text{like}_{max}\)</span> is the score assigned to the most-liked party.</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [12]:</pre></div><div id="eu25-wagner-meandistance" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Calculate Individual Level Mean Distance</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>distance_individual <span class="op">&lt;-</span> thermo_long <span class="op">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  group_by(meta_pid, der_partisan_type, meta_country) <span class="op">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Identify the maximum score for this individual</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    like_max <span class="op">=</span> <span class="bu">max</span>(thermo_score, na.rm <span class="op">=</span> TRUE)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Exclude the party/parties that have the maximum score</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># If multiple parties are tied for max, Wagner typically excludes all of them</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># from the summation to focus on the 'distance' to the rest.</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(thermo_score <span class="op">&lt;</span> like_max) <span class="op">|&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># n_p is the number of parties remaining after excluding the max</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    n_p <span class="op">=</span> n(),</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Formula: sqrt( sum( (like - like_max)^2 ) / n_p )</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    distance_score <span class="op">=</span> sqrt(<span class="bu">sum</span>((thermo_score <span class="op">-</span> like_max)<span class="op">^</span><span class="dv">2</span>) <span class="op">/</span> n_p),</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Ensure we have at least one party to compare against the max</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(n_p <span class="op">&gt;=</span> <span class="dv">1</span>, <span class="op">!</span><span class="kw">is</span>.na(distance_score))</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Aggregate by Partisan Type (Pooled)</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>pooled_ap_distance <span class="op">&lt;-</span> distance_individual <span class="op">|&gt;</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  group_by(der_partisan_type) <span class="op">|&gt;</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    ap <span class="op">=</span> mean(distance_score),</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    sd_ap <span class="op">=</span> sd(distance_score),</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>    n_ap <span class="op">=</span> n(),</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    se_ap <span class="op">=</span> sd_ap <span class="op">/</span> sqrt(n_ap),</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> ap <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> ap <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    der_partisan_type <span class="op">=</span> case_when(</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">1</span> <span class="op">~</span> <span class="st">"Explicit"</span>,</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">0</span> <span class="op">~</span> <span class="st">"Implicit"</span>,</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>      <span class="kw">is</span>.na(der_partisan_type) <span class="op">~</span> <span class="st">"Non-Partisan"</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Aggregate for Total (Pooled)</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>total_ap_distance <span class="op">&lt;-</span> distance_individual <span class="op">|&gt;</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    ap <span class="op">=</span> mean(distance_score),</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    sd_ap <span class="op">=</span> sd(distance_score),</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>    n_ap <span class="op">=</span> n(),</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>    se_ap <span class="op">=</span> sd_ap <span class="op">/</span> sqrt(n_ap),</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> ap <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> ap <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se_ap,</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  mutate(der_partisan_type <span class="op">=</span> <span class="st">"Total"</span>)</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Combine and format for toplot</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>pooled_ap_distance <span class="op">&lt;-</span> bind_rows(pooled_ap_distance, total_ap_distance) <span class="op">|&gt;</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>    measurement <span class="op">=</span> <span class="st">"Attitudinal"</span>,</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>    measure <span class="op">=</span> <span class="st">"Distance"</span>,</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>    outcome <span class="op">=</span> <span class="st">"Thermo Score"</span>,</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>    weighted <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>  select(</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>    der_partisan_type,</span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>    ap,</span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>    ci_low,</span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>    ci_high,</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>    measurement,</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>    measure,</span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>    outcome,</span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>    weighted</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a>pooled_ap_thermo <span class="op">&lt;-</span> pooled_ap_thermo <span class="op">|&gt;</span></span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a>  bind_rows(pooled_ap_distance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
+<p>Again, we can also calculate a weighted version of this measure. This would then take into account that it should matter more if an individual strongly dislikes large parties rather than a small, insignificant competitor.</p>
+<p><span class="math display">\[
+\text{Distance}_i = \sqrt{{ \sum_{p=1}^{P} v_p (\text{like}_{ip} - \text{like}_{max,i})^2 } }
+\]</span></p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [13]:</pre></div><div id="eu25-wagner-distance-weighted" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Prepare data with weights and identify individual max affect</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>thermo_dist_weighted <span class="op">&lt;-</span> thermo_long <span class="op">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  left_join(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    votes_per_party <span class="op">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      select(meta_country, der_vote_combined_name, v_p <span class="op">=</span> der_anchor_vote_share),</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    by <span class="op">=</span> c(<span class="st">"meta_country"</span>, <span class="st">"thermo_party"</span> <span class="op">=</span> <span class="st">"der_vote_combined_name"</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(<span class="op">!</span><span class="kw">is</span>.na(v_p), <span class="op">!</span><span class="kw">is</span>.na(thermo_score)) <span class="op">|&gt;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  group_by(meta_pid) <span class="op">|&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  mutate(like_max <span class="op">=</span> <span class="bu">max</span>(thermo_score, na.rm <span class="op">=</span> TRUE)) <span class="op">|&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Focus only on the distance for parties that are NOT the most-liked</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(thermo_score <span class="op">&lt;</span> like_max) <span class="op">|&gt;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  ungroup()</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Individual Level Weighted Distance</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>api_distance_weighted_ind <span class="op">&lt;-</span> thermo_dist_weighted <span class="op">|&gt;</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  group_by(meta_pid, der_partisan_type, meta_country) <span class="op">|&gt;</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># sum of weights for the non-max parties</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    w_sum_v <span class="op">=</span> <span class="bu">sum</span>(v_p),</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Weighted Distance formula</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    distance_score <span class="op">=</span> sqrt(<span class="bu">sum</span>(v_p <span class="op">*</span> (thermo_score <span class="op">-</span> like_max)<span class="op">^</span><span class="dv">2</span>) <span class="op">/</span> w_sum_v),</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    n_p <span class="op">=</span> n(),</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(n_p <span class="op">&gt;=</span> <span class="dv">1</span>)</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Aggregate to Country Level (to ensure equal country weight)</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>ap_country_distance_w <span class="op">&lt;-</span> api_distance_weighted_ind <span class="op">|&gt;</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>  group_by(meta_country, der_partisan_type) <span class="op">|&gt;</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  summarise(ap_country <span class="op">=</span> mean(distance_score), .groups <span class="op">=</span> <span class="st">"drop"</span>)</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. European Aggregation by Partisan Type</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>ap_europe_distance_weighted <span class="op">&lt;-</span> ap_country_distance_w <span class="op">|&gt;</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>  group_by(der_partisan_type) <span class="op">|&gt;</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>    ap <span class="op">=</span> mean(ap_country),</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>    se <span class="op">=</span> sd(ap_country) <span class="op">/</span> sqrt(n()),</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> ap <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se,</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> ap <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se,</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>    der_partisan_type <span class="op">=</span> case_when(</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">1</span> <span class="op">~</span> <span class="st">"Explicit"</span>,</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>      der_partisan_type <span class="op">==</span> <span class="dv">0</span> <span class="op">~</span> <span class="st">"Implicit"</span>,</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>      <span class="kw">is</span>.na(der_partisan_type) <span class="op">~</span> <span class="st">"Non-Partisan"</span></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Total Weighted European Score</span></span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>total_ap_distance_weighted <span class="op">&lt;-</span> ap_country_distance_w <span class="op">|&gt;</span></span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>  group_by(meta_country) <span class="op">|&gt;</span></span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>  summarise(ap_country_total <span class="op">=</span> mean(ap_country), .groups <span class="op">=</span> <span class="st">"drop"</span>) <span class="op">|&gt;</span></span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>  summarise(</span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a>    ap <span class="op">=</span> mean(ap_country_total),</span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a>    se <span class="op">=</span> sd(ap_country_total) <span class="op">/</span> sqrt(n()),</span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a>    ci_low <span class="op">=</span> ap <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se,</span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>    ci_high <span class="op">=</span> ap <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a>  mutate(der_partisan_type <span class="op">=</span> <span class="st">"Total"</span>)</span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a><span class="co"># 6. Combine for toplot</span></span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a>pooled_ap_distance_weighted <span class="op">&lt;-</span> bind_rows(</span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a>  ap_europe_distance_weighted,</span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a>  total_ap_distance_weighted</span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a>) <span class="op">|&gt;</span></span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a>    measurement <span class="op">=</span> <span class="st">"Attitudinal"</span>,</span>
+<span id="cb15-70"><a href="#cb15-70" aria-hidden="true" tabindex="-1"></a>    measure <span class="op">=</span> <span class="st">"Distance"</span>,</span>
+<span id="cb15-71"><a href="#cb15-71" aria-hidden="true" tabindex="-1"></a>    outcome <span class="op">=</span> <span class="st">"Thermo Score"</span>,</span>
+<span id="cb15-72"><a href="#cb15-72" aria-hidden="true" tabindex="-1"></a>    weighted <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb15-73"><a href="#cb15-73" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">|&gt;</span></span>
+<span id="cb15-74"><a href="#cb15-74" aria-hidden="true" tabindex="-1"></a>  select(<span class="op">-</span>se)</span>
+<span id="cb15-75"><a href="#cb15-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-76"><a href="#cb15-76" aria-hidden="true" tabindex="-1"></a>pooled_ap_thermo <span class="op">&lt;-</span> pooled_ap_thermo <span class="op">|&gt;</span></span>
+<span id="cb15-77"><a href="#cb15-77" aria-hidden="true" tabindex="-1"></a>  bind_rows(pooled_ap_distance_weighted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div>
 </section>
 </section>
 <section id="figure" class="level1" data-number="8">
 <h1 data-number="8"><span class="header-section-number">8</span> Figure</h1>
-<p>The full <strong>Affective Polarization Index</strong> (Reiljan 2020):</p>
-<p><span class="math display">\[
-\text{API} = \sum_{n=1}^{N} \left[ \sum_{\substack{m = 1\\ m \neq n}}^{N} \left( (Like_n - Like_m) \times \left(\frac{\text{Vote share}_{m}}{1 - \text{Vote share}_{n}} \right) \right) \times \text{Vote share}_n \right]
-\]</span></p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [14]:</pre></div><div id="cell-fig-eu25-ap-comparison" class="cell" data-fig-dpi="500">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>toplot <span class="op">&lt;-</span> bind_rows(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  pooled_ap_cj,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  pooled_ap_thermo</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># minor adjustments for plotting</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>nudge_map <span class="op">&lt;-</span> c(</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Explicit"</span> <span class="op">=</span> <span class="fl">0.20</span>,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Implicit"</span> <span class="op">=</span> <span class="fl">0.07</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Total"</span> <span class="op">=</span> <span class="op">-</span><span class="fl">0.07</span>,</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Non-Partisan"</span> <span class="op">=</span> <span class="op">-</span><span class="fl">0.20</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>toplot <span class="op">&lt;-</span> toplot <span class="op">|&gt;</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  mutate(</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> factor(</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>      paste(measurement, measure),</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>      levels <span class="op">=</span> rev(c(</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Behavioral API"</span>,</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Attitudinal API"</span>,</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Attitudinal Distance"</span>,</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Attitudinal Spread"</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>      ))</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    nudge_y <span class="op">=</span> nudge_map[der_partisan_type]</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>toplot2 <span class="op">&lt;-</span> toplot <span class="op">|&gt;</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  <span class="bu">filter</span>(weighted <span class="op">==</span> <span class="dv">1</span>)</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>ggplot(</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>  toplot2,</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  aes(</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> ap,</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> y,</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>    shape <span class="op">=</span> der_partisan_type,</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> der_partisan_type</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>) <span class="op">+</span></span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 1) Points nudged based on weight</span></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>  geom_point(</span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>    position <span class="op">=</span> position_nudge(y <span class="op">=</span> toplot2$nudge_y)</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2) Error bars nudged the same way and linetype depending on weight</span></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>  geom_errorbar(</span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>    aes(</span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>      xmin <span class="op">=</span> ci_low,</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a>      xmax <span class="op">=</span> ci_high</span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>    position <span class="op">=</span> position_nudge(y <span class="op">=</span> toplot2$nudge_y),</span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a>    width <span class="op">=</span> <span class="fl">0.1</span></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a>  geom_vline(</span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a>    xintercept <span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>    linetype <span class="op">=</span> <span class="st">"dashed"</span></span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a>  labs(</span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">""</span>,</span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"AP"</span>,</span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a>    shape <span class="op">=</span> <span class="st">"Partisan Type"</span>,</span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"Partisan Type"</span></span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">+</span></span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a>  theme_pubr() <span class="op">+</span></span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a>  theme(aspect.ratio <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> <span class="fl">1.618</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-eu25-ap-comparison" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-eu25-ap-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="">
+<a href="3.2_ap_measures.embed_files/figure-html/fig-eu25-ap-comparison-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Comparison of Behavioral and Attitudinal Affective Polarization in the EU25. This figure displays aggregated affective polarization (AP) scores across four different operationalizations, categorized by partisan attachment type. Behavioral API (Token) measures the difference in expected token allocations between co-partisans and out-partisans in a conjoint game. Attitudinal API represents Reiljan (2020)’s index, calculated as the distance between in-group and average out-group thermometer scores. Attitudinal Distance and Spread follow Wagner (2021) metrics, capturing the root mean square distance from the most-liked party and the overall standard deviation of party evaluations, respectively. All estimates are weighted by party vote shares within each country to reflect national party system compositions and then averaged across 25 European countries. To ensure comparability, attitudinal thermometer scores (originally 0–100) have been rescaled to a 0–10 range to match the behavioral token scale. Explicit partisans are those reporting a psychological attachment to a party; Implicit partisans are those denying attachment but reporting a vote choice; Total represents all individuals with a partisan anchor; and Non-Partisans represent respondents without a reported party anchor. Error bars indicate 95% confidence intervals based on cross-national variance."><img src="3.2_ap_measures.embed_files/figure-html/fig-eu25-ap-comparison-output-1.png" class="img-fluid figure-img" data-fig-pos="H"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-eu25-ap-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Comparison of Behavioral and Attitudinal Affective Polarization in the EU25. This figure displays aggregated affective polarization (AP) scores across four different operationalizations, categorized by partisan attachment type. Behavioral API (Token) measures the difference in expected token allocations between co-partisans and out-partisans in a conjoint game. Attitudinal API represents <span class="citation" data-cites="reiljan2020fear">Reiljan (<a href="#ref-reiljan2020fear" role="doc-biblioref">2020</a>)</span>’s index, calculated as the distance between in-group and average out-group thermometer scores. Attitudinal Distance and Spread follow <span class="citation" data-cites="wagner2021affective">Wagner (<a href="#ref-wagner2021affective" role="doc-biblioref">2021</a>)</span> metrics, capturing the root mean square distance from the most-liked party and the overall standard deviation of party evaluations, respectively. All estimates are weighted by party vote shares within each country to reflect national party system compositions and then averaged across 25 European countries. To ensure comparability, attitudinal thermometer scores (originally 0–100) have been rescaled to a 0–10 range to match the behavioral token scale. Explicit partisans are those reporting a psychological attachment to a party; Implicit partisans are those denying attachment but reporting a vote choice; Total represents all individuals with a partisan anchor; and Non-Partisans represent respondents without a reported party anchor. Error bars indicate 95% confidence intervals based on cross-national variance.
+</figcaption>
+</figure>
+</div>
+</div>
+</div></div>
 </section>
 <section id="session-info" class="level1" data-number="9">
 <h1 data-number="9"><span class="header-section-number">9</span> Session Info</h1>
-<div class="cell-container"><div class="cell-decorator"><pre>In [12]:</pre></div><div id="session-info" class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>session_info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-container"><div class="cell-decorator"><pre>In [15]:</pre></div><div id="session-info" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>session_info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in system2("quarto", "-V", stdout = TRUE, env = paste0("TMPDIR=", :
 running command '"quarto"
-TMPDIR=C:/Users/Tris/AppData/Local/Temp/RtmpyEBrY3/file2980619b53b5 -V' had
+TMPDIR=C:/Users/Tris/AppData/Local/Temp/Rtmpqk1wU0/file38806da028a0 -V' had
 status 1</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
@@ -1333,21 +1697,29 @@ status 1</code></pre>
 </section>
 <section id="render-time" class="level1" data-number="10">
 <h1 data-number="10"><span class="header-section-number">10</span> Render Time</h1>
-<div class="cell-container"><div class="cell-decorator"><pre>In [13]:</pre></div><div id="render-time" class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>end_time <span class="op">&lt;-</span> Sys.time()</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>rendering_time <span class="op">&lt;-</span> end_time <span class="op">-</span> start_time</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>message(paste(</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Document rendered in:"</span>,</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">round</span>(<span class="im">as</span>.numeric(rendering_time, units <span class="op">=</span> <span class="st">"secs"</span>), <span class="dv">2</span>),</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"seconds.</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="er">"</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="er">))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-container"><div class="cell-decorator"><pre>In [16]:</pre></div><div id="render-time" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>end_time <span class="op">&lt;-</span> Sys.time()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>rendering_time <span class="op">&lt;-</span> end_time <span class="op">-</span> start_time</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>message(paste(</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Document rendered in:"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">round</span>(<span class="im">as</span>.numeric(rendering_time, units <span class="op">=</span> <span class="st">"secs"</span>), <span class="dv">2</span>),</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"seconds.</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="er">"</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="er">))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Document rendered in: 14.9 seconds.</code></pre>
+<pre><code>Document rendered in: 20.29 seconds.</code></pre>
 </div>
 </div></div>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-reiljan2020fear" class="csl-entry" role="listitem">
+Reiljan, Andres. 2020. <span>“<span>‘Fear and Loathing Across Party Lines’</span>(also) in Europe: Affective Polarisation in European Party Systems.”</span> <em>European Journal of Political Research</em> 59 (2): 376–96. <a href="https://doi.org/10.1111/1475-6765.12351">https://doi.org/10.1111/1475-6765.12351</a>.
+</div>
+<div id="ref-wagner2021affective" class="csl-entry" role="listitem">
+Wagner, Markus. 2021. <span>“Affective Polarization in Multiparty Systems.”</span> <em>Electoral Studies</em> 69: 102199. <a href="https://doi.org/10.1016/j.electstud.2020.102199">https://doi.org/10.1016/j.electstud.2020.102199</a>.
+</div>
+</div>
 </section>
      </main>
 <!-- /main column -->  <script id="quarto-html-after-body" type="application/javascript">

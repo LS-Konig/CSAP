@@ -80,7 +80,7 @@ For our behavioral experiment, we conceptually follow Reiljan's API
 
 ## Results
 
-{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap >}}
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison >}}
 
 ## Limitations
 
