@@ -457,6 +457,13 @@ There are three main operationalization strategies applied in European AP studie
 
 ## API
 
+The full **Affective Polarization Index** (Reiljan 2020):
+
+$$
+\text{API} = \sum_{n=1}^{N} \left[ \sum_{\substack{m = 1\\ m \neq n}}^{N} \left( (Like_n - Like_m) \times \left(\frac{\text{Vote share}_{m}}{1 - \text{Vote share}_{n}} \right) \right) \times \text{Vote share}_n \right]
+$$
+
+
 ```{r}
 #| label: eu25-reiljan-api
 
@@ -729,7 +736,7 @@ pooled_ap_spread <- api_spread_individual |>
     der_partisan_type = case_when(
       der_partisan_type == 1 ~ "Explicit",
       der_partisan_type == 0 ~ "Implicit",
-      .default = NA
+      is.na(der_partisan_type) ~ "Non-Partisan"
     )
   )
 
@@ -764,6 +771,9 @@ pooled_ap_spread <- bind_rows(pooled_ap_spread, total_ap_spread) |>
     outcome,
     weighted
   )
+
+pooled_ap_thermo <- pooled_ap_thermo |>
+  bind_rows(pooled_ap_spread)
 ```
 
 The Weighted Affective Polarization (WAP) equation for parties $j$ and voter $i$ is:
@@ -857,6 +867,8 @@ pooled_ap_spread_weighted <- bind_rows(
   ) |>
   select(-se)
 
+pooled_ap_thermo <- pooled_ap_thermo |>
+  bind_rows(pooled_ap_spread_weighted)
 ```
 
 ## Mean distance from the most-liked party
@@ -944,6 +956,9 @@ pooled_ap_distance <- bind_rows(pooled_ap_distance, total_ap_distance) |>
     outcome,
     weighted
   )
+
+pooled_ap_thermo <- pooled_ap_thermo |>
+  bind_rows(pooled_ap_distance)
 ```
 
 Again, we can also calculate a weighted version of this measure. This would then take into account that it should matter more if an individual strongly dislikes large parties rather than a small, insignificant competitor.
@@ -1029,20 +1044,56 @@ pooled_ap_distance_weighted <- bind_rows(
     weighted = 1
   ) |>
   select(-se)
+
+pooled_ap_thermo <- pooled_ap_thermo |>
+  bind_rows(pooled_ap_distance_weighted)
 ```
 
 # Figure
 
 ```{r}
 #| label: fig-eu25-ap-comparison
+#| fig-cap: ""
+#| fig-dpi: 500
+#| fig-pos : H
+
+toplot <- bind_rows(
+  pooled_ap_cj,
+  pooled_ap_thermo
+)
+
+ggplot(
+  toplot |> filter(weighted == 1),
+  aes(
+    x = ap,
+    y = paste(measurement, measure),
+    shape = der_partisan_type,
+    color = der_partisan_type
+  )
+) +
+  # 1) Points nudged based on weight
+  geom_point(
+    position = position_nudge(y = ifelse(toplot$weighted == 1, 0.1, -0.1))
+  ) +
+
+  # 2) Error bars nudged the same way and linetype depending on weight
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    position = position_nudge(y = ifelse(toplot$weighted == 1, 0.1, -0.1)),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1 / 1.618)
 
 ```
 
-The full **Affective Polarization Index** (Reiljan 2020):
-
-$$
-\text{API} = \sum_{n=1}^{N} \left[ \sum_{\substack{m = 1\\ m \neq n}}^{N} \left( (Like_n - Like_m) \times \left(\frac{\text{Vote share}_{m}}{1 - \text{Vote share}_{n}} \right) \right) \times \text{Vote share}_n \right]
-$$
 
 
 # Session Info
