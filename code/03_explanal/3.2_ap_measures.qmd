@@ -690,33 +690,42 @@ ggplot(
 
 ... to be continued with Wagners measures
 
-```{r}
-#| label: total-sample-wagner-mean-distance
+## Spread of like-dislike scores
 
-# calculate individual level AP
-meandist_individual <- thermo_long |>
+[I]t is the average absolute party like-dislike difference relative to each respondent's average party like-dislike score
+
+$$
+\text{Spread}_i = \sqrt{ \frac{ \sum_{p=1}^{P} ( \text{like}_{ip} - \overline{\text{like}}_{i})^2 } {n_p}}
+$$
+
+```{r}
+#| label: eu25-wagner-spread
+
+# Calculate Spread per respondent
+api_spread_individual <- thermo_long |>
   group_by(meta_pid, der_partisan_type) |>
   summarise(
-    mean_like = mean(thermo_score, na.rm = TRUE),
-    ap = sqrt(mean((thermo_score - mean_like)^2, na.rm = TRUE)),
+    # Wagner's Spread is the standard deviation of all party evaluations for individual i
+    spread_score = sd(thermo_score, na.rm = TRUE),
+    n_parties = n(),
     .groups = "drop"
-  )
+  ) |>
+  # Filter for respondents who rated at least 2 parties
+  filter(n_parties >= 2, !is.na(spread_score))
 
-
-pooled_meandist_thermo <- meandist_individual |>
+# Aggregate by Partisan Type
+pooled_ap_spread <- api_spread_individual |>
   group_by(der_partisan_type) |>
   summarise(
-    diff_mean = mean(ap),
-    sd_ap = sd(ap),
+    ap = mean(spread_score),
+    sd_ap = sd(spread_score),
     n_ap = n(),
     se_ap = sd_ap / sqrt(n_ap),
-    ci_low = diff_mean - 1.96 * se_ap,
-    ci_high = diff_mean + 1.96 * se_ap,
+    ci_low = ap - 1.96 * se_ap,
+    ci_high = ap + 1.96 * se_ap,
     .groups = "drop"
   ) |>
   mutate(
-    measure = "Thermometer",
-    index = "Mean Distance",
     der_partisan_type = case_when(
       der_partisan_type == 1 ~ "Explicit",
       der_partisan_type == 0 ~ "Implicit",
@@ -724,44 +733,155 @@ pooled_meandist_thermo <- meandist_individual |>
     )
   )
 
-
-total_meandist_thermo <- meandist_individual |>
+# Aggregate for Total
+total_ap_spread <- api_spread_individual |>
   summarise(
-    diff_mean = mean(ap),
-    sd_diff = sd(ap),
-    n_diff = n(),
-    se_diff = sd_diff / sqrt(n_diff),
-    ci_low = diff_mean - 1.96 * se_diff,
-    ci_high = diff_mean + 1.96 * se_diff,
+    ap = mean(spread_score),
+    sd_ap = sd(spread_score),
+    n_ap = n(),
+    se_ap = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se_ap,
+    ci_high = ap + 1.96 * se_ap,
+    .groups = "drop"
+  ) |>
+  mutate(der_partisan_type = "Total")
+
+# Combine and format for toplot
+pooled_ap_spread <- bind_rows(pooled_ap_spread, total_ap_spread) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "Spread",
+    outcome = "Thermo Score",
+    weighted = 0
+  ) |>
+  select(
+    der_partisan_type,
+    ap,
+    ci_low,
+    ci_high,
+    measurement,
+    measure,
+    outcome,
+    weighted
+  )
+```
+
+The Weighted Affective Polarization (WAP) equation for parties $j$ and voter $i$ is:
+
+$$
+\text{Spread}_i = \sqrt{ \sum_{p=1}^{P} v_p ( \text{like}_{ip} - \overline{\text{like}}_{i})^2 }
+$$
+
+$v_p$ is the vote share of each party, measured as a proportion with a range from 0 to 1.
+The mean affect should itself be weighted by party size and is calculated as:
+
+$$
+\overline{like}_i = \sum_{p=1}^{p} ( v_p * \text{like}_{ip})
+$$
+
+```{r}
+#| label: eu25-wagner-spread-weighted
+
+# 1. Attach party vote shares (v_p) to every evaluation
+thermo_weighted_ind <- thermo_long |>
+  left_join(
+    votes_per_party |>
+      select(meta_country, der_vote_combined_name, v_p = der_anchor_vote_share),
+    by = c("meta_country", "thermo_party" = "der_vote_combined_name")
+  ) |>
+  filter(!is.na(v_p), !is.na(thermo_score))
+
+# 2. Calculate Individual Weighted Spread using your formulas
+api_spread_weighted_ind <- thermo_weighted_ind |>
+  group_by(meta_pid, der_partisan_type, meta_country) |>
+  summarise(
+    # Formula: Mean like = sum(v_p * like)
+    # Note: sum(v_p) might be < 1 if not all parties were rated, so we normalize
+    w_sum_v = sum(v_p),
+    weighted_mean = sum(v_p * thermo_score) / w_sum_v,
+
+    # Formula: Spread = sqrt( sum( v_p * (like - mean)^2 ) )
+    # Again, normalizing by sum(v_p) ensures the weighted variance is scale-correct
+    spread_score = sqrt(sum(v_p * (thermo_score - weighted_mean)^2) / w_sum_v),
+    n_parties = n(),
+    .groups = "drop"
+  ) |>
+  filter(n_parties >= 2)
+
+# 3. Aggregate for the European Level (Country-Averaging)
+# We aggregate to country first to ensure each country contributes equally
+ap_country_spread_w <- api_spread_weighted_ind |>
+  group_by(meta_country, der_partisan_type) |>
+  summarise(ap_country = mean(spread_score), .groups = "drop")
+
+# 4. Final European Scores
+ap_europe_spread_weighted <- ap_country_spread_w |>
+  group_by(der_partisan_type) |>
+  summarise(
+    ap = mean(ap_country),
+    se = sd(ap_country) / sqrt(n()),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
     .groups = "drop"
   ) |>
   mutate(
-    der_partisan_type = "Total",
-    measure = "Thermometer",
-    index = "Mean Distance",
-  ) |>
-  relocate(der_partisan_type, .before = diff_mean)
-
-pooled_ap_thermo <- bind_rows(pooled_ap_thermo, total_ap_thermo)
-
-```
-
-
-```{r}
-#| label: total-sample-wagner-spread
-
-spread_individual <- thermo_long |>
-  group_by(meta_pid, der_partisan_type) |>
-  summarise(
-    likemax = max(thermo_score, na.rm = TRUE),
-    spread = sqrt(mean(
-      (thermo_score[thermo_score != likemax] - likemax)^2,
-      na.rm = TRUE
-    ))
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      is.na(der_partisan_type) ~ "Non-Partisan"
+    )
   )
 
+# 5. Total Weighted Score (including everyone)
+total_ap_spread_weighted <- ap_country_spread_w |>
+  group_by(meta_country) |>
+  summarise(ap_country_total = mean(ap_country), .groups = "drop") |>
+  summarise(
+    ap = mean(ap_country_total),
+    se = sd(ap_country_total) / sqrt(n()),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se
+  ) |>
+  mutate(der_partisan_type = "Total")
+
+# Combine for toplot
+pooled_ap_spread_weighted <- bind_rows(
+  ap_europe_spread_weighted,
+  total_ap_spread_weighted
+) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "Spread",
+    outcome = "Thermo Score",
+    weighted = 1
+  ) |>
+  select(-se)
+
 ```
 
+## Mean distance from the most-liked party
+
+This ‘mean-distance’ measure captures how much lower on average an individual's affect for other parties is. Hence, this measure assumes positive identification with one party as the key aspect of affect patterns.
+
+$$
+\text{Distance}_i = \sqrt{ \frac{ \sum_{p=1}^{P} (\text{like}_{ip} - \text{like}_{max,i})^2 }{n_p} }
+$$
+
+This time, $n$ is the number of parties without the most-liked party. $\text{like}_{max}$ is the score assigned to the most-liked party.
+
+```{r}
+#| label: eu25-wagner-meandistance
+```
+
+Again, we can also calculate a weighted version of this measure. This would then take into account that it should matter more if an individual strongly dislikes large parties rather than a small, insignificant competitor.
+
+$$
+\text{Distance}_i = \sqrt{{ \sum_{p=1}^{P} v_p (\text{like}_{ip} - \text{like}_{max,i})^2 } }
+$$
+
+```{r}
+#| label: eu25-wagner-meandistance-weighted
+```
 
 # Figure
 
