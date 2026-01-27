@@ -1053,7 +1053,7 @@ pooled_ap_thermo <- pooled_ap_thermo |>
 
 ```{r}
 #| label: fig-eu25-ap-comparison
-#| fig-cap: ""
+#| fig-cap: "Comparison of Behavioral and Attitudinal Affective Polarization in the EU25. This figure displays aggregated affective polarization (AP) scores across four different operationalizations, categorized by partisan attachment type. Behavioral API (Token) measures the difference in expected token allocations between co-partisans and out-partisans in a conjoint game. Attitudinal API represents Reiljan’s (2020) index, calculated as the distance between in-group and average out-group thermometer scores. Attitudinal Distance and Spread follow Wagner’s (2021) metrics, capturing the root mean square distance from the most-liked party and the overall standard deviation of party evaluations, respectively. All estimates are weighted by party vote shares within each country to reflect national party system compositions and then averaged across 25 European countries. To ensure comparability, attitudinal thermometer scores (originally 0–100) have been rescaled to a 0–10 range to match the behavioral token scale. Explicit partisans are those reporting a psychological attachment to a party; Implicit partisans are those denying attachment but reporting a vote choice; Total represents all individuals with a partisan anchor; and Non-Partisans represent respondents without a reported party anchor. Error bars indicate 95% confidence intervals based on cross-national variance."
 #| fig-dpi: 500
 #| fig-pos : H
 
@@ -1062,18 +1062,43 @@ toplot <- bind_rows(
   pooled_ap_thermo
 )
 
+# minor adjustments for plotting
+nudge_map <- c(
+  "Explicit" = 0.20,
+  "Implicit" = 0.07,
+  "Total" = -0.07,
+  "Non-Partisan" = -0.20
+)
+
+toplot <- toplot |>
+  mutate(
+    y = factor(
+      paste(measurement, measure),
+      levels = rev(c(
+        "Behavioral API",
+        "Attitudinal API",
+        "Attitudinal Distance",
+        "Attitudinal Spread"
+      ))
+    ),
+    nudge_y = nudge_map[der_partisan_type]
+  )
+
+toplot2 <- toplot |>
+  filter(weighted == 1)
+
 ggplot(
-  toplot |> filter(weighted == 1),
+  toplot2,
   aes(
     x = ap,
-    y = paste(measurement, measure),
+    y = y,
     shape = der_partisan_type,
     color = der_partisan_type
   )
 ) +
   # 1) Points nudged based on weight
   geom_point(
-    position = position_nudge(y = ifelse(toplot$weighted == 1, 0.1, -0.1))
+    position = position_nudge(y = toplot2$nudge_y)
   ) +
 
   # 2) Error bars nudged the same way and linetype depending on weight
@@ -1082,12 +1107,18 @@ ggplot(
       xmin = ci_low,
       xmax = ci_high
     ),
-    position = position_nudge(y = ifelse(toplot$weighted == 1, 0.1, -0.1)),
+    position = position_nudge(y = toplot2$nudge_y),
     width = 0.1
   ) +
   geom_vline(
     xintercept = 0,
     linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP",
+    shape = "Partisan Type",
+    color = "Partisan Type"
   ) +
   theme_pubr() +
   theme(aspect.ratio = 1 / 1.618)
