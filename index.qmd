@@ -2,9 +2,9 @@
 title: |
   How does partisan type influence affective polarization?
 subtitle: |
-  A comparative study of 25 European democracies
+  Conceptualization, measurement, and scope conditions in 25 European democracies
 abstract: |
-  Space for an abstract. 
+  Draft – framing and roadmap notes. 
 execute:
   echo: false
   warning: false
@@ -15,78 +15,205 @@ draft: true
 draft-mode: visible
 ---
 
-We term identifiers, non-identifiers, and non-partisans.
+We distinguish between **explicit identifiers**, **implicit partisans (vote-based)**, and **non-partisans**.
 
-
-## Roadmap
-
-This study examines variation in affective polarization (AP) along **three analytically distinct dimensions**:
-
-1. **Operationalization of partisanship**  
-   Ingroup defined via **explicit partisan attachment** (identity-based) versus **vote intention/choice** (behavioral anchoring)
-
-2. **Measurement of polarization**  
-   **Attitudinal polarization** (thermometer-based measures) versus **behavioral polarization** (conjoint outcomes)
-
-3. **External validity and scope conditions**  
-   Cross-national variation in the prevalence and distribution of partisan types across European democracies
+The core claim of the paper is that *observed levels and cross-national patterns of affective polarization (AP) depend systematically on how partisanship and polarization are conceptualized and measured* in multi-party systems.
 
 ---
 
-## Empirical strategy
+## Framing: Conceptual proliferation in comparative AP research
 
-### 1. Aggregate (European-level) patterns
+Affective polarization has become central in political science and is increasingly studied in **comparative multi-party systems**. This expansion raises conceptual and methodological questions.
 
-First, we establish **European-level benchmarks** of affective polarization, conditioning on **partisan status** and **measurement strategy**.
+Recent work (e.g., Garcia et al.) distinguishes between:
 
-- Outcome: Affective polarization  
-- X-axis: Magnitude of AP  
-- Y-axis: Measurement type (API, Wagner MD, CJ-based AP)  
-- Shape / color: Partisan type (explicit partisan, implicit partisan, nonpartisan)
+- **Ideological vs. ideational polarization**
+- **Identity-based vs. attitude-based affective polarization**
+- **Targets of affect**:
+  - Vertical (toward political elites / parties)
+  - Horizontal (toward fellow citizens / partisans)
 
-**Measurement logic**:
+In multi-party systems, additional choices matter:
 
-- **API and CJ-based AP** rely on *identity-based ingroup–outgroup definitions* and allow direct comparison between **attitudinal** and **behavioral** polarization.
-- **Wagner’s measures** capture *perceived system-level affective differentiation* and uniquely allow inclusion of **nonpartisans**, providing a non-partisan baseline against which partisan polarization can be evaluated.
+- **Ingroup identification**: explicit identification vs. vote intention/choice  
+- **Outgroup construction**: all parties vs. most distant party  
+- **Weighting by party size**  
+- Inclusion (or exclusion) of **non-partisans**
 
-This step clarifies whether differences across partisan types reflect:
-- ingroup bias,
-- behavioral discrimination,
-- or broader differences in perceived affective structure.
+Comparative research has rarely examined how these design choices affect:
+- the magnitude of AP,
+- cross-country rankings,
+- and substantive inferences about democratic implications.
 
-### 2. Comparative analysis: cross-national variation
+This is our entry point.
 
-Second, we examine how these patterns **vary across countries**.
+---
 
-- Compare the magnitude and dispersion of AP by partisan type within countries  
-- Assess whether identity-based and system-level polarization align or diverge cross-nationally  
-- Evaluate how the **distribution of partisan types** conditions observed levels of affective polarization
+## Analytical separation of components
 
-This step establishes the **external validity** of the individual-level findings and identifies contextual heterogeneity across European party systems.
+We proceed in three conceptually distinct steps:
 
+1. **Thermometer-based AP (attitudinal; vertical; party-targeted)**  
+   → Used to illustrate how operationalization choices affect comparative inference in multi-party systems.
+
+2. **Behavioral AP (conjoint; horizontal; citizen-targeted)**  
+   → Estimated via solidarity and trust games.  
+   → Presented as consequences in behavioral terms, not as mere alternative measurement.
+
+3. **Comparative scope and composition**  
+   → How the distribution of partisan types across 25 democracies conditions aggregate AP.
+
+We explicitly separate thermometer and game results in the manuscript to avoid conflating:
+- concept,
+- measurement,
+- and behavioral consequences.
+
+---
+
+## Part I – Thermometer-based affective polarization
+
+This section uses *only party-targeted thermometer items*.
+
+Key limitations:
+- No direct measurement of affect toward fellow citizens.
+- Thus: vertical (party) rather than horizontal (citizen) AP.
+
+### Roadmap for this section
+
+We demonstrate how AP estimates change depending on:
+
+- Explicit vs. implicit ingroup definition  
+- Inclusion vs. exclusion of non-partisans  
+- Alternative aggregation and weighting strategies  
+
+Main goal:
+Show that in multi-party systems, the *choice of operationalization* meaningfully affects:
+- effect sizes,
+- country rankings,
+- dispersion across countries.
+
+This directly addresses open questions in the comparative AP literature about conceptual transfer from two-party to multi-party contexts.
+
+---
+
+### Empirical strategy (Thermometer section)
+
+#### 1. European-level benchmarks
+
+- Compare magnitude of AP across:
+  - Explicit identifiers
+  - Implicit partisans
+  - Non-partisans
+
+- Compare alternative indices (e.g., API-style vs. most-distant formulations).
+
+Focus:
+How much do conceptual decisions move the needle?
+
+#### 2. Cross-national variation
+
+- Estimate country-specific AP under different operationalizations.
+- Examine:
+  - Stability of rankings,
+  - Variance differences,
+  - Sensitivity to partisan composition.
+
+Potential modeling strategy:
+- Hierarchical (partial pooling) framework.
+- EU- and country-level quantities derived from the same posterior.
+- Standardized or scale-relative effects to ensure comparability across thermometer and token metrics (no raw-scale comparisons).
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
+
+---
+
+## Part II – Behavioral polarization as consequences
+
+We present the conjoint results separately from thermometer analyses.
+
+Conceptual shift:
+- From **attitudinal differentiation toward parties (vertical)**  
+  to  
+- **Behavioral discrimination toward fellow citizens (horizontal)**.
+
+Outcomes:
+- Solidarity allocations (dictator game logic)
+- Trust allocations (trust game logic)
+
+Here, affective polarization manifests as:
+- Differential allocation toward co-partisans vs. out-partisans.
+
+We treat these as **behavioral consequences of partisan boundaries**, rather than as alternative scaling of thermometer AP.
+
+Open conceptual question:
+To what extent do attitudinal (vertical) and behavioral (horizontal) AP align within and across countries?
+
+Possible empirical extension:
+- Estimate correlation between country-level attitudinal AP and behavioral AP (posterior correlation).
+
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison >}}
+
+---
+
+## Sorting and the religion attribute (note for later section)
+
+The religion attribute in the conjoint is uniformly randomized.
+
+Implication:
+- No endogenous religious sorting by design.
+- Effects of Muslimhood can be interpreted under an assumption of equal exposure probability.
+
+Potential extension (optional section):
+- Counterfactual discussion: how would behavioral polarization differ under religious sorting?
+- Clarify that our design approximates a *no-sorting benchmark*.
+
+This should only be included if it clearly strengthens the contribution.
+
+---
 
 ## Data
 
 We use data from @hahm2024divided.
 
-## Measurement
+25 European democracies.
+Multiple party systems with varying partisan compositions.
 
-We compare several measurement strategies frequently employed in the context of multi-party systems.
+---
 
-For our behavioral experiment, we conceptually follow Reiljan's API
+## Limitations (draft notes)
 
+1. **Party-targeted thermometers only**  
+   → No direct measure of citizen-targeted affect.
 
-## Results
+2. **Weighting by party size**  
+   Assumes encounter probability proportional to electoral share.  
+   Social visibility may violate this (e.g., radical challenger parties).
 
-{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison >}}
+3. **Cross-sectional structure**  
+   No dynamic inference about causal development of AP.
 
-## Limitations
+4. **Comparability across scales**  
+   Thermometer and token allocations differ in scale and interpretation.  
+   → Report standardized or scale-relative posterior effects.
 
-Our findings remain limited due to the cross-national nature of our data.
+---
 
-When weighting affective polarization by party size to estimate country --- or Europe-level scores, this procedure implicitly assumes that the probability of any individual encountering and correctly identifying another partisan is proportional to the size of parties' electorates. In practice, structural factors may violate this assumption: for example, partisans of smaller or more radical challenger parties may be more salient or more easily recognized, such that their social visibility exceeds their electoral share. Consequently, weighted estimates may over- or understate true horizontal affective polarization in contexts where partisan recognition is systematically biased.
+## Contribution (working formulation)
+
+The paper contributes by showing that in comparative multi-party systems:
+
+- Affective polarization is not a single quantity.
+- Its magnitude and cross-national pattern depend on:
+  - ingroup definition,
+  - inclusion of non-partisans,
+  - aggregation choices,
+  - and whether polarization is conceptualized vertically or horizontally.
+
+Rather than asking only *“How polarized are European democracies?”*,  
+we ask:
+
+**“How does conceptualization reshape what,” and even who, “we observe as polarized?”**
+
 
 ## References
 
@@ -125,48 +252,4 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 {{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-covariate-distr >}}
 
 ### Robustness {.appendix}
-
-## Eidesstattliche Erklärung -- Statutory Declaration {.unlisted .unnumbered}
-
-\noindent Hiermit versichere ich, dass diese Arbeit von mir persönlich verfasst ist
-und dass ich keinerlei fremde Hilfe in Anspruch genommen habe. Ebenso
-versichere ich, dass diese Arbeit oder Teile daraus weder von mir selbst
-noch von anderen als Leistungsnachweise andernorts eingereicht wurden.
-Wörtliche oder sinngemäße Übernahmen aus anderen Schriften und
-Veröffentlichungen in gedruckter oder elektronischer Form sind
-gekennzeichnet. Sämtliche Sekundärliteratur und sonstige Quellen sind
-nachgewiesen und in der Bibliographie aufgeführt. Das Gleiche gilt für
-graphische Darstellungen und Bilder sowie für alle Internet-Quellen. Ich
-bin ferner damit einverstanden, dass meine Arbeit zum Zwecke eines
-Plagiatsabgleichs in elektronischer Form anonymisiert versendet und
-gespeichert werden kann. Mir ist bekannt, dass von der Korrektur der
-Arbeit abgesehen und die Prüfungsleistung mit „nicht ausreichend“
-bewertet werden kann, wenn die Erklärung nicht erteilt wird.
-
-
-\noindent I hereby declare that the paper presented is my own work and that I have
-not called upon the help of a third party. In addition, I affirm that neither I
-nor anybody else has submitted this paper or parts of it to obtain credits
-elsewhere before. I have clearly marked and acknowledged all quotations
-or references that have been taken from the works of other. All secondary
-literature and other sources are marked and listed in the bibliography. The
-same applies to all charts, diagrams and illustrations as well as to all Internet
-sources. Moreover, I consent to my paper being electronically stores and
-sent anonymously in order to be checked for plagiarism. I am aware that
-the paper cannot be evaluated and may be graded “failed” (“nicht
-                                                           ausreichend”) if the declaration is not made.
-
-```{=latex}
-\vspace{2cm}
-\noindent
-\parbox{5cm}{
-  \hrulefill\\
-  Place, Date
-}
-\hfill
-\parbox{5cm}{
-  \hrulefill\\
-  Signature
-}
-```
 
