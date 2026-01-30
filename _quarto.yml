@@ -1,5 +1,7 @@
 project:
   type: manuscript
+  resources: 
+    - robots.txt
 
 manuscript:
   notebooks:
@@ -45,6 +47,9 @@ format:
       - at: pre-quarto
         path: _extensions/andrewheiss/wordcount/wordcount.lua
     toc: true
+    include-in-header:
+      text:
+        <meta name="robots" content="noindex">
   pdf:
     toc: false
     toc-depth: 3

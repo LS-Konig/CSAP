@@ -41,9 +41,9 @@ Recent work distinguishes between:
 
 - **Ideological vs. ideational polarization**
 - **Identity-based vs. attitude-based affective polarization**
-- **Targets of affect**:
-  - Vertical (toward political elites / parties)
-  - Horizontal (toward fellow citizens / partisans)
+- **Targets of affect** [@areal2024verticalvshorizontal; @rollicke2023polarisation; @reiljan2024patterns]:
+  - Vertical/political (toward political elites (LAP) / parties (PAP))
+  - Horizontal/social (toward fellow citizens / partisans)
 
 In multi-party systems, additional choices matter:
 
@@ -85,6 +85,7 @@ We explicitly separate thermometer and game results to avoid conflating:
 This section uses *only party-targeted thermometer items*.
 
 Key limitation:
+
 - No direct measure of affect toward fellow citizens.
 - Thus: vertical (party) rather than horizontal (citizen) AP.
 
@@ -98,6 +99,7 @@ We demonstrate how AP estimates change depending on:
 
 Main goal:
 Show that in multi-party systems, the *choice of operationalization* meaningfully affects:
+
 - effect sizes,
 - country rankings,
 - dispersion across countries.
@@ -117,9 +119,9 @@ varies substantially across countries.
 
 Loose idea for theoretical anchoring:
 
-- Link variation to classic work on **partisan dealignment and cognitive mobilization** (Dalton 1984; Dalton 2013).  
-- Consider long-term differences in **party system institutionalization** and partisan attachment (e.g., Mainwaring & Scully 1995 – conceptually relevant though developed for Latin America).  
-- Connect to literature on **party identification decline and electoral volatility** in Europe.
+- Link variation to classic work on partisan dealignment in Europe
+- Consider long-term differences in party system institutionalization and partisan attachment 
+- Connect to literature on party identification decline and electoral volatility in Europe.
 
 Potential implication:
 Countries with weak partisan identities may mechanically display lower identity-based AP but not necessarily lower behavioral discrimination.
