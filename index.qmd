@@ -21,11 +21,24 @@ The core claim of the paper is that *observed levels and cross-national patterns
 
 ---
 
+## Data and empirical domain
+
+We use data from @hahm2024divided, collected in **2019** in 25 European democracies (all EU member states at the time except Luxembourg and Malta, plus the UK).
+
+The dataset has been used to study partyism and coalition partnership dynamics (e.g., APSR article based on the same project), but our contribution differs in focus:  
+we center on **conceptualization, measurement, and comparative scope conditions of affective polarization** rather than coalition alignment or generalized partyism.
+
+Temporal limitation:
+- Data stem from a single cross-sectional wave (2019).  
+- Findings do not capture post-2019 developments (e.g., pandemic politics, recent electoral realignments).
+
+---
+
 ## Framing: Conceptual proliferation in comparative AP research
 
 Affective polarization has become central in political science and is increasingly studied in **comparative multi-party systems**. This expansion raises conceptual and methodological questions.
 
-Recent work (e.g., Garcia et al.) distinguishes between:
+Recent work distinguishes between:
 
 - **Ideological vs. ideational polarization**
 - **Identity-based vs. attitude-based affective polarization**
@@ -58,15 +71,15 @@ We proceed in three conceptually distinct steps:
 
 2. **Behavioral AP (conjoint; horizontal; citizen-targeted)**  
    → Estimated via solidarity and trust games.  
-   → Presented as consequences in behavioral terms, not as mere alternative measurement.
+   → Presented as behavioral consequences of partisan boundaries.
 
 3. **Comparative scope and composition**  
    → How the distribution of partisan types across 25 democracies conditions aggregate AP.
 
-We explicitly separate thermometer and game results in the manuscript to avoid conflating:
+We explicitly separate thermometer and game results to avoid conflating:
 - concept,
 - measurement,
-- and behavioral consequences.
+- and behavioral manifestation.
 
 ---
 
@@ -74,8 +87,8 @@ We explicitly separate thermometer and game results in the manuscript to avoid c
 
 This section uses *only party-targeted thermometer items*.
 
-Key limitations:
-- No direct measurement of affect toward fellow citizens.
+Key limitation:
+- No direct measure of affect toward fellow citizens.
 - Thus: vertical (party) rather than horizontal (citizen) AP.
 
 ### Roadmap for this section
@@ -92,36 +105,30 @@ Show that in multi-party systems, the *choice of operationalization* meaningfull
 - country rankings,
 - dispersion across countries.
 
-This directly addresses open questions in the comparative AP literature about conceptual transfer from two-party to multi-party contexts.
+This directly addresses open questions about the transferability of U.S.-centric AP concepts to fragmented party systems.
 
 ---
 
-### Empirical strategy (Thermometer section)
+### Comparative composition of partisan types (idea notes)
 
-#### 1. European-level benchmarks
+The share of:
 
-- Compare magnitude of AP across:
-  - Explicit identifiers
-  - Implicit partisans
-  - Non-partisans
+- explicit identifiers,
+- implicit (vote-based) partisans,
+- non-partisans,
 
-- Compare alternative indices (e.g., API-style vs. most-distant formulations).
+varies substantially across countries.
 
-Focus:
-How much do conceptual decisions move the needle?
+Loose idea for theoretical anchoring:
 
-#### 2. Cross-national variation
+- Link variation to classic work on **partisan dealignment and cognitive mobilization** (Dalton 1984; Dalton 2013).  
+- Consider long-term differences in **party system institutionalization** and partisan attachment (e.g., Mainwaring & Scully 1995 – conceptually relevant though developed for Latin America).  
+- Connect to literature on **party identification decline and electoral volatility** in Europe.
 
-- Estimate country-specific AP under different operationalizations.
-- Examine:
-  - Stability of rankings,
-  - Variance differences,
-  - Sensitivity to partisan composition.
+Potential implication:
+Countries with weak partisan identities may mechanically display lower identity-based AP but not necessarily lower behavioral discrimination.
 
-Potential modeling strategy:
-- Hierarchical (partial pooling) framework.
-- EU- and country-level quantities derived from the same posterior.
-- Standardized or scale-relative effects to ensure comparability across thermometer and token metrics (no raw-scale comparisons).
+This section remains exploratory and descriptive but could situate our compositional findings in broader comparative political culture debates.
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
 
@@ -137,82 +144,99 @@ Conceptual shift:
 - **Behavioral discrimination toward fellow citizens (horizontal)**.
 
 Outcomes:
-- Solidarity allocations (dictator game logic)
-- Trust allocations (trust game logic)
+- Solidarity allocations  
+- Trust allocations  
 
-Here, affective polarization manifests as:
-- Differential allocation toward co-partisans vs. out-partisans.
+Behavioral AP manifests as differential allocation toward:
+- co-partisans,
+- out-partisans,
+- non-partisans.
 
-We treat these as **behavioral consequences of partisan boundaries**, rather than as alternative scaling of thermometer AP.
+---
 
-Open conceptual question:
-To what extent do attitudinal (vertical) and behavioral (horizontal) AP align within and across countries?
+## Muslimhood, partisan interaction, and sorting (targeted extension)
 
-Possible empirical extension:
-- Estimate correlation between country-level attitudinal AP and behavioral AP (posterior correlation).
+The religion attribute in the conjoint is **uniformly randomized** across:
+
+- Muslim  
+- Christian  
+- Non-religious  
+
+Thus, estimates assume **no religious sorting** in exposure.
+
+Exploratory results (note to be formalized):
+
+- Muslim co-partisans receive fewer tokens than Christian or non-religious co-partisans.
+- Muslim out-partisans receive fewer tokens than Christian or non-religious out-partisans.
+- The penalty is larger within the co-partisan condition than within the out-partisan condition.
+- Interaction effects are therefore **asymmetric**, not uniform across partisan categories.
+
+Two implications:
+
+1. **Theoretical**:  
+   One should not assume symmetric sorting or interaction effects between partisan and religious identities.  
+   Minority attributes may condition in-group favoritism differently than out-group derogation.
+
+2. **External validity**:  
+   Because religion is uniformly distributed by design, real-world exposure patterns (where Muslim citizens are not evenly distributed across partisan categories) are not reflected.  
+
+Possible extension:
+- Incorporate prior information about realistic joint distributions of religion × partisanship to simulate more externally valid scenarios.
+- Use the uniform design as a benchmark (“no-sorting counterfactual”) against which realistic sorting patterns could be contrasted.
+
+---
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison >}}
 
 ---
 
-## Sorting and the religion attribute (note for later section)
+## Modeling strategy (note)
 
-The religion attribute in the conjoint is uniformly randomized.
+Planned approach:
 
-Implication:
-- No endogenous religious sorting by design.
-- Effects of Muslimhood can be interpreted under an assumption of equal exposure probability.
+- Hierarchical (partial pooling) estimation for country-level quantities.
+- EU-level benchmarks derived via marginalization over country-level posteriors.
+- Report standardized or scale-relative effects (thermometer vs. token scales not directly comparable).
 
-Potential extension (optional section):
-- Counterfactual discussion: how would behavioral polarization differ under religious sorting?
-- Clarify that our design approximates a *no-sorting benchmark*.
-
-This should only be included if it clearly strengthens the contribution.
-
----
-
-## Data
-
-We use data from @hahm2024divided.
-
-25 European democracies.
-Multiple party systems with varying partisan compositions.
+Potential extension:
+- Estimate posterior correlation between country-level attitudinal AP and behavioral AP.
 
 ---
 
 ## Limitations (draft notes)
 
 1. **Party-targeted thermometers only**  
-   → No direct measure of citizen-targeted affect.
+   → No direct citizen-targeted affect measure in the attitudinal section.
 
 2. **Weighting by party size**  
    Assumes encounter probability proportional to electoral share.  
    Social visibility may violate this (e.g., radical challenger parties).
 
-3. **Cross-sectional structure**  
-   No dynamic inference about causal development of AP.
+3. **Uniform conjoint distribution**  
+   No endogenous religious sorting; real-world joint distributions may differ.
 
-4. **Comparability across scales**  
-   Thermometer and token allocations differ in scale and interpretation.  
-   → Report standardized or scale-relative posterior effects.
+4. **Cross-sectional design (2019)**  
+   Results capture a specific pre-pandemic political context.  
+   No dynamic inference about temporal change.
 
 ---
 
 ## Contribution (working formulation)
 
-The paper contributes by showing that in comparative multi-party systems:
+In comparative multi-party systems:
 
 - Affective polarization is not a single quantity.
-- Its magnitude and cross-national pattern depend on:
+- Its magnitude and cross-national configuration depend on:
   - ingroup definition,
   - inclusion of non-partisans,
-  - aggregation choices,
+  - aggregation rules,
   - and whether polarization is conceptualized vertically or horizontally.
 
 Rather than asking only *“How polarized are European democracies?”*,  
 we ask:
 
-**“How does conceptualization reshape what,” and even who, “we observe as polarized?”**
+**How does conceptualization reshape what, and even who, we observe as polarized in multi-party contexts?**
+
 
 
 ## References
