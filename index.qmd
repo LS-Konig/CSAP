@@ -19,7 +19,7 @@ We distinguish between **explicit identifiers**, **implicit partisans (vote-base
 
 The core claim of the paper is that *observed levels and cross-national patterns of affective polarization (AP) depend systematically on how partisanship and polarization are conceptualized and measured* in multi-party systems.
 
----
+
 
 ## Data and empirical domain
 
@@ -32,7 +32,6 @@ Temporal limitation:
 - Data stem from a single cross-sectional wave (2019).  
 - Findings do not capture post-2019 developments (e.g., pandemic politics, recent electoral realignments).
 
----
 
 ## Framing: Conceptual proliferation in comparative AP research
 
@@ -60,7 +59,6 @@ Comparative research has rarely examined how these design choices affect:
 
 This is our entry point.
 
----
 
 ## Analytical separation of components
 
@@ -81,7 +79,6 @@ We explicitly separate thermometer and game results to avoid conflating:
 - measurement,
 - and behavioral manifestation.
 
----
 
 ## Part I – Thermometer-based affective polarization
 
@@ -107,7 +104,6 @@ Show that in multi-party systems, the *choice of operationalization* meaningfull
 
 This directly addresses open questions about the transferability of U.S.-centric AP concepts to fragmented party systems.
 
----
 
 ### Comparative composition of partisan types (idea notes)
 
@@ -132,7 +128,6 @@ This section remains exploratory and descriptive but could situate our compositi
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
 
----
 
 ## Part II – Behavioral polarization as consequences
 
@@ -144,15 +139,21 @@ Conceptual shift:
 - **Behavioral discrimination toward fellow citizens (horizontal)**.
 
 Outcomes:
-- Solidarity allocations  
-- Trust allocations  
 
-Behavioral AP manifests as differential allocation toward:
-- co-partisans,
-- out-partisans,
-- non-partisans.
+- Solidarity allocations (dictator game logic)
+- Trust allocations (trust game logic)
 
----
+Here, affective polarization manifests as:
+- Differential allocation toward co-partisans vs. out-partisans.
+
+We treat these as **behavioral consequences of partisan boundaries**, rather than as alternative scaling of thermometer AP.
+
+Open conceptual question:
+To what extent do attitudinal (vertical) and behavioral (horizontal) AP align within and across countries?
+
+Possible empirical extension:
+- Estimate correlation between country-level attitudinal AP and behavioral AP (posterior correlation).
+
 
 ## Muslimhood, partisan interaction, and sorting (targeted extension)
 
@@ -184,11 +185,11 @@ Possible extension:
 - Incorporate prior information about realistic joint distributions of religion × partisanship to simulate more externally valid scenarios.
 - Use the uniform design as a benchmark (“no-sorting counterfactual”) against which realistic sorting patterns could be contrasted.
 
----
+
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison >}}
 
----
+
 
 ## Modeling strategy (note)
 
