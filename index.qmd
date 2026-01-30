@@ -29,7 +29,8 @@ The dataset has been used to study partyism and coalition partnership dynamics (
 we center on **conceptualization, measurement, and comparative scope conditions of affective polarization** rather than coalition alignment or generalized partyism.
 
 Temporal limitation:
-- Data stem from a single cross-sectional wave (2019).  
+
+- Data stem from a two cross-sectional waves (2019).  
 - Findings do not capture post-2019 developments (e.g., pandemic politics, recent electoral realignments).
 
 
@@ -53,6 +54,7 @@ In multi-party systems, additional choices matter:
 - Inclusion (or exclusion) of **non-partisans**
 
 Comparative research has rarely examined how these design choices affect:
+
 - the magnitude of AP,
 - cross-country rankings,
 - and substantive inferences about democratic implications.
@@ -75,6 +77,7 @@ We proceed in three conceptually distinct steps:
    → How the distribution of partisan types across 25 democracies conditions aggregate AP.
 
 We explicitly separate thermometer and game results to avoid conflating:
+
 - concept,
 - measurement,
 - and behavioral manifestation.
@@ -136,6 +139,7 @@ This section remains exploratory and descriptive but could situate our compositi
 We present the conjoint results separately from thermometer analyses.
 
 Conceptual shift:
+
 - From **attitudinal differentiation toward parties (vertical)**  
   to  
 - **Behavioral discrimination toward fellow citizens (horizontal)**.
@@ -146,6 +150,7 @@ Outcomes:
 - Trust allocations (trust game logic)
 
 Here, affective polarization manifests as:
+
 - Differential allocation toward co-partisans vs. out-partisans.
 
 We treat these as **behavioral consequences of partisan boundaries**, rather than as alternative scaling of thermometer AP.
@@ -154,6 +159,7 @@ Open conceptual question:
 To what extent do attitudinal (vertical) and behavioral (horizontal) AP align within and across countries?
 
 Possible empirical extension:
+
 - Estimate correlation between country-level attitudinal AP and behavioral AP (posterior correlation).
 
 
@@ -184,6 +190,7 @@ Two implications:
    Because religion is uniformly distributed by design, real-world exposure patterns (where Muslim citizens are not evenly distributed across partisan categories) are not reflected.  
 
 Possible extension:
+
 - Incorporate prior information about realistic joint distributions of religion × partisanship to simulate more externally valid scenarios.
 - Use the uniform design as a benchmark (“no-sorting counterfactual”) against which realistic sorting patterns could be contrasted.
 
@@ -202,6 +209,7 @@ Planned approach:
 - Report standardized or scale-relative effects (thermometer vs. token scales not directly comparable).
 
 Potential extension:
+
 - Estimate posterior correlation between country-level attitudinal AP and behavioral AP.
 
 ---
