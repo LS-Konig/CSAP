@@ -4,7 +4,7 @@ title: |
 subtitle: |
   Conceptualization, measurement, and scope conditions in 25 European democracies
 abstract: |
-  Draft – framing and roadmap notes. 
+  DRAFT: Work in progress. Please do not cite or circulate without the author's permission. Current status: framing and roadmap notes. 
 execute:
   echo: false
   warning: false
