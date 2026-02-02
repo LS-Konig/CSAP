@@ -199,7 +199,6 @@ Possible extension:
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison >}}
 
 
-
 ## Modeling strategy (note)
 
 Planned approach:
