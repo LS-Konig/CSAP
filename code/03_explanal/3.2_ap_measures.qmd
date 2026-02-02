@@ -425,22 +425,21 @@ thermo_long <- eu25games2019 |>
     meta_pid,
     der_partisan_type,
     der_partisan_anchor,
-    starts_with("q_thermo_"),
-    starts_with("ext_q_thermo_")
+    matches("^q_thermo_[0-9]+$"),
+    matches("^ext_q_thermo_[0-9]+_pf_name$")
   ) |>
+  distinct(meta_pid, .keep_all = T) |>
   pivot_longer(
-    cols = matches("^q_thermo_[0-9]+$"),
-    names_to = "thermo_slot",
-    values_to = "thermo_score"
+    cols = matches("^(q_thermo_|ext_q_thermo_)[0-9]+"),
+    names_to = c(".value", "slot"),
+    names_pattern = "(q_thermo|ext_q_thermo)_(\\d+)"
   ) |>
-  pivot_longer(
-    cols = matches("^ext_q_thermo_[0-9]+_pf_name$"),
-    names_to = "party_slot",
-    values_to = "thermo_party"
+  rename(
+    thermo_score = q_thermo,
+    thermo_party = ext_q_thermo
   ) |>
-  filter(
-    str_extract(thermo_slot, "[0-9]+") == str_extract(party_slot, "[0-9]+")
-  ) |>
+  filter(!is.na(thermo_score), !is.na(thermo_party)) |>
+  mutate(thermo_score = thermo_score / 10) |>
   select(
     meta_country,
     meta_pid,
@@ -448,9 +447,8 @@ thermo_long <- eu25games2019 |>
     der_partisan_anchor,
     thermo_party,
     thermo_score
-  ) |>
-  filter(!is.na(thermo_score), !is.na(thermo_party)) |>
-  mutate(thermo_score = thermo_score / 10)
+  )
+
 ```
 
 There are three main operationalization strategies applied in European AP studies: Reiljan's API, Wagner's mean distance and Wagner's average spread.
@@ -742,6 +740,7 @@ pooled_ap_spread <- api_spread_individual |>
 
 # Aggregate for Total
 total_ap_spread <- api_spread_individual |>
+  filter(!is.na(der_partisan_type)) |>
   summarise(
     ap = mean(spread_score),
     sd_ap = sd(spread_score),
@@ -844,6 +843,7 @@ ap_europe_spread_weighted <- ap_country_spread_w |>
 
 # 5. Total Weighted Score (including everyone)
 total_ap_spread_weighted <- ap_country_spread_w |>
+  filter(!is.na(der_partisan_type)) |>
   group_by(meta_country) |>
   summarise(ap_country_total = mean(ap_country), .groups = "drop") |>
   summarise(
@@ -927,6 +927,7 @@ pooled_ap_distance <- distance_individual |>
 
 # 3. Aggregate for Total (Pooled)
 total_ap_distance <- distance_individual |>
+  filter(!is.na(der_partisan_type)) |>
   summarise(
     ap = mean(distance_score),
     sd_ap = sd(distance_score),
@@ -1022,6 +1023,7 @@ ap_europe_distance_weighted <- ap_country_distance_w |>
 
 # 5. Total Weighted European Score
 total_ap_distance_weighted <- ap_country_distance_w |>
+  filter(!is.na(der_partisan_type)) |>
   group_by(meta_country) |>
   summarise(ap_country_total = mean(ap_country), .groups = "drop") |>
   summarise(
@@ -1057,7 +1059,7 @@ pooled_ap_thermo <- pooled_ap_thermo |>
 #| fig-dpi: 500
 #| fig-pos : H
 
-toplot <- bind_rows(
+toplot_eu25 <- bind_rows(
   pooled_ap_cj,
   pooled_ap_thermo
 )
@@ -1070,7 +1072,7 @@ nudge_map <- c(
   "Non-Partisan" = -0.20
 )
 
-toplot <- toplot |>
+toplot_eu25 <- toplot_eu25 |>
   mutate(
     y = factor(
       paste(measurement, measure),
@@ -1084,11 +1086,11 @@ toplot <- toplot |>
     nudge_y = nudge_map[der_partisan_type]
   )
 
-toplot2 <- toplot |>
+toplot_eu25_2 <- toplot_eu25 |>
   filter(weighted == 1)
 
 ggplot(
-  toplot2,
+  toplot_eu25_2,
   aes(
     x = ap,
     y = y,
@@ -1098,7 +1100,7 @@ ggplot(
 ) +
   # 1) Points nudged based on weight
   geom_point(
-    position = position_nudge(y = toplot2$nudge_y)
+    position = position_nudge(y = toplot_eu25_2$nudge_y)
   ) +
 
   # 2) Error bars nudged the same way and linetype depending on weight
@@ -1107,7 +1109,7 @@ ggplot(
       xmin = ci_low,
       xmax = ci_high
     ),
-    position = position_nudge(y = toplot2$nudge_y),
+    position = position_nudge(y = toplot_eu25_2$nudge_y),
     width = 0.1
   ) +
   geom_vline(
@@ -1125,7 +1127,1440 @@ ggplot(
 
 ```
 
+# By Country
 
+```{r}
+#| label: country-ap-cj-unweighted
+
+# 1. Explicit / Implicit within each country -----------------------------
+
+ap_cj_country_unw <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type)
+  ) |>
+  group_by(meta_country, der_partisan_type, der_partisan_relationship) |>
+  summarise(
+    mean = mean(cj_token),
+    sd = sd(cj_token),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  tidyr::pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = c(mean, sd, n)
+  ) |>
+  mutate(
+    ap = mean_Co - mean_Out,
+    se = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    der_partisan_type = dplyr::case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit"
+    )
+  )
+
+
+# 2. Total AP within each country ---------------------------------------
+
+ap_cj_country_total_unw <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type)
+  ) |>
+  group_by(meta_country, der_partisan_relationship) |>
+  summarise(
+    mean = mean(cj_token),
+    sd = sd(cj_token),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  tidyr::pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = c(mean, sd, n)
+  ) |>
+  mutate(
+    ap = mean_Co - mean_Out,
+    se = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    der_partisan_type = "Total"
+  )
+
+
+# 3. Combine and format --------------------------------------------------
+
+ap_cj_country_unw <- bind_rows(
+  ap_cj_country_unw,
+  ap_cj_country_total_unw
+) |>
+  select(
+    meta_country,
+    der_partisan_type,
+    ap,
+    ci_low,
+    ci_high
+  ) |>
+  mutate(
+    measurement = "Behavioral",
+    measure = "API",
+    outcome = "Token",
+    weighted = 0
+  )
+
+```
+
+```{r}
+#| label: country-ap-cj-weighted
+
+########################################
+# 1. Party-level AP within country
+########################################
+
+ap_country_party_weighted <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_partisan_type),
+    !is.na(der_anchor_vote_share)
+  ) |>
+  group_by(
+    meta_country,
+    der_partisan_type,
+    der_partisan_anchor,
+    der_partisan_relationship
+  ) |>
+  summarise(
+    mean = mean(cj_token),
+    sd = sd(cj_token),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  tidyr::pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = c(mean, sd, n)
+  ) |>
+  mutate(
+    ap_party = mean_Co - mean_Out,
+    # delta-method SE for party-level difference
+    se_party = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out)
+  )
+
+
+########################################
+# 2. Weight by party vote share
+########################################
+
+ap_country_weighted <- ap_country_party_weighted |>
+  left_join(
+    eu25games2019 |>
+      distinct(meta_country, der_partisan_anchor, der_anchor_vote_share),
+    by = c("meta_country", "der_partisan_anchor")
+  ) |>
+  group_by(meta_country, der_partisan_type) |>
+  summarise(
+    # weighted AP
+    ap = sum(ap_party * der_anchor_vote_share, na.rm = TRUE),
+
+    # approximate SE assuming independence across parties
+    se = sqrt(sum((der_anchor_vote_share^2) * (se_party^2), na.rm = TRUE)),
+
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    weighted = 1,
+    measurement = "Behavioral",
+    measure = "API",
+    outcome = "Token",
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit"
+    )
+  )
+
+
+########################################
+# 3. Total AP within country
+########################################
+
+ap_country_party_total_w <- eu25games2019 |>
+  filter(
+    der_partisan_relationship %in% c("Co", "Out"),
+    !is.na(der_anchor_vote_share)
+  ) |>
+  group_by(
+    meta_country,
+    der_partisan_anchor,
+    der_partisan_relationship
+  ) |>
+  summarise(
+    mean = mean(cj_token),
+    sd = sd(cj_token),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  tidyr::pivot_wider(
+    names_from = der_partisan_relationship,
+    values_from = c(mean, sd, n)
+  ) |>
+  mutate(
+    ap_party = mean_Co - mean_Out,
+    se_party = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out)
+  )
+
+
+ap_country_weighted_total <- ap_country_party_total_w |>
+  left_join(
+    eu25games2019 |>
+      distinct(meta_country, der_partisan_anchor, der_anchor_vote_share),
+    by = c("meta_country", "der_partisan_anchor")
+  ) |>
+  group_by(meta_country) |>
+  summarise(
+    ap = sum(ap_party * der_anchor_vote_share, na.rm = TRUE),
+    se = sqrt(sum((der_anchor_vote_share^2) * (se_party^2), na.rm = TRUE)),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = "Total",
+    weighted = 1,
+    measurement = "Behavioral",
+    measure = "API",
+    outcome = "Token"
+  )
+
+
+########################################
+# 4. Final country-level tibble
+########################################
+
+ap_cj_country_weighted <- bind_rows(
+  ap_country_weighted,
+  ap_country_weighted_total
+) |>
+  select(
+    meta_country,
+    der_partisan_type,
+    ap,
+    ci_low,
+    ci_high,
+    measurement,
+    measure,
+    outcome,
+    weighted
+  )
+```
+
+```{r}
+#| label: country-reiljan-api
+
+# calculate individual level AP within country
+api_individual_country <- thermo_long |>
+  mutate(
+    ingroup = thermo_party == der_partisan_anchor
+  ) |>
+  group_by(meta_country, meta_pid, der_partisan_type) |>
+  summarise(
+    mean_Co = mean(thermo_score[ingroup], na.rm = TRUE),
+    mean_Out = mean(thermo_score[!ingroup], na.rm = TRUE),
+    api = mean_Co - mean_Out,
+    n_Co = sum(ingroup),
+    n_Out = sum(!ingroup),
+    .groups = "drop"
+  ) |>
+  filter(n_Co > 0, n_Out > 0)
+
+ap_thermo_country <- api_individual_country |>
+  group_by(meta_country, der_partisan_type) |>
+  summarise(
+    ap = mean(api),
+    sd_ap = sd(api),
+    n_ap = n(),
+    se_ap = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se_ap,
+    ci_high = ap + 1.96 * se_ap,
+    .groups = "drop"
+  ) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "API",
+    outcome = "Thermo Score",
+    weighted = 0,
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      .default = NA
+    )
+  )
+
+
+ap_thermo_country_total <- api_individual_country |>
+  group_by(meta_country) |>
+  summarise(
+    ap = mean(api),
+    sd_ap = sd(api),
+    n_ap = n(),
+    se_ap = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se_ap,
+    ci_high = ap + 1.96 * se_ap,
+    .groups = "drop"
+  ) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "API",
+    outcome = "Thermo Score",
+    weighted = 0,
+    der_partisan_type = "Total"
+  )
+
+ap_thermo_country <- bind_rows(
+  ap_thermo_country,
+  ap_thermo_country_total
+) |>
+  select(
+    meta_country,
+    der_partisan_type,
+    ap,
+    ci_low,
+    ci_high,
+    measurement,
+    measure,
+    outcome,
+    weighted
+  )
+
+
+```
+
+```{r}
+#| label: country-reiljan-api-weighted
+
+api_individual_country <- thermo_long |>
+  filter(!is.na(der_partisan_type)) |>
+  mutate(ingroup = thermo_party == der_partisan_anchor) |>
+  group_by(meta_country, meta_pid, der_partisan_type, der_partisan_anchor) |>
+  summarise(
+    mean_Co = mean(thermo_score[ingroup], na.rm = TRUE),
+    mean_Out = mean(thermo_score[!ingroup], na.rm = TRUE),
+    api = mean_Co - mean_Out,
+    .groups = "drop"
+  )
+
+api_party_country <- api_individual_country |>
+  group_by(meta_country, der_partisan_type, der_partisan_anchor) |>
+  summarise(
+    mean_api = mean(api, na.rm = TRUE),
+    sd_api = sd(api, na.rm = TRUE),
+    n_api = n(),
+    var_api = (sd_api^2) / n_api, # variance of party mean
+    .groups = "drop"
+  )
+
+api_party_country <- api_party_country |>
+  left_join(
+    votes_per_party |>
+      select(
+        meta_country,
+        der_vote_combined_name,
+        der_anchor_vote_share
+      ),
+    by = join_by(
+      meta_country,
+      der_partisan_anchor == der_vote_combined_name
+    )
+  )
+
+ap_thermo_country_weighted <- api_party_country |>
+  group_by(meta_country, der_partisan_type) |>
+  summarise(
+    ap = sum(mean_api * der_anchor_vote_share, na.rm = TRUE),
+    var_ap = sum((der_anchor_vote_share^2) * var_api, na.rm = TRUE),
+    se = sqrt(var_ap),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "API",
+    outcome = "Thermo Score",
+    weighted = 1,
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit"
+    )
+  ) |>
+  select(-var_ap, -se)
+
+api_party_total_country <- api_individual_country |>
+  group_by(meta_country, der_partisan_anchor) |>
+  summarise(
+    mean_api = mean(api, na.rm = TRUE),
+    sd_api = sd(api, na.rm = TRUE),
+    n_api = n(),
+    var_api = (sd_api^2) / n_api,
+    .groups = "drop"
+  ) |>
+  left_join(
+    votes_per_party |>
+      select(
+        meta_country,
+        der_vote_combined_name,
+        der_anchor_vote_share
+      ),
+    by = join_by(
+      meta_country,
+      der_partisan_anchor == der_vote_combined_name
+    )
+  )
+
+ap_thermo_country_weighted_total <- api_party_total_country |>
+  group_by(meta_country) |>
+  summarise(
+    ap = sum(mean_api * der_anchor_vote_share, na.rm = TRUE),
+    var_ap = sum((der_anchor_vote_share^2) * var_api, na.rm = TRUE),
+    se = sqrt(var_ap),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "API",
+    outcome = "Thermo Score",
+    weighted = 1,
+    der_partisan_type = "Total"
+  ) |>
+  select(-var_ap, -se)
+
+ap_thermo_country_weighted <- bind_rows(
+  ap_thermo_country_weighted,
+  ap_thermo_country_weighted_total
+) |>
+  select(
+    meta_country,
+    der_partisan_type,
+    ap,
+    ci_low,
+    ci_high,
+    measurement,
+    measure,
+    outcome,
+    weighted
+  )
+
+```
+
+```{r}
+#| label: country-wagner-spread
+
+api_spread_individual_country <- thermo_long |>
+  group_by(meta_country, meta_pid, der_partisan_type) |>
+  summarise(
+    # Wagner's Spread: SD of all party ratings for respondent i
+    spread_score = sd(thermo_score, na.rm = TRUE),
+    n_parties = n(),
+    .groups = "drop"
+  ) |>
+  filter(n_parties >= 2, !is.na(spread_score))
+
+
+ap_spread_country <- api_spread_individual_country |>
+  group_by(meta_country, der_partisan_type) |>
+  summarise(
+    ap = mean(spread_score),
+    sd_ap = sd(spread_score),
+    n_ap = n(),
+    se_ap = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se_ap,
+    ci_high = ap + 1.96 * se_ap,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      is.na(der_partisan_type) ~ "Non-Partisan"
+    )
+  )
+
+ap_spread_country_total <- api_spread_individual_country |>
+  # filter so total means total partisans
+  filter(!is.na(der_partisan_type)) |>
+  group_by(meta_country) |>
+  summarise(
+    ap = mean(spread_score),
+    sd_ap = sd(spread_score),
+    n_ap = n(),
+    se_ap = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se_ap,
+    ci_high = ap + 1.96 * se_ap,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = "Total"
+  )
+
+ap_spread_country <- bind_rows(
+  ap_spread_country,
+  ap_spread_country_total
+) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "Spread",
+    outcome = "Thermo Score",
+    weighted = 0
+  ) |>
+  select(
+    meta_country,
+    der_partisan_type,
+    ap,
+    ci_low,
+    ci_high,
+    measurement,
+    measure,
+    outcome,
+    weighted
+  )
+
+```
+
+```{r}
+#| label: country-wagner-spread-weighted
+thermo_weighted_ind <- thermo_long |>
+  left_join(
+    votes_per_party |>
+      select(meta_country, der_vote_combined_name, v_p = der_anchor_vote_share),
+    by = c("meta_country", "thermo_party" = "der_vote_combined_name")
+  ) |>
+  filter(!is.na(v_p), !is.na(thermo_score))
+
+api_spread_weighted_ind <- thermo_weighted_ind |>
+  group_by(meta_country, meta_pid, der_partisan_type) |>
+  summarise(
+    w_sum_v = sum(v_p),
+    weighted_mean = sum(v_p * thermo_score) / w_sum_v,
+    spread_score = sqrt(sum(v_p * (thermo_score - weighted_mean)^2) / w_sum_v),
+    n_parties = n(),
+    .groups = "drop"
+  ) |>
+  filter(n_parties >= 2, !is.na(spread_score))
+
+ap_spread_country_weighted <- api_spread_weighted_ind |>
+  group_by(meta_country, der_partisan_type) |>
+  summarise(
+    ap = mean(spread_score),
+    sd_ap = sd(spread_score),
+    n_ap = n(),
+    se = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      is.na(der_partisan_type) ~ "Non-Partisan"
+    )
+  ) |>
+  select(-sd_ap, -n_ap, -se)
+
+ap_spread_country_weighted_total <- api_spread_weighted_ind |>
+  filter(!is.na(der_partisan_type)) |>
+  group_by(meta_country) |>
+  summarise(
+    ap = mean(spread_score),
+    sd_ap = sd(spread_score),
+    n_ap = n(),
+    se = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = "Total"
+  ) |>
+  select(-sd_ap, -n_ap, -se)
+
+ap_spread_country_weighted <- bind_rows(
+  ap_spread_country_weighted,
+  ap_spread_country_weighted_total
+) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "Spread",
+    outcome = "Thermo Score",
+    weighted = 1
+  ) |>
+  select(
+    meta_country,
+    der_partisan_type,
+    ap,
+    ci_low,
+    ci_high,
+    measurement,
+    measure,
+    outcome,
+    weighted
+  )
+
+```
+
+```{r}
+#| label: country-wagner-meandistance
+
+distance_individual_country <- thermo_long |>
+  group_by(meta_country, meta_pid, der_partisan_type) |>
+  mutate(
+    like_max = max(thermo_score, na.rm = TRUE)
+  ) |>
+  filter(thermo_score < like_max) |>
+  summarise(
+    n_p = n(),
+    distance_score = sqrt(sum((thermo_score - like_max)^2) / n_p),
+    .groups = "drop"
+  ) |>
+  filter(n_p >= 1, !is.na(distance_score))
+
+ap_distance_country <- distance_individual_country |>
+  group_by(meta_country, der_partisan_type) |>
+  summarise(
+    ap = mean(distance_score),
+    sd_ap = sd(distance_score),
+    n_ap = n(),
+    se = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      is.na(der_partisan_type) ~ "Non-Partisan"
+    )
+  ) |>
+  select(-sd_ap, -n_ap, -se)
+
+ap_distance_country_total <- distance_individual_country |>
+  filter(!is.na(der_partisan_type)) |>
+  group_by(meta_country) |>
+  summarise(
+    ap = mean(distance_score),
+    sd_ap = sd(distance_score),
+    n_ap = n(),
+    se = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = "Total"
+  ) |>
+  select(-sd_ap, -n_ap, -se)
+
+ap_distance_country <- bind_rows(
+  ap_distance_country,
+  ap_distance_country_total
+) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "Distance",
+    outcome = "Thermo Score",
+    weighted = 0
+  ) |>
+  select(
+    meta_country,
+    der_partisan_type,
+    ap,
+    ci_low,
+    ci_high,
+    measurement,
+    measure,
+    outcome,
+    weighted
+  )
+
+```
+
+```{r}
+#| label: country-wagner-distance-weighted
+
+thermo_dist_weighted <- thermo_long |>
+  left_join(
+    votes_per_party |>
+      select(meta_country, der_vote_combined_name, v_p = der_anchor_vote_share),
+    by = c("meta_country", "thermo_party" = "der_vote_combined_name")
+  ) |>
+  filter(!is.na(v_p), !is.na(thermo_score)) |>
+  group_by(meta_country, meta_pid) |>
+  mutate(
+    like_max = max(thermo_score, na.rm = TRUE)
+  ) |>
+  filter(thermo_score < like_max) |>
+  ungroup()
+
+api_distance_weighted_ind <- thermo_dist_weighted |>
+  group_by(meta_country, meta_pid, der_partisan_type) |>
+  summarise(
+    w_sum_v = sum(v_p),
+    distance_score = sqrt(sum(v_p * (thermo_score - like_max)^2) / w_sum_v),
+    n_p = n(),
+    .groups = "drop"
+  ) |>
+  filter(n_p >= 1, !is.na(distance_score))
+
+ap_distance_country_weighted <- api_distance_weighted_ind |>
+  group_by(meta_country, der_partisan_type) |>
+  summarise(
+    ap = mean(distance_score),
+    sd_ap = sd(distance_score),
+    n_ap = n(),
+    se = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = case_when(
+      der_partisan_type == 1 ~ "Explicit",
+      der_partisan_type == 0 ~ "Implicit",
+      is.na(der_partisan_type) ~ "Non-Partisan"
+    )
+  ) |>
+  select(-sd_ap, -n_ap, -se)
+
+ap_distance_country_weighted_total <- api_distance_weighted_ind |>
+  filter(!is.na(der_partisan_type)) |>
+  group_by(meta_country) |>
+  summarise(
+    ap = mean(distance_score),
+    sd_ap = sd(distance_score),
+    n_ap = n(),
+    se = sd_ap / sqrt(n_ap),
+    ci_low = ap - 1.96 * se,
+    ci_high = ap + 1.96 * se,
+    .groups = "drop"
+  ) |>
+  mutate(
+    der_partisan_type = "Total"
+  ) |>
+  select(-sd_ap, -n_ap, -se)
+
+ap_distance_country_weighted <- bind_rows(
+  ap_distance_country_weighted,
+  ap_distance_country_weighted_total
+) |>
+  mutate(
+    measurement = "Attitudinal",
+    measure = "Distance",
+    outcome = "Thermo Score",
+    weighted = 1
+  ) |>
+  select(
+    meta_country,
+    der_partisan_type,
+    ap,
+    ci_low,
+    ci_high,
+    measurement,
+    measure,
+    outcome,
+    weighted
+  )
+
+```
+
+```{r}
+#| label: fig-country-ap-comparison
+#| fig-cap: "Comparison of Behavioral and Attitudinal Affective Polarization across 25 European countries. This figure displays aggregated affective polarization (AP) scores across four different operationalizations, categorized by partisan attachment type. Behavioral API (Token) measures the difference in expected token allocations between co-partisans and out-partisans in a conjoint game. Attitudinal API represents @reiljan2020fear's index, calculated as the distance between in-group and average out-group thermometer scores. Attitudinal Distance and Spread follow @wagner2021affective metrics, capturing the root mean square distance from the most-liked party and the overall standard deviation of party evaluations, respectively. All estimates are weighted by party vote shares within each country to reflect national party system compositions and then averaged across 25 European countries. To ensure comparability, attitudinal thermometer scores (originally 0–100) have been rescaled to a 0–10 range to match the behavioral token scale. Explicit partisans are those reporting a psychological attachment to a party; Implicit partisans are those denying attachment but reporting a vote choice; Total represents all individuals with a partisan anchor; and Non-Partisans represent respondents without a reported party anchor. Error bars indicate 95% confidence intervals based on cross-national variance."
+#| fig-dpi: 500
+#| fig-pos : H
+
+toplot_country <- bind_rows(
+  ap_cj_country_unw,
+  ap_cj_country_weighted,
+  ap_thermo_country,
+  ap_thermo_country_weighted,
+  ap_spread_country,
+  ap_spread_country_weighted,
+  ap_distance_country,
+  ap_distance_country_weighted
+)
+
+# minor adjustments for plotting
+nudge_map <- c(
+  "Explicit" = 0.20,
+  "Implicit" = 0.07,
+  "Total" = -0.07,
+  "Non-Partisan" = -0.20
+)
+
+toplot_country <- toplot_country |>
+  mutate(
+    y = factor(
+      paste(measurement, measure),
+      levels = rev(c(
+        "Behavioral API",
+        "Attitudinal API",
+        "Attitudinal Distance",
+        "Attitudinal Spread"
+      ))
+    ),
+    nudge_y = nudge_map[der_partisan_type]
+  )
+
+toplot_country2 <- toplot_country |>
+  filter(weighted == 1)
+
+ggplot(
+  toplot_country2,
+  aes(
+    x = ap,
+    y = y,
+    shape = der_partisan_type,
+    color = der_partisan_type
+  )
+) +
+  # 1) Points nudged based on weight
+  geom_point(
+    position = position_nudge(y = toplot_country2$nudge_y)
+  ) +
+
+  # 2) Error bars nudged the same way and linetype depending on weight
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    position = position_nudge(y = toplot_country2$nudge_y),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP",
+    shape = "Partisan Type",
+    color = "Partisan Type"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1 / 1.618) +
+  facet_wrap(~meta_country)
+
+```
+
+
+# New Figures
+
+```{r}
+#| label: toplot-data
+
+expl_res <- toplot_eu25 |>
+  mutate(meta_country = "EU25") |>
+  relocate(meta_country, .before = der_partisan_type) |>
+  bind_rows(toplot_country) |>
+  rename(measure_id = y)
+
+expl_res_w <- expl_res |>
+  filter(weighted == 1)
+```
+
+
+```{r}
+#| label: fig-measures-country-combined
+#| fig-height: 8
+#| fig-dpi: 500
+
+ggplot(
+  expl_res_w,
+  aes(
+    x = ap,
+    y = meta_country,
+    shape = der_partisan_type,
+    color = der_partisan_type
+  )
+) +
+  # 1) Points nudged based on weight
+  geom_point(position = position_nudge(y = expl_res_w$nudge_y)) +
+
+  # 2) Error bars nudged the same way and linetype depending on weight
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    position = position_nudge(y = expl_res_w$nudge_y),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP",
+    shape = "Partisan Type",
+    color = "Partisan Type"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1) +
+  facet_wrap(~measure_id, scales = "free")
+
+
+```
+
+# Country AP rankings {#sec-country-ranking}
+
+This section shows country rankings of AP values by partisan type and measurement. Use the tabs below to explore each measure.
+
+::: {.panel-tabset}
+
+## Behavioral API
+
+::: {.panel-tabset}
+
+## Implicit
+
+```{r}
+#| label: fig-countryrank-behav-impl
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Implicit",
+    measure_id == "Behavioral API",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Explicit
+
+```{r}
+#| label: fig-countryrank-behav-expl
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Explicit",
+    measure_id == "Behavioral API",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Total
+
+```{r}
+#| label: fig-countryrank-behav-total
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Total",
+    measure_id == "Behavioral API",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+:::
+
+
+## Attitudinal API
+
+::: {.panel-tabset}
+
+## Implicit
+
+```{r}
+#| label: fig-countryrank-attapi-impl
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Implicit",
+    measure_id == "Attitudinal API",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Explicit
+
+```{r}
+#| label: fig-countryrank-attapi-expl
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Explicit",
+    measure_id == "Attitudinal API",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Total
+
+```{r}
+#| label: fig-countryrank-attapi-total
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Total",
+    measure_id == "Attitudinal API",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+:::
+
+## Attitudinal Distance
+
+::: {.panel-tabset}
+
+## Implicit
+
+```{r}
+#| label: fig-countryrank-attdist-impl
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Implicit",
+    measure_id == "Attitudinal Distance",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Explicit
+
+```{r}
+#| label: fig-countryrank-attdist-expl
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Explicit",
+    measure_id == "Attitudinal Distance",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Total
+
+```{r}
+#| label: fig-countryrank-attdist-total
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Total",
+    measure_id == "Attitudinal Distance",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Non-Partisans
+
+```{r}
+#| label: fig-countryrank-attdist-non
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Non-Partisan",
+    measure_id == "Attitudinal Distance",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+:::
+
+## Attitudinal Spread
+
+::: {.panel-tabset}
+
+## Implicit
+
+```{r}
+#| label: fig-countryrank-attspread-impl
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Implicit",
+    measure_id == "Attitudinal Spread",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Explicit
+
+```{r}
+#| label: fig-countryrank-attspread-expl
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Explicit",
+    measure_id == "Attitudinal Spread",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Total
+
+```{r}
+#| label: fig-countryrank-attspread-total
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Total",
+    measure_id == "Attitudinal Spread",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+## Non-Partisans
+
+```{r}
+#| label: fig-countryrank-attspread-non
+
+expl_res_w |>
+  filter(
+    der_partisan_type == "Non-Partisan",
+    measure_id == "Attitudinal Spread",
+  ) |>
+  mutate(meta_country = fct_reorder(meta_country, ap)) |>
+  ggplot(aes(x = ap, y = meta_country)) +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP"
+  ) +
+  theme_pubr() +
+  theme(aspect.ratio = 1.618 / 1)
+```
+
+:::
+
+
+:::
+
+
+```{r}
+#| label: interactive-figure
+#| eval: false
+
+# Unique options for dropdowns
+partisan_types <- unique(expl_res_w$der_partisan_type)
+measure_ids <- unique(expl_res_w$measure_id)
+
+ui <- fluidPage(
+  titlePanel("Country Rankings by AP"),
+
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(
+        "type",
+        "Select partisan type for sorting:",
+        choices = partisan_types,
+        selected = "Implicit"
+      ),
+      selectInput(
+        "measure",
+        "Select measure_id:",
+        choices = measure_ids,
+        selected = "Behavioral API"
+      )
+    ),
+
+    mainPanel(
+      plotOutput("ap_plot", height = "800px")
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$ap_plot <- renderPlot({
+    # Filter and reorder based on user selection
+    expl_res_w %>%
+      filter(
+        der_partisan_type == input$type,
+        measure_id == input$measure
+      ) %>%
+      mutate(meta_country = fct_reorder(meta_country, ap)) %>%
+      ggplot(aes(x = ap, y = meta_country)) +
+      geom_point() +
+      geom_errorbar(aes(xmin = ci_low, xmax = ci_high), width = 0.1) +
+      geom_vline(xintercept = 0, linetype = "dashed") +
+      labs(
+        y = "",
+        x = "AP",
+        shape = "Partisan Type",
+        color = "Partisan Type"
+      ) +
+      theme_pubr() +
+      theme(aspect.ratio = 1.618 / 1)
+  })
+}
+
+shinyApp(ui, server)
+
+
+```
 
 # Session Info
 
