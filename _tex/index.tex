@@ -192,7 +192,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={How does partisan type influence affective polarization?},
+  pdftitle={How does partisan attachement influence affective polarization?},
   pdfauthor={Tristan Muno; Thomas König},
   colorlinks=true,
   linkcolor={blue},
@@ -202,7 +202,7 @@
   pdfcreator={LaTeX via pandoc}}
 
 
-\title{How does partisan type influence affective
+\title{How does partisan attachement influence affective
 polarization?\thanks{Space for acknowledgements. Wordcount: .}}
 \usepackage{etoolbox}
 \makeatletter
@@ -213,7 +213,7 @@ polarization?\thanks{Space for acknowledgements. Wordcount: .}}
 \subtitle{Conceptualization, measurement, and scope conditions in 25
 European democracies}
 \author{Tristan Muno \and Thomas König}
-\date{February 2, 2026}
+\date{February 10, 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
@@ -223,215 +223,182 @@ author's permission. Current status: framing and roadmap notes.
 
 
 \setstretch{2}
-We distinguish between \textbf{explicit identifiers}, \textbf{implicit
-partisans (vote-based)}, and \textbf{non-partisans}.
-
-The core claim of the paper is that \emph{observed levels and
-cross-national patterns of affective polarization (AP) depend
-systematically on how partisanship and polarization are conceptualized
-and measured} in multi-party systems.
-
-\section{Data and empirical domain}\label{data-and-empirical-domain}
-
-We use data from Hahm, Hilpert, and König
-(\citeproc{ref-hahm2024divided}{2024}), collected in \textbf{2019} in 25
-European democracies (all EU member states at the time except Luxembourg
-and Malta, plus the UK).
-
-The dataset has been used to study partyism and coalition partnership
-dynamics (e.g., APSR article based on the same project), but our
-contribution differs in focus:\\
-we center on \textbf{conceptualization, measurement, and comparative
-scope conditions of affective polarization} rather than coalition
-alignment or generalized partyism.
-
-Temporal limitation:
+\section{Introduction}\label{introduction}
 
 \begin{itemize}
-\tightlist
 \item
-  Data stem from a two cross-sectional waves (2019).\\
+  Affective polarization is a phenomenon that has received enormous
+  prominence among political science since Iyengar, Sood, and Lelkes
+  (\citeproc{ref-iyengar2012affect}{2012}) seminal paper
 \item
-  Findings do not capture post-2019 developments (e.g., pandemic
-  politics, recent electoral realignments).
-\end{itemize}
-
-\section{Framing: Conceptual proliferation in comparative AP
-research}\label{framing-conceptual-proliferation-in-comparative-ap-research}
-
-Affective polarization has become central in political science and is
-increasingly studied in \textbf{comparative multi-party systems}. This
-expansion raises conceptual and methodological questions.
-
-Recent work distinguishes between:
-
-\begin{itemize}
-\tightlist
+  This surge has stipulated various theoretical, conceptual and
+  measurement debates
 \item
-  \textbf{Ideological vs.~ideational polarization}
+  Traditionally originating in the American two-party context,
+  comparative scholars increasingly focussed on transferring insights
+  and approaches to multiparty systems, whose party system structures
+  complicates both theorizing and empirically investigating AP
 \item
-  \textbf{Identity-based vs.~attitude-based affective polarization}
-\item
-  \textbf{Targets of affect}
-  (\citeproc{ref-areal2024verticalvshorizontal}{Areal and Harteveld
-  2024}; \citeproc{ref-rollicke2023polarisation}{Röllicke 2023};
-  \citeproc{ref-reiljan2024patterns}{Reiljan et al. 2024}):
+  Basic AP in 2012:
 
   \begin{itemize}
   \tightlist
   \item
-    Vertical/political (toward political elites (LAP) / parties (PAP))
+    introduces distinction between ideological and affective
+    polarization
   \item
-    Horizontal/social (toward fellow citizens / partisans)
+    ingroup love and outgroup hate in partisan / political contexts
+  \item
+    US: two parties -\textgreater{} partisan ingroup / outgroup
+    distinction easy
+  \item
+    ambiguities:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      polarization as \emph{state} (levels of AP) or \emph{process}
+      (trends of AP)?
+    \item
+      normative implications: early research posited negative
+      implications for democracy, recent studies question this simple
+      association
+    \end{itemize}
   \end{itemize}
+\item
+  Refinements since:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    differentiating the targets of AP: horizontal or social AP (among
+    citizens) vs vertical or political AP (toward parties (PAP) or party
+    leaders (LAP))
+  \item
+    differentiating attitudinal/expressive AP (e.g.~thermoscores) and
+    behavioral AP (e.g.~Trust Games)
+  \item
+    conceptual and measurement closely related:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      how to define ingroup(s), one or multiple?
+
+      \begin{itemize}
+      \tightlist
+      \item
+        how to \emph{code} ingroup(s)? Identity/attachement vs (rep.)
+        vote choice?
+      \end{itemize}
+    \item
+      how to define outgroup(s), least liked or average across
+      outgroups?
+    \item
+      inclusion or exclusion of non-partisans
+    \item
+      in comparative literature, three main approaches have mostly been
+      applied to measure AP with thermometer ratings:
+
+      \begin{itemize}
+      \tightlist
+      \item
+        Reiljan (\citeproc{ref-reiljan2020fear}{2020})'s AP index, which
+        assignes an ingroup and averages across all outgroups, the
+        difference constituting the AP quantity
+      \item
+        Wagner (\citeproc{ref-wagner2021affective}{2021}) mean distance
+        from most liked party
+      \item
+        Wagner (\citeproc{ref-wagner2021affective}{2021})'s average
+        spread of scores
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\item
+  Problems/Implications Extending it to multiparty systems:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Lack of systematic study of implications of measurement / conceptual
+    choices for studying AP in comparative multi-party settings
+  \item
+    We address this gap leveraging a cross-sectional survey experiment
+    fieldes in 25 European multiparty democracies
+  \item
+    Focus on:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      Operationalization of partisans:
+
+      \begin{itemize}
+      \tightlist
+      \item
+        how do AP estimates differ between respondents that report to
+        feel attached to a party (explicit partisans) compared to those
+        that neglegted such an attachement, yet still reported a vote
+        choice (implicit partisans)?
+      \item
+        how do the distribution of implicit/explicit partisans vary
+        across countries -\textgreater{} cross-national variation imply
+        differential consequences of partisan operationalization for
+        external validity of study, as partisan sample my or may not be
+        representative population of interest
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\item
+  Study proceeds in three substudies / analyses:
 \end{itemize}
-
-In multi-party systems, additional choices matter:
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Ingroup identification}: explicit identification vs.~vote
-  intention/choice\\
-\item
-  \textbf{Outgroup construction}: all parties vs.~most distant party\\
-\item
-  \textbf{Weighting by party size}\\
-\item
-  Inclusion (or exclusion) of \textbf{non-partisans}
-\end{itemize}
-
-Comparative research has rarely examined how these design choices
-affect:
-
-\begin{itemize}
-\tightlist
-\item
-  the magnitude of AP,
-\item
-  cross-country rankings,
-\item
-  and substantive inferences about democratic implications.
-\end{itemize}
-
-This is our entry point.
-
-\section{Analytical separation of
-components}\label{analytical-separation-of-components}
-
-We proceed in three conceptually distinct steps:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
+\tightlist
 \item
-  \textbf{Thermometer-based AP (attitudinal; vertical;
-  party-targeted)}\\
-  → Used to illustrate how operationalization choices affect comparative
-  inference in multi-party systems.
+  Analysis of Thermometer Items (attitudinal, vertical, party-targeted)
+  -\textgreater{} how does measurement and conceptualization influence
+  the resulting estimates of AP?
 \item
-  \textbf{Behavioral AP (conjoint; horizontal; citizen-targeted)}\\
-  → Estimated via solidarity and trust games.\\
-  → Presented as behavioral consequences of partisan boundaries.
+  Analysis of Behavioral Consequences (behavioral, horizontal,
+  citizen-targeted conjoint scenario) -\textgreater{} how does
+  measurement and conceptualization influence the behavioral
+  consequences of AP?
 \item
-  \textbf{Comparative scope and composition}\\
-  → How the distribution of partisan types across 25 democracies
-  conditions aggregate AP.
+  Analysis of AP Sorting with Muslim attribute -\textgreater{} how does
+  partisan AP interact with other salient group identities? Muslimhood
+  as salient out-group feature in European societies -\textgreater{}
+  conjoint experiment: assumes uniform distribution -\textgreater{}
+  unrealistic but interesting (if ``Muslim'' feature uniformly
+  distributed, AP asymetrically affected -\textgreater{} social identity
+  complexity, interactions can be asymmetric) -\textgreater{} use
+  empirical distribution of Muslim partisan respondents -\textgreater{}
+  AP x Muslim estimate in sorted scenario
 \end{enumerate}
 
-We explicitly separate thermometer and game results to avoid conflating:
+\section{Theory}\label{theory}
 
-\begin{itemize}
-\tightlist
-\item
-  concept,
-\item
-  measurement,
-\item
-  and behavioral manifestation.
-\end{itemize}
+The central reseach question is: How do conceptual and measurement
+choices condition our understanding of AP in multiparty democracies?
 
-\section{Part I -- Thermometer-based affective
-polarization}\label{part-i-thermometer-based-affective-polarization}
+We proceed in steps. In our first study
 
-This section uses \emph{only party-targeted thermometer items}.
+\section{Research Design}\label{research-design}
 
-Key limitation:
+\subsection{Data}\label{data}
 
-\begin{itemize}
-\tightlist
-\item
-  No direct measure of affect toward fellow citizens.
-\item
-  Thus: vertical (party) rather than horizontal (citizen) AP.
-\end{itemize}
+\subsection{Empirical Strategy}\label{empirical-strategy}
 
-\subsection{Roadmap for this section}\label{roadmap-for-this-section}
+\section{Results}\label{results}
 
-We demonstrate how AP estimates change depending on:
+\subsection{Study 1: Operationalizing Attitudinal Affective Polarization
+in Multiparty
+Systems}\label{study-1-operationalizing-attitudinal-affective-polarization-in-multiparty-systems}
 
-\begin{itemize}
-\tightlist
-\item
-  Explicit vs.~implicit ingroup definition\\
-\item
-  Inclusion vs.~exclusion of non-partisans\\
-\item
-  Alternative aggregation and weighting strategies
-\end{itemize}
-
-Main goal: Show that in multi-party systems, the \emph{choice of
-operationalization} meaningfully affects:
-
-\begin{itemize}
-\tightlist
-\item
-  effect sizes,
-\item
-  country rankings,
-\item
-  dispersion across countries.
-\end{itemize}
-
-This directly addresses open questions about the transferability of
-U.S.-centric AP concepts to fragmented party systems.
-
-\subsection{Comparative composition of partisan types (idea
-notes)}\label{comparative-composition-of-partisan-types-idea-notes}
-
-The share of:
-
-\begin{itemize}
-\tightlist
-\item
-  explicit identifiers,
-\item
-  implicit (vote-based) partisans,
-\item
-  non-partisans,
-\end{itemize}
-
-varies substantially across countries.
-
-Loose idea for theoretical anchoring:
-
-\begin{itemize}
-\tightlist
-\item
-  Link variation to classic work on partisan dealignment in Europe
-\item
-  Consider long-term differences in party system institutionalization
-  and partisan attachment
-\item
-  Connect to literature on party identification decline and electoral
-  volatility in Europe.
-\end{itemize}
-
-Potential implication: Countries with weak partisan identities may
-mechanically display lower identity-based AP but not necessarily lower
-behavioral discrimination.
-
-This section remains exploratory and descriptive but could situate our
-compositional findings in broader comparative political culture debates.
+RQ: How do alternative operationalizations of partisanship and
+thermometer-based indices affect estimates of attitudinal AP?
 
 \begin{figure}[H]
 
@@ -457,277 +424,254 @@ respondents each (detailed numbers are reported in appendix section X).}
 \href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-fig-impl-expl-distribution}{Code
 Notebook 3.1}}
 
-\section{Part II -- Behavioral polarization as
-consequences}\label{part-ii-behavioral-polarization-as-consequences}
+-\textgreater{} Distribution of reported attachement (explicit types) or
+partisan composition varies susbtantially across countries
 
-We present the conjoint results separately from thermometer analyses.
+-\textgreater{} share of explicit partisans varies from
+\textasciitilde85\% in Denmark to \textasciitilde41\% in Latvia
 
-Conceptual shift:
+-\textgreater{} share of implicit partisans varies from
+\textasciitilde41\% in Latvia to 8\% in Denmark
 
-\begin{itemize}
-\tightlist
-\item
-  From \textbf{attitudinal differentiation toward parties (vertical)}\\
-  to\\
-\item
-  \textbf{Behavioral discrimination toward fellow citizens
-  (horizontal)}.
-\end{itemize}
-
-Outcomes:
-
-\begin{itemize}
-\tightlist
-\item
-  Solidarity allocations (dictator game logic)
-\item
-  Trust allocations (trust game logic)
-\end{itemize}
-
-Here, affective polarization manifests as:
-
-\begin{itemize}
-\tightlist
-\item
-  Differential allocation toward co-partisans vs.~out-partisans.
-\end{itemize}
-
-We treat these as \textbf{behavioral consequences of partisan
-boundaries}, rather than as alternative scaling of thermometer AP.
-
-Open conceptual question: To what extent do attitudinal (vertical) and
-behavioral (horizontal) AP align within and across countries?
-
-Possible empirical extension:
-
-\begin{itemize}
-\tightlist
-\item
-  Estimate correlation between country-level attitudinal AP and
-  behavioral AP (posterior correlation).
-\end{itemize}
-
-\section{Muslimhood, partisan interaction, and sorting (targeted
-extension)}\label{muslimhood-partisan-interaction-and-sorting-targeted-extension}
-
-The religion attribute in the conjoint is \textbf{uniformly randomized}
-across:
-
-\begin{itemize}
-\tightlist
-\item
-  Muslim\\
-\item
-  Christian\\
-\item
-  Non-religious
-\end{itemize}
-
-Thus, estimates assume \textbf{no religious sorting} in exposure.
-
-Exploratory results (note to be formalized):
-
-\begin{itemize}
-\tightlist
-\item
-  Muslim co-partisans receive fewer tokens than Christian or
-  non-religious co-partisans.
-\item
-  Muslim out-partisans receive fewer tokens than Christian or
-  non-religious out-partisans.
-\item
-  The penalty is larger within the co-partisan condition than within the
-  out-partisan condition.
-\item
-  Interaction effects are therefore \textbf{asymmetric}, not uniform
-  across partisan categories.
-\end{itemize}
-
-Two implications:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item
-  \textbf{Theoretical}:\\
-  One should not assume symmetric sorting or interaction effects between
-  partisan and religious identities.\\
-  Minority attributes may condition in-group favoritism differently than
-  out-group derogation.
-\item
-  \textbf{External validity}:\\
-  Because religion is uniformly distributed by design, real-world
-  exposure patterns (where Muslim citizens are not evenly distributed
-  across partisan categories) are not reflected.
-\end{enumerate}
-
-Possible extension:
-
-\begin{itemize}
-\tightlist
-\item
-  Incorporate prior information about realistic joint distributions of
-  religion × partisanship to simulate more externally valid scenarios.
-\item
-  Use the uniform design as a benchmark (``no-sorting counterfactual'')
-  against which realistic sorting patterns could be contrasted.
-\end{itemize}
+-\textgreater{} share of non-partisans varies from 23\% in Croatia to
+6\% in Estonia
 
 \begin{figure}[H]
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.2_ap_measures-fig-eu25-ap-comparison-output-1.png}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.2_ap_measures-fig-eu25-ap-comparison-thermo-output-1.png}}
 
 }
 
-\caption{\label{fig-eu25-ap-comparison}Comparison of Behavioral and
-Attitudinal Affective Polarization in the EU25. This figure displays
-aggregated affective polarization (AP) scores across four different
-operationalizations, categorized by partisan attachment type. Behavioral
-API (Token) measures the difference in expected token allocations
-between co-partisans and out-partisans in a conjoint game. Attitudinal
-API represents Reiljan (\citeproc{ref-reiljan2020fear}{2020})'s index,
-calculated as the distance between in-group and average out-group
-thermometer scores. Attitudinal Distance and Spread follow Wagner
-(\citeproc{ref-wagner2021affective}{2021}) metrics, capturing the root
-mean square distance from the most-liked party and the overall standard
+\caption{\label{fig-eu25-ap-comparison-thermo}Attitudinal Affective
+Polarization in the EU25. This figure displays aggregated attitudinal AP
+scores across three operationalizations, categorized by partisan
+attachement type. API follows Reiljan
+(\citeproc{ref-reiljan2020fear}{2020})'s and is calculated as the
+distance between in-group and average out-group feeling thermometer
+scores. Distance and Spread follow Wagner
+(\citeproc{ref-wagner2021affective}{2021}), capturing the root mean
+square distance from the most-liked party and the overall standard
 deviation of party evaluations, respectively. All estimates are weighted
 by party vote shares within each country to reflect national party
-system compositions and then averaged across 25 European countries. To
-ensure comparability, attitudinal thermometer scores (originally 0--100)
-have been rescaled to a 0--10 range to match the behavioral token scale.
-Explicit partisans are those reporting a psychological attachment to a
-party; Implicit partisans are those denying attachment but reporting a
-vote choice; Total represents all individuals with a partisan anchor;
-and Non-Partisans represent respondents without a reported party anchor.
-Error bars indicate 95\% confidence intervals based on cross-national
+system compositions and then averaged across 25 European countries.
+{[}OLD: To ensure comparability across measures, thermometer scores
+(originally 0--100) are rescaled to a 0--10 range{]}. Explicit partisans
+are respondents reporting a psychological attachment to a party;
+Implicit partisans are those denying partisan attachment but reporting a
+vote choice; Total includes all individuals with a partisan anchor; and
+Non-Partisans are respondents without a reported party anchor. Error
+bars indicate 95\% confidence intervals based on cross-national
 variance.}
 
 \end{figure}%
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-eu25-ap-comparison}{Code
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-eu25-ap-comparison-thermo}{Code
 Notebook 3.2}}
 
-\section{Modeling strategy (note)}\label{modeling-strategy-note}
+-\textgreater{} across measures, explicit partisans systematically
+higher AP than implicit -\textgreater{} Non-partisans (which can be
+included in Wagner measures) systematically less polarized
+-\textgreater{} restricting sample to explicit partisans (identifiers)
+yields higher aggregate AP
 
-Planned approach:
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.2_ap_measures-fig-country-ap-comparison-thermo-output-1.png}}
+
+}
+
+\caption{\label{fig-country-ap-comparison-thermo}Attitudinal Affective
+Polarization across European Countries.This figure displays
+country-specific estimates of attitudinal affective polarization (AP)
+across three operationalizations and partisan attachment types.
+Attitudinal API follows Reiljan (\citeproc{ref-reiljan2020fear}{2020})
+and is calculated as the distance between in-group and average out-group
+feeling thermometer scores. Attitudinal Distance and Spread follow
+wagner2021affective, capturing the root mean square distance from the
+most-liked party and the overall standard deviation of party
+evaluations, respectively. Estimates are calculated separately for each
+country and weighted by party vote shares to reflect national party
+system compositions. Thermometer scores (originally 0--100) are rescaled
+to a 0--10 range to ensure comparability across measures. Explicit
+partisans are respondents reporting a psychological attachment to a
+party; Implicit partisans are those denying partisan attachment but
+reporting a vote choice; Total includes all individuals with a partisan
+anchor; and Non-Partisans are respondents without a reported party
+anchor. Error bars indicate 95\% confidence intervals.}
+
+\end{figure}%
+
+\textsubscript{Source:
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-country-ap-comparison-thermo}{Code
+Notebook 3.2}}
+
+\subsection{Study 2: Behavioral Consequences of Affective
+Polarization}\label{study-2-behavioral-consequences-of-affective-polarization}
+
+RQ: Do these operational differences alter the observed behavioral
+consequences of polarization?
+
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.2_ap_measures-fig-eu25-ap-comparison-cj-output-1.png}}
+
+}
+
+\caption{\label{fig-eu25-ap-comparison-cj}Behavioral Affective
+Polarization in the EU25. This figure displays aggregated behavioral
+affective polarization (AP) scores across partisan attachment types.
+Behavioral API (Token) measures the difference in expected token
+allocations between co-partisans and out-partisans in a conjoint
+allocation game. All estimates are weighted by party vote shares within
+each country to reflect national party system compositions and then
+averaged across 25 European countries. Explicit partisans are
+respondents reporting a psychological attachment to a party; Implicit
+partisans are those denying partisan attachment but reporting a vote
+choice; Total includes all individuals with a partisan anchor; and
+Non-Partisans are respondents without a reported party anchor. Error
+bars indicate 95\% confidence intervals based on cross-national
+variance.}
+
+\end{figure}%
+
+\textsubscript{Source:
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-eu25-ap-comparison-cj}{Code
+Notebook 3.2}}
+
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.2_ap_measures-fig-country-ap-comparison-cj-output-1.png}}
+
+}
+
+\caption{\label{fig-country-ap-comparison-cj}Behavioral Affective
+Polarization across European Countries. This figure displays
+country-specific estimates of behavioral affective polarization (AP)
+across partisan attachment types. Behavioral API (Token) measures the
+difference in expected token allocations between co-partisans and
+out-partisans in a conjoint allocation game. Estimates are calculated
+separately for each country and weighted by party vote shares to reflect
+national party system compositions. Explicit partisans are respondents
+reporting a psychological attachment to a party; Implicit partisans are
+those denying partisan attachment but reporting a vote choice; Total
+includes all individuals with a partisan anchor; and Non-Partisans are
+respondents without a reported party anchor. Error bars indicate 95\%
+confidence intervals.}
+
+\end{figure}%
+
+\textsubscript{Source:
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-country-ap-comparison-cj}{Code
+Notebook 3.2}}
+
+\subsection{Study 3: Partisan Sorting and Muslim Outgroup
+Salience}\label{study-3-partisan-sorting-and-muslim-outgroup-salience}
+
+How does partisan affective polarization interact with salient outgroup
+identities -- specifically Muslimhood -- to structure patterns of
+political sorting?
+
+\section{Limitations}\label{limitations}
 
 \begin{itemize}
 \tightlist
 \item
-  Hierarchical (partial pooling) estimation for country-level
-  quantities.
-\item
-  EU-level benchmarks derived via marginalization over country-level
-  posteriors.
-\item
-  Report standardized or scale-relative effects (thermometer vs.~token
-  scales not directly comparable).
+  Party-targeted attitudinal measures only
 \end{itemize}
 
-Potential extension:
+The attitudinal analysis relies exclusively on party-targeted
+thermometer ratings. It does not include direct citizen-targeted affect
+measures, limiting conclusions about horizontal affective polarization
+at the attitudinal level.
 
 \begin{itemize}
 \tightlist
 \item
-  Estimate posterior correlation between country-level attitudinal AP
-  and behavioral AP.
+  Assumption underlying party-size weighting
 \end{itemize}
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+Weighting by electoral party size---common in the
+literature---implicitly assumes that the probability of encountering
+partisans is proportional to vote share. This may not hold if certain
+parties (e.g., radical challenger parties) are socially more or less
+visible than their electoral strength suggests.
 
-\section{Limitations (draft notes)}\label{limitations-draft-notes}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
+\begin{itemize}
+\tightlist
 \item
-  \textbf{Party-targeted thermometers only}\\
-  → No direct citizen-targeted affect measure in the attitudinal
-  section.
-\item
-  \textbf{Weighting by party size}\\
-  Assumes encounter probability proportional to electoral share.\\
-  Social visibility may violate this (e.g., radical challenger parties).
-\item
-  \textbf{Uniform conjoint distribution}\\
-  No endogenous religious sorting; real-world joint distributions may
-  differ.
-\item
-  \textbf{Cross-sectional design (2019)}\\
-  Results capture a specific pre-pandemic political context.\\
-  No dynamic inference about temporal change.
-\end{enumerate}
+  Cross-sectional design (2019)
+\end{itemize}
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+The data capture a specific pre-pandemic political context and allow
+inference only about the level (state) of affective polarization at that
+point in time. The design does not permit conclusions about temporal
+dynamics or trends.
 
-\section{Contribution (working
-formulation)}\label{contribution-working-formulation}
+\begin{itemize}
+\tightlist
+\item
+  External validity of the experimental setting
+\end{itemize}
 
-In comparative multi-party systems:
+Although the conjoint experiment approximates horizontal, citizen-level
+interactions, it remains an artificial setting. In real-world
+encounters, identities are rarely presented as explicit labels. Instead,
+they are inferred through cues and cognitive processes. This limits the
+direct generalizability of experimentally induced identity effects to
+everyday social interactions.
+
+\section{Conclusion}\label{conclusion}
+
+(Preliminary thoughts) In comparative multi-party systems:
 
 \begin{itemize}
 \tightlist
 \item
   Affective polarization is not a single quantity.
 \item
-  Its magnitude and cross-national configuration depend on:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    ingroup definition,
-  \item
-    inclusion of non-partisans,
-  \item
-    aggregation rules,
-  \item
-    and whether polarization is conceptualized vertically or
-    horizontally.
-  \end{itemize}
+  Its magnitude and cross-national configuration depend on: -
+  measurement instrument (attitudinal/behavioral) - ingroup definition
+  (implicit/explicit/all), - inclusion of non-partisans, - and whether
+  polarization is conceptualized vertically or horizontally.
 \end{itemize}
 
 Rather than asking only \emph{``How polarized are European
 democracies?''},\\
 we ask:
 
-\textbf{How does conceptualization reshape what, and even who, we
-observe as polarized in multi-party contexts?}
+How does conceptualization reshape what, and even who, we observe as
+polarized in multi-party contexts?
 
 \section{References}\label{references}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
-\bibitem[\citeproctext]{ref-areal2024verticalvshorizontal}
-Areal, J., and E. Harteveld. 2024. {``Vertical Vs Horizontal Affective
-Polarization: Disentangling Feelings Towards Elites and Voters.''}
-\emph{Electoral Studies} 90.
-\url{https://doi.org/10.1016/j.electstud.2024.102814}.
-
 \bibitem[\citeproctext]{ref-hahm2024divided}
 Hahm, Hyeonho, David Hilpert, and Thomas König. 2024. {``Divided We
 Unite: The Nature of Partyism and the Role of Coalition Partnership in
 Europe.''} \emph{American Political Science Review} 118 (1): 69--87.
 \url{https://doi.org/10.1017/S0003055423000266}.
 
+\bibitem[\citeproctext]{ref-iyengar2012affect}
+Iyengar, Shanto, Gaurav Sood, and Yphtach Lelkes. 2012. {``Affect, Not
+Ideology: A Social Identity Perspective on Polarization.''} \emph{Public
+Opinion Quarterly} 76 (3): 405--31.
+\url{https://doi.org/10.1093/poq/nfs038}.
+
 \bibitem[\citeproctext]{ref-reiljan2020fear}
 Reiljan, Andres. 2020. {``{`Fear and Loathing Across Party Lines'}(also)
 in Europe: Affective Polarisation in European Party Systems.''}
 \emph{European Journal of Political Research} 59 (2): 376--96.
 \url{https://doi.org/10.1111/1475-6765.12351}.
-
-\bibitem[\citeproctext]{ref-reiljan2024patterns}
-Reiljan, Andres, Diego Garzia, Frederico Ferreira Da Silva, and
-Alexander H Trechsel. 2024. {``Patterns of Affective Polarization Toward
-Parties and Leaders Across the Democratic World.''} \emph{American
-Political Science Review} 118 (2): 654--70.
-\url{https://doi.org/10.1017/S0003055423000485}.
-
-\bibitem[\citeproctext]{ref-rollicke2023polarisation}
-Röllicke, L. 2023. {``Polarisation, Identity and Affect -
-Conceptualising Affective Polarisation in Multi-Party Systems.''}
-\emph{Electoral Studies} 85.
-\url{https://doi.org/10.1016/j.electstud.2023.102655}.
 
 \bibitem[\citeproctext]{ref-wagner2021affective}
 Wagner, Markus. 2021. {``Affective Polarization in Multiparty
