@@ -1305,7 +1305,7 @@ ap_cj_country_unw <- eu25games2019 |>
     n = n(),
     .groups = "drop"
   ) |>
-  tidyr::pivot_wider(
+  pivot_wider(
     names_from = der_partisan_relationship,
     values_from = c(mean, sd, n)
   ) |>
@@ -1314,7 +1314,7 @@ ap_cj_country_unw <- eu25games2019 |>
     se = sqrt(sd_Co^2 / n_Co + sd_Out^2 / n_Out),
     ci_low = ap - 1.96 * se,
     ci_high = ap + 1.96 * se,
-    der_partisan_type = dplyr::case_when(
+    der_partisan_type = case_when(
       der_partisan_type == 1 ~ "Explicit",
       der_partisan_type == 0 ~ "Implicit"
     )
@@ -1335,7 +1335,7 @@ ap_cj_country_total_unw <- eu25games2019 |>
     n = n(),
     .groups = "drop"
   ) |>
-  tidyr::pivot_wider(
+  pivot_wider(
     names_from = der_partisan_relationship,
     values_from = c(mean, sd, n)
   ) |>
@@ -1395,7 +1395,7 @@ ap_country_party_weighted <- eu25games2019 |>
     n = n(),
     .groups = "drop"
   ) |>
-  tidyr::pivot_wider(
+  pivot_wider(
     names_from = der_partisan_relationship,
     values_from = c(mean, sd, n)
   ) |>
@@ -1460,7 +1460,7 @@ ap_country_party_total_w <- eu25games2019 |>
     n = n(),
     .groups = "drop"
   ) |>
-  tidyr::pivot_wider(
+  pivot_wider(
     names_from = der_partisan_relationship,
     values_from = c(mean, sd, n)
   ) |>
