@@ -1173,7 +1173,7 @@ ggplot(
   toplot_eu25_3,
   aes(
     x = ap,
-    y = y,
+    y = measure,
     shape = der_partisan_type,
     color = der_partisan_type
   )
@@ -2115,6 +2115,180 @@ ggplot(
   facet_wrap(~meta_country)
 
 ```
+
+```{r}
+#| label: fig-country-ap-comparison-thermo
+#| fig-cap: "Attitudinal Affective Polarization across European Countries.This figure displays country-specific estimates of attitudinal affective polarization (AP) across three operationalizations and partisan attachment types. Attitudinal API follows @reiljan2020fear and is calculated as the distance between in-group and average out-group feeling thermometer scores. Attitudinal Distance and Spread follow wagner2021affective, capturing the root mean square distance from the most-liked party and the overall standard deviation of party evaluations, respectively. Estimates are calculated separately for each country and weighted by party vote shares to reflect national party system compositions. Thermometer scores (originally 0–100) are rescaled to a 0–10 range to ensure comparability across measures. Explicit partisans are respondents reporting a psychological attachment to a party; Implicit partisans are those denying partisan attachment but reporting a vote choice; Total includes all individuals with a partisan anchor; and Non-Partisans are respondents without a reported party anchor. Error bars indicate 95% confidence intervals."
+#| fig-dpi: 500
+#| fig-pos : H
+#| fig-width: 7
+#| fig-height: 10
+
+toplot_country <- bind_rows(
+  ap_cj_country_unw,
+  ap_cj_country_weighted,
+  ap_thermo_country,
+  ap_thermo_country_weighted,
+  ap_spread_country,
+  ap_spread_country_weighted,
+  ap_distance_country,
+  ap_distance_country_weighted
+)
+
+# minor adjustments for plotting
+nudge_map <- c(
+  "Explicit" = 0.20,
+  "Implicit" = 0.07,
+  "Total" = -0.07,
+  "Non-Partisan" = -0.20
+)
+
+toplot_country <- toplot_country |>
+  mutate(
+    y = factor(
+      paste(measurement, measure),
+      levels = rev(c(
+        "Behavioral API",
+        "Attitudinal API",
+        "Attitudinal Distance",
+        "Attitudinal Spread"
+      ))
+    ),
+    nudge_y = nudge_map[der_partisan_type]
+  )
+
+toplot_country3 <- toplot_country |>
+  filter(
+    weighted == 1,
+    measurement == "Attitudinal"
+  )
+
+ggplot(
+  toplot_country3,
+  aes(
+    x = ap,
+    y = measure,
+    shape = der_partisan_type,
+    color = der_partisan_type
+  )
+) +
+  # 1) Points nudged based on weight
+  geom_point(
+    position = position_nudge(y = toplot_country3$nudge_y)
+  ) +
+
+  # 2) Error bars nudged the same way and linetype depending on weight
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    position = position_nudge(y = toplot_country3$nudge_y),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP",
+    shape = "Partisan Type",
+    color = "Partisan Type"
+  ) +
+  theme_pubr() +
+  # theme(aspect.ratio = 1 / 1.618) +
+  facet_wrap(~meta_country)
+
+```
+
+```{r}
+#| label: fig-country-ap-comparison-cj
+#| fig-cap: "Behavioral Affective Polarization across European Countries. This figure displays country-specific estimates of behavioral affective polarization (AP) across partisan attachment types. Behavioral API (Token) measures the difference in expected token allocations between co-partisans and out-partisans in a conjoint allocation game. Estimates are calculated separately for each country and weighted by party vote shares to reflect national party system compositions. Explicit partisans are respondents reporting a psychological attachment to a party; Implicit partisans are those denying partisan attachment but reporting a vote choice; Total includes all individuals with a partisan anchor; and Non-Partisans are respondents without a reported party anchor. Error bars indicate 95% confidence intervals."
+#| fig-dpi: 500
+#| fig-pos : H
+#| fig-width: 7
+#| fig-height: 10
+
+toplot_country <- bind_rows(
+  ap_cj_country_unw,
+  ap_cj_country_weighted,
+  ap_thermo_country,
+  ap_thermo_country_weighted,
+  ap_spread_country,
+  ap_spread_country_weighted,
+  ap_distance_country,
+  ap_distance_country_weighted
+)
+
+# minor adjustments for plotting
+nudge_map <- c(
+  "Explicit" = 0.20,
+  "Implicit" = 0.07,
+  "Total" = -0.07,
+  "Non-Partisan" = -0.20
+)
+
+toplot_country <- toplot_country |>
+  mutate(
+    y = factor(
+      paste(measurement, measure),
+      levels = rev(c(
+        "Behavioral API",
+        "Attitudinal API",
+        "Attitudinal Distance",
+        "Attitudinal Spread"
+      ))
+    ),
+    nudge_y = nudge_map[der_partisan_type]
+  )
+
+toplot_country3 <- toplot_country |>
+  filter(
+    weighted == 1,
+    measurement == "Behavioral"
+  )
+
+ggplot(
+  toplot_country3,
+  aes(
+    x = ap,
+    y = measure,
+    shape = der_partisan_type,
+    color = der_partisan_type
+  )
+) +
+  # 1) Points nudged based on weight
+  geom_point(
+    position = position_nudge(y = toplot_country3$nudge_y)
+  ) +
+
+  # 2) Error bars nudged the same way and linetype depending on weight
+  geom_errorbar(
+    aes(
+      xmin = ci_low,
+      xmax = ci_high
+    ),
+    position = position_nudge(y = toplot_country3$nudge_y),
+    width = 0.1
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    y = "",
+    x = "AP",
+    shape = "Partisan Type",
+    color = "Partisan Type"
+  ) +
+  theme_pubr() +
+  # theme(aspect.ratio = 1 / 1.618) +
+  facet_wrap(~meta_country)
+
+```
+
+
 
 
 # New Figures
