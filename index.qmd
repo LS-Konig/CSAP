@@ -1,6 +1,6 @@
 ---
 title: |
-  How does partisan type influence affective polarization?
+  How does partisan attachement influence affective polarization?
 subtitle: |
   Conceptualization, measurement, and scope conditions in 25 European democracies
 abstract: |
@@ -14,6 +14,52 @@ execute:
 draft: true
 draft-mode: visible
 ---
+
+- Affective polarization is a phenomenon that has received enormous prominence among political science since @iyengar2012affect seminal paper
+- This surge has stipulated various theoretical, conceptual and measurement debates
+- Traditionally originating in the American two-party context, comparative scholars increasingly focussed on transferring insights and approaches to multiparty systems, whose party system structures complicates both theorizing and empirically investigating AP
+
+- Basic AP in 2012:
+   - introduces distinction between ideological and affective polarization
+   - ingroup love and outgroup hate in partisan / political contexts
+   - US: two parties -> partisan ingroup / outgroup distinction easy
+   - ambiguities: 
+      - polarization as *state* (levels of AP) or *process* (trends of AP)? 
+      - normative implications: early research posited negative implications for democracy, recent studies question this simple association
+
+- Refinements since:
+   - differentiating the targets of AP: horizontal or social AP (among citizens) vs vertical or political AP (toward parties (PAP) or party leaders (LAP))
+   - differentiating attitudinal/expressive AP (e.g. thermoscores) and behavioral AP (e.g. Trust Games)
+   - conceptual and measurement closely related:
+      - how to define ingroup(s), one or multiple?
+         - how to *code* ingroup(s)? Identity/attachement vs (rep.) vote choice?
+      - how to define outgroup(s), least liked or average across outgroups?
+      - inclusion or exclusion of non-partisans
+      - in comparative literature, three main approaches have mostly been applied to measure AP with thermometer ratings: 
+         - @reiljan2020fear's AP index, which assignes an ingroup and averages across all outgroups, the difference constituting the AP quantity 
+         - @wagner2021affective mean distance from most liked party
+         - @wagner2021affective's average spread of scores
+
+
+- Problems/Implications Extending it to multiparty systems:
+   - Lack of systematic study of implications of measurement / conceptual choices for studying AP in comparative multi-party settings
+   - I address this gap leveraging a cross-sectional survey experiment fieldes in 25 European multiparty democracies
+   - Focus on:
+      - Operationalization of partisans: 
+         - how do AP estimates differ between respondents that report to feel attached to a party (explicit partisans) compared to those that neglegted such an attachement, yet still reported a vote choice (implicit partisans)?
+         - how do the distribution of implicit/explicit partisans vary across countries -> cross-national variation imply differential consequences of partisan operationalization for external validity of study, as partisan sample my or may not be representative population of interest
+
+- Study proceeds in three substudies / analyses:
+      1. Analysis of Thermometer Items (attitudinal, vertical, party-targeted) -> how does measurement and conceptualization influence the resulting estimates of AP?
+      2. Analysis of Behavioral Consequences (behavioral, horizontal, citizen-targeted conjoint scenario) -> how does measurement and conceptualization influence the behavioral consequences of AP?
+      3. Analysis of AP Sorting with Muslim attribute -> how does partisan AP interact with other salient group identities? Muslimhood as salient out-group feature in European societies -> conjoint experiment: assumes uniform distribution -> unrealistic but interesting (if "Muslim" feature uniformly distributed, AP asymetrically affected -> social identity complexity, interactions can be asymmetric) -> use empirical distribution of Muslim partisan respondents -> AP x Muslim estimate in sorted scenario
+
+
+
+
+
+
+
 
 We distinguish between **explicit identifiers**, **implicit partisans (vote-based)**, and **non-partisans**.
 
