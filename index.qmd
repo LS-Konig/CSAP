@@ -15,6 +15,8 @@ draft: true
 draft-mode: visible
 ---
 
+## Introduction
+
 - Affective polarization is a phenomenon that has received enormous prominence among political science since @iyengar2012affect seminal paper
 - This surge has stipulated various theoretical, conceptual and measurement debates
 - Traditionally originating in the American two-party context, comparative scholars increasingly focussed on transferring insights and approaches to multiparty systems, whose party system structures complicates both theorizing and empirically investigating AP
@@ -43,7 +45,7 @@ draft-mode: visible
 
 - Problems/Implications Extending it to multiparty systems:
    - Lack of systematic study of implications of measurement / conceptual choices for studying AP in comparative multi-party settings
-   - I address this gap leveraging a cross-sectional survey experiment fieldes in 25 European multiparty democracies
+   - We address this gap leveraging a cross-sectional survey experiment fieldes in 25 European multiparty democracies
    - Focus on:
       - Operationalization of partisans: 
          - how do AP estimates differ between respondents that report to feel attached to a party (explicit partisans) compared to those that neglegted such an attachement, yet still reported a vote choice (implicit partisans)?
@@ -56,242 +58,80 @@ draft-mode: visible
 
 
 
+## Theory
 
+The central reseach question is: How do conceptual and measurement choices condition our understanding of AP in multiparty democracies?
 
+We proceed in steps. In our first study
 
+## Research Design
 
+### Data
 
-We distinguish between **explicit identifiers**, **implicit partisans (vote-based)**, and **non-partisans**.
+### Empirical Strategy
 
-The core claim of the paper is that *observed levels and cross-national patterns of affective polarization (AP) depend systematically on how partisanship and polarization are conceptualized and measured* in multi-party systems.
+## Results
 
+### Study 1: Operationalizing Attitudinal Affective Polarization in Multiparty Systems
 
-
-## Data and empirical domain
-
-We use data from @hahm2024divided, collected in **2019** in 25 European democracies (all EU member states at the time except Luxembourg and Malta, plus the UK).
-
-The dataset has been used to study partyism and coalition partnership dynamics (e.g., APSR article based on the same project), but our contribution differs in focus:  
-we center on **conceptualization, measurement, and comparative scope conditions of affective polarization** rather than coalition alignment or generalized partyism.
-
-Temporal limitation:
-
-- Data stem from a two cross-sectional waves (2019).  
-- Findings do not capture post-2019 developments (e.g., pandemic politics, recent electoral realignments).
-
-
-## Framing: Conceptual proliferation in comparative AP research
-
-Affective polarization has become central in political science and is increasingly studied in **comparative multi-party systems**. This expansion raises conceptual and methodological questions.
-
-Recent work distinguishes between:
-
-- **Ideological vs. ideational polarization**
-- **Identity-based vs. attitude-based affective polarization**
-- **Targets of affect** [@areal2024verticalvshorizontal; @rollicke2023polarisation; @reiljan2024patterns]:
-  - Vertical/political (toward political elites (LAP) / parties (PAP))
-  - Horizontal/social (toward fellow citizens / partisans)
-
-In multi-party systems, additional choices matter:
-
-- **Ingroup identification**: explicit identification vs. vote intention/choice  
-- **Outgroup construction**: all parties vs. most distant party  
-- **Weighting by party size**  
-- Inclusion (or exclusion) of **non-partisans**
-
-Comparative research has rarely examined how these design choices affect:
-
-- the magnitude of AP,
-- cross-country rankings,
-- and substantive inferences about democratic implications.
-
-This is our entry point.
-
-
-## Analytical separation of components
-
-We proceed in three conceptually distinct steps:
-
-1. **Thermometer-based AP (attitudinal; vertical; party-targeted)**  
-   → Used to illustrate how operationalization choices affect comparative inference in multi-party systems.
-
-2. **Behavioral AP (conjoint; horizontal; citizen-targeted)**  
-   → Estimated via solidarity and trust games.  
-   → Presented as behavioral consequences of partisan boundaries.
-
-3. **Comparative scope and composition**  
-   → How the distribution of partisan types across 25 democracies conditions aggregate AP.
-
-We explicitly separate thermometer and game results to avoid conflating:
-
-- concept,
-- measurement,
-- and behavioral manifestation.
-
-
-## Part I – Thermometer-based affective polarization
-
-This section uses *only party-targeted thermometer items*.
-
-Key limitation:
-
-- No direct measure of affect toward fellow citizens.
-- Thus: vertical (party) rather than horizontal (citizen) AP.
-
-### Roadmap for this section
-
-We demonstrate how AP estimates change depending on:
-
-- Explicit vs. implicit ingroup definition  
-- Inclusion vs. exclusion of non-partisans  
-- Alternative aggregation and weighting strategies  
-
-Main goal:
-Show that in multi-party systems, the *choice of operationalization* meaningfully affects:
-
-- effect sizes,
-- country rankings,
-- dispersion across countries.
-
-This directly addresses open questions about the transferability of U.S.-centric AP concepts to fragmented party systems.
-
-
-### Comparative composition of partisan types (idea notes)
-
-The share of:
-
-- explicit identifiers,
-- implicit (vote-based) partisans,
-- non-partisans,
-
-varies substantially across countries.
-
-Loose idea for theoretical anchoring:
-
-- Link variation to classic work on partisan dealignment in Europe
-- Consider long-term differences in party system institutionalization and partisan attachment 
-- Connect to literature on party identification decline and electoral volatility in Europe.
-
-Potential implication:
-Countries with weak partisan identities may mechanically display lower identity-based AP but not necessarily lower behavioral discrimination.
-
-This section remains exploratory and descriptive but could situate our compositional findings in broader comparative political culture debates.
+RQ: How do alternative operationalizations of partisanship and thermometer-based indices affect estimates of attitudinal AP?
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
 
+-> Distribution of reported attachement (explicit types) or partisan composition varies susbtantially across countries
+-> share of explicit partisans varies from ~85% in Denmark to ~41% in Latvia
+-> share of implicit partisans varies from ~41% in Latvia to 8% in Denmark
+-> share of non-partisans varies from 23% in Croatia to 6% in Estonia
 
-## Part II – Behavioral polarization as consequences
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-thermo >}}
 
-We present the conjoint results separately from thermometer analyses.
-
-Conceptual shift:
-
-- From **attitudinal differentiation toward parties (vertical)**  
-  to  
-- **Behavioral discrimination toward fellow citizens (horizontal)**.
-
-Outcomes:
-
-- Solidarity allocations (dictator game logic)
-- Trust allocations (trust game logic)
-
-Here, affective polarization manifests as:
-
-- Differential allocation toward co-partisans vs. out-partisans.
-
-We treat these as **behavioral consequences of partisan boundaries**, rather than as alternative scaling of thermometer AP.
-
-Open conceptual question:
-To what extent do attitudinal (vertical) and behavioral (horizontal) AP align within and across countries?
-
-Possible empirical extension:
-
-- Estimate correlation between country-level attitudinal AP and behavioral AP (posterior correlation).
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-country-ap-comparison >}}
 
 
-## Muslimhood, partisan interaction, and sorting (targeted extension)
+### Study 2: Behavioral Consequences of Affective Polarization
 
-The religion attribute in the conjoint is **uniformly randomized** across:
+RQ: Do these operational differences alter the observed behavioral consequences of polarization?
 
-- Muslim  
-- Christian  
-- Non-religious  
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-cj >}}
 
-Thus, estimates assume **no religious sorting** in exposure.
+### Study 3: Partisan Sorting and Muslim Outgroup Salience
 
-Exploratory results (note to be formalized):
+How does partisan affective polarization interact with salient outgroup identities -- specifically Muslimhood -- to structure patterns of political sorting?
 
-- Muslim co-partisans receive fewer tokens than Christian or non-religious co-partisans.
-- Muslim out-partisans receive fewer tokens than Christian or non-religious out-partisans.
-- The penalty is larger within the co-partisan condition than within the out-partisan condition.
-- Interaction effects are therefore **asymmetric**, not uniform across partisan categories.
+## Limitations
 
-Two implications:
+- Party-targeted attitudinal measures only
 
-1. **Theoretical**:  
-   One should not assume symmetric sorting or interaction effects between partisan and religious identities.  
-   Minority attributes may condition in-group favoritism differently than out-group derogation.
+The attitudinal analysis relies exclusively on party-targeted thermometer ratings. It does not include direct citizen-targeted affect measures, limiting conclusions about horizontal affective polarization at the attitudinal level.
 
-2. **External validity**:  
-   Because religion is uniformly distributed by design, real-world exposure patterns (where Muslim citizens are not evenly distributed across partisan categories) are not reflected.  
+- Assumption underlying party-size weighting
 
-Possible extension:
+Weighting by electoral party size—common in the literature—implicitly assumes that the probability of encountering partisans is proportional to vote share. This may not hold if certain parties (e.g., radical challenger parties) are socially more or less visible than their electoral strength suggests.
 
-- Incorporate prior information about realistic joint distributions of religion × partisanship to simulate more externally valid scenarios.
-- Use the uniform design as a benchmark (“no-sorting counterfactual”) against which realistic sorting patterns could be contrasted.
+- Cross-sectional design (2019)
 
+The data capture a specific pre-pandemic political context and allow inference only about the level (state) of affective polarization at that point in time. The design does not permit conclusions about temporal dynamics or trends.
 
+- External validity of the experimental setting
 
-{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison >}}
+Although the conjoint experiment approximates horizontal, citizen-level interactions, it remains an artificial setting. In real-world encounters, identities are rarely presented as explicit labels. Instead, they are inferred through cues and cognitive processes. This limits the direct generalizability of experimentally induced identity effects to everyday social interactions.
 
+## Conclusion
 
-## Modeling strategy (note)
-
-Planned approach:
-
-- Hierarchical (partial pooling) estimation for country-level quantities.
-- EU-level benchmarks derived via marginalization over country-level posteriors.
-- Report standardized or scale-relative effects (thermometer vs. token scales not directly comparable).
-
-Potential extension:
-
-- Estimate posterior correlation between country-level attitudinal AP and behavioral AP.
-
----
-
-## Limitations (draft notes)
-
-1. **Party-targeted thermometers only**  
-   → No direct citizen-targeted affect measure in the attitudinal section.
-
-2. **Weighting by party size**  
-   Assumes encounter probability proportional to electoral share.  
-   Social visibility may violate this (e.g., radical challenger parties).
-
-3. **Uniform conjoint distribution**  
-   No endogenous religious sorting; real-world joint distributions may differ.
-
-4. **Cross-sectional design (2019)**  
-   Results capture a specific pre-pandemic political context.  
-   No dynamic inference about temporal change.
-
----
-
-## Contribution (working formulation)
-
+(Preliminary thoughts)
 In comparative multi-party systems:
 
 - Affective polarization is not a single quantity.
 - Its magnitude and cross-national configuration depend on:
-  - ingroup definition,
-  - inclusion of non-partisans,
-  - aggregation rules,
-  - and whether polarization is conceptualized vertically or horizontally.
+      - measurement instrument (attitudinal/behavioral)
+      - ingroup definition (implicit/explicit/all),
+      - inclusion of non-partisans,
+      - and whether polarization is conceptualized vertically or horizontally.
 
 Rather than asking only *“How polarized are European democracies?”*,  
 we ask:
 
-**How does conceptualization reshape what, and even who, we observe as polarized in multi-party contexts?**
+How does conceptualization reshape what, and even who, we observe as polarized in multi-party contexts?
 
 
 
