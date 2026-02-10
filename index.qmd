@@ -52,9 +52,10 @@ draft-mode: visible
          - how do the distribution of implicit/explicit partisans vary across countries -> cross-national variation imply differential consequences of partisan operationalization for external validity of study, as partisan sample my or may not be representative population of interest
 
 - Study proceeds in three substudies / analyses:
-      1. Analysis of Thermometer Items (attitudinal, vertical, party-targeted) -> how does measurement and conceptualization influence the resulting estimates of AP?
-      2. Analysis of Behavioral Consequences (behavioral, horizontal, citizen-targeted conjoint scenario) -> how does measurement and conceptualization influence the behavioral consequences of AP?
-      3. Analysis of AP Sorting with Muslim attribute -> how does partisan AP interact with other salient group identities? Muslimhood as salient out-group feature in European societies -> conjoint experiment: assumes uniform distribution -> unrealistic but interesting (if "Muslim" feature uniformly distributed, AP asymetrically affected -> social identity complexity, interactions can be asymmetric) -> use empirical distribution of Muslim partisan respondents -> AP x Muslim estimate in sorted scenario
+      
+1. Analysis of Thermometer Items (attitudinal, vertical, party-targeted) -> how does measurement and conceptualization influence the resulting estimates of AP?
+2. Analysis of Behavioral Consequences (behavioral, horizontal, citizen-targeted conjoint scenario) -> how does measurement and conceptualization influence the behavioral consequences of AP?
+3. Analysis of AP Sorting with Muslim attribute -> how does partisan AP interact with other salient group identities? Muslimhood as salient out-group feature in European societies -> conjoint experiment: assumes uniform distribution -> unrealistic but interesting (if "Muslim" feature uniformly distributed, AP asymetrically affected -> social identity complexity, interactions can be asymmetric) -> use empirical distribution of Muslim partisan respondents -> AP x Muslim estimate in sorted scenario
 
 
 
@@ -79,13 +80,20 @@ RQ: How do alternative operationalizations of partisanship and thermometer-based
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
 
 -> Distribution of reported attachement (explicit types) or partisan composition varies susbtantially across countries
+
 -> share of explicit partisans varies from ~85% in Denmark to ~41% in Latvia
+
 -> share of implicit partisans varies from ~41% in Latvia to 8% in Denmark
+
 -> share of non-partisans varies from 23% in Croatia to 6% in Estonia
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-thermo >}}
 
-{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-country-ap-comparison >}}
+-> across measures, explicit partisans systematically higher AP than implicit
+-> Non-partisans (which can be included in Wagner measures) systematically less polarized
+-> restricting sample to explicit partisans (identifiers) yields higher aggregate AP 
+
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-country-ap-comparison-thermo >}}
 
 
 ### Study 2: Behavioral Consequences of Affective Polarization
@@ -93,6 +101,8 @@ RQ: How do alternative operationalizations of partisanship and thermometer-based
 RQ: Do these operational differences alter the observed behavioral consequences of polarization?
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-cj >}}
+
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-country-ap-comparison-cj >}}
 
 ### Study 3: Partisan Sorting and Muslim Outgroup Salience
 
