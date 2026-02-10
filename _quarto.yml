@@ -47,6 +47,7 @@ format:
       - at: pre-quarto
         path: _extensions/andrewheiss/wordcount/wordcount.lua
     toc: true
+    toc-depth: 3
     include-in-header:
       text:
         <meta name="robots" content="noindex">
