@@ -1559,13 +1559,13 @@ modelvars_labels <- c(
 # Distribution of DV
 
 ```{r}
-#| label: fig-distr-y
+#| label: fig-distr-token
 #| fig-dpi: 500
-#| fig-cap: "Distribution of token allocation (Y) by game. Dictator game: $Mean = 3.41$, $median = 4$, $SD = 2.35$. Trust game: $Mean = 3.48$, $median = 4$, $SD = 2.49$"
+#| fig-cap: "Distribution of token allocation by game. Dictator game: $Mean = 3.41$, $median = 4$, $SD = 2.35$. Trust game: $Mean = 3.48$, $median = 4$, $SD = 2.49$"
 #| fig-pos: H
 
-summary_stats <- df_modelvars %>%
-  group_by(meta_game_lab) %>%
+summary_stats <- df_modelvars |>
+  group_by(meta_game_lab) |>
   summarise(
     mean_token = mean(cj_token, na.rm = TRUE),
     median_token = median(cj_token, na.rm = TRUE),
@@ -1576,23 +1576,23 @@ summary_stats <- df_modelvars %>%
 df_modelvars |>
   select(cj_token, meta_game_lab) |>
   ggplot(
-    aes(x = log(cj_token + 1), fill = meta_game_lab)
+    aes(x = cj_token, fill = meta_game_lab)
   ) +
   geom_histogram(
     position = position_dodge(),
     color = "black"
   ) +
-  # scale_x_continuous(
-  #   breaks = 0:10,
-  #   labels = 0:10
-  # ) +
+  scale_x_continuous(
+    breaks = 0:10,
+    labels = 0:10
+  ) +
   scale_fill_manual(
     values = c("white", "gray")
   ) +
   labs(
-    x = "Tokens allocated (Y)",
+    x = "Tokens allocated",
     y = "N",
-    fill = "Conjoint Game"
+    fill = "Game"
   ) +
   ggpubr::theme_pubr()
 
