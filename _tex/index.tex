@@ -213,7 +213,7 @@ polarization?\thanks{Space for acknowledgements. Wordcount: .}}
 \subtitle{Conceptualization, measurement, and scope conditions in 25
 European democracies}
 \author{Tristan Muno \and Thomas König}
-\date{February 10, 2026}
+\date{February 11, 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
@@ -385,7 +385,7 @@ choices condition our understanding of AP in multiparty democracies?
 
 We proceed in steps. In our first study
 
-\section{Research Design}\label{research-design}
+\section{Research design}\label{research-design}
 
 \subsection{Data}\label{data}
 
@@ -472,8 +472,11 @@ variance.}
 Notebook 3.2}}
 
 -\textgreater{} across measures, explicit partisans systematically
-higher AP than implicit -\textgreater{} Non-partisans (which can be
-included in Wagner measures) systematically less polarized
+higher AP than implicit
+
+-\textgreater{} Non-partisans (which can be included in Wagner measures)
+systematically less polarized
+
 -\textgreater{} restricting sample to explicit partisans (identifiers)
 yields higher aggregate AP
 
@@ -510,6 +513,18 @@ anchor. Error bars indicate 95\% confidence intervals.}
 \href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-country-ap-comparison-thermo}{Code
 Notebook 3.2}}
 
+-\textgreater{} pattern roughly consistent across countries (i.e., blue
+-\textgreater{} green -\textgreater{} orange)
+
+-\textgreater{} cross-national variation in terms of magnitudes and
+within-country differences
+
+-\textgreater{} With the varying country-specific distributions
+(Figure~\ref{fig-impl-expl-distribution}) in mind, AP estimates for all
+partisans (total) shift either close to that of explicit partisans
+(e.g.~Denmark, Greece, Sweden) or stay centered between estimates for
+explicit and implicit partisans (e.g.~Austria, Bulgaria, Ireland)
+
 \subsection{Study 2: Behavioral Consequences of Affective
 Polarization}\label{study-2-behavioral-consequences-of-affective-polarization}
 
@@ -545,6 +560,12 @@ variance.}
 \href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-eu25-ap-comparison-cj}{Code
 Notebook 3.2}}
 
+-\textgreater{} unlike in attitudinal AP, intervals for explicit and
+implicit overlap, hence no systematic difference
+
+-\textgreater{} preliminary interpretation: accordign to data explicit
+attachement does not matter for behavioral AP
+
 \begin{figure}[H]
 
 \centering{
@@ -573,12 +594,26 @@ confidence intervals.}
 \href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-country-ap-comparison-cj}{Code
 Notebook 3.2}}
 
+-\textgreater{} pooled results generally consistent across countries
+
+-\textgreater{} no systematic difference in behavioral AP between
+explicit and implicit
+
+-\textgreater{} ``strongest tendency'' in Denmark, Lithuania and
+Portugal
+
+-\textgreater{} otherwise almost no difference
+
+-\textgreater{} estimate for total partisans drawn to explicit partisans
+(due to conjoint setup)
+
 \subsection{Study 3: Partisan Sorting and Muslim Outgroup
 Salience}\label{study-3-partisan-sorting-and-muslim-outgroup-salience}
 
 How does partisan affective polarization interact with salient outgroup
 identities -- specifically Muslimhood -- to structure patterns of
-political sorting?
+political sorting? Are there differences between explicit and implicit
+partisans?
 
 \section{Limitations}\label{limitations}
 
@@ -846,6 +881,44 @@ Total & 3022 & 5251 & 5921 & 6338 & 6310 & 2650 & 21 \\
 \href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-tbl-nresp-country-agegroup}{Code
 Notebook 3.1}}
 
+\subsection{Survey item wording (English
+version)}\label{survey-item-wording-english-version}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.2105}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.7895}}@{}}
+\caption{Survey item wording (English
+version)}\label{tbl-survey-items}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Question
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Question
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Feeling Thermometer & We would like to get your feelings toward some
+political parties and political leaders in the news these days. Below
+there is a list of parties and people. I'd like you to rate them using
+something we call the feeling thermometer. Ratings between 50 degrees
+and 100 degrees mean that you feel favorable and warm toward the party
+or person. Ratings between 0 degrees and 50 degrees mean that you don't
+feel favorable toward the party or person and that you don't care too
+much for that party or person. You would rate the political party or the
+person at the 50 degree mark if you don't feel particularly warm or cold
+toward the person. \\
+\end{longtable}
+
 \subsection{Experimental setup}\label{experimental-setup}
 
 Before the behavioral games, Hahm, Hilpert, and König
@@ -905,150 +978,37 @@ profile.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.1_descr_anal-fig-distr-y-output-2.png}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.1_descr_anal-fig-distr-token-output-2.png}}
 
 }
 
-\caption{\label{fig-distr-y}Distribution of token allocation (Y) by
+\caption{\label{fig-distr-token}Distribution of token allocation by
 game. Dictator game: \(Mean = 3.41\), \(median = 4\), \(SD = 2.35\).
 Trust game: \(Mean = 3.48\), \(median = 4\), \(SD = 2.49\)}
 
 \end{figure}%
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-fig-distr-y}{Code
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-fig-distr-token}{Code
 Notebook 3.1}}
 
-\subsection{Distribution of T and R}\label{distribution-of-t-and-r}
+\begin{figure}[H]
 
-\begin{longtable}[]{@{}llll@{}}
+\centering{
 
-\caption{\label{tbl-t-r-distr}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-latex/code-03_explanal-3.2_ap_measures-fig-distr-thermo-output-2.png}}
 
-\tabularnewline
+}
 
-\toprule\noalign{}
-der\_partisan\_type & None & Co & Out \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-0 & 5123 & 1948 & 18465 \\
-1 & 14898 & 30820 & 29366 \\
+\caption{\label{fig-distr-thermo}Distribution of thermometer ratings
+(rescaled from 0-100 to 0-10). \(Mean = 3.89\), \(median = 4\),
+\(SD = 3.04\)}
 
-\end{longtable}
+\end{figure}%
 
 \textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-tbl-t-r-distr}{Code
-Notebook 3.1}}
-
-\subsection{Distribution of Covariates by
-T}\label{distribution-of-covariates-by-t}
-
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3306}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3306}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3306}}@{}}
-
-\caption{\label{tbl-covariate-distr}}
-
-\tabularnewline
-
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-{\textbf{Variable}}
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-{\textbf{0}\\
-N = 25,536}{\textsuperscript{1}}\strut
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-{\textbf{1}\\
-N = 75,084}{\textsuperscript{1}}\strut
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-q\_lrpos2\_z & -0.08 (-0.45, 0.29) & -0.08 (-0.82, 0.66) \\
-q\_eupos2\_z & 0.08 (-0.68, 0.46) & 0.08 (-0.68, 0.84) \\
-q\_econ\_nativism\_z & 0.15 (-1.03, 0.74) & 0.15 (-1.03, 0.74) \\
-q\_cult\_nativism\_z & 0.07 (-1.03, 0.62) & 0.07 (-1.03, 0.62) \\
-q\_satis\_demo\_country\_z & 0.30 (-0.81, 1.40) & 0.30 (-0.81, 0.30) \\
-q\_understand\_nat\_pol\_z & 0.12 (-0.65, 0.12) & 0.12 (-0.65, 0.90) \\
-q\_understand\_eu\_pol\_z & 0.22 (-0.50, 0.22) & 0.22 (-0.50, 0.94) \\
-q\_parties\_harm\_z & 0.25 (-0.38, 0.88) & 0.25 (-0.38, 0.88) \\
-q\_officials\_talk\_action\_z & 0.41 (-0.33, 1.15) & 0.41 (-0.33,
-1.15) \\
-q\_politics\_good\_evil\_z & -0.14 (-0.76, 0.48) & -0.14 (-0.76,
-0.48) \\
-q\_people\_unaware\_z & 0.40 (-0.81, 1.00) & -0.20 (-0.81, 1.00) \\
-q\_leaders\_educated\_z & 0.39 (-0.32, 1.10) & 0.39 (-1.03, 1.10) \\
-q\_expert\_decisions\_z & 0.16 (-0.49, 0.80) & 0.16 (-0.49, 0.80) \\
-q\_listen\_other\_groups\_z & 0.18 (-0.74, 1.10) & 0.18 (-0.74, 1.10) \\
-q\_democracy\_compromise\_z & -0.29 (-0.29, 0.57) & -0.29 (-0.29,
-0.57) \\
-q\_interest\_pol\_country\_z & 0.06 (-0.60, 0.72) & 0.06 (-0.60,
-0.72) \\
-q\_interest\_pol\_eu\_z & -0.28 (-0.96, 0.39) & 0.39 (-0.28, 1.06) \\
-q\_eval\_finance\_household\_z & 0.01 (-0.99, 1.00) & 0.01 (-0.99,
-1.00) \\
-q\_eval\_job\_z & 0.11 (-0.80, 1.03) & 0.11 (-0.80, 0.11) \\
-q\_eval\_econ\_country\_z & -0.14 (-1.03, 0.76) & -0.14 (-1.03, 0.76) \\
-q\_eval\_econ\_eur\_z & 0.07 (-0.94, 1.09) & 0.07 (-0.94, 1.09) \\
-q\_risk\_taking\_z & 0.11 (-0.56, 0.78) & 0.11 (-0.56, 0.78) \\
-q\_future\_discount\_z & -0.17 (-0.84, 0.50) & -0.17 (-0.84, 0.50) \\
-q\_edu\_z & -0.08 (-0.73, 0.57) & -0.08 (-0.73, 0.57) \\
-q\_age\_z & -0.11 (-0.92, 0.64) & 0.09 (-0.79, 0.91) \\
-q\_religion\_en & \begin{minipage}[t]{\linewidth}\raggedright
-\hfill\break
-\strut
-\end{minipage} & \begin{minipage}[t]{\linewidth}\raggedright
-\hfill\break
-\strut
-\end{minipage} \\
-~~~~catholic & 8,606 (34\%) & 27,379 (36\%) \\
-~~~~no religion & 9,462 (37\%) & 25,678 (34\%) \\
-~~~~protstnt & 1,881 (7.4\%) & 7,570 (10\%) \\
-~~~~other religion & 5,470 (21\%) & 13,791 (18\%) \\
-~~~~muslim & 114 (0.4\%) & 664 (0.9\%) \\
-q\_perc\_class & \begin{minipage}[t]{\linewidth}\raggedright
-\hfill\break
-\strut
-\end{minipage} & \begin{minipage}[t]{\linewidth}\raggedright
-\hfill\break
-\strut
-\end{minipage} \\
-~~~~Working class & 5,307 (22\%) & 15,198 (21\%) \\
-~~~~Lower middle class & 4,866 (20\%) & 13,924 (19\%) \\
-~~~~Middle class & 12,060 (49\%) & 35,019 (48\%) \\
-~~~~Upper middle class & 2,055 (8.4\%) & 7,622 (10\%) \\
-~~~~Upper class & 191 (0.8\%) & 1,310 (1.8\%) \\
-q\_rural\_urban & \begin{minipage}[t]{\linewidth}\raggedright
-\hfill\break
-\strut
-\end{minipage} & \begin{minipage}[t]{\linewidth}\raggedright
-\hfill\break
-\strut
-\end{minipage} \\
-~~~~Rural area or village & 5,819 (23\%) & 17,093 (23\%) \\
-~~~~Small or middle sized town & 9,069 (36\%) & 28,418 (38\%) \\
-~~~~Large town & 10,573 (42\%) & 29,298 (39\%) \\
-q\_gender & \begin{minipage}[t]{\linewidth}\raggedright
-\hfill\break
-\strut
-\end{minipage} & \begin{minipage}[t]{\linewidth}\raggedright
-\hfill\break
-\strut
-\end{minipage} \\
-~~~~Male & 10,939 (43\%) & 39,456 (53\%) \\
-~~~~Female & 14,565 (57\%) & 35,514 (47\%) \\
-~~~~Other & 32 (0.1\%) & 114 (0.2\%) \\
-{\textsuperscript{1}} {Median (Q1, Q3); n (\%)} & & \\
-
-\end{longtable}
-
-\textsubscript{Source:
-\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.1_descr_anal-preview.html\#cell-tbl-covariate-distr}{Code
-Notebook 3.1}}
+\href{https://LS-Konig.github.io/CSAP/code/03_explanal/3.2_ap_measures.qmd.html\#cell-fig-distr-thermo}{Code
+Notebook 3.2}}
 
 \subsection{Robustness}\label{robustness}
 
