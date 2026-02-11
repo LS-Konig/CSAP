@@ -451,6 +451,38 @@ thermo_long <- eu25games2019 |>
 
 ```
 
+
+```{r}
+#| label: fig-distr-thermo
+#| fig-cap: "Distribution of thermometer ratings (rescaled from 0-100 to 0-10). $Mean = 3.89$, $median = 4$, $SD = 3.04$"
+
+summary_stats <- thermo_long |>
+  summarise(
+    mean_thermo = mean(thermo_score, na.rm = TRUE),
+    median_thermo = median(thermo_score, na.rm = TRUE),
+    sd_thermo = sd(thermo_score, na.rm = TRUE)
+  )
+
+thermo_long |>
+  ggplot(
+    aes(x = thermo_score)
+  ) +
+  geom_histogram(
+    color = "black",
+    fill = "white"
+  ) +
+  scale_x_continuous(
+    breaks = 0:10,
+    labels = 0:10
+  ) +
+  labs(
+    x = "Thermo Score",
+    y = "N"
+  ) +
+  ggpubr::theme_pubr()
+```
+
+
 There are three main operationalization strategies applied in European AP studies: Reiljan's API, Wagner's mean distance and Wagner's average spread.
 
 ## API
