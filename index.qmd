@@ -90,11 +90,19 @@ RQ: How do alternative operationalizations of partisanship and thermometer-based
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-thermo >}}
 
 -> across measures, explicit partisans systematically higher AP than implicit
+
 -> Non-partisans (which can be included in Wagner measures) systematically less polarized
+
 -> restricting sample to explicit partisans (identifiers) yields higher aggregate AP 
+
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-country-ap-comparison-thermo >}}
 
+-> pattern roughly consistent across countries (i.e., blue -> green -> orange)
+
+-> cross-national variation in terms of magnitudes and within-country differences
+
+-> With the varying country-specific distributions (@fig-impl-expl-distribution) in mind, AP estimates for all partisans (total) shift either close to that of explicit partisans (e.g. Denmark, Greece, Sweden) or stay centered between estimates for explicit and implicit partisans (e.g. Austria, Bulgaria, Ireland)
 
 ### Study 2: Behavioral Consequences of Affective Polarization
 
@@ -102,11 +110,26 @@ RQ: Do these operational differences alter the observed behavioral consequences 
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-cj >}}
 
+-> unlike in attitudinal AP, intervals for explicit and implicit overlap, hence no systematic difference 
+
+-> preliminary interpretation: accordign to data explicit attachement does not matter for behavioral AP 
+
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-country-ap-comparison-cj >}}
+
+-> pooled results generally consistent across countries
+
+-> no systematic difference in behavioral AP between explicit and implicit
+
+-> "strongest tendency" in Denmark, Lithuania and Portugal
+
+-> otherwise almost no difference
+
+-> estimate for total partisans drawn to explicit partisans (due to conjoint setup)
 
 ### Study 3: Partisan Sorting and Muslim Outgroup Salience
 
 How does partisan affective polarization interact with salient outgroup identities -- specifically Muslimhood -- to structure patterns of political sorting?
+Are there differences between explicit and implicit partisans?
 
 ## Limitations
 
@@ -177,7 +200,9 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 
 ### Distribution of Y {.appendix}
 
-{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-distr-y >}}
+{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-distr-token >}}
+
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-distr-thermo >}}
 
 
 ### Robustness {.appendix}
