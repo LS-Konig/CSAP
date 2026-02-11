@@ -4,7 +4,7 @@ title: |
 subtitle: |
   Conceptualization, measurement, and scope conditions in 25 European democracies
 abstract: |
-  DRAFT: Work in progress. Please do not cite or circulate without the author's permission. Current status: framing and roadmap notes. 
+  DRAFT: Work in progress. Please do not cite or circulate without the author's permission.
 execute:
   echo: false
   warning: false
@@ -45,7 +45,7 @@ draft-mode: visible
 
 - Problems/Implications Extending it to multiparty systems:
    - Lack of systematic study of implications of measurement / conceptual choices for studying AP in comparative multi-party settings
-   - We address this gap leveraging a cross-sectional survey experiment fieldes in 25 European multiparty democracies
+   - We address this gap leveraging a cross-sectional survey experiment fielded in 25 European multiparty democracies
    - Focus on:
       - Operationalization of partisans: 
          - how do AP estimates differ between respondents that report to feel attached to a party (explicit partisans) compared to those that neglegted such an attachement, yet still reported a vote choice (implicit partisans)?
@@ -69,7 +69,153 @@ We proceed in steps. In our first study
 
 ### Data
 
+The data are structured hierarchically with multiple nested levels:
+
+- Level 4: Country ($c$)
+- Level 3: Party anchor ($p$) - nested within country
+- Level 2: Respondent ($i$) - nested within party-country
+- Level 1: Observation (round/rating) ($r$) - nested within respondent
+
+$$r \subset i \subset p \subset c$$
+
 ### Empirical Strategy
+
+We employ a Bayesian hierarchical modeling approach. We apply the same model structure across studies, varying the outcome and predictor specifications to address distinct research questions. This unified framework enables systematic comparison of affective polarization across attitudinal and behavioral domains.
+
+#### Base Model Structure
+
+Both thermometer and token allocation models share the following hierarchical specification:
+
+**Likelihood:**
+$$
+Y_{ripc} \sim \mathcal{N}(\mu_{ripc}, \sigma^2)
+$$
+
+**Linear predictor:**
+$$
+\begin{aligned}
+\mu_{ripc} = &\alpha_0 + \alpha_c + \alpha_{p[c]} + \alpha_{i[pc]} \\
+&+ \beta_1 \cdot \text{CoParty}_{r} \\
+&+ \beta_2 \cdot \text{Explicit}_{i} \\
+&+ \beta_3 \cdot (\text{CoParty}_{r} \times \text{Explicit}_{i}) \\
+&+ \beta_{1c} \cdot \text{CoParty}_{r} \\
+&+ \beta_{1p[c]} \cdot \text{CoParty}_{r} \\
+&+ \beta_{3c} \cdot (\text{CoParty}_{r} \times \text{Explicit}_{i}) \\
+&+ \boldsymbol{X}_{ripc}'\boldsymbol{\beta}
+\end{aligned}
+$$
+
+where:
+
+- $Y_{ripc}$ is the outcome (thermometer rating or token allocation)
+- $\text{CoParty}_r$ is an indicator for whether the rated party (Study 1) or game partner (Studies 2-3) matches respondent $i$'s party anchor
+- $\text{Explicit}_i$ indicates whether respondent $i$ reported explicit party attachment (vs. implicit partisanship via vote choice only)
+- $\boldsymbol{X}_{ripc}$ includes controls (party size, ideological distance, etc.)
+
+**Random effects:**
+$$
+\begin{aligned}
+\alpha_c &\sim \mathcal{N}(0, \sigma_{\text{country}}^2) && \text{Country intercepts} \\
+\alpha_{p[c]} &\sim \mathcal{N}(0, \sigma_{\text{party}}^2) && \text{Party intercepts (within country)} \\
+\alpha_{i[pc]} &\sim \mathcal{N}(0, \sigma_{\text{respondent}}^2) && \text{Respondent intercepts (within party)} \\
+\beta_{1c} &\sim \mathcal{N}(0, \sigma_{\text{AP,country}}^2) && \text{Country-varying AP effect} \\
+\beta_{1p[c]} &\sim \mathcal{N}(0, \sigma_{\text{AP,party}}^2) && \text{Party-varying AP effect} \\
+\beta_{3c} &\sim \mathcal{N}(0, \sigma_{\text{interaction,country}}^2) && \text{Country-varying type effect}
+\end{aligned}
+$$
+
+**Priors:**
+$$
+\begin{aligned}
+\alpha_0 &\sim \mathcal{N}(50, 20^2) && \text{Grand intercept} \\
+\beta_1, \beta_2, \beta_3, \boldsymbol{\beta} &\sim \mathcal{N}(0, 10^2) && \text{Fixed effects} \\
+\sigma_{\text{country}}, \sigma_{\text{party}}, \sigma_{\text{respondent}} &\sim \text{Exp}(1) && \text{Random effect SDs} \\
+\sigma_{\text{AP,country}}, \sigma_{\text{AP,party}}, \sigma_{\text{interaction,country}} &\sim \text{Exp}(1) && \text{Random slope SDs} \\
+\sigma &\sim \text{Exp}(1) && \text{Residual SD}
+\end{aligned}
+$$
+
+### Study 1: Operationalizing Attitudinal Affective Polarization
+
+**Research Question:** How do alternative operationalizations of partisanship and thermometer-based indices affect estimates of attitudinal AP?
+
+**Outcome:** $Y_{ripc} = \text{Rating}_{ripc}$ (thermometer score, 0-100 scale)
+
+**Model:**
+$$
+\text{Rating}_{ripc} \sim \mathcal{N}(\mu_{ripc}, \sigma^2)
+$$
+
+with $\mu_{ripc}$ specified as in the base model above.
+
+**Key parameters:**
+
+- $\beta_1$: Average affective polarization effect (co-party premium in ratings)
+- $\beta_3$: Differential AP between explicit and implicit partisans
+- $\beta_{1c}$: Country-specific deviations in AP
+- $\beta_{1p[c]}$: Party-specific deviations in AP (within country)
+
+**Controls:** Party size of rated party, ideological distance between respondent and rated party
+
+### Study 2: Behavioral Consequences of Affective Polarization
+
+**Research Question:** Do operational differences in partisanship alter the observed behavioral consequences of polarization?
+
+**Outcome:** $Y_{ripc} = \text{Tokens}_{ripc}$ (token allocation to game partner, 0-100 scale)
+
+**Model:**
+$$
+\text{Tokens}_{ripc} \sim \mathcal{N}(\mu_{ripc}, \sigma^2)
+$$
+
+with $\mu_{ripc}$ specified as in the base model.
+
+**Key parameters:**
+
+- $\beta_1$: Behavioral AP effect (co-partisan favoritism in resource allocation)
+- $\beta_3$: Differential behavioral AP between explicit and implicit partisans
+- $\beta_{1c}$, $\beta_{1p[c]}$: Country- and party-varying behavioral AP
+
+**Comparison with Study 1:** We evaluate whether $\beta_1^{\text{(Study 1)}} \neq \beta_1^{\text{(Study 2)}}$ and $\beta_3^{\text{(Study 1)}} \neq \beta_3^{\text{(Study 2)}}$ through posterior comparisons.
+
+### Study 3: Partisan Sorting and Muslim Outgroup Salience
+
+**Research Question:** How does partisan affective polarization interact with salient outgroup identities—specifically Muslimhood—to structure patterns of political sorting? Are there differences between explicit and implicit partisans?
+
+**Outcome:** $Y_{ripc} = \text{Tokens}_{ripc}$ (token allocation, 0-100 scale)
+
+**Extended model:**
+$$
+\begin{aligned}
+\mu_{ripc} = &\alpha_0 + \alpha_c + \alpha_{p[c]} + \alpha_{i[pc]} \\
+&+ \beta_1 \cdot \text{CoParty}_{r} \\
+&+ \beta_2 \cdot \text{Explicit}_{i} \\
+&+ \beta_3 \cdot (\text{CoParty}_{r} \times \text{Explicit}_{i}) \\
+&+ \beta_4 \cdot \text{Muslim}_{r} \\
+&+ \beta_5 \cdot (\text{CoParty}_{r} \times \text{Muslim}_{r}) \\
+&+ \beta_6 \cdot (\text{Explicit}_{i} \times \text{Muslim}_{r}) \\
+&+ \beta_7 \cdot (\text{CoParty}_{r} \times \text{Explicit}_{i} \times \text{Muslim}_{r}) \\
+&+ \beta_{1c} \cdot \text{CoParty}_{r} + \beta_{1p[c]} \cdot \text{CoParty}_{r} \\
+&+ \boldsymbol{X}_{ripc}'\boldsymbol{\beta}
+\end{aligned}
+$$
+
+where $\text{Muslim}_r$ indicates whether the game partner is identified as Muslim.
+
+**Key parameters:**
+
+- $\beta_4$: Main effect of partner being Muslim (Muslim penalty)
+- $\beta_5$: Partisan sorting moderation by Muslim identity (does co-partisanship override Muslim outgroup status?)
+- $\beta_6$: Differential Muslim penalty for explicit vs. implicit partisans
+- $\beta_7$: Three-way interaction testing whether partisan sorting with Muslim partners differs by partisan type
+
+**Substantive interpretation:**
+
+- If $\beta_5 > 0$: Co-partisanship attenuates Muslim penalty (partisan identity overrides religious outgroup)
+- If $\beta_5 < 0$: Muslim identity overrides co-partisanship (religious outgroup trumps partisan ingroup)
+- If $\beta_7 \neq 0$: This sorting pattern differs between explicit and implicit partisans
+
+All models are estimated using Hamiltonian Monte Carlo via Stan (implemented through the **brms** package in R), with 4 chains of 4,000 iterations each (2,000 warmup), yielding 8,000 posterior draws for inference.
 
 ## Results
 
@@ -183,10 +329,15 @@ How does conceptualization reshape what, and even who, we observe as polarized i
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-nresp-country-agegroup >}}
 
+{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-respondents >}}
+
 ### Survey item wording (English version) {.appendix}
 
 | Variable | Question |
 |:---|:--------------|
+|  Party Attachement |  |
+|  Vote Intention |  |
+|  Vote Choice |  |
 |  Feeling Thermometer |  We would like to get your feelings toward some political parties and political leaders in the news these days. Below there is a list of parties and people. I'd like you to rate them using something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees mean that you feel favorable and warm toward the party or person. Ratings between 0 degrees and 50 degrees mean that you don't feel favorable toward the party or person and that you don't care too much for that party or person. You would rate the political party or the person at the 50 degree mark if you don't feel particularly warm or cold toward the person. |
 : Survey item wording (English version) {#tbl-survey-items}
 
