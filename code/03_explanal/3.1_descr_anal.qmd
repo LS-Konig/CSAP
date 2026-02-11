@@ -371,17 +371,17 @@ eu25games2019 |>
 
 ```{mermaid}
 flowchart TD
-    A(Respondents <br> N = 29,827) --> B(No Party ID <br> N = 10,880) 
-    A(Respondents <br> N = 29,827) --> C(Party ID <br> N = 18,357)
+    A(Respondents <br> N = 29,827) --> B("No Party Attachement <br> N = 10,880") 
+    A(Respondents <br> N = 29,827) --> C("Party Attachement <br> (explicit) <br> N = 18,357")
 
-    B --> D(No Vote <br> N = 3,900)
-    B --> E(Vote <br> N = 6,234)
+    B --> D("No Vote reported <br> (non-partisan) <br> N = 3,900")
+    B --> E("Vote reported <br> (implicit) <br> N = 6,234")
 
-    C --> F(No Vote <br> N = 1,030)
-    C --> G(Vote <br> N = 16,917)
+    C --> F(No Vote reported <br> N = 1,030)
+    C --> G(Vote reported <br> N = 16,917)
 
-    G --> H(Same as PID <br> N = 13,220)
-    G --> I(Diff from PID <br> N = 3,697)
+    G --> H(Same as <br> Party Attachement <br> N = 13,220)
+    G --> I(Diff from <br> Party Attachement <br> N = 3,697)
 ```
 
 ## Figures
