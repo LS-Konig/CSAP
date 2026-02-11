@@ -65,7 +65,7 @@ The central reseach question is: How do conceptual and measurement choices condi
 
 We proceed in steps. In our first study
 
-## Research Design
+## Research design
 
 ### Data
 
@@ -160,6 +160,12 @@ How does conceptualization reshape what, and even who, we observe as polarized i
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-nresp-country-agegroup >}}
 
+### Survey item wording (English version) {.appendix}
+
+| Variable | Question |
+|:---|:--------------|
+|  Feeling Thermometer |  We would like to get your feelings toward some political parties and political leaders in the news these days. Below there is a list of parties and people. I'd like you to rate them using something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees mean that you feel favorable and warm toward the party or person. Ratings between 0 degrees and 50 degrees mean that you don't feel favorable toward the party or person and that you don't care too much for that party or person. You would rate the political party or the person at the 50 degree mark if you don't feel particularly warm or cold toward the person. |
+: Survey item wording (English version) {#tbl-survey-items}
 
 ### Experimental setup {.appendix}
 
@@ -173,13 +179,6 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-distr-y >}}
 
-### Distribution of T and R {.appendix}
-
-{{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-t-r-distr >}}
-
-### Distribution of Covariates by T
-
-{{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-covariate-distr >}}
 
 ### Robustness {.appendix}
 
