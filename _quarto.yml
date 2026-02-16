@@ -6,6 +6,7 @@ project:
 manuscript:
   notebooks:
     - notebook: code/03_explanal/3.1_descr_anal.qmd
+    - notebook: code/03_explanal/3.2_ap_measures.qmd
   code-links: binder
 
 execute: 
@@ -52,6 +53,7 @@ format:
       text:
         <meta name="robots" content="noindex">
   pdf:
+    code-links: false
     toc: false
     toc-depth: 3
     include-in-header:
@@ -60,8 +62,8 @@ format:
         \setlength{\parindent}{15pt}
         \usepackage[font=footnotesize]{caption}
     thanks: |
-      Space for acknowledgements.
-      Wordcount: {{< words-body >}}.
+      Do not share without consent.
+      Wordcount: 9040.
     papersize: a4
     fontsize: 12pt
     linestretch: 2

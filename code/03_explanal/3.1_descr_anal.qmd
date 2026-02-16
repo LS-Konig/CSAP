@@ -369,20 +369,27 @@ eu25games2019 |>
 
 ## Schematic overview
 
+::: {#fig-respondents}
+
 ```{mermaid}
 flowchart TD
-    A(Respondents <br> N = 29,827) --> B("No Party Attachement <br> N = 10,880") 
-    A(Respondents <br> N = 29,827) --> C("Party Attachement <br> (explicit) <br> N = 18,357")
+    A("Respondents <br> N = 29,827") 
+        -->|36.5%| B("No Party Attachement <br> N = 10,880") 
+    A 
+        -->|61.5%| C("Party Attachement <br> (explicit) <br> N = 18,357")
 
-    B --> D("No Vote reported <br> (non-partisan) <br> N = 3,900")
-    B --> E("Vote reported <br> (implicit) <br> N = 6,234")
+    B -->|35.8%| D("No Vote reported <br> (non-partisan) <br> N = 3,900")
+    B -->|57.3%| E("Vote reported <br> (implicit) <br> N = 6,234")
 
-    C --> F(No Vote reported <br> N = 1,030)
-    C --> G(Vote reported <br> N = 16,917)
+    C -->|5.6%| F("No Vote reported <br> N = 1,030")
+    C -->|92.2%| G("Vote reported <br> N = 16,917")
 
-    G --> H(Same as <br> Party Attachement <br> N = 13,220)
-    G --> I(Diff from <br> Party Attachement <br> N = 3,697)
+    G -->|78.1%| H("Same as <br> Party Attachement <br> N = 13,220")
+    G -->|21.9%| I("Diff from <br> Party Attachement <br> N = 3,697")
 ```
+
+Distribution of respondents by reported party attachment and vote behavior. Percentages refer to the parent node.
+:::
 
 ## Figures
 

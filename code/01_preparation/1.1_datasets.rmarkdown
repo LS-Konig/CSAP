@@ -1,0 +1,2382 @@
+---
+title: |
+  CSAP Code Notebook 1.1
+subtitle: |
+  Data Preparation
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Creating and Preparing one Consistent Dataset
+
+This notebook creates a dataset of the EU 25 Behavioral Games Survey Experiment 2019 data that expands the published reduced version by adding more variables from the original survey. Since [Hahm, Hilper & König (2024)](https://doi.org/10.1017/S0003055423000266) already processed the data, the following code primarily preprocesses additional variables from both the raw and unpublished wide format datasets and merges them to the long format dataframe of [Hahm, Hilper & König (2024)](https://doi.org/10.1017/S0003055423000266).
+
+The next sections give a brief overview of the datasources and the variable naming scheme.
+
+## 📦 Datasets Overview
+
+This project has evolved to include **three main datasets**, representing different stages of cleaning and processing.
+
+
+### 1. Published and Limited Dataset
+
+`data/01_raw/hahmetal-data/aff_pol_df_analy_jan2023.RData`  
+This file contains the processed and cleaned **long-format dataset** used in [Hahm, Hilper & König (2024)](https://doi.org/10.1017/S0003055423000266), see corresponding [Dataverse](https://doi.org/10.7910/DVN/YCDJNT) entry.
+
+In R, the dataset object is called **`dffin`**.  
+
+- Structure: 1 row = 1 round of games played  
+- Focus: behavioral outcomes and conjoint task variables  
+- Limitation: only a subset of the original survey variables is included  
+
+This version is optimized for conjoint experiment analyses and is the version underlying the published research.
+
+
+### 2. Old Codebook Dataset
+
+Folder: `data/01_raw/old-codebook-data/`
+
+Contains two files for each survey wave:
+
+- `dfw1.RData`
+- `dfw2.RData`
+
+Each file is in **wide format** (1 row = 1 respondent) and includes most of the original survey questions.  
+Many variables are **recoded and cleaned** (e.g., numeric coding, English translation).  
+
+This dataset was initially created as part of early research assistant work to build a comprehensive **survey codebook**.
+
+The folder also includes a **codebook PDF (`codebook.pdf`)** with:
+- Question wordings  
+- Summary statistics  
+- Note: The documentation follows the **Irish questionnaire** closely and is therefore somewhat limited in cross-country coverage.
+
+
+
+### 3. Original Survey Data
+
+`data/01_raw/survey-data/data_w1w2.RData`  
+This file contains all **original survey datasets**, each in wide format (1 row = 1 respondent).
+
+- Structure: two lists, `dataw1` and `dataw2`, each containing **25 data frames** (one per country).  
+- Special feature: the **first row** of each data frame stores the **original question wordings** for that country — valuable for reconstructing survey design and translation differences.
+
+## Variable Naming Scheme
+
+To ensure consistency and transparency across all datasets (survey, experiment, metadata, and merged sources), we apply the following naming convention:
+
+| Prefix | Category | Description | Example variables |
+|--------|------------|-------------|-------------------|
+| `q_`   | Survey questions | Self-reported answers from respondents (background, attitudes, behaviors) | `q_age`, `q_gender`, `q_party_id` |
+| `cj_`  | Conjoint experiment | Attributes of profiles **and** behavioral outcomes within the experiment | `cj_token`, `cj_party`, `cj_religion` |
+| `meta_` | Metadata / paradata | Technical or contextual variables from survey administration | `meta_country`, `meta_wave`, `meta_pid`, `meta_duration` |
+| `ext_` | External data | Variables merged from external sources (e.g., PartyFacts, election data) | `ext_cj_party_pf_id`, `ext_party_id_pf_id` |
+| `der_` | Derived variables | Constructed or recoded variables based on raw data | `der_co_partisan`, `der_conational` |
+
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+# Load Datasets
+
+This loads the object `dffin` in the environment:
+
+```{r}
+#| label: load-data-hametal
+
+load(
+  here(
+    "data",
+    "01_raw",
+    "hahmetal-data",
+    "aff_pol_df_analy_jan2023.RData"
+  )
+)
+
+```
+
+This loads the objects `dataw1` and `dataw2` in the environment:
+
+```{r}
+#| label: load-data-raw-survey
+
+load(
+  here(
+    "data",
+    "01_raw",
+    "raw-survey-data",
+    "data_w1w2.RData"
+  )
+)
+
+```
+
+This loads the objects `dfw1` and `dfw2` in the environment:
+
+```{r}
+#| label: load-data-old-codebook
+
+load(
+  here(
+    "data",
+    "01_raw",
+    "old-codebook-data",
+    "dfw1.RData"
+  )
+)
+
+
+load(
+  here(
+    "data",
+    "01_raw",
+    "old-codebook-data",
+    "dfw2.RData"
+  )
+)
+
+```
+
+# Rename Hahm et al Variables
+
+```{r}
+#| label: rename-hahmetal
+
+dffin_renamed <- dffin |>
+  rename(
+    q_party_id = Q52,
+    meta_country_abbr = country,
+    ext_pid_pg_id = Q52_pg_id,
+    ext_cj_pid_pg_id = drawn_pg_id,
+    meta_country = labcountries,
+    ext_pid_cmp_id = q52_cmp_id,
+    cj_token = pl2gets,
+    der_copartisan = copartisan,
+    der_coeuid = drawncoeustance1,
+    der_coeuid2 = drawncoeustance2,
+    der_coeuid3 = drawncoeustance3,
+    der_conational = nationality,
+    der_coreli = samereligion,
+    cj_rel_cath = pl2cathlic,
+    cj_rel_prot = pl2prtstnt,
+    cj_rel_mus = pl2muslimc,
+    cj_rel_non = pl2norelic,
+    cj_eu_pro = drawnproeupartner,
+    der_sameage = sameage,
+    der_samesex = samesex,
+    der_sameclass = sameclass,
+    cj_trmnt = trmnt,
+    cj_party = partydrawn,
+    cj_eupos = euposdrawn,
+    cj_nationality = natnltydrawn,
+    cj_religion = relidrawn,
+    cj_age = agedrawn,
+    cj_sex = sexdrawn,
+    cj_class = classdrawn,
+    meta_startdate = cleanstartdate,
+    q_age = Q3_1,
+    der_age_group = agegroup,
+    q_agecontinuous = age_continuous,
+    q_gender = sex,
+    der_class3 = class,
+    q_religion_en = rel_belief,
+    q_edu = edu,
+    q_lrpos2 = lrpos,
+    q_eupos2 = eupos,
+    ext_thermscore_party1 = thermscore_party1,
+    ext_thermscore_party2 = thermscore_party2,
+    ext_thermscore_party3 = thermscore_party3,
+    ext_thermscore_party4 = thermscore_party4,
+    ext_thermscore_party5 = thermscore_party5,
+    ext_thermscore_party6 = thermscore_party6,
+    ext_lrpos_party1 = lrpos_party1,
+    ext_lrpos_party2 = lrpos_party2,
+    ext_lrpos_party3 = lrpos_party3,
+    ext_lrpos_party4 = lrpos_party4,
+    ext_lrpos_party5 = lrpos_party5,
+    ext_lrpos_party6 = lrpos_party6,
+    ext_lrpos_party7 = lrpos_party7,
+    ext_lrpos_party8 = lrpos_party8,
+    ext_eupos_party1 = eupos_party1,
+    ext_eupos_party2 = eupos_party2,
+    ext_eupos_party3 = eupos_party3,
+    ext_eupos_party4 = eupos_party4,
+    ext_eupos_party5 = eupos_party5,
+    ext_eupos_party6 = eupos_party6,
+    ext_eupos_party7 = eupos_party7,
+    ext_eupos_party8 = eupos_party8,
+    der_nopid = nopid,
+    meta_timespentongames = timespentongames,
+    meta_pid = PID,
+    meta_psid = PSID,
+    meta_round = round,
+    meta_game = game,
+    der_countryn = cntryn, # tf?
+    meta_part = part,
+    cj_eupos_shown = euattachmentshown,
+    cj_pid_shown = partisanshipshown,
+    der_diffage = diffage,
+    der_diffsex = diffsex,
+    der_diffclass = diffclass,
+    der_diffreligion = diffreligion,
+    der_outpartisan = outpartisan,
+    der_outattach1 = outattach1,
+    der_outattach2 = outattach2,
+    der_outattach3 = outattach3,
+    der_outpartisan2 = outpartisan2,
+    meta_drop = drop,
+    ext_coalition_partners_now = coalition_partners_now,
+    ext_coalitiongovsupporter = coalitiongovsupporter,
+    ext_cmp_voteshare = cmp_vote_share.x,
+    ext_pid_lrpos = Q52_partypos_lr,
+    ext_cj_pid_lrpos = drawn_partypos_lr,
+    ext_dist_lrpos_cmp = cmp_dist_lr,
+    ext_pid_avg_lrpos_since2000 = Q52_avg_rile_since2000,
+    ext_cj_pid_avg_lrpos_since2000 = drawn_partypos_lr,
+    ext_avg_dist_lrpos_since2000 = avg_cmp_dist_lr_2000,
+    ext_eurostat_coding_gdppc = freq.unit.na_item.geo.TIME_PERIOD,
+    ext_gdppc_2019 = X2019,
+    ext_gdppc_2019_num = gdppc,
+    ext_gini = gini,
+    ext_population = population,
+    ext_sumsquaredseatshare = sumsquaredseatshare,
+    ext_eff_n_parties = eff_n_parties,
+    ext_dalton_polar_lr = dalton_polarization_lr,
+    ext_tier1_avemag = tier1_avemag,
+    ext_avg_npi = avg_npi,
+    ext_avg_npi_since2000 = avg_npi_since2000,
+    ext_current_npi = current_npi,
+    ext_rile_sd = rile_sd,
+    ext_joint_spell_since2000 = joint_spell_since2000,
+    ext_pl1_govexp_since2000 = gov_experience_ego_since2000,
+    ext_pl1_coalexp_since2000 = coalition_experience_ego_since2000,
+    ext_cj_pid_lrpos2 = lrpos_partydrawn,
+    der_supportsplacableparty = supportsplacablparty,
+    ext_cj_pid_eupos = eupos_partydrawn,
+    q_pid_perceived_lr = perceptionofownpartylr,
+    ext_respondentperceptionofownpartylr = respondentperceptionofownpartylr,
+    ext_respondentdistancetoownpartylr = respondentdistancetoownpartylr,
+    ext_respondentdistancetoparty1lr = respondentdistancetoparty1lr,
+    ext_respondentdistancetoparty2lr = respondentdistancetoparty2lr,
+    ext_respondentdistancetoparty3lr = respondentdistancetoparty3lr,
+    ext_respondentdistancetoparty4lr = respondentdistancetoparty4lr,
+    ext_respondentdistancetoparty5lr = respondentdistancetoparty5lr,
+    ext_respondentdistancetoparty6lr = respondentdistancetoparty6lr,
+    ext_respondentdistancetoparty7lr = respondentdistancetoparty7lr,
+    ext_respondentdistancetoparty8lr = respondentdistancetoparty8lr,
+    ext_respondentdistancetooutpartylr_avg = respondentdistancetooutpartylr_avg,
+    q_pid_perceived_eu = perceptionofownpartyeu,
+    ext_respondentperceptionofownpartyeu = respondentperceptionofownpartyeu,
+    ext_respondentdistancetoparty1eu = respondentdistancetoparty1eu,
+    ext_respondentdistancetoparty2eu = respondentdistancetoparty2eu,
+    ext_respondentdistancetoparty3eu = respondentdistancetoparty3eu,
+    ext_respondentdistancetoparty4eu = respondentdistancetoparty4eu,
+    ext_respondentdistancetoparty5eu = respondentdistancetoparty5eu,
+    ext_respondentdistancetoparty6eu = respondentdistancetoparty6eu,
+    ext_respondentdistancetoparty7eu = respondentdistancetoparty7eu,
+    ext_respondentdistancetoparty8eu = respondentdistancetoparty8eu,
+    ext_respondentdistancetooutpartyeu_avg = respondentdistancetooutpartyeu_avg,
+    der_lr_extremity = lr_extremity,
+    cj_age_en = clean_agedrawn,
+    cj_sex_en = clean_sexdrawn,
+    cj_class_en = clean_classdrawn,
+    cj_reli_en = clean_relidrawn,
+    der_co_partisan = co_partisan,
+    der_out_partisan = out_partisan,
+    ext_sd_years_in_gov_since2000 = sd_years_in_gov_since2000,
+    ext_sd_years_in_coalition_since2000 = sd_years_in_coalition_since2000,
+    ext_sd_years_wi_coalition_partner_since2000 = sd_years_wi_coalition_partner_since2000,
+    ext_sd_avg_district_magnitude_now = sd_avg_district_magnitude_now,
+    ext_sd_eff_n_parties_now = sd_eff_n_parties_now,
+    ext_sd_npi_now = sd_npi_now,
+    ext_sd_dalton_polarization_lr = sd_dalton_polarization_lr,
+    ext_average_sd_years_wi_coalition_partner_since2000 = average_sd_years_wi_coalition_partner_since2000,
+    ext_num_immigrants_2018 = num_immigrants_2018,
+    ext_num_immigrants_2018_01 = num_immigrants_2018_01
+  )
+
+# save(
+#   dffin_renamed,
+#   file = here(
+#     "data",
+#     "02_processed",
+#     "dffin_renamed.RData"
+#   )
+# )
+```
+
+# Rename Old Codebook Dataset
+
+```{r}
+#| label: rename-codebook-data
+
+dfw1_renamed <- dfw1 |>
+  rename(
+    meta_country = country,
+    meta_startdate = startdate,
+    meta_enddate = enddate,
+    meta_date = date,
+    meta_pid = pid,
+    meta_psid = psid,
+    meta_wave = wave,
+    meta_status = status,
+    meta_ipaddress = ipaddress,
+    meta_progress = progress,
+    meta_duration_seconds = duration_seconds,
+    meta_finished = finished,
+    meta_responseid = responseid,
+    meta_latitude = latitude,
+    meta_longitude = longitude,
+    meta_distchannel = distchannel,
+    meta_lang = lang,
+    q_gender = q2,
+    q_age = q3,
+    q_nationality = q4,
+    q_nationality_other = q4_text,
+    q_attach_country = q5_1,
+    q_attach_eu = q5_2,
+    q_attach_eur = q5_3,
+    q_religion = q6,
+    q_religion_other = q6_text,
+    q_perc_class = q7,
+    q_attcheck = attcheck,
+
+    meta_prime_moreeu_firstclick = q9_first.click,
+    meta_prime_moreeu_lastclick = q9_last.click,
+    meta_prime_moreeu_pagesubmit = q9_page.submit,
+    meta_prime_moreeu_clickcount = q9_click.count,
+    meta_prime_eutoofar_firstclick = q11_first.click,
+    meta_prime_eutoofar_lastclick = q11_last.click,
+    meta_prime_eutoofar_pagesubmit = q11_page.submit,
+    meta_prime_eutoofar_clickcount = q11_click.count,
+    meta_prime_eutoofarecon_firstclick = q13_first.click,
+    meta_prime_eutoofarecon_lastclick = q13_last.click,
+    meta_prime_eutoofarecon_pagesubmit = q13_page.submit,
+    meta_prime_eutoofarecon_clickcount = q13_click.count,
+    meta_prime_eutoofarcult_firstclick = q15_first.click,
+    meta_prime_eutoofarcult_lastclick = q15_last.click,
+    meta_prime_eutoofarcult_pagesubmit = q15_page.submit,
+    meta_prime_eutoofarcult_clickcount = q15_click.count,
+    meta_prime_eutoofarpol_firstclick = q17_first.click,
+    meta_prime_eutoofarpol_lastclick = q17_last.click,
+    meta_prime_eutoofarpol_pagesubmit = q17_page.submit,
+    meta_prime_eutoofarpol_clickcount = q17_click.count,
+    meta_prime_eutoofarcontrol_firstclick = q19_first.click,
+    meta_prime_eutoofarcontrol_lastclick = q19_last.click,
+    meta_prime_eutoofarcontrol_pagesubmit = q19_page.submit,
+    meta_prime_eutoofarcontrol_clickcount = q19_click.count,
+
+    q_eupos_7scale = q20,
+    q_understand_eu_pol = q21_1,
+    q_eu_politicians_care = q21_2,
+    q_eu_public_say = q21_3,
+    q_politicians_follow_people = q22_1,
+    q_people_make_decisions = q22_2,
+    q_prefer_citizen_rep = q22_3,
+    q_officials_talk_action = q22_4,
+    q_politics_good_evil = q22_5,
+    q_political_compromise = q22_6,
+    q_democracy_compromise = q23_1,
+    q_listen_other_groups = q23_2,
+    q_expert_decisions = q23_3,
+    q_leaders_educated = q23_4,
+    q_parties_harm = q23_5,
+    q_people_unaware = q23_6,
+    q_eu_long_term = q24_1,
+    q_eu_listen_people = q24_2,
+    q_eu_impact_econ = q25_1,
+    q_eu_impact_cult = q25_2,
+    q_eu_impact_polstatus = q25_3,
+    q_eu_disagree_dissolve = q26_1,
+    q_eu_satisfaction = q26_2,
+
+    q_eupos_7scale_2 = q27,
+    q_understand_eu_pol_2 = q28_1,
+    q_eu_politicians_care_2 = q28_2,
+    q_eu_public_say_2 = q28_3,
+    q_politicians_follow_people_2 = q29_1,
+    q_people_make_decisions_2 = q29_2,
+    q_prefer_citizen_rep_2 = q29_3,
+    q_officials_talk_action_2 = q29_4,
+    q_politics_good_evil_2 = q29_5,
+    q_political_compromise_2 = q29_6,
+    q_democracy_compromise_2 = q30_1,
+    q_listen_other_groups_2 = q30_2,
+    q_expert_decisions_2 = q30_3,
+    q_leaders_educated_2 = q30_4,
+    q_parties_harm_2 = q30_5,
+    q_people_unaware_2 = q30_6,
+    q_eu_long_term_2 = q31_1,
+    q_eu_listen_people_2 = q31_2,
+    q_eu_impact_econ_2 = q32_1,
+    q_eu_impact_cult_2 = q32_2,
+    q_eu_impact_polstatus_2 = q32_3,
+    q_eu_disagree_dissolve_2 = q33_1,
+    q_eu_satisfaction_2 = q33_2,
+
+    q_eupos_7scale_3 = q34,
+
+    q_voting_likelihood = q42,
+    q_confirm_voted = q43,
+    q_voted_party = q44,
+    q_voted_party_other = q44_text,
+    q_vote_intention = q45,
+    q_vote_intention_other = q45_text,
+    q_vote_intention_hypo = q46,
+    q_vote_intention_hypo_other = q46_text,
+
+    q_election_challenge_polgroups = q49_1,
+    q_election_impact_eu = q49_2,
+    q_election_importance = q50,
+    q_voted_party_2014 = q51,
+    q_voted_party_2014_other = q51_text,
+    q_party_id = q52,
+    q_party_id_other = q52_text,
+    meta_attrorder_cj = attrorderpl2,
+
+    q_eu_news_tv_days = q197_1,
+    q_eu_news_newspaper_days = q197_2,
+    q_eu_news_radio_days = q197_3,
+    q_eu_news_socialmedia_days = q197_4,
+    q_eu_news_internet_days = q197_5,
+    q_eu_news_personal_days = q197_6,
+    q_eu_news_other_days = q197_7,
+    q_eu_news_other = q197_7_text,
+
+    q_eu_campaign_sources = q198,
+    q_eu_campaign_sources_other = q198_text,
+
+    meta_prime_cjeu_firstclick = q213_first.click,
+    meta_prime_cjeu_lastclick = q213_last.click,
+    meta_prime_cjeu_clickcount = q213_click.count,
+    meta_prime_cjeu_pagesubmit = q213_page.submit,
+
+    q_cjeu_bias = q214,
+    q_cjeu_disagree_dissolve = q215_1,
+    q_cjeu_satisfaction = q215_2,
+    q_eval_econ_eur = q216_1,
+    q_eval_econ_country = q216_2,
+    q_eval_finance_household = q216_3,
+    q_eval_job = q216_4,
+
+    q_satis_demo_country = q217_1,
+    q_satis_demo_eu = q217_2,
+    q_interest_pol_country = q222_1,
+    q_interest_pol_eu = q222_2,
+    q_econ_nativism = q223_1,
+    q_cult_nativism = q223_2,
+
+    q_factcheck_ep_reps = q224_1,
+    q_factcheck_ec_pres = q224_2,
+    q_factcheck_council_pres = q224_3,
+    q_factcheck_courts = q224_4,
+
+    q_informed_ec = q225_1,
+    q_informed_council = q225_2,
+    q_informed_ep = q225_3,
+    q_informed_cjeu = q225_4,
+
+    q_trust_ec = q226_1,
+    q_trust_council = q226_2,
+    q_trust_ep = q226_3,
+    q_trust_cjeu = q226_4,
+
+    q_risk_taking = q227,
+    q_future_discount = q228,
+    q_lrpos = q236,
+
+    q_lrpos_ec = q238_1,
+    q_lrpos_council = q238_2,
+    q_lrpos_ep = q238_3,
+    q_lrpos_cjeu = q238_4,
+
+    q_understand_nat_pol = q239_1,
+    q_nat_politicians_care = q239_2,
+    q_nat_public_say = q239_3,
+
+    q_eupos = q240,
+    q_eupos_ec = q242_1,
+    q_eupos_council = q242_2,
+    q_eupos_ep = q242_3,
+    q_eupos_cjeu = q242_4,
+
+    q_age_at_edu_stop = q243_1,
+    q_age_at_edu_stop_other = q243_text,
+    q_rural_urban = q244,
+    q_postal_code = q245,
+    q_region = q246,
+    q_current_occupation = q247,
+    q_last_occupation = q248
+  )
+
+dfw2_renamed <- dfw2 |>
+  rename(
+    meta_country = country,
+    meta_startdate = startdate,
+    meta_enddate = enddate,
+    meta_date = date,
+    meta_pid = pid,
+    meta_psid = psid,
+    meta_wave = wave,
+    meta_status = status,
+    meta_ipaddress = ipaddress,
+    meta_progress = progress,
+    meta_duration_seconds = duration_seconds,
+    meta_finished = finished,
+    meta_responseid = responseid,
+    meta_latitude = latitude,
+    meta_longitude = longitude,
+    meta_distchannel = distchannel,
+    meta_lang = lang,
+    q_gender = q2,
+    q_age = q3,
+    q_nationality = q4,
+    q_nationality_other = q4_text,
+    q_attach_country = q5_1,
+    q_attach_eu = q5_2,
+    q_attach_eur = q5_3,
+    q_religion = q6,
+    q_religion_other = q6_text,
+    q_perc_class = q7,
+    q_attcheck = attcheck,
+
+    q_understand_eu_pol = q35_1,
+    q_eu_politicians_care = q35_2,
+    q_eu_public_say = q35_3,
+    q_politicians_follow_people = q36_1,
+    q_people_make_decisions = q36_2,
+    q_prefer_citizen_rep = q36_3,
+    q_officials_talk_action = q36_4,
+    q_politics_good_evil = q36_5,
+    q_political_compromise = q36_6,
+    q_democracy_compromise = q37_1,
+    q_listen_other_groups = q37_2,
+    q_expert_decisions = q37_3,
+    q_leaders_educated = q37_4,
+    q_parties_harm = q37_5,
+    q_people_unaware = q37_6,
+    q_eu_long_term = q38_1,
+    q_eu_listen_people = q38_2,
+    q_eu_impact_econ = q39_1,
+    q_eu_impact_cult = q39_2,
+    q_eu_impact_polstatus = q39_3,
+    q_eu_disagree_dissolve = q40_1,
+    q_eu_satisfaction = q40_2,
+
+    q_eupos_7scale = q41,
+
+    q_party_id = q52,
+    q_party_id_other = q52_text,
+    q_vote = q53,
+    q_voted_party = q54,
+    q_voted_party_other = q54_text,
+    q_voted_party_hypo = q55,
+    q_voted_party_hypo_other = q55_text,
+    q_voted_party_2014 = q56,
+    q_voted_party_2014_other = q56_text,
+
+    meta_attrorder_cj = attrorderpl2,
+    q_eu_campaign_sources = q199,
+    q_eu_campaign_sources_other = q199_text,
+
+    q_eu_campaign_participation = q200,
+    q_eu_campaign_participation_other = q200_text,
+
+    meta_prime_cjeu_pro_firstclick = q201_first.click,
+    meta_prime_cjeu_pro_lastclick = q201_last.click,
+    meta_prime_cjeu_pro_clickcount = q201_click.count,
+    meta_prime_cjeu_pro_pagesubmit = q201_page.submit,
+
+    q_cjeu_disagree_dissolve = q203_1,
+    q_cjeu_satisfaction = q203_2,
+
+    meta_prime_cjeu_anti_firstclick = q204_first.click,
+    meta_prime_cjeu_anti_lastclick = q204_last.click,
+    meta_prime_cjeu_anti_clickcount = q204_click.count,
+    meta_prime_cjeu_anti_pagesubmit = q204_page.submit,
+
+    q_cjeu_disagree_dissolve2 = q206_1,
+    q_cjeu_satisfaction2 = q206_2,
+
+    meta_prime_cjeu_control_firstclick = q207_first.click,
+    meta_prime_cjeu_control_lastclick = q207_last.click,
+    meta_prime_cjeu_control_clickcount = q207_click.count,
+    meta_prime_cjeu_control_pagesubmit = q207_page.submit,
+
+    q_cjeu_tendeny = q208,
+
+    q_cjeu_disagree_dissolve3 = q209_1,
+    q_cjeu_satisfaction3 = q209_2,
+
+    meta_prime_cjeu_control2_firstclick = q210_first.click,
+    meta_prime_cjeu_control2_lastclick = q210_last.click,
+    meta_prime_cjeu_control2_clickcount = q210_click.count,
+    meta_prime_cjeu_control2_pagesubmit = q210_page.submit,
+
+    q_cjeu_disagree_dissolve4 = q211_1,
+    q_cjeu_satisfaction4 = q211_2,
+
+    q_cjeu_tendency2 = q212,
+
+    q_tolerate_different_ideas = q218_1,
+    q_order_over_freedom = q218_2,
+    q_disobey_unjust_laws = q218_3,
+    q_disobey_gov_laws = q218_4,
+    q_immediate_over_legal = q218_5,
+    q_gov_bend_laws = q218_6,
+
+    q_eval_econ_eur = q219_1,
+    q_eval_econ_country = q219_2,
+    q_eval_finance_household = q219_3,
+    q_eval_job = q219_4,
+
+    q_global_bad_econ_country = q220_1,
+    q_global_bad_cult = q220_2,
+    q_global_less_say = q220_3,
+    q_global_less_gov_control = q220_4,
+
+    q_satis_demo_country = q221_1,
+    q_satis_demo_eu = q221_2,
+
+    q_interest_pol_country = q229_1,
+    q_interest_pol_eu = q229_2,
+    q_econ_nativism = q230_1,
+    q_cult_nativism = q230_2,
+
+    q_factcheck_council = q231_1,
+    q_factcheck_ep = q231_2,
+    q_factcheck_cjeu_pres = q231_3,
+    q_factcheck_euro_area = q231_4,
+
+    q_informed_ec = q232_1,
+    q_informed_council = q232_2,
+    q_informed_ep = q232_3,
+    q_informed_cjeu = q232_4,
+
+    q_trust_ec = q233_1,
+    q_trust_council = q233_2,
+    q_trust_ep = q233_3,
+    q_trust_cjeu = q233_4,
+
+    q_risk_taking = q234,
+    q_future_discount = q235,
+    q_lrpos = q236,
+
+    q_lrpos_ec = q238_1,
+    q_lrpos_council = q238_2,
+    q_lrpos_ep = q238_3,
+    q_lrpos_cjeu = q238_4,
+
+    q_understand_nat_pol = q239_1,
+    q_nat_politicians_care = q239_2,
+    q_nat_public_say = q239_3,
+
+    q_eupos = q240,
+    q_eupos_ec = q242_1,
+    q_eupos_council = q242_2,
+    q_eupos_ep = q242_3,
+    q_eupos_cjeu = q242_4,
+
+    q_age_at_edu_stop = q243_1,
+    q_age_at_edu_stop_other = q243_text,
+    q_rural_urban = q244,
+    q_postal_code = q245,
+    q_region = q246,
+    q_current_occupation = q247,
+    q_last_occupation = q248
+  )
+
+# save(
+#   dfw1_renamed,
+#   file = here(
+#     "data",
+#     "02_processed",
+#     "dfw1_renamed.RData"
+#   )
+# )
+
+# save(
+#   dfw2_renamed,
+#   file = here(
+#     "data",
+#     "02_processed",
+#     "dfw2_renamed.RData"
+#   )
+# )
+```
+
+# Rename Original Survey Data
+
+```{r}
+#| label: og-surveydata-by-country
+
+dataw1_aus <- dataw1[[1]] |> as_tibble()
+dataw1_bel <- dataw1[[2]] |> as_tibble()
+dataw1_bul <- dataw1[[3]] |> as_tibble()
+dataw1_cro <- dataw1[[4]] |> as_tibble()
+dataw1_cze <- dataw1[[5]] |> as_tibble()
+dataw1_den <- dataw1[[6]] |> as_tibble()
+dataw1_est <- dataw1[[7]] |> as_tibble()
+dataw1_fin <- dataw1[[8]] |> as_tibble()
+dataw1_fra <- dataw1[[9]] |> as_tibble()
+dataw1_ger <- dataw1[[10]] |> as_tibble()
+dataw1_gre <- dataw1[[11]] |> as_tibble()
+dataw1_hun <- dataw1[[12]] |> as_tibble()
+dataw1_ire <- dataw1[[13]] |> as_tibble()
+dataw1_ita <- dataw1[[14]] |> as_tibble()
+dataw1_lat <- dataw1[[15]] |> as_tibble()
+dataw1_lit <- dataw1[[16]] |> as_tibble()
+dataw1_net <- dataw1[[17]] |> as_tibble()
+dataw1_pol <- dataw1[[18]] |> as_tibble()
+dataw1_por <- dataw1[[19]] |> as_tibble()
+dataw1_rom <- dataw1[[20]] |> as_tibble()
+dataw1_slovakia <- dataw1[[21]] |> as_tibble()
+dataw1_slovenia <- dataw1[[22]] |> as_tibble()
+dataw1_spa <- dataw1[[23]] |> as_tibble()
+dataw1_swe <- dataw1[[24]] |> as_tibble()
+dataw1_uk <- dataw1[[25]] |> as_tibble()
+
+dataw2_aus <- dataw2[[1]] |> as_tibble()
+dataw2_bel <- dataw2[[2]] |> as_tibble()
+dataw2_bul <- dataw2[[3]] |> as_tibble()
+dataw2_cro <- dataw2[[4]] |> as_tibble()
+dataw2_cze <- dataw2[[5]] |> as_tibble()
+dataw2_den <- dataw2[[6]] |> as_tibble()
+dataw2_est <- dataw2[[7]] |> as_tibble()
+dataw2_fin <- dataw2[[8]] |> as_tibble()
+dataw2_fra <- dataw2[[9]] |> as_tibble()
+dataw2_ger <- dataw2[[10]] |> as_tibble()
+dataw2_gre <- dataw2[[11]] |> as_tibble()
+dataw2_hun <- dataw2[[12]] |> as_tibble()
+dataw2_ire <- dataw2[[13]] |> as_tibble()
+dataw2_ita <- dataw2[[14]] |> as_tibble()
+dataw2_lat <- dataw2[[15]] |> as_tibble()
+dataw2_lit <- dataw2[[16]] |> as_tibble()
+dataw2_net <- dataw2[[17]] |> as_tibble()
+dataw2_pol <- dataw2[[18]] |> as_tibble()
+dataw2_por <- dataw2[[19]] |> as_tibble()
+dataw2_rom <- dataw2[[20]] |> as_tibble()
+dataw2_slovakia <- dataw2[[21]] |> as_tibble()
+dataw2_slovenia <- dataw2[[22]] |> as_tibble()
+dataw2_spa <- dataw2[[23]] |> as_tibble()
+dataw2_swe <- dataw2[[24]] |> as_tibble()
+dataw2_uk <- dataw2[[25]] |> as_tibble()
+
+```
+
+# Thermoscore Questions from Original Survey Data
+
+```{r}
+#| label: thermo-scores
+
+# Austria ----------------------------------------------------------------------
+aus_w1_thermo_scores <- dataw1_aus |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Österreichische Volkspartei (ÖVP)",
+    q_thermo_2_party = "Sozialdemokratische Partei Österreich (SPÖ)",
+    q_thermo_3_party = "Freiheitliche Partei Österreichs (FPÖ)",
+    q_thermo_4_party = "NEOS - Das Neue Europa",
+    q_thermo_5_party = "Die Grünen - Die grüne Alternative",
+    q_thermo_6_party = "JETZT - Liste Pilz (JETZT)"
+  )
+
+aus_w2_thermo_scores <- dataw2_aus |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Österreichische Volkspartei (ÖVP)",
+    q_thermo_2_party = "Sozialdemokratische Partei Österreich (SPÖ)",
+    q_thermo_3_party = "Freiheitliche Partei Österreichs (FPÖ)",
+    q_thermo_4_party = "NEOS - Das Neue Europa",
+    q_thermo_5_party = "Die Grünen - Die grüne Alternative",
+    q_thermo_6_party = "JETZT - Liste Pilz (JETZT)"
+  )
+
+# Belgium ----------------------------------------------------------------------
+bel_w1_thermo_scores <- dataw1_bel |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Nieuw-Vlaamse Alliantie (N-VA)",
+    q_thermo_2_party = "PS (Parti Socialiste)",
+    q_thermo_3_party = "Mouvement Réformateur (MR)",
+    q_thermo_4_party = "Christen-Democratisch en Vlaams (CD&V)",
+    q_thermo_5_party = "Open Vlaamse Liberalen en Democraten (Open Vld)",
+    q_thermo_6_party = "sp.a (Socialistische Partij – Anders)"
+  )
+
+bel_w2_thermo_scores <- dataw2_bel |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Nieuw-Vlaamse Alliantie (N-VA)",
+    q_thermo_2_party = "PS (Parti Socialiste)",
+    q_thermo_3_party = "Mouvement Réformateur (MR)",
+    q_thermo_4_party = "Christen-Democratisch en Vlaams (CD&V)",
+    q_thermo_5_party = "Open Vlaamse Liberalen en Democraten (Open Vld)",
+    q_thermo_6_party = "sp.a (Socialistische Partij – Anders)"
+  )
+
+# Bulgaria ---------------------------------------------------------------------
+bul_w1_thermo_scores <- dataw1_bul |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Граждани за европейско развитие на България (ГЕРБ)",
+    q_thermo_2_party = "Българска социалистическа партия (БСП)",
+    q_thermo_3_party = "Движение за права и свободи (ДПС)",
+    q_thermo_4_party = "ВМРО – Българско Национално Движение",
+    q_thermo_5_party = "Атака",
+    q_thermo_6_party = "Воля"
+  )
+
+bul_w2_thermo_scores <- dataw2_bul |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Граждани за европейско развитие на България (ГЕРБ)",
+    q_thermo_2_party = "Българска социалистическа партия (БСП)",
+    q_thermo_3_party = "Движение за права и свободи (ДПС)",
+    q_thermo_4_party = "ВМРО – Българско Национално Движение",
+    q_thermo_5_party = "Атака",
+    q_thermo_6_party = "Воля"
+  )
+
+# Croatia ----------------------------------------------------------------------
+cro_w1_thermo_scores <- dataw1_cro |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Hrvatska demokratska zajednica (HDZ)",
+    q_thermo_2_party = "Socijaldemokratska partija Hrvatske (SDP)",
+    q_thermo_3_party = "Živi zid",
+    q_thermo_4_party = "Most nezavisnih lista (MOST)",
+    q_thermo_5_party = "Bruna Esih – Zlatko Hasanbegović: Neovisni za Hrvatsku (NHR)",
+    q_thermo_6_party = "Bandić Milan 365 - Stranka rada i solidarnosti (BM365)"
+  )
+
+cro_w2_thermo_scores <- dataw2_cro |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Hrvatska demokratska zajednica (HDZ)",
+    q_thermo_2_party = "Socijaldemokratska partija Hrvatske (SDP)",
+    q_thermo_3_party = "Živi zid",
+    q_thermo_4_party = "Most nezavisnih lista (MOST)",
+    q_thermo_5_party = "Bruna Esih – Zlatko Hasanbegović: Neovisni za Hrvatsku (NHR)",
+    q_thermo_6_party = "Bandić Milan 365 - Stranka rada i solidarnosti (BM365)"
+  )
+
+# Czechia ----------------------------------------------------------------------
+cze_w1_thermo_scores <- dataw1_cze |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "ANO 2011 (ANO)",
+    q_thermo_2_party = "Občanská demokratická strana (ODS)",
+    q_thermo_3_party = "Česká pirátská strana (Piráti)",
+    q_thermo_4_party = "Svoboda a přímá demokracie (SPD)",
+    q_thermo_5_party = "Komunistická strana Čech a Moravy (KSČM)",
+    q_thermo_6_party = "Česká strana sociálně demokratická (ČSSD)"
+  )
+
+cze_w2_thermo_scores <- dataw2_cze |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "ANO 2011 (ANO)",
+    q_thermo_2_party = "Občanská demokratická strana (ODS)",
+    q_thermo_3_party = "Česká pirátská strana (Piráti)",
+    q_thermo_4_party = "Svoboda a přímá demokracie (SPD)",
+    q_thermo_5_party = "Komunistická strana Čech a Moravy (KSČM)",
+    q_thermo_6_party = "Česká strana sociálně demokratická (ČSSD)"
+  )
+
+# Denmark ----------------------------------------------------------------------
+den_w1_thermo_scores <- dataw1_den |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Socialdemokratiet (A)",
+    q_thermo_2_party = "Venstre (V)",
+    q_thermo_3_party = "Dansk Folkeparti (O)",
+    q_thermo_4_party = "Det Radikale Venstre (B)",
+    q_thermo_5_party = "Socialistisk Folkeparti (F)",
+    q_thermo_6_party = "Enhedslisten – De rød-grønne (Ø)"
+  )
+
+den_w2_thermo_scores <- dataw2_den |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Socialdemokratiet (A)",
+    q_thermo_2_party = "Venstre (V)",
+    q_thermo_3_party = "Dansk Folkeparti (O)",
+    q_thermo_4_party = "Det Radikale Venstre (B)",
+    q_thermo_5_party = "Socialistisk Folkeparti (F)",
+    q_thermo_6_party = "Enhedslisten – De rød-grønne (Ø)"
+  )
+
+# Estonia ----------------------------------------------------------------------
+est_w1_thermo_scores <- dataw1_est |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Eesti Reformierakond (ER)",
+    q_thermo_2_party = "Eesti Keskerakond (KE)",
+    q_thermo_3_party = "Eesti Konservatiivne Rahvaerakond (EKRE)",
+    q_thermo_4_party = "Sotsiaaldemokraatlik Erakond (SDE)",
+    q_thermo_5_party = "Isamaa (I)",
+    q_thermo_6_party = "Eesti 200"
+  )
+
+est_w2_thermo_scores <- dataw2_est |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Eesti Reformierakond (ER)",
+    q_thermo_2_party = "Eesti Keskerakond (KE)",
+    q_thermo_3_party = "Eesti Konservatiivne Rahvaerakond (EKRE)",
+    q_thermo_4_party = "Sotsiaaldemokraatlik Erakond (SDE)",
+    q_thermo_5_party = "Isamaa (I)",
+    q_thermo_6_party = "Eesti 200"
+  )
+
+# Finland ----------------------------------------------------------------------
+fin_w1_thermo_scores <- dataw1_fin |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Suomen Sosialidemokraattinen Puolue (SDP)",
+    q_thermo_2_party = "Kansallinen Kokoomus (KOK)",
+    q_thermo_3_party = "Perussuomalaiset (PS)",
+    q_thermo_4_party = "Suomen Keskusta (KESK)",
+    q_thermo_5_party = "Vihreä liitto (VIHR)",
+    q_thermo_6_party = "Vasemmistoliitto (VAS)"
+  )
+
+fin_w2_thermo_scores <- dataw2_fin |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Suomen Sosialidemokraattinen Puolue (SDP)",
+    q_thermo_2_party = "Kansallinen Kokoomus (KOK)",
+    q_thermo_3_party = "Perussuomalaiset (PS)",
+    q_thermo_4_party = "Suomen Keskusta (KESK)",
+    q_thermo_5_party = "Vihreä liitto (VIHR)",
+    q_thermo_6_party = "Vasemmistoliitto (VAS)"
+  )
+
+# France -----------------------------------------------------------------------
+fra_w1_thermo_scores <- dataw1_fra |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "La République En Marche (REM)",
+    q_thermo_2_party = "Les Républicains (LR)",
+    q_thermo_3_party = "Rassemblement national (RN (ex. Front National (FN)))",
+    q_thermo_4_party = "La France Insoumise (FI)",
+    q_thermo_5_party = "Parti Socialiste (PS)",
+    q_thermo_6_party = "Europe Écologie - Les Verts (EÉLV)"
+  )
+
+fra_w2_thermo_scores <- dataw2_fra |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "La République En Marche (REM)",
+    q_thermo_2_party = "Les Républicains (LR)",
+    q_thermo_3_party = "Rassemblement national (RN (ex. Front National (FN)))",
+    q_thermo_4_party = "La France Insoumise (FI)",
+    q_thermo_5_party = "Parti Socialiste (PS)",
+    q_thermo_6_party = "Europe Écologie - Les Verts (EÉLV)"
+  )
+
+# Germany ----------------------------------------------------------------------
+ger_w1_thermo_scores <- dataw1_ger |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_22,
+    q_thermo_3 = Q196_23,
+    q_thermo_4 = Q196_24,
+    q_thermo_5 = Q196_25,
+    q_thermo_6 = Q196_26,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Christlich Demokratische Union (CDU)",
+    q_thermo_2_party = "Sozialdemokratische Partei Deutschlands (SPD)",
+    q_thermo_3_party = "Alternative für Deutschland (AfD)",
+    q_thermo_4_party = "Freie Demokratische Partei (FDP)",
+    q_thermo_5_party = "Die Linke (Linke)",
+    q_thermo_6_party = "Bündnis 90 / Die Grünen (Grüne)"
+  )
+
+ger_w2_thermo_scores <- dataw2_ger |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_22,
+    q_thermo_3 = Q196_23,
+    q_thermo_4 = Q196_24,
+    q_thermo_5 = Q196_25,
+    q_thermo_6 = Q196_26,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Christlich Demokratische Union (CDU)",
+    q_thermo_2_party = "Sozialdemokratische Partei Deutschlands (SPD)",
+    q_thermo_3_party = "Alternative für Deutschland (AfD)",
+    q_thermo_4_party = "Freie Demokratische Partei (FDP)",
+    q_thermo_5_party = "Die Linke (Linke)",
+    q_thermo_6_party = "Bündnis 90 / Die Grünen (Grüne)"
+  )
+
+# Greece -----------------------------------------------------------------------
+gre_w1_thermo_scores <- dataw1_gre |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Nέα Δημοκρατία (NΔ)",
+    q_thermo_2_party = "Συνασπισμός Ριζοσπαστικής Αριστεράς (ΣΥ.ΡIΖ.Α)",
+    q_thermo_3_party = "Πανελλήνιο Σοσιαλιστικό ίνημα (ΠΑΣΟK)",
+    q_thermo_4_party = "Κίνημα Δημοκρατών Σοσιαλιστών (ΚΙΔΗΣΟ)",
+    q_thermo_5_party = "Λαϊκός Σύνδεσμος -Χρυσή Αυγή (ΛΣ-ΧΑ)",
+    q_thermo_6_party = "Kομμουνιστικό Kόμμα Ελλάδας (KKΕ)"
+  )
+
+gre_w2_thermo_scores <- dataw2_gre |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Nέα Δημοκρατία (NΔ)",
+    q_thermo_2_party = "Συνασπισμός Ριζοσπαστικής Αριστεράς (ΣΥ.ΡIΖ.Α)",
+    q_thermo_3_party = "Πανελλήνιο Σοσιαλιστικό ίνημα (ΠΑΣΟK)",
+    q_thermo_4_party = "Κίνημα Δημοκρατών Σοσιαλιστών (ΚΙΔΗΣΟ)",
+    q_thermo_5_party = "Λαϊκός Σύνδεσμος -Χρυσή Αυγή (ΛΣ-ΧΑ)",
+    q_thermo_6_party = "Kομμουνιστικό Kόμμα Ελλάδας (KKΕ)"
+  )
+
+# Hungary ----------------------------------------------------------------------
+hun_w1_thermo_scores <- dataw1_hun |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Fidesz – Magyar Polgári Szövetség (FIDESZ)",
+    q_thermo_2_party = "Kereszténydemokrata Néppárt (KDNP)",
+    q_thermo_3_party = "Jobbik Magyarországért Mozgalom (JOBBIK)",
+    q_thermo_4_party = "Magyar Szocialista Párt (MSZP)",
+    q_thermo_5_party = "Párbeszéd Magyarországért (Párbeszéd)",
+    q_thermo_6_party = "Demokratikus Koalíció (DK)"
+  )
+
+hun_w2_thermo_scores <- dataw2_hun |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Fidesz – Magyar Polgári Szövetség (FIDESZ)",
+    q_thermo_2_party = "Kereszténydemokrata Néppárt (KDNP)",
+    q_thermo_3_party = "Jobbik Magyarországért Mozgalom (JOBBIK)",
+    q_thermo_4_party = "Magyar Szocialista Párt (MSZP)",
+    q_thermo_5_party = "Párbeszéd Magyarországért (Párbeszéd)",
+    q_thermo_6_party = "Demokratikus Koalíció (DK)"
+  )
+
+# Ireland ----------------------------------------------------------------------
+ire_w1_thermo_scores <- dataw1_ire |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_7,
+    q_thermo_3 = Q196_8,
+    q_thermo_4 = Q196_9,
+    q_thermo_5 = Q196_10,
+    q_thermo_6 = Q196_11,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Fine Gael (FG)",
+    q_thermo_2_party = "Fianna Fáil (FF)",
+    q_thermo_3_party = "Sinn Féin (SF)",
+    q_thermo_4_party = "Labour Party (LP)",
+    q_thermo_5_party = "Independent Alliance",
+    q_thermo_6_party = "Green Party (GP)"
+  )
+
+ire_w2_thermo_scores <- dataw2_ire |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_7,
+    q_thermo_3 = Q196_8,
+    q_thermo_4 = Q196_9,
+    q_thermo_5 = Q196_10,
+    q_thermo_6 = Q196_11,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Fine Gael (FG)",
+    q_thermo_2_party = "Fianna Fáil (FF)",
+    q_thermo_3_party = "Sinn Féin (SF)",
+    q_thermo_4_party = "Labour Party (LP)",
+    q_thermo_5_party = "Independent Alliance",
+    q_thermo_6_party = "Green Party (GP)"
+  )
+
+# Italy ------------------------------------------------------------------------
+ita_w1_thermo_scores <- dataw1_ita |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Lega (Lega Salvini Premier)",
+    q_thermo_2_party = "Movimento 5 Stelle (M5S)",
+    q_thermo_3_party = "Partito Democratico (PD)",
+    q_thermo_4_party = "Forza Italia (FI)",
+    q_thermo_5_party = "Fratelli d'Italia (FDI)",
+    q_thermo_6_party = "Più Europa (+E)"
+  )
+
+ita_w2_thermo_scores <- dataw2_ita |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Lega (Lega Salvini Premier)",
+    q_thermo_2_party = "Movimento 5 Stelle (M5S)",
+    q_thermo_3_party = "Partito Democratico (PD)",
+    q_thermo_4_party = "Forza Italia (FI)",
+    q_thermo_5_party = "Fratelli d'Italia (FDI)",
+    q_thermo_6_party = "Più Europa (+E)"
+  )
+
+# Latvia -----------------------------------------------------------------------
+lat_w1_thermo_scores <- dataw1_lat |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Sociāldemokrātiskā partija „Saskaņa“ (SDP)",
+    q_thermo_2_party = "Jaunā konservatīvā partija (JKP)",
+    q_thermo_3_party = "Zaļo un Zemnieku savienība (ZZS): Latvijas Zemnieku savienība (LZS) + Latvijas Zaļā partija (LZP)",
+    q_thermo_4_party = "Nacionālā apvienība „Visu Latvijai!” – „Tēvzemei un Brīvībai/LNNK” (NA)",
+    q_thermo_5_party = "'Kam pieder valsts' (KPV LV)",
+    q_thermo_6_party = "Kustība Par! (Par!)"
+  )
+
+lat_w2_thermo_scores <- dataw2_lat |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Sociāldemokrātiskā partija „Saskaņa“ (SDP)",
+    q_thermo_2_party = "Jaunā konservatīvā partija (JKP)",
+    q_thermo_3_party = "Zaļo un Zemnieku savienība (ZZS): Latvijas Zemnieku savienība (LZS) + Latvijas Zaļā partija (LZP)",
+    q_thermo_4_party = "Nacionālā apvienība „Visu Latvijai!” – „Tēvzemei un Brīvībai/LNNK” (NA)",
+    q_thermo_5_party = "'Kam pieder valsts' (KPV LV)",
+    q_thermo_6_party = "Kustība Par! (Par!)"
+  )
+
+# Lithuania --------------------------------------------------------------------
+lit_w1_thermo_scores <- dataw1_lit |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Tėvynės sąjunga - Lietuvos krikščionys demokratai (TS-LKD)",
+    q_thermo_2_party = "Lietuvos valstiečių ir žaliųjų sąjunga (LVŽS)",
+    q_thermo_3_party = "Lietuvos socialdemokratų partija (LSDP)",
+    q_thermo_4_party = "Tvarka ir teisingumas (TT)",
+    q_thermo_5_party = "Darbo Partija (DP)",
+    q_thermo_6_party = "Lietuvos socialdemokratų darbo partija (LSDDP)"
+  )
+
+lit_w2_thermo_scores <- dataw2_lit |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Tėvynės sąjunga - Lietuvos krikščionys demokratai (TS-LKD)",
+    q_thermo_2_party = "Lietuvos valstiečių ir žaliųjų sąjunga (LVŽS)",
+    q_thermo_3_party = "Lietuvos socialdemokratų partija (LSDP)",
+    q_thermo_4_party = "Tvarka ir teisingumas (TT)",
+    q_thermo_5_party = "Darbo Partija (DP)",
+    q_thermo_6_party = "Lietuvos socialdemokratų darbo partija (LSDDP)"
+  )
+
+# Netherlands ------------------------------------------------------------------
+net_w1_thermo_scores <- dataw1_net |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Volkspartij voor Vrijheid en Democratie (VVD)",
+    q_thermo_2_party = "Partij voor de Vrijheid (PVV)",
+    q_thermo_3_party = "GroenLinks (GL)",
+    q_thermo_4_party = "Christen-Democratisch Appèl (CDA)",
+    q_thermo_5_party = "Democraten 66 (D66)",
+    q_thermo_6_party = "Socialistische Partij (SP)"
+  )
+
+net_w2_thermo_scores <- dataw2_net |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Volkspartij voor Vrijheid en Democratie (VVD)",
+    q_thermo_2_party = "Partij voor de Vrijheid (PVV)",
+    q_thermo_3_party = "GroenLinks (GL)",
+    q_thermo_4_party = "Christen-Democratisch Appèl (CDA)",
+    q_thermo_5_party = "Democraten 66 (D66)",
+    q_thermo_6_party = "Socialistische Partij (SP)"
+  )
+
+# Poland -----------------------------------------------------------------------
+pol_w1_thermo_scores <- dataw1_pol |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Prawo i Sprawiedliwość (PiS)",
+    q_thermo_2_party = "Platforma Obywatelska (PO)",
+    q_thermo_3_party = "Wiosna",
+    q_thermo_4_party = "Kukiz'15",
+    q_thermo_5_party = "Polskie Stronnictwo Ludowe (PSL)",
+    q_thermo_6_party = "Sojusz Lewicy Demokratycznej (SLD)"
+  )
+
+pol_w2_thermo_scores <- dataw2_pol |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Prawo i Sprawiedliwość (PiS)",
+    q_thermo_2_party = "Platforma Obywatelska (PO)",
+    q_thermo_3_party = "Wiosna",
+    q_thermo_4_party = "Kukiz'15",
+    q_thermo_5_party = "Polskie Stronnictwo Ludowe (PSL)",
+    q_thermo_6_party = "Sojusz Lewicy Demokratycznej (SLD)"
+  )
+
+# Portugal ---------------------------------------------------------------------
+por_w1_thermo_scores <- dataw1_por |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_27,
+    q_thermo_3 = Q196_28,
+    q_thermo_4 = Q196_29,
+    q_thermo_5 = Q196_30,
+    q_thermo_6 = Q196_31,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Partido Socialista (PS)",
+    q_thermo_2_party = "Partido Social Democrata (PSD)",
+    q_thermo_3_party = "Centro Democrático e Social – Partido Popular (CDS–PP)",
+    q_thermo_4_party = "Bloco de Esquerda (BE)",
+    q_thermo_5_party = "Partido Comunista Português (PCP)",
+    q_thermo_6_party = "Partido Ecologista 'os Verdes' (PEV)"
+  )
+
+por_w2_thermo_scores <- dataw2_por |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_27,
+    q_thermo_3 = Q196_28,
+    q_thermo_4 = Q196_29,
+    q_thermo_5 = Q196_30,
+    q_thermo_6 = Q196_31,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Partido Socialista (PS)",
+    q_thermo_2_party = "Partido Social Democrata (PSD)",
+    q_thermo_3_party = "Centro Democrático e Social – Partido Popular (CDS–PP)",
+    q_thermo_4_party = "Bloco de Esquerda (BE)",
+    q_thermo_5_party = "Partido Comunista Português (PCP)",
+    q_thermo_6_party = "Partido Ecologista 'os Verdes' (PEV)"
+  )
+
+# Romania ----------------------------------------------------------------------
+rom_w1_thermo_scores <- dataw1_rom |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_18,
+    q_thermo_3 = Q196_19,
+    q_thermo_4 = Q196_20,
+    q_thermo_5 = Q196_21,
+    q_thermo_6 = Q196_22,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Partidul Social Democrat (PSD)",
+    q_thermo_2_party = "Partidul Naţional Liberal (PNL)",
+    q_thermo_3_party = "Alianța Liberalilor și Democraților (ALDE)",
+    q_thermo_4_party = "Uniunea Salvați România (USR)",
+    q_thermo_5_party = "Pro România (PRO)",
+    q_thermo_6_party = "Uniunea Democrată Maghiară din România (UDMR - Romániai Magyar Demokrata Szövetség (RMDSZ))"
+  )
+
+rom_w2_thermo_scores <- dataw2_rom |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_18,
+    q_thermo_3 = Q196_19,
+    q_thermo_4 = Q196_20,
+    q_thermo_5 = Q196_21,
+    q_thermo_6 = Q196_22,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Partidul Social Democrat (PSD)",
+    q_thermo_2_party = "Partidul Naţional Liberal (PNL)",
+    q_thermo_3_party = "Alianța Liberalilor și Democraților (ALDE)",
+    q_thermo_4_party = "Uniunea Salvați România (USR)",
+    q_thermo_5_party = "Pro România (PRO)",
+    q_thermo_6_party = "Uniunea Democrată Maghiară din România (UDMR - Romániai Magyar Demokrata Szövetség (RMDSZ))"
+  )
+
+# Slovakia ---------------------------------------------------------------------
+slovakia_w1_thermo_scores <- dataw1_slovakia |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "SMER - Sociálna demokracia (SMER-SD)",
+    q_thermo_2_party = "Sloboda a Solidarita (SaS)",
+    q_thermo_3_party = "Obyčajní Ľudia A Nezávislé Osobnosti (Oľano)",
+    q_thermo_4_party = "Kotleba – Ľudová strana Naše Slovensko (ĽSNS)",
+    q_thermo_5_party = "Progresívne Slovensko",
+    q_thermo_6_party = "SME RODINA – Boris Kollár (SME RODINA)"
+  )
+
+slovakia_w2_thermo_scores <- dataw2_slovakia |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "SMER - Sociálna demokracia (SMER-SD)",
+    q_thermo_2_party = "Sloboda a Solidarita (SaS)",
+    q_thermo_3_party = "Obyčajní Ľudia A Nezávislé Osobnosti (Oľano)",
+    q_thermo_4_party = "Kotleba – Ľudová strana Naše Slovensko (ĽSNS)",
+    q_thermo_5_party = "Progresívne Slovensko",
+    q_thermo_6_party = "SME RODINA – Boris Kollár (SME RODINA)"
+  )
+
+# Slovenia ---------------------------------------------------------------------
+slovenia_w1_thermo_scores <- dataw1_slovenia |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Lista Marjana Šarca (LMŠ)",
+    q_thermo_2_party = "Slovenska demokratska stranka (SDS)",
+    q_thermo_3_party = "Socialni demokrati (SD)",
+    q_thermo_4_party = "Levica",
+    q_thermo_5_party = "Stranka modernega centra (SMC)",
+    q_thermo_6_party = "Nova Slovenija - Krščanski demokrati (N.Si)"
+  )
+
+slovenia_w2_thermo_scores <- dataw2_slovenia |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Lista Marjana Šarca (LMŠ)",
+    q_thermo_2_party = "Slovenska demokratska stranka (SDS)",
+    q_thermo_3_party = "Socialni demokrati (SD)",
+    q_thermo_4_party = "Levica",
+    q_thermo_5_party = "Stranka modernega centra (SMC)",
+    q_thermo_6_party = "Nova Slovenija - Krščanski demokrati (N.Si)"
+  )
+
+# Spain ------------------------------------------------------------------------
+spa_w1_thermo_scores <- dataw1_spa |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Partido Socialista Obrero Español (PSOE)",
+    q_thermo_2_party = "Partido Popular (PP)",
+    q_thermo_3_party = "Ciudadanos - Partido de la Ciudadanía (C's)",
+    q_thermo_4_party = "Podemos",
+    q_thermo_5_party = "Vox",
+    q_thermo_6_party = "Izquierda Unida (IU)"
+  )
+
+spa_w2_thermo_scores <- dataw2_spa |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Partido Socialista Obrero Español (PSOE)",
+    q_thermo_2_party = "Partido Popular (PP)",
+    q_thermo_3_party = "Ciudadanos - Partido de la Ciudadanía (C's)",
+    q_thermo_4_party = "Podemos",
+    q_thermo_5_party = "Vox",
+    q_thermo_6_party = "Izquierda Unida (IU)"
+  )
+
+# Sweden -----------------------------------------------------------------------
+swe_w1_thermo_scores <- dataw1_swe |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Socialdemokratiska arbetarpartiet (SAP)",
+    q_thermo_2_party = "Sverigedemokraterna (SD)",
+    q_thermo_3_party = "Moderata samlingspartiet (M)",
+    q_thermo_4_party = "Kristdemokraterna (KD)",
+    q_thermo_5_party = "Vänsterpartiet (V)",
+    q_thermo_6_party = "Centerpartiet (C)"
+  )
+
+swe_w2_thermo_scores <- dataw2_swe |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_17,
+    q_thermo_3 = Q196_18,
+    q_thermo_4 = Q196_19,
+    q_thermo_5 = Q196_20,
+    q_thermo_6 = Q196_21,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Socialdemokratiska arbetarpartiet (SAP)",
+    q_thermo_2_party = "Sverigedemokraterna (SD)",
+    q_thermo_3_party = "Moderata samlingspartiet (M)",
+    q_thermo_4_party = "Kristdemokraterna (KD)",
+    q_thermo_5_party = "Vänsterpartiet (V)",
+    q_thermo_6_party = "Centerpartiet (C)"
+  )
+
+# UK ---------------------------------------------------------------------------
+uk_w1_thermo_scores <- dataw1_uk |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Labour Party (Labour)",
+    q_thermo_2_party = "Conservative and Unionist Party (Conservative Party)",
+    q_thermo_3_party = "Brexit Party",
+    q_thermo_4_party = "Liberal Democrats (Lib Dem)",
+    q_thermo_5_party = "Scotish National Party (SNP)",
+    q_thermo_6_party = "Green Party of England and Wales (GP)"
+  )
+
+uk_w2_thermo_scores <- dataw2_uk |>
+  select(
+    q_thermo_1 = Q196_1,
+    q_thermo_2 = Q196_12,
+    q_thermo_3 = Q196_13,
+    q_thermo_4 = Q196_14,
+    q_thermo_5 = Q196_15,
+    q_thermo_6 = Q196_16,
+    ResponseId
+  ) |>
+  mutate(
+    q_thermo_1_party = "Labour Party (Labour)",
+    q_thermo_2_party = "Conservative and Unionist Party (Conservative Party)",
+    q_thermo_3_party = "Brexit Party",
+    q_thermo_4_party = "Liberal Democrats (Lib Dem)",
+    q_thermo_5_party = "Scotish National Party (SNP)",
+    q_thermo_6_party = "Green Party of England and Wales (GP)"
+  )
+
+
+# Combined Thermoscore Object---------------------------------------------------
+# First two rows are removed as they contain question instructions (thus duplicate responseid values)
+thermo_scores <- bind_rows(
+  aus_w1_thermo_scores |> slice(-c(1, 2)),
+  aus_w2_thermo_scores |> slice(-c(1, 2)),
+  bel_w1_thermo_scores |> slice(-c(1, 2)),
+  bel_w2_thermo_scores |> slice(-c(1, 2)),
+  bul_w1_thermo_scores |> slice(-c(1, 2)),
+  bul_w2_thermo_scores |> slice(-c(1, 2)),
+  cro_w1_thermo_scores |> slice(-c(1, 2)),
+  cro_w2_thermo_scores |> slice(-c(1, 2)),
+  cze_w1_thermo_scores |> slice(-c(1, 2)),
+  cze_w2_thermo_scores |> slice(-c(1, 2)),
+  den_w1_thermo_scores |> slice(-c(1, 2)),
+  den_w2_thermo_scores |> slice(-c(1, 2)),
+  est_w1_thermo_scores |> slice(-c(1, 2)),
+  est_w2_thermo_scores |> slice(-c(1, 2)),
+  fin_w1_thermo_scores |> slice(-c(1, 2)),
+  fin_w2_thermo_scores |> slice(-c(1, 2)),
+  fra_w1_thermo_scores |> slice(-c(1, 2)),
+  fra_w2_thermo_scores |> slice(-c(1, 2)),
+  ger_w1_thermo_scores |> slice(-c(1, 2)),
+  ger_w2_thermo_scores |> slice(-c(1, 2)),
+  gre_w1_thermo_scores |> slice(-c(1, 2)),
+  gre_w2_thermo_scores |> slice(-c(1, 2)),
+  hun_w1_thermo_scores |> slice(-c(1, 2)),
+  hun_w2_thermo_scores |> slice(-c(1, 2)),
+  ire_w1_thermo_scores |> slice(-c(1, 2)),
+  ire_w2_thermo_scores |> slice(-c(1, 2)),
+  ita_w1_thermo_scores |> slice(-c(1, 2)),
+  ita_w2_thermo_scores |> slice(-c(1, 2)),
+  lat_w1_thermo_scores |> slice(-c(1, 2)),
+  lat_w2_thermo_scores |> slice(-c(1, 2)),
+  lit_w1_thermo_scores |> slice(-c(1, 2)),
+  lit_w2_thermo_scores |> slice(-c(1, 2)),
+  net_w1_thermo_scores |> slice(-c(1, 2)),
+  net_w2_thermo_scores |> slice(-c(1, 2)),
+  pol_w1_thermo_scores |> slice(-c(1, 2)),
+  pol_w2_thermo_scores |> slice(-c(1, 2)),
+  por_w1_thermo_scores |> slice(-c(1, 2)),
+  por_w2_thermo_scores |> slice(-c(1, 2)),
+  rom_w1_thermo_scores |> slice(-c(1, 2)),
+  rom_w2_thermo_scores |> slice(-c(1, 2)),
+  slovakia_w1_thermo_scores |> slice(-c(1, 2)),
+  slovakia_w2_thermo_scores |> slice(-c(1, 2)),
+  slovenia_w1_thermo_scores |> slice(-c(1, 2)),
+  slovenia_w2_thermo_scores |> slice(-c(1, 2)),
+  spa_w1_thermo_scores |> slice(-c(1, 2)),
+  spa_w2_thermo_scores |> slice(-c(1, 2)),
+  swe_w1_thermo_scores |> slice(-c(1, 2)),
+  swe_w2_thermo_scores |> slice(-c(1, 2)),
+  uk_w1_thermo_scores |> slice(-c(1, 2)),
+  uk_w2_thermo_scores |> slice(-c(1, 2))
+) |>
+  rename(meta_responseid = ResponseId) |>
+  mutate(
+    q_thermo_1 = as.numeric(q_thermo_1),
+    q_thermo_2 = as.numeric(q_thermo_2),
+    q_thermo_3 = as.numeric(q_thermo_3),
+    q_thermo_4 = as.numeric(q_thermo_4),
+    q_thermo_5 = as.numeric(q_thermo_5),
+    q_thermo_6 = as.numeric(q_thermo_6),
+  )
+
+```
+
+# Full Long Format Dataset
+
+Append Survey Items to Hahm et al. processed data.
+
+```{r}
+#| label: long-format-data
+
+# create new long format dataset with only vars of interest
+eu25games_long <- dffin_renamed |>
+  select(
+    # Metadata and identifiers
+    meta_country_abbr,
+    meta_country,
+    meta_part,
+    meta_pid,
+    meta_psid,
+    meta_game,
+    meta_round,
+
+    # Conjoint variables
+    cj_trmnt,
+    cj_token,
+
+    # Raw game variables
+    cj_party,
+    cj_eupos,
+    cj_nationality,
+    cj_religion,
+    cj_age,
+    cj_sex,
+    cj_class,
+
+    # cleaned game variables
+    cj_reli_en,
+    cj_sex_en,
+    cj_class_en,
+    cj_age_en,
+    cj_eu_pro,
+
+    # analytical game variables
+    cj_eupos_shown,
+    cj_pid_shown,
+    der_co_partisan,
+    der_out_partisan,
+    der_conational,
+    der_outpartisan,
+    der_outpartisan2,
+    der_outattach1,
+    der_outattach2,
+    der_outattach3,
+    der_nopid,
+    q_religion_en,
+
+    # cleaned variables
+    q_lrpos2,
+    q_eupos2,
+    der_lr_extremity,
+    q_edu
+  )
+```
+
+Which variables are present both in w1 and w2?
+
+```{r}
+#| label: identify-vars-in-both-waves
+
+vars_dfw1 <- dfw1_renamed |> colnames()
+vars_dfw2 <- dfw2_renamed |> colnames()
+
+vars_in_w1_and_w2 <- vars_dfw1[vars_dfw1 %in% vars_dfw2]
+```
+
+With some variables being "spread" across multiple question variables in wave 1, this need to be fixed first.
+
+```{r}
+#| label: wave1-codebook-prep-for-merge
+
+doubles <- c(
+  "q_eupos_7scale",
+  "q_understand_eu_pol",
+  "q_eu_politicians_care",
+  "q_eu_public_say",
+  "q_politicians_follow_people",
+  "q_people_make_decisions",
+  "q_prefer_citizen_rep",
+  "q_officials_talk_action",
+  "q_politics_good_evil",
+  "q_political_compromise",
+  "q_democracy_compromise",
+  "q_listen_other_groups",
+  "q_expert_decisions",
+  "q_leaders_educated",
+  "q_parties_harm",
+  "q_people_unaware",
+  "q_eu_long_term",
+  "q_eu_listen_people",
+  "q_eu_impact_econ",
+  "q_eu_impact_cult",
+  "q_eu_impact_polstatus",
+  "q_eu_disagree_dissolve",
+  "q_eu_satisfaction",
+  "q_eupos_7scale_2",
+  "q_understand_eu_pol_2",
+  "q_eu_politicians_care_2",
+  "q_eu_public_say_2",
+  "q_politicians_follow_people_2",
+  "q_people_make_decisions_2",
+  "q_prefer_citizen_rep_2",
+  "q_officials_talk_action_2",
+  "q_politics_good_evil_2",
+  "q_political_compromise_2",
+  "q_democracy_compromise_2",
+  "q_listen_other_groups_2",
+  "q_expert_decisions_2",
+  "q_leaders_educated_2",
+  "q_parties_harm_2",
+  "q_people_unaware_2",
+  "q_eu_long_term_2",
+  "q_eu_listen_people_2",
+  "q_eu_impact_econ_2",
+  "q_eu_impact_cult_2",
+  "q_eu_impact_polstatus_2",
+  "q_eu_disagree_dissolve_2",
+  "q_eu_satisfaction_2"
+)
+
+# The for loop to iterate through the variables
+for (i in 1:23) {
+  # Print a message to track the loop's progress
+  message("Counting variable pair: ", doubles[i], " and ", doubles[i], "_2")
+
+  # Get the column names as strings
+  col1_name <- doubles[i]
+  col2_name <- paste0(doubles[i], "_2")
+
+  # Use the `!!sym()` pattern to use the string variables as column names
+  # The result of the count operation is stored in the 'result' variable
+  result <- dfw1_renamed |>
+    count(
+      !!sym(col1_name),
+      !!sym(col2_name)
+    )
+
+  # Print the result of the count for the current iteration
+  print(result)
+}
+
+
+# eupos3 is different somehow...leaving it aside for now
+dfw1_renamed |>
+  count(
+    q_eupos_7scale,
+    q_eupos_7scale_2,
+    q_eupos_7scale_3
+  )
+
+```
+
+```{r}
+#| label: prepare-merging
+
+# select variables to merge to long format
+prep_w1 <- dfw1_renamed |>
+  select(
+    starts_with("meta_"),
+    starts_with("id_"),
+    starts_with("q_"),
+    -starts_with("dict"),
+    -starts_with("trust")
+  )
+
+prep_w1 <- prep_w1 |>
+  # Collapse "doubled" variables
+  mutate(
+    q_eupos_7scale = coalesce(
+      q_eupos_7scale,
+      q_eupos_7scale_2
+    ),
+    q_understand_eu_pol = coalesce(
+      q_understand_eu_pol,
+      q_understand_eu_pol_2
+    ),
+    q_eu_politicians_care = coalesce(
+      q_eu_politicians_care,
+      q_eu_politicians_care_2
+    ),
+    q_eu_public_say = coalesce(
+      q_eu_public_say,
+      q_eu_public_say_2
+    ),
+    q_politicians_follow_people = coalesce(
+      q_politicians_follow_people,
+      q_politicians_follow_people_2
+    ),
+    q_people_make_decisions = coalesce(
+      q_people_make_decisions,
+      q_people_make_decisions_2
+    ),
+    q_prefer_citizen_rep = coalesce(
+      q_prefer_citizen_rep,
+      q_prefer_citizen_rep_2
+    ),
+    q_officials_talk_action = coalesce(
+      q_officials_talk_action,
+      q_officials_talk_action_2
+    ),
+    q_politics_good_evil = coalesce(
+      q_politics_good_evil,
+      q_politics_good_evil_2
+    ),
+    q_political_compromise = coalesce(
+      q_political_compromise,
+      q_political_compromise_2
+    ),
+    q_democracy_compromise = coalesce(
+      q_democracy_compromise,
+      q_democracy_compromise_2
+    ),
+    q_listen_other_groups = coalesce(
+      q_listen_other_groups,
+      q_listen_other_groups_2
+    ),
+    q_expert_decisions = coalesce(
+      q_expert_decisions,
+      q_expert_decisions_2
+    ),
+    q_leaders_educated = coalesce(
+      q_leaders_educated,
+      q_leaders_educated_2
+    ),
+    q_parties_harm = coalesce(
+      q_parties_harm,
+      q_parties_harm_2
+    ),
+    q_people_unaware = coalesce(
+      q_people_unaware,
+      q_people_unaware_2
+    ),
+    q_eu_long_term = coalesce(
+      q_eu_long_term,
+      q_eu_long_term_2
+    ),
+    q_eu_listen_people = coalesce(
+      q_eu_listen_people,
+      q_eu_listen_people_2
+    ),
+    q_eu_impact_econ = coalesce(
+      as.numeric(q_eu_impact_econ),
+      q_eu_impact_econ_2
+    ),
+    q_eu_impact_cult = coalesce(
+      as.numeric(q_eu_impact_cult),
+      q_eu_impact_cult_2
+    ),
+    q_eu_impact_polstatus = coalesce(
+      as.numeric(q_eu_impact_polstatus),
+      q_eu_impact_polstatus_2
+    ),
+    q_eu_disagree_dissolve = as.numeric(coalesce(
+      q_eu_disagree_dissolve,
+      q_eu_disagree_dissolve_2
+    )),
+    q_eu_satisfaction = coalesce(
+      q_eu_satisfaction,
+      q_eu_satisfaction_2
+    )
+  ) |>
+  # Remove _2 doubled variables and priming variables (only in w1)
+  select(
+    -ends_with("_2"),
+    -contains("prime_")
+  ) |>
+  # to numeric so mergin works
+  mutate(
+    q_cjeu_disagree_dissolve = as.numeric(q_cjeu_disagree_dissolve)
+  )
+
+# select wave 2 variables
+prep_w2 <- dfw2_renamed |>
+  select(
+    starts_with("meta_"),
+    starts_with("id_"),
+    starts_with("q_"),
+    -starts_with("dict"),
+    -starts_with("trust")
+  ) |>
+  select(
+    -contains("prime_")
+  )
+
+
+# there are still duplicate id values that need to be resolved
+```
+
+Since the wide format data is uncleaned,[^1] it contains some duplicate IDs (this might happen, for instance, if a respondent starts the survey on their home computer but then quits and starts at another time again using their phone). More precisely, while in total there are now `r prep_w1 |> nrow()` observations in the `prep_w1` object and `r prep_w2 |> nrow()` observations in the `prep_w2` object, in the former only `r prep_w1 |> distinct(meta_pid) |> nrow()` are distinct IDs and in the latter only `r prep_w2 |> distinct(meta_pid) |> nrow()` are distinct IDs. In comparison, the APSR dataset (`dffin`) contains `r dffin_renamed |> distinct(meta_pid) |> nrow()` distinct IDs. This yields further preparation of `prep_w1` and `prep_w2`: I will keep only the observation with the highest progress for each respondent. This procedure is necessary to avoid many-to-many relationships when merging the data.
+
+[^1]: The data are "unclean" in the sense that unlike the processed APSR publication dataset, all respondents are contained (even those that did not complete the survey for instance)
+
+```{r}
+#| label: resolve-duplicate-id-values
+
+# check size of problem
+sum(duplicated(prep_w1$meta_pid))
+sum(duplicated(prep_w2$meta_pid))
+
+# for each pid value, keep only the rows with most progress
+prep_w1_distinct <- prep_w1 |>
+  group_by(meta_wave, meta_pid) |>
+  filter(meta_progress == max(meta_progress)) |>
+  ungroup()
+
+# check how many now
+sum(duplicated(prep_w1_distinct$meta_pid))
+# slightly less, but still some present
+
+# same for wave 2
+prep_w2_distinct <- prep_w2 |>
+  group_by(meta_wave, meta_pid) |>
+  filter(meta_progress == max(meta_progress)) |>
+  ungroup()
+
+# check how many now
+sum(duplicated(prep_w2_distinct$meta_pid))
+# slightly less, but still some present
+
+# variable to store if duplicate
+prep_w1_distinct <- prep_w1_distinct |>
+  group_by(meta_pid) |>
+  mutate(
+    is_dup = if_else(
+      n() > 1,
+      1,
+      0,
+      missing = NA
+    )
+  ) |>
+  ungroup()
+
+prep_w2_distinct <- prep_w2_distinct |>
+  group_by(meta_pid) |>
+  mutate(
+    is_dup = if_else(
+      n() > 1,
+      1,
+      0,
+      missing = NA
+    )
+  ) |>
+  ungroup()
+
+# Filter only duplicate id observations
+# and create dummy if id is present in dffin
+id_list_dffin <- dffin_renamed |>
+  filter(
+    meta_part == "part1"
+  ) |>
+  pull(
+    meta_pid
+  )
+
+
+dupl_w1 <- prep_w1_distinct |>
+  filter(is_dup == 1) |>
+  mutate(
+    in_dffin = if_else(
+      meta_pid %in% id_list_dffin,
+      1,
+      0,
+      missing = NA
+    )
+  )
+
+dupl_w2 <- prep_w2_distinct |>
+  filter(is_dup == 1) |>
+  mutate(
+    in_dffin = if_else(
+      meta_pid %in% id_list_dffin,
+      1,
+      0,
+      missing = NA
+    )
+  )
+
+# see how many of the duplicate ids are in dffin
+dupl_w1 |> count(is_dup, in_dffin)
+dupl_w2 |> count(is_dup, in_dffin)
+
+# of those duplicate IDs present in dffin, keep only those with least NA values
+
+dupl_w1 <- dupl_w1 |>
+  mutate(na_count = rowSums(is.na(across(everything())))) |>
+  group_by(meta_pid) |>
+  mutate(
+    to_drop = case_when(
+      in_dffin == 0 ~ 1, # Drop if in_dffin is 0
+      in_dffin == 1 & na_count == max(na_count) ~ 1, # Drop if it's the observation with more NAs
+      TRUE ~ 0 # Keep otherwise
+    )
+  ) |>
+  ungroup()
+
+dupl_w2 <- dupl_w2 |>
+  mutate(na_count = rowSums(is.na(across(everything())))) |>
+  group_by(meta_pid) |>
+  mutate(
+    to_drop = case_when(
+      in_dffin == 0 ~ 1, # Drop if in_dffin is 0
+      in_dffin == 1 & na_count == max(na_count) ~ 1, # Drop if it's the observation with more NAs
+      TRUE ~ 0 # Keep otherwise
+    )
+  ) |>
+  ungroup()
+
+# see how many cases are affected
+dupl_w1 |> count(to_drop)
+dupl_w2 |> count(to_drop)
+
+# drop the observations from data
+prep_w1_distinct <- prep_w1_distinct |>
+  left_join(
+    dupl_w1 |>
+      select(
+        meta_pid,
+        meta_responseid,
+        to_drop
+      ),
+    by = join_by(meta_pid, meta_responseid)
+  ) |>
+  mutate(
+    to_drop = ifelse(
+      is.na(to_drop),
+      0,
+      to_drop
+    )
+  ) |>
+  filter(to_drop == 0) |>
+  select(-is_dup, -to_drop)
+
+prep_w2_distinct <- prep_w2_distinct |>
+  left_join(
+    dupl_w1 |>
+      select(
+        meta_pid,
+        meta_responseid,
+        to_drop
+      ),
+    by = join_by(meta_pid, meta_responseid)
+  ) |>
+  mutate(
+    to_drop = ifelse(
+      is.na(to_drop),
+      0,
+      to_drop
+    )
+  ) |>
+  filter(to_drop == 0) |>
+  select(-is_dup, -to_drop)
+```
+
+```{r}
+#| label: merge
+
+# append w1 and w2
+prepped <- prep_w1_distinct |>
+  bind_rows(prep_w2_distinct) |>
+  mutate(
+    meta_country = if_else(
+      meta_country == "UK",
+      "United Kingdom",
+      meta_country
+    )
+  )
+
+# merge variables to long dataset
+eu25games2019 <- eu25games_long |>
+  mutate(
+    meta_wave = case_when(
+      meta_part == "part1" ~ 1,
+      meta_part == "part2" ~ 2,
+      .default = NA
+    )
+  ) |>
+  left_join(
+    prepped,
+    by = join_by(meta_pid, meta_psid, meta_wave, meta_country)
+  )
+
+# Merge thermometer scores -----------------------------------------------------
+eu25games2019 <- eu25games2019 |>
+  left_join(
+    thermo_scores,
+    by = join_by(meta_responseid)
+  )
+```
+
+```{r}
+#| label: save-data
+
+# save dataset
+saveRDS(
+  eu25games2019,
+  file = here(
+    "data",
+    "02_processed",
+    "data",
+    "eu25games2019_1.rds"
+  )
+)
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

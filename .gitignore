@@ -32,3 +32,5 @@ Thumbs.db
 /.quarto/
 
 **/*.quarto_ipynb
+
+*notes*
