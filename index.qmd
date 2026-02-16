@@ -188,93 +188,66 @@ As with thermometer ratings, the design generates multiple observations per resp
 
 ### Partisan Type: Explicit Versus Implicit Partisans {#sec-partisan-type}
 
-Our key explanatory variable distinguishes respondents by partisan type. Following standard European election studies, the survey asked: "Do you consider yourself to be close to any particular political party?" Respondents answering affirmatively ("Yes") then indicated which party. We classify these respondents as **explicit partisans** ($\text{Type}_i = 1$): individuals who report subjective attachment to a party.
+Our key explanatory variable distinguishes respondents by partisan type. The survey first asked: “Do you consider yourself to be close to any particular political party? If so, which party do you feel close to?” Respondents indicating closeness to any party are classified as explicit partisans ($\text{Type}_i = 1$). For these individuals, the named party defines the respondent’s partisan anchor. This group comprises roughly 18,000 respondents in our sample.
 
-Respondents answering negatively ("No" or "Don't know") were subsequently asked about vote choice: "Which party did you vote for in the most recent national election?" or "If there were a national election tomorrow, which party would you vote for?" Respondents denying attachment but reporting a vote choice are classified as **implicit partisans** ($\text{Type}_i = 0$): individuals who reveal partisan anchors through electoral behavior but explicitly reject subjective identification.
+Respondents who selected the option indicating no attachment to any party were subsequently evaluated using multiple electoral preference items capturing both retrospective and prospective behavior: vote intention and reported vote choice (including alternative and earlier election recall items). We employ a recall-maximizing strategy: if a respondent reported any party preference across these measures, that party is assigned as the respondent’s partisan anchor and the respondent is classified as an implicit partisan ($\text{Type}_i = 0$). These individuals deny subjective identification but reveal a behavioral partisan anchor through electoral preference (approximately 6,000 respondents).
 
-For both groups, the reported party (whether from the attachment item or vote choice question) serves as the **partisan anchor** defining copartisan versus outpartisan distinctions in subsequent evaluations. This approach extends classic insights on U.S. independent "leaners" [@petrocik2009measuring; @kinder2017neither] to multiparty systems, distinguishing subjective identity from behavioral anchoring while maintaining consistent partisan reference points for AP measurement.
+Respondents who neither reported party attachment nor indicated any party in any vote item are classified as non-partisans (approximately 3,900 respondents). Because they lack a defensible partisan anchor, they cannot be assigned copartisan–outpartisan relationships and are therefore excluded from analyses requiring such comparisons.
 
-Importantly, this classification varies substantially across countries. Figure 1 displays the distribution of partisan types across our 25-country sample. Explicit partisans range from approximately 40% of respondents in some countries to over 80% in others, highlighting that identical sampling decisions (e.g., restricting analyses to explicit identifiers) produce fundamentally different populations of inference across national contexts. This cross-national variation motivates our focus on comparing AP across partisan types.
+For explicit and implicit partisans alike, the identified party—whether derived from attachment or electoral preference—serves as the partisan anchor defining copartisan versus outpartisan distinctions in subsequent evaluations. This procedure distinguishes subjective identification from behavioral anchoring while maintaining a consistent reference point for measuring affective polarization across respondents.
+
+Importantly, the distribution of partisan types varies substantially across countries. @fig-impl-expl-distribution displays this cross-national variation, with explicit partisans comprising roughly 40% of respondents in some countries and more than 80% in others. Consequently, identical sampling decisions -- such as restricting analyses to self-reported identifiers -- produce different populations of inference across national contexts, motivating our comparison of affective polarization across partisan types.
+
+{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
 
 ### Analytical Strategy {#sec-methods}
 
-We employ Bayesian hierarchical models to estimate AP as a function of partisan type, accounting for the nested data structure and enabling principled cross-national inference [@gelman2006data]. Our approach unfolds in three stages, corresponding to our main analyses and extensions.
+We (plan to) employ Bayesian hierarchical models to estimate affective polarization (AP) as a function of partisan type, accounting for the nested data structure and enabling principled cross-national inference. The empirical strategy is designed in three stages corresponding to the main analyses and planned extensions.
 
-#### Stage 1: Core Model—Partisan Type and Affective Polarization {#sec-core-model}
+#### Stage 1: Core Model — Partisan Type and Affective Polarization {#sec-core-model}
 
-Our primary analysis tests whether explicit and implicit partisans differ in vertical versus horizontal AP. The core model specification is:
-
-$$
-\text{Outcome}_{ric} = \alpha + \beta_1 \cdot \text{CoPartisan}_{ric} + \beta_2 \cdot \text{Type}_i + \beta_3 \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i) + \varepsilon_{ric}
-$$
-
-where:
-
-- $\text{Outcome}_{ric}$ is either the thermometer rating (vertical AP) or token allocation (horizontal AP) for observation $r$ by respondent $i$ in country $c$
-- $\text{CoPartisan}_{ric}$ indicates whether the evaluated party/profile matches respondent $i$'s partisan anchor
-- $\text{Type}_i$ indicates explicit ($= 1$) versus implicit ($= 0$) partisan status
-- $\beta_1$ captures baseline AP for implicit partisans (the ingroup favoritism effect absent subjective attachment)
-- $\beta_2$ captures the main effect of explicit partisanship on baseline affect
-- $\beta_3$ captures the **key parameter**: whether explicit partisans exhibit stronger AP than implicit partisans
-
-This specification operationalizes AP as a **derived quantity of interest**: the difference in expected outcomes when evaluating copartisans versus averaging across outpartisans. For respondent $i$ of partisan type $t$:
+The primary analysis evaluates whether explicit and implicit partisans differ in vertical versus horizontal AP. The core model specification is
 
 $$
-\text{AP}_t = \mathbb{E}[\text{Outcome} \mid \text{CoPartisan} = 1, \text{Type} = t] - \mathbb{E}[\text{Outcome} \mid \text{CoPartisan} = 0, \text{Type} = t]
+\text{Outcome}_{ric} = \alpha + \beta_1 \cdot \text{CoPartisan}_{ric} + \beta_2 \cdot \text{Type}_i + \beta_3 \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i) + \varepsilon_{ric}.
 $$
 
-For implicit partisans ($t = 0$): $\text{AP}_{\text{implicit}} = \beta_1$
+Here, $\text{Outcome}_{ric}$ denotes either the thermometer rating (vertical AP) or token allocation (horizontal AP) for observation $r$ by respondent $i$ in country $c$. $\text{CoPartisan}_{ric}$ indicates whether the evaluated party or profile matches respondent $i$’s partisan anchor, and $\text{Type}_i$ distinguishes explicit ($=1$) from implicit ($=0$) partisans. The coefficient $\beta_1$ captures baseline ingroup favoritism among implicit partisans, $\beta_2$ represents baseline affective differences between partisan types, and $\beta_3$ is the key parameter capturing whether explicit partisans exhibit stronger AP than implicit partisans.
 
-For explicit partisans ($t = 1$): $\text{AP}_{\text{explicit}} = \beta_1 + \beta_3$
+This specification treats AP as a derived quantity of interest defined as the expected difference between evaluations of copartisans and outpartisans. For respondent $i$ of partisan type $t$,
 
-Our hypotheses translate directly into testable predictions about $\beta_3$:
+$$
+\text{AP}_t = \mathbb{E}[\text{Outcome} \mid \text{CoPartisan}=1, \text{Type}=t] - \mathbb{E}[\text{Outcome} \mid \text{CoPartisan}=0, \text{Type}=t].
+$$
 
-- **H$_{1a}$ and H$_{2a}$** (identity mechanism): $\beta_3 > 0$ for both vertical and horizontal AP
-- **H$_{1b}$** (categorization mechanism, vertical): $\beta_3 \approx 0$ for thermometer ratings
-- **H$_{2b}$** (categorization mechanism, horizontal): $\beta_3 \approx 0$ for token allocations
-
-This framework maintains consistency with @reiljan2020fear's API—calculating polarization as ingroup affect minus average outgroup affect—while extending it to behavioral outcomes and testing whether subjective attachment amplifies polarization beyond partisan anchoring.
+For implicit partisans $(t=0)$, $\text{AP}_{\text{implicit}}=\beta_1$, whereas for explicit partisans $(t=1)$, $\text{AP}_{\text{explicit}}=\beta_1+\beta_3$. The hypotheses therefore translate into predictions about $\beta_3$: identity-based mechanisms imply $\beta_3>0$ for both vertical and horizontal AP, whereas categorization-based mechanisms imply $\beta_3\approx0$ in the respective dimension. This framework remains consistent with the logic of the Affective Polarization Index while extending it to behavioral outcomes and evaluating whether subjective attachment amplifies polarization beyond partisan anchoring.
 
 #### Stage 2: Multilevel Extension for Cross-National Comparison {#sec-multilevel}
 
-The pooled specification in Stage 1 estimates population-average effects but masks potentially substantial cross-national heterogeneity. To examine how partisan type effects vary across European democracies, we extend the model with a three-level hierarchical structure:
+The pooled specification provides population-average effects but may conceal cross-national heterogeneity. To examine variation across European democracies, the model is extended to a three-level hierarchical structure:
 
 $$
 \begin{aligned}
 \text{Outcome}_{ric} = &(\alpha + \alpha_c + \alpha_i) + \\
 &(\beta_1 + \beta_{1c}) \cdot \text{CoPartisan}_{ric} + \\
 &(\beta_2 + \beta_{2c}) \cdot \text{Type}_i + \\
-&(\beta_3 + \beta_{3c}) \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i) + \\
-&\varepsilon_{ric}
+&(\beta_3 + \beta_{3c}) \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i) + \varepsilon_{ric}.
 \end{aligned}
 $$
 
-where:
+Within-respondent variation across evaluations is captured by $\varepsilon_{ric} \sim \mathcal{N}(0,\sigma^2)$. Respondent-level heterogeneity is modeled through $\alpha_i \sim \mathcal{N}(0,\sigma_{\text{respondent}}^2)$, while country-level clustering is captured by $\alpha_c \sim \mathcal{N}(0,\sigma_{\text{country}}^2)$. Random slopes are specified at the country level: $\beta_{1c}$ captures cross-national variation in AP strength, $\beta_{2c}$ variation in baseline differences between partisan types, and $\beta_{3c}$ variation in the partisan-type gap in AP.
 
-- **Level 1 (Observations)**: $\varepsilon_{ric} \sim \mathcal{N}(0, \sigma^2)$ represents within-respondent variation across multiple evaluations
-- **Level 2 (Respondents)**: $\alpha_i \sim \mathcal{N}(0, \sigma_{\text{respondent}}^2)$ accounts for respondent-specific baseline affects
-- **Level 3 (Countries)**: Random intercepts $\alpha_c \sim \mathcal{N}(0, \sigma_{\text{country}}^2)$ and random slopes for all effects:
-  - $\beta_{1c} \sim \mathcal{N}(0, \sigma_{\text{AP,country}}^2)$ captures country-varying AP strength
-  - $\beta_{2c} \sim \mathcal{N}(0, \sigma_{\text{type,country}}^2)$ captures country-varying explicit partisan effects
-  - $\beta_{3c} \sim \mathcal{N}(0, \sigma_{\text{interaction,country}}^2)$ captures country-varying partisan type effects on AP
-
-This specification allows random intercepts at both respondent and country levels to account for clustering, while random slopes are estimated only at the country level to enable comparative inference about cross-national heterogeneity in partisan type effects.
-
-The multilevel structure enables two complementary inference strategies:
-
-**Pooled estimates** marginalize over random effects to recover population-average effects comparable to Stage 1 but with appropriately propagated uncertainty from the hierarchical structure. These represent average AP patterns across European democracies.
-
-**Country-specific estimates** condition on country-level random effects to simulate AP by partisan type within each national context:
+This hierarchical specification enables two complementary inferential perspectives. Marginalizing over random effects yields pooled estimates representing average patterns across European democracies. Conditioning on country-level effects produces country-specific estimates,
 
 $$
-\text{AP}_{c,t} = (\beta_1 + \beta_{1c}) + t \cdot (\beta_3 + \beta_{3c})
+\text{AP}_{c,t} = (\beta_1 + \beta_{1c}) + t \cdot (\beta_3 + \beta_{3c}),
 $$
 
-Posterior simulations generate full distributions of country-specific AP estimates, allowing us to test whether the vertical-horizontal asymmetry in partisan type effects holds consistently across diverse party systems or varies systematically with institutional or cultural contexts. We visualize these patterns through small-multiple plots showing estimated AP for explicit and implicit partisans in each of the 25 countries.
+allowing evaluation of whether the vertical–horizontal asymmetry in partisan type effects is consistent across party systems or varies systematically across contexts.
 
 #### Stage 3: Individual-Level Moderators {#sec-moderators}
 
-To identify what drives vertical AP and whether the explicit-implicit gap varies with respondent characteristics (H$_3$ and H$_4$), we incorporate individual-level covariates and three-way interactions:
+A planned extension examines whether the explicit–implicit gap in AP varies with respondent characteristics, corresponding to hypotheses about individual-level moderators. The model incorporates covariates and three-way interactions:
 
 $$
 \begin{aligned}
@@ -282,34 +255,19 @@ $$
 &\beta_4 \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i) + \\
 &\beta_5 \cdot (\text{CoPartisan}_{ric} \times \text{Covariate}_i) + \\
 &\beta_6 \cdot (\text{Type}_i \times \text{Covariate}_i) + \\
-&\beta_7 \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i \times \text{Covariate}_i) + \varepsilon_{ric}
+&\beta_7 \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i \times \text{Covariate}_i) + \varepsilon_{ric}.
 \end{aligned}
 $$
 
-The triple interaction $\beta_7$ tests whether the partisan type gap in AP ($\beta_4$) varies systematically with individual characteristics. If $\beta_7 \neq 0$, the explicit-implicit difference in polarization is larger (or smaller) among respondents with higher covariate values, revealing moderators of identity-based mechanisms.
+The coefficient $\beta_7$ evaluates whether the partisan-type gap in AP varies systematically with individual characteristics. Covariates will be selected based on established correlates of affective polarization, including ideological extremity, political interest, social identity strength, perceived threat, and democratic norms. Separate models will be estimated for vertical and horizontal outcomes to assess whether moderation emerges for attitudinal polarization but not behavioral discrimination. Substantive interpretation will rely on simulated conditional marginal effects across observed covariate ranges.
 
-Following existing research on AP correlates, we examine covariates including ideological extremity [@abramowitz2008ispolarization], political interest [@luttig2017authoritarianism], strength of social identities [@mason2018one], perceived threat [@huddy2015expressive], and democratic norms [@graham2020democracy]. For each covariate, we estimate separate models for vertical and horizontal outcomes, testing H$_3$ (moderation exists for vertical AP) and H$_4$ (moderation absent for horizontal AP).
+#### Estimation and Inference {#sec-estimation}
 
-We present results via **conditional marginal effects**: simulating $\text{AP}_{\text{explicit}} - \text{AP}_{\text{implicit}}$ across the observed range of each covariate, visualized as posterior distributions showing how the partisan type gap varies with respondent characteristics. If identity consolidation drives vertical polarization, we expect $\beta_7 > 0$ for ideological extremity and political engagement when predicting thermometer ratings, but $\beta_7 \approx 0$ when predicting token allocations.
+All models are estimated using Bayesian inference via Hamiltonian Monte Carlo implemented in Stan through the `brms` package in R. Weakly informative priors are specified: $\mathcal{N}(0,10)$ for fixed effects, $\text{Exponential}(1)$ for random-effect standard deviations, and $\text{Half-}\mathcal{N}(0,5)$ for residual variance. Posterior sampling uses four chains of 2,000 iterations with 1,000 warmup iterations, yielding 4,000 posterior draws. Convergence is evaluated using $\hat{R}<1.01$ and effective sample sizes exceeding 1,000. Results are summarized using posterior medians and 95% credible intervals, and hypotheses are evaluated through posterior probabilities.
 
-These moderator models can also incorporate the multilevel structure from Stage 2, allowing country-varying effects of individual-level moderators. However, for parsimony and interpretability, we begin with pooled specifications and relegate full multilevel moderator models to supplementary analyses.
+Substantive quantities are derived through posterior simulation. For each draw, AP by partisan type is calculated as $\text{AP}_t=\beta_1+t\cdot\beta_3$, and country-specific estimates as $\text{AP}_{c,t}=(\beta_1+\beta_{1c})+t\cdot(\beta_3+\beta_{3c})$. For moderator models, the conditional partisan-type difference is $\Delta\text{AP}=\beta_4+\beta_7\cdot\text{Covariate}$. This simulation-based approach propagates parameter uncertainty through all derived quantities.
 
-### Estimation and Inference {#sec-estimation}
-
-All models are estimated using Bayesian inference via Hamiltonian Monte Carlo (Stan) implemented through the `brms` package in R [@burkner2017brms]. We specify weakly informative priors: $\mathcal{N}(0, 10)$ for fixed effects, $\text{Exponential}(1)$ for random effect standard deviations, and $\text{Half-}\mathcal{N}(0, 5)$ for residual variance. These priors regularize estimates while remaining substantially more diffuse than the likelihood, ensuring data-driven inference.
-
-For each model, we draw 4 chains of 2,000 iterations (1,000 warmup), yielding 4,000 posterior draws for inference. Convergence is assessed via $\hat{R} < 1.01$ and effective sample sizes exceeding 1,000 [@vehtari2021rank]. We report posterior medians and 95% credible intervals throughout. Hypothesis tests evaluate posterior probability that parameters exceed substantive thresholds (e.g., $P(\beta_3 > 0 \mid \text{data})$).
-
-**Quantities of interest** are derived via posterior simulation:
-
-- **AP by partisan type**: For each posterior draw, calculate $\text{AP}_t = \beta_1 + t \cdot \beta_3$, generating distributions of AP for explicit and implicit partisans
-- **Country-specific AP**: For each country $c$ and posterior draw, calculate $\text{AP}_{c,t} = (\beta_1 + \beta_{1c}) + t \cdot (\beta_3 + \beta_{3c})$
-- **Conditional marginal effects**: For each covariate value and posterior draw, calculate $\Delta \text{AP} = [\beta_4 + \beta_7 \cdot \text{Covariate}]$, showing how the partisan type gap varies with individual characteristics
-
-This simulation-based approach propagates uncertainty from all model parameters through derived quantities, yielding principled inferential statements about substantive effects [@gelman2020regression].
-
-Full model specifications, prior sensitivity analyses, and diagnostic plots are provided in the Online Appendix.
-
+Full model specifications, prior sensitivity analyses, and diagnostics will be reported in the Online Appendix.
 
 ## Results
 
@@ -317,7 +275,7 @@ Full model specifications, prior sensitivity analyses, and diagnostic plots are 
 
 RQ: How do alternative operationalizations of partisanship and thermometer-based indices affect estimates of attitudinal AP?
 
-{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
+
 
 -> Distribution of reported attachement (explicit types) or partisan composition varies susbtantially across countries
 
