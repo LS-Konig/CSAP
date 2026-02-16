@@ -263,13 +263,25 @@ The coefficient $\beta_7$ evaluates whether the partisan-type gap in AP varies s
 
 #### Estimation and Inference {#sec-estimation}
 
-All models are estimated using Bayesian inference via Hamiltonian Monte Carlo implemented in Stan through the `brms` package in R. Weakly informative priors are specified: $\mathcal{N}(0,10)$ for fixed effects, $\text{Exponential}(1)$ for random-effect standard deviations, and $\text{Half-}\mathcal{N}(0,5)$ for residual variance. Posterior sampling uses four chains of 2,000 iterations with 1,000 warmup iterations, yielding 4,000 posterior draws. Convergence is evaluated using $\hat{R}<1.01$ and effective sample sizes exceeding 1,000. Results are summarized using posterior medians and 95% credible intervals, and hypotheses are evaluated through posterior probabilities.
+All models are intended to be estimated using Bayesian inference via Hamiltonian Monte Carlo implemented in Stan through the `brms` package in R [@burkner2017brms]. We plan to use weakly informative priors: $\mathcal{N}(0,10)$ for fixed effects, $\text{Exponential}(1)$ for random-effect standard deviations, and $\text{Half-}\mathcal{N}(0,5)$ for residual variance. Convergence will be evaluated using $\hat{R}$ and effective sample sizes. Results are summarized using posterior medians and 95% credible intervals, and hypotheses are evaluated through posterior probabilities.
 
 Substantive quantities are derived through posterior simulation. For each draw, AP by partisan type is calculated as $\text{AP}_t=\beta_1+t\cdot\beta_3$, and country-specific estimates as $\text{AP}_{c,t}=(\beta_1+\beta_{1c})+t\cdot(\beta_3+\beta_{3c})$. For moderator models, the conditional partisan-type difference is $\Delta\text{AP}=\beta_4+\beta_7\cdot\text{Covariate}$. This simulation-based approach propagates parameter uncertainty through all derived quantities.
 
 Full model specifications, prior sensitivity analyses, and diagnostics will be reported in the Online Appendix.
 
-## Results
+## Planned Results Structure
+
+### Vertical AP
+
+- Figure/Panel with pooled EU25-wide and country specific AP by type 
+
+### Horizontal AP
+
+- Figure/Panel with pooled EU25-wide and country specific AP by type 
+
+### Individual level moderation
+
+- Marginal/Conditional effect figure(s), with covariate values on x-axis, effect on AP on y axis, different lines (and intervals) by type, separate panels for vertical/horiztonal AP
 
 ### Study 1: Operationalizing Attitudinal Affective Polarization in Multiparty Systems
 
@@ -324,10 +336,6 @@ RQ: Do these operational differences alter the observed behavioral consequences 
 
 -> estimate for total partisans drawn to explicit partisans (due to conjoint setup)
 
-### Study 3: Partisan Sorting and Muslim Outgroup Salience
-
-How does partisan affective polarization interact with salient outgroup identities -- specifically Muslimhood -- to structure patterns of political sorting?
-Are there differences between explicit and implicit partisans?
 
 ## Limitations
 
@@ -349,22 +357,7 @@ Although the conjoint experiment approximates horizontal, citizen-level interact
 
 ## Conclusion
 
-(Preliminary thoughts)
-In comparative multi-party systems:
-
-- Affective polarization is not a single quantity.
-- Its magnitude and cross-national configuration depend on:
-      - measurement instrument (attitudinal/behavioral)
-      - ingroup definition (implicit/explicit/all),
-      - inclusion of non-partisans,
-      - and whether polarization is conceptualized vertically or horizontally.
-
-Rather than asking only *“How polarized are European democracies?”*,  
-we ask:
-
-How does conceptualization reshape what, and even who, we observe as polarized in multi-party contexts?
-
-
+tbd
 
 ## References
 
