@@ -389,6 +389,8 @@ Although the conjoint experiment approximates horizontal, citizen-level interact
 
 tbd
 
+\singlespacing
+
 ## References
 
 ::: {#refs}
@@ -403,8 +405,6 @@ tbd
 {{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-nresp-country-gender >}}
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#tbl-nresp-country-agegroup >}}
-
-{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-respondents >}}
 
 ### Survey item wording (English version) {.appendix}
 
