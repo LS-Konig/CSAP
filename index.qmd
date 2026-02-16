@@ -1,10 +1,10 @@
 ---
 title: |
-  How does partisan attachement influence affective polarization?
+  Does Partisan Attachment Amplify Affective Polarization?
 subtitle: |
-  Conceptualization, measurement, and scope conditions in 25 European democracies
+  Vertical and Horizontal Dimensions Across 25 European Democracies
 abstract: |
-  DRAFT: Work in progress. Please do not cite or circulate without the author's permission.
+  Affective polarization (AP) research faces a persistent measurement challenge: should partisans be identified through self-reported attachment or vote choice? This distinction matters theoretically—identity accounts predict attachment amplifies polarization, while categorization accounts suggest vote anchors suffice—and comparatively, as explicit attachment rates vary widely across European democracies. We introduce *partisan type* (explicit versus implicit partisans) and test whether subjective attachment differentially predicts *vertical* AP (party-targeted attitudes) versus *horizontal* AP (citizen-targeted behavior). Analyzing thermometer ratings and conjoint trust-game data from 25 countries (N≈29,800), we find explicit partisans exhibit significantly higher vertical AP than implicit partisans, but the two groups show no difference in horizontal behavioral discrimination. These results reveal distinct psychological mechanisms: subjective attachment shapes party affect but not interpersonal behavior. We identify individual-level moderators of vertical AP and show the explicit-implicit gap varies with ideological extremity and political engagement, while horizontal AP remains invariant. For comparative research, our findings validate combining vote-anchored and attachment-based samples for behavioral studies while cautioning that restricting to explicit identifiers may misrepresent attitudinal polarization's behavioral translation in multiparty systems.
 execute:
   echo: false
   warning: false
@@ -19,9 +19,9 @@ draft-mode: visible
 
 ### The Rise and Expansion of Affective Polarization Research
 - Affective polarization (AP) has become a central phenomenon in political science since @iyengar2012affect's seminal work
-- Original conceptualization: citizens increasingly like their own party while disliking opposing parties—going beyond mere policy disagreement to emotional antipathy and social distancing
+- Original conceptualization: citizens increasingly like their own party while disliking opposing parties, going beyond mere policy disagreement to emotional antipathy and social distancing
 - Initially focused on US two-party system where ingroup/outgroup distinctions are straightforward
-- Rapid expansion has generated rich empirical literature but also conceptual ambiguities and measurement debates
+- Rapid expansion has generated rich empirical literature but also conceptual ambiguities and measurement debates 
 
 ### Core Debates and Refinements
 - **Conceptual ambiguities in early work:**
