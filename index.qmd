@@ -196,7 +196,9 @@ Respondents who neither reported party attachment nor indicated any party in any
 
 For explicit and implicit partisans alike, the identified party—whether derived from attachment or electoral preference—serves as the partisan anchor defining copartisan versus outpartisan distinctions in subsequent evaluations. This procedure distinguishes subjective identification from behavioral anchoring while maintaining a consistent reference point for measuring affective polarization across respondents.
 
-Importantly, the distribution of partisan types varies substantially across countries. @fig-impl-expl-distribution displays this cross-national variation, with explicit partisans comprising roughly 40% of respondents in some countries and more than 80% in others. Consequently, identical sampling decisions -- such as restricting analyses to self-reported identifiers -- produce different populations of inference across national contexts, motivating our comparison of affective polarization across partisan types.
+Importantly, the distribution of partisan types varies substantially across countries. @fig-impl-expl-distribution visualizes this cross-national heterogeneity in partisan attachment and behavioral anchoring. The share of explicit partisans ranges from approximately 85% of respondents in Denmark to about 41% in Latvia, while implicit partisans show the inverse pattern, varying from roughly 41% in Latvia to 8% in Denmark. Non-partisans also differ markedly across contexts, ranging from 23% in Croatia to 6% in Estonia.
+
+These patterns indicate that both reported attachment and overall partisan composition differ strongly across national contexts. Consequently, identical sampling decisions -- such as restricting analyses to self-reported identifiers -- would generate different populations of inference across countries. This cross-national variation motivates our comparison of affective polarization across partisan types rather than focusing exclusively on explicit identifiers.
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
 
@@ -318,19 +320,8 @@ This progression balances transparency, interpretability, and statistical rigor,
 
 - figure with panels by country? Unsure yet
 
-### Study 1: Operationalizing Attitudinal Affective Polarization in Multiparty Systems
+## Exploratory descriptive results
 
-RQ: How do alternative operationalizations of partisanship and thermometer-based indices affect estimates of attitudinal AP?
-
-
-
--> Distribution of reported attachement (explicit types) or partisan composition varies susbtantially across countries
-
--> share of explicit partisans varies from ~85% in Denmark to ~41% in Latvia
-
--> share of implicit partisans varies from ~41% in Latvia to 8% in Denmark
-
--> share of non-partisans varies from 23% in Croatia to 6% in Estonia
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-thermo >}}
 
