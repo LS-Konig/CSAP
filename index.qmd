@@ -21,7 +21,7 @@ Affective polarization (AP) -- the tendency to favor one's own partisan group wh
 Beyond policy disagreement, AP encompasses social distancing, interpersonal hostility, and discriminatory behavior toward partisan outgroups, raising concerns about democratic cooperation and political stability [@graham2020democracy; @kingzette2021affective; @berntzen2023consequencesofaffective].
 Extensive research now documents AP's prevalence across advanced democracies [@wagner2021affective; @reiljan2020fear; @reiljan2024patterns], yet fundamental questions persist about its measurement and psychological foundations.
 A particularly consequential ambiguity concerns who counts as "partisan" in empirical analyses: should researchers restrict samples to citizens who self-report feeling attached to a party, or include all those who reveal partisan preferences through vote choice regardless of reported attachment?
-This operationalization choice carries major implications for both theory and comparative inference, yet existing research has not systematically examined whether these two groups exhibit equivalent levels of affective polarization.
+This operationalization choice carries major implications for both theory and comparative inference, yet existing research has not systematically examined whether these two groups exhibit equivalent levels of AP.
 
 The partisan identification question matters theoretically because it implicates competing accounts of AP's underlying mechanisms.
 Social identity perspectives emphasize subjective attachment as a psychological bond that intensifies emotional investment in political groups, predicting that explicit partisan identifiers should exhibit stronger polarization than those who merely vote without reporting felt attachment [@huddy2015expressive; @mason2018one; @iyengar2015fear].
@@ -53,7 +53,7 @@ Subjective attachment shapes *attitudes toward parties* but does not amplify *be
 
 Extending these findings, we plan to examine individual-level moderators to identify what drives vertical AP and whether the explicit–implicit gap varies systematically with respondent characteristics. In our future analyses, we will incorporate theoretically relevant covariates -- including ideological extremity, political interest, social identity strength, perceived threat, democratic norms, social trust, and media consumption -- that are available in our data, following insights from existing literature. This approach will allow us to explore whether differences in vertical AP between explicit and implicit partisans are amplified or attenuated among particular subgroups.
 
-These exploratory findings carry several preliminary implications for affective polarization research. First, regarding measurement and population definition, the equivalence of horizontal AP between explicit and implicit partisans suggests that combining vote-anchored and attachment-based respondents is reasonable when estimating behavioral polarization, avoiding unnecessary reductions in external validity. Second, the vertical–horizontal asymmetry indicates that subjective attachment amplifies party-targeted attitudes but does not appear to drive interpersonal discrimination, highlighting the need for multidimensional frameworks distinguishing elite- versus citizen-targeted polarization. Finally, the consistency of this asymmetry across 25 European democracies suggests that these patterns may reflect structural features of multiparty electoral systems rather than country-specific idiosyncrasies, providing a foundation for future analyses of individual-level moderators.
+These exploratory findings carry several preliminary implications for AP research. First, regarding measurement and population definition, the equivalence of horizontal AP between explicit and implicit partisans suggests that combining vote-anchored and attachment-based respondents is reasonable when estimating behavioral polarization, avoiding unnecessary reductions in external validity. Second, the vertical–horizontal asymmetry indicates that subjective attachment amplifies party-targeted attitudes but does not appear to drive interpersonal discrimination, highlighting the need for multidimensional frameworks distinguishing elite- versus citizen-targeted polarization. Finally, the consistency of this asymmetry across 25 European democracies suggests that these patterns may reflect structural features of multiparty electoral systems rather than country-specific idiosyncrasies, providing a foundation for future analyses of individual-level moderators.
 
 The paper proceeds as follows. @sec-theory reviews theoretical perspectives on partisan identity and affective polarization, develops our conceptualization of partisan type, and derives testable hypotheses distinguishing vertical from horizontal AP. @sec-rd describes the data from 25 European democracies, the measurement strategy applying @reiljan2020fear's API logic consistently across both dimensions, and the Bayesian hierarchical modeling approach. @sec-results-planned outlines the planned presentation of empirical results, @sec-results-descr presents the mentioned preliminary descriptive findings.
 
@@ -92,7 +92,7 @@ Third, operationalization choices. Measurement depends on defining partisan grou
 Scholars must determine how to identify partisans (attachment vs vote choice), whether individuals may hold multiple ingroups [@kekkonen2021affective; @kekkonen2022puzzles; @bantel2023camps], how to define outgroups (least-liked party vs average opponent) [@wagner2021affective], and whether to include non-partisans in analysis [@rollicke2023polarisation].
 These decisions reshape empirical findings rather than merely refining them.
 
-Together, these developments imply that affective polarization is not a single phenomenon but a family of related outcomes whose interpretation depends heavily on conceptual and measurement choices [@campos2025new; @IyengarWagner2025Conceptualizing].
+Together, these developments imply that AP is not a single phenomenon but a family of related outcomes whose interpretation depends heavily on conceptual and measurement choices [@campos2025new; @IyengarWagner2025Conceptualizing].
 
 ### Extending Affective Polarization to Multiparty Systems {#sec-extending-AP}
 
@@ -116,11 +116,11 @@ Comparative research typically assumes equivalence, yet this assumption is rarel
 
 To address these comparability and interpretation problems, we distinguish between respondents who report attachment to a party and those who deny attachment but reveal a partisan anchor through vote choice. We refer to these categories as partisan types: explicit and implicit partisans. The distinction serves primarily as a consistent terminology allowing comparable analysis across contexts rather than a novel theoretical construct.
 
-The distinction matters because it directly affects the population of inference. If the proportion of explicit and implicit identifiers varies across countries, analyses limited to explicit identifiers describe fundamentally different electorates across cases. Consequently, comparative conclusions about affective polarization may depend as much on sampling decisions as on political behavior.
+The distinction matters because it directly affects the population of inference. If the proportion of explicit and implicit identifiers varies across countries, analyses limited to explicit identifiers describe fundamentally different electorates across cases. Consequently, comparative conclusions about AP may depend as much on sampling decisions as on political behavior.
 
 Beyond measurement, the comparison offers leverage for adjudicating competing theoretical accounts of polarization. Social identity theories emphasize subjective attachment as a psychological bond that intensifies emotional investment in political groups [@huddy2015expressive; @mason2018one; @huddy2013group; @west2022partisanship]. In contrast, categorization and cue-processing perspectives suggest that partisan labels and vote anchors alone provide sufficient information to generate polarized responses, even absent felt attachment [@orr2023affective; @orr2020policy; @dafoe2018information; @tajfel1971social].
 
-We therefore compare explicit and implicit partisans across two dimensions of affective polarization:
+We therefore compare explicit and implicit partisans across two dimensions of AP:
 (1) vertical attitudinal polarization toward parties and
 (2) horizontal behavioral discrimination toward citizens.
 We further examine whether individual characteristics moderate these relationships. The analysis of individual-level drivers remains exploratory; covariate selection will be guided by existing research on ideological extremity [@abramowitz2006exploring; @abramowitz2008ispolarization], engagement [@luttig2017authoritarianism], social identity strength [@mason2015disrespectfully; @mason2018one], perceived threat [@huddy2015expressive], democratic norms [@graham2020democracy], social trust, and media consumption [@bail2018exposure; @tornberg2022digital].
@@ -134,24 +134,24 @@ Social identity accounts emphasize subjective attachment as a psychological bond
 
 If attachment creates emotional investment in political objects, explicit identifiers should evaluate ingroup and outgroup parties more differently than implicit identifiers.
 
-$\text{H}_{1a}$ (Identity mechanism): Explicit partisans exhibit higher vertical affective polarization than implicit partisans.
+$\text{H}_{1a}$ (Identity mechanism): Explicit partisans exhibit higher vertical AP than implicit partisans.
 
 If partisan categorization alone activates evaluative schemas, attachment adds little beyond knowing one's partisan anchor [@orr2023affective].
 
 $\text{H}_{1b}$ (Categorization mechanism):
-Explicit and implicit partisans exhibit equivalent vertical affective polarization.
+Explicit and implicit partisans exhibit equivalent vertical AP.
 
 #### Horizontal (Behavioral) AP
 
 If identity strength drives discriminatory behavior toward political opponents, explicit identifiers should favor copartisans more strongly in interpersonal decisions [@huddy2015expressive; @iyengar2015fear].
 
 $\text{H}_{2a}$ (Identity mechanism):
-Explicit partisans exhibit higher horizontal affective polarization than implicit partisans.
+Explicit partisans exhibit higher horizontal AP than implicit partisans.
 
 If categorization and inferred alignment are sufficient to generate intergroup bias [@tajfel1971social; @Sherif1961intergroup], behavioral discrimination should not depend on subjective attachment.
 
 $\text{H}_{2b}$ (Categorization mechanism):
-Explicit and implicit partisans exhibit equivalent horizontal affective polarization.
+Explicit and implicit partisans exhibit equivalent horizontal AP.
 
 #### Individual-Level Moderation
 
@@ -176,7 +176,7 @@ Each respondent completed: (1) standard demographic and political attitude batte
 
 Vertical (attitudinal) AP is measured using feeling thermometer ratings toward political parties. Respondents evaluated all major parties in their country on a 0 (dislike) to 100 (like) scale. We rescale this measure to a 0–10 scale so that the outcome space matches the horizontal AP token allocation measure, facilitating direct comparison across the two dimensions.
 
-The hierarchical structure generates multiple observations per respondent: each individual $i$ in country $c$ provides ratings $r$ for multiple parties. We construct a binary indicator $\text{CoPartisan}_{ric}$ that equals 1 when the rated party matches respondent $i$'s partisan anchor and 0 otherwise. This operationalization allows us to estimate AP as the difference between ingroup affect (ratings of one's own party) and average outgroup affect (ratings of all other parties), directly implementing @reiljan2020fear's Affective Polarization Index (API) logic within a regression framework.
+The hierarchical structure generates multiple observations per respondent: each individual $i$ in country $c$ provides ratings $r$ for multiple parties. We construct a binary indicator $\text{CoPartisan}_{ric}$ that equals 1 when the rated party matches respondent $i$'s partisan anchor and 0 otherwise. This operationalization allows us to estimate AP as the difference between ingroup affect (ratings of one's own party) and average outgroup affect (ratings of all other parties), directly implementing @reiljan2020fear's AP Index (API) logic within a regression framework.
 
 ### Measuring Horizontal Affective Polarization: Token Allocation in Behavioral Games {#sec-horizontal-measure}
 
@@ -194,17 +194,17 @@ Respondents who selected the option indicating no attachment to any party were s
 
 Respondents who neither reported party attachment nor indicated any party in any vote item are classified as non-partisans (approximately 3,900 respondents). Because they lack a defensible partisan anchor, they cannot be assigned copartisan–outpartisan relationships and are therefore excluded from analyses requiring such comparisons.
 
-For explicit and implicit partisans alike, the identified party—whether derived from attachment or electoral preference—serves as the partisan anchor defining copartisan versus outpartisan distinctions in subsequent evaluations. This procedure distinguishes subjective identification from behavioral anchoring while maintaining a consistent reference point for measuring affective polarization across respondents.
+For explicit and implicit partisans alike, the identified party—whether derived from attachment or electoral preference—serves as the partisan anchor defining copartisan versus outpartisan distinctions in subsequent evaluations. This procedure distinguishes subjective identification from behavioral anchoring while maintaining a consistent reference point for measuring AP across respondents.
 
 Importantly, the distribution of partisan types varies substantially across countries. @fig-impl-expl-distribution visualizes this cross-national heterogeneity in partisan attachment and behavioral anchoring. The share of explicit partisans ranges from approximately 85% of respondents in Denmark to about 41% in Latvia, while implicit partisans show the inverse pattern, varying from roughly 41% in Latvia to 8% in Denmark. Non-partisans also differ markedly across contexts, ranging from 23% in Croatia to 6% in Estonia.
 
-These patterns indicate that both reported attachment and overall partisan composition differ strongly across national contexts. Consequently, identical sampling decisions -- such as restricting analyses to self-reported identifiers -- would generate different populations of inference across countries. This cross-national variation motivates our comparison of affective polarization across partisan types rather than focusing exclusively on explicit identifiers.
+These patterns indicate that both reported attachment and overall partisan composition differ strongly across national contexts. Consequently, identical sampling decisions -- such as restricting analyses to self-reported identifiers -- would generate different populations of inference across countries. This cross-national variation motivates our comparison of AP across partisan types rather than focusing exclusively on explicit identifiers.
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
 
 ### Analytical Strategy {#sec-methods}
 
-We (plan to) employ Bayesian hierarchical models to estimate affective polarization as a function of partisan type, progressively building complexity to balance interpretability with inferential rigor.
+We (plan to) employ Bayesian hierarchical models to estimate AP as a function of partisan type, progressively building complexity to balance interpretability with inferential rigor.
 Our approach unfolds in three stages: first, we introduce the core linear predictor that defines AP and connects directly to our hypotheses.
 Second, we embed this predictor within a multilevel structure enabling cross-national inference.
 Third, we extend the model to examine individual-level moderators of partisan type effects.
@@ -222,7 +222,7 @@ where $r$ indexes evaluations (party ratings or behavioral allocations), $i$ ind
 The outcome is either a feeling thermometer rating (vertical AP) or token allocation in the behavioral task (horizontal AP).
 The indicator $\text{CoPartisan}_{ric} = 1$ when the evaluated party or profile matches respondent $i$'s partisan anchor, and $\text{Type}_i = 1$ for explicit partisans versus 0 for implicit partisans.
 
-This specification defines affective polarization as a derived quantity of interest: the expected difference in evaluations between copartisans and outpartisans.
+This specification defines AP as a derived quantity of interest: the expected difference in evaluations between copartisans and outpartisans.
 Formally:
 
 $$
@@ -233,7 +233,7 @@ From the linear predictor, this translates to $\text{AP}_{\text{implicit}} = \be
 The central hypothesis test therefore concerns $\beta_3$: identity-based theories predict $\beta_3 > 0$, indicating that explicit attachment amplifies polarization, while categorization-based theories predict $\beta_3 \approx 0$, indicating that partisan anchors alone suffice to generate the ingroup-outgroup gap.
 We apply this framework separately to vertical and horizontal outcomes, enabling direct comparison of partisan type effects across attitudinal and behavioral polarization.
 
-This operationalization maintains consistency with @reiljan2020fear's Affective Polarization Index -- calculating polarization as ingroup affect minus average outgroup affect -- while embedding the comparison within a regression framework that isolates the role of subjective attachment.
+This operationalization maintains consistency with @reiljan2020fear's AP Index -- calculating polarization as ingroup affect minus average outgroup affect -- while embedding the comparison within a regression framework that isolates the role of subjective attachment.
 The binary copartisan indicator ensures that AP reflects the difference between a single ingroup evaluation and the average across all outgroup evaluations, exactly paralleling the API logic but extending it to both thermometer ratings and behavioral allocations.
 
 #### Multilevel Structure for Cross-National Inference {#sec-multilevel-structure}
@@ -278,7 +278,7 @@ $$
 \end{aligned}
 $$
 
-The key parameter is $\beta_7$, which evaluates whether the partisan-type difference in affective polarization ($\beta_4$) varies systematically across individuals.
+The key parameter is $\beta_7$, which evaluates whether the partisan-type difference in AP ($\beta_4$) varies systematically across individuals.
 Substantively, this parameter indicates whether the explicit–implicit gap depends on respondent characteristics rather than representing a uniform population-level difference.
 
 For any given value of a covariate, the partisan-type gap in AP is
@@ -290,7 +290,7 @@ $$
 We will therefore interpret moderation using simulated conditional marginal effects derived from the posterior distribution, tracing how the explicit–implicit difference changes across the observed covariate range and identifying regions where the gap is credibly positive, negative, or indistinguishable from zero.
 
 At the present stage, the specific covariates to be included are not fixed.
-Their selection will be guided by prior research on correlates of affective polarization and by data availability across countries.
+Their selection will be guided by prior research on correlates of AP and by data availability across countries.
 Models will be estimated separately for vertical (thermometer) and horizontal (behavioral allocation) outcomes to evaluate whether moderation appears in attitudinal polarization but not behavioral discrimination.
 
 The moderator specification can be combined with the multilevel structure introduced above, allowing effects to vary across countries.
@@ -302,7 +302,7 @@ Our three-stage analytical strategy maintains a constant estimand -- AP as the i
 Stage 1 defines AP through a simple interaction-based linear predictor that connects directly to competing theoretical predictions about partisan type effects.
 Stage 2 embeds this predictor within a hierarchical model accounting for data structure and enabling cross-national inference about heterogeneity in partisan type effects.
 Stage 3 extends the framework to test whether individual characteristics moderate the explicit-implicit gap, distinguishing contexts where subjective attachment matters most.
-This progression balances transparency, interpretability, and statistical rigor, allowing us to adjudicate between identity-based and categorization-based accounts of affective polarization across both vertical and horizontal dimensions.
+This progression balances transparency, interpretability, and statistical rigor, allowing us to adjudicate between identity-based and categorization-based accounts of AP across both vertical and horizontal dimensions.
 
 ## Planned Results Structure {#sec-results-planned}
 
@@ -371,7 +371,7 @@ This is so far mainly a collection of limitations for myself in order to not for
 
 - Party-targeted attitudinal measures only
 
-The attitudinal analysis relies exclusively on party-targeted thermometer ratings. It does not include direct citizen-targeted affect measures, limiting conclusions about horizontal affective polarization at the attitudinal level.
+The attitudinal analysis relies exclusively on party-targeted thermometer ratings. It does not include direct citizen-targeted affect measures, limiting conclusions about horizontal AP at the attitudinal level.
 
 - Assumption underlying party-size weighting
 
@@ -379,7 +379,7 @@ Weighting by electoral party size—common in the literature—implicitly assume
 
 - Cross-sectional design (2019)
 
-The data capture a specific pre-pandemic political context and allow inference only about the level (state) of affective polarization at that point in time. The design does not permit conclusions about temporal dynamics or trends.
+The data capture a specific pre-pandemic political context and allow inference only about the level (state) of AP at that point in time. The design does not permit conclusions about temporal dynamics or trends.
 
 - External validity of the experimental setting
 
