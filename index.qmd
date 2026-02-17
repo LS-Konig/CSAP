@@ -111,6 +111,10 @@ As a result, identical operationalizations may imply different target population
 
 [Table of comparative studies and ingroup strategies]
 
+| Study | AP | Sample | Countries |
+|:------|:---|:-------|:----------|
+|       |    |        |           |
+
 Moreover, attachment questions themselves may capture different psychological phenomena depending on party system institutionalization and stability [@garzia2023affective].
 Comparative research typically assumes equivalence, yet this assumption is rarely evaluated.
 

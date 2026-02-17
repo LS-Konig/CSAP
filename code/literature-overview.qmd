@@ -1,0 +1,184 @@
+---
+title: |
+  Comparative AP Literature Summary
+subtitle: |
+  How does reported partisan attachement influence affective polarization?: A comparative study of 25 European democracies
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+bibliography: ../references.bib
+biblio-style: apsr
+---
+
+# Comparative Affective Polarization Studies: Overview Table
+
+## Coding Guide
+
+Each study is coded on four dimensions. Definitions are fixed below — apply them consistently across all entries and use the **Notes** column only for genuine ambiguities that cannot be resolved by the rules given here.
+
+### 1. AP Target
+*What is the object of polarized affect — parties/elites, or fellow citizens?*
+
+| Code | Definition | Typical measure |
+|:-----|:-----------|:----------------|
+| **Vertical** | Affect directed at **parties or political elites** | Feeling thermometers toward parties or leaders |
+| **Horizontal** | Affect or behavior directed at **fellow citizens** with different partisan identities | Social distance, discrimination tasks, allocation games |
+| **Both** | Study **explicitly reports both** vertical and horizontal measures as distinct dimensions | Combined survey + behavioral experiment |
+
+> **Key distinction:** Feeling thermometers toward *parties* = Vertical. Feeling thermometers toward *party supporters* or behavioral tasks involving *citizens* = Horizontal. If a study uses party thermometers and treats them as a proxy for citizen-level polarization without measuring it directly, code as **Vertical** and flag in Notes.
+
+
+### 2. AP Manifestation
+*How is AP expressed and operationalized?*
+
+| Code | Definition | Typical measure |
+|:-----|:-----------|:----------------|
+| **Attitudinal** | **Self-reported evaluations** of parties, leaders, or partisan outgroups | Feeling thermometers, like-dislike scales, social distance items |
+| **Behavioral** | **Actions** in incentivized or experimental settings | Dictator games, trust games, conjoint discrimination tasks |
+| **Both** | Study reports and analyzes **both** attitudinal and behavioral measures | Survey thermometers + allocation experiment in same study |
+
+
+### 3. Sample
+*Who is included in the analysis as a "partisan"?*
+
+This is the dimension most consequential for the paper's argument. Apply codes strictly.
+
+| Code | Definition |
+|:-----|:-----------|
+| **Identifiers** | Restricted to respondents who **self-report psychological attachment** to a party (explicit partisans only) |
+| **Voters** | Restricted to respondents who **report a vote choice**, regardless of felt attachment; includes implicit partisans |
+| **Mixed** | Combines identifiers and voters under a shared partisan anchor, or uses a strategy encompassing both groups |
+| **All** | **No partisan restriction** — non-partisans included in the analysis |
+
+**Decision rules:**
+
+- Reiljan's API on CSES → **Identifiers** (restricted to respondents naming a liked party)
+- Wagner's spread measure on full sample → **All**
+- Any anchor that accepts vote choice without requiring attachment → **Voters** or **Mixed**
+- When unclear, note the exact operationalization in Notes
+
+
+### 4. Data Source
+*What dataset does the study rely on?*
+
+Record the primary dataset by its common name. This column reveals which studies draw on the **same underlying data** — a key part of the paper's framing regarding the field's dependence on a small number of datasets.
+
+Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
+
+
+## Table
+
+| Study  | AP Target | AP Manifestation | Sample | N Countries | Data Source | Notes |
+|:------:|:---------:|:----------------:|:------:|:-----------:|:------------|:------|
+| @iyengar2012affect | Both | Attitudinal | Identifiers | 2 | Multiple (ANES, YouGov, @almond_verba_1959_civic_culture, Blair Center Election Study, AP-Yahoo! News 2008 election study) | Thermometers toward parties (V) + social trust/discrimination items (H); US & UK |
+| @Westwood2018tie | Horizontal | Both | Voters | 4 | Original survey | Trust games; US, UK, Belgium, Spain |
+| @reiljan2020fear  | Vertical | Attitudinal | Mixed | 23 | CSES | Introduces API |
+| @gidron2020american  | Vertical | Attitudinal | Identifiers | 20 | Original survey | US, UK, Israel; party thermometers |
+| @wagner2021affective  | Vertical | Attitudinal | All | 51 | CSES | Spread-of-scores & distance measures; includes non-partisans |
+| @Helbling2020social | Horizontal | Attitudinal | Voters | 2 | Original survey | Social avoidance; Austria & Germany |
+| @kekkonen2021affective  | Vertical | Attitudinal | Mixed | 1 | Original survey | Finland; citizen-targeted affect |
+| @Harteveld2024consequences  | Both | Both | Mixed | 9 | Original Survey (CONAP) | Operationalize in- and out-group via most- and least liked party supporters in like/dislike items |
+| @areal2024verticalvshorizontal  | Both | Attitudinal | Voters | 9 | Multiple | Explicit V vs H comparison; correlation ~0.4–0.7 by country |
+| @reiljan2024patterns  | Vertical | Attitudinal | Voters | 40 | CSES | Distinguish vertical AP into LAP and PAP; analyses based on identifiers only as robustness |
+| @hahm2024divided  | Horizontal | Behavioral | Identifiers | 25 | Hahm et al. (2024) | Conjoint dictator + trust games |
+|  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |
+
+
+
+## To-Do / Studies Still to Code
+
+- [ ] Boxell et al. (2024) — cross-national AP trends
+- [ ] Lauka, Mann & Frees (2018) — early European cross-national AP
+- [ ] Ward & Tavits (2019) — party cues and AP
+- [ ] Knudsen (2020) — Norway, horizontal AP
+- [ ] Renström et al. (2022) — Sweden
+- [ ] Bradley & Chauchard (2022) — cross-national measure correlations
+- [ ] Hobolt, Leeper & Tilley (2020) — Brexit & AP, UK
+- [ ] Hernández et al. (2021) — electoral cycle effects on AP
+- [ ] Garzia et al. (2023) — affective dealignment, multiparty context
+- [ ] Torcal & Comellas (2025) — operationalization in multiparty systems
+
+
+
+
+## Collection of potentially useful quotes
+
+> There are nevertheless key aspects that still generate debate. How important are partisan identities for affective polarization? What is relationship between vertical (leader, party) and horizontal (citizen) affective polarization? [@IyengarWagner2025Conceptualizing, S.47]
+
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+# Code 1
+
+```{r}
+#| label: code-1
+
+# start your code here
+
+```
+
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
+
+
+  
