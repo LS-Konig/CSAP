@@ -90,9 +90,11 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 | @areal2024verticalvshorizontal  | Both | Attitudinal | Voters | 9 | Multiple | Explicit V vs H comparison; correlation ~0.4–0.7 by country |
 | @reiljan2024patterns  | Vertical | Attitudinal | Voters | 40 | CSES | Distinguish vertical AP into LAP and PAP; analyses based on identifiers only as robustness |
 | @hahm2024divided  | Horizontal | Behavioral | Identifiers | 25 | Hahm et al. (2024) | Conjoint dictator + trust games |
-|  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |
+| @Hernandez2021affective | Vertical | Attitudinal | All  | 42 | CSES |  |
+| @boxell2024cross | Vertical | Attitudinal | Identifiers  | 12 | Multiple |  |
+| @lauka2018mass | Vertical | Attitudinal | Voters  | 48 | CSES |  |
+| @bradley2022ethnic | Vertical | Attitudinal | All  | 48 | CSES | Investigate identifiers with API and all with Wagner |
+| @tichelbaecker2023we | Both | Attitudinal | Mixed | 10 | Original Survey | |
 
 
 
