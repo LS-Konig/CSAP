@@ -95,6 +95,7 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 | @lauka2018mass | Vertical | Attitudinal | Voters  | 48 | CSES |  |
 | @bradley2022ethnic | Vertical | Attitudinal | All  | 48 | CSES | Investigate identifiers with API and all with Wagner |
 | @tichelbaecker2023we | Both | Attitudinal | Mixed | 10 | Original Survey | |
+| @garzia2023affective | Both | Attitudinal | All | 18 | Original Survey | Investigate identifiers with API and all with Wagner |
 
 
 
