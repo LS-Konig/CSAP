@@ -96,6 +96,12 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 | @bradley2022ethnic | Vertical | Attitudinal | All  | 48 | CSES | Investigate identifiers with API and all with Wagner |
 | @tichelbaecker2023we | Both | Attitudinal | Mixed | 10 | Original Survey | |
 | @garzia2023affective | Both | Attitudinal | All | 18 | Original Survey | Investigate identifiers with API and all with Wagner |
+| @Gidron2023who | Vertical | Attitudinal | Identifiers | 20 | CSES | |
+| @Horne2023way | Vertical | Attitudinal | Identifiers | 19 | CSES | |
+| @harteveld2021ticking | Vertical | Attitudinal | Identifiers | 40 | CSES | |
+| @Comellas2023ideological | Horizontal | Attitudinal | Identifiers | 5 | TRI-POL | Study bloc AP |
+| @Fuller2022populism | All | Both | Attitudinal | 9 | Original Survey | Main analysis uses scaling method on thermo items, further analyses use identifiers with vertical/attitudinal (thermo) measures and horizontal/attitudinal social distance items |
+| @harteveld2022affective | Mixed | Vertical | Attitudinal | 28 | CSES | Includes a second analysis with longitudinal data from Netherlands (LISS) |
 
 
 
