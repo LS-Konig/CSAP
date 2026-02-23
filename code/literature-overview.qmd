@@ -110,6 +110,9 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 | @kekkonen2022puzzles | Both | Attitudinal | Identifiers | 1 | Original Survey | Compare single and multiple ingroup operationalizations |
 | @bettarelli2023regional | Vertical | Attitudinal | All | 30 | CSES | Compare wagner spread aggregated across country and NUTS regions |
 | @ryan2023exploring | Vertical | Attitudinal | All | 5 | CSES | Nordic countries |
+| @reiljan2021ideological | Vertical | Attitudinal | All | 1 | SOM | Code most liked party as in-group |
+| @Knudsen2021affective | Both | Attitudinal | Voters | 2 | Original Survey | Calls for differential treatment of vertical and horizontal AP |
+| @segovia2022affective | Vertical | Attitudinal | All | 1 | CEP | notes |
 
 
 ## To-Do / Studies Still to Code
