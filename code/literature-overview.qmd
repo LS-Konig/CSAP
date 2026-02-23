@@ -115,7 +115,8 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 | @segovia2022affective | Vertical | Attitudinal | All | 1 | CEP | Chile case study |
 | @Orhan2022relationship | Vertical | Attitudinal | Identifiers | 53 | CSES | |
 | @berntzen2023consequencesofaffective | Both | Attitudinal | All | 2 | NCP, YouGov | |
-| @Torcal2023social |  |  | | | | |
+| @Torcal2023social | Vertical | Attitudinal  | ALL | 1 | CIUPANEL, E-DEM | Spain |
+| @Martini2019trust | Vertical | Behavioral | Identifiers | 2 | Original Survey | notes |
 
 
 
@@ -140,6 +141,8 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 > There are nevertheless key aspects that still generate debate. How important are partisan identities for affective polarization? What is relationship between vertical (leader, party) and horizontal (citizen) affective polarization? [@IyengarWagner2025Conceptualizing, S.47]
 
 @kekkonen2022puzzles high correlation between single ingroup and multiple ingroup
+
+@Torcal2023social for recall maximizing ingroup strategy 
 
 # Setup
 
