@@ -112,7 +112,11 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 | @ryan2023exploring | Vertical | Attitudinal | All | 5 | CSES | Nordic countries |
 | @reiljan2021ideological | Vertical | Attitudinal | All | 1 | SOM | Code most liked party as in-group |
 | @Knudsen2021affective | Both | Attitudinal | Voters | 2 | Original Survey | Calls for differential treatment of vertical and horizontal AP |
-| @segovia2022affective | Vertical | Attitudinal | All | 1 | CEP | notes |
+| @segovia2022affective | Vertical | Attitudinal | All | 1 | CEP | Chile case study |
+| @Orhan2022relationship | Vertical | Attitudinal | Identifiers | 53 | CSES | |
+| @berntzen2023consequencesofaffective | Both | Attitudinal | All | 2 | NCP, YouGov | |
+| @Torcal2023social |  |  | | | | |
+
 
 
 ## To-Do / Studies Still to Code
