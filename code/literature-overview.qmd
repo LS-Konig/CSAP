@@ -117,6 +117,10 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 | @berntzen2023consequencesofaffective | Both | Attitudinal | All | 2 | NCP, YouGov | |
 | @Torcal2023social | Vertical | Attitudinal  | ALL | 1 | CIUPANEL, E-DEM | Spain |
 | @Martini2019trust | Vertical | Behavioral | Identifiers | 2 | Original Survey | notes |
+| @ruggeri2021general | trgt | mfst | smpl | n | data | notes | 
+| @Ward2019partisan | Vertical | Attitudinal | All | 34 | CSES | notes | 
+
+continue w/ nir 2012
 
 
 
