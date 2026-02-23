@@ -89,7 +89,7 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 | @Harteveld2024consequences  | Both | Both | Mixed | 9 | Original Survey (CONAP) | Operationalize in- and out-group via most- and least liked party supporters in like/dislike items |
 | @areal2024verticalvshorizontal  | Both | Attitudinal | Voters | 9 | Multiple | Explicit V vs H comparison; correlation ~0.4–0.7 by country |
 | @reiljan2024patterns  | Vertical | Attitudinal | Voters | 40 | CSES | Distinguish vertical AP into LAP and PAP; analyses based on identifiers only as robustness |
-| @hahm2024divided  | Horizontal | Behavioral | Identifiers | 25 | Hahm et al. (2024) | Conjoint dictator + trust games |
+| @hahm2024divided  | Horizontal | Behavioral | Identifiers | 25 | Original Survey | Conjoint dictator + trust games |
 | @Hernandez2021affective | Vertical | Attitudinal | All  | 42 | CSES |  |
 | @boxell2024cross | Vertical | Attitudinal | Identifiers  | 12 | Multiple |  |
 | @lauka2018mass | Vertical | Attitudinal | Voters  | 48 | CSES |  |
@@ -100,9 +100,16 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 | @Horne2023way | Vertical | Attitudinal | Identifiers | 19 | CSES | |
 | @harteveld2021ticking | Vertical | Attitudinal | Identifiers | 40 | CSES | |
 | @Comellas2023ideological | Horizontal | Attitudinal | Identifiers | 5 | TRI-POL | Study bloc AP |
-| @Fuller2022populism | All | Both | Attitudinal | 9 | Original Survey | Main analysis uses scaling method on thermo items, further analyses use identifiers with vertical/attitudinal (thermo) measures and horizontal/attitudinal social distance items |
-| @harteveld2022affective | Mixed | Vertical | Attitudinal | 28 | CSES | Includes a second analysis with longitudinal data from Netherlands (LISS) |
-
+| @Fuller2022populism | Both | Both | Attitudinal | 9 | Original Survey | Main analysis uses scaling method on thermo items, further analyses use identifiers with vertical/attitudinal (thermo) measures and horizontal/attitudinal social distance items |
+| @harteveld2022affective | Vertical | Attitudinal | Mixed | 28 | CSES | Includes a second analysis with longitudinal data from Netherlands (LISS) |
+| @Torcal2022affective | Both | Attitudinal | All | 48 | CSES, CNEP, E-DEM | Code most liked party as in-group |
+| @adams2023can | Vertical | Attitudinal | Identifiers | 20 | CSES | | 
+| @renstrom2021intergroup | Both | Attitudinal | All | 1 | Original Survey | Code most liked party as in-group |
+| @renstrom2022protecting | Both | Attitudinal | All  | 1 | Original Survey | Code most liked party as in-group |
+| @hahm2023divided | Horizontal | Behavioral | Identifiers | 25 | Original Survey | Study AP around EU attachement | 
+| @kekkonen2022puzzles | Both | Attitudinal | Identifiers | 1 | Original Survey | Compare single and multiple ingroup operationalizations |
+| @bettarelli2023regional | Vertical | Attitudinal | All | 30 | CSES | Compare wagner spread aggregated across country and NUTS regions |
+| @ryan2023exploring | Vertical | Attitudinal | All | 5 | CSES | Nordic countries |
 
 
 ## To-Do / Studies Still to Code
@@ -125,6 +132,7 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 
 > There are nevertheless key aspects that still generate debate. How important are partisan identities for affective polarization? What is relationship between vertical (leader, party) and horizontal (citizen) affective polarization? [@IyengarWagner2025Conceptualizing, S.47]
 
+@kekkonen2022puzzles high correlation between single ingroup and multiple ingroup
 
 # Setup
 
