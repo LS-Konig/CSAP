@@ -122,6 +122,10 @@ Common sources: `CSES`, `ESS`, `Original survey`, `Multiple`
 
 continue w/ nir 2012
 
+to-do table:
+  - browse "top" journals (APSR, AJPS, CPS, BJPS, JOP) for (comparative/multiparty/Europe) AP papers
+  - change sample column to ingroup strategy -> highlight identity/attachement primacy in literature
+  - ingroup via most liked party as robustness (or correlation with anchors)
 
 
 ## To-Do / Studies Still to Code
