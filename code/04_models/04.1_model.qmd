@@ -45,12 +45,46 @@ sapply(p_required, require, character.only = TRUE)
 rm(p_required, p_to_install, packages)
 ```
 
-# Code 1
+# Load Data
 
 ```{r}
-#| label: code-1
+#| label: load-data
 
-# start your code here
+eu25games2019 <- readRDS(
+  here(
+    "data",
+    "03_final",
+    "eu25games2019.rds"
+  )
+)
+
+thermo_long <- readRDS(
+  here(
+    "data",
+    "03_final",
+    "thermo_long.rds"
+  )
+)
+
+```
+
+# Prepare Data
+
+```{r}
+#| label: prepare-dat
+
+# Outcome 1: Thermometer Scores
+thermo2model <- thermo_long |>
+  mutate(
+    copartisan = if_else(
+      der_partisan_anchor == thermo_party,
+      1,
+      0
+    )
+  ) |>
+  na.omit()
+
+# Outcome 2: Game allocation
 
 ```
 
