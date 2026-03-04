@@ -449,6 +449,15 @@ thermo_long <- eu25games2019 |>
     thermo_score
   )
 
+saveRDS(
+  thermo_long,
+  file = here(
+    "data",
+    "03_final",
+    "thermo_long.rds"
+  )
+)
+
 ```
 
 
