@@ -15,6 +15,26 @@ draft: true
 draft-mode: visible
 ---
 
+## Notes
+
+The central contrast of the analysis, the backbone of the intended contribution: respondents that reported attachement vs respondets that declined attachement.
+
+Coding of Ingroup:
+  - Recall maximizing identity first (reported attachement, else vote)
+  - Vote only
+  - Most liked party
+
+These three should be convincing, we can then decide which to present in main paper and which in appendix as robustness.
+
+To-Do:
+  - Clean Code for variable creation
+  - Thermo and Game outcome data, wide question data
+  - Reshape table to show identity primacy in ingroup coding in AP literature
+  - Survey literature for relevant mediators
+
+Analysis Pipeline
+
+
 ## Introduction {#sec-introduction}
 
 Affective polarization (AP) -- the tendency to favor one's own partisan group while disliking opponents -- has emerged as a defining feature of contemporary democracies [@iyengar2012affect; @iyengar2019origins; @boxell2024cross].
