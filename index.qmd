@@ -32,7 +32,412 @@ To-Do:
   - Reshape table to show identity primacy in ingroup coding in AP literature
   - Survey literature for relevant mediators
 
-Analysis Pipeline
+
+## Literature Analysis Pipeline
+
+# Part I: Project Roadmap {.unnumbered}
+
+## Week 1: Corpus Construction & Scheme Design
+
+### Step 1 — Journal Universe & Keyword Search (Days 1–2)
+
+**Goal:** Produce a raw candidate corpus of all potentially relevant papers.
+
+**Action:**
+
+- [ ] Define final journal list: top 80 PS journals (JCR) + top 40 sociology journals + generalists (PNAS, NHB, APSR, AJPS, BJPS)
+- [ ] Document inclusion/exclusion criteria for journals in a methods note
+- [ ] Query OpenAlex with keyword set:
+  - `"affective polarization"`
+  - `"partisan affect"`
+  - `"out-party animus"`
+  - `"partisan hostility"`
+  - `"party animosity"`
+  - `"partisan thermometer"` (co-occurring with partisan/party context)
+- [ ] Pull all metadata fields: DOI, title, abstract, journal, year, author affiliations, OA status, cited-by count
+- [ ] Export to a flat `.csv` or `.parquet` file — this is your master metadata file, do not overwrite it
+
+**Expected output:** 800–2,500 raw records.
+
+**Backup:** If OpenAlex sociology coverage is patchy, supplement with a Web of Science export filtered to the same journal list (~1 hour of additional work).
+
+### Step 2 — Full-Text Acquisition (Days 1–3, parallel with Step 1)
+
+**Goal:** Maximize full-text coverage before any downstream steps.
+
+**Action:**
+
+- [ ] Run all DOIs through Unpaywall API on Day 1 — start immediately, it is slow
+- [ ] Batch-download via institutional access for remaining papers
+- [ ] Search SSRN and OSF by DOI/title for papers still missing
+- [ ] After Day 3: **hard stop on acquisition effort**, regardless of coverage
+- [ ] Add `fulltext_status` variable to master file: `full` / `abstract_only` / `missing`
+
+**Decision rule:** Abstract-only is acceptable for: country scope, partisan system, data type, AP dimension (horizontal/vertical). It is **not** acceptable for: ingroup selection criterion, non-identifier treatment, estimand conditionality. Flag these as `NA` for abstract-only papers and address in robustness checks.
+
+**Backup:** If full-text coverage falls below ~50%, run a systematic check of whether abstract-only papers differ from full-text papers on observable characteristics (journal tier, year, region). If no systematic difference, missingness is plausibly ignorable — report this test explicitly.
+
+### Step 3 — Relevance Filter (Days 3–4)
+
+**Goal:** Reduce corpus to papers genuinely studying AP, not merely citing it.
+
+**Retention rule (any one criterion sufficient):**
+
+- [ ] AP term appears ≥ 3 times in abstract, **or**
+- [ ] AP term appears in title, **or**
+- [ ] Methods section references a standard AP instrument (ANES thermometer, feeling thermometer, social distance scale, trust game)
+
+**Validation:**
+
+- [ ] Manually review 100 randomly drawn **retained** papers
+- [ ] Manually review 50 randomly drawn **excluded** papers
+- [ ] Record precision and recall estimates from this spot-check
+- [ ] Adjust thresholds if false-positive rate is high (backup filter: AP term must co-occur with measurement-related term within 200 characters)
+- [ ] Document final filter criteria and spot-check results — this becomes a methods paragraph
+
+**Expected output after filter:** 400–1,200 papers.
+
+---
+
+### Step 4 — Coding Scheme Design & Rules Document (Days 4–6)
+
+**Goal:** Produce a written coding rules document before any coding occurs.
+
+- [ ] Draft decision rules for all dimensions in Part II of this document
+- [ ] Pilot the scheme on 20 papers (drawn from the filtered corpus)
+- [ ] Revise ambiguous rules based on pilot
+- [ ] Finalise rules document
+- [ ] **Pre-register coding scheme and rules document on OSF before proceeding to Step 5**
+
+::: {.callout-important}
+Pre-registration is non-negotiable. Upload the coding rules document and the list of dimensions 
+to OSF with a timestamp before coding the full validation sample. This prevents any post-hoc 
+accusation that categories were designed to fit results.
+:::
+
+## Week 1–2: Hand-Coding & Validation
+
+### Step 5 — Hand-Code Validation Sample (Days 5–10)
+
+**Goal:** Produce a gold-standard coded sample against which the LLM classifier is validated.
+
+**Action:**
+
+- [ ] Draw stratified random sample of **200 papers** from filtered corpus
+  - Stratify by: journal tier (top 20 / rest), year (pre-2016 / 2016–2020 / 2021+), geographic scope (US-only / comparative)
+- [ ] Code all 200 papers on all dimensions (see Part II)
+- [ ] Target pace: ~10 papers/hour with rules document open — budget 20–25 hours explicitly
+- [ ] Record coding in a separate spreadsheet with one row per paper and one column per dimension
+- [ ] For every `unclear` coding: write a one-line note on why — this informs prompt revision
+
+**Reliability check:**
+
+- [ ] After completing all 200 codes, select 50 papers for re-coding
+- [ ] Wait at least 5 days, then recode those 50 papers without reference to prior codes
+- [ ] Compute Cohen's κ per dimension
+- [ ] For any dimension with κ < 0.65: revise coding rule and recode affected papers
+- [ ] Report all κ values in the methods, including weak ones
+
+::: {.callout-warning}
+If a second coder is available (RA, colleague), use them for at least 60–80 papers instead of 
+test-retest. Inter-rater reliability is a stronger standard and more robust to reviewer criticism.
+:::
+
+
+## Week 2: Classification Pipeline
+
+### Step 6 — LLM Classification Pipeline (Days 8–14)
+
+**Goal:** Classify the full corpus on all coding dimensions using Claude API, validated against the gold-standard sample.
+
+#### 6a — Prompt Design
+
+- [ ] Write structured system prompt including:
+  - Condensed coding rules for all dimensions (from Part II)
+  - 4–5 worked examples with correct JSON outputs (few-shot)
+  - Explicit instruction to output `"unclear"` when evidence is insufficient — never guess
+  - Explicit instruction to output a `confidence` field (high / medium / low) per dimension
+- [ ] Specify JSON output schema with one field per dimension
+- [ ] Test prompt on 10 papers manually before running validation
+
+#### 6b — Validation Against Gold-Standard Sample
+
+- [ ] Run classifier on all 200 hand-coded papers
+- [ ] Compute accuracy, precision, recall, and Cohen's κ per dimension against your codes
+- [ ] Identify dimensions with κ < 0.65 — revise prompt for those dimensions
+- [ ] Re-run on gold-standard sample after revision
+- [ ] Record final per-dimension validation statistics — these go in the paper
+
+**Acceptable performance thresholds:**
+
+| Dimension | Expected difficulty | Minimum κ to proceed |
+|---|---|---|
+| Geographic scope / country count | Low | 0.80 |
+| Partisan system | Low | 0.80 |
+| Data type | Low | 0.75 |
+| AP dimension (H/V) | Medium | 0.70 |
+| Measurement type | Medium | 0.70 |
+| Ingroup selection criterion | High | 0.65 |
+| Non-identifier treatment | High | 0.65 |
+| Estimand conditionality | High | 0.65 |
+
+#### 6c — Full Corpus Classification
+
+- [ ] Run classifier on all remaining papers in filtered corpus
+- [ ] Parse and clean JSON outputs; log malformed responses
+- [ ] Flag all low-confidence responses for human spot-check
+- [ ] Human-review a random sample of ~50 flagged papers to assess whether confidence flag is calibrated
+- [ ] Merge classification outputs with master metadata file
+
+## Week 3: Analysis & Integration
+
+### Step 7 — Analysis & Integration with Empirical Paper (Days 13–21)
+
+**Goal:** Produce descriptive results for the literature review component and integrate directly with your paper's theoretical motivation.
+
+#### 7a — Descriptive Analysis
+
+- [ ] Distribution of ingroup selection criteria across the corpus (and over time)
+- [ ] Share of papers using attachment-based selection, by geographic scope
+- [ ] Distribution of AP dimension (horizontal / vertical / both) across the literature
+- [ ] Distribution of measurement type (attitudinal / behavioral / implicit)
+- [ ] Country frequency map: how many studies include each country
+- [ ] Cross-tabulation: non-identifier treatment × geographic scope
+- [ ] Cross-tabulation: estimand conditionality × ingroup selection criterion
+
+#### 7b — Link to External Data on Non-Identification Rates
+
+- [ ] Download CSES Module data (or Comparative Manifesto / ESS) for share of non-identifiers by country
+- [ ] Merge country-level non-identification rates with country frequency data from corpus
+- [ ] Test whether countries with higher non-identification rates are under-represented in the AP literature
+- [ ] Visualize the relationship — this becomes a key figure in the paper
+
+::: {.callout-tip}
+This is the empirical core of contribution (b). A scatter plot with country-level non-identification 
+rate on the x-axis and number of AP studies including that country on the y-axis makes the 
+external validity problem immediately visible without any additional argumentation.
+:::
+
+#### 7c — Reporting
+
+- [ ] Methods section for the literature review component drafted
+- [ ] All figures and tables produced
+- [ ] Findings integrated into paper's introduction / motivation / theory section
+- [ ] Coding rules document finalised as appendix
+- [ ] Replication materials (corpus, codes, prompt, classification outputs) uploaded to OSF
+
+
+# Part II: Coding Scheme & Instructions {.unnumbered}
+
+::: {.callout-note}
+This section is your standing instruction for all coding — both human (Steps 4–5) and LLM 
+(Step 6). When writing the LLM prompt, condense these rules and add worked examples. 
+When hand-coding, keep this document open. The "unclear" option is always available on 
+every dimension — use it rather than guessing.
+:::
+
+
+## Unit of Analysis
+
+One paper = one row. If a paper contains multiple studies with different operationalizations, 
+code the **primary** study (typically the largest N or the one foregrounded in the abstract). 
+Record in the `multi_study_note` field that additional studies exist with different codes.
+
+
+## Dimension 1: Ingroup Selection Criterion
+
+**What this captures:** How the researcher decides *who counts as a partisan* — i.e., who is 
+included in the analytical sample as an ingroup member.
+
+This is distinct from the AP measure itself. Code the selection logic, not the measurement instrument.
+
+| Code | Label | Decision rule |
+|---|---|---|
+| `ATT` | Attachment / identification | Paper uses self-reported closeness to a party, party identification, or "feeling attached" to define partisans. Includes ANES-style party ID scales where a non-zero response defines partisan status. |
+| `VOTE` | Vote choice / intended vote | Paper defines partisans by their reported vote in the last election or intended vote. |
+| `SCALE` | Self-placement on party scale | Paper uses a left-right or party placement scale, and assigns respondents to a party/bloc based on their position. |
+| `IMPLICIT` | Thermometer/AP-measure-based | No explicit prior selection: ingroup is defined implicitly by the direction of the AP measure itself (e.g., the party rated higher on a thermometer). |
+| `NONE` | No selection — full population | Paper estimates AP for the full adult population without partisanship-conditioning. |
+| `MIXED` | Multiple criteria used | Paper applies different criteria in different models, subsamples, or countries. Describe in `ingroup_note`. |
+| `UNCLEAR` | Cannot determine from text | Coding rules do not resolve the ambiguity; text is insufficient. |
+
+**Common ambiguity:** ANES 7-point party ID scale — if the paper treats "independent leaners" as partisans, code `ATT`. If it excludes pure independents only, code `ATT`. If it restricts to "strong" and "not very strong" identifiers only, code `ATT` but note the restriction in `ingroup_note`.
+
+
+## Dimension 2: Outgroup Operationalization
+
+**What this captures:** How the outgroup is defined, independently of the ingroup. 
+Code in parallel with Dimension 1 — asymmetric operationalization is itself a finding.
+
+| Code | Label | Decision rule |
+|---|---|---|
+| `MIRROR` | Mirror of ingroup criterion | Outgroup defined using the same criterion as ingroup (e.g., if ingroup = ATT, outgroup = all who feel attached to a different party) |
+| `ALL_OPP` | All supporters of opposing party | Outgroup = all respondents associated with the main opposing party, regardless of their own attachment |
+| `ELITES` | Political elites only | Outgroup = politicians, candidates, or elected officials — vertical AP |
+| `GENERIC` | Generic out-party reference | Paper asks about "supporters of other parties" or "the other side" without specifying a criterion |
+| `MIXED` | Multiple criteria | As above |
+| `UNCLEAR` | Cannot determine | |
+
+
+## Dimension 3: Non-Identifier Treatment
+
+**What this captures:** Whether and how the paper handles respondents who do not identify 
+with or feel attached to any party — the group whose exclusion is the core of your theoretical argument.
+
+| Code | Label | Decision rule |
+|---|---|---|
+| `EXCLUDED_NOTED` | Excluded, explicitly acknowledged | Paper excludes non-identifiers AND explicitly discusses implications for external validity, sample representativeness, or cross-national comparability |
+| `EXCLUDED_SILENT` | Excluded, not acknowledged | Paper excludes non-identifiers (implicitly or explicitly) but does not discuss what this means |
+| `INCLUDED_SEPARATE` | Included as separate category | Non-identifiers are retained and coded as a distinct group in analyses |
+| `INCLUDED_IMPUTED` | Included via imputation or auxiliary measure | Paper uses a method to assign non-identifiers to a partisan group (e.g., leaners included via follow-up question) |
+| `FULL_POP` | Full population — selection not applicable | Paper uses Dimension 1 code `NONE`; non-identifier issue does not arise |
+| `UNCLEAR` | Cannot determine | |
+
+::: {.callout-important}
+**This dimension is the empirical heart of your contribution.** The expected finding is 
+that `EXCLUDED_SILENT` dominates the literature, and that this is more common in 
+comparative studies than in single-country US studies — where the problem is less severe 
+because non-identification rates are low and relatively stable.
+:::
+
+
+## Dimension 4: AP Measurement Type
+
+**What this captures:** The instrument used to measure affective polarization, distinct from 
+the selection criterion in Dimension 1.
+
+| Code | Label | Decision rule |
+|---|---|---|
+| `THERM` | Feeling thermometer differential | In-party minus out-party thermometer rating, or equivalent like/dislike scale |
+| `SOCIAL_DIST` | Social distance | Willingness to associate with out-partisans (marry, befriend, hire, live near) |
+| `TRAIT_ATTR` | Trait attribution | Ratings of out-partisans on traits (honest, intelligent, open-minded, etc.) |
+| `TRUST` | Trust game / economic game | Behavioral trust, dictator game, or public goods game with partisan framing |
+| `EXPERIMENT` | Other experimental behavioral measure | Any behavioral outcome in an experiment not captured above (hiring decisions, candidate evaluation tasks, etc.) |
+| `IMPLICIT` | Implicit measure | IAT, affective priming, or similar implicit association task |
+| `COMPOSITE` | Composite index | Paper constructs an index combining multiple of the above |
+| `OTHER` | Other explicit measure | Describe in `measure_note` |
+| `UNCLEAR` | Cannot determine | |
+
+
+## Dimension 5: AP Dimension (Horizontal vs. Vertical)
+
+**What this captures:** Whether the paper studies citizen-citizen polarization, citizen-elite 
+polarization, or both.
+
+| Code | Label | Decision rule |
+|---|---|---|
+| `HORIZONTAL` | Citizen-citizen | Respondents rate or react to ordinary supporters of the opposing party |
+| `VERTICAL` | Citizen-elite | Respondents rate or react to politicians, candidates, or parties-as-institutions |
+| `BOTH` | Both dimensions | Paper explicitly studies and compares both |
+| `UNCLEAR` | Cannot determine | |
+
+**Note:** Many papers conflate these by using "party" stimuli ambiguously. If the stimulus is 
+described as "the Democratic Party" or "party supporters" without further specification, use 
+your judgment based on context and note the ambiguity in `dimension_note`.
+
+
+## Dimension 6: Estimand Conditionality
+
+**What this captures:** Whether the paper's stated research question and estimand conditions 
+on being a partisan, or targets the full population. This is the estimand-operationalization 
+alignment check.
+
+| Code | Label | Decision rule |
+|---|---|---|
+| `CONDITIONAL` | Explicitly conditional on partisanship | Paper states its estimand as "among partisans" or "among identifiers" — the restriction is acknowledged as a scope condition |
+| `POPULATION` | Population-level estimand | Paper claims to estimate AP in the public, the electorate, or the population — not restricted to partisans |
+| `MISALIGNED` | Population claim, partisan sample | Paper claims a population-level estimand but operationalizes using an attachment- or vote-based selection criterion without acknowledging the restriction. **This is the key mismatch your argument identifies.** |
+| `UNCLEAR` | Cannot determine | |
+
+
+## Dimension 7: Geographic Scope
+
+**What this captures:** The empirical country coverage of the study.
+
+- `n_countries`: Integer. Number of countries in the empirical analysis.
+- `country_list`: String. ISO3 codes for all countries included (e.g., `"USA, DEU, GBR"`).
+- `scope_type`: Categorical.
+
+| Code | Label | Decision rule |
+|---|---|---|
+| `SINGLE_US` | Single country — United States | |
+| `SINGLE_OTHER` | Single country — non-US | Record country in `country_list` |
+| `TWO_COUNTRY` | Two-country comparison | |
+| `MULTI_SMALL` | Multi-country, 3–10 countries | |
+| `MULTI_LARGE` | Multi-country, 11+ countries | |
+| `CROSS_NATIONAL` | Large-N cross-national | Paper uses cross-national survey data (CSES, ESS, Eurobarometer, etc.) as primary data |
+
+
+## Dimension 8: Partisan System
+
+**What this captures:** The party system structure in the study's empirical context.
+
+| Code | Label | Decision rule |
+|---|---|---|
+| `TWO_PARTY` | Two-party or dominant two-party system | US, UK (to a degree) — paper treats the contest as binary |
+| `MULTIPARTY` | Multiparty system | Three or more parties compete meaningfully; paper operationalizes ingroup/outgroup in a multiparty context |
+| `MIXED` | Mixed — includes both system types | Comparative study spanning both types |
+| `UNCLEAR` | Cannot determine | |
+
+**Note:** This dimension interacts critically with the non-identifier problem. In multiparty 
+systems, the share of non-identifiers is typically higher, and the definition of "outgroup" 
+is more ambiguous. Flag this interaction in `partisan_note` when relevant.
+
+
+## Dimension 9: Data Type
+
+| Code | Label | Decision rule |
+|---|---|---|
+| `SURVEY_OBS` | Survey, observational | Standard cross-sectional or panel survey, no experimental manipulation |
+| `SURVEY_EXP` | Survey experiment | Experimental vignette or treatment embedded in a survey |
+| `LAB_EXP` | Laboratory experiment | Controlled lab setting |
+| `FIELD_EXP` | Field experiment | Real-world experimental intervention |
+| `BEHAVIORAL` | Administrative or behavioral data | Actual behavior (voting records, transaction data, etc.) — not self-report |
+| `MIXED` | Multiple data types | |
+| `UNCLEAR` | Cannot determine | |
+
+
+## Dimension 10: Time Period of Empirical Data
+
+| Code | Label |
+|---|---|
+| `PRE_2010` | Data collected before 2010 |
+| `2010_2016` | Data collected 2010–2016 |
+| `2017_2020` | Data collected 2017–2020 |
+| `2021_PLUS` | Data collected 2021 or later |
+| `MULTI_PERIOD` | Data spans multiple periods above |
+| `UNCLEAR` | Cannot determine |
+
+
+## Auxiliary Fields
+
+These are not coding dimensions but must be recorded for every paper.
+
+| Field | Content |
+|---|---|
+| `doi` | Digital object identifier |
+| `fulltext_status` | `full` / `abstract_only` / `missing` |
+| `multi_study_note` | Flag and describe if paper contains multiple studies with different operationalizations |
+| `ingroup_note` | Free text for Dimension 1 ambiguities |
+| `measure_note` | Free text for Dimension 4 ambiguities |
+| `dimension_note` | Free text for Dimension 5 ambiguities |
+| `partisan_note` | Free text for Dimension 8 interactions |
+| `coder_confidence` | `high` / `medium` / `low` — your overall confidence in the coding for this paper |
+| `review_flag` | Boolean — mark for second-pass human review |
+
+
+## Coding Priority Rules
+
+When dimensions conflict or text is ambiguous, apply in order:
+
+1. **Explicit statement wins.** If the paper explicitly names its selection criterion or estimand, use that over inferences from the instrument.
+2. **Methods section wins over abstract.** When abstract and methods conflict, trust the methods section.
+3. **When in doubt, code `unclear`.** Do not resolve ambiguity by inference if the text does not support it. `Unclear` is a valid and informative code.
+4. **Multi-study papers:** Code the primary study. If no primary study is identifiable, code the first study reported and flag in `multi_study_note`.
+5. **Review articles and meta-analyses:** Exclude from corpus. They do not have their own operationalizations.
+
+
+
 
 
 ## Introduction {#sec-introduction}
