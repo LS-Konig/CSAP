@@ -20,9 +20,12 @@ draft-mode: visible
 The central contrast of the analysis, the backbone of the intended contribution: respondents that reported attachement vs respondets that declined attachement.
 
 Coding of Ingroup:
+  - Identity only: reported attachement, else exclude
   - Recall maximizing identity first (reported attachement, else vote)
   - Vote only
-  - Most liked party
+  - Most liked party (Thermo)
+
+Key contrast: declined attachement vs reported attachement (robustness: "attachers w/ differing ingroup codings")
 
 These three should be convincing, we can then decide which to present in main paper and which in appendix as robustness.
 
