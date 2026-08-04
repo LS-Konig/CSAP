@@ -1,10 +1,8 @@
 ---
 title: |
-  Does Partisan Attachment Amplify Affective Polarization?
-subtitle: |
-  Vertical and Horizontal Dimensions Across 25 European Democracies
+  Reported Attachment, Revealed Discrimination: What the Party-Closeness Item Selects On in Europe
 abstract: |
-  Affective polarization (AP) research faces a core measurement choice: should partisans be identified by self-reported attachment or by vote choice? The distinction is theoretical -- identity accounts imply attachment intensifies polarization, whereas categorization accounts imply vote anchors suffice -- and comparative, given cross-national variation in attachment across European democracies. We distinguish explicit partisans (reporting attachment) from implicit partisans (denying attachment yet revealing a vote anchor) and assess whether attachment corresponds differently to vertical AP (party-directed attitudes) and horizontal AP (citizen-directed behavior). Using thermometer ratings and conjoint trust-game data from 25 countries (N≈22,900), explicit partisans display greater vertical AP than implicit partisans, but both groups exhibit similar levels of horizontal behavioral discrimination. Party-directed affect and citizen-directed behavior therefore appear structured by different individual-level dispositions. For comparative research, combining vote-anchored and attachment-based samples suits behavioral analyses, whereas restricting samples to explicit identifiers likely overstates the behavioral implications of attitudinal polarization in multiparty systems.
+  Affective polarization is estimated on partisans, so someone must decide who counts as one. In Europe that decision usually rests on a single self-report -- whether a respondent says they feel close to a party -- an item whose prevalence ranges from roughly 41% to 85% across countries. We hold the partisan anchor constant and vary only the reporting: self-identified partisans are compared against vote-anchored respondents who deny feeling close to any party, using thermometer ratings and conjoint trust and dictator games from 25 European democracies (N = 22,858). Both groups favor co-partisans strongly in the games, and by indistinguishable amounts; the same respondents differ substantially in party-directed animus on the thermometers. Self-reported attachment inflates measured polarization without corresponding to any additional discrimination in behavior. It behaves like a reporting disposition, not an identity.
 execute:
   echo: false
   warning: false
@@ -15,887 +13,170 @@ draft: true
 draft-mode: visible
 ---
 
-
-## Core argument chain
-
-**1. AP requires a partisan sample; someone must decide who counts.**
-- Support: none needed — framing claim.
-- Function: sets up the choice as consequential rather than technical.
-
-**2. In Europe, the attachment item does not cleanly identify partisans.**
-- Support (conceptual): Converse & Dupeux; Thomassen — attachment reports the vote rather than preceding it.
-- Support (empirical): share reporting attachment ranges ~41% (LV) to ~85% (DK) in Hahm data; Mannheim Trend File / CSES for the long-run decline.
-- Function: establishes that the item measures something other than what the field assumes.
-
-**3. Coding choices therefore shift the population of inference, differently in each country.**
-- Support: your four ingroup codings re-estimated in Hahm data; report country **rank correlations** across codings alongside level differences.
-- Function: converts a conceptual worry into a quantity.
-
-**4. The literature makes this choice, mostly without comment.** ← *empirical claim 1*
-- Support: hand-built table of 25–40 comparative AP studies coded on ingroup criterion + non-identifier treatment (Dimensions 1 and 3).
-- Expected pattern: `EXCLUDED_SILENT` dominates; behavioral studies anchor on vote, attitudinal on attachment — mode confounded with definition at field level.
-
-**5. Whether it distorts conclusions is answerable: hold the anchor constant, vary the reporting.**
-- Support: explicit vs. implicit partisans, both with a party anchor; Bayesian hierarchical model, party-within-country varying intercepts/slopes so the contrast is estimated inside party-country cells.
-- Function: rules out composition (challenger-party clustering) as the explanation.
-
-**6. Answer: it depends on the measure.** ← *empirical claim 2*
-- Attitudinal (thermometers): substantial explicit–implicit gap, consistent across 25 countries.
-- Behavioral (trust/dictator conjoint): no gap — **equivalence test against a pre-specified ROPE in token units**, not overlapping intervals.
-- Benchmark: partisan attribute effect vs. EU position and class within the same conjoint, to show the null isn't design weakness.
-- Design caveat stated here, not in limitations: target and mode are confounded; claim framed as attitudinal vs. behavioral.
-
-**7. Therefore attachment behaves like a reporting disposition, not an identity.**
-- Support: the 5–6 combination; optional response-style check (endpoint use on non-political 0–10 batteries).
-- Implication: cross-national AP levels partly reflect national differences in willingness to say "close to."
-- Secondary, ceilinged: pattern fits categorization sufficiency in the behavioral domain, but design cannot separate attachment *creating* investment from *marking* it.
-
-## Newest Notes
-
-1. trace history / development of partisanship / PID in Europe
--> goal: what does partisanship / PID even mean in Europe
-2. taxonomy of partisanship: PIDs, leaners, non-PIDs; expectations regarding AP according to theory
--> despite recent work on multipartisanship (Block), much empirical work still uses some way of assigning an ingroup
-3. What strategy AP studies use to code ingroup, how these choices possibly shift population of inference
--> does it substantially matter tho?
-4. 2x2 matrix AP conceptual overview: conceptual (vertical/horizontal) and measurement (attitudinal/behavioral) dimension
--> how do the (data covered) facets of those AP dimensions differ by *type* of partisanship?
-5. compare identifiers (report attachement) to *leaners* (non-identifiers but reveil preference through vote)
--> use Bayesian modeling to approximate within-party contrast to isolate effect of identifying on AP extent
-6. 
-
-## New Notes
-
-to do:
-
-survey/collect datasets on:
-
-partisanship
-
-AP
-
-ideally both over time in Europe
-
-goal: PID over time in ideol. space, from center dominated to challenger dominated?
-
-
-AP          Attitudinal     Behavioral
-
-Vertical
-
-Horizontal
-
-Dataset inventory and collection status: `data/01_raw/external-data.md`.
-
-## Notes
-
-The central contrast of the analysis, the backbone of the intended contribution: respondents that reported attachement vs respondets that declined attachement.
-
-Coding of Ingroup:
-  - Identity only: reported attachement, else exclude
-  - Recall maximizing identity first (reported attachement, else vote)
-  - Vote only
-  - Most liked party (Thermo)
-
-Key contrast: declined attachement vs reported attachement (robustness: "attachers w/ differing ingroup codings")
-
-These three should be convincing, we can then decide which to present in main paper and which in appendix as robustness.
-
-To-Do:
-  - Clean Code for variable creation
-  - Thermo and Game outcome data, wide question data
-  - Reshape table to show identity primacy in ingroup coding in AP literature
-  - Survey literature for relevant mediators
-
-
-## Literature Analysis Pipeline
-
-# Part I: Project Roadmap {.unnumbered}
-
-## Week 1: Corpus Construction & Scheme Design
-
-### Step 1 — Journal Universe & Keyword Search (Days 1–2)
-
-**Goal:** Produce a raw candidate corpus of all potentially relevant papers.
-
-**Action:**
-
-- [ ] Define final journal list: top 80 PS journals (JCR) + top 40 sociology journals + generalists (PNAS, NHB, APSR, AJPS, BJPS)
-- [ ] Document inclusion/exclusion criteria for journals in a methods note
-- [ ] Query OpenAlex with keyword set:
-  - `"affective polarization"`
-  - `"partisan affect"`
-  - `"out-party animus"`
-  - `"partisan hostility"`
-  - `"party animosity"`
-  - `"partisan thermometer"` (co-occurring with partisan/party context)
-- [ ] Pull all metadata fields: DOI, title, abstract, journal, year, author affiliations, OA status, cited-by count
-- [ ] Export to a flat `.csv` or `.parquet` file — this is your master metadata file, do not overwrite it
-
-**Expected output:** 800–2,500 raw records.
-
-**Backup:** If OpenAlex sociology coverage is patchy, supplement with a Web of Science export filtered to the same journal list (~1 hour of additional work).
-
-### Step 2 — Full-Text Acquisition (Days 1–3, parallel with Step 1)
-
-**Goal:** Maximize full-text coverage before any downstream steps.
-
-**Action:**
-
-- [ ] Run all DOIs through Unpaywall API on Day 1 — start immediately, it is slow
-- [ ] Batch-download via institutional access for remaining papers
-- [ ] Search SSRN and OSF by DOI/title for papers still missing
-- [ ] After Day 3: **hard stop on acquisition effort**, regardless of coverage
-- [ ] Add `fulltext_status` variable to master file: `full` / `abstract_only` / `missing`
-
-**Decision rule:** Abstract-only is acceptable for: country scope, partisan system, data type, AP dimension (horizontal/vertical). It is **not** acceptable for: ingroup selection criterion, non-identifier treatment, estimand conditionality. Flag these as `NA` for abstract-only papers and address in robustness checks.
-
-**Backup:** If full-text coverage falls below ~50%, run a systematic check of whether abstract-only papers differ from full-text papers on observable characteristics (journal tier, year, region). If no systematic difference, missingness is plausibly ignorable — report this test explicitly.
-
-### Step 3 — Relevance Filter (Days 3–4)
-
-**Goal:** Reduce corpus to papers genuinely studying AP, not merely citing it.
-
-**Retention rule (any one criterion sufficient):**
-
-- [ ] AP term appears ≥ 3 times in abstract, **or**
-- [ ] AP term appears in title, **or**
-- [ ] Methods section references a standard AP instrument (ANES thermometer, feeling thermometer, social distance scale, trust game)
-
-**Validation:**
-
-- [ ] Manually review 100 randomly drawn **retained** papers
-- [ ] Manually review 50 randomly drawn **excluded** papers
-- [ ] Record precision and recall estimates from this spot-check
-- [ ] Adjust thresholds if false-positive rate is high (backup filter: AP term must co-occur with measurement-related term within 200 characters)
-- [ ] Document final filter criteria and spot-check results — this becomes a methods paragraph
-
-**Expected output after filter:** 400–1,200 papers.
-
----
-
-### Step 4 — Coding Scheme Design & Rules Document (Days 4–6)
-
-**Goal:** Produce a written coding rules document before any coding occurs.
-
-- [ ] Draft decision rules for all dimensions in Part II of this document
-- [ ] Pilot the scheme on 20 papers (drawn from the filtered corpus)
-- [ ] Revise ambiguous rules based on pilot
-- [ ] Finalise rules document
-- [ ] **Pre-register coding scheme and rules document on OSF before proceeding to Step 5**
-
-::: {.callout-important}
-Pre-registration is non-negotiable. Upload the coding rules document and the list of dimensions 
-to OSF with a timestamp before coding the full validation sample. This prevents any post-hoc 
-accusation that categories were designed to fit results.
-:::
-
-## Week 1–2: Hand-Coding & Validation
-
-### Step 5 — Hand-Code Validation Sample (Days 5–10)
-
-**Goal:** Produce a gold-standard coded sample against which the LLM classifier is validated.
-
-**Action:**
-
-- [ ] Draw stratified random sample of **200 papers** from filtered corpus
-  - Stratify by: journal tier (top 20 / rest), year (pre-2016 / 2016–2020 / 2021+), geographic scope (US-only / comparative)
-- [ ] Code all 200 papers on all dimensions (see Part II)
-- [ ] Target pace: ~10 papers/hour with rules document open — budget 20–25 hours explicitly
-- [ ] Record coding in a separate spreadsheet with one row per paper and one column per dimension
-- [ ] For every `unclear` coding: write a one-line note on why — this informs prompt revision
-
-**Reliability check:**
-
-- [ ] After completing all 200 codes, select 50 papers for re-coding
-- [ ] Wait at least 5 days, then recode those 50 papers without reference to prior codes
-- [ ] Compute Cohen's κ per dimension
-- [ ] For any dimension with κ < 0.65: revise coding rule and recode affected papers
-- [ ] Report all κ values in the methods, including weak ones
-
-::: {.callout-warning}
-If a second coder is available (RA, colleague), use them for at least 60–80 papers instead of 
-test-retest. Inter-rater reliability is a stronger standard and more robust to reviewer criticism.
-:::
-
-
-## Week 2: Classification Pipeline
-
-### Step 6 — LLM Classification Pipeline (Days 8–14)
-
-**Goal:** Classify the full corpus on all coding dimensions using Claude API, validated against the gold-standard sample.
-
-#### 6a — Prompt Design
-
-- [ ] Write structured system prompt including:
-  - Condensed coding rules for all dimensions (from Part II)
-  - 4–5 worked examples with correct JSON outputs (few-shot)
-  - Explicit instruction to output `"unclear"` when evidence is insufficient — never guess
-  - Explicit instruction to output a `confidence` field (high / medium / low) per dimension
-- [ ] Specify JSON output schema with one field per dimension
-- [ ] Test prompt on 10 papers manually before running validation
-
-#### 6b — Validation Against Gold-Standard Sample
-
-- [ ] Run classifier on all 200 hand-coded papers
-- [ ] Compute accuracy, precision, recall, and Cohen's κ per dimension against your codes
-- [ ] Identify dimensions with κ < 0.65 — revise prompt for those dimensions
-- [ ] Re-run on gold-standard sample after revision
-- [ ] Record final per-dimension validation statistics — these go in the paper
-
-**Acceptable performance thresholds:**
-
-| Dimension | Expected difficulty | Minimum κ to proceed |
-|---|---|---|
-| Geographic scope / country count | Low | 0.80 |
-| Partisan system | Low | 0.80 |
-| Data type | Low | 0.75 |
-| AP dimension (H/V) | Medium | 0.70 |
-| Measurement type | Medium | 0.70 |
-| Ingroup selection criterion | High | 0.65 |
-| Non-identifier treatment | High | 0.65 |
-| Estimand conditionality | High | 0.65 |
-
-#### 6c — Full Corpus Classification
-
-- [ ] Run classifier on all remaining papers in filtered corpus
-- [ ] Parse and clean JSON outputs; log malformed responses
-- [ ] Flag all low-confidence responses for human spot-check
-- [ ] Human-review a random sample of ~50 flagged papers to assess whether confidence flag is calibrated
-- [ ] Merge classification outputs with master metadata file
-
-## Week 3: Analysis & Integration
-
-### Step 7 — Analysis & Integration with Empirical Paper (Days 13–21)
-
-**Goal:** Produce descriptive results for the literature review component and integrate directly with your paper's theoretical motivation.
-
-#### 7a — Descriptive Analysis
-
-- [ ] Distribution of ingroup selection criteria across the corpus (and over time)
-- [ ] Share of papers using attachment-based selection, by geographic scope
-- [ ] Distribution of AP dimension (horizontal / vertical / both) across the literature
-- [ ] Distribution of measurement type (attitudinal / behavioral / implicit)
-- [ ] Country frequency map: how many studies include each country
-- [ ] Cross-tabulation: non-identifier treatment × geographic scope
-- [ ] Cross-tabulation: estimand conditionality × ingroup selection criterion
-
-#### 7b — Link to External Data on Non-Identification Rates
-
-- [ ] Download CSES Module data (or Comparative Manifesto / ESS) for share of non-identifiers by country
-- [ ] Merge country-level non-identification rates with country frequency data from corpus
-- [ ] Test whether countries with higher non-identification rates are under-represented in the AP literature
-- [ ] Visualize the relationship — this becomes a key figure in the paper
-
-::: {.callout-tip}
-This is the empirical core of contribution (b). A scatter plot with country-level non-identification 
-rate on the x-axis and number of AP studies including that country on the y-axis makes the 
-external validity problem immediately visible without any additional argumentation.
-:::
-
-#### 7c — Reporting
-
-- [ ] Methods section for the literature review component drafted
-- [ ] All figures and tables produced
-- [ ] Findings integrated into paper's introduction / motivation / theory section
-- [ ] Coding rules document finalised as appendix
-- [ ] Replication materials (corpus, codes, prompt, classification outputs) uploaded to OSF
-
-
-# Part II: Coding Scheme & Instructions {.unnumbered}
-
-::: {.callout-note}
-This section is your standing instruction for all coding — both human (Steps 4–5) and LLM 
-(Step 6). When writing the LLM prompt, condense these rules and add worked examples. 
-When hand-coding, keep this document open. The "unclear" option is always available on 
-every dimension — use it rather than guessing.
-:::
-
-
-## Unit of Analysis
-
-One paper = one row. If a paper contains multiple studies with different operationalizations, 
-code the **primary** study (typically the largest N or the one foregrounded in the abstract). 
-Record in the `multi_study_note` field that additional studies exist with different codes.
-
-
-## Dimension 1: Ingroup Selection Criterion
-
-**What this captures:** How the researcher decides *who counts as a partisan* — i.e., who is 
-included in the analytical sample as an ingroup member.
-
-This is distinct from the AP measure itself. Code the selection logic, not the measurement instrument.
-
-| Code | Label | Decision rule |
-|---|---|---|
-| `ATT` | Attachment / identification | Paper uses self-reported closeness to a party, party identification, or "feeling attached" to define partisans. Includes ANES-style party ID scales where a non-zero response defines partisan status. |
-| `VOTE` | Vote choice / intended vote | Paper defines partisans by their reported vote in the last election or intended vote. |
-| `SCALE` | Self-placement on party scale | Paper uses a left-right or party placement scale, and assigns respondents to a party/bloc based on their position. |
-| `IMPLICIT` | Thermometer/AP-measure-based | No explicit prior selection: ingroup is defined implicitly by the direction of the AP measure itself (e.g., the party rated higher on a thermometer). |
-| `NONE` | No selection — full population | Paper estimates AP for the full adult population without partisanship-conditioning. |
-| `MIXED` | Multiple criteria used | Paper applies different criteria in different models, subsamples, or countries. Describe in `ingroup_note`. |
-| `UNCLEAR` | Cannot determine from text | Coding rules do not resolve the ambiguity; text is insufficient. |
-
-**Common ambiguity:** ANES 7-point party ID scale — if the paper treats "independent leaners" as partisans, code `ATT`. If it excludes pure independents only, code `ATT`. If it restricts to "strong" and "not very strong" identifiers only, code `ATT` but note the restriction in `ingroup_note`.
-
-
-## Dimension 2: Outgroup Operationalization
-
-**What this captures:** How the outgroup is defined, independently of the ingroup. 
-Code in parallel with Dimension 1 — asymmetric operationalization is itself a finding.
-
-| Code | Label | Decision rule |
-|---|---|---|
-| `MIRROR` | Mirror of ingroup criterion | Outgroup defined using the same criterion as ingroup (e.g., if ingroup = ATT, outgroup = all who feel attached to a different party) |
-| `ALL_OPP` | All supporters of opposing party | Outgroup = all respondents associated with the main opposing party, regardless of their own attachment |
-| `ELITES` | Political elites only | Outgroup = politicians, candidates, or elected officials — vertical AP |
-| `GENERIC` | Generic out-party reference | Paper asks about "supporters of other parties" or "the other side" without specifying a criterion |
-| `MIXED` | Multiple criteria | As above |
-| `UNCLEAR` | Cannot determine | |
-
-
-## Dimension 3: Non-Identifier Treatment
-
-**What this captures:** Whether and how the paper handles respondents who do not identify 
-with or feel attached to any party — the group whose exclusion is the core of your theoretical argument.
-
-| Code | Label | Decision rule |
-|---|---|---|
-| `EXCLUDED_NOTED` | Excluded, explicitly acknowledged | Paper excludes non-identifiers AND explicitly discusses implications for external validity, sample representativeness, or cross-national comparability |
-| `EXCLUDED_SILENT` | Excluded, not acknowledged | Paper excludes non-identifiers (implicitly or explicitly) but does not discuss what this means |
-| `INCLUDED_SEPARATE` | Included as separate category | Non-identifiers are retained and coded as a distinct group in analyses |
-| `INCLUDED_IMPUTED` | Included via imputation or auxiliary measure | Paper uses a method to assign non-identifiers to a partisan group (e.g., leaners included via follow-up question) |
-| `FULL_POP` | Full population — selection not applicable | Paper uses Dimension 1 code `NONE`; non-identifier issue does not arise |
-| `UNCLEAR` | Cannot determine | |
-
-::: {.callout-important}
-**This dimension is the empirical heart of your contribution.** The expected finding is 
-that `EXCLUDED_SILENT` dominates the literature, and that this is more common in 
-comparative studies than in single-country US studies — where the problem is less severe 
-because non-identification rates are low and relatively stable.
-:::
-
-
-## Dimension 4: AP Measurement Type
-
-**What this captures:** The instrument used to measure affective polarization, distinct from 
-the selection criterion in Dimension 1.
-
-| Code | Label | Decision rule |
-|---|---|---|
-| `THERM` | Feeling thermometer differential | In-party minus out-party thermometer rating, or equivalent like/dislike scale |
-| `SOCIAL_DIST` | Social distance | Willingness to associate with out-partisans (marry, befriend, hire, live near) |
-| `TRAIT_ATTR` | Trait attribution | Ratings of out-partisans on traits (honest, intelligent, open-minded, etc.) |
-| `TRUST` | Trust game / economic game | Behavioral trust, dictator game, or public goods game with partisan framing |
-| `EXPERIMENT` | Other experimental behavioral measure | Any behavioral outcome in an experiment not captured above (hiring decisions, candidate evaluation tasks, etc.) |
-| `IMPLICIT` | Implicit measure | IAT, affective priming, or similar implicit association task |
-| `COMPOSITE` | Composite index | Paper constructs an index combining multiple of the above |
-| `OTHER` | Other explicit measure | Describe in `measure_note` |
-| `UNCLEAR` | Cannot determine | |
-
-
-## Dimension 5: AP Dimension (Horizontal vs. Vertical)
-
-**What this captures:** Whether the paper studies citizen-citizen polarization, citizen-elite 
-polarization, or both.
-
-| Code | Label | Decision rule |
-|---|---|---|
-| `HORIZONTAL` | Citizen-citizen | Respondents rate or react to ordinary supporters of the opposing party |
-| `VERTICAL` | Citizen-elite | Respondents rate or react to politicians, candidates, or parties-as-institutions |
-| `BOTH` | Both dimensions | Paper explicitly studies and compares both |
-| `UNCLEAR` | Cannot determine | |
-
-**Note:** Many papers conflate these by using "party" stimuli ambiguously. If the stimulus is 
-described as "the Democratic Party" or "party supporters" without further specification, use 
-your judgment based on context and note the ambiguity in `dimension_note`.
-
-
-## Dimension 6: Estimand Conditionality
-
-**What this captures:** Whether the paper's stated research question and estimand conditions 
-on being a partisan, or targets the full population. This is the estimand-operationalization 
-alignment check.
-
-| Code | Label | Decision rule |
-|---|---|---|
-| `CONDITIONAL` | Explicitly conditional on partisanship | Paper states its estimand as "among partisans" or "among identifiers" — the restriction is acknowledged as a scope condition |
-| `POPULATION` | Population-level estimand | Paper claims to estimate AP in the public, the electorate, or the population — not restricted to partisans |
-| `MISALIGNED` | Population claim, partisan sample | Paper claims a population-level estimand but operationalizes using an attachment- or vote-based selection criterion without acknowledging the restriction. **This is the key mismatch your argument identifies.** |
-| `UNCLEAR` | Cannot determine | |
-
-
-## Dimension 7: Geographic Scope
-
-**What this captures:** The empirical country coverage of the study.
-
-- `n_countries`: Integer. Number of countries in the empirical analysis.
-- `country_list`: String. ISO3 codes for all countries included (e.g., `"USA, DEU, GBR"`).
-- `scope_type`: Categorical.
-
-| Code | Label | Decision rule |
-|---|---|---|
-| `SINGLE_US` | Single country — United States | |
-| `SINGLE_OTHER` | Single country — non-US | Record country in `country_list` |
-| `TWO_COUNTRY` | Two-country comparison | |
-| `MULTI_SMALL` | Multi-country, 3–10 countries | |
-| `MULTI_LARGE` | Multi-country, 11+ countries | |
-| `CROSS_NATIONAL` | Large-N cross-national | Paper uses cross-national survey data (CSES, ESS, Eurobarometer, etc.) as primary data |
-
-
-## Dimension 8: Partisan System
-
-**What this captures:** The party system structure in the study's empirical context.
-
-| Code | Label | Decision rule |
-|---|---|---|
-| `TWO_PARTY` | Two-party or dominant two-party system | US, UK (to a degree) — paper treats the contest as binary |
-| `MULTIPARTY` | Multiparty system | Three or more parties compete meaningfully; paper operationalizes ingroup/outgroup in a multiparty context |
-| `MIXED` | Mixed — includes both system types | Comparative study spanning both types |
-| `UNCLEAR` | Cannot determine | |
-
-**Note:** This dimension interacts critically with the non-identifier problem. In multiparty 
-systems, the share of non-identifiers is typically higher, and the definition of "outgroup" 
-is more ambiguous. Flag this interaction in `partisan_note` when relevant.
-
-
-## Dimension 9: Data Type
-
-| Code | Label | Decision rule |
-|---|---|---|
-| `SURVEY_OBS` | Survey, observational | Standard cross-sectional or panel survey, no experimental manipulation |
-| `SURVEY_EXP` | Survey experiment | Experimental vignette or treatment embedded in a survey |
-| `LAB_EXP` | Laboratory experiment | Controlled lab setting |
-| `FIELD_EXP` | Field experiment | Real-world experimental intervention |
-| `BEHAVIORAL` | Administrative or behavioral data | Actual behavior (voting records, transaction data, etc.) — not self-report |
-| `MIXED` | Multiple data types | |
-| `UNCLEAR` | Cannot determine | |
-
-
-## Dimension 10: Time Period of Empirical Data
-
-| Code | Label |
-|---|---|
-| `PRE_2010` | Data collected before 2010 |
-| `2010_2016` | Data collected 2010–2016 |
-| `2017_2020` | Data collected 2017–2020 |
-| `2021_PLUS` | Data collected 2021 or later |
-| `MULTI_PERIOD` | Data spans multiple periods above |
-| `UNCLEAR` | Cannot determine |
-
-
-## Auxiliary Fields
-
-These are not coding dimensions but must be recorded for every paper.
-
-| Field | Content |
-|---|---|
-| `doi` | Digital object identifier |
-| `fulltext_status` | `full` / `abstract_only` / `missing` |
-| `multi_study_note` | Flag and describe if paper contains multiple studies with different operationalizations |
-| `ingroup_note` | Free text for Dimension 1 ambiguities |
-| `measure_note` | Free text for Dimension 4 ambiguities |
-| `dimension_note` | Free text for Dimension 5 ambiguities |
-| `partisan_note` | Free text for Dimension 8 interactions |
-| `coder_confidence` | `high` / `medium` / `low` — your overall confidence in the coding for this paper |
-| `review_flag` | Boolean — mark for second-pass human review |
-
-
-## Coding Priority Rules
-
-When dimensions conflict or text is ambiguous, apply in order:
-
-1. **Explicit statement wins.** If the paper explicitly names its selection criterion or estimand, use that over inferences from the instrument.
-2. **Methods section wins over abstract.** When abstract and methods conflict, trust the methods section.
-3. **When in doubt, code `unclear`.** Do not resolve ambiguity by inference if the text does not support it. `Unclear` is a valid and informative code.
-4. **Multi-study papers:** Code the primary study. If no primary study is identifiable, code the first study reported and flag in `multi_study_note`.
-5. **Review articles and meta-analyses:** Exclude from corpus. They do not have their own operationalizations.
-
-
-
-
-
-## Introduction {#sec-introduction}
-
-Affective polarization (AP) -- the tendency to favor one's own partisan group while disliking opponents -- has emerged as a defining feature of contemporary democracies [@iyengar2012affect; @iyengar2019origins; @boxell2024cross].
-Beyond policy disagreement, AP encompasses social distancing, interpersonal hostility, and discriminatory behavior toward partisan outgroups, raising concerns about democratic cooperation and political stability [@graham2020democracy; @kingzette2021affective; @berntzen2023consequencesofaffective].
-Extensive research now documents AP's prevalence across advanced democracies [@wagner2021affective; @reiljan2020fear; @reiljan2024patterns], yet fundamental questions persist about its measurement and psychological foundations.
-A particularly consequential ambiguity concerns who counts as "partisan" in empirical analyses: should researchers restrict samples to citizens who self-report feeling attached to a party, or include all those who reveal partisan preferences through vote choice regardless of reported attachment?
-This operationalization choice carries major implications for both theory and comparative inference, yet existing research has not systematically examined whether these two groups exhibit equivalent levels of AP.
-
-The partisan identification question matters theoretically because it implicates competing accounts of AP's underlying mechanisms.
-Social identity perspectives emphasize subjective attachment as a psychological bond that intensifies emotional investment in political groups, predicting that explicit partisan identifiers should exhibit stronger polarization than those who merely vote without reporting felt attachment [@huddy2015expressive; @mason2018one; @iyengar2015fear].
-In contrast, categorization and cue-processing accounts suggest that partisan labels and vote anchors provide sufficient information to generate polarized responses even absent subjective identification [@orr2023affective; @orr2020policy; @dafoe2018information].
-Distinguishing these mechanisms has proven difficult because party cues simultaneously signal group membership and ideological content, producing observational equivalence [@orr2023affective].
-The partisan type distinction—explicit versus implicit partisanship—provides analytical leverage: systematic differences between these groups would support identity-centric accounts, while equivalent behavior would challenge the assumption that subjective attachment drives polarization.
-
-The measurement stakes are especially high in comparative multiparty research.
-Unlike the U.S. two-party system, European electorates contain substantial proportions of voters who express stable partisan preferences yet deny feeling attached to any party.
-The prevalence of explicit partisan attachment varies dramatically—ranging from roughly 40% to 80% across European countries in our data—meaning that restricting analyses to self-identified partisans reshapes the population of inference differently in each national context and undermines cross-national comparability [@rollicke2023polarisation; @TorcalComellas2025Operationalizing].
-Moreover, widely used AP measures diverge precisely in their treatment of partisans: @reiljan2020fear's Affective Polarization Index (API) originally focused on reported identifiers, while @wagner2021affective's spread measure encompasses all respondents, yielding potentially different empirical portraits of polarization [@campos2025new; @CarlinLove2025Measuring].
-Without systematic evidence on whether explicit and implicit partisans exhibit equivalent AP, researchers face arbitrary decisions about sample inclusion that may distort substantive conclusions and comparative inference.
-
-Recent theoretical refinements further complicate these issues by distinguishing *vertical* AP—attitudes toward parties and elites—from *horizontal* AP—behavior toward fellow citizens [@klar2018affective; @areal2024verticalvshorizontal; @druckman2019we].
-This differentiation matters because different manifestations of polarization may arise from different psychological mechanisms and carry distinct normative implications [@Berntzen2025PoliticalViolence; @campos2025new].
-If subjective partisan attachment shapes how citizens feel about *parties* but not how they treat partisan *others* in interpersonal contexts, then vertical and horizontal AP would require separate theoretical accounts.
-Testing whether partisan type differentially predicts these two dimensions could reveal whether attachment-driven and categorization-driven processes operate in parallel, with the former dominating party-targeted attitudes and the latter governing citizen-targeted behavior—a possibility existing research has not explored.
-
-We address these challenges by distinguishing *explicit* partisans—respondents who report feeling attached to a party—from *implicit* partisans—those who deny such attachment yet reveal partisan anchors through vote choice.
-We term this distinction *partisan type*.
-This conceptualization extends classic insights on independents, leaners, and implicit partisan identity [@petrocik2009measuring; @kinder2017neither; @theodoridis2017me; @elliott2024like] to multiparty systems, isolating a theoretical quantity prior work has not directly examined: whether self-reported attachment enhances polarization beyond the effects of partisan categorization alone.
-Empirically, we analyze thermometer ratings (vertical AP) and conjoint trust-game experiments (horizontal AP) from 25 European democracies (N≈22,900), applying Bayesian hierarchical models with country-level random effects to estimate AP conditional on partisan type while accounting for respondent clustering and cross-national heterogeneity.
-
-Our (preliminary and exploratory) findings reveal a striking asymmetry.
-For vertical AP measured through party thermometer ratings, explicit partisans exhibit systematically and substantially higher polarization than implicit partisans across all 25 countries.
-Yet for horizontal AP measured through token allocations in trust games embedding randomized partisan cues, explicit and implicit partisans discriminate identically: both groups show equivalent levels of AP.
-This vertical-horizontal divergence challenges theories positing unified mechanisms underlying affective polarization.
-Subjective attachment shapes *attitudes toward parties* but does not amplify *behavioral discrimination among citizens*.
-
-Extending these findings, we plan to examine individual-level moderators to identify what drives vertical AP and whether the explicit–implicit gap varies systematically with respondent characteristics. In our future analyses, we will incorporate theoretically relevant covariates -- including ideological extremity, political interest, social identity strength, perceived threat, democratic norms, social trust, and media consumption -- that are available in our data, following insights from existing literature. This approach will allow us to explore whether differences in vertical AP between explicit and implicit partisans are amplified or attenuated among particular subgroups.
-
-These exploratory findings carry several preliminary implications for AP research. First, regarding measurement and population definition, the equivalence of horizontal AP between explicit and implicit partisans suggests that combining vote-anchored and attachment-based respondents is reasonable when estimating behavioral polarization, avoiding unnecessary reductions in external validity. Second, the vertical–horizontal asymmetry indicates that subjective attachment amplifies party-targeted attitudes but does not appear to drive interpersonal discrimination, highlighting the need for multidimensional frameworks distinguishing elite- versus citizen-targeted polarization. Finally, the consistency of this asymmetry across 25 European democracies suggests that these patterns may reflect structural features of multiparty electoral systems rather than country-specific idiosyncrasies, providing a foundation for future analyses of individual-level moderators.
-
-The paper proceeds as follows. @sec-theory reviews theoretical perspectives on partisan identity and affective polarization, develops our conceptualization of partisan type, and derives testable hypotheses distinguishing vertical from horizontal AP. @sec-rd describes the data from 25 European democracies, the measurement strategy applying @reiljan2020fear's API logic consistently across both dimensions, and the Bayesian hierarchical modeling approach. @sec-results-planned outlines the planned presentation of empirical results, @sec-results-descr presents the mentioned preliminary descriptive findings.
-
-## Theory {#sec-theory}
-
-### Origin and Expansion of Affective Polarization Research {#sec-origins}
-
-The contemporary study of political polarization was reshaped by the insight that partisan conflict is driven not only by ideological disagreement but also by social and emotional divisions [@iyengar2012affect].
-Early work demonstrated that hostility between partisans intensified even while policy preferences remained comparatively stable [@fiorina2006culture; @fiorina2008polarization], redirecting scholarly attention from ideological distance [@poole1984polarization; @mccarty2006polarized] toward affective orientations between political groups.
-Building on social identity approaches, affective polarization (AP) is typically defined as the tendency of individuals to feel warmth toward perceived ingroup members and hostility toward outgroups [@iyengar2015fear; @iyengar2019origins; @IyengarWagner2025Conceptualizing].
-
-Rooted in Social Identity Theory and Self-Categorization Theory [@tajfel1979integrative; @tajfel2004thesocial], AP reflects a broader and well-documented human propensity for ingroup favoritism and outgroup derogation observable even in minimal group settings [@tajfel1971social; @Sherif1961intergroup; @brewer1999psychology].
-Political science research focuses on cases where the salient social identity is partisanship [@Huddy2001social; @huddy2015expressive; @mason2015disrespectfully].
-Over the past decade, this perspective has generated a large comparative literature documenting the prevalence of AP across advanced democracies [@wagner2021affective; @reiljan2020fear; @reiljan2024patterns; @boxell2024cross], identifying its drivers [@hobolt2024polarizing; @bail2018exposure; @orr2020policy; @mason2015disrespectfully; @tornberg2022digital; @luttig2017authoritarianism], tracing its consequences for democratic attitudes and behavior [@diermeier2019partisan; @berntzen2023consequencesofaffective; @kingzette2021affective; @graham2020democracy; @mcconnell2018economic; @broockman2023doesaffective], examining temporal trends [@iyengar2018strengthening], and evaluating interventions designed to reduce partisan hostility [@adams2023can; @kalla2022voter; @druckman2023does; @mernyk2022correcting].
-
-The rapid growth of this research program has produced substantial empirical knowledge but also conceptual and measurement disputes [@campos2025new; @bakker2024putting; @IyengarWagner2025Conceptualizing; @CarlinLove2025Measuring].
-Scholars increasingly recognize that the concept encompasses multiple related phenomena and that different operationalizations can yield divergent conclusions about its magnitude, distribution, and implications.
-Consequently, cumulative knowledge now depends less on documenting whether AP exists than on clarifying what precisely is being measured and for whom theoretical claims apply.
-
-### Core Debates and Conceptual Refinements {#sec-core-debates}
-
-Early debates centered on whether polarization should be understood as a state or a process and whether its democratic consequences are uniformly harmful or conditional [@kingzette2021affective; @moore2020exaggerated; @westwood2022current].
-More recent work emphasizes that different manifestations of AP may have distinct normative implications and psychological origins [@Berntzen2025PoliticalViolence; @broockman2023doesaffective; @voelkel2023interventions].
-Three major refinements structure the contemporary literature.
-
-First, target differentiation.
-Scholars distinguish vertical polarization—affect toward parties and elites—from horizontal polarization—affect and behavior toward fellow citizens [@klar2018affective; @harteveld2021ticking; @druckman2019we; @areal2024verticalvshorizontal].
-Vertical AP can further target parties or leaders [@reiljan2024patterns; @Torcal2022affective], while horizontal AP concerns interpersonal discrimination.
-Because elite-directed hostility and citizen-directed behavior may arise from different mechanisms, conflating them risks obscuring causal relationships.
-
-Second, manifestation differentiation.
-Research differentiates attitudinal AP, typically measured with feeling thermometers or social distance scales, from behavioral AP, measured through economic allocation decisions or real interactions [@druckman2019we; @CarlinLove2025Measuring; @iyengar2015fear].
-These measures need not align: citizens may express dislike without discriminating behaviorally, or discriminate without reporting strong hostility.
-
-Third, operationalization choices. Measurement depends on defining partisan groups.
-Scholars must determine how to identify partisans (attachment vs vote choice), whether individuals may hold multiple ingroups [@kekkonen2021affective; @kekkonen2022puzzles; @bantel2023camps], how to define outgroups (least-liked party vs average opponent) [@wagner2021affective], and whether to include non-partisans in analysis [@rollicke2023polarisation].
-These decisions reshape empirical findings rather than merely refining them.
-
-Together, these developments imply that AP is not a single phenomenon but a family of related outcomes whose interpretation depends heavily on conceptual and measurement choices [@campos2025new; @IyengarWagner2025Conceptualizing].
-
-### Extending Affective Polarization to Multiparty Systems {#sec-extending-AP}
-
-These challenges intensify in multiparty democracies [@rollicke2023polarisation; @TorcalComellas2025Operationalizing]. In two-party systems, ingroup and outgroup boundaries are clear.
-In fragmented party systems, however, several ambiguities emerge.
-
-First, it is unclear what constitutes the ingroup.
-Researchers variously define it as the most-liked party, multiple parties, or ideological blocs [@kekkonen2021affective; @kekkonen2022puzzles; @bantel2023camps; @reiljan2021ideological]. Second, identifying membership can rely on subjective attachment or vote choice [@wagner2021affective; @reiljan2020fear].
-Third, defining outgroups may involve the least-liked party or the average evaluation of all opponents [@wagner2021affective].
-Finally, many citizens lack explicit partisan identification, raising the question of whether they belong in the population of inference [@garzia2023affective].
-
-Existing measurement strategies address these issues differently.
-Some approaches assign each respondent a single ingroup and calculate polarization relative to all outparties [@reiljan2020fear; @hahm2024divided]; others measure dispersion in party evaluations and include non-identifiers [@wagner2021affective]; still others allow multiple ingroups [@kekkonen2021affective; @kekkonen2022puzzles].
-Because explicit partisan attachment varies substantially across European countries, these decisions affect cross-national comparability. Restricting analyses to self-identified partisans can approximate the electorate in countries with high identification rates but represent only a minority in others.
-As a result, identical operationalizations may imply different target populations across cases.
-
-[Table of comparative studies and ingroup strategies]
-
-| Study | AP | Sample | Countries |
-|:------|:---|:-------|:----------|
-|       |    |        |           |
-
-Moreover, attachment questions themselves may capture different psychological phenomena depending on party system institutionalization and stability [@garzia2023affective].
-Comparative research typically assumes equivalence, yet this assumption is rarely evaluated.
-
-### Partisan Type, Population of Inference, and Research Contribution {#sec-contribution}
-
-To address these comparability and interpretation problems, we distinguish between respondents who report attachment to a party and those who deny attachment but reveal a partisan anchor through vote choice. We refer to these categories as partisan types: explicit and implicit partisans. The distinction serves primarily as a consistent terminology allowing comparable analysis across contexts rather than a novel theoretical construct.
-
-The distinction matters because it directly affects the population of inference. If the proportion of explicit and implicit identifiers varies across countries, analyses limited to explicit identifiers describe fundamentally different electorates across cases. Consequently, comparative conclusions about AP may depend as much on sampling decisions as on political behavior.
-
-Beyond measurement, the comparison offers leverage for adjudicating competing theoretical accounts of polarization. Social identity theories emphasize subjective attachment as a psychological bond that intensifies emotional investment in political groups [@huddy2015expressive; @mason2018one; @huddy2013group; @west2022partisanship]. In contrast, categorization and cue-processing perspectives suggest that partisan labels and vote anchors alone provide sufficient information to generate polarized responses, even absent felt attachment [@orr2023affective; @orr2020policy; @dafoe2018information; @tajfel1971social].
-
-We therefore compare explicit and implicit partisans across two dimensions of AP:
-(1) vertical attitudinal polarization toward parties and
-(2) horizontal behavioral discrimination toward citizens.
-We further examine whether individual characteristics moderate these relationships. The analysis of individual-level drivers remains exploratory; covariate selection will be guided by existing research on ideological extremity [@abramowitz2006exploring; @abramowitz2008ispolarization], engagement [@luttig2017authoritarianism], social identity strength [@mason2015disrespectfully; @mason2018one], perceived threat [@huddy2015expressive], democratic norms [@graham2020democracy], social trust, and media consumption [@bail2018exposure; @tornberg2022digital].
-
-### Hypotheses {#sec-hypotheses}
-
-We evaluate competing explanations of AP by comparing explicit and implicit partisans across vertical (attitudinal) and horizontal (behavioral) domains. 
-Social identity accounts emphasize subjective attachment as a psychological bond that intensifies affective investment in political groups [@huddy2015expressive; @mason2018one], whereas categorization accounts argue that partisan labels and vote anchors alone suffice to generate polarized responses [@orr2023affective; @dafoe2018information].
-
-#### Vertical (Attitudinal) AP
-
-If attachment creates emotional investment in political objects, explicit identifiers should evaluate ingroup and outgroup parties more differently than implicit identifiers.
-
-$\text{H}_{1a}$ (Identity mechanism): Explicit partisans exhibit higher vertical AP than implicit partisans.
-
-If partisan categorization alone activates evaluative schemas, attachment adds little beyond knowing one's partisan anchor [@orr2023affective].
-
-$\text{H}_{1b}$ (Categorization mechanism):
-Explicit and implicit partisans exhibit equivalent vertical AP.
-
-#### Horizontal (Behavioral) AP
-
-If identity strength drives discriminatory behavior toward political opponents, explicit identifiers should favor copartisans more strongly in interpersonal decisions [@huddy2015expressive; @iyengar2015fear].
-
-$\text{H}_{2a}$ (Identity mechanism):
-Explicit partisans exhibit higher horizontal AP than implicit partisans.
-
-If categorization and inferred alignment are sufficient to generate intergroup bias [@tajfel1971social; @Sherif1961intergroup], behavioral discrimination should not depend on subjective attachment.
-
-$\text{H}_{2b}$ (Categorization mechanism):
-Explicit and implicit partisans exhibit equivalent horizontal AP.
-
-#### Individual-Level Moderation
-
-Identity-based mechanisms imply that affective investment intensifies among individuals whose political orientations are psychologically consolidated [@mason2015disrespectfully; @west2022partisanship].
-
-$\text{H}_3$: The explicit–implicit gap in vertical polarization is larger among ideologically extreme and politically engaged respondents.
-
-If behavioral discrimination primarily follows categorization rather than identity strength, these moderators should not alter behavioral differences.
-
-$\text{H}_4$: Individual-level moderators affect vertical but not horizontal differences between partisan types.
-
-
-## Research Design {#sec-rd}
-
-### Data {#sec-data}
-
-We analyze survey data from 25 European democracies collected as part of a large-scale conjoint experiment fielded in 2019 (N ≈ 22,900 respondents after cleaning) [@hahm2024divided]. The study was designed to examine partisan discrimination across diverse party systems, combining standard survey measures of political attitudes with behavioral games embedding randomized partisan cues. The cross-national scope -- spanning established Western European democracies, Southern European countries, and newer Central and Eastern European democracies -- provides substantial variation in party system characteristics, democratic consolidation, and patterns of partisan attachment.
-
-Each respondent completed: (1) standard demographic and political attitude batteries, including party thermometer ratings and a partisan attachment item; (2) vote choice questions; and (3) behavioral games (dictator and trust games) in which they allocated resources to profiles randomly assigned partisan and demographic attributes. The hierarchical structure of the data -- with multiple evaluations nested within respondents, who are nested within countries -- requires multilevel modeling to appropriately account for clustering and estimate cross-national heterogeneity.
-
-We work from a harmonized release of this survey, `eu25games2019` [@muno2026eu25games], which cleans the raw per-country fieldwork exports into a single respondent-by-wave dataset and merges Party Facts identifiers onto every party-bearing item. Working from the harmonized release rather than from the authors' own analysis file means our sample is constructed by our own coding decisions rather than inherited: we retain respondents who passed the survey's attention check, completed the questionnaire, and played the games, and we keep each panelist's earliest game wave so that no respondent enters twice. This yields 22,858 respondents across the 25 countries, each contributing six game rounds.
-
-### Measuring Vertical Affective Polarization: Party Thermometer Ratings {#sec-vertical-measure}
-
-Vertical (attitudinal) AP is measured using feeling thermometer ratings toward political parties. Respondents evaluated all major parties in their country on a 0 (dislike) to 100 (like) scale. We rescale this measure to a 0–10 scale so that the outcome space matches the horizontal AP token allocation measure, facilitating direct comparison across the two dimensions.
-
-The hierarchical structure generates multiple observations per respondent: each individual $i$ in country $c$ provides ratings $r$ for multiple parties. We construct a binary indicator $\text{CoPartisan}_{ric}$ that equals 1 when the rated party matches respondent $i$'s partisan anchor and 0 otherwise. This operationalization allows us to estimate AP as the difference between ingroup affect (ratings of one's own party) and average outgroup affect (ratings of all other parties), directly implementing @reiljan2020fear's AP Index (API) logic within a regression framework.
-
-### Measuring Horizontal Affective Polarization: Token Allocation in Behavioral Games {#sec-horizontal-measure}
-
-Horizontal (behavioral) AP is measured through token allocations in conjoint experiments embedding partisan cues [@hahm2024divided]. Respondents participated in dictator and trust games where they allocated tokens to profiles describing hypothetical citizens. Each profile included randomized attributes: partisan affiliation, age, social class, gender, religion, and EU position. The randomization ensures that partisan cues are orthogonal to other profile characteristics, isolating the causal effect of copartisanship on resource allocation.
-
-In the dictator game, respondents divided 10 tokens between themselves and a partner. In the trust game, respondents decided how many tokens (0–10) to send to a partner, with sent tokens tripled and the partner choosing how many to return. Both games measure behavioral discrimination: the extent to which respondents favor copartisans over outpartisans in resource allocation decisions.
-
-As with thermometer ratings, the design generates multiple observations per respondent: each individual $i$ evaluated multiple profiles $r$. We construct $\text{CoPartisan}_{ric} = 1$ when the profile's party affiliation matches respondent $i$'s partisan anchor, and 0 otherwise. This parallel operationalization allows direct comparison of vertical and horizontal AP using identical analytical frameworks.
-
-### Partisan Type: Explicit Versus Implicit Partisans {#sec-partisan-type}
-
-Our key explanatory variable distinguishes respondents by partisan type. The survey first asked: “Do you consider yourself to be close to any particular political party? If so, which party do you feel close to?” Respondents indicating closeness to any party are classified as explicit partisans ($\text{Type}_i = 1$). For these individuals, the named party defines the respondent’s partisan anchor. This group comprises roughly 18,000 respondents in our sample.
-
-Respondents who selected the option indicating no attachment to any party were subsequently evaluated using multiple electoral preference items capturing both retrospective and prospective behavior: vote intention and reported vote choice (including alternative and earlier election recall items). We employ a recall-maximizing strategy: if a respondent reported any party preference across these measures, that party is assigned as the respondent’s partisan anchor and the respondent is classified as an implicit partisan ($\text{Type}_i = 0$). These individuals deny subjective identification but reveal a behavioral partisan anchor through electoral preference (approximately 6,000 respondents).
-
-Respondents who neither reported party attachment nor indicated any party in any vote item are classified as non-partisans (approximately 3,900 respondents). Because they lack a defensible partisan anchor, they cannot be assigned copartisan–outpartisan relationships and are therefore excluded from analyses requiring such comparisons.
-
-For explicit and implicit partisans alike, the identified party—whether derived from attachment or electoral preference—serves as the partisan anchor defining copartisan versus outpartisan distinctions in subsequent evaluations. This procedure distinguishes subjective identification from behavioral anchoring while maintaining a consistent reference point for measuring AP across respondents.
-
-Importantly, the distribution of partisan types varies substantially across countries. @fig-impl-expl-distribution visualizes this cross-national heterogeneity in partisan attachment and behavioral anchoring. The share of explicit partisans ranges from approximately 85% of respondents in Denmark to about 41% in Latvia, while implicit partisans show the inverse pattern, varying from roughly 41% in Latvia to 8% in Denmark. Non-partisans also differ markedly across contexts, ranging from 23% in Croatia to 6% in Estonia.
-
-These patterns indicate that both reported attachment and overall partisan composition differ strongly across national contexts. Consequently, identical sampling decisions -- such as restricting analyses to self-reported identifiers -- would generate different populations of inference across countries. This cross-national variation motivates our comparison of AP across partisan types rather than focusing exclusively on explicit identifiers.
+<!--
+ROTER FADEN -- every section below serves the central claim; if a bullet does not
+move one of these steps, it belongs in the appendix.
+  1. AP is measured on partisans, so someone must decide who counts.
+  2. In Europe the attachment item does not cleanly identify partisans.
+  3. Coding choices therefore shift the population of inference, differently per country.
+  4. The literature makes this choice, mostly silently.            -> EMPIRICAL CLAIM 1
+  5. Whether it distorts conclusions is answerable: hold the anchor constant, vary the reporting.
+  6. Answer depends on the measure -- large attitudinal gap, no behavioral gap. -> EMPIRICAL CLAIM 2
+  7. Therefore attachment behaves like a reporting disposition, not an identity.
+Load-bearing: 3, 6, 7. Necessary: 2, 4. Calibration: 5, 8.
+-->
+
+## Introduction {#sec-intro}
+
+**Purpose**
+
+- State the central claim in the first paragraph, before any literature.
+- Name what it contradicts: standard coding practice in comparative AP research, and the identity/expressive-partisanship account of what attachment does.
+- Establish that "who counts as a partisan" is a consequential measurement choice, not a technical footnote.
+- Set up the two empirical claims (§3 coding practice, §6 the behavioral null) as the contribution.
+
+**What must hold**
+
+- The claim is stated as *attitudinal vs. behavioral*, never vertical vs. horizontal.
+- The magnitude of the co-partisan effect (β₁) is previewed *before* the reader is told it does not vary by type (β₃) -- otherwise the null reads as "nothing happens".
+- The contribution is framed as measurement, not as adjudicating identity vs. categorization; the theory payoff is ceilinged in §9.
+- "Vote-anchored" throughout; never "leaners", never "implicit partisans" in prose.
+
+## What attachment measures in Europe {#sec-attachment}
+
+**Purpose**
+
+- Makes step 2 of the chain: the attachment item does not cleanly identify partisans in Europe. Without this the paper is a null result about nothing.
+- Fixes the taxonomy used everywhere after: self-identified partisans / vote-anchored respondents / non-partisans.
+- Draws the key distinction: attachment used as a *binary selection filter* vs. attachment as a *graded identity measure*. The paper's target is the former.
+- Engages Bankert/Huddy expressive partisanship as the strongest counter-position, on its own terms.
+
+**What must hold**
+
+- Converse & Dupeux and Thomassen carry the conceptual point: in Europe the attachment report follows the vote rather than preceding it.
+- The cross-national spread in attachment shares is *shown*, not asserted (~41% LV to ~85% DK) -- @fig-impl-expl-distribution below; long-run decline from the Mannheim Trend File / CSES if it earns its space.
+- 3--4 pages, not a review. Anything not bearing on "filter or identity?" is cut.
+- Vote-anchored ≠ leaners is stated here as terminology; the empirical overlap estimate is deferred to §4.
+- Figure: the taxonomy itself (PIDs / vote-anchored / non-partisans), showing what each coding rule keeps and drops.
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
 
-### Analytical Strategy {#sec-methods}
+## Coding practice in comparative AP research {#sec-coding-practice}
 
-We (plan to) employ Bayesian hierarchical models to estimate AP as a function of partisan type, progressively building complexity to balance interpretability with inferential rigor.
-Our approach unfolds in three stages: first, we introduce the core linear predictor that defines AP and connects directly to our hypotheses.
-Second, we embed this predictor within a multilevel structure enabling cross-national inference.
-Third, we extend the model to examine individual-level moderators of partisan type effects.
-This progression maintains a constant estimand -- the ingroup-outgroup evaluation gap -- while progressively incorporating the nested data structure and testing conditional relationships.
+::: {.callout-note}
+EMPIRICAL CLAIM 1.
+:::
 
-#### The Linear Predictor: Defining Affective Polarization {#sec-linear-predictor}
+**Purpose**
 
-At its core, our analysis asks whether respondents evaluate copartisans differently from outpartisans, and whether this difference differs among partisan types. The basic model specification is:
+- Shows the field actually makes this choice, and mostly makes it silently -- so the problem is the literature's, not a hypothetical the paper invented.
+- Converts step 3 into something a reader can check: which papers, which rule, what they say about the respondents they drop.
 
-$$
-\text{Outcome}_{ric} = \alpha + \beta_1 \cdot \text{CoPartisan}_{ric} + \beta_2 \cdot \text{Type}_i + \beta_3 \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i)
-$$
+**What must hold**
 
-where $r$ indexes evaluations (party ratings or behavioral allocations), $i$ indexes respondents, and $c$ indexes countries.
-The outcome is either a feeling thermometer rating (vertical AP) or token allocation in the behavioral task (horizontal AP).
-The indicator $\text{CoPartisan}_{ric} = 1$ when the evaluated party or profile matches respondent $i$'s partisan anchor, and $\text{Type}_i = 1$ for explicit partisans versus 0 for implicit partisans.
+- A **census**, not a sample, of comparative/European AP articles in a named journal set over defined years. *(Open decision: journal set and year range -- Tristan to specify.)* Target ~40 papers.
+- Hand-coded on **two dimensions only**: ingroup criterion, non-identifier treatment. Resisting scope creep here is what keeps the section credible.
+- Coding rules stated so a reader could reproduce them; ambiguous and unclear cases reported rather than resolved by inference.
+- Expected pattern: silent exclusion dominates, and mode is confounded with definition at the field level (behavioral studies anchor on vote, attitudinal on attachment). If the pattern does not appear, the section still stands as description -- say so.
+- Out of scope: the LLM literature-classification pipeline. That is a separate paper; nothing from it feeds this section.
 
-This specification defines AP as a derived quantity of interest: the expected difference in evaluations between copartisans and outpartisans.
-Formally:
+## Design: holding the anchor constant {#sec-design}
 
-$$
-\text{AP}_t = \mathbb{E}[\text{Outcome} \mid \text{CoPartisan}=1, \text{Type}=t] - \mathbb{E}[\text{Outcome} \mid \text{CoPartisan}=0, \text{Type}=t]
-$$
+**Purpose**
 
-From the linear predictor, this translates to $\text{AP}_{\text{implicit}} = \beta_1$ for implicit partisans and $\text{AP}_{\text{explicit}} = \beta_1 + \beta_3$ for explicit partisans.
-The central hypothesis test therefore concerns $\beta_3$: identity-based theories predict $\beta_3 > 0$, indicating that explicit attachment amplifies polarization, while categorization-based theories predict $\beta_3 \approx 0$, indicating that partisan anchors alone suffice to generate the ingroup-outgroup gap.
-We apply this framework separately to vertical and horizontal outcomes, enabling direct comparison of partisan type effects across attitudinal and behavioral polarization.
+- Makes step 5 credible: the two groups differ in whether attachment is *reported*, not in whether they have a party.
+- This is the section referees will attack. Every assumption gets named here and answered here, not in limitations.
 
-This operationalization maintains consistency with @reiljan2020fear's AP Index -- calculating polarization as ingroup affect minus average outgroup affect -- while embedding the comparison within a regression framework that isolates the role of subjective attachment.
-The binary copartisan indicator ensures that AP reflects the difference between a single ingroup evaluation and the average across all outgroup evaluations, exactly paralleling the API logic but extending it to both thermometer ratings and behavioral allocations.
+**What must hold**
 
-#### Multilevel Structure for Cross-National Inference {#sec-multilevel-structure}
+- Data and sample construction: `eu25games2019` harmonized release; attention check, completion, games played, earliest game wave per panelist; 22,858 respondents × 6 rounds. Sample decisions are this project's own, so they must be defended, not inherited.
+- Anchor construction: attachment party for self-identified partisans, recall-maximizing vote anchor for vote-anchored respondents; non-partisans have no defensible anchor and are excluded from contrasts requiring one.
+- The linear predictor and what each coefficient means: β₁ = co-partisan effect, β₃ = its difference by type. Estimand stated explicitly.
+- **Comparability.** Party-within-country varying intercepts and slopes, so the contrast is estimated inside party-country cells. Report balance. State plainly: this rules out composition, it does **not** identify a causal effect.
+- **Defectors** (attachment party ≠ vote party) are otherwise assigned an anchor by fiat. Code both anchors and test which predicts ratings and allocations.
+- **Leaner overlap** estimated from the CSES branching probe -- the only source carrying it. Report the overlap; do not assume the groups are distinct.
+- **The design confound, stated here.** Target and measurement mode are perfectly confounded in these data: thermometers are vertical-attitudinal, the conjoint horizontal-behavioral, the diagonal is unobserved. The claim is therefore attitudinal vs. behavioral, full stop.
+- **The equivalence test is pre-specified here, before results.** ROPE in token units, justified against the size of β₁. Committing to it after seeing the posterior is worthless.
 
-Because evaluations are nested within respondents and respondents within countries, we estimate the linear predictor within a three-level hierarchical model:
+## Attitudinal result {#sec-attitudinal}
 
-$$
-\begin{aligned}
-\text{Outcome}_{ric} = &(\alpha + \alpha_i + \alpha_c) \\
-&+ (\beta_1 + \beta_{1c}) \cdot \text{CoPartisan}_{ric} \\
-&+ (\beta_2 + \beta_{2c}) \cdot \text{Type}_i \\
-&+ (\beta_3 + \beta_{3c}) \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i) \\
-&+ \varepsilon_{ric}
-\end{aligned}
-$$
+**Purpose**
 
-where $\alpha_i \sim \mathcal{N}(0, \sigma_{\text{respondent}}^2)$ represents respondent-specific intercepts accounting for repeated measures within individuals, $\alpha_c \sim \mathcal{N}(0, \sigma_{\text{country}}^2)$ represents country-specific intercepts, and $\beta_{1c}$, $\beta_{2c}$, $\beta_{3c}$ represent country-varying slopes for the copartisan effect, type effect, and their interaction.
-Residual variation $\varepsilon_{ric} \sim \mathcal{N}(0, \sigma^2)$ captures within-respondent noise across evaluations.
+- The *contrast case*, not the finding: establishes that there is a large, consistent gap to be explained, which §6 then fails to find in behavior.
+- Absorbs country heterogeneity -- one figure here, not a separate section.
 
-This hierarchical specification serves two purposes.
-First, it appropriately accounts for clustering: standard errors reflect uncertainty at all levels of the data structure, avoiding anti-conservative inference.
-Second, it enables estimation of both population-average and country-specific effects.
-Population-average AP is recovered by marginalizing over random effects, yielding $\text{AP}_t = \beta_1 + t \cdot \beta_3$, which answers whether explicit partisans polarize more than implicit partisans on average across European democracies.
-Country-specific AP is estimated by conditioning on country-level random effects, yielding $\text{AP}_{c,t} = (\beta_1 + \beta_{1c}) + t \cdot (\beta_3 + \beta_{3c})$, which reveals whether the explicit-implicit gap varies systematically across party systems.
+**What must hold**
 
-The multilevel approach is particularly important given the substantial cross-national variation in explicit partisan prevalence documented in @fig-impl-expl-distribution.
-If partisan type effects vary systematically with party system characteristics -- for instance, if subjective attachment matters more in institutionalized party systems -- the country-varying slopes will capture this heterogeneity.
-Conversely, if the vertical-horizontal asymmetry in partisan type effects holds consistently across all 25 countries, this would suggest a broadly shared mechanism operating across diverse institutional contexts.
-We assess this through posterior distributions of $\beta_{3c}$, testing whether country-specific deviations cluster around zero or exhibit systematic patterns.
-
-#### Individual-Level Moderators of Partisan Type Effects {#sec-moderators}
-
-To examine whether the explicit–implicit gap in vertical AP varies with respondent characteristics, we extend the linear predictor to include individual-level moderators and their interactions with partisan type:
-
-$$
-\begin{aligned}
-\eta_{ric} = &\alpha + \beta_1 \cdot \text{CoPartisan}_{ric} + \beta_2 \cdot \text{Type}_i + \beta_3 \cdot \text{Covariate}_i \\
-&+ \beta_4 \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i) \\
-&+ \beta_5 \cdot (\text{CoPartisan}_{ric} \times \text{Covariate}_i) \\
-&+ \beta_6 \cdot (\text{Type}_i \times \text{Covariate}_i) \\
-&+ \beta_7 \cdot (\text{CoPartisan}_{ric} \times \text{Type}_i \times \text{Covariate}_i)
-\end{aligned}
-$$
-
-The key parameter is $\beta_7$, which evaluates whether the partisan-type difference in AP ($\beta_4$) varies systematically across individuals.
-Substantively, this parameter indicates whether the explicit–implicit gap depends on respondent characteristics rather than representing a uniform population-level difference.
-
-For any given value of a covariate, the partisan-type gap in AP is
-
-$$
-\Delta \text{AP} = \beta_4 + \beta_7 \cdot \text{Covariate}.
-$$
-
-We will therefore interpret moderation using simulated conditional marginal effects derived from the posterior distribution, tracing how the explicit–implicit difference changes across the observed covariate range and identifying regions where the gap is credibly positive, negative, or indistinguishable from zero.
-
-At the present stage, the specific covariates to be included are not fixed.
-Their selection will be guided by prior research on correlates of AP and by data availability across countries.
-Models will be estimated separately for vertical (thermometer) and horizontal (behavioral allocation) outcomes to evaluate whether moderation appears in attitudinal polarization but not behavioral discrimination.
-
-The moderator specification can be combined with the multilevel structure introduced above, allowing effects to vary across countries.
-For clarity, we begin with pooled moderator models that estimate average patterns across contexts; country-varying moderator effects constitute a planned extension examined in supplementary analyses.
-
-#### Summary {#sec-strategy-summary}
-
-Our three-stage analytical strategy maintains a constant estimand -- AP as the ingroup-outgroup evaluation gap—while progressively improving inferential realism.
-Stage 1 defines AP through a simple interaction-based linear predictor that connects directly to competing theoretical predictions about partisan type effects.
-Stage 2 embeds this predictor within a hierarchical model accounting for data structure and enabling cross-national inference about heterogeneity in partisan type effects.
-Stage 3 extends the framework to test whether individual characteristics moderate the explicit-implicit gap, distinguishing contexts where subjective attachment matters most.
-This progression balances transparency, interpretability, and statistical rigor, allowing us to adjudicate between identity-based and categorization-based accounts of AP across both vertical and horizontal dimensions.
-
-## Planned Results Structure {#sec-results-planned}
-
-### Vertical AP
-
-- Figure/Panel with pooled EU25-wide and country specific AP by type 
-
-### Horizontal AP
-
-- Figure/Panel with pooled EU25-wide and country specific AP by type 
-
-### Individual level moderation
-
-- Marginal/Conditional effect figure(s), with covariate values on x-axis, effect on AP on y axis, different lines (and intervals) by type, separate panels for vertical/horiztonal AP
-
-- figure with panels by country? Unsure yet
-
-## Exploratory descriptive results {#sec-results-descr}
-
-### Pooled vertical/attitudinal AP measures by type
+- Concede up front that the attachment item and the thermometer are partly mechanically related; a reader who spots this before the paper does will discount the rest.
+- The gap must hold *inside* party-country cells, not only pooled -- otherwise it is composition.
+- Consistency across the 25 countries shown once, with the magnitude variation described rather than modelled a second time.
+- Framing discipline: this section is a benchmark for §6. It is not the headline.
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-thermo >}}
 
--> across measures, explicit partisans systematically higher AP than implicit
-
--> Non-partisans (which can be included in Wagner measures) systematically less polarized
-
--> restricting sample to explicit partisans (identifiers) yields higher aggregate AP 
-
-### Country-level vertical/attitudinal AP measures by type
-
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-country-ap-comparison-thermo >}}
 
--> pattern roughly consistent across countries (i.e., blue -> green -> orange)
+## Behavioral result {#sec-behavioral}
 
--> cross-national variation in terms of magnitudes and within-country differences
+::: {.callout-note}
+EMPIRICAL CLAIM 2. The load-bearing section.
+:::
 
--> With the varying country-specific distributions (@fig-impl-expl-distribution) in mind, AP estimates for all partisans (total) shift either close to that of explicit partisans (e.g. Denmark, Greece, Sweden) or stay centered between estimates for explicit and implicit partisans (e.g. Austria, Bulgaria, Ireland)
+**Purpose**
 
-### Pooled horizontal/behavioral AP measures by type
+- Establishes that the discrimination is there in both groups and does not differ by type -- the empirical core of step 6, and the whole basis for step 7.
+
+**What must hold**
+
+- **Order is not negotiable.** Report the magnitude of β₁ first: both partisan types favor co-partisans substantially and credibly. Only then report β₃ ≈ 0.
+- The null is *tested*, not inferred: posterior mass inside the pre-specified ROPE. Overlapping credible intervals are not evidence of equivalence and must not be presented as such.
+- Answer "your null reflects weak design" twice over: β₁ itself shows the instrument has power, and the partisan attribute is benchmarked against EU position, class, and religion within the same conjoint.
+- Country-level results shown to be consistent with the pooled estimate, without turning into a second heterogeneity section.
+- The vertical/horizontal 2×2 survives here and only here, as a conceptual device explaining why the answer splits by measure. It is not the paper's framing.
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-cj >}}
 
--> unlike in attitudinal AP, intervals for explicit and implicit overlap, hence no systematic difference 
-
--> preliminary interpretation: accordign to data explicit attachement does not matter for behavioral AP 
-
-### Country-level horizontal/behavioral AP measures by type
-
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-country-ap-comparison-cj >}}
 
--> pooled results generally consistent across countries
+## Does attachment do work, or mark prior investment? {#sec-panel}
 
--> no systematic difference in behavioral AP between explicit and implicit
+**Purpose**
 
--> "strongest tendency" in Denmark, Lithuania and Portugal
+- Main text, not appendix. Without it, "attachment is just a report" and "attachment marks something real that the games cannot see" both survive §6.
+- Tests within person whether acquiring or losing attachment changes anything, using external panel data.
 
--> otherwise almost no difference
+**What must hold**
 
--> estimate for total partisans drawn to explicit partisans (due to conjoint setup)
+- **Gate, checked before the section is written:** the attachment transition matrix must show real within-person movement. If it is thin, drop the section rather than report an underpowered result.
+- One country, one panel, done properly -- see the candidate list in `data/01_raw/external-data.md`. Exactly one gets downloaded.
+- Cross-source comparability caveats stated: different instrument, different context, not a replication of the games.
+- Ceiling stated explicitly: the design cannot separate attachment *creating* investment from *marking* it.
 
+## What this does to comparative estimates {#sec-comparative}
 
-## Limitations
+**Purpose**
 
-This is so far mainly a collection of limitations for myself in order to not forget them in the end.
+- Calibration: turns the finding into the quantity a comparative researcher actually faces when choosing a coding rule.
 
-- Party-targeted attitudinal measures only
+**What must hold**
 
-The attitudinal analysis relies exclusively on party-targeted thermometer ratings. It does not include direct citizen-targeted affect measures, limiting conclusions about horizontal AP at the attitudinal level.
+- All four ingroup codings re-estimated on the same data: identity only; recall-maximizing (attachment, else vote); vote only; most-liked party.
+- Country rank correlations reported alongside level differences -- committed in advance to reporting either way. If ranks are ~0.95, the deflationary result is still the result and still a contribution.
+- Note that most-liked-party coding selects on the outcome and is mechanically inflationary; it is included as a comparison, not as a candidate rule.
 
-- Assumption underlying party-size weighting
+## Discussion {#sec-discussion}
 
-Weighting by electoral party size—common in the literature—implicitly assumes that the probability of encountering partisans is proportional to vote share. This may not hold if certain parties (e.g., radical challenger parties) are socially more or less visible than their electoral strength suggests.
+**Purpose**
 
-- Cross-sectional design (2019)
+- Measurement implication first: what a comparative researcher should do differently when coding partisans, and what published cross-national AP levels partly reflect.
+- Theory implication second and ceilinged.
+- Limitations owned in the text, not deflected to a list.
 
-The data capture a specific pre-pandemic political context and allow inference only about the level (state) of AP at that point in time. The design does not permit conclusions about temporal dynamics or trends.
+**What must hold**
 
-- External validity of the experimental setting
-
-Although the conjoint experiment approximates horizontal, citizen-level interactions, it remains an artificial setting. In real-world encounters, identities are rarely presented as explicit labels. Instead, they are inferred through cues and cognitive processes. This limits the direct generalizability of experimentally induced identity effects to everyday social interactions.
-
-## Conclusion
-
-tbd
+- Measurement: cross-national differences in AP levels partly reflect national differences in willingness to say "close to", not only differences in polarization.
+- Theory: the pattern fits categorization sufficiency in the behavioral domain, but the design cannot adjudicate identity vs. categorization. Say so before a referee does.
+- Limitations conceded before they are raised: ten hypothetical tokens may not be where identity shows up; a single 2019 cross-section speaks to level, not trend; the conjoint labels identities that real encounters only cue; the attitudinal measures are party-targeted only.
 
 \singlespacing
 
@@ -905,6 +186,11 @@ tbd
 :::
 
 ## Appendix {.appendix}
+
+### Individual-level moderators {.appendix}
+
+- Demoted from the main text. Labelled either preregistered or exploratory -- no middle option.
+- Not a third results section; reported as conditional effects on the existing models.
 
 ### Sample descriptives {.appendix}
 
@@ -932,12 +218,14 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 
 ![Example of potential co-player profile.](images/cj-example-profile.png){#fig-example-profile}
 
-### Distribution of Y {.appendix}
+### Distribution of outcomes {.appendix}
 
 {{< embed code/03_explanal/3.1_descr_anal.qmd#fig-distr-token >}}
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-distr-thermo >}}
 
-
 ### Robustness {.appendix}
 
+- Attention check switched off (`apply_attention_check`), to show the sample rule does not drive the contrast.
+- Defector anchor coded both ways (§4), reported separately for ratings and allocations.
+- Response-style check: endpoint use on non-political 0--10 batteries, testing whether the attitudinal gap is partly a scale-use disposition.
