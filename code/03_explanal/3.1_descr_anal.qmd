@@ -373,19 +373,19 @@ eu25games2019 |>
 
 ```{mermaid}
 flowchart TD
-    A("Respondents <br> N = 29,827") 
-        -->|36.5%| B("No Party Attachement <br> N = 10,880") 
-    A 
-        -->|61.5%| C("Party Attachement <br> (explicit) <br> N = 18,357")
+    A("Respondents <br> N = 22,858")
+        -->|40.9%| B("No Party Attachement <br> N = 9,349")
+    A
+        -->|59.1%| C("Party Attachement <br> (explicit) <br> N = 13,509")
 
-    B -->|35.8%| D("No Vote reported <br> (non-partisan) <br> N = 3,900")
-    B -->|57.3%| E("Vote reported <br> (implicit) <br> N = 6,234")
+    B -->|41.2%| D("No Vote reported <br> (non-partisan) <br> N = 3,854")
+    B -->|58.8%| E("Vote reported <br> (implicit) <br> N = 5,495")
 
-    C -->|5.6%| F("No Vote reported <br> N = 1,030")
-    C -->|92.2%| G("Vote reported <br> N = 16,917")
+    C -->|8.0%| F("No Vote reported <br> N = 1,086")
+    C -->|92.0%| G("Vote reported <br> N = 12,423")
 
-    G -->|78.1%| H("Same as <br> Party Attachement <br> N = 13,220")
-    G -->|21.9%| I("Diff from <br> Party Attachement <br> N = 3,697")
+    G -->|75.0%| H("Same as <br> Party Attachement <br> N = 9,314")
+    G -->|25.0%| I("Diff from <br> Party Attachement <br> N = 3,109")
 ```
 
 Distribution of respondents by reported party attachment and vote behavior. Percentages refer to the parent node.
@@ -522,7 +522,7 @@ ggplot(
 
 eu25games2019 <- eu25games2019 |>
   mutate(
-    cj_token_logged = log(cj_token + 1)
+    cj_token_logged = log(cj_pl2 + 1)
   )
 
 token_means <- eu25games2019 |>
@@ -802,7 +802,7 @@ ggplot(
 
 eu25games2019 <- eu25games2019 |>
   mutate(
-    cj_token_logged = log(cj_token + 1)
+    cj_token_logged = log(cj_pl2 + 1)
   )
 
 token_means <- eu25games2019 |>
@@ -1141,15 +1141,20 @@ eu25games2019 |>
 #| label: tbl-nresp-country-gender
 #| tbl-cap: "Sample composition by country and gender. Numbers denote respondents."
 
-eu25games2019 |>
+# column labels are taken from the data rather than hard-coded: the published
+# `q_gender` is coded female / male / other, which is not the order the previous
+# raw coding produced
+gender_tab <- eu25games2019 |>
   distinct(meta_pid, .keep_all = T) |>
   tabyl(
     meta_country,
     q_gender
   ) |>
-  adorn_totals() |>
+  adorn_totals()
+
+gender_tab |>
   knitr::kable(
-    col.names = c("Country", "Male", "Female", "Other")
+    col.names = c("Country", str_to_title(names(gender_tab)[-1]))
   )
 ```
 
@@ -1253,12 +1258,14 @@ ggdag(tidy_dag) +
 
 df_modelvars <- eu25games2019 |>
   filter(
-    der_conational == "co-national",
+    # co-national profiles only; the published coding calls this level
+    # "own_country" (previously "co-national" in `der_conational`)
+    cj_nationality_shown == "own_country",
     !is.na(der_partisan_type)
   ) |>
   select(
     # outcome Y
-    cj_token,
+    cj_pl2,
     # vars of interest
     der_partisan_type, # T
     der_partisan_relationship, # R
@@ -1272,58 +1279,63 @@ df_modelvars <- eu25games2019 |>
     # conjoint controls Z
     meta_round,
     meta_wave,
-    cj_age_en,
-    cj_reli_en,
-    cj_class_en,
-    cj_sex_en,
-    cj_eupos_shown,
+    cj_age,
+    cj_rel,
+    cj_class,
+    cj_sex,
+    cj_eupos,
     # =========================================================================
     # COVARIATES (C) FOR CAUSAL ISOLATION
     # =========================================================================
 
     # --- BLOCK 1: Fundamental Political Identity and Ideology (Core Drivers of T & Y) ---
-    q_lrpos2, # Left-Right ideological self-placement (Controls for core political position)
-    q_eupos2, # EU integration position (Controls for major second dimension position)
-    q_econ_nativism, # Attitudes towards economic nativism (Controls for key sociotropic threat perception)
-    q_cult_nativism, # Attitudes towards cultural nativism (Controls for key sociotropic identity boundary)
-    q_religion_en, # Respondent's religious affiliation (Controls for a major social cleavage/identity)
+    q_lr_self, # Left-Right ideological self-placement (Controls for core political position)
+    q_euint_self, # EU integration position (Controls for major second dimension position)
+    q_nativ_econ, # Attitudes towards economic nativism (Controls for key sociotropic threat perception)
+    q_nativ_cult, # Attitudes towards cultural nativism (Controls for key sociotropic identity boundary)
+    q_religion, # Respondent's religious affiliation (Controls for a major social cleavage/identity)
 
     # --- BLOCK 2: Anti-System & Populist Attitudes (CRUCIAL CONFOUNDERS for T) ---
     # These variables control for system-level dissatisfaction/cynicism that pushes
     # individuals to reject EXPLICIT partisan identity (T=0) while also driving Y.
-    q_satis_demo_country, # Satisfaction with democracy in the country (System trust)
-    q_understand_nat_pol, # Political efficacy (national level)
-    q_nat_politicians_care, # Political responsiveness (national level)
-    q_nat_public_say, # Political efficacy (national level)
-    q_understand_eu_pol, # Political efficacy (EU level)
-    q_eu_politicians_care, # Political responsiveness (EU level)
-    q_eu_public_say, # Political efficacy (EU level)
-    q_parties_harm, # Anti-party sentiment ("Parties do more harm than good")
-    q_officials_talk_action, # Anti-elitism ("Officials talk too much")
-    q_prefer_citizen_rep, # People-centrism ("Prefer citizens to politicians")
-    q_people_make_decisions, # People-centrism ("People, not politicians, should decide")
-    q_politicians_follow_people, # People-centrism ("Politicians must follow the people's will")
-    q_politics_good_evil, # Manichaean worldview ("Politics is good vs. evil")
-    q_people_unaware, # System cynicism ("People are unaware")
-    q_leaders_educated, # Anti-populism (Elitism)
-    q_expert_decisions, # Anti-populism (Expert governance)
-    q_listen_other_groups, # Tolerance/Pluralism
-    q_democracy_compromise, # Tolerance/Pluralism
+    q_satis_demo_nat, # Satisfaction with democracy in the country (System trust)
+    q_nat_efficacy_understand, # Political efficacy (national level)
+    q_nat_efficacy_care, # Political responsiveness (national level)
+    q_nat_efficacy_nosay, # Political efficacy (national level)
+    q_eu_efficacy_understand, # Political efficacy (EU level)
+    q_eu_efficacy_care, # Political responsiveness (EU level)
+    q_eu_efficacy_nosay, # Political efficacy (EU level)
+    q_party_harm, # Anti-party sentiment ("Parties do more harm than good")
+    q_pop_reps, # Anti-elitism ("Officials talk too much")
+    q_pop_citizen, # People-centrism ("Prefer citizens to politicians")
+    q_pop_people, # People-centrism ("People, not politicians, should decide")
+    q_pop_will, # People-centrism ("Politicians must follow the people's will")
+    q_pop_goodevil, # Manichaean worldview ("Politics is good vs. evil")
+    q_people_incompetent, # System cynicism ("People are unaware")
+    q_tech_leaders, # Anti-populism (Elitism)
+    q_tech_experts, # Anti-populism (Expert governance)
+    q_dem_listen, # Tolerance/Pluralism
+    q_dem_compromise, # Tolerance/Pluralism
 
     # --- BLOCK 3: Political Engagement & General Identity (Predictors of T and Y) ---
-    q_attach_country, # Emotional attachment to one's country
-    q_attach_eu, # Emotional attachment to the EU
-    q_attach_eur, # Emotional attachment to Europe
-    q_interest_pol_country, # Political engagement (national)
-    q_interest_pol_eu, # Political engagement (EU)
-    q_election_importance, # Political engagement (election importance)
+    q_identity_country, # Emotional attachment to one's country
+    q_identity_eu, # Emotional attachment to the EU
+    q_identity_europe, # Emotional attachment to Europe
+    q_nat_int, # Political engagement (national)
+    q_eu_int, # Political engagement (EU)
+    q_election_importance_self, # Political engagement (election importance)
 
     # --- BLOCK 4: Socioeconomic Status (SES) and Economic Context (Background Predictors) ---
-    q_edu, # Education level
-    q_perc_class, # Subjective social class
-    q_eval_finance_household, # Micro-level economic evaluation
+    # NOTE: education enters as the age at which the respondent stopped
+    # full-time education. The previous pipeline used an education-*level*
+    # scale that Hahm et al. had constructed; the published data does not
+    # carry it, and `q_edu_age_stop` is the closest available proxy. It is a
+    # different construct, so read it as such rather than as a level measure.
+    q_edu_age_stop, # Education (age left full-time education)
+    q_class, # Subjective social class
+    q_eval_fin_household, # Micro-level economic evaluation
     q_eval_job, # Job/Employment evaluation
-    q_eval_econ_country, # Macro-level economic evaluation (country)
+    q_eval_econ_nat, # Macro-level economic evaluation (country)
     q_eval_econ_eur, # Macro-level economic evaluation (Europe)
 
     # --- BLOCK 5: Demographics and Fixed Traits (General Controls) ---
@@ -1357,68 +1369,37 @@ na_counts_modelvars1 <- df_modelvars |>
   arrange(desc(NA_Count))
 
 
-# Remove variables with too many NAs (>10k)
-df_modelvars <- df_modelvars |>
-  select(
-    -q_nat_politicians_care,
-    -q_nat_public_say,
-    -q_eu_politicians_care,
-    -q_eu_public_say,
-    -q_prefer_citizen_rep,
-    -q_people_make_decisions,
-    -q_politicians_follow_people,
-    -q_attach_country,
-    -q_attach_eu,
-    -q_attach_eur,
-    -q_election_importance
-  )
-
-# Recode dont know answers correctly
+# Recode don't-know answers and implausible values to NA.
+#
+# The published data codes the categorical background items as strings rather
+# than as the numeric scales the previous pipeline received, and it has already
+# stripped the numeric don't-know codes from the ordinal scales. What remains to
+# clean is therefore the explicit `dont_know` / `other` string levels, plus the
+# out-of-range values in the education item (age at which full-time education
+# stopped runs from 0 to 120 in the raw data).
 df_modelvars <- df_modelvars |>
   mutate(
-    q_satis_demo_country = case_when(
-      q_satis_demo_country == 5 | q_satis_demo_country == 6 ~ NA,
-      .default = q_satis_demo_country
-    ),
-    q_perc_class = if_else(
-      q_perc_class == 6,
-      NA,
-      q_perc_class
-    ),
-    q_eval_finance_household = if_else(
-      q_eval_finance_household == 6,
-      NA,
-      q_eval_finance_household
-    ),
-    q_eval_job = if_else(
-      q_eval_job == 6,
-      NA,
-      q_eval_job
-    ),
-    q_eval_econ_country = if_else(
-      q_eval_econ_country == 6,
-      NA,
-      q_eval_econ_country
-    ),
-    q_eval_econ_eur = if_else(
-      q_eval_econ_eur == 6,
-      NA,
-      q_eval_econ_eur
-    ),
-    q_rural_urban = if_else(
-      q_rural_urban == 4,
-      NA,
-      q_rural_urban
+    q_class = if_else(q_class %in% c("dont_know", "other"), NA, q_class),
+    q_religion = if_else(q_religion == "dont_know", NA, q_religion),
+    q_edu_age_stop = if_else(
+      q_edu_age_stop >= 5 & q_edu_age_stop <= 70,
+      q_edu_age_stop,
+      NA
     )
   )
 
-# Categeorical to factors
+# Categorical to factors, ordered low -> high where the variable is ordinal
 df_modelvars <- df_modelvars |>
   mutate(
-    # categorical to factors
-    q_perc_class = factor(
-      q_perc_class,
-      levels = c(1, 2, 3, 4, 5),
+    q_class = factor(
+      q_class,
+      levels = c(
+        "working_class",
+        "lower_middle_class",
+        "middle_class",
+        "upper_middle_class",
+        "higher_class"
+      ),
       labels = c(
         "Working class",
         "Lower middle class",
@@ -1429,7 +1410,7 @@ df_modelvars <- df_modelvars |>
     ),
     q_rural_urban = factor(
       q_rural_urban,
-      levels = c(1, 2, 3),
+      levels = c("rural", "small_med_town", "large_city"),
       labels = c(
         "Rural area or village",
         "Small or middle sized town",
@@ -1438,43 +1419,80 @@ df_modelvars <- df_modelvars |>
     ),
     q_gender = factor(
       q_gender,
-      levels = c(1, 2, 3),
+      levels = c("male", "female", "other"),
       labels = c("Male", "Female", "Other")
     ),
-    q_religion_en = as_factor(q_religion_en)
+    q_religion = as_factor(q_religion)
   )
+
+# The factor recodes above must not silently produce all-NA columns: that is what
+# happens when the published coding changes and the `levels` are left stale.
+stopifnot(
+  all(vapply(
+    df_modelvars[c("q_class", "q_rural_urban", "q_gender", "q_religion")],
+    \(x) mean(is.na(x)) < 0.5,
+    logical(1)
+  ))
+)
+
+# Drop covariates that are too sparse to carry into a listwise-complete model
+# frame. Determined from the data rather than hard-coded, so that a change in
+# upstream item coverage is visible here instead of silently emptying the frame.
+na_threshold <- 0.10
+
+sparse_covars <- df_modelvars |>
+  select(starts_with("q_")) |>
+  summarise(across(everything(), ~ mean(is.na(.x)))) |>
+  pivot_longer(everything(), names_to = "Variable", values_to = "prop_na") |>
+  filter(prop_na > na_threshold) |>
+  arrange(desc(prop_na))
+
+sparse_covars |>
+  mutate(prop_na = round(prop_na, 3)) |>
+  knitr::kable(
+    caption = paste0(
+      "Covariates dropped for missingness above ",
+      na_threshold * 100,
+      "%."
+    )
+  )
+
+df_modelvars <- df_modelvars |>
+  select(-all_of(sparse_covars$Variable))
 
 # standardize survey scales
 df_modelvars <- df_modelvars |>
   mutate(
     across(
-      .cols = c(
-        q_lrpos2,
-        q_eupos2,
-        q_econ_nativism,
-        q_cult_nativism,
-        q_satis_demo_country,
-        q_understand_nat_pol,
-        q_understand_eu_pol,
-        q_parties_harm,
-        q_officials_talk_action,
-        q_politics_good_evil,
-        q_people_unaware,
-        q_leaders_educated,
-        q_expert_decisions,
-        q_listen_other_groups,
-        q_democracy_compromise,
-        q_interest_pol_country,
-        q_interest_pol_eu,
-        q_eval_finance_household,
-        q_eval_job,
-        q_eval_econ_country,
-        q_eval_econ_eur,
-        q_risk_taking,
-        q_future_discount,
-        q_edu,
-        q_age
-      ), # List all continuous variables to standardize
+      # any_of(), because the sparsity filter above may already have removed
+      # some of these
+      .cols = any_of(c(
+        "q_lr_self",
+        "q_euint_self",
+        "q_nativ_econ",
+        "q_nativ_cult",
+        "q_satis_demo_nat",
+        "q_nat_efficacy_understand",
+        "q_eu_efficacy_understand",
+        "q_party_harm",
+        "q_pop_reps",
+        "q_pop_goodevil",
+        "q_people_incompetent",
+        "q_tech_leaders",
+        "q_tech_experts",
+        "q_dem_listen",
+        "q_dem_compromise",
+        "q_nat_int",
+        "q_eu_int",
+        "q_eval_fin_household",
+        "q_eval_job",
+        "q_eval_econ_nat",
+        "q_eval_econ_eur",
+        "q_risk_taking",
+        "q_future_discount",
+        "q_edu_age_stop",
+        "q_age"
+      )), # List all continuous variables to standardize
       .fns = ~ scale(.)[, 1], # Apply the scale() function
       .names = "{.col}_z" # Name the new standardized columns with a '_z' suffix
     )
@@ -1509,19 +1527,19 @@ df_modelvars <- df_modelvars |>
     starts_with("der_"),
     starts_with("meta_"),
     ends_with("_z"),
-    q_religion_en,
-    q_perc_class,
+    q_religion,
+    q_class,
     q_rural_urban,
     q_gender
   )
 
 modelvars_labels <- c(
-  "Token" = "cj_token",
-  "Conj. Age" = "cj_age_en",
-  "Conj. Religion" = "cj_reli_en",
-  "Conj. Class" = "cj_class_en",
-  "Conj. Gender" = "cj_sex_en",
-  "Conj. EU" = "cj_eupos_shown",
+  "Token" = "cj_pl2",
+  "Conj. Age" = "cj_age",
+  "Conj. Religion" = "cj_rel",
+  "Conj. Class" = "cj_class",
+  "Conj. Gender" = "cj_sex",
+  "Conj. EU" = "cj_eupos",
   "Type" = "der_partisan_type",
   "Relationship" = "der_partisan_relationship",
   "Anchor" = "der_partisan_anchor",
@@ -1529,34 +1547,38 @@ modelvars_labels <- c(
   "Country" = "meta_country",
   "Game" = "meta_game_lab",
   "Round" = "meta_round",
-  "Wave" = "meta_wave",
-  "LR Pos" = "q_lrpos2_z",
-  "EU Pos" = "q_eupos2_z",
-  "Econ. Nativism" = "q_econ_nativism_z",
-  "Cult. Nativism" = "q_cult_nativism_z",
-  "Satis. Democ." = "q_satis_demo_country_z",
-  "Understand Nat. Pol." = "q_understand_nat_pol_z",
-  "Understand EU Pol." = "q_understand_eu_pol_z",
-  "Parties Harm" = "q_parties_harm_z",
-  "Officials Talk/Action" = "q_officials_talk_action_z",
-  "Politics Good/Evil" = "q_politics_good_evil_z",
-  "People Unaware" = "q_people_unaware_z",
-  "Leaders Educated" = "q_leaders_educated_z",
-  "Expert Decisions" = "q_expert_decisions_z",
-  "Listen Other Groups" = "q_listen_other_groups_z",
-  "Democ. Compromise" = "q_democracy_compromise_z",
-  "Interest Nat. Pol." = "q_interest_pol_country_z",
-  "Interest EU Pol." = "q_interest_pol_eu_z",
-  "Eval. HH Finance" = "q_eval_finance_household_z",
+  # survey wave, now on the published data's own scale: the games ran in
+  # waves 2 and 3 (the previous pipeline relabelled these 1 and 2)
+  "Survey wave" = "meta_wave",
+  "LR Pos" = "q_lr_self_z",
+  "EU Pos" = "q_euint_self_z",
+  "Econ. Nativism" = "q_nativ_econ_z",
+  "Cult. Nativism" = "q_nativ_cult_z",
+  "Satis. Democ." = "q_satis_demo_nat_z",
+  "Understand Nat. Pol." = "q_nat_efficacy_understand_z",
+  "Understand EU Pol." = "q_eu_efficacy_understand_z",
+  "Parties Harm" = "q_party_harm_z",
+  "Officials Talk/Action" = "q_pop_reps_z",
+  "Politics Good/Evil" = "q_pop_goodevil_z",
+  "People Unaware" = "q_people_incompetent_z",
+  "Leaders Educated" = "q_tech_leaders_z",
+  "Expert Decisions" = "q_tech_experts_z",
+  "Listen Other Groups" = "q_dem_listen_z",
+  "Democ. Compromise" = "q_dem_compromise_z",
+  "Interest Nat. Pol." = "q_nat_int_z",
+  "Interest EU Pol." = "q_eu_int_z",
+  "Eval. HH Finance" = "q_eval_fin_household_z",
   "Eval. Job" = "q_eval_job_z",
-  "Eval. Nat. Econ." = "q_eval_econ_country_z",
+  "Eval. Nat. Econ." = "q_eval_econ_nat_z",
   "Eval. Eur. Econ." = "q_eval_econ_eur_z",
   "Risk Taking" = "q_risk_taking_z",
   "Future Discount" = "q_future_discount_z",
-  "Education (Z)" = "q_edu_z",
+  # the published data carries age at which education stopped, not an
+  # education-level scale -- see the note in the model-data chunk
+  "Education, age left (Z)" = "q_edu_age_stop_z",
   "Age (Z)" = "q_age_z",
-  "Religion" = "q_religion_en",
-  "Perc. Class" = "q_perc_class",
+  "Religion" = "q_religion",
+  "Perc. Class" = "q_class",
   "Rural/Urban" = "q_rural_urban",
   "Gender" = "q_gender"
 )
@@ -1568,22 +1590,22 @@ modelvars_labels <- c(
 ```{r}
 #| label: fig-distr-token
 #| fig-dpi: 500
-#| fig-cap: "Distribution of token allocation by game. Dictator game: $Mean = 3.41$, $median = 4$, $SD = 2.35$. Trust game: $Mean = 3.48$, $median = 4$, $SD = 2.49$"
+#| fig-cap: "Distribution of token allocation by game. Dictator game: $Mean = 3.31$, $median = 4$, $SD = 2.32$. Trust game: $Mean = 3.37$, $median = 3$, $SD = 2.47$"
 #| fig-pos: H
 
 summary_stats <- df_modelvars |>
   group_by(meta_game_lab) |>
   summarise(
-    mean_token = mean(cj_token, na.rm = TRUE),
-    median_token = median(cj_token, na.rm = TRUE),
-    sd_token = sd(cj_token, na.rm = TRUE)
+    mean_token = mean(cj_pl2, na.rm = TRUE),
+    median_token = median(cj_pl2, na.rm = TRUE),
+    sd_token = sd(cj_pl2, na.rm = TRUE)
   )
 
 
 df_modelvars |>
-  select(cj_token, meta_game_lab) |>
+  select(cj_pl2, meta_game_lab) |>
   ggplot(
-    aes(x = cj_token, fill = meta_game_lab)
+    aes(x = cj_pl2, fill = meta_game_lab)
   ) +
   geom_histogram(
     position = position_dodge(),
@@ -1620,41 +1642,23 @@ df_modelvars |>
 ```{r}
 #| label: tbl-covariate-distr
 
-df_modelvars |>
+covariate_tab <- df_modelvars |>
   select(
     der_partisan_type,
     ends_with("_z"),
-    q_religion_en,
-    q_perc_class,
-    q_rural_urban,
-    q_gender
-  ) |>
+    any_of(c("q_religion", "q_class", "q_rural_urban", "q_gender"))
+  )
+
+# every standardized scale is continuous by construction; derive the list from
+# the frame so that dropping a sparse covariate upstream cannot break this table
+covariate_tab |>
   tbl_summary(
     by = der_partisan_type,
     missing = "no",
-    type = list(
-      q_econ_nativism_z ~ "continuous",
-      q_cult_nativism_z ~ "continuous",
-      q_satis_demo_country_z ~ "continuous",
-      q_understand_nat_pol_z ~ "continuous",
-      q_understand_eu_pol_z ~ "continuous",
-      q_parties_harm_z ~ "continuous",
-      q_officials_talk_action_z ~ "continuous",
-      q_politics_good_evil_z ~ "continuous",
-      q_people_unaware_z ~ "continuous",
-      q_leaders_educated_z ~ "continuous",
-      q_expert_decisions_z ~ "continuous",
-      q_listen_other_groups_z ~ "continuous",
-      q_democracy_compromise_z ~ "continuous",
-      q_interest_pol_country_z ~ "continuous",
-      q_interest_pol_eu_z ~ "continuous",
-      q_eval_finance_household_z ~ "continuous",
-      q_eval_job_z ~ "continuous",
-      q_eval_econ_country_z ~ "continuous",
-      q_eval_econ_eur_z ~ "continuous",
-      q_risk_taking_z ~ "continuous",
-      q_future_discount_z ~ "continuous"
-    )
+    type = as.list(setNames(
+      rep("continuous", sum(str_ends(names(covariate_tab), "_z"))),
+      str_subset(names(covariate_tab), "_z$")
+    ))
   ) |>
   modify_header(label = "**Variable**") |>
   as_gt() |>

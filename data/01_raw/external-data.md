@@ -20,22 +20,47 @@ Sizes are approximate. Codebook PDFs are present on disk but **not in the repo**
 
 ## A. Primary analysis data
 
-Everything under `data/01_raw/` that is not in `external/`. Variable-level documentation
-for these files lives in `code/01_preparation/1.1_datasets.qmd`.
+Everything under `data/01_raw/` that is not in `external/`. There is exactly one primary
+input, and it is externally published and citable.
 
 | Status | File | Size | Role |
 |---|---|---|---|
-| ✅ | `hahmetal-data/aff_pol_df_analy_jan2023.RData` | 16 MB | **The analysis source.** Hahm, Hilpert & König (2024), 25 European democracies, N≈29,800. Thermometer ratings (attitudinal AP) and conjoint dictator/trust games (behavioral AP). |
-| ✅ | `raw-survey-data/data_w1w2.RData` | 24 MB | Raw two-wave survey file underlying the Hahm et al. analysis object. |
-| ✅ | `old-codebook-data/dfw1.RData`, `dfw2.RData` | 6 MB, 8 MB | Earlier codebook-era wave files. Retained for variable provenance. |
-| ✅ | `EU25_Survey_Austria.csv` | 8 MB | Single-country export sitting loose at the root of `01_raw/`. **Unfiled** — no code path reads it; decide whether it belongs under `raw-survey-data/` or should be removed. |
+| ✅ | `eu25games2019.rds` | 29 MB | **The analysis source.** Harmonized release of the Hahm, Hilpert & König (2024) three-wave EU-elections survey, 25 European democracies, 103,685 respondent-waves × 847 columns, xz-compressed (>1 GB in memory). Carries the thermometer ratings (attitudinal AP), the conjoint dictator/trust games (behavioral AP), and Party Facts IDs merged onto every party-bearing item. |
+
+**Provenance.** Muno, Tristan, and Thomas König. *eu25games2019: A cleaned three-wave EU
+elections survey (2019) across 25 countries*. Zenodo, v1.0.0.
+<https://doi.org/10.5281/zenodo.21294634> — source repo
+<https://github.com/LS-Konig/eu25games2019>. Code is MIT; **the data is CC BY 4.0** and
+carries a re-identification / ethical-use notice in the upstream `LICENSE`. Cite the
+dataset *and* the source study (`@hahm2024divided`).
+
+**Variable reference.** The upstream codebook, `eu25games2019/code/08_codebook.html`
+(~11 MB), is authoritative: per-variable question wording in all 25 languages plus the
+empirical coded↔raw value maps. `data/03_final/variable_crosswalk.csv` in that repo maps
+each variable to its original Dynata code per wave. Do not re-document variables here.
+
+**Refreshing the copy.** `code/01_preparation/1.1_datasets.qmd` has a `download_fresh`
+flag that pulls the current `main` over HTTPS; `code/00_helper/copyR.R` copies from a
+local sibling clone instead. The committed copy is what the manuscript renders against —
+notebook 1.1 asserts its shape on load, so a changed upstream release fails fast.
 
 Downstream pipeline:
 
 ```
-01_raw/hahmetal-data/  →  02_processed/eu25games2019.RData  →  03_final/eu25games2019.rds
-                                                              03_final/thermo_long.rds
+01_raw/eu25games2019.rds
+  │  1.1_datasets.qmd   clean, fold in the French fork, wide → long
+  ▼
+02_processed/eu25games2019_long.rds
+  │  2.1_key_variables.qmd   partisan type T, anchor A, relationship R
+  ▼
+03_final/eu25games2019.rds  ──►  03_final/thermo_long.rds  (written by 3.2)
 ```
+
+**Superseded and removed.** `hahmetal-data/aff_pol_df_analy_jan2023.RData` (Hahm et al.'s
+own analysis frame), `raw-survey-data/data_w1w2.RData`, `old-codebook-data/dfw{1,2}.RData`
+and the loose `EU25_Survey_Austria.csv` were deleted when the pipeline moved to the
+published release; all of their content is in it. They remain recoverable from git history
+and from the upstream repo's `data/01_raw/Wave{1,2,3}.rds`.
 
 ---
 

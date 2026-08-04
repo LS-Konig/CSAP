@@ -18,72 +18,55 @@ execute:
   message: true
 ---
 
-# Creating and Preparing one Consistent Dataset
+# Building the Analysis Frame
 
-This notebook creates a dataset of the EU 25 Behavioral Games Survey Experiment 2019 data that expands the published reduced version by adding more variables from the original survey. Since [Hahm, Hilper & König (2024)](https://doi.org/10.1017/S0003055423000266) already processed the data, the following code primarily preprocesses additional variables from both the raw and unpublished wide format datasets and merges them to the long format dataframe of [Hahm, Hilper & König (2024)](https://doi.org/10.1017/S0003055423000266).
+This notebook turns the published **`eu25games2019`** dataset into the long-format
+analysis frame this project estimates on: one row per respondent × game × round.
 
-The next sections give a brief overview of the datasources and the variable naming scheme.
+All wrangling that used to live here — merging Hahm et al.'s analysis frame with the
+raw per-country Dynata exports, recovering the thermometer slots from the
+country-specific `Q196_*` columns, and hand-coding ~1,750 party spellings against Party
+Facts — has been extracted into a standalone, citable data repository:
 
-## 📦 Datasets Overview
+> Muno, Tristan, and Thomas König. *eu25games2019: A cleaned three-wave EU elections
+> survey (2019) across 25 countries*. Zenodo.
+> <https://doi.org/10.5281/zenodo.21294634>
 
-This project has evolved to include **three main datasets**, representing different stages of cleaning and processing.
+Source repository: <https://github.com/LS-Konig/eu25games2019> (v1.0.0).
+The survey design and data collection underlying it are due to
+[Hahm, Hilpert & König (2024)](https://doi.org/10.1017/S0003055423000266).
 
+Consequently, notebooks `1.2_parties.qmd` (Party Facts crosswalk) and
+`1.3_codebook.qmd` (variable labels + codebook) no longer exist: Party Facts IDs ship
+with the data as `ext_*_pf_name` / `ext_*_pf_id`, and the codebook is generated upstream
+at `eu25games2019/code/08_codebook.html`. That codebook — not this notebook — is the
+authoritative variable reference.
 
-### 1. Published and Limited Dataset
+## The input
 
-`data/01_raw/hahmetal-data/aff_pol_df_analy_jan2023.RData`  
-This file contains the processed and cleaned **long-format dataset** used in [Hahm, Hilper & König (2024)](https://doi.org/10.1017/S0003055423000266), see corresponding [Dataverse](https://doi.org/10.7910/DVN/YCDJNT) entry.
+`data/01_raw/eu25games2019.rds`: 103,685 × 847, **wide**, one row per respondent × wave,
+xz-compressed to ~29 MB (>1 GB in memory once decompressed — budget for it).
 
-In R, the dataset object is called **`dffin`**.  
+| Prefix | Category |
+|--------|----------|
+| `q_` | Coded survey responses; `q_*_raw` keeps the original response string |
+| `cj_` | Conjoint experiment attributes and game outcomes (waves 2–3) |
+| `prime_` | Priming-experiment paradata |
+| `meta_` | Respondent / wave metadata |
+| `ext_` | Externally merged Party Facts IDs and names |
+| `der_` | Derived variables (upstream: the three attention-check flags only) |
 
-- Structure: 1 row = 1 round of games played  
-- Focus: behavioral outcomes and conjoint task variables  
-- Limitation: only a subset of the original survey variables is included  
+## What this notebook does
 
-This version is optimized for conjoint experiment analyses and is the version underlying the published research.
+1. Load the published file (optionally re-fetching it from GitHub).
+2. Check the shipped file still has the shape this code was written against.
+3. Fold the French questionnaire fork (`*_fra`) back into the base columns.
+4. Apply respondent-level cleaning.
+5. Carry wave-1 covariates forward into missing wave-2/3 cells.
+6. Reduce to one game-playing wave per respondent.
+7. Reshape the six game slots from wide to long.
 
-
-### 2. Old Codebook Dataset
-
-Folder: `data/01_raw/old-codebook-data/`
-
-Contains two files for each survey wave:
-
-- `dfw1.RData`
-- `dfw2.RData`
-
-Each file is in **wide format** (1 row = 1 respondent) and includes most of the original survey questions.  
-Many variables are **recoded and cleaned** (e.g., numeric coding, English translation).  
-
-This dataset was initially created as part of early research assistant work to build a comprehensive **survey codebook**.
-
-The folder also includes a **codebook PDF (`codebook.pdf`)** with:
-- Question wordings  
-- Summary statistics  
-- Note: The documentation follows the **Irish questionnaire** closely and is therefore somewhat limited in cross-country coverage.
-
-
-
-### 3. Original Survey Data
-
-`data/01_raw/survey-data/data_w1w2.RData`  
-This file contains all **original survey datasets**, each in wide format (1 row = 1 respondent).
-
-- Structure: two lists, `dataw1` and `dataw2`, each containing **25 data frames** (one per country).  
-- Special feature: the **first row** of each data frame stores the **original question wordings** for that country — valuable for reconstructing survey design and translation differences.
-
-## Variable Naming Scheme
-
-To ensure consistency and transparency across all datasets (survey, experiment, metadata, and merged sources), we apply the following naming convention:
-
-| Prefix | Category | Description | Example variables |
-|--------|------------|-------------|-------------------|
-| `q_`   | Survey questions | Self-reported answers from respondents (background, attitudes, behaviors) | `q_age`, `q_gender`, `q_party_id` |
-| `cj_`  | Conjoint experiment | Attributes of profiles **and** behavioral outcomes within the experiment | `cj_token`, `cj_party`, `cj_religion` |
-| `meta_` | Metadata / paradata | Technical or contextual variables from survey administration | `meta_country`, `meta_wave`, `meta_pid`, `meta_duration` |
-| `ext_` | External data | Variables merged from external sources (e.g., PartyFacts, election data) | `ext_cj_party_pf_id`, `ext_party_id_pf_id` |
-| `der_` | Derived variables | Constructed or recoded variables based on raw data | `der_co_partisan`, `der_conational` |
-
+Output: `data/02_processed/eu25games2019_long.rds`, consumed by `2.1_key_variables.qmd`.
 
 # Setup
 
@@ -96,12 +79,12 @@ start_time <- Sys.time()
 # set width of console output
 options(width = 80)
 
-
 # Install and load required packages
 p_required <- c(
-  "tidyverse",
-  "here",
-  "sessioninfo"
+  "tidyverse", # dplyr, ggplot, tibbles etc
+  "here", # relative and sys agnostic file paths
+  "knitr", # kable()
+  "sessioninfo" # documentation
 )
 packages <- rownames(installed.packages())
 p_to_install <- p_required[!(p_required %in% packages)]
@@ -112,2247 +95,715 @@ sapply(p_required, require, character.only = TRUE)
 rm(p_required, p_to_install, packages)
 ```
 
-# Load Datasets
+# Load Data
 
-This loads the object `dffin` in the environment:
-
-```{r}
-#| label: load-data-hametal
-
-load(
-  here(
-    "data",
-    "01_raw",
-    "hahmetal-data",
-    "aff_pol_df_analy_jan2023.RData"
-  )
-)
-
-```
-
-This loads the objects `dataw1` and `dataw2` in the environment:
+`download_fresh` controls where the data comes from. Set it to `TRUE` to pull the
+current `main` of the source repository and overwrite the local copy; otherwise the
+committed copy in `data/01_raw/` is read. The committed copy is what the manuscript
+renders against, so leave this `FALSE` unless you deliberately want to move to a newer
+upstream release — and re-run the contract check below if you do.
 
 ```{r}
-#| label: load-data-raw-survey
+#| label: load-data
 
-load(
-  here(
-    "data",
-    "01_raw",
-    "raw-survey-data",
-    "data_w1w2.RData"
-  )
-)
+download_fresh <- FALSE
 
-```
-
-This loads the objects `dfw1` and `dfw2` in the environment:
-
-```{r}
-#| label: load-data-old-codebook
-
-load(
-  here(
-    "data",
-    "01_raw",
-    "old-codebook-data",
-    "dfw1.RData"
-  )
-)
-
-
-load(
-  here(
-    "data",
-    "01_raw",
-    "old-codebook-data",
-    "dfw2.RData"
-  )
-)
-
-```
-
-# Rename Hahm et al Variables
-
-```{r}
-#| label: rename-hahmetal
-
-dffin_renamed <- dffin |>
-  rename(
-    q_party_id = Q52,
-    meta_country_abbr = country,
-    ext_pid_pg_id = Q52_pg_id,
-    ext_cj_pid_pg_id = drawn_pg_id,
-    meta_country = labcountries,
-    ext_pid_cmp_id = q52_cmp_id,
-    cj_token = pl2gets,
-    der_copartisan = copartisan,
-    der_coeuid = drawncoeustance1,
-    der_coeuid2 = drawncoeustance2,
-    der_coeuid3 = drawncoeustance3,
-    der_conational = nationality,
-    der_coreli = samereligion,
-    cj_rel_cath = pl2cathlic,
-    cj_rel_prot = pl2prtstnt,
-    cj_rel_mus = pl2muslimc,
-    cj_rel_non = pl2norelic,
-    cj_eu_pro = drawnproeupartner,
-    der_sameage = sameage,
-    der_samesex = samesex,
-    der_sameclass = sameclass,
-    cj_trmnt = trmnt,
-    cj_party = partydrawn,
-    cj_eupos = euposdrawn,
-    cj_nationality = natnltydrawn,
-    cj_religion = relidrawn,
-    cj_age = agedrawn,
-    cj_sex = sexdrawn,
-    cj_class = classdrawn,
-    meta_startdate = cleanstartdate,
-    q_age = Q3_1,
-    der_age_group = agegroup,
-    q_agecontinuous = age_continuous,
-    q_gender = sex,
-    der_class3 = class,
-    q_religion_en = rel_belief,
-    q_edu = edu,
-    q_lrpos2 = lrpos,
-    q_eupos2 = eupos,
-    ext_thermscore_party1 = thermscore_party1,
-    ext_thermscore_party2 = thermscore_party2,
-    ext_thermscore_party3 = thermscore_party3,
-    ext_thermscore_party4 = thermscore_party4,
-    ext_thermscore_party5 = thermscore_party5,
-    ext_thermscore_party6 = thermscore_party6,
-    ext_lrpos_party1 = lrpos_party1,
-    ext_lrpos_party2 = lrpos_party2,
-    ext_lrpos_party3 = lrpos_party3,
-    ext_lrpos_party4 = lrpos_party4,
-    ext_lrpos_party5 = lrpos_party5,
-    ext_lrpos_party6 = lrpos_party6,
-    ext_lrpos_party7 = lrpos_party7,
-    ext_lrpos_party8 = lrpos_party8,
-    ext_eupos_party1 = eupos_party1,
-    ext_eupos_party2 = eupos_party2,
-    ext_eupos_party3 = eupos_party3,
-    ext_eupos_party4 = eupos_party4,
-    ext_eupos_party5 = eupos_party5,
-    ext_eupos_party6 = eupos_party6,
-    ext_eupos_party7 = eupos_party7,
-    ext_eupos_party8 = eupos_party8,
-    der_nopid = nopid,
-    meta_timespentongames = timespentongames,
-    meta_pid = PID,
-    meta_psid = PSID,
-    meta_round = round,
-    meta_game = game,
-    der_countryn = cntryn, # tf?
-    meta_part = part,
-    cj_eupos_shown = euattachmentshown,
-    cj_pid_shown = partisanshipshown,
-    der_diffage = diffage,
-    der_diffsex = diffsex,
-    der_diffclass = diffclass,
-    der_diffreligion = diffreligion,
-    der_outpartisan = outpartisan,
-    der_outattach1 = outattach1,
-    der_outattach2 = outattach2,
-    der_outattach3 = outattach3,
-    der_outpartisan2 = outpartisan2,
-    meta_drop = drop,
-    ext_coalition_partners_now = coalition_partners_now,
-    ext_coalitiongovsupporter = coalitiongovsupporter,
-    ext_cmp_voteshare = cmp_vote_share.x,
-    ext_pid_lrpos = Q52_partypos_lr,
-    ext_cj_pid_lrpos = drawn_partypos_lr,
-    ext_dist_lrpos_cmp = cmp_dist_lr,
-    ext_pid_avg_lrpos_since2000 = Q52_avg_rile_since2000,
-    ext_cj_pid_avg_lrpos_since2000 = drawn_partypos_lr,
-    ext_avg_dist_lrpos_since2000 = avg_cmp_dist_lr_2000,
-    ext_eurostat_coding_gdppc = freq.unit.na_item.geo.TIME_PERIOD,
-    ext_gdppc_2019 = X2019,
-    ext_gdppc_2019_num = gdppc,
-    ext_gini = gini,
-    ext_population = population,
-    ext_sumsquaredseatshare = sumsquaredseatshare,
-    ext_eff_n_parties = eff_n_parties,
-    ext_dalton_polar_lr = dalton_polarization_lr,
-    ext_tier1_avemag = tier1_avemag,
-    ext_avg_npi = avg_npi,
-    ext_avg_npi_since2000 = avg_npi_since2000,
-    ext_current_npi = current_npi,
-    ext_rile_sd = rile_sd,
-    ext_joint_spell_since2000 = joint_spell_since2000,
-    ext_pl1_govexp_since2000 = gov_experience_ego_since2000,
-    ext_pl1_coalexp_since2000 = coalition_experience_ego_since2000,
-    ext_cj_pid_lrpos2 = lrpos_partydrawn,
-    der_supportsplacableparty = supportsplacablparty,
-    ext_cj_pid_eupos = eupos_partydrawn,
-    q_pid_perceived_lr = perceptionofownpartylr,
-    ext_respondentperceptionofownpartylr = respondentperceptionofownpartylr,
-    ext_respondentdistancetoownpartylr = respondentdistancetoownpartylr,
-    ext_respondentdistancetoparty1lr = respondentdistancetoparty1lr,
-    ext_respondentdistancetoparty2lr = respondentdistancetoparty2lr,
-    ext_respondentdistancetoparty3lr = respondentdistancetoparty3lr,
-    ext_respondentdistancetoparty4lr = respondentdistancetoparty4lr,
-    ext_respondentdistancetoparty5lr = respondentdistancetoparty5lr,
-    ext_respondentdistancetoparty6lr = respondentdistancetoparty6lr,
-    ext_respondentdistancetoparty7lr = respondentdistancetoparty7lr,
-    ext_respondentdistancetoparty8lr = respondentdistancetoparty8lr,
-    ext_respondentdistancetooutpartylr_avg = respondentdistancetooutpartylr_avg,
-    q_pid_perceived_eu = perceptionofownpartyeu,
-    ext_respondentperceptionofownpartyeu = respondentperceptionofownpartyeu,
-    ext_respondentdistancetoparty1eu = respondentdistancetoparty1eu,
-    ext_respondentdistancetoparty2eu = respondentdistancetoparty2eu,
-    ext_respondentdistancetoparty3eu = respondentdistancetoparty3eu,
-    ext_respondentdistancetoparty4eu = respondentdistancetoparty4eu,
-    ext_respondentdistancetoparty5eu = respondentdistancetoparty5eu,
-    ext_respondentdistancetoparty6eu = respondentdistancetoparty6eu,
-    ext_respondentdistancetoparty7eu = respondentdistancetoparty7eu,
-    ext_respondentdistancetoparty8eu = respondentdistancetoparty8eu,
-    ext_respondentdistancetooutpartyeu_avg = respondentdistancetooutpartyeu_avg,
-    der_lr_extremity = lr_extremity,
-    cj_age_en = clean_agedrawn,
-    cj_sex_en = clean_sexdrawn,
-    cj_class_en = clean_classdrawn,
-    cj_reli_en = clean_relidrawn,
-    der_co_partisan = co_partisan,
-    der_out_partisan = out_partisan,
-    ext_sd_years_in_gov_since2000 = sd_years_in_gov_since2000,
-    ext_sd_years_in_coalition_since2000 = sd_years_in_coalition_since2000,
-    ext_sd_years_wi_coalition_partner_since2000 = sd_years_wi_coalition_partner_since2000,
-    ext_sd_avg_district_magnitude_now = sd_avg_district_magnitude_now,
-    ext_sd_eff_n_parties_now = sd_eff_n_parties_now,
-    ext_sd_npi_now = sd_npi_now,
-    ext_sd_dalton_polarization_lr = sd_dalton_polarization_lr,
-    ext_average_sd_years_wi_coalition_partner_since2000 = average_sd_years_wi_coalition_partner_since2000,
-    ext_num_immigrants_2018 = num_immigrants_2018,
-    ext_num_immigrants_2018_01 = num_immigrants_2018_01
+if (download_fresh) {
+  raw_url <- paste0(
+    "https://raw.githubusercontent.com/LS-Konig/eu25games2019/",
+    "main/data/03_final/eu25games2019.rds?cache_bust=1"
   )
 
-# save(
-#   dffin_renamed,
-#   file = here(
-#     "data",
-#     "02_processed",
-#     "dffin_renamed.RData"
-#   )
-# )
-```
+  tmp <- tempfile(fileext = ".rds")
+  download.file(raw_url, tmp, mode = "wb")
 
-# Rename Old Codebook Dataset
+  # decompresses on read, takes a few seconds
+  eu25games2019 <- read_rds(tmp)
 
-```{r}
-#| label: rename-codebook-data
-
-dfw1_renamed <- dfw1 |>
-  rename(
-    meta_country = country,
-    meta_startdate = startdate,
-    meta_enddate = enddate,
-    meta_date = date,
-    meta_pid = pid,
-    meta_psid = psid,
-    meta_wave = wave,
-    meta_status = status,
-    meta_ipaddress = ipaddress,
-    meta_progress = progress,
-    meta_duration_seconds = duration_seconds,
-    meta_finished = finished,
-    meta_responseid = responseid,
-    meta_latitude = latitude,
-    meta_longitude = longitude,
-    meta_distchannel = distchannel,
-    meta_lang = lang,
-    q_gender = q2,
-    q_age = q3,
-    q_nationality = q4,
-    q_nationality_other = q4_text,
-    q_attach_country = q5_1,
-    q_attach_eu = q5_2,
-    q_attach_eur = q5_3,
-    q_religion = q6,
-    q_religion_other = q6_text,
-    q_perc_class = q7,
-    q_attcheck = attcheck,
-
-    meta_prime_moreeu_firstclick = q9_first.click,
-    meta_prime_moreeu_lastclick = q9_last.click,
-    meta_prime_moreeu_pagesubmit = q9_page.submit,
-    meta_prime_moreeu_clickcount = q9_click.count,
-    meta_prime_eutoofar_firstclick = q11_first.click,
-    meta_prime_eutoofar_lastclick = q11_last.click,
-    meta_prime_eutoofar_pagesubmit = q11_page.submit,
-    meta_prime_eutoofar_clickcount = q11_click.count,
-    meta_prime_eutoofarecon_firstclick = q13_first.click,
-    meta_prime_eutoofarecon_lastclick = q13_last.click,
-    meta_prime_eutoofarecon_pagesubmit = q13_page.submit,
-    meta_prime_eutoofarecon_clickcount = q13_click.count,
-    meta_prime_eutoofarcult_firstclick = q15_first.click,
-    meta_prime_eutoofarcult_lastclick = q15_last.click,
-    meta_prime_eutoofarcult_pagesubmit = q15_page.submit,
-    meta_prime_eutoofarcult_clickcount = q15_click.count,
-    meta_prime_eutoofarpol_firstclick = q17_first.click,
-    meta_prime_eutoofarpol_lastclick = q17_last.click,
-    meta_prime_eutoofarpol_pagesubmit = q17_page.submit,
-    meta_prime_eutoofarpol_clickcount = q17_click.count,
-    meta_prime_eutoofarcontrol_firstclick = q19_first.click,
-    meta_prime_eutoofarcontrol_lastclick = q19_last.click,
-    meta_prime_eutoofarcontrol_pagesubmit = q19_page.submit,
-    meta_prime_eutoofarcontrol_clickcount = q19_click.count,
-
-    q_eupos_7scale = q20,
-    q_understand_eu_pol = q21_1,
-    q_eu_politicians_care = q21_2,
-    q_eu_public_say = q21_3,
-    q_politicians_follow_people = q22_1,
-    q_people_make_decisions = q22_2,
-    q_prefer_citizen_rep = q22_3,
-    q_officials_talk_action = q22_4,
-    q_politics_good_evil = q22_5,
-    q_political_compromise = q22_6,
-    q_democracy_compromise = q23_1,
-    q_listen_other_groups = q23_2,
-    q_expert_decisions = q23_3,
-    q_leaders_educated = q23_4,
-    q_parties_harm = q23_5,
-    q_people_unaware = q23_6,
-    q_eu_long_term = q24_1,
-    q_eu_listen_people = q24_2,
-    q_eu_impact_econ = q25_1,
-    q_eu_impact_cult = q25_2,
-    q_eu_impact_polstatus = q25_3,
-    q_eu_disagree_dissolve = q26_1,
-    q_eu_satisfaction = q26_2,
-
-    q_eupos_7scale_2 = q27,
-    q_understand_eu_pol_2 = q28_1,
-    q_eu_politicians_care_2 = q28_2,
-    q_eu_public_say_2 = q28_3,
-    q_politicians_follow_people_2 = q29_1,
-    q_people_make_decisions_2 = q29_2,
-    q_prefer_citizen_rep_2 = q29_3,
-    q_officials_talk_action_2 = q29_4,
-    q_politics_good_evil_2 = q29_5,
-    q_political_compromise_2 = q29_6,
-    q_democracy_compromise_2 = q30_1,
-    q_listen_other_groups_2 = q30_2,
-    q_expert_decisions_2 = q30_3,
-    q_leaders_educated_2 = q30_4,
-    q_parties_harm_2 = q30_5,
-    q_people_unaware_2 = q30_6,
-    q_eu_long_term_2 = q31_1,
-    q_eu_listen_people_2 = q31_2,
-    q_eu_impact_econ_2 = q32_1,
-    q_eu_impact_cult_2 = q32_2,
-    q_eu_impact_polstatus_2 = q32_3,
-    q_eu_disagree_dissolve_2 = q33_1,
-    q_eu_satisfaction_2 = q33_2,
-
-    q_eupos_7scale_3 = q34,
-
-    q_voting_likelihood = q42,
-    q_confirm_voted = q43,
-    q_voted_party = q44,
-    q_voted_party_other = q44_text,
-    q_vote_intention = q45,
-    q_vote_intention_other = q45_text,
-    q_vote_intention_hypo = q46,
-    q_vote_intention_hypo_other = q46_text,
-
-    q_election_challenge_polgroups = q49_1,
-    q_election_impact_eu = q49_2,
-    q_election_importance = q50,
-    q_voted_party_2014 = q51,
-    q_voted_party_2014_other = q51_text,
-    q_party_id = q52,
-    q_party_id_other = q52_text,
-    meta_attrorder_cj = attrorderpl2,
-
-    q_eu_news_tv_days = q197_1,
-    q_eu_news_newspaper_days = q197_2,
-    q_eu_news_radio_days = q197_3,
-    q_eu_news_socialmedia_days = q197_4,
-    q_eu_news_internet_days = q197_5,
-    q_eu_news_personal_days = q197_6,
-    q_eu_news_other_days = q197_7,
-    q_eu_news_other = q197_7_text,
-
-    q_eu_campaign_sources = q198,
-    q_eu_campaign_sources_other = q198_text,
-
-    meta_prime_cjeu_firstclick = q213_first.click,
-    meta_prime_cjeu_lastclick = q213_last.click,
-    meta_prime_cjeu_clickcount = q213_click.count,
-    meta_prime_cjeu_pagesubmit = q213_page.submit,
-
-    q_cjeu_bias = q214,
-    q_cjeu_disagree_dissolve = q215_1,
-    q_cjeu_satisfaction = q215_2,
-    q_eval_econ_eur = q216_1,
-    q_eval_econ_country = q216_2,
-    q_eval_finance_household = q216_3,
-    q_eval_job = q216_4,
-
-    q_satis_demo_country = q217_1,
-    q_satis_demo_eu = q217_2,
-    q_interest_pol_country = q222_1,
-    q_interest_pol_eu = q222_2,
-    q_econ_nativism = q223_1,
-    q_cult_nativism = q223_2,
-
-    q_factcheck_ep_reps = q224_1,
-    q_factcheck_ec_pres = q224_2,
-    q_factcheck_council_pres = q224_3,
-    q_factcheck_courts = q224_4,
-
-    q_informed_ec = q225_1,
-    q_informed_council = q225_2,
-    q_informed_ep = q225_3,
-    q_informed_cjeu = q225_4,
-
-    q_trust_ec = q226_1,
-    q_trust_council = q226_2,
-    q_trust_ep = q226_3,
-    q_trust_cjeu = q226_4,
-
-    q_risk_taking = q227,
-    q_future_discount = q228,
-    q_lrpos = q236,
-
-    q_lrpos_ec = q238_1,
-    q_lrpos_council = q238_2,
-    q_lrpos_ep = q238_3,
-    q_lrpos_cjeu = q238_4,
-
-    q_understand_nat_pol = q239_1,
-    q_nat_politicians_care = q239_2,
-    q_nat_public_say = q239_3,
-
-    q_eupos = q240,
-    q_eupos_ec = q242_1,
-    q_eupos_council = q242_2,
-    q_eupos_ep = q242_3,
-    q_eupos_cjeu = q242_4,
-
-    q_age_at_edu_stop = q243_1,
-    q_age_at_edu_stop_other = q243_text,
-    q_rural_urban = q244,
-    q_postal_code = q245,
-    q_region = q246,
-    q_current_occupation = q247,
-    q_last_occupation = q248
+  write_rds(
+    eu25games2019,
+    file = here("data", "01_raw", "eu25games2019.rds"),
+    compress = "xz"
   )
 
-dfw2_renamed <- dfw2 |>
-  rename(
-    meta_country = country,
-    meta_startdate = startdate,
-    meta_enddate = enddate,
-    meta_date = date,
-    meta_pid = pid,
-    meta_psid = psid,
-    meta_wave = wave,
-    meta_status = status,
-    meta_ipaddress = ipaddress,
-    meta_progress = progress,
-    meta_duration_seconds = duration_seconds,
-    meta_finished = finished,
-    meta_responseid = responseid,
-    meta_latitude = latitude,
-    meta_longitude = longitude,
-    meta_distchannel = distchannel,
-    meta_lang = lang,
-    q_gender = q2,
-    q_age = q3,
-    q_nationality = q4,
-    q_nationality_other = q4_text,
-    q_attach_country = q5_1,
-    q_attach_eu = q5_2,
-    q_attach_eur = q5_3,
-    q_religion = q6,
-    q_religion_other = q6_text,
-    q_perc_class = q7,
-    q_attcheck = attcheck,
-
-    q_understand_eu_pol = q35_1,
-    q_eu_politicians_care = q35_2,
-    q_eu_public_say = q35_3,
-    q_politicians_follow_people = q36_1,
-    q_people_make_decisions = q36_2,
-    q_prefer_citizen_rep = q36_3,
-    q_officials_talk_action = q36_4,
-    q_politics_good_evil = q36_5,
-    q_political_compromise = q36_6,
-    q_democracy_compromise = q37_1,
-    q_listen_other_groups = q37_2,
-    q_expert_decisions = q37_3,
-    q_leaders_educated = q37_4,
-    q_parties_harm = q37_5,
-    q_people_unaware = q37_6,
-    q_eu_long_term = q38_1,
-    q_eu_listen_people = q38_2,
-    q_eu_impact_econ = q39_1,
-    q_eu_impact_cult = q39_2,
-    q_eu_impact_polstatus = q39_3,
-    q_eu_disagree_dissolve = q40_1,
-    q_eu_satisfaction = q40_2,
-
-    q_eupos_7scale = q41,
-
-    q_party_id = q52,
-    q_party_id_other = q52_text,
-    q_vote = q53,
-    q_voted_party = q54,
-    q_voted_party_other = q54_text,
-    q_voted_party_hypo = q55,
-    q_voted_party_hypo_other = q55_text,
-    q_voted_party_2014 = q56,
-    q_voted_party_2014_other = q56_text,
-
-    meta_attrorder_cj = attrorderpl2,
-    q_eu_campaign_sources = q199,
-    q_eu_campaign_sources_other = q199_text,
-
-    q_eu_campaign_participation = q200,
-    q_eu_campaign_participation_other = q200_text,
-
-    meta_prime_cjeu_pro_firstclick = q201_first.click,
-    meta_prime_cjeu_pro_lastclick = q201_last.click,
-    meta_prime_cjeu_pro_clickcount = q201_click.count,
-    meta_prime_cjeu_pro_pagesubmit = q201_page.submit,
-
-    q_cjeu_disagree_dissolve = q203_1,
-    q_cjeu_satisfaction = q203_2,
-
-    meta_prime_cjeu_anti_firstclick = q204_first.click,
-    meta_prime_cjeu_anti_lastclick = q204_last.click,
-    meta_prime_cjeu_anti_clickcount = q204_click.count,
-    meta_prime_cjeu_anti_pagesubmit = q204_page.submit,
-
-    q_cjeu_disagree_dissolve2 = q206_1,
-    q_cjeu_satisfaction2 = q206_2,
-
-    meta_prime_cjeu_control_firstclick = q207_first.click,
-    meta_prime_cjeu_control_lastclick = q207_last.click,
-    meta_prime_cjeu_control_clickcount = q207_click.count,
-    meta_prime_cjeu_control_pagesubmit = q207_page.submit,
-
-    q_cjeu_tendeny = q208,
-
-    q_cjeu_disagree_dissolve3 = q209_1,
-    q_cjeu_satisfaction3 = q209_2,
-
-    meta_prime_cjeu_control2_firstclick = q210_first.click,
-    meta_prime_cjeu_control2_lastclick = q210_last.click,
-    meta_prime_cjeu_control2_clickcount = q210_click.count,
-    meta_prime_cjeu_control2_pagesubmit = q210_page.submit,
-
-    q_cjeu_disagree_dissolve4 = q211_1,
-    q_cjeu_satisfaction4 = q211_2,
-
-    q_cjeu_tendency2 = q212,
-
-    q_tolerate_different_ideas = q218_1,
-    q_order_over_freedom = q218_2,
-    q_disobey_unjust_laws = q218_3,
-    q_disobey_gov_laws = q218_4,
-    q_immediate_over_legal = q218_5,
-    q_gov_bend_laws = q218_6,
-
-    q_eval_econ_eur = q219_1,
-    q_eval_econ_country = q219_2,
-    q_eval_finance_household = q219_3,
-    q_eval_job = q219_4,
-
-    q_global_bad_econ_country = q220_1,
-    q_global_bad_cult = q220_2,
-    q_global_less_say = q220_3,
-    q_global_less_gov_control = q220_4,
-
-    q_satis_demo_country = q221_1,
-    q_satis_demo_eu = q221_2,
-
-    q_interest_pol_country = q229_1,
-    q_interest_pol_eu = q229_2,
-    q_econ_nativism = q230_1,
-    q_cult_nativism = q230_2,
-
-    q_factcheck_council = q231_1,
-    q_factcheck_ep = q231_2,
-    q_factcheck_cjeu_pres = q231_3,
-    q_factcheck_euro_area = q231_4,
-
-    q_informed_ec = q232_1,
-    q_informed_council = q232_2,
-    q_informed_ep = q232_3,
-    q_informed_cjeu = q232_4,
-
-    q_trust_ec = q233_1,
-    q_trust_council = q233_2,
-    q_trust_ep = q233_3,
-    q_trust_cjeu = q233_4,
-
-    q_risk_taking = q234,
-    q_future_discount = q235,
-    q_lrpos = q236,
-
-    q_lrpos_ec = q238_1,
-    q_lrpos_council = q238_2,
-    q_lrpos_ep = q238_3,
-    q_lrpos_cjeu = q238_4,
-
-    q_understand_nat_pol = q239_1,
-    q_nat_politicians_care = q239_2,
-    q_nat_public_say = q239_3,
-
-    q_eupos = q240,
-    q_eupos_ec = q242_1,
-    q_eupos_council = q242_2,
-    q_eupos_ep = q242_3,
-    q_eupos_cjeu = q242_4,
-
-    q_age_at_edu_stop = q243_1,
-    q_age_at_edu_stop_other = q243_text,
-    q_rural_urban = q244,
-    q_postal_code = q245,
-    q_region = q246,
-    q_current_occupation = q247,
-    q_last_occupation = q248
+  rm(raw_url, tmp)
+} else {
+  eu25games2019 <- read_rds(
+    file = here("data", "01_raw", "eu25games2019.rds")
   )
-
-# save(
-#   dfw1_renamed,
-#   file = here(
-#     "data",
-#     "02_processed",
-#     "dfw1_renamed.RData"
-#   )
-# )
-
-# save(
-#   dfw2_renamed,
-#   file = here(
-#     "data",
-#     "02_processed",
-#     "dfw2_renamed.RData"
-#   )
-# )
-```
-
-# Rename Original Survey Data
-
-```{r}
-#| label: og-surveydata-by-country
-
-dataw1_aus <- dataw1[[1]] |> as_tibble()
-dataw1_bel <- dataw1[[2]] |> as_tibble()
-dataw1_bul <- dataw1[[3]] |> as_tibble()
-dataw1_cro <- dataw1[[4]] |> as_tibble()
-dataw1_cze <- dataw1[[5]] |> as_tibble()
-dataw1_den <- dataw1[[6]] |> as_tibble()
-dataw1_est <- dataw1[[7]] |> as_tibble()
-dataw1_fin <- dataw1[[8]] |> as_tibble()
-dataw1_fra <- dataw1[[9]] |> as_tibble()
-dataw1_ger <- dataw1[[10]] |> as_tibble()
-dataw1_gre <- dataw1[[11]] |> as_tibble()
-dataw1_hun <- dataw1[[12]] |> as_tibble()
-dataw1_ire <- dataw1[[13]] |> as_tibble()
-dataw1_ita <- dataw1[[14]] |> as_tibble()
-dataw1_lat <- dataw1[[15]] |> as_tibble()
-dataw1_lit <- dataw1[[16]] |> as_tibble()
-dataw1_net <- dataw1[[17]] |> as_tibble()
-dataw1_pol <- dataw1[[18]] |> as_tibble()
-dataw1_por <- dataw1[[19]] |> as_tibble()
-dataw1_rom <- dataw1[[20]] |> as_tibble()
-dataw1_slovakia <- dataw1[[21]] |> as_tibble()
-dataw1_slovenia <- dataw1[[22]] |> as_tibble()
-dataw1_spa <- dataw1[[23]] |> as_tibble()
-dataw1_swe <- dataw1[[24]] |> as_tibble()
-dataw1_uk <- dataw1[[25]] |> as_tibble()
-
-dataw2_aus <- dataw2[[1]] |> as_tibble()
-dataw2_bel <- dataw2[[2]] |> as_tibble()
-dataw2_bul <- dataw2[[3]] |> as_tibble()
-dataw2_cro <- dataw2[[4]] |> as_tibble()
-dataw2_cze <- dataw2[[5]] |> as_tibble()
-dataw2_den <- dataw2[[6]] |> as_tibble()
-dataw2_est <- dataw2[[7]] |> as_tibble()
-dataw2_fin <- dataw2[[8]] |> as_tibble()
-dataw2_fra <- dataw2[[9]] |> as_tibble()
-dataw2_ger <- dataw2[[10]] |> as_tibble()
-dataw2_gre <- dataw2[[11]] |> as_tibble()
-dataw2_hun <- dataw2[[12]] |> as_tibble()
-dataw2_ire <- dataw2[[13]] |> as_tibble()
-dataw2_ita <- dataw2[[14]] |> as_tibble()
-dataw2_lat <- dataw2[[15]] |> as_tibble()
-dataw2_lit <- dataw2[[16]] |> as_tibble()
-dataw2_net <- dataw2[[17]] |> as_tibble()
-dataw2_pol <- dataw2[[18]] |> as_tibble()
-dataw2_por <- dataw2[[19]] |> as_tibble()
-dataw2_rom <- dataw2[[20]] |> as_tibble()
-dataw2_slovakia <- dataw2[[21]] |> as_tibble()
-dataw2_slovenia <- dataw2[[22]] |> as_tibble()
-dataw2_spa <- dataw2[[23]] |> as_tibble()
-dataw2_swe <- dataw2[[24]] |> as_tibble()
-dataw2_uk <- dataw2[[25]] |> as_tibble()
-
-```
-
-# Thermoscore Questions from Original Survey Data
-
-```{r}
-#| label: thermo-scores
-
-# Austria ----------------------------------------------------------------------
-aus_w1_thermo_scores <- dataw1_aus |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Österreichische Volkspartei (ÖVP)",
-    q_thermo_2_party = "Sozialdemokratische Partei Österreich (SPÖ)",
-    q_thermo_3_party = "Freiheitliche Partei Österreichs (FPÖ)",
-    q_thermo_4_party = "NEOS - Das Neue Europa",
-    q_thermo_5_party = "Die Grünen - Die grüne Alternative",
-    q_thermo_6_party = "JETZT - Liste Pilz (JETZT)"
-  )
-
-aus_w2_thermo_scores <- dataw2_aus |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Österreichische Volkspartei (ÖVP)",
-    q_thermo_2_party = "Sozialdemokratische Partei Österreich (SPÖ)",
-    q_thermo_3_party = "Freiheitliche Partei Österreichs (FPÖ)",
-    q_thermo_4_party = "NEOS - Das Neue Europa",
-    q_thermo_5_party = "Die Grünen - Die grüne Alternative",
-    q_thermo_6_party = "JETZT - Liste Pilz (JETZT)"
-  )
-
-# Belgium ----------------------------------------------------------------------
-bel_w1_thermo_scores <- dataw1_bel |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Nieuw-Vlaamse Alliantie (N-VA)",
-    q_thermo_2_party = "PS (Parti Socialiste)",
-    q_thermo_3_party = "Mouvement Réformateur (MR)",
-    q_thermo_4_party = "Christen-Democratisch en Vlaams (CD&V)",
-    q_thermo_5_party = "Open Vlaamse Liberalen en Democraten (Open Vld)",
-    q_thermo_6_party = "sp.a (Socialistische Partij – Anders)"
-  )
-
-bel_w2_thermo_scores <- dataw2_bel |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Nieuw-Vlaamse Alliantie (N-VA)",
-    q_thermo_2_party = "PS (Parti Socialiste)",
-    q_thermo_3_party = "Mouvement Réformateur (MR)",
-    q_thermo_4_party = "Christen-Democratisch en Vlaams (CD&V)",
-    q_thermo_5_party = "Open Vlaamse Liberalen en Democraten (Open Vld)",
-    q_thermo_6_party = "sp.a (Socialistische Partij – Anders)"
-  )
-
-# Bulgaria ---------------------------------------------------------------------
-bul_w1_thermo_scores <- dataw1_bul |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Граждани за европейско развитие на България (ГЕРБ)",
-    q_thermo_2_party = "Българска социалистическа партия (БСП)",
-    q_thermo_3_party = "Движение за права и свободи (ДПС)",
-    q_thermo_4_party = "ВМРО – Българско Национално Движение",
-    q_thermo_5_party = "Атака",
-    q_thermo_6_party = "Воля"
-  )
-
-bul_w2_thermo_scores <- dataw2_bul |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Граждани за европейско развитие на България (ГЕРБ)",
-    q_thermo_2_party = "Българска социалистическа партия (БСП)",
-    q_thermo_3_party = "Движение за права и свободи (ДПС)",
-    q_thermo_4_party = "ВМРО – Българско Национално Движение",
-    q_thermo_5_party = "Атака",
-    q_thermo_6_party = "Воля"
-  )
-
-# Croatia ----------------------------------------------------------------------
-cro_w1_thermo_scores <- dataw1_cro |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Hrvatska demokratska zajednica (HDZ)",
-    q_thermo_2_party = "Socijaldemokratska partija Hrvatske (SDP)",
-    q_thermo_3_party = "Živi zid",
-    q_thermo_4_party = "Most nezavisnih lista (MOST)",
-    q_thermo_5_party = "Bruna Esih – Zlatko Hasanbegović: Neovisni za Hrvatsku (NHR)",
-    q_thermo_6_party = "Bandić Milan 365 - Stranka rada i solidarnosti (BM365)"
-  )
-
-cro_w2_thermo_scores <- dataw2_cro |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Hrvatska demokratska zajednica (HDZ)",
-    q_thermo_2_party = "Socijaldemokratska partija Hrvatske (SDP)",
-    q_thermo_3_party = "Živi zid",
-    q_thermo_4_party = "Most nezavisnih lista (MOST)",
-    q_thermo_5_party = "Bruna Esih – Zlatko Hasanbegović: Neovisni za Hrvatsku (NHR)",
-    q_thermo_6_party = "Bandić Milan 365 - Stranka rada i solidarnosti (BM365)"
-  )
-
-# Czechia ----------------------------------------------------------------------
-cze_w1_thermo_scores <- dataw1_cze |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "ANO 2011 (ANO)",
-    q_thermo_2_party = "Občanská demokratická strana (ODS)",
-    q_thermo_3_party = "Česká pirátská strana (Piráti)",
-    q_thermo_4_party = "Svoboda a přímá demokracie (SPD)",
-    q_thermo_5_party = "Komunistická strana Čech a Moravy (KSČM)",
-    q_thermo_6_party = "Česká strana sociálně demokratická (ČSSD)"
-  )
-
-cze_w2_thermo_scores <- dataw2_cze |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "ANO 2011 (ANO)",
-    q_thermo_2_party = "Občanská demokratická strana (ODS)",
-    q_thermo_3_party = "Česká pirátská strana (Piráti)",
-    q_thermo_4_party = "Svoboda a přímá demokracie (SPD)",
-    q_thermo_5_party = "Komunistická strana Čech a Moravy (KSČM)",
-    q_thermo_6_party = "Česká strana sociálně demokratická (ČSSD)"
-  )
-
-# Denmark ----------------------------------------------------------------------
-den_w1_thermo_scores <- dataw1_den |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Socialdemokratiet (A)",
-    q_thermo_2_party = "Venstre (V)",
-    q_thermo_3_party = "Dansk Folkeparti (O)",
-    q_thermo_4_party = "Det Radikale Venstre (B)",
-    q_thermo_5_party = "Socialistisk Folkeparti (F)",
-    q_thermo_6_party = "Enhedslisten – De rød-grønne (Ø)"
-  )
-
-den_w2_thermo_scores <- dataw2_den |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Socialdemokratiet (A)",
-    q_thermo_2_party = "Venstre (V)",
-    q_thermo_3_party = "Dansk Folkeparti (O)",
-    q_thermo_4_party = "Det Radikale Venstre (B)",
-    q_thermo_5_party = "Socialistisk Folkeparti (F)",
-    q_thermo_6_party = "Enhedslisten – De rød-grønne (Ø)"
-  )
-
-# Estonia ----------------------------------------------------------------------
-est_w1_thermo_scores <- dataw1_est |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Eesti Reformierakond (ER)",
-    q_thermo_2_party = "Eesti Keskerakond (KE)",
-    q_thermo_3_party = "Eesti Konservatiivne Rahvaerakond (EKRE)",
-    q_thermo_4_party = "Sotsiaaldemokraatlik Erakond (SDE)",
-    q_thermo_5_party = "Isamaa (I)",
-    q_thermo_6_party = "Eesti 200"
-  )
-
-est_w2_thermo_scores <- dataw2_est |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Eesti Reformierakond (ER)",
-    q_thermo_2_party = "Eesti Keskerakond (KE)",
-    q_thermo_3_party = "Eesti Konservatiivne Rahvaerakond (EKRE)",
-    q_thermo_4_party = "Sotsiaaldemokraatlik Erakond (SDE)",
-    q_thermo_5_party = "Isamaa (I)",
-    q_thermo_6_party = "Eesti 200"
-  )
-
-# Finland ----------------------------------------------------------------------
-fin_w1_thermo_scores <- dataw1_fin |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Suomen Sosialidemokraattinen Puolue (SDP)",
-    q_thermo_2_party = "Kansallinen Kokoomus (KOK)",
-    q_thermo_3_party = "Perussuomalaiset (PS)",
-    q_thermo_4_party = "Suomen Keskusta (KESK)",
-    q_thermo_5_party = "Vihreä liitto (VIHR)",
-    q_thermo_6_party = "Vasemmistoliitto (VAS)"
-  )
-
-fin_w2_thermo_scores <- dataw2_fin |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Suomen Sosialidemokraattinen Puolue (SDP)",
-    q_thermo_2_party = "Kansallinen Kokoomus (KOK)",
-    q_thermo_3_party = "Perussuomalaiset (PS)",
-    q_thermo_4_party = "Suomen Keskusta (KESK)",
-    q_thermo_5_party = "Vihreä liitto (VIHR)",
-    q_thermo_6_party = "Vasemmistoliitto (VAS)"
-  )
-
-# France -----------------------------------------------------------------------
-fra_w1_thermo_scores <- dataw1_fra |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "La République En Marche (REM)",
-    q_thermo_2_party = "Les Républicains (LR)",
-    q_thermo_3_party = "Rassemblement national (RN (ex. Front National (FN)))",
-    q_thermo_4_party = "La France Insoumise (FI)",
-    q_thermo_5_party = "Parti Socialiste (PS)",
-    q_thermo_6_party = "Europe Écologie - Les Verts (EÉLV)"
-  )
-
-fra_w2_thermo_scores <- dataw2_fra |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "La République En Marche (REM)",
-    q_thermo_2_party = "Les Républicains (LR)",
-    q_thermo_3_party = "Rassemblement national (RN (ex. Front National (FN)))",
-    q_thermo_4_party = "La France Insoumise (FI)",
-    q_thermo_5_party = "Parti Socialiste (PS)",
-    q_thermo_6_party = "Europe Écologie - Les Verts (EÉLV)"
-  )
-
-# Germany ----------------------------------------------------------------------
-ger_w1_thermo_scores <- dataw1_ger |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_22,
-    q_thermo_3 = Q196_23,
-    q_thermo_4 = Q196_24,
-    q_thermo_5 = Q196_25,
-    q_thermo_6 = Q196_26,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Christlich Demokratische Union (CDU)",
-    q_thermo_2_party = "Sozialdemokratische Partei Deutschlands (SPD)",
-    q_thermo_3_party = "Alternative für Deutschland (AfD)",
-    q_thermo_4_party = "Freie Demokratische Partei (FDP)",
-    q_thermo_5_party = "Die Linke (Linke)",
-    q_thermo_6_party = "Bündnis 90 / Die Grünen (Grüne)"
-  )
-
-ger_w2_thermo_scores <- dataw2_ger |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_22,
-    q_thermo_3 = Q196_23,
-    q_thermo_4 = Q196_24,
-    q_thermo_5 = Q196_25,
-    q_thermo_6 = Q196_26,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Christlich Demokratische Union (CDU)",
-    q_thermo_2_party = "Sozialdemokratische Partei Deutschlands (SPD)",
-    q_thermo_3_party = "Alternative für Deutschland (AfD)",
-    q_thermo_4_party = "Freie Demokratische Partei (FDP)",
-    q_thermo_5_party = "Die Linke (Linke)",
-    q_thermo_6_party = "Bündnis 90 / Die Grünen (Grüne)"
-  )
-
-# Greece -----------------------------------------------------------------------
-gre_w1_thermo_scores <- dataw1_gre |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Nέα Δημοκρατία (NΔ)",
-    q_thermo_2_party = "Συνασπισμός Ριζοσπαστικής Αριστεράς (ΣΥ.ΡIΖ.Α)",
-    q_thermo_3_party = "Πανελλήνιο Σοσιαλιστικό ίνημα (ΠΑΣΟK)",
-    q_thermo_4_party = "Κίνημα Δημοκρατών Σοσιαλιστών (ΚΙΔΗΣΟ)",
-    q_thermo_5_party = "Λαϊκός Σύνδεσμος -Χρυσή Αυγή (ΛΣ-ΧΑ)",
-    q_thermo_6_party = "Kομμουνιστικό Kόμμα Ελλάδας (KKΕ)"
-  )
-
-gre_w2_thermo_scores <- dataw2_gre |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Nέα Δημοκρατία (NΔ)",
-    q_thermo_2_party = "Συνασπισμός Ριζοσπαστικής Αριστεράς (ΣΥ.ΡIΖ.Α)",
-    q_thermo_3_party = "Πανελλήνιο Σοσιαλιστικό ίνημα (ΠΑΣΟK)",
-    q_thermo_4_party = "Κίνημα Δημοκρατών Σοσιαλιστών (ΚΙΔΗΣΟ)",
-    q_thermo_5_party = "Λαϊκός Σύνδεσμος -Χρυσή Αυγή (ΛΣ-ΧΑ)",
-    q_thermo_6_party = "Kομμουνιστικό Kόμμα Ελλάδας (KKΕ)"
-  )
-
-# Hungary ----------------------------------------------------------------------
-hun_w1_thermo_scores <- dataw1_hun |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Fidesz – Magyar Polgári Szövetség (FIDESZ)",
-    q_thermo_2_party = "Kereszténydemokrata Néppárt (KDNP)",
-    q_thermo_3_party = "Jobbik Magyarországért Mozgalom (JOBBIK)",
-    q_thermo_4_party = "Magyar Szocialista Párt (MSZP)",
-    q_thermo_5_party = "Párbeszéd Magyarországért (Párbeszéd)",
-    q_thermo_6_party = "Demokratikus Koalíció (DK)"
-  )
-
-hun_w2_thermo_scores <- dataw2_hun |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Fidesz – Magyar Polgári Szövetség (FIDESZ)",
-    q_thermo_2_party = "Kereszténydemokrata Néppárt (KDNP)",
-    q_thermo_3_party = "Jobbik Magyarországért Mozgalom (JOBBIK)",
-    q_thermo_4_party = "Magyar Szocialista Párt (MSZP)",
-    q_thermo_5_party = "Párbeszéd Magyarországért (Párbeszéd)",
-    q_thermo_6_party = "Demokratikus Koalíció (DK)"
-  )
-
-# Ireland ----------------------------------------------------------------------
-ire_w1_thermo_scores <- dataw1_ire |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_7,
-    q_thermo_3 = Q196_8,
-    q_thermo_4 = Q196_9,
-    q_thermo_5 = Q196_10,
-    q_thermo_6 = Q196_11,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Fine Gael (FG)",
-    q_thermo_2_party = "Fianna Fáil (FF)",
-    q_thermo_3_party = "Sinn Féin (SF)",
-    q_thermo_4_party = "Labour Party (LP)",
-    q_thermo_5_party = "Independent Alliance",
-    q_thermo_6_party = "Green Party (GP)"
-  )
-
-ire_w2_thermo_scores <- dataw2_ire |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_7,
-    q_thermo_3 = Q196_8,
-    q_thermo_4 = Q196_9,
-    q_thermo_5 = Q196_10,
-    q_thermo_6 = Q196_11,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Fine Gael (FG)",
-    q_thermo_2_party = "Fianna Fáil (FF)",
-    q_thermo_3_party = "Sinn Féin (SF)",
-    q_thermo_4_party = "Labour Party (LP)",
-    q_thermo_5_party = "Independent Alliance",
-    q_thermo_6_party = "Green Party (GP)"
-  )
-
-# Italy ------------------------------------------------------------------------
-ita_w1_thermo_scores <- dataw1_ita |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Lega (Lega Salvini Premier)",
-    q_thermo_2_party = "Movimento 5 Stelle (M5S)",
-    q_thermo_3_party = "Partito Democratico (PD)",
-    q_thermo_4_party = "Forza Italia (FI)",
-    q_thermo_5_party = "Fratelli d'Italia (FDI)",
-    q_thermo_6_party = "Più Europa (+E)"
-  )
-
-ita_w2_thermo_scores <- dataw2_ita |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Lega (Lega Salvini Premier)",
-    q_thermo_2_party = "Movimento 5 Stelle (M5S)",
-    q_thermo_3_party = "Partito Democratico (PD)",
-    q_thermo_4_party = "Forza Italia (FI)",
-    q_thermo_5_party = "Fratelli d'Italia (FDI)",
-    q_thermo_6_party = "Più Europa (+E)"
-  )
-
-# Latvia -----------------------------------------------------------------------
-lat_w1_thermo_scores <- dataw1_lat |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Sociāldemokrātiskā partija „Saskaņa“ (SDP)",
-    q_thermo_2_party = "Jaunā konservatīvā partija (JKP)",
-    q_thermo_3_party = "Zaļo un Zemnieku savienība (ZZS): Latvijas Zemnieku savienība (LZS) + Latvijas Zaļā partija (LZP)",
-    q_thermo_4_party = "Nacionālā apvienība „Visu Latvijai!” – „Tēvzemei un Brīvībai/LNNK” (NA)",
-    q_thermo_5_party = "'Kam pieder valsts' (KPV LV)",
-    q_thermo_6_party = "Kustība Par! (Par!)"
-  )
-
-lat_w2_thermo_scores <- dataw2_lat |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Sociāldemokrātiskā partija „Saskaņa“ (SDP)",
-    q_thermo_2_party = "Jaunā konservatīvā partija (JKP)",
-    q_thermo_3_party = "Zaļo un Zemnieku savienība (ZZS): Latvijas Zemnieku savienība (LZS) + Latvijas Zaļā partija (LZP)",
-    q_thermo_4_party = "Nacionālā apvienība „Visu Latvijai!” – „Tēvzemei un Brīvībai/LNNK” (NA)",
-    q_thermo_5_party = "'Kam pieder valsts' (KPV LV)",
-    q_thermo_6_party = "Kustība Par! (Par!)"
-  )
-
-# Lithuania --------------------------------------------------------------------
-lit_w1_thermo_scores <- dataw1_lit |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Tėvynės sąjunga - Lietuvos krikščionys demokratai (TS-LKD)",
-    q_thermo_2_party = "Lietuvos valstiečių ir žaliųjų sąjunga (LVŽS)",
-    q_thermo_3_party = "Lietuvos socialdemokratų partija (LSDP)",
-    q_thermo_4_party = "Tvarka ir teisingumas (TT)",
-    q_thermo_5_party = "Darbo Partija (DP)",
-    q_thermo_6_party = "Lietuvos socialdemokratų darbo partija (LSDDP)"
-  )
-
-lit_w2_thermo_scores <- dataw2_lit |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Tėvynės sąjunga - Lietuvos krikščionys demokratai (TS-LKD)",
-    q_thermo_2_party = "Lietuvos valstiečių ir žaliųjų sąjunga (LVŽS)",
-    q_thermo_3_party = "Lietuvos socialdemokratų partija (LSDP)",
-    q_thermo_4_party = "Tvarka ir teisingumas (TT)",
-    q_thermo_5_party = "Darbo Partija (DP)",
-    q_thermo_6_party = "Lietuvos socialdemokratų darbo partija (LSDDP)"
-  )
-
-# Netherlands ------------------------------------------------------------------
-net_w1_thermo_scores <- dataw1_net |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Volkspartij voor Vrijheid en Democratie (VVD)",
-    q_thermo_2_party = "Partij voor de Vrijheid (PVV)",
-    q_thermo_3_party = "GroenLinks (GL)",
-    q_thermo_4_party = "Christen-Democratisch Appèl (CDA)",
-    q_thermo_5_party = "Democraten 66 (D66)",
-    q_thermo_6_party = "Socialistische Partij (SP)"
-  )
-
-net_w2_thermo_scores <- dataw2_net |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Volkspartij voor Vrijheid en Democratie (VVD)",
-    q_thermo_2_party = "Partij voor de Vrijheid (PVV)",
-    q_thermo_3_party = "GroenLinks (GL)",
-    q_thermo_4_party = "Christen-Democratisch Appèl (CDA)",
-    q_thermo_5_party = "Democraten 66 (D66)",
-    q_thermo_6_party = "Socialistische Partij (SP)"
-  )
-
-# Poland -----------------------------------------------------------------------
-pol_w1_thermo_scores <- dataw1_pol |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Prawo i Sprawiedliwość (PiS)",
-    q_thermo_2_party = "Platforma Obywatelska (PO)",
-    q_thermo_3_party = "Wiosna",
-    q_thermo_4_party = "Kukiz'15",
-    q_thermo_5_party = "Polskie Stronnictwo Ludowe (PSL)",
-    q_thermo_6_party = "Sojusz Lewicy Demokratycznej (SLD)"
-  )
-
-pol_w2_thermo_scores <- dataw2_pol |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Prawo i Sprawiedliwość (PiS)",
-    q_thermo_2_party = "Platforma Obywatelska (PO)",
-    q_thermo_3_party = "Wiosna",
-    q_thermo_4_party = "Kukiz'15",
-    q_thermo_5_party = "Polskie Stronnictwo Ludowe (PSL)",
-    q_thermo_6_party = "Sojusz Lewicy Demokratycznej (SLD)"
-  )
-
-# Portugal ---------------------------------------------------------------------
-por_w1_thermo_scores <- dataw1_por |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_27,
-    q_thermo_3 = Q196_28,
-    q_thermo_4 = Q196_29,
-    q_thermo_5 = Q196_30,
-    q_thermo_6 = Q196_31,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Partido Socialista (PS)",
-    q_thermo_2_party = "Partido Social Democrata (PSD)",
-    q_thermo_3_party = "Centro Democrático e Social – Partido Popular (CDS–PP)",
-    q_thermo_4_party = "Bloco de Esquerda (BE)",
-    q_thermo_5_party = "Partido Comunista Português (PCP)",
-    q_thermo_6_party = "Partido Ecologista 'os Verdes' (PEV)"
-  )
-
-por_w2_thermo_scores <- dataw2_por |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_27,
-    q_thermo_3 = Q196_28,
-    q_thermo_4 = Q196_29,
-    q_thermo_5 = Q196_30,
-    q_thermo_6 = Q196_31,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Partido Socialista (PS)",
-    q_thermo_2_party = "Partido Social Democrata (PSD)",
-    q_thermo_3_party = "Centro Democrático e Social – Partido Popular (CDS–PP)",
-    q_thermo_4_party = "Bloco de Esquerda (BE)",
-    q_thermo_5_party = "Partido Comunista Português (PCP)",
-    q_thermo_6_party = "Partido Ecologista 'os Verdes' (PEV)"
-  )
-
-# Romania ----------------------------------------------------------------------
-rom_w1_thermo_scores <- dataw1_rom |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_18,
-    q_thermo_3 = Q196_19,
-    q_thermo_4 = Q196_20,
-    q_thermo_5 = Q196_21,
-    q_thermo_6 = Q196_22,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Partidul Social Democrat (PSD)",
-    q_thermo_2_party = "Partidul Naţional Liberal (PNL)",
-    q_thermo_3_party = "Alianța Liberalilor și Democraților (ALDE)",
-    q_thermo_4_party = "Uniunea Salvați România (USR)",
-    q_thermo_5_party = "Pro România (PRO)",
-    q_thermo_6_party = "Uniunea Democrată Maghiară din România (UDMR - Romániai Magyar Demokrata Szövetség (RMDSZ))"
-  )
-
-rom_w2_thermo_scores <- dataw2_rom |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_18,
-    q_thermo_3 = Q196_19,
-    q_thermo_4 = Q196_20,
-    q_thermo_5 = Q196_21,
-    q_thermo_6 = Q196_22,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Partidul Social Democrat (PSD)",
-    q_thermo_2_party = "Partidul Naţional Liberal (PNL)",
-    q_thermo_3_party = "Alianța Liberalilor și Democraților (ALDE)",
-    q_thermo_4_party = "Uniunea Salvați România (USR)",
-    q_thermo_5_party = "Pro România (PRO)",
-    q_thermo_6_party = "Uniunea Democrată Maghiară din România (UDMR - Romániai Magyar Demokrata Szövetség (RMDSZ))"
-  )
-
-# Slovakia ---------------------------------------------------------------------
-slovakia_w1_thermo_scores <- dataw1_slovakia |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "SMER - Sociálna demokracia (SMER-SD)",
-    q_thermo_2_party = "Sloboda a Solidarita (SaS)",
-    q_thermo_3_party = "Obyčajní Ľudia A Nezávislé Osobnosti (Oľano)",
-    q_thermo_4_party = "Kotleba – Ľudová strana Naše Slovensko (ĽSNS)",
-    q_thermo_5_party = "Progresívne Slovensko",
-    q_thermo_6_party = "SME RODINA – Boris Kollár (SME RODINA)"
-  )
-
-slovakia_w2_thermo_scores <- dataw2_slovakia |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "SMER - Sociálna demokracia (SMER-SD)",
-    q_thermo_2_party = "Sloboda a Solidarita (SaS)",
-    q_thermo_3_party = "Obyčajní Ľudia A Nezávislé Osobnosti (Oľano)",
-    q_thermo_4_party = "Kotleba – Ľudová strana Naše Slovensko (ĽSNS)",
-    q_thermo_5_party = "Progresívne Slovensko",
-    q_thermo_6_party = "SME RODINA – Boris Kollár (SME RODINA)"
-  )
-
-# Slovenia ---------------------------------------------------------------------
-slovenia_w1_thermo_scores <- dataw1_slovenia |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Lista Marjana Šarca (LMŠ)",
-    q_thermo_2_party = "Slovenska demokratska stranka (SDS)",
-    q_thermo_3_party = "Socialni demokrati (SD)",
-    q_thermo_4_party = "Levica",
-    q_thermo_5_party = "Stranka modernega centra (SMC)",
-    q_thermo_6_party = "Nova Slovenija - Krščanski demokrati (N.Si)"
-  )
-
-slovenia_w2_thermo_scores <- dataw2_slovenia |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Lista Marjana Šarca (LMŠ)",
-    q_thermo_2_party = "Slovenska demokratska stranka (SDS)",
-    q_thermo_3_party = "Socialni demokrati (SD)",
-    q_thermo_4_party = "Levica",
-    q_thermo_5_party = "Stranka modernega centra (SMC)",
-    q_thermo_6_party = "Nova Slovenija - Krščanski demokrati (N.Si)"
-  )
-
-# Spain ------------------------------------------------------------------------
-spa_w1_thermo_scores <- dataw1_spa |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Partido Socialista Obrero Español (PSOE)",
-    q_thermo_2_party = "Partido Popular (PP)",
-    q_thermo_3_party = "Ciudadanos - Partido de la Ciudadanía (C's)",
-    q_thermo_4_party = "Podemos",
-    q_thermo_5_party = "Vox",
-    q_thermo_6_party = "Izquierda Unida (IU)"
-  )
-
-spa_w2_thermo_scores <- dataw2_spa |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Partido Socialista Obrero Español (PSOE)",
-    q_thermo_2_party = "Partido Popular (PP)",
-    q_thermo_3_party = "Ciudadanos - Partido de la Ciudadanía (C's)",
-    q_thermo_4_party = "Podemos",
-    q_thermo_5_party = "Vox",
-    q_thermo_6_party = "Izquierda Unida (IU)"
-  )
-
-# Sweden -----------------------------------------------------------------------
-swe_w1_thermo_scores <- dataw1_swe |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Socialdemokratiska arbetarpartiet (SAP)",
-    q_thermo_2_party = "Sverigedemokraterna (SD)",
-    q_thermo_3_party = "Moderata samlingspartiet (M)",
-    q_thermo_4_party = "Kristdemokraterna (KD)",
-    q_thermo_5_party = "Vänsterpartiet (V)",
-    q_thermo_6_party = "Centerpartiet (C)"
-  )
-
-swe_w2_thermo_scores <- dataw2_swe |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_17,
-    q_thermo_3 = Q196_18,
-    q_thermo_4 = Q196_19,
-    q_thermo_5 = Q196_20,
-    q_thermo_6 = Q196_21,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Socialdemokratiska arbetarpartiet (SAP)",
-    q_thermo_2_party = "Sverigedemokraterna (SD)",
-    q_thermo_3_party = "Moderata samlingspartiet (M)",
-    q_thermo_4_party = "Kristdemokraterna (KD)",
-    q_thermo_5_party = "Vänsterpartiet (V)",
-    q_thermo_6_party = "Centerpartiet (C)"
-  )
-
-# UK ---------------------------------------------------------------------------
-uk_w1_thermo_scores <- dataw1_uk |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Labour Party (Labour)",
-    q_thermo_2_party = "Conservative and Unionist Party (Conservative Party)",
-    q_thermo_3_party = "Brexit Party",
-    q_thermo_4_party = "Liberal Democrats (Lib Dem)",
-    q_thermo_5_party = "Scotish National Party (SNP)",
-    q_thermo_6_party = "Green Party of England and Wales (GP)"
-  )
-
-uk_w2_thermo_scores <- dataw2_uk |>
-  select(
-    q_thermo_1 = Q196_1,
-    q_thermo_2 = Q196_12,
-    q_thermo_3 = Q196_13,
-    q_thermo_4 = Q196_14,
-    q_thermo_5 = Q196_15,
-    q_thermo_6 = Q196_16,
-    ResponseId
-  ) |>
-  mutate(
-    q_thermo_1_party = "Labour Party (Labour)",
-    q_thermo_2_party = "Conservative and Unionist Party (Conservative Party)",
-    q_thermo_3_party = "Brexit Party",
-    q_thermo_4_party = "Liberal Democrats (Lib Dem)",
-    q_thermo_5_party = "Scotish National Party (SNP)",
-    q_thermo_6_party = "Green Party of England and Wales (GP)"
-  )
-
-
-# Combined Thermoscore Object---------------------------------------------------
-# First two rows are removed as they contain question instructions (thus duplicate responseid values)
-thermo_scores <- bind_rows(
-  aus_w1_thermo_scores |> slice(-c(1, 2)),
-  aus_w2_thermo_scores |> slice(-c(1, 2)),
-  bel_w1_thermo_scores |> slice(-c(1, 2)),
-  bel_w2_thermo_scores |> slice(-c(1, 2)),
-  bul_w1_thermo_scores |> slice(-c(1, 2)),
-  bul_w2_thermo_scores |> slice(-c(1, 2)),
-  cro_w1_thermo_scores |> slice(-c(1, 2)),
-  cro_w2_thermo_scores |> slice(-c(1, 2)),
-  cze_w1_thermo_scores |> slice(-c(1, 2)),
-  cze_w2_thermo_scores |> slice(-c(1, 2)),
-  den_w1_thermo_scores |> slice(-c(1, 2)),
-  den_w2_thermo_scores |> slice(-c(1, 2)),
-  est_w1_thermo_scores |> slice(-c(1, 2)),
-  est_w2_thermo_scores |> slice(-c(1, 2)),
-  fin_w1_thermo_scores |> slice(-c(1, 2)),
-  fin_w2_thermo_scores |> slice(-c(1, 2)),
-  fra_w1_thermo_scores |> slice(-c(1, 2)),
-  fra_w2_thermo_scores |> slice(-c(1, 2)),
-  ger_w1_thermo_scores |> slice(-c(1, 2)),
-  ger_w2_thermo_scores |> slice(-c(1, 2)),
-  gre_w1_thermo_scores |> slice(-c(1, 2)),
-  gre_w2_thermo_scores |> slice(-c(1, 2)),
-  hun_w1_thermo_scores |> slice(-c(1, 2)),
-  hun_w2_thermo_scores |> slice(-c(1, 2)),
-  ire_w1_thermo_scores |> slice(-c(1, 2)),
-  ire_w2_thermo_scores |> slice(-c(1, 2)),
-  ita_w1_thermo_scores |> slice(-c(1, 2)),
-  ita_w2_thermo_scores |> slice(-c(1, 2)),
-  lat_w1_thermo_scores |> slice(-c(1, 2)),
-  lat_w2_thermo_scores |> slice(-c(1, 2)),
-  lit_w1_thermo_scores |> slice(-c(1, 2)),
-  lit_w2_thermo_scores |> slice(-c(1, 2)),
-  net_w1_thermo_scores |> slice(-c(1, 2)),
-  net_w2_thermo_scores |> slice(-c(1, 2)),
-  pol_w1_thermo_scores |> slice(-c(1, 2)),
-  pol_w2_thermo_scores |> slice(-c(1, 2)),
-  por_w1_thermo_scores |> slice(-c(1, 2)),
-  por_w2_thermo_scores |> slice(-c(1, 2)),
-  rom_w1_thermo_scores |> slice(-c(1, 2)),
-  rom_w2_thermo_scores |> slice(-c(1, 2)),
-  slovakia_w1_thermo_scores |> slice(-c(1, 2)),
-  slovakia_w2_thermo_scores |> slice(-c(1, 2)),
-  slovenia_w1_thermo_scores |> slice(-c(1, 2)),
-  slovenia_w2_thermo_scores |> slice(-c(1, 2)),
-  spa_w1_thermo_scores |> slice(-c(1, 2)),
-  spa_w2_thermo_scores |> slice(-c(1, 2)),
-  swe_w1_thermo_scores |> slice(-c(1, 2)),
-  swe_w2_thermo_scores |> slice(-c(1, 2)),
-  uk_w1_thermo_scores |> slice(-c(1, 2)),
-  uk_w2_thermo_scores |> slice(-c(1, 2))
-) |>
-  rename(meta_responseid = ResponseId) |>
-  mutate(
-    q_thermo_1 = as.numeric(q_thermo_1),
-    q_thermo_2 = as.numeric(q_thermo_2),
-    q_thermo_3 = as.numeric(q_thermo_3),
-    q_thermo_4 = as.numeric(q_thermo_4),
-    q_thermo_5 = as.numeric(q_thermo_5),
-    q_thermo_6 = as.numeric(q_thermo_6),
-  )
-
-```
-
-# Full Long Format Dataset
-
-Append Survey Items to Hahm et al. processed data.
-
-```{r}
-#| label: long-format-data
-
-# create new long format dataset with only vars of interest
-eu25games_long <- dffin_renamed |>
-  select(
-    # Metadata and identifiers
-    meta_country_abbr,
-    meta_country,
-    meta_part,
-    meta_pid,
-    meta_psid,
-    meta_game,
-    meta_round,
-
-    # Conjoint variables
-    cj_trmnt,
-    cj_token,
-
-    # Raw game variables
-    cj_party,
-    cj_eupos,
-    cj_nationality,
-    cj_religion,
-    cj_age,
-    cj_sex,
-    cj_class,
-
-    # cleaned game variables
-    cj_reli_en,
-    cj_sex_en,
-    cj_class_en,
-    cj_age_en,
-    cj_eu_pro,
-
-    # analytical game variables
-    cj_eupos_shown,
-    cj_pid_shown,
-    der_co_partisan,
-    der_out_partisan,
-    der_conational,
-    der_outpartisan,
-    der_outpartisan2,
-    der_outattach1,
-    der_outattach2,
-    der_outattach3,
-    der_nopid,
-    q_religion_en,
-
-    # cleaned variables
-    q_lrpos2,
-    q_eupos2,
-    der_lr_extremity,
-    q_edu
-  )
-```
-
-Which variables are present both in w1 and w2?
-
-```{r}
-#| label: identify-vars-in-both-waves
-
-vars_dfw1 <- dfw1_renamed |> colnames()
-vars_dfw2 <- dfw2_renamed |> colnames()
-
-vars_in_w1_and_w2 <- vars_dfw1[vars_dfw1 %in% vars_dfw2]
-```
-
-With some variables being "spread" across multiple question variables in wave 1, this need to be fixed first.
-
-```{r}
-#| label: wave1-codebook-prep-for-merge
-
-doubles <- c(
-  "q_eupos_7scale",
-  "q_understand_eu_pol",
-  "q_eu_politicians_care",
-  "q_eu_public_say",
-  "q_politicians_follow_people",
-  "q_people_make_decisions",
-  "q_prefer_citizen_rep",
-  "q_officials_talk_action",
-  "q_politics_good_evil",
-  "q_political_compromise",
-  "q_democracy_compromise",
-  "q_listen_other_groups",
-  "q_expert_decisions",
-  "q_leaders_educated",
-  "q_parties_harm",
-  "q_people_unaware",
-  "q_eu_long_term",
-  "q_eu_listen_people",
-  "q_eu_impact_econ",
-  "q_eu_impact_cult",
-  "q_eu_impact_polstatus",
-  "q_eu_disagree_dissolve",
-  "q_eu_satisfaction",
-  "q_eupos_7scale_2",
-  "q_understand_eu_pol_2",
-  "q_eu_politicians_care_2",
-  "q_eu_public_say_2",
-  "q_politicians_follow_people_2",
-  "q_people_make_decisions_2",
-  "q_prefer_citizen_rep_2",
-  "q_officials_talk_action_2",
-  "q_politics_good_evil_2",
-  "q_political_compromise_2",
-  "q_democracy_compromise_2",
-  "q_listen_other_groups_2",
-  "q_expert_decisions_2",
-  "q_leaders_educated_2",
-  "q_parties_harm_2",
-  "q_people_unaware_2",
-  "q_eu_long_term_2",
-  "q_eu_listen_people_2",
-  "q_eu_impact_econ_2",
-  "q_eu_impact_cult_2",
-  "q_eu_impact_polstatus_2",
-  "q_eu_disagree_dissolve_2",
-  "q_eu_satisfaction_2"
-)
-
-# The for loop to iterate through the variables
-for (i in 1:23) {
-  # Print a message to track the loop's progress
-  message("Counting variable pair: ", doubles[i], " and ", doubles[i], "_2")
-
-  # Get the column names as strings
-  col1_name <- doubles[i]
-  col2_name <- paste0(doubles[i], "_2")
-
-  # Use the `!!sym()` pattern to use the string variables as column names
-  # The result of the count operation is stored in the 'result' variable
-  result <- dfw1_renamed |>
-    count(
-      !!sym(col1_name),
-      !!sym(col2_name)
-    )
-
-  # Print the result of the count for the current iteration
-  print(result)
 }
 
-
-# eupos3 is different somehow...leaving it aside for now
-dfw1_renamed |>
-  count(
-    q_eupos_7scale,
-    q_eupos_7scale_2,
-    q_eupos_7scale_3
-  )
-
+dim(eu25games2019)
 ```
 
+## Contract check
+
+Everything downstream is written against a specific shape of the published file. An
+upstream release that renames or drops a column would otherwise fail somewhere deep in
+the analysis notebooks with a confusing error. These assertions fail fast instead.
+
+The `_nationality_drawn` / `_nationality_shown` split matters in particular: the drawn
+nationality is a flat background lottery, whereas the *shown* nationality is what the
+respondent actually saw, because the treatment branch overrides the draw in every
+condition except `4_somenat`. Earlier releases conflated the two under `cj_<slot>_nat`.
+
 ```{r}
-#| label: prepare-merging
+#| label: verify-input-contract
 
-# select variables to merge to long format
-prep_w1 <- dfw1_renamed |>
-  select(
-    starts_with("meta_"),
-    starts_with("id_"),
-    starts_with("q_"),
-    -starts_with("dict"),
-    -starts_with("trust")
-  )
+slots <- c(
+  "cj_dict1",
+  "cj_dict2",
+  "cj_dict3",
+  "cj_trust1",
+  "cj_trust2",
+  "cj_trust3"
+)
 
-prep_w1 <- prep_w1 |>
-  # Collapse "doubled" variables
-  mutate(
-    q_eupos_7scale = coalesce(
-      q_eupos_7scale,
-      q_eupos_7scale_2
-    ),
-    q_understand_eu_pol = coalesce(
-      q_understand_eu_pol,
-      q_understand_eu_pol_2
-    ),
-    q_eu_politicians_care = coalesce(
-      q_eu_politicians_care,
-      q_eu_politicians_care_2
-    ),
-    q_eu_public_say = coalesce(
-      q_eu_public_say,
-      q_eu_public_say_2
-    ),
-    q_politicians_follow_people = coalesce(
-      q_politicians_follow_people,
-      q_politicians_follow_people_2
-    ),
-    q_people_make_decisions = coalesce(
-      q_people_make_decisions,
-      q_people_make_decisions_2
-    ),
-    q_prefer_citizen_rep = coalesce(
-      q_prefer_citizen_rep,
-      q_prefer_citizen_rep_2
-    ),
-    q_officials_talk_action = coalesce(
-      q_officials_talk_action,
-      q_officials_talk_action_2
-    ),
-    q_politics_good_evil = coalesce(
-      q_politics_good_evil,
-      q_politics_good_evil_2
-    ),
-    q_political_compromise = coalesce(
-      q_political_compromise,
-      q_political_compromise_2
-    ),
-    q_democracy_compromise = coalesce(
-      q_democracy_compromise,
-      q_democracy_compromise_2
-    ),
-    q_listen_other_groups = coalesce(
-      q_listen_other_groups,
-      q_listen_other_groups_2
-    ),
-    q_expert_decisions = coalesce(
-      q_expert_decisions,
-      q_expert_decisions_2
-    ),
-    q_leaders_educated = coalesce(
-      q_leaders_educated,
-      q_leaders_educated_2
-    ),
-    q_parties_harm = coalesce(
-      q_parties_harm,
-      q_parties_harm_2
-    ),
-    q_people_unaware = coalesce(
-      q_people_unaware,
-      q_people_unaware_2
-    ),
-    q_eu_long_term = coalesce(
-      q_eu_long_term,
-      q_eu_long_term_2
-    ),
-    q_eu_listen_people = coalesce(
-      q_eu_listen_people,
-      q_eu_listen_people_2
-    ),
-    q_eu_impact_econ = coalesce(
-      as.numeric(q_eu_impact_econ),
-      q_eu_impact_econ_2
-    ),
-    q_eu_impact_cult = coalesce(
-      as.numeric(q_eu_impact_cult),
-      q_eu_impact_cult_2
-    ),
-    q_eu_impact_polstatus = coalesce(
-      as.numeric(q_eu_impact_polstatus),
-      q_eu_impact_polstatus_2
-    ),
-    q_eu_disagree_dissolve = as.numeric(coalesce(
-      q_eu_disagree_dissolve,
-      q_eu_disagree_dissolve_2
-    )),
-    q_eu_satisfaction = coalesce(
-      q_eu_satisfaction,
-      q_eu_satisfaction_2
-    )
-  ) |>
-  # Remove _2 doubled variables and priming variables (only in w1)
-  select(
-    -ends_with("_2"),
-    -contains("prime_")
-  ) |>
-  # to numeric so mergin works
-  mutate(
-    q_cjeu_disagree_dissolve = as.numeric(q_cjeu_disagree_dissolve)
-  )
+# note: the conjoint party attribute ships only as `_party_raw` (the displayed
+# spelling) plus its Party Facts siblings -- there is no coded `_party` column
+new_cols <- as.vector(outer(
+  slots,
+  c(
+    "_nationality_drawn",
+    "_nationality_shown",
+    "_treatment",
+    "_party_raw",
+    "_pl1",
+    "_pl2"
+  ),
+  paste0
+))
 
-# select wave 2 variables
-prep_w2 <- dfw2_renamed |>
-  select(
-    starts_with("meta_"),
-    starts_with("id_"),
-    starts_with("q_"),
-    -starts_with("dict"),
-    -starts_with("trust")
-  ) |>
-  select(
-    -contains("prime_")
-  )
+old_cols <- c(
+  paste0(slots, "_nat"),
+  paste0(slots, "_nat_raw"),
+  paste0("der_", slots, "_nationality")
+)
 
+pf_cols <- as.vector(outer(
+  paste0("ext_", slots, "_party"),
+  c("_pf_name", "_pf_id"),
+  paste0
+))
 
-# there are still duplicate id values that need to be resolved
+stopifnot(
+  # dimensions roughly stable
+  abs(nrow(eu25games2019) - 103685) < 50,
+  abs(ncol(eu25games2019) - 847) < 5,
+  # game columns present under their current names
+  all(new_cols %in% names(eu25games2019)),
+  # no superseded conflated names survive
+  !any(old_cols %in% names(eu25games2019)),
+  # Party Facts siblings for the conjoint party attribute
+  all(pf_cols %in% names(eu25games2019)),
+  # thermometer slots and their Party Facts siblings
+  all(paste0("q_thermo_", 1:6) %in% names(eu25games2019)),
+  all(paste0("ext_q_thermo_", 1:6, "_pf_name") %in% names(eu25games2019)),
+  # attention checks
+  all(paste0("der_att_check_", 1:3) %in% names(eu25games2019)),
+  # no dictator/trust games in wave 1: all game-slot columns NA there
+  # (the separate cj_task* conjoint instrument does run in wave 1)
+  all(vapply(
+    eu25games2019[
+      eu25games2019$meta_wave == 1,
+      grepl("^cj_(dict|trust)[123]_", names(eu25games2019))
+    ],
+    \(x) all(is.na(x)),
+    logical(1)
+  ))
+)
+
+rm(new_cols, old_cols, pf_cols)
 ```
 
-Since the wide format data is uncleaned,[^1] it contains some duplicate IDs (this might happen, for instance, if a respondent starts the survey on their home computer but then quits and starts at another time again using their phone). More precisely, while in total there are now `r prep_w1 |> nrow()` observations in the `prep_w1` object and `r prep_w2 |> nrow()` observations in the `prep_w2` object, in the former only `r prep_w1 |> distinct(meta_pid) |> nrow()` are distinct IDs and in the latter only `r prep_w2 |> distinct(meta_pid) |> nrow()` are distinct IDs. In comparison, the APSR dataset (`dffin`) contains `r dffin_renamed |> distinct(meta_pid) |> nrow()` distinct IDs. This yields further preparation of `prep_w1` and `prep_w2`: I will keep only the observation with the highest progress for each respondent. This procedure is necessary to avoid many-to-many relationships when merging the data.
+# Code the two label-string scales
 
-[^1]: The data are "unclean" in the sense that unlike the processed APSR publication dataset, all respondents are contained (even those that did not complete the survey for instance)
+Two seven-point items — willingness to take risks and willingness to give something up
+today for the future — were left in the published data as the *untranslated label
+string* rather than as a code, e.g. `"(1) Completely unwilling to take risks"`,
+`"(1) Völlig unwillens, Risiken einzugehen"`. Every language embeds the response code as
+a leading digit run, which is the same rule the upstream pipeline applies to its other
+ordinal scales, so we extract it here. Values outside 1–7 are scale-entry errors and
+become `NA`.
+
+This has to happen before the French reconciliation below, because for these two items
+the French fork *is* already coded as an integer, so base and fork would otherwise be of
+incompatible types.
 
 ```{r}
-#| label: resolve-duplicate-id-values
+#| label: code-label-string-scales
 
-# check size of problem
-sum(duplicated(prep_w1$meta_pid))
-sum(duplicated(prep_w2$meta_pid))
+label_string_scales <- c("q_risk_taking", "q_future_discount")
 
-# for each pid value, keep only the rows with most progress
-prep_w1_distinct <- prep_w1 |>
-  group_by(meta_wave, meta_pid) |>
-  filter(meta_progress == max(meta_progress)) |>
-  ungroup()
+eu25games2019 <- eu25games2019 |>
+  mutate(across(
+    all_of(label_string_scales),
+    ~ {
+      code <- as.integer(str_extract(.x, "\\d+"))
+      if_else(code >= 1 & code <= 7, code, NA_integer_)
+    }
+  ))
 
-# check how many now
-sum(duplicated(prep_w1_distinct$meta_pid))
-# slightly less, but still some present
+eu25games2019 |>
+  select(all_of(label_string_scales)) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "code") |>
+  count(variable, code) |>
+  pivot_wider(names_from = variable, values_from = n) |>
+  kable(caption = "Coded values of the two label-string scales.")
 
-# same for wave 2
-prep_w2_distinct <- prep_w2 |>
-  group_by(meta_wave, meta_pid) |>
-  filter(meta_progress == max(meta_progress)) |>
-  ungroup()
+stopifnot(
+  all(vapply(
+    eu25games2019[label_string_scales],
+    \(x) is.integer(x) && all(is.na(x) | (x >= 1 & x <= 7)),
+    logical(1)
+  ))
+)
+```
 
-# check how many now
-sum(duplicated(prep_w2_distinct$meta_pid))
-# slightly less, but still some present
+# Reconcile the French questionnaire fork
 
-# variable to store if duplicate
-prep_w1_distinct <- prep_w1_distinct |>
-  group_by(meta_pid) |>
-  mutate(
-    is_dup = if_else(
-      n() > 1,
-      1,
-      0,
-      missing = NA
-    )
+France was fielded through a separate Qualtrics block, so a subset of French responses
+lands in parallel `*_fra` columns rather than in the base column. This is not cosmetic:
+in wave 2 the base vote-recall column holds **8** French responses while the fork holds
+**600**. Left unreconciled, France would effectively vanish from the vote-anchored group
+— exactly the group this project is about.
+
+We `coalesce()` each fork into its base column (base value wins where both exist) and
+then drop the fork. `q_vote_choice_ep2014_fra` is the French label for the 2014 EP
+recall, so it folds into `q_vote_choice_past2014`.
+
+```{r}
+#| label: coalesce-french-fork
+
+# base <- fork, for the Party Facts sibling pairs
+pf_fork_map <- tribble(
+  ~base,                        ~fork,
+  "ext_q_party_id",             "ext_q_party_id_fra",
+  "ext_q_party_id_other",       "ext_q_party_id_other_fra",
+  "ext_q_vote_choice_past",     "ext_q_vote_choice_past_fra",
+  "ext_q_vote_choice_past_other", "ext_q_vote_choice_past_other_fra",
+  "ext_q_vote_choice_hypo",     "ext_q_vote_choice_hypo_fra",
+  "ext_q_vote_choice_hypo_other", "ext_q_vote_choice_hypo_other_fra",
+  "ext_q_vote_choice_past2014", "ext_q_vote_choice_ep2014_fra",
+  "ext_q_vote_choice_past2014_other", "ext_q_vote_choice_ep2014_other_fra"
+)
+
+coalesce_fork <- function(df, base, fork) {
+  for (sfx in c("_pf_name", "_pf_id")) {
+    b <- paste0(base, sfx)
+    f <- paste0(fork, sfx)
+    if (all(c(b, f) %in% names(df))) {
+      df[[b]] <- coalesce(df[[b]], df[[f]])
+      df[[f]] <- NULL
+    }
+  }
+  df
+}
+
+eu25games2019 <- reduce2(
+  pf_fork_map$base,
+  pf_fork_map$fork,
+  coalesce_fork,
+  .init = eu25games2019
+)
+
+# plain attitudinal / demographic items: q_<name>_fra -> q_<name>
+fra_items <- names(eu25games2019) |>
+  str_subset("^q_.*_fra$") |>
+  setdiff(str_subset(names(eu25games2019), "_raw$"))
+
+type_clashes <- character()
+
+for (f in fra_items) {
+  b <- str_remove(f, "_fra$")
+  if (!(b %in% names(eu25games2019))) next
+  # a base/fork pair of differing type means the upstream recode treated the two
+  # questionnaire versions differently; fold it in by hand rather than guess
+  if (!identical(class(eu25games2019[[b]]), class(eu25games2019[[f]]))) {
+    type_clashes <- c(type_clashes, b)
+    next
+  }
+  eu25games2019[[b]] <- coalesce(eu25games2019[[b]], eu25games2019[[f]])
+}
+
+stopifnot(length(type_clashes) == 0)
+
+# drop every remaining fork column, forks and their raw siblings alike
+eu25games2019 <- eu25games2019 |>
+  select(-matches("_fra(_raw)?$"), -matches("_fra_pf_(name|id)$"))
+```
+
+France must now be non-empty on the party-attachment item and on at least one vote item
+in every wave in which those items were asked.
+
+```{r}
+#| label: verify-french-fork
+
+fr_check <- eu25games2019 |>
+  filter(meta_country == "France") |>
+  summarise(
+    n = n(),
+    party_id = sum(!is.na(ext_q_party_id_pf_name)),
+    vote_past = sum(!is.na(ext_q_vote_choice_past_pf_name)),
+    vote_hypo = sum(!is.na(ext_q_vote_choice_hypo_pf_name)),
+    vote_intended = sum(!is.na(ext_q_vote_choice_intended_pf_name)),
+    .by = meta_wave
   ) |>
-  ungroup()
+  arrange(meta_wave)
 
-prep_w2_distinct <- prep_w2_distinct |>
-  group_by(meta_pid) |>
-  mutate(
-    is_dup = if_else(
-      n() > 1,
-      1,
-      0,
-      missing = NA
-    )
-  ) |>
-  ungroup()
+fr_check |>
+  kable(caption = "France: non-missing responses per wave after folding in the fork.")
 
-# Filter only duplicate id observations
-# and create dummy if id is present in dffin
-id_list_dffin <- dffin_renamed |>
+stopifnot(
+  # attachment asked in all three waves
+  all(fr_check$party_id > 0),
+  # vote recall recovered in the game waves
+  all(fr_check$vote_past[fr_check$meta_wave %in% c(2, 3)] > 100)
+)
+```
+
+# Respondent cleaning
+
+The old pipeline inherited an already-cleaned frame from Hahm et al. The published data
+is the full uncleaned survey, so the cleaning decisions are now ours and are made
+explicitly here. The rules follow the companion project `MBEU25`
+(`code/02_data_prep.qmd`), so the two projects analyse comparable samples.
+
+`apply_attention_check` is broken out as a switch because it is by far the most
+consequential filter — see the sample-accounting table at the end of this section.
+
+```{r}
+#| label: cleaning-switches
+
+apply_attention_check <- TRUE
+```
+
+Wave-1 respondents who never returned carry no games, but their wave-1 rows are the
+source for the covariate backfill further down, so they are kept for now and dropped
+after backfilling.
+
+```{r}
+#| label: filter-wave1-only
+
+n_start <- nrow(eu25games2019)
+
+pids_in_games <- eu25games2019 |>
+  filter(meta_wave %in% c(2, 3)) |>
+  distinct(meta_pid) |>
+  pull(meta_pid)
+
+eu25games2019 <- eu25games2019 |>
+  filter(meta_wave %in% c(2, 3) | meta_pid %in% pids_in_games)
+
+n_after_wave1only <- nrow(eu25games2019)
+n_after_wave1only
+```
+
+The attention check asked respondents to ignore a question and type a fixed phrase into
+an "Other" box. `der_att_check_3` is `TRUE` only when both the categorical response and
+the free-text box were answered as instructed. It was fielded in all three waves.
+
+```{r}
+#| label: filter-attention-check
+
+eu25games2019 |>
+  count(meta_wave, der_att_check_3) |>
+  pivot_wider(names_from = der_att_check_3, values_from = n) |>
+  kable(caption = "Attention-check outcomes by wave, before filtering.")
+
+if (apply_attention_check) {
+  eu25games2019 <- eu25games2019 |>
+    filter(der_att_check_3)
+}
+
+n_after_attention <- nrow(eu25games2019)
+n_after_attention
+```
+
+Incomplete responses are dropped next. A small number of panelists then still appear
+twice within a wave *with a completed game* — response timings suggest an invitation
+link that was clicked twice rather than genuine repeat participation, and the duplicate
+records are near-identical. They cannot be adjudicated, so both copies go.
+
+```{r}
+#| label: filter-completeness-and-duplicates
+
+to_remove <- eu25games2019 |>
+  filter(!is.na(cj_dict1_pl2), meta_finished) |>
+  count(meta_wave, meta_pid) |>
+  filter(n > 1) |>
+  pull(meta_pid)
+
+length(to_remove)
+
+eu25games2019 <- eu25games2019 |>
+  # only complete responses
+  filter(meta_finished) |>
+  # remove the within-wave duplicate panelists identified above
+  filter(!(meta_pid %in% to_remove)) |>
+  # keep only respondents who appear in a game wave, plus their wave-1 rows
+  filter(meta_pid %in% meta_pid[meta_wave %in% c(2, 3)]) |>
+  # three known duplicate wave-1 IDs
   filter(
-    meta_part == "part1"
+    !(meta_wave == 1 &
+      meta_pid %in% c("1078674746", "1277956255", "1516614375"))
   ) |>
-  pull(
-    meta_pid
-  )
+  # and any wave-1 row with no ID at all
+  filter(!(meta_wave == 1 & is.na(meta_pid)))
 
-
-dupl_w1 <- prep_w1_distinct |>
-  filter(is_dup == 1) |>
-  mutate(
-    in_dffin = if_else(
-      meta_pid %in% id_list_dffin,
-      1,
-      0,
-      missing = NA
-    )
-  )
-
-dupl_w2 <- prep_w2_distinct |>
-  filter(is_dup == 1) |>
-  mutate(
-    in_dffin = if_else(
-      meta_pid %in% id_list_dffin,
-      1,
-      0,
-      missing = NA
-    )
-  )
-
-# see how many of the duplicate ids are in dffin
-dupl_w1 |> count(is_dup, in_dffin)
-dupl_w2 |> count(is_dup, in_dffin)
-
-# of those duplicate IDs present in dffin, keep only those with least NA values
-
-dupl_w1 <- dupl_w1 |>
-  mutate(na_count = rowSums(is.na(across(everything())))) |>
-  group_by(meta_pid) |>
-  mutate(
-    to_drop = case_when(
-      in_dffin == 0 ~ 1, # Drop if in_dffin is 0
-      in_dffin == 1 & na_count == max(na_count) ~ 1, # Drop if it's the observation with more NAs
-      TRUE ~ 0 # Keep otherwise
-    )
-  ) |>
-  ungroup()
-
-dupl_w2 <- dupl_w2 |>
-  mutate(na_count = rowSums(is.na(across(everything())))) |>
-  group_by(meta_pid) |>
-  mutate(
-    to_drop = case_when(
-      in_dffin == 0 ~ 1, # Drop if in_dffin is 0
-      in_dffin == 1 & na_count == max(na_count) ~ 1, # Drop if it's the observation with more NAs
-      TRUE ~ 0 # Keep otherwise
-    )
-  ) |>
-  ungroup()
-
-# see how many cases are affected
-dupl_w1 |> count(to_drop)
-dupl_w2 |> count(to_drop)
-
-# drop the observations from data
-prep_w1_distinct <- prep_w1_distinct |>
-  left_join(
-    dupl_w1 |>
-      select(
-        meta_pid,
-        meta_responseid,
-        to_drop
-      ),
-    by = join_by(meta_pid, meta_responseid)
-  ) |>
-  mutate(
-    to_drop = ifelse(
-      is.na(to_drop),
-      0,
-      to_drop
-    )
-  ) |>
-  filter(to_drop == 0) |>
-  select(-is_dup, -to_drop)
-
-prep_w2_distinct <- prep_w2_distinct |>
-  left_join(
-    dupl_w1 |>
-      select(
-        meta_pid,
-        meta_responseid,
-        to_drop
-      ),
-    by = join_by(meta_pid, meta_responseid)
-  ) |>
-  mutate(
-    to_drop = ifelse(
-      is.na(to_drop),
-      0,
-      to_drop
-    )
-  ) |>
-  filter(to_drop == 0) |>
-  select(-is_dup, -to_drop)
+n_after_completeness <- nrow(eu25games2019)
+n_after_completeness
 ```
 
+# Carry wave-1 covariates forward
+
+The games start in wave 2, so every item asked in wave 1 is a valid *pre-treatment*
+measure for the same panelist. Where a wave-2/3 cell is missing and the panelist's
+wave-1 value exists, we carry it forward, matched on `(meta_pid, meta_country)`.
+
+Only `NA` cells are touched — existing values are never overwritten — and the audit
+table below reports exactly how many cells each variable recovered. The recovered items
+are almost entirely attitudinal (efficacy, populism and identity scales); carrying them
+forward assumes temporal stability over the few months separating the waves, which is
+acceptable because they enter only as respondent-level covariates, never as outcomes.
+
 ```{r}
-#| label: merge
+#| label: backfill-wave1
 
-# append w1 and w2
-prepped <- prep_w1_distinct |>
-  bind_rows(prep_w2_distinct) |>
-  mutate(
-    meta_country = if_else(
-      meta_country == "UK",
-      "United Kingdom",
-      meta_country
-    )
-  )
+# pre-game respondent items that exist in wave 1 and are used downstream
+vars_pre_game <- c(
+  "q_gender",
+  "q_age",
+  "q_identity_country",
+  "q_identity_eu",
+  "q_identity_europe",
+  "q_religion",
+  "q_class",
+  "q_lr_self",
+  "q_euint_self",
+  "q_nativ_econ",
+  "q_nativ_cult",
+  "q_nat_int",
+  "q_eu_int",
+  "q_satis_demo_nat",
+  "q_nat_efficacy_understand",
+  "q_nat_efficacy_care",
+  "q_nat_efficacy_nosay",
+  "q_eu_efficacy_understand",
+  "q_eu_efficacy_care",
+  "q_eu_efficacy_nosay",
+  "q_party_harm",
+  "q_pop_will",
+  "q_pop_people",
+  "q_pop_citizen",
+  "q_pop_reps",
+  "q_pop_goodevil",
+  "q_people_incompetent",
+  "q_dem_compromise",
+  "q_dem_listen",
+  "q_tech_experts",
+  "q_tech_leaders",
+  "q_risk_taking",
+  "q_future_discount",
+  "q_rural_urban",
+  "q_edu_age_stop"
+)
 
-# merge variables to long dataset
-eu25games2019 <- eu25games_long |>
-  mutate(
-    meta_wave = case_when(
-      meta_part == "part1" ~ 1,
-      meta_part == "part2" ~ 2,
-      .default = NA
-    )
-  ) |>
-  left_join(
-    prepped,
-    by = join_by(meta_pid, meta_psid, meta_wave, meta_country)
-  )
+stopifnot(all(vars_pre_game %in% names(eu25games2019)))
 
-# Merge thermometer scores -----------------------------------------------------
+# each panelist's wave-1 values
+w1_values <- eu25games2019 |>
+  filter(meta_wave == 1) |>
+  select(meta_pid, meta_country, all_of(vars_pre_game))
+
+na_before <- eu25games2019 |>
+  filter(meta_wave %in% c(2, 3)) |>
+  summarise(across(all_of(vars_pre_game), ~ sum(is.na(.x)))) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "na_before")
+
+# carry one variable forward from its wave-1 partner
+backfill_w1 <- function(df, v) {
+  w1 <- paste0(v, "_w1")
+  df |>
+    mutate(
+      "filled_{v}" := meta_wave %in%
+        c(2, 3) &
+        is.na(.data[[v]]) &
+        !is.na(.data[[w1]])
+    ) |>
+    mutate("{v}" := coalesce(.data[[v]], .data[[w1]]))
+}
+
 eu25games2019 <- eu25games2019 |>
   left_join(
-    thermo_scores,
-    by = join_by(meta_responseid)
+    w1_values,
+    by = c("meta_pid", "meta_country"),
+    suffix = c("", "_w1")
+  ) |>
+  reduce(vars_pre_game, backfill_w1, .init = _)
+
+na_after <- eu25games2019 |>
+  filter(meta_wave %in% c(2, 3)) |>
+  summarise(across(all_of(vars_pre_game), ~ sum(is.na(.x)))) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "na_after")
+
+n_filled <- eu25games2019 |>
+  filter(meta_wave %in% c(2, 3)) |>
+  summarise(across(starts_with("filled_"), ~ sum(.x))) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "n_filled") |>
+  mutate(variable = str_remove(variable, "^filled_"))
+
+fill_audit <- na_before |>
+  left_join(na_after, by = "variable") |>
+  left_join(n_filled, by = "variable") |>
+  filter(n_filled > 0) |>
+  arrange(desc(n_filled))
+
+fill_audit |>
+  kable(
+    caption = "Wave-1 backfill: wave-2/3 missing cells before and after, and cells recovered."
   )
+
+cat("Total cells filled from wave 1:", sum(fill_audit$n_filled), "\n")
+
+stopifnot(all(fill_audit$na_after == fill_audit$na_before - fill_audit$n_filled))
+
+# drop helper columns
+eu25games2019 <- eu25games2019 |>
+  select(-ends_with("_w1"), -starts_with("filled_"))
 ```
+
+# One game-playing wave per respondent
+
+Wave-1 rows have now served their purpose and carry no games, so they are dropped.
+
+What remains needs one more decision that `MBEU25` does not have to make. Roughly 9,500
+panelists played the games in **both** wave 2 and wave 3. `MBEU25` keeps both
+observations, because its models carry respondent-level random effects. This project is
+different: its descriptive tables and its partisan-type framework are *respondent*-level
+(`distinct(meta_pid)` throughout notebook 3.1), so a panelist present twice would be
+counted twice, with an arbitrary wave silently winning each tabulation.
+
+Hahm et al. resolved this the same way we do — their analysis frame contains each
+respondent exactly once. We keep each panelist's **earliest** game wave, so wave 2 is
+preferred wherever available and the retained measurement is the one closest to the
+2019 European election.
+
+```{r}
+#| label: one-wave-per-respondent
+
+eu25games2019 <- eu25games2019 |>
+  # wave 1 carries no games
+  filter(meta_wave %in% c(2, 3)) |>
+  # and neither do wave-2/3 respondents who abandoned before the games
+  filter(!is.na(cj_dict1_pl2)) |>
+  # keep the earliest game wave per panelist
+  slice_min(meta_wave, n = 1, by = meta_pid)
+
+stopifnot(
+  # one row per respondent
+  nrow(eu25games2019) == n_distinct(eu25games2019$meta_pid),
+  # both game waves survive
+  all(c(2, 3) %in% eu25games2019$meta_wave)
+)
+
+eu25games2019 |>
+  count(meta_wave) |>
+  kable(caption = "Retained respondents by game wave.")
+```
+
+## Sample accounting
+
+```{r}
+#| label: tbl-sample-accounting
+
+tibble(
+  step = c(
+    "published file (respondent x wave)",
+    "wave 2/3, plus wave-1 rows of returning panelists",
+    if (apply_attention_check) "passed the attention check" else NULL,
+    "complete responses, within-wave duplicates removed",
+    "played the games, earliest game wave only"
+  ),
+  n_rows = c(
+    n_start,
+    n_after_wave1only,
+    if (apply_attention_check) n_after_attention else NULL,
+    n_after_completeness,
+    nrow(eu25games2019)
+  )
+) |>
+  mutate(dropped = lag(n_rows) - n_rows) |>
+  kable(caption = "Rows remaining after each cleaning step.")
+
+cat(
+  "Respondents in the analysis frame:",
+  n_distinct(eu25games2019$meta_pid),
+  "\n"
+)
+```
+
+# Reshape the games to long format
+
+The published data is wide: each of the six game slots (`cj_dict1..3`, `cj_trust1..3`)
+carries a full set of attribute and outcome columns. Estimation needs one row per game
+played.
+
+Two details are worth stating, because both are easy to get wrong:
+
+- The Party Facts siblings of the conjoint party attribute are named
+  `ext_cj_<slot>_party_pf_*` and therefore do **not** match a `^cj_(dict|trust)\d+_`
+  pattern. They are renamed into the slot namespace before the pivot and renamed back
+  afterwards, so that `ext_cj_party_pf_name` — the column notebooks 2.1 and 3.2 expect —
+  survives the reshape.
+- The columns held fixed during the pivot must be excluded with
+  `starts_with("cj_treatment")`, never `starts_with("cj_tr")`: the shorter prefix also
+  matches `cj_trust*` and silently drops the entire Trust game.
+
+```{r}
+#| label: game-outcomes-to-long
+
+n_respondents <- n_distinct(eu25games2019$meta_pid)
+
+eu25_long <- eu25games2019 |>
+  # move the Party Facts siblings into the slot namespace so the pivot sees them
+  rename_with(
+    ~ str_replace(.x, "^ext_(cj_(?:dict|trust)\\d+)_party_pf_", "\\1_partypf"),
+    matches("^ext_cj_(dict|trust)\\d+_party_pf_(name|id)$")
+  ) |>
+  pivot_longer(
+    cols = matches("^cj_(dict|trust)\\d+_"),
+    names_to = c("game_type", "round", ".value"),
+    names_pattern = "^(cj_dict|cj_trust)(\\d+)_(.+)$"
+  ) |>
+  # restore the cj_ prefix on the pivoted stems
+  rename_with(
+    ~ paste0("cj_", .x),
+    -c(
+      starts_with("meta_"),
+      starts_with("q_"),
+      starts_with("ext_"),
+      starts_with("der_"),
+      starts_with("prime_"),
+      starts_with("cj_attr"),
+      starts_with("cj_att_pos"),
+      starts_with("cj_rand"),
+      starts_with("cj_task"),
+      starts_with("cj_treatment"),
+      contains("_instr_")
+    )
+  ) |>
+  rename(
+    ext_cj_party_pf_name = cj_partypfname,
+    ext_cj_party_pf_id = cj_partypfid
+  ) |>
+  mutate(
+    # game identifiers in the form the analysis notebooks use
+    meta_game = if_else(cj_game_type == "cj_dict", "dict", "trust"),
+    meta_round = as.integer(cj_round)
+  ) |>
+  select(-cj_game_type, -cj_round)
+
+stopifnot(
+  # six slots per respondent, nothing dropped or duplicated
+  nrow(eu25_long) == 6 * n_respondents,
+  # evenly split across the two games
+  all(table(eu25_long$meta_game) == 3 * n_respondents),
+  # the outcome and the reshaped attributes came through
+  all(
+    c(
+      "cj_pl1",
+      "cj_pl2",
+      "cj_treatment",
+      "cj_nationality_shown",
+      "cj_party_raw",
+      "cj_eupos",
+      "cj_rel",
+      "cj_age",
+      "cj_sex",
+      "cj_class",
+      "ext_cj_party_pf_name"
+    ) %in%
+      names(eu25_long)
+  ),
+  # allocations are on the 0-10 token scale
+  min(eu25_long$cj_pl2, na.rm = TRUE) >= 0,
+  max(eu25_long$cj_pl2, na.rm = TRUE) <= 10
+)
+
+dim(eu25_long)
+```
+
+## Equivalence with the previous pipeline
+
+Three variables that used to be inherited from Hahm et al.'s derived analysis frame are
+now reconstructed from the published raw survey. The correspondence is exact rather than
+approximate, and is documented upstream:
+
+| previously (Hahm et al.) | now (published) | note |
+|---|---|---|
+| `cj_token` (`pl2gets`) | `cj_pl2` | tokens the co-player receives, 0–10 |
+| `cj_trmnt` (`trmnt`) | `cj_treatment` | same four conditions, `-` → `_` in the level names |
+| `der_conational` (`nationality`) | `cj_nationality_shown` | `co-national` → `own_country`, `out-national-EU` → `eu`, `out-national-non-EU` → `non_eu` |
+| `der_nopid` (`nopid`) | `ext_q_party_id_pf_name == "none"` | |
+
+`eu25games2019/code/07_recode.qmd` states that `cj_<slot>_nationality_shown` reproduces
+the effective `nationality` of Hilpert's analysis frame
+(`prepare_dat_consld.R:2374–2391`), so this is a documented reimplementation of the
+original coding, not an independent guess at it.
+
+```{r}
+#| label: tbl-treatment-check
+
+eu25_long |>
+  count(cj_treatment, cj_nationality_shown) |>
+  kable(
+    caption = "Shown nationality by treatment condition. The conational conditions force `own_country`, `3_eunat_eustance` forces `eu`, and only `4_somenat` passes the background draw through."
+  )
+
+stopifnot(
+  all(
+    eu25_long$cj_nationality_shown[
+      grepl("conat", eu25_long$cj_treatment)
+    ] ==
+      "own_country"
+  ),
+  all(
+    eu25_long$cj_nationality_shown[
+      eu25_long$cj_treatment == "3_eunat_eustance"
+    ] ==
+      "eu"
+  )
+)
+```
+
+```{r}
+#| label: tbl-token-distribution
+
+eu25_long |>
+  summarise(
+    n = sum(!is.na(cj_pl2)),
+    mean = round(mean(cj_pl2, na.rm = TRUE), 3),
+    sd = round(sd(cj_pl2, na.rm = TRUE), 3),
+    median = median(cj_pl2, na.rm = TRUE),
+    .by = meta_game
+  ) |>
+  kable(caption = "Token allocations by game.")
+```
+
+# Save
 
 ```{r}
 #| label: save-data
 
-# save dataset
-saveRDS(
-  eu25games2019,
+write_rds(
+  eu25_long,
   file = here(
     "data",
     "02_processed",
-    "data",
-    "eu25games2019_1.rds"
-  )
+    "eu25games2019_long.rds"
+  ),
+  compress = "xz"
 )
 ```
 
@@ -2376,7 +827,6 @@ rendering_time <- end_time - start_time
 message(paste(
   "Document rendered in:",
   round(as.numeric(rendering_time, units = "secs"), 2),
-  "seconds.
-"
+  "seconds."
 ))
 ```

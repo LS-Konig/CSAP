@@ -34,3 +34,5 @@ Thumbs.db
 **/*.quarto_ipynb
 
 *notes*
+# Quarto site libraries (regenerated on render)
+/site_libs/

@@ -192,8 +192,8 @@ pooled_ap_cj <- eu25games2019 |>
   ) |>
   group_by(der_partisan_type, der_partisan_relationship) |>
   summarise(
-    mean = mean(cj_token),
-    sd = sd(cj_token),
+    mean = mean(cj_pl2),
+    sd = sd(cj_pl2),
     n = n(),
     .groups = "drop"
   ) |>
@@ -221,8 +221,8 @@ total_pooled_ap_cj <- eu25games2019 |>
   ) |>
   group_by(der_partisan_relationship) |>
   summarise(
-    mean = mean(cj_token),
-    sd = sd(cj_token),
+    mean = mean(cj_pl2),
+    sd = sd(cj_pl2),
     n = n(),
     .groups = "drop"
   ) |>
@@ -298,7 +298,7 @@ ap_country_party <- eu25games2019 |>
     der_partisan_relationship
   ) |>
   summarise(
-    mean = mean(cj_token),
+    mean = mean(cj_pl2),
     .groups = "drop"
   ) |>
   pivot_wider(
@@ -362,7 +362,7 @@ ap_country_party_total <- eu25games2019 |>
     der_partisan_relationship
   ) |>
   summarise(
-    mean = mean(cj_token),
+    mean = mean(cj_pl2),
     .groups = "drop"
   ) |>
   pivot_wider(
@@ -463,7 +463,7 @@ saveRDS(
 
 ```{r}
 #| label: fig-distr-thermo
-#| fig-cap: "Distribution of thermometer ratings (rescaled from 0-100 to 0-10). $Mean = 3.89$, $median = 4$, $SD = 3.04$"
+#| fig-cap: "Distribution of thermometer ratings (rescaled from 0-100 to 0-10). $Mean = 3.82$, $median = 4$, $SD = 3.04$"
 
 summary_stats <- thermo_long |>
   summarise(
@@ -1341,8 +1341,8 @@ ap_cj_country_unw <- eu25games2019 |>
   ) |>
   group_by(meta_country, der_partisan_type, der_partisan_relationship) |>
   summarise(
-    mean = mean(cj_token),
-    sd = sd(cj_token),
+    mean = mean(cj_pl2),
+    sd = sd(cj_pl2),
     n = n(),
     .groups = "drop"
   ) |>
@@ -1371,8 +1371,8 @@ ap_cj_country_total_unw <- eu25games2019 |>
   ) |>
   group_by(meta_country, der_partisan_relationship) |>
   summarise(
-    mean = mean(cj_token),
-    sd = sd(cj_token),
+    mean = mean(cj_pl2),
+    sd = sd(cj_pl2),
     n = n(),
     .groups = "drop"
   ) |>
@@ -1431,8 +1431,8 @@ ap_country_party_weighted <- eu25games2019 |>
     der_partisan_relationship
   ) |>
   summarise(
-    mean = mean(cj_token),
-    sd = sd(cj_token),
+    mean = mean(cj_pl2),
+    sd = sd(cj_pl2),
     n = n(),
     .groups = "drop"
   ) |>
@@ -1496,8 +1496,8 @@ ap_country_party_total_w <- eu25games2019 |>
     der_partisan_relationship
   ) |>
   summarise(
-    mean = mean(cj_token),
-    sd = sd(cj_token),
+    mean = mean(cj_pl2),
+    sd = sd(cj_pl2),
     n = n(),
     .groups = "drop"
   ) |>

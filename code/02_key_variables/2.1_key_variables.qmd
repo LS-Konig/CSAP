@@ -50,8 +50,7 @@ eu25games2019 <- readRDS(
   here(
     "data",
     "02_processed",
-    "data",
-    "eu25games2019_3.rds"
+    "eu25games2019_long.rds"
   )
 )
 
@@ -59,13 +58,54 @@ eu25games2019 <- readRDS(
 
 # Vote and Party ID Variables
 
-We have:
-  - Partisan Attachement (`q_party_id`)
-  - Vote Intention (`q_vote_intention``q_vote_intention_hypo`)
-  - Reported Vote Choice (`q_voted_party`, `q_voted_party_hypo`)
-  - Reported Vote Choice 2014 (`q_voted_party_2014`)
+The published data harmonises every party-bearing item against Party Facts, so each is
+available as an `ext_<item>_pf_name` / `ext_<item>_pf_id` pair. The items we need are:
 
-- Given our primary interest in comparing explicit and implicit attachement, we pursue a maximizing strategy (i.e., for example, collapsing `vote_intention` and `vote_intention_hypo`)
+- Partisan attachment: `ext_q_party_id_pf_*` — *"Do you consider yourself to be close to
+  any particular political party? If so, which party do you feel close to?"*
+- Vote intention: `ext_q_vote_choice_intended_pf_*` (wave 2, *"Which party will you vote
+  for in this election?"*)
+- Hypothetical vote: `ext_q_vote_choice_hypo_pf_*` (*"Just assuming you were going
+  to vote / had voted, which party would you (have) vote(d) for?"*)
+- Reported vote choice: `ext_q_vote_choice_past_pf_*` (*"Which party did you vote for in
+  this election?"*)
+
+Given our primary interest in comparing explicit and implicit attachment, we pursue a
+recall-maximizing strategy: intention first, then the hypothetical probe, then reported
+choice. Note that the published data merges the wave-2 and wave-3 hypothetical items
+into a single `q_vote_choice_hypo` column, so this collapses to three sources rather than
+the four the previous pipeline coalesced.
+
+## Non-party responses
+
+Party Facts assigns real parties a numeric `pf_id`; non-party answers instead carry a
+sentinel string in `pf_name` with `pf_id = NA`. Parties genuinely absent from Party Facts
+are marked `"<name> [og]"`, also with `pf_id = NA` — **these are real parties** and must
+stay in the partisan groups, so the sentinel set has to be matched literally rather than
+by testing `is.na(pf_id)`.
+
+```{r}
+#| label: pf-sentinels
+
+# non-party answers in the Party Facts crosswalk
+pf_no_party <- c(
+  "none",
+  "dont-know",
+  "refused",
+  "did-not-vote",
+  "blank-invalid",
+  "not-eligible"
+)
+
+# answers that name something, but not a codeable party
+pf_other <- c("other", "independent")
+
+# which of these actually occur in this sample?
+eu25games2019 |>
+  distinct(meta_pid, ext_q_party_id_pf_name) |>
+  filter(ext_q_party_id_pf_name %in% c(pf_no_party, pf_other)) |>
+  count(ext_q_party_id_pf_name, name = "respondents")
+```
 
 ```{r}
 #| label: aggregated-vote-and-pid-variables
@@ -74,29 +114,29 @@ eu25games2019 <- eu25games2019 |>
   # Create aggregated/combined variables
   mutate(
     der_vote_combined_name = coalesce(
-      ext_q_vote_intention_pf_name,
-      ext_q_vote_intention_hypo_pf_name,
-      ext_q_voted_party_pf_name,
-      ext_q_voted_party_hypo_pf_name
+      ext_q_vote_choice_intended_pf_name,
+      ext_q_vote_choice_hypo_pf_name,
+      ext_q_vote_choice_past_pf_name
     ),
     der_vote_combined_id = coalesce(
-      ext_q_vote_intention_pf_id,
-      ext_q_vote_intention_hypo_pf_id,
-      ext_q_voted_party_pf_id,
-      ext_q_voted_party_hypo_pf_id
+      ext_q_vote_choice_intended_pf_id,
+      ext_q_vote_choice_hypo_pf_id,
+      ext_q_vote_choice_past_pf_id
     ),
     der_vote_cat = case_when(
-      der_vote_combined_name == "other" ~ "Other",
-      der_vote_combined_name == "dont-know" ~ "Don't know",
+      der_vote_combined_name %in% pf_other ~ "Other",
+      der_vote_combined_name %in% pf_no_party ~ "Don't know",
       is.na(der_vote_combined_name) ~ "NA",
       .default = "Vote reported"
     ),
     der_pid = case_when(
-      ext_q_party_id_pf_name == "none" ~ "No Party ID",
-      ext_q_party_id_pf_name == "other" ~ "Other",
+      ext_q_party_id_pf_name %in% pf_no_party ~ "No Party ID",
+      ext_q_party_id_pf_name %in% pf_other ~ "Other",
       is.na(ext_q_party_id_pf_name) ~ "NA",
       .default = "Party ID reported"
-    )
+    ),
+    # Hahm et al.'s `nopid` flag, reconstructed from the harmonized attachment item
+    der_nopid = if_else(der_pid == "Party ID reported", 0, 1)
   ) |>
   # Convert to factors and sort by frequency
   mutate(
@@ -106,9 +146,24 @@ eu25games2019 <- eu25games2019 |>
     )
   )
 
+eu25games2019 |>
+  distinct(meta_pid, der_pid, der_vote_cat) |>
+  count(der_pid, der_vote_cat)
 ```
 
 # Variable Combining Partisan Type (Implicit/Explicit) and Group-relationship (Co/Out/None)
+
+The conjoint conditions and the displayed co-player nationality now come straight from
+the published data rather than from Hahm et al.'s derived analysis frame:
+
+| previously | now | levels |
+|---|---|---|
+| `cj_trmnt` | `cj_treatment` | `1_conat_eustance_partisan`, `2_conat_partisan`, `3_eunat_eustance`, `4_somenat` |
+| `der_conational` | `cj_nationality_shown` | `own_country`, `eu`, `non_eu` |
+
+`cj_nationality_shown` is the nationality the respondent actually saw. The treatment
+branch overrides the background nationality lottery in every condition except
+`4_somenat`, so the raw draw (`cj_nationality_drawn`) must not be used here.
 
 ```{r}
 #| label: implicit-explicit-co-out-interaction-variable
@@ -135,57 +190,57 @@ eu25games2019 <- eu25games2019 |>
       # === EXPLICIT PID =======================================================
       # case 1: pid and control group (implies conational)
       der_partisanship == "1_pid_expl" &
-        cj_trmnt == "4_somenat" &
-        der_conational == "co-national" ~ "1_control_expl",
+        cj_treatment == "4_somenat" &
+        cj_nationality_shown == "own_country" ~ "1_control_expl",
       # case 2: pid and copartisan (same)
       der_partisanship == "1_pid_expl" &
-        str_detect(cj_trmnt, "partisan") &
+        str_detect(cj_treatment, "partisan") &
         (ext_cj_party_pf_name == ext_q_party_id_pf_name) ~ "2_co_expl",
       # case 3: pid and outpartisan
       der_partisanship == "1_pid_expl" &
-        str_detect(cj_trmnt, "partisan") &
+        str_detect(cj_treatment, "partisan") &
         (ext_cj_party_pf_name != ext_q_party_id_pf_name) ~ "3_out_expl",
       # case 4: pid and eu outnational cj (hence no party shown)
       der_partisanship == "1_pid_expl" &
-        !str_detect(cj_trmnt, "partisan") &
-        str_detect(cj_trmnt, "eunat") ~ "97_eunat_expl",
+        !str_detect(cj_treatment, "partisan") &
+        str_detect(cj_treatment, "eunat") ~ "97_eunat_expl",
       # case 5: pid and noneu outnational cj (hence no party shown)
       der_partisanship == "1_pid_expl" &
-        !str_detect(cj_trmnt, "partisan") &
-        str_detect(cj_trmnt, "somenat") ~ "98_outnat_expl",
+        !str_detect(cj_treatment, "partisan") &
+        str_detect(cj_treatment, "somenat") ~ "98_outnat_expl",
 
       # === IMPLICIT PID =======================================================
       # case 4: pid and control group
       der_partisanship == "2_pid_impl" &
-        cj_trmnt == "4_somenat" &
-        der_conational == "co-national" ~ "4_control_impl",
+        cj_treatment == "4_somenat" &
+        cj_nationality_shown == "own_country" ~ "4_control_impl",
       # case 5: impl pid and copartisan
       der_partisanship == "2_pid_impl" &
-        str_detect(cj_trmnt, "partisan") &
+        str_detect(cj_treatment, "partisan") &
         (ext_cj_party_pf_name == der_vote_combined_name) ~ "5_co_impl",
       # case 6: pid and outpartisan
       der_partisanship == "2_pid_impl" &
-        str_detect(cj_trmnt, "partisan") &
+        str_detect(cj_treatment, "partisan") &
         (ext_cj_party_pf_name != der_vote_combined_name) ~ "6_out_impl",
       # case 4: pid and eu outnational cj (hence no party shown)
       der_partisanship == "2_pid_impl" &
-        !str_detect(cj_trmnt, "partisan") &
-        str_detect(cj_trmnt, "eunat") ~ "97_eunat_impl",
+        !str_detect(cj_treatment, "partisan") &
+        str_detect(cj_treatment, "eunat") ~ "97_eunat_impl",
       # case 5: pid and noneu outnational cj (hence no party shown)
       der_partisanship == "2_pid_impl" &
-        !str_detect(cj_trmnt, "partisan") &
-        str_detect(cj_trmnt, "somenat") ~ "98_outnat_impl",
+        !str_detect(cj_treatment, "partisan") &
+        str_detect(cj_treatment, "somenat") ~ "98_outnat_impl",
 
       # === NO PID =============================================================
       der_partisanship == "3_nopid" &
-        cj_trmnt == "4_somenat" &
-        der_conational == "co-national" ~ "7_control_nopid",
+        cj_treatment == "4_somenat" &
+        cj_nationality_shown == "own_country" ~ "7_control_nopid",
       der_partisanship == "3_nopid" &
-        str_detect(cj_trmnt, "partisan") ~ "8_ptycue_nopid",
+        str_detect(cj_treatment, "partisan") ~ "8_ptycue_nopid",
       der_partisanship == "3_nopid" &
-        der_conational == "out-national-EU" ~ "99_outnatEU_nopid",
+        cj_nationality_shown == "eu" ~ "99_outnatEU_nopid",
       der_partisanship == "3_nopid" &
-        der_conational == "out-national-non-EU" ~ "99_outnat_nopid",
+        cj_nationality_shown == "non_eu" ~ "99_outnat_nopid",
       .default = NA
     )
   )
@@ -214,15 +269,24 @@ eu25games2019 <- eu25games2019 |>
 
 ## Partisan Anchor $A$
 
+The anchor is keyed on `der_partisanship` rather than restated in terms of `der_pid` and
+`der_vote_cat`. Restating the conditions is how the two definitions previously drifted
+apart: `der_partisanship` counts a respondent whose attachment item is missing but whose
+vote is reported as an implicit partisan, whereas the old anchor rule matched only
+`der_pid == "No Party ID"` and so left those respondents anchorless (11 respondents in
+the current sample). Deriving $A$ from $T$'s own input makes the two consistent by
+construction.
+
 ```{r}
 #| label: partisan-anchor
 
 eu25games2019 <- eu25games2019 |>
   mutate(
     der_partisan_anchor = case_when(
-      der_pid == "Party ID reported" ~ ext_q_party_id_pf_name,
-      der_pid == "No Party ID" &
-        der_vote_cat == "Vote reported" ~ der_vote_combined_name
+      # explicit partisans are anchored to the party they report feeling close to
+      der_partisanship == "1_pid_expl" ~ ext_q_party_id_pf_name,
+      # vote-anchored partisans to the party they report voting for
+      der_partisanship == "2_pid_impl" ~ der_vote_combined_name
     )
   )
 
@@ -250,8 +314,8 @@ eu25games2019 <- eu25games2019 |>
   mutate(
     der_partisan_relationship = case_when(
       # control group (no partisan cue but still conational)
-      cj_trmnt == "4_somenat" &
-        der_conational == "co-national" ~ "None",
+      cj_treatment == "4_somenat" &
+        cj_nationality_shown == "own_country" ~ "None",
       # copartisan
       der_partisan_anchor == ext_cj_party_pf_name ~ "Co",
       # outpartisan
@@ -278,8 +342,42 @@ eu25games2019 <- eu25games2019 |>
 
 ```
 
+# Verify the framework variables
+
+The three framework variables are what every later result rests on, so check their joint
+distribution rather than trusting the `case_when()` chains silently.
+
+```{r}
+#| label: verify-framework-variables
+
+# T x R, restricted to the co-national profiles the design compares
+eu25games2019 |>
+  filter(cj_nationality_shown == "own_country", !is.na(der_partisan_type)) |>
+  count(meta_game, der_partisan_type, der_partisan_relationship)
+
+stopifnot(
+  # partisan type is defined exactly for explicit and implicit partisans
+  all(
+    is.na(eu25games2019$der_partisan_type) ==
+      !(eu25games2019$der_partisanship %in% c("1_pid_expl", "2_pid_impl"))
+  ),
+  # every partisan carries an anchor
+  all(!is.na(
+    eu25games2019$der_partisan_anchor[!is.na(eu25games2019$der_partisan_type)]
+  )),
+  # anchors are real parties, never Party Facts sentinels
+  !any(
+    eu25games2019$der_partisan_anchor %in% c(pf_no_party, pf_other),
+    na.rm = TRUE
+  ),
+  # both games survive, three rounds each
+  setequal(eu25games2019$meta_game, c("dict", "trust")),
+  setequal(eu25games2019$meta_round, 1:3)
+)
+```
+
 # Save dataset ready for estimation
-  
+
 ```{r}
 #| label: save-data-2model
 

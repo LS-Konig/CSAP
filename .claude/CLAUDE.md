@@ -109,31 +109,48 @@ Quarto is configured with `freeze: auto` — code chunks that have already been 
 
 ### Data pipeline
 
+There is **one** raw input: `data/01_raw/eu25games2019.rds`, the published harmonized release of the Hahm et al. survey (Zenodo DOI [10.5281/zenodo.21294634](https://doi.org/10.5281/zenodo.21294634), v1.0.0, repo `LS-Konig/eu25games2019`). 103,685 respondent-waves × 847 columns, wide, xz-compressed to 29 MB but >1 GB in memory. Party Facts IDs are already merged onto every party-bearing item as `ext_*_pf_name` / `ext_*_pf_id`.
+
 ```
-data/01_raw/          → data/02_processed/      → data/03_final/
-(raw survey files)      (harmonized RData)         (analysis-ready RDS)
+data/01_raw/eu25games2019.rds          published release (wide, respondent x wave)
+  │  1.1_datasets.qmd
+  ▼
+data/02_processed/eu25games2019_long.rds   1 row = respondent x game x round
+  │  2.1_key_variables.qmd
+  ▼
+data/03_final/eu25games2019.rds  ──►  data/03_final/thermo_long.rds  (written by 3.2)
 ```
 
-The main analysis object is `eu25games2019` (stored as both `.RData` in `02_processed/` and `.rds` in `03_final/`). Thermometer scores are in `thermo_long.rds`.
+**The upstream codebook is the variable reference**, not anything in this repo: `C:/R/research/eu25games2019/code/08_codebook.html` (question wording in all 25 languages, empirical coded↔raw value maps) and `data/03_final/variable_crosswalk.csv` (variable → original Dynata code per wave) in that repo. Do not re-document variables here. See `data/01_raw/external-data.md` for provenance, licence and how to refresh the local copy.
 
 ### Code pipeline (numbered, sequential)
 
 | Directory | Purpose |
 |-----------|---------|
-| `code/00_helper/` | Utility scripts: `copyR.R` (data copying), `glftrackeR.R` (auto-LFS tracking) |
-| `code/01_preparation/` | Data loading from multiple raw sources (1.1), party harmonization (1.2), codebook (1.3) |
+| `code/00_helper/` | Utility scripts: `copyR.R` (refresh the raw file from a sibling clone), `glftrackeR.R` (auto-LFS tracking) |
+| `code/01_preparation/` | `1.1_datasets.qmd` only: load the published release, clean, fold in the French questionnaire fork, reshape the games wide→long |
 | `code/02_key_variables/` | Partisan identity variable construction (explicit vs. implicit partisans, anchor) |
 | `code/03_explanal/` | Descriptive analyses (3.1) and AP measurement (3.2) — these two are the featured notebooks |
 | `code/04_models/` | Bayesian regression models via brms |
 | `code/literature-overview.qmd` | Systematic coding of comparative AP studies |
 
+There is no 1.2 (party harmonization) or 1.3 (codebook) any more — both are handled upstream.
+
+### Sample construction
+
+Cleaning decisions are now this project's own, because the published release is the full uncleaned survey rather than Hahm et al.'s analysis frame. `1.1_datasets.qmd` keeps respondents who passed the attention check (`der_att_check_3`, switchable via `apply_attention_check`), completed the questionnaire, are not within-wave duplicates, and played the games; wave-1 covariates are carried forward into missing wave-2/3 cells before wave-1 rows are dropped. Each panelist is then reduced to their **earliest game wave**, because roughly 9,500 played in both waves 2 and 3 and this project's tables are respondent-level. Result: **22,858 respondents × 6 game rounds = 137,148 rows**, against 29,827 respondents in the pre-migration frame — the attention check accounts for essentially all of the difference.
+
 ### Key variables
 
 - `der_pid` — derived party ID (explicit partisan indicator)
-- `der_vote_cat` — vote category (explicit / implicit / non-partisan)
-- `der_partisan_anchor` — the party a respondent is anchored to
-- `der_copartisan` — co-partisan indicator in the trust game
+- `der_vote_cat` — vote category, built by coalescing `ext_q_vote_choice_{intended,hypo,past}_pf_name` in that order
+- `der_partisan_type` — T: 1 explicit, 0 vote-anchored, NA otherwise
+- `der_partisan_anchor` — A: the party a respondent is anchored to; derived from `der_partisanship` so the two cannot diverge
+- `der_partisan_relationship` — R: `None` / `Co` / `Out`. **This is the co-partisan indicator** — there is no `der_copartisan` column
+- `cj_pl2` — token allocation, the behavioral outcome; `cj_treatment` and `cj_nationality_shown` are the conjoint condition and the displayed co-player nationality (levels `own_country` / `eu` / `non_eu`)
 - Thermometer scores — the **attitudinal** AP measure; conjoint token allocations are the **behavioral** measure
+
+**Published names are used throughout.** The pre-migration names (`cj_token`, `cj_trmnt`, `der_conational`, `q_perc_class`, `q_lrpos2`, …) are gone; match the upstream codebook, not older notebooks or notes. `meta_wave` is now the true survey wave, so the game rows carry 2 and 3, not 1 and 2. `meta_country` uses "Czechia", not "Czech Republic".
 
 **Terminology mapping (code vs. manuscript).** The variables still use `implicit`; the manuscript prose uses the neutral term **vote-anchored**. Keep the variable levels as they are and translate in prose. Vote-anchored respondents are not the same thing as *leaners* — leaners come from an attitudinal probe, these from vote recall — so never use the terms interchangeably; section 4 estimates the overlap using the CSES branching probe.
 
@@ -153,7 +170,7 @@ Four ingroup codings are compared in section 8: identity only; recall-maximizing
 
 **`data/01_raw/external-data.md` is the authoritative inventory** — read it before looking for a dataset or proposing a new one. It covers both the collected sources and the planned ones, with status marks and access notes. What follows is a summary only; keep the two in sync, and put new detail in the inventory rather than here.
 
-`data/01_raw/external/` holds supporting sources, separate from the main Hahm et al. file in `data/01_raw/hahmetal-data/`:
+`data/01_raw/external/` holds supporting sources, separate from the primary analysis file `data/01_raw/eu25games2019.rds`:
 
 - `cses/imd/` — CSES Integrated Module Dataset. The only source carrying the branching closeness probe, so the sole basis for the leaner-overlap estimate in section 4 and for splitting "no attachment" into leaners vs. true non-partisans.
 - `cses/mod5/` — CSES Module 5 (2016–2021). Closest module in time to the 2019 Hahm et al. fieldwork; use for period-matched attachment shares.
