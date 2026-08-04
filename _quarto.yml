@@ -7,7 +7,6 @@ manuscript:
   notebooks:
     - notebook: code/03_explanal/3.1_descr_anal.qmd
     - notebook: code/03_explanal/3.2_ap_measures.qmd
-  code-links: binder
 
 execute: 
   freeze: auto

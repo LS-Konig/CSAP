@@ -80,18 +80,13 @@ Before adding any analysis to the manuscript, ask whether it changes step 7 of t
 
 ## Stack
 
-- **R 4.5.1** with **renv** for reproducible package management
-- **Quarto 1.7.32** for all documents (manuscript, analysis notebooks, presentation)
+- **R 4.5.3** — packages come from the user library (`C:/Users/Tris/AppData/Local/R/win-library/4.5`). There is deliberately **no renv** during active development; it will be re-introduced with `renv::init()` only when the directory is frozen for replication. Do not add `.Rprofile`, `renv/`, or `renv.lock` back before then.
+- **Quarto 1.9.36** for all documents (manuscript, analysis notebooks, presentation)
 - **brms** for Bayesian multilevel regression (Stan-based)
 - **ggplot2 / ggpubr / ggrepel / ggdag** for visualization
 - **Git LFS** for large data files (>100 MB)
 
 ## Commands
-
-**Restore R environment (first time or after pulling):**
-```r
-renv::restore()
-```
 
 **Render the full manuscript (HTML + PDF + DOCX):**
 ```bash
@@ -109,11 +104,6 @@ quarto render presentation.qmd
 ```
 
 Quarto is configured with `freeze: auto` — code chunks that have already been executed are cached; re-run only changed chunks. To force a full re-render, delete the `_freeze/` directory first.
-
-**Installing Quarto + TinyTeX (cloud/Binder setup only):**
-```bash
-bash postBuild
-```
 
 ## Architecture
 
