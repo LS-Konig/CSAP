@@ -1,1 +1,3 @@
 index-meca.zip filter=lfs diff=lfs merge=lfs -text
+data/01_raw/external/mannheim-eurobarometer-trend-file-1970-2002/ZA3521_v2-0-1.dta filter=lfs diff=lfs merge=lfs -text
+data/01_raw/external/cses/mod6/cses6.rdata filter=lfs diff=lfs merge=lfs -text
