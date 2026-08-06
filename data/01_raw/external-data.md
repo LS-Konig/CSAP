@@ -84,13 +84,60 @@ section needs.
 
 Source: <https://cses.org/data-download/download-data-documentation/>
 
+**The IMD already contains Module 5 in full** — 114,714 of its 395,797 rows carry
+`IMD1008_MOD_5 == 1`, exactly the row count of `cses5.rdata`, and 55 of Module 5's 56
+election-study IDs appear in the IMD. Stacking IMD and Module 5 double-counts every Module 5
+election. Module 6 shares no study IDs with either. Default to **IMD + Module 6**; reach for
+`cses5.rdata` only when you need Module-5-specific variables the IMD does not harmonise.
+
+Practical notes, verified against the files:
+
+- CSES stores metadata **Stata-style at the data-frame level**: `attr(d, "var.labels")` runs
+  parallel to `names(d)` and `attr(d, "label.table")` holds the value labels. The per-column
+  `attr(x, "label")` that `haven` would set is `NULL`, so a naive label search finds nothing.
+- **Module 6 uses lowercase variable names and renumbers items.** The attachment battery is
+  `IMD3005_*` in the IMD, `E3024_*` in Module 5 and `f3023_*` in Module 6 — and `f3005_*` in
+  Module 6 is an unrelated item ("country better run by"). Never assume a code carries across
+  releases.
+- `cses6.rdata` loads two objects, `cses6` and a stray `.Traceback`; select by name.
+- Weight tiers differ. Use the *within-sample* weight for within-country shares: `IMD1010_1`
+  (IMD), `f1101_1` (Module 6). Module 6's `f1103_1` ("polity weight") is identically 1 within a
+  polity — it exists for pooling across polities, so using it is equivalent to running unweighted.
+- `IMD1006_EU` / `f1007_eu` flag EU membership **at the time of the election**, which implements
+  an accession-year filter natively.
+- Attachment value labels are identical across releases: `0` no, `1` yes, `7` volunteered
+  refused, `8` volunteered don't know, `9` missing. DK and refusal are separately coded, so a
+  three-way harmonisation needs no reconstruction.
+- CSES has **no East/West Germany split**: all German studies are post-unification and `IMD1007`
+  (sample component) is documented only as "see election study notes".
+
 ### Mannheim Eurobarometer Trend File 1970–2002
 
 | Status | Path | Files | Role and caveats |
 |---|---|---|---|
-| ✅ 🔒 | `mannheim-eurobarometer-trend-file-1970-2002/` | `ZA3521_v2-0-1.dta` (228 MB) + codebook PDF | Ed. 2.0.1: 86 waves, 145 variables, >1m cases, Western Europe. Free after GESIS registration. **Argument step 2:** the long-run attachment decline. Carries **both** party attachment and party preference, so the explicit / vote-anchored split is constructible back to the early 1970s — no other source reaches that far. |
+| ✅ 🔒 | `mannheim-eurobarometer-trend-file-1970-2002/` | `ZA3521_v2-0-1.dta` (228 MB) + codebook PDF | Ed. 2.0.1: 86 waves, 145 variables, 1,134,384 cases, Western Europe. Free after GESIS registration. **Argument step 2:** the long-run attachment decline. Carries **both** party attachment and party preference, so the explicit / vote-anchored split is constructible from 1975 — no other source reaches back that far. |
 
-Caveats: item wording varies across waves and is documented in the codebook; **not all trend
+Variables, verified against the file (`code/03_explanal/3.3_pid_over_time.qmd`):
+
+- `closepty` — the attachment item, carrying **status and strength in one variable**:
+  `1` very close, `2` fairly close, `3` merely a sympathiser, `4` no party, `8` DK/NA, `9` inap.
+- `feelclo` — *which* party the respondent feels close to (country-specific party codes). Not a
+  status item; fielded erratically.
+- `voteint` — vote intention; `lastvote` — last vote (past-vote recall); `inclvote` — inclination
+  to vote. **Two different constructs; never merge them.**
+- `nation1` is the country identifier to use: it separates West (`4`) from East (`14`) Germany and
+  Great Britain (`9`) from Northern Ireland (`10`). `nation2` pools both pairs irrecoverably.
+- Weights: `wsample`, `wnation` (within-country — the right one for national shares), `weuro`
+  (weights countries to EU population).
+
+**Coverage correction.** The attachment item runs **1975–1994 only**, not the full span of the
+file. Substantive-response counts are zero for `closepty` before 1975 and from 1995 onward; the
+earlier claim that the explicit / vote-anchored split reaches "back to the early 1970s" holds for
+the *vote* item alone. `voteint` covers 1970–2002 but is absent in 1998 and 2001; `lastvote` is
+fielded only in 1979 and 1982–1995. Austria, Finland and Sweden acceded in 1995, after `closepty`
+was dropped, so they have **no** Eurobarometer attachment series at all.
+
+Other caveats: item wording varies across waves and is documented in the codebook; **not all trend
 variables are present in all waves** — verify item coverage wave by wave before building a
 series. The attachment battery is largely dropped from the Standard Eurobarometer after 2002,
 so this file ends at a genuine discontinuity, not an arbitrary cut.
@@ -104,11 +151,51 @@ Source: <https://search.gesis.org/research_data/ZA3521> (DOI 10.4232/1.10074)
 | ✅ | `carlin-love-2018/` | `BJPS data.dta` (3.4 MB), `BJPS US 2011 Bin Laden Study.dta` (16 KB) | Carlin & Love, partisan trust-game discrimination. Out-of-sample benchmark for the behavioral result — establishes what a copartisan effect of the size we estimate looks like elsewhere. |
 | ✅ | `westwood-et-al-2015/` | `trustGameSSI.csv`, `partisanIAT-SSI.csv`, `dscoreLR.csv`, `dscoreWB.csv`, `AJPSResponsivenessNegativity.csv` | Westwood et al., partisan trust game + partisan IAT. Reference measures for behavioral and implicit AP; the IAT files are the comparison point for any claim about implicit vs. self-reported animus. |
 
+### TRI-POL — Torcal et al. three-wave panel
+
+| Status | Path | Files | Role and caveats |
+|---|---|---|---|
+| ✅ | `tripol/` | 5 × `TRI_POL_{AR,CL,ES,IT,PT}.XLSX` (21 MB) + 21 codebook/questionnaire PDFs (27 MB) | Three-wave panel, Sept 2021–Apr 2022, 6,201 respondents in W1. Carries party/leader thermometers, an **incentivized** partisan trust game, a W3 conjoint, within-person social-distance items, and the attachment item in all three waves. **The only external source with an attitudinal *and* a behavioral AP measure on the same respondents** — hence the robustness leg for sections 5–6, and a section 7 candidate. |
+
+**→ `data/01_raw/external/tripol/tripol.md` is the detailed reference for this dataset:**
+full variable inventory, verified design facts, the modelling-transfer table, and the import
+gotchas. Read it before touching the files. Only the inventory-level summary lives here.
+
+Provenance: TRI-POL, PI Mariano Torcal (RECSM–UPF). Data paper Torcal, Carty, Comellas, Bosch,
+Thomson & Serani (2023), *Data in Brief*
+<https://www.sciencedirect.com/science/article/pii/S2352340923003384>. Repository
+<https://osf.io/3t7jz/>. Already cited in the project as `@Comellas2023ideological`
+(`code/literature-overview.qmd:102`). Netquest **online opt-in quota panels — not probability
+samples, and the files carry no survey weights.**
+
+The three facts that determine how it can be used, all verified against the files:
+
+- **The trust game is between-subjects.** `GAME_SHOW_2` shows each respondent the in-party
+  *or* the out-party counterpart; respondents answering both = **0**, in all five countries.
+  So the unit of observation is the respondent, not round-within-respondent, and the model is
+  one level shallower than the main analysis. `esmP11_2` — an anonymous-counterpart round
+  present for **100%** of cued players — substitutes for the respondent random intercept.
+- ⚠️ **The counterpart party is piped by a type-dependent rule**: attachment where available,
+  top PTV otherwise. TRI-POL therefore varies the anchor *and* the reporting, which is exactly
+  what section 4's design exists to prevent, and it is most-liked-party coding besides.
+  Re-anchor everyone on `p36_` PTV and retain only matches; this must be the primary
+  specification, not a footnote.
+- ✅ **The section 7 gate is cleared.** 18–23% of respondents switch attachment status per
+  wave, in both directions, in every country (ES W1→W2: 176 yes→no, 89 no→yes). Recorded, not
+  committed — see C.1.
+
+Only ES, IT and PT are in the paper's frame; AR and CL are extra-European.
+
+**Not in this download**, despite being expected: no Stata `.dta` (XLSX only, wide, one row per
+respondent), no passive-meter trace files (`met*` variables are self-reports *about* the meter),
+no Party Facts crosswalk. No file approaches the LFS threshold — largest is 4.9 MB.
+
 ---
 
 ## C. External data — planned
 
-Not downloaded. Links and notes carried over from the manuscript inventory.
+Not downloaded, with one exception noted below. Links and notes carried over from the
+manuscript inventory.
 
 ### C.1 Section 7 panel candidates
 
@@ -116,7 +203,12 @@ Section 7 (the within-person leg, main text) needs one panel with repeated attac
 measurement. **Gate: choose on the attachment transition matrix.** Check within-person
 movement in the attachment item *before* committing; if movement is thin, drop section 7
 rather than report an underpowered result. One country done properly beats several done
-shallowly — so exactly one of these gets downloaded.
+shallowly — so exactly one of these gets *used*.
+
+**TRI-POL is now on disk** (it was collected for the sections 5–6 robustness leg, not for
+section 7) and has cleared the gate. That does not settle the choice: the others below remain
+open, and several have more waves or probability samples. It does mean the gate can be checked
+against a real transition matrix rather than assumed.
 
 | Status | Dataset | Coverage | Link | Notes |
 |---|---|---|---|---|
@@ -125,7 +217,7 @@ shallowly — so exactly one of these gets downloaded.
 | ⬜ 🔒 | LISS panel | NL | <https://www.lissdata.nl> · <https://www.dataarchive.lissdata.nl/study-units/view/22> | Probability panel. Carries like–dislike toward party *supporters*, not only parties. Accepts external module proposals — a route to fielding attitudinal and behavioral items on the same respondents. |
 | ⬜ | POLAT Panel | ES, 12 waves | <https://doi.org/10.34810/DATA1486> · <https://www.nature.com/articles/s41597-025-05684-4> | Built because household panels carry thin political batteries. Most waves of any candidate. |
 | ⬜ 🔒 | AUTNES Online Panel 2017–2024 | AT | <https://doi.org/10.11587/HNUFCC> | Long multi-wave voter panel, recently documented. |
-| ⬜ | TRI-POL | ES, PT, IT, AR, CL | <https://osf.io/3t7jz/> · <https://www.upf.edu/web/tri-pol> | 3 waves, Sept 2021–Apr 2022. Embedded experiments; device-tracked trace data matched to survey. **No "don't know" option** except on knowledge items — a useful control for non-response artefacts. Read the data paper first: <https://www.sciencedirect.com/science/article/pii/S2352340923003384> |
+| ✅ | TRI-POL | ES, PT, IT (+ AR, CL) | see [section B](#tri-pol--torcal-et-al-three-wave-panel) · `tripol/tripol.md` | **Downloaded, and the gate is cleared** — 18–23% of respondents switch attachment status per wave, both directions, all five countries. The only candidate carrying thermometers, an incentivized behavioral measure *and* within-person attachment movement. Trace data is **not** in the download. |
 | ⬜ | Finnish online panel (Kekkonen & Ylä-Anttila) | FI | <https://www.frontiersin.org/journals/political-science/articles/10.3389/fpos.2022.920567/full> | Partisan social distance + like–dislike. Addresses in/out-group definition under multipartyism head-on. |
 
 ### C.2 Cross-national attitudinal infrastructures
@@ -188,6 +280,16 @@ Listed so they are not mistaken for collectable data.
   interviewer effects are strongest. EES moved online, national studies migrated to web
   panels, ESS R12 is mixed-mode. A jump in vote-anchored partisans around a mode switch is
   not evidence of dealignment.
+- **The anchor is not constructed the same way across sources.** The main analysis holds the
+  anchor constant and varies only whether attachment is reported. TRI-POL cannot do this by
+  design — it pipes the game counterpart from attachment where available and from top PTV
+  otherwise — and it has **no vote-recall item at all**, so its vote anchor must come from
+  intention or PTV. Any TRI-POL estimate compared against the main result must state which
+  anchoring rule produced it; the two are not interchangeable.
+- **Sample type differs where it matters most.** The main analysis file and CSES rest on
+  probability or quota-controlled designs; TRI-POL is an opt-in Netquest panel with **no
+  survey weights** in the release. Treat TRI-POL results as a within-source replication of a
+  *contrast*, never as a source of population levels.
 - **Practical rule:** treat each source as its own series, never splice, and anchor claims to
   constant-mode / constant-wording stretches. The Mannheim trend file and Politbarometer give
   the longest such stretches.

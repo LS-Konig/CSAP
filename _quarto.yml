@@ -7,6 +7,7 @@ manuscript:
   notebooks:
     - notebook: code/03_explanal/3.1_descr_anal.qmd
     - notebook: code/03_explanal/3.2_ap_measures.qmd
+    - notebook: code/03_explanal/3.3_pid_over_time.qmd
 
 execute: 
   freeze: auto

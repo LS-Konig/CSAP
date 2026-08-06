@@ -152,6 +152,358 @@ to-do table:
 
 @Torcal2023social for recall maximizing ingroup strategy 
 
+
+
+
+
+
+---
+title: "Partisanship, Partisan Identity and De-/Realignment in Europe"
+subtitle: "A structured bibliography of the post-1945 debate (EU-27 excl. MT/CY/LU, plus the UK)"
+format: html
+---
+
+## How to read this list
+
+Entries are grouped by **phase of the debate** and then by **country/region**, so the list doubles as a
+map of the argument rather than a flat reference dump.
+
+**DOI column convention.** DOIs marked as links were verified during compilation. Entries with `—` are
+canonical references whose bibliographic details are given from standard citation practice but whose DOI
+was **not** individually verified — check these against Crossref or your library before citing. Books
+generally have no DOI and are marked `[book]`.
+
+---
+
+## 1. Foundations: importing the Michigan model into Europe (1950s–1970s)
+
+The founding question: is "party identification", developed for a two-party US context, a meaningful
+concept in European multiparty systems with strong cleavage structures and disciplined parties?
+
+| Reference | Scope | Contribution to the debate | DOI |
+|---|---|---|---|
+| Campbell, A., Converse, P. E., Miller, W. E. & Stokes, D. E. (1960). *The American Voter.* Wiley. | US (baseline) | Establishes party identification as an enduring affective attachment and the "funnel of causality". | [book] |
+| Lipset, S. M. & Rokkan, S. (1967). Cleavage structures, party systems, and voter alignments. In *Party Systems and Voter Alignments.* Free Press. | Western Europe | The freezing hypothesis: party systems reflect frozen social cleavages of the 1920s. The reference point for all later de-/realignment claims. | [book] |
+| Butler, D. & Stokes, D. (1969). *Political Change in Britain.* Macmillan. | UK | First systematic European application of the Michigan model; introduces cohort/socialisation reasoning to British electoral change. | [book] |
+| Converse, P. E. (1969). Of time and partisan stability. *Comparative Political Studies*, 2(2), 139–171. | Comparative | Learning model: partisanship strengthens with democratic experience; foundational for later CEE work. | — |
+| Budge, I., Crewe, I. & Farlie, D. (eds.) (1976). *Party Identification and Beyond.* Wiley. | Comparative | The first collective stress-test of the concept outside the US; still the canonical statement of the sceptical position. | [book] |
+| Thomassen, J. (1976). Party identification as a cross-national concept: Its meaning in the Netherlands. In Budge et al. (eds.), *Party Identification and Beyond.* | Netherlands | The classic negative finding: in the Dutch case party ID appears to follow rather than cause vote choice. | [book] |
+| Rose, R. & Mishler, W. (1998). Negative and positive party identification in post-communist countries. *Electoral Studies*, 17(2), 217–234. | CEE | Introduces negative party identification as a distinct orientation in new democracies. | — |
+
+---
+
+## 2. The dealignment thesis (1980s–1990s)
+
+| Reference | Scope | Contribution | DOI |
+|---|---|---|---|
+| Dalton, R. J. (1984). Cognitive mobilization and partisan dealignment in advanced industrial democracies. *The Journal of Politics*, 46(1), 264–284. | 8 nations | The cognitive-mobilisation mechanism: rising skills and resources reduce the need for partisan cues, producing "apartisans". | [10.2307/2130444](https://doi.org/10.2307/2130444) |
+| Dalton, R. J., Flanagan, S. C. & Beck, P. A. (eds.) (1984). *Electoral Change in Advanced Industrial Democracies: Realignment or Dealignment?* Princeton UP. | Comparative | Frames the de- vs. realignment dichotomy that organises the field to this day. | [book] |
+| Crewe, I. & Denver, D. (eds.) (1985). *Electoral Change in Western Democracies: Patterns and Sources of Electoral Volatility.* Croom Helm. | Western Europe | Early systematic treatment of volatility as the behavioural signature of dealignment. | [book] |
+| Schmitt, H. (1989). On party attachment in Western Europe and the utility of Eurobarometer data. *West European Politics*, 12(2), 122–139. | EC member states | Establishes the Eurobarometer partisanship series and its measurement pitfalls. | — |
+| Richardson, B. M. (1991). European party loyalties revisited. *American Political Science Review*, 85(3), 751–775. | Western Europe | Rehabilitates partisanship in Europe against the sceptics; distinguishes party loyalty from vote. | — |
+| Franklin, M., Mackie, T. & Valen, H. (eds.) (1992). *Electoral Change: Responses to Evolving Social and Attitudinal Structures in Western Countries.* Cambridge UP. | 16 countries | The definitive test of declining cleavage voting; shows social-structural effects weakening across Western democracies. | [book] |
+| Schmitt, H. & Holmberg, S. (1995). Political parties in decline? In Klingemann, H.-D. & Fuchs, D. (eds.), *Citizens and the State.* Oxford UP. | Western Europe | Nuanced verdict: attachment declines, but unevenly and less than the "crisis of parties" narrative implies. | [book] |
+| Pedersen, M. N. (1979). The dynamics of European party systems: Changing patterns of electoral volatility. *European Journal of Political Research*, 7(1), 1–26. | Western Europe | The Pedersen index; the standard aggregate measure in all subsequent volatility work. | — |
+
+---
+
+## 3. Consolidation and contestation (2000s)
+
+| Reference | Scope | Contribution | DOI |
+|---|---|---|---|
+| Dalton, R. J. & Wattenberg, M. P. (eds.) (2000). *Parties without Partisans: Political Change in Advanced Industrial Democracies.* Oxford UP. | Comparative | The canonical statement of the dealignment consensus; Dalton's chapter documents cross-national decline in party ID. | [book] |
+| Thomassen, J. (ed.) (2005). *The European Voter: A Comparative Study of Modern Democracies.* Oxford UP. | 6 countries, long series | Long-run national election-study evidence; finds decline weaker and more country-specific than assumed. | [book] |
+| Berglund, F., Holmberg, S., Schmitt, H. & Thomassen, J. (2005). Party identification and party choice. In Thomassen (ed.), *The European Voter.* | 6 countries | Directly addresses whether party ID is causally prior to vote in European systems. | [book] |
+| Holmberg, S. (2007). Partisanship reconsidered. In Dalton, R. J. & Klingemann, H.-D. (eds.), *The Oxford Handbook of Political Behavior.* | Comparative | Balance sheet of the concept's travels; defends its utility. | [book] |
+| Dalton, R. J. & Weldon, S. (2007). Partisanship and party system institutionalization. *Party Politics*, 13(2), 179–196. | Comparative incl. CEE | Links individual partisanship to system-level institutionalisation. | — |
+| Bartle, J. & Bellucci, P. (eds.) (2009). *Political Parties and Partisanship: Social Identity and Individual Attitudes.* Routledge. | Comparative | The turning point toward a social-identity reading of European partisanship. | [book] |
+| Kroh, M. & Selb, P. (2009). Inheritance and the dynamics of party identification. *Political Behavior*, 31(4), 559–574. | Germany (SOEP) | Reconciles traditionalist and revisionist views: inherited attachments behave traditionally, acquired ones revisionist. | [10.1007/s11109-009-9084-2](https://doi.org/10.1007/s11109-009-9084-2) |
+| Schmitt-Beck, R., Weick, S. & Christoph, B. (2006). Shaky attachments: Individual-level stability and change of partisanship among West German voters, 1984–2001. *European Journal of Political Research*, 45(4), 581–608. | Germany (SOEP panel) | Panel evidence on the instability of German partisanship. | — |
+| Marsh, M. (2006). Party identification in Ireland: An insecure anchor for a floating party system. *Electoral Studies*, 25(3), 489–508. | Ireland | Key national case: weak party ID in a system without a classic left–right cleavage. | — |
+| Neundorf, A., Stegmueller, D. & Scotto, T. J. (2011). The individual-level dynamics of bounded partisanship. *Public Opinion Quarterly*, 75(3), 458–482. | UK, Germany | "Bounded partisanship": stability within blocs, movement across parties. | — |
+| van Biezen, I., Mair, P. & Poguntke, T. (2012). Going, going, ... gone? The decline of party membership in contemporary Europe. *European Journal of Political Research*, 51(1), 24–56. | Europe-wide | The organisational counterpart to attitudinal dealignment. | — |
+| Mair, P. (2013). *Ruling the Void: The Hollowing of Western Democracy.* Verso. | Western Europe | The influential normative synthesis of disengagement and party decline. | [book] |
+
+---
+
+## 4. Volatility, dealignment and its consequences (2010s–today)
+
+| Reference | Scope | Contribution | DOI |
+|---|---|---|---|
+| Dassonneville, R. (2013). Questioning generational replacement: An age, period and cohort analysis of electoral volatility in the Netherlands, 1971–2010. *Electoral Studies*, 32(1), 37–47. | Netherlands | APC decomposition: volatility is a period rather than purely cohort phenomenon. | — |
+| Dassonneville, R., Hooghe, M. & Vanhoutte, B. (2012). Age, period and cohort effects in the decline of party identification in Germany, 1992–2009. *German Politics*, 21(2), 209–227. | Germany | Central APC contribution to the German dealignment dispute (with Dalton's rejoinder). | [10.1080/09644008.2012.679659](https://doi.org/10.1080/09644008.2012.679659) |
+| Dassonneville, R. & Hooghe, M. (2018). Indifference and alienation: Diverging dimensions of electoral dealignment in Europe. *Acta Politica*, 53(1), 1–23. | Europe | Distinguishes two behavioural routes out of alignment. | — |
+| Dassonneville, R. & Hooghe, M. (2017). Economic indicators and electoral volatility: Economic effects on electoral volatility in Western Europe, 1950–2013. *Comparative European Politics*, 15(6), 919–943. | 16 countries, 1950–2013 | Macro-economic drivers of aggregate dealignment. | — |
+| Dejaeghere, Y. & Dassonneville, R. (2017). A comparative investigation into the effects of party-system variables on party switching using individual-level data. *Party Politics*, 23(2), 110–123. | Comparative | System-level moderators of individual switching. | [10.1177/1354068815576294](https://doi.org/10.1177/1354068815576294) |
+| Dassonneville, R., Fournier, P. & Somer-Topcu, Z. (2023). Partisan attachments in a multidimensional space. *West European Politics*, 46(4). | Western Europe | Supply-side account: ideologically consistent parties across dimensions generate clearer brands and more party ID. | [10.1080/01402382.2022.2087387](https://doi.org/10.1080/01402382.2022.2087387) |
+| Garzia, D., Ferreira da Silva, F. & De Angelis, A. (2022). Partisan dealignment and the personalisation of politics in West European parliamentary democracies, 1961–2018. *West European Politics*, 45(2), 311–334. | 14 countries, 109 election surveys | The key demonstration that dealignment causes rising leader effects. | [10.1080/01402382.2020.1845941](https://doi.org/10.1080/01402382.2020.1845941) |
+| Chiaramonte, A. & Emanuele, V. (2017). Party system volatility, regeneration and de-institutionalization in Western Europe (1945–2015). *Party Politics*, 23(4), 376–388. | 20 countries, 1945–2015 | The definitive long-run aggregate volatility series for Western Europe. | — |
+| van der Meer, T. W. G., van Elsas, E., Lubbe, R. & van der Brug, W. (2015). Are volatile voters erratic, whimsical or seriously picky? *Party Politics*, 21(1), 100–114. | Netherlands | Disaggregates "the volatile voter"; volatility is largely intra-bloc and reasoned. | — |
+| Fieldhouse, E., Green, J., Evans, G., Mellon, J., Prosser, C., Schmitt, H. & van der Eijk, C. (2020). *Electoral Shocks: The Volatile Voter in a Turbulent World.* Oxford UP. | UK | Ties record volatility to a sequence of political shocks in a dealigned electorate. | [book] |
+| Kroh, M. (2014). *Documentation of Sample Sizes and Panel Attrition in the SOEP* / related SOEP-based partisanship work. | Germany | Data infrastructure underpinning much German panel work on partisanship. | — |
+
+---
+
+## 5. Realignment: new cleavages, education and the sociocultural divide
+
+| Reference | Scope | Contribution | DOI |
+|---|---|---|---|
+| Kriesi, H., Grande, E., Lachat, R., Dolezal, M., Bornschier, S. & Frey, T. (2006). Globalization and the transformation of the national political space: Six European countries compared. *European Journal of Political Research*, 45(6), 921–956. | AT, CH, DE, FR, NL, UK | The integration–demarcation divide; the foundational realignment statement. | — |
+| Kriesi, H. et al. (2008). *West European Politics in the Age of Globalization.* Cambridge UP. | 6 countries | Book-length elaboration with party-supply and mass-demand evidence. | [book] |
+| Bornschier, S. (2010). *Cleavage Politics and the Populist Right.* Temple UP. | Western Europe | Links the new cultural divide to radical-right party formation. | [book] |
+| Stubager, R. (2009). Education-based group identity and consciousness in the authoritarian–libertarian value conflict. *European Journal of Political Research*, 48(2), 204–233. | Denmark | Early demonstration that education functions as a *group identity*, not just a predictor. | — |
+| Oesch, D. & Rennwald, L. (2018). Electoral competition in Europe's new tripolar political space: Class voting for the left, centre-right and radical right. *European Journal of Political Research*, 57(4), 783–807. | Western Europe | Tripolar class realignment; the standard class-schema reference. | — |
+| Hooghe, L. & Marks, G. (2018). Cleavage theory meets Europe's crises: Lipset, Rokkan, and the transnational cleavage. *Journal of European Public Policy*, 25(1), 109–135. | Europe | The transnational cleavage thesis. | — |
+| Marks, G., Attewell, D., Hooghe, L., Rovny, J. & Steenbergen, M. (2023). The social bases of political parties: A new measure and survey. *British Journal of Political Science*, 53(1), 249–260. | Europe | New party-structuration measure enabling inter-temporal comparison of cleavage strength. | — |
+| Bornschier, S., Häusermann, S., Zollinger, D. & Colombo, C. (2021). How "us" and "them" relates to voting behavior: Group identities and voting for the new left and radical right. *Comparative Political Studies*, 54(12), 2087–2122. | Switzerland/Western Europe | Brings explicit group-identity measurement into cleavage research. | — |
+| Zollinger, D. (2024). Cleavage identities in voters' own words: Harnessing open-ended survey responses. *American Journal of Political Science*, 68(1), 139–159. | Switzerland | Inductive identity measurement; a methodological bridge between cleavage and identity literatures. | — |
+| Hooghe, L. & Marks, G. (2026). How does the education cleavage stack up against the classic cleavages of the past? *West European Politics*, 49(3). | Europe + US | Argues GAL/TAN parties are as socially structured as classic cleavage parties were in the 1950s. | [10.1080/01402382.2025.2452789](https://doi.org/10.1080/01402382.2025.2452789) |
+| Zollinger, D. & Attewell, D. (2025). Updating cleavage theory for the twenty-first century. *West European Politics*. | Western democracies | Introduction to the current state-of-the-art special issue on cleavage politics. | [10.1080/01402382.2025.2560781](https://doi.org/10.1080/01402382.2025.2560781) |
+| Ford, R. & Jennings, W. (2020). The changing cleavage politics of Western Europe. *Annual Review of Political Science*, 23, 295–314. | Western Europe | The standard review linking education expansion, migration, ageing and geography to realignment. | [10.1146/annurev-polisci-052217-104957](https://doi.org/10.1146/annurev-polisci-052217-104957) |
+| Emanuele, V. & Chiaramonte, A. (2018). A growing impact of new parties: Myth or reality? *Party Politics*, 24(5), 475–487. | Western Europe | Distinguishes realignment through new parties from mere volatility. | — |
+
+---
+
+## 6. The identity turn: partisanship as social identity
+
+| Reference | Scope | Contribution | DOI |
+|---|---|---|---|
+| Bankert, A., Huddy, L. & Rosema, M. (2017). Measuring partisanship as a social identity in multi-party systems. *Political Behavior*, 39(1), 103–132. | NL, SE, UK | The eight-item partisan identity scale; establishes measurement equivalence across multiparty systems. | [10.1007/s11109-016-9349-5](https://doi.org/10.1007/s11109-016-9349-5) |
+| Huddy, L., Bankert, A. & Davies, C. (2018). Expressive versus instrumental partisanship in multiparty European systems. *Political Psychology*, 39(S1), 173–199. | UK, SE, NL, IT | Shows expressive partisanship outperforms ideological intensity in Europe. | [10.1111/pops.12482](https://doi.org/10.1111/pops.12482) |
+| Bakker, B. N., Hopmann, D. N. & Persson, M. (2015). Personality traits and party identification over time. *European Journal of Political Research*, 54(1), 197–215. | Germany (panel) | Dispositional origins of the direction, strength and stability of party ID. | [10.1111/1475-6765.12070](https://doi.org/10.1111/1475-6765.12070) |
+| Westwood, S. J., Iyengar, S., Walgrave, S., Leonisio, R., Miller, L. & Strijbis, O. (2018). The tie that divides: Cross-national evidence of the primacy of partyism. *European Journal of Political Research*, 57(2), 333–354. | UK, BE, ES (+US) | Partisan discrimination exceeds religious, linguistic, ethnic and regional discrimination. | [10.1111/1475-6765.12228](https://doi.org/10.1111/1475-6765.12228) |
+| Hobolt, S. B., Leeper, T. J. & Tilley, J. (2021). Divided by the vote: Affective polarization in the wake of the Brexit referendum. *British Journal of Political Science*, 51(4), 1476–1493. | UK | Opinion-based identities can generate polarisation as intense as partisanship. | [10.1017/S0007123420000125](https://doi.org/10.1017/S0007123420000125) |
+| Rekker, R., Keijsers, L., Branje, S. & Meeus, W. (2019). The formation of party preference in adolescence and early adulthood. *Young*, 27(1). | Netherlands | Cohort-sequential panel pinpointing the formative window for party preference. | [10.1177/1103308818757037](https://doi.org/10.1177/1103308818757037) |
+| Slothuus, R. & Bisgaard, M. (2021). How political parties shape public opinion in the real world. *American Journal of Political Science*, 65(4), 896–911. | Denmark | Quasi-experimental panel around two real party position reversals; strong evidence for partisan-led opinion. | [10.1111/ajps.12550](https://doi.org/10.1111/ajps.12550) |
+| Bisgaard, M. & Slothuus, R. (2018). Partisan elites as culprits? How party cues shape partisan perceptual gaps. *American Journal of Political Science*, 62(2), 456–469. | Denmark | Elite cues as the mechanism behind partisan factual disagreement. | — |
+
+### 6a. Negative partisanship
+
+| Reference | Scope | Contribution | DOI |
+|---|---|---|---|
+| Medeiros, M. & Noël, A. (2014). The forgotten side of partisanship: Negative party identification in four Anglo-American democracies. *Comparative Political Studies*, 47(7), 1022–1046. | incl. UK | Re-establishes negative party ID as a distinct construct. | — |
+| Mayer, S. J. (2017). How negative partisanship affects voting behavior in Europe. *Research & Politics*, 4(1). | 17 European PR systems (CSES) | Negative party ID independently raises turnout (~9 pp) and shapes vote choice. | [10.1177/2053168016686636](https://doi.org/10.1177/2053168016686636) |
+| Anderson, C. D., McGregor, R. M. & Stephenson, L. B. (2022). Us versus them: Do the rules of the game encourage negative partisanship? *European Journal of Political Research*, 61(4), 1060–1079. | CSES | Institutional origins of negative partisanship, moderated by sophistication. | [10.1111/1475-6765.12485](https://doi.org/10.1111/1475-6765.12485) |
+| Meléndez, C. & Rovira Kaltwasser, C. (2021). Negative partisanship towards the populist radical right and democratic resilience in Western Europe. *Democratization*, 28(5), 949–969. | Western Europe | Negative partisanship as a possible brake on democratic erosion. | [10.1080/13510347.2021.1883002](https://doi.org/10.1080/13510347.2021.1883002) |
+| Mayer, S. J. & Russo, L. (2024). What one is not: A new scale to measure negative party identity in multi-party systems. *Quality & Quantity*, 58, 2887–2906. | DE, IT | Measurement instrument for negative party identity. | — |
+| Areal, J. (2022). "Them" without "us": Negative identities and affective polarization in Brazil. *Politics, Groups, and Identities* / *Political Research Exchange*. | Brazil (comparative relevance) | Shows negative identities can operate without positive attachment. | [10.1080/2474736X.2022.2117635](https://doi.org/10.1080/2474736X.2022.2117635) |
+
+---
+
+## 7. Affective polarisation in European multiparty systems
+
+| Reference | Scope | Contribution | DOI |
+|---|---|---|---|
+| Reiljan, A. (2020). "Fear and loathing across party lines" (also) in Europe. *European Journal of Political Research*, 59(2), 376–396. | 22 European democracies | The Affective Polarisation Index; CEE and Southern Europe exceed the US. | [10.1111/1475-6765.12351](https://doi.org/10.1111/1475-6765.12351) |
+| Wagner, M. (2021). Affective polarization in multiparty systems. *Electoral Studies*, 69, 102199. | 51 countries, 166 elections | The standard individual-level measurement toolkit. | [10.1016/j.electstud.2020.102199](https://doi.org/10.1016/j.electstud.2020.102199) |
+| Gidron, N., Adams, J. & Horne, W. (2020). *American Affective Polarization in Comparative Perspective.* Cambridge UP. | 20 Western publics | Macro-correlates: unemployment, inequality, elite cultural conflict, majoritarian institutions. | [10.1017/9781108914123](https://doi.org/10.1017/9781108914123) |
+| Gidron, N., Adams, J. & Horne, W. (2023). Who dislikes whom? *British Journal of Political Science*, 53(3), 997–1015. | 20 Western democracies | Dyadic approach; elite policy conflict and coalition partnership drive party-pair affect. | [10.1017/S0007123422000394](https://doi.org/10.1017/S0007123422000394) |
+| Horne, W., Adams, J. & Gidron, N. (2023). The way we were: How histories of co-governance alleviate partisan hostility. *Comparative Political Studies*, 56(3), 299–325. | Western democracies | Coalition history as a structural depolarising force. | [10.1177/00104140221100197](https://doi.org/10.1177/00104140221100197) |
+| Harteveld, E. (2021). Ticking all the boxes? A comparative study of social sorting and affective polarization. *Electoral Studies*, 72, 102337. | 40 countries, 119 elections | Social sorting travels beyond the US. | [10.1016/j.electstud.2021.102337](https://doi.org/10.1016/j.electstud.2021.102337) |
+| Harteveld, E. (2021). Fragmented foes: Affective polarization in the multiparty context of the Netherlands. *Electoral Studies*, 71, 102332. | Netherlands | Shows out-party affect is bloc-structured, not undifferentiated. | [10.1016/j.electstud.2021.102332](https://doi.org/10.1016/j.electstud.2021.102332) |
+| Hernández, E., Anduiza, E. & Rico, G. (2021). Affective polarization and the salience of elections. *Electoral Studies*, 69, 102203. | 42 countries, 99 surveys | Election proximity as an exogenous driver of measured polarisation. | [10.1016/j.electstud.2020.102203](https://doi.org/10.1016/j.electstud.2020.102203) |
+| Knudsen, E. (2021). Affective polarization in multiparty systems? *Scandinavian Political Studies*, 44(1), 34–44. | Norway vs US | Target of measurement (parties vs voters) changes cross-national rankings. | [10.1111/1467-9477.12186](https://doi.org/10.1111/1467-9477.12186) |
+| Kekkonen, A. & Ylä-Anttila, T. (2021). Affective blocs: Understanding affective polarization in multiparty systems. *Electoral Studies*, 72, 102367. | Finland | Bloc-based conceptualisation for fragmented systems. | [10.1016/j.electstud.2021.102367](https://doi.org/10.1016/j.electstud.2021.102367) |
+| Reiljan, A. & Ryan, A. (2021). Ideological tripolarization, partisan tribalism and institutional trust. *Scandinavian Political Studies*, 44(2), 195–219. | Sweden | Foundations of affective polarisation in a tripolar system. | — |
+| Reiljan, A., Garzia, D., Ferreira da Silva, F. & Trechsel, A. H. (2024). Patterns of affective polarization toward parties and leaders across the democratic world. *American Political Science Review*, 118(2), 654–670. | CSES | Separates leader- from party-directed polarisation. | [10.1017/S0003055423000485](https://doi.org/10.1017/S0003055423000485) |
+| Garzia, D., Ferreira da Silva, F. & Maye, S. (2023). Affective polarization in comparative and longitudinal perspective. *Public Opinion Quarterly*, 87(1), 219–231. | Parliamentary democracies | Long-run trends outside the US. | [10.1093/poq/nfad004](https://doi.org/10.1093/poq/nfad004) |
+| Boxell, L., Gentzkow, M. & Shapiro, J. M. (2024). Cross-country trends in affective polarization. *Review of Economics and Statistics*, 106(2), 557–565. | 12 OECD democracies | Divergent trends; rise is not universal. | [10.1162/rest_a_01160](https://doi.org/10.1162/rest_a_01160) |
+| Wagner, M. (2024). Affective polarization in Europe. *European Political Science Review*, 16(3), 378–392. | Europe | The state-of-the-field review; essential for conceptual and measurement decisions. | [10.1017/S1755773923000383](https://doi.org/10.1017/S1755773923000383) |
+| Russo, L., Wagner, M. & Harteveld, E. (2023). Introduction: Affective polarization in multiparty systems. *Electoral Studies*, 86, 102691. | Europe | Special-issue framing of conceptualisation, causes and consequences. | [10.1016/j.electstud.2023.102691](https://doi.org/10.1016/j.electstud.2023.102691) |
+| Gidron, N., Sheffer, L. & Mor, G. (2022). Validating the feeling thermometer as a measure of partisan affect in multi-party systems. *Electoral Studies*, 80, 102542. | Multiparty | Measurement validation. | [10.1016/j.electstud.2022.102542](https://doi.org/10.1016/j.electstud.2022.102542) |
+| Areal, J. & Harteveld, E. (2024). Vertical vs horizontal affective polarization: Disentangling feelings towards elites and voters. *Electoral Studies*, 90, 102814. | Europe | Separates elite- from voter-directed animosity. | [10.1016/j.electstud.2024.102814](https://doi.org/10.1016/j.electstud.2024.102814) |
+| Praprotnik, K. & Wagner, M. (2023). Affective polarization and coalition signals. *Political Science Research and Methods.* | Austria | Coalition signalling as a short-term depolarising cue. | [10.1017/psrm.2023.33](https://doi.org/10.1017/psrm.2023.33) |
+| Wagner, M. & Harteveld, E. (2025). Elite cooperation and affective polarization: Evidence from German coalitions. *Political Studies.* | Germany, 20 years monthly data | Coalition formation reduces affective distance, conditional on surprise and recency. | [10.1177/00323217241300993](https://doi.org/10.1177/00323217241300993) |
+| Hahm, H., Hilpert, D. & König, T. (2023). Divided by Europe: Affective polarisation in the context of European elections. *West European Politics*, 46(4), 705–731. | EU | EU integration as an axis of partisan affect. | — |
+| Harteveld, E., Mendoza, P. & Rooduijn, M. (2022). Affective polarization and the populist radical right: Creating the hating? *Government and Opposition*, 57(4), 703–727. | 28 countries, 103 elections | Tests whether PRR parties generate or merely reflect animosity. | — |
+| Harteveld, E. & Wagner, M. (2023). Does affective polarisation increase turnout? *West European Politics*, 46(4), 732–759. | DE, NL, ES | Mobilising consequences of polarisation. | [10.1080/01402382.2022.2087395](https://doi.org/10.1080/01402382.2022.2087395) |
+| Berntzen, L. E., Kelsall, H. & Harteveld, E. (2024). Consequences of affective polarization. *European Journal of Political Research*, 63(3), 927–949. | UK, Norway | Avoidance and intolerance yes; support for violence largely not. | [10.1111/1475-6765.12623](https://doi.org/10.1111/1475-6765.12623) |
+| Harteveld, E., Berntzen, L. E., Kokkonen, A., Kelsall, H., Linde, J. & Dahlberg, S. (2026). The (alleged) consequences of affective polarization: A survey experiment in nine democracies. *European Journal of Political Research.* | 9 countries, N≈18,000 | The main causal test outside the US. | [10.1017/S1475676526101273](https://doi.org/10.1017/S1475676526101273) |
+| Torcal, M. & Magalhães, P. C. (2022). Ideological extremism, perceived party system polarization, and support for democracy. *European Political Science Review*, 14(2), 188–205. | Europe | Curvilinear relationship between perceived polarisation and democratic support. | [10.1017/S1755773922000066](https://doi.org/10.1017/S1755773922000066) |
+| Janssen, L. & Turkenburg, E. (2025). Breaking free from linear assumptions. *European Journal of Political Research.* | Europe | Reconciles mixed findings via an inverted-U specification. | [10.1111/1475-6765.12725](https://doi.org/10.1111/1475-6765.12725) |
+| Torcal, M. & Harteveld, E. (eds.) (2025). *Handbook of Affective Polarization.* Edward Elgar. | Global/European | Current reference work; chapters on measurement in multiparty systems, negative partisanship, party competition. | [book] |
+
+---
+
+## 8. Central and Eastern Europe
+
+| Reference | Scope | Contribution | DOI |
+|---|---|---|---|
+| Whitefield, S. (2002). Political cleavages and post-communist politics. *Annual Review of Political Science*, 5, 181–200. | CEE | The framing review of cleavage formation in new democracies. | — |
+| Tavits, M. (2005). The development of stable party support: Electoral dynamics in post-communist Europe. *American Journal of Political Science*, 49(2), 283–298. | CEE | Whether Converse-style learning produces stabilising attachments. | — |
+| Tavits, M. (2008). On the linkage between electoral volatility and party system instability in Central and Eastern Europe. *European Journal of Political Research*, 47(5), 537–555. | CEE | Disentangles voter-level from supply-side instability. | — |
+| Powell, E. N. & Tucker, J. A. (2014). Revisiting electoral volatility in post-communist countries: New data, new results and new approaches. *British Journal of Political Science*, 44(1), 123–147. | CEE | Separates Type A (party entry/exit) from Type B (vote-switching) volatility. | — |
+| Rovny, J. & Polk, J. (2019). New wine in old bottles: Explaining the dimensional structure of East European party systems. *Party Politics*, 25(1), 12–24. | CEE | Dimensional structure and its implications for stable alignments. | — |
+| Markowski, R. (2016). The Polish parliamentary election of 2015: A free and fair election that results in unfair political consequences. *West European Politics*, 39(6), 1311–1322. | Poland | Entry point to the Polish realignment/polarisation literature. | — |
+| Tworzecki, H. (2019). Poland: A case of top-down polarization. *The ANNALS of the AAPSS*, 681(1), 97–119. | Poland | Elite-driven polarisation in a dealigned electorate. | — |
+| Enyedi, Z. (2005). The role of agency in cleavage formation. *European Journal of Political Research*, 44(5), 697–720. | Hungary/CEE | Agency-based account of how elites construct alignments. | — |
+| Gherghina, S. (2014). *Party Organization and Electoral Volatility in Central and Eastern Europe.* Routledge. | CEE | Organisational sources of (in)stability. | [book] |
+| Sikk, A. (2005). How unstable? Volatility and the genuinely new parties in Eastern Europe. *European Journal of Political Research*, 44(3), 391–412. | CEE/Baltics | New-party entry as the driver of measured volatility. | — |
+| Haughton, T. & Deegan-Krause, K. (2020). *The New Party Challenge: Changing Cycles of Party Birth and Death in Central Europe and Beyond.* Oxford UP. | CEE | Explains recurrent party turnover in weakly aligned electorates. | [book] |
+
+---
+
+## 9. Country-level literatures (Western and Southern Europe)
+
+### United Kingdom
+
+| Reference | Contribution | DOI |
+|---|---|---|
+| Crewe, I., Särlvik, B. & Alt, J. (1977). Partisan dealignment in Britain 1964–1974. *British Journal of Political Science*, 7(2), 129–190. | The paper that named British dealignment. | — |
+| Särlvik, B. & Crewe, I. (1983). *Decade of Dealignment.* Cambridge UP. | Book-length statement. | [book] |
+| Clarke, H., Sanders, D., Stewart, M. & Whiteley, P. (2004). *Political Choice in Britain.* Oxford UP. | Valence politics as the successor to cleavage-based alignment. | [book] |
+| Evans, G. & Tilley, J. (2012). How parties shape class politics: Explaining the decline of the class basis of party support. *British Journal of Political Science*, 42(1), 137–161. | Supply-side explanation: class dealignment is party-induced. | — |
+| Evans, G. & Tilley, J. (2017). *The New Politics of Class.* Oxford UP. | The full argument, with long-run BES data. | [book] |
+| Fieldhouse, E. et al. (2020). *Electoral Shocks.* Oxford UP. | Volatility, shocks and the Brexit realignment. | [book] |
+| Hobolt, S. B., Leeper, T. J. & Tilley, J. (2021). Divided by the vote. *BJPS*, 51(4). | Brexit identities as functional substitutes for partisanship. | [10.1017/S0007123420000125](https://doi.org/10.1017/S0007123420000125) |
+
+### Germany
+
+| Reference | Contribution | DOI |
+|---|---|---|
+| Baker, K. L., Dalton, R. J. & Hildebrandt, K. (1981). *Germany Transformed.* Harvard UP. | Classic account of value change and partisan realignment. | [book] |
+| Arzheimer, K. (2006). "Dead men walking?" Party identification in Germany, 1977–2002. *Electoral Studies*, 25(4), 791–807. | Systematic test of the German decline claim. | — |
+| Schmitt-Beck, R., Weick, S. & Christoph, B. (2006). Shaky attachments. *EJPR*, 45(4). | Panel evidence on instability. | — |
+| Dassonneville, R., Hooghe, M. & Vanhoutte, B. (2012). Age, period and cohort effects... *German Politics*, 21(2). | APC decomposition of German dealignment. | [10.1080/09644008.2012.679659](https://doi.org/10.1080/09644008.2012.679659) |
+| Kroh, M. & Selb, P. (2009). Inheritance and the dynamics of party identification. *Political Behavior*, 31(4). | Socialisation vs. running tally, SOEP. | [10.1007/s11109-009-9084-2](https://doi.org/10.1007/s11109-009-9084-2) |
+| Hudde, A. (2022). Partisan affect in times of fractionalization: Visualizing who likes whom in Germany, 1977 to 2020. *Socius*, 8. | Long-run descriptive mapping of German partisan affect. | — |
+| Wagner, M. & Harteveld, E. (2025). Elite cooperation and affective polarization. *Political Studies.* | Coalition effects on partisan affect. | [10.1177/00323217241300993](https://doi.org/10.1177/00323217241300993) |
+
+### Netherlands & Belgium
+
+| Reference | Contribution | DOI |
+|---|---|---|
+| Thomassen, J. (1976). Party identification as a cross-national concept. In Budge et al. | The founding Dutch sceptical case. | [book] |
+| Thomassen, J. & Rosema, M. (2009). Party identification revisited. In Bartle & Bellucci (eds.). | Reassessment after three decades. | [book] |
+| Dassonneville, R. (2013). Questioning generational replacement. *Electoral Studies*, 32(1). | APC analysis of Dutch volatility. | — |
+| van der Meer, T. et al. (2015). Are volatile voters erratic, whimsical or seriously picky? *Party Politics*, 21(1). | Reasoned intra-bloc volatility. | — |
+| Aarts, K. & van der Kolk, H. / de Lange, S. et al. (2020). Dealignment, realignment and generational differences in the Netherlands. *West European Politics*, 43(4). | Decomposes dealignment vs. cleavage realignment by cohort. | [10.1080/01402382.2020.1774203](https://doi.org/10.1080/01402382.2020.1774203) |
+| Harteveld, E. (2021). Fragmented foes. *Electoral Studies*, 71, 102332. | Bloc structure of Dutch partisan affect. | [10.1016/j.electstud.2021.102332](https://doi.org/10.1016/j.electstud.2021.102332) |
+| Rekker, R. et al. (2019). The formation of party preference in adolescence and early adulthood. *Young*, 27(1). | Formative-window evidence. | [10.1177/1103308818757037](https://doi.org/10.1177/1103308818757037) |
+| Walgrave, S. & Westwood, S. J. et al. (2018). Partyism in Belgium — see Westwood et al. (2018). | Belgian evidence on partyism vs. linguistic cleavage. | [10.1111/1475-6765.12228](https://doi.org/10.1111/1475-6765.12228) |
+
+### Nordics (DK, SE, FI)
+
+| Reference | Contribution | DOI |
+|---|---|---|
+| Borre, O. & Andersen, J. G. (1997). *Voting and Political Attitudes in Denmark.* Aarhus UP. | Long-run Danish alignment change. | [book] |
+| Stubager, R. (2009). Education-based group identity and consciousness. *EJPR*, 48(2). | Education as identity in Denmark. | — |
+| Slothuus, R. & Bisgaard, M. (2021). How political parties shape public opinion in the real world. *AJPS*, 65(4). | Danish quasi-experiment on partisan following. | [10.1111/ajps.12550](https://doi.org/10.1111/ajps.12550) |
+| Hansen, K. M. & Kosiara-Pedersen, K. (2017). How campaigns polarize the electorate. *Party Politics*, 23(3). | Danish bloc-based polarisation. | — |
+| Oscarsson, H. & Holmberg, S. (2020). *Research on Swedish Voting Behaviour* / *Swedish Voting Behavior*. | The reference synthesis for Sweden. | [book] |
+| Reiljan, A. & Ryan, A. (2021). Ideological tripolarization, partisan tribalism and institutional trust. *Scandinavian Political Studies*, 44(2). | Swedish tripolar structure. | — |
+| Oskarson, M. & Demker, M. (2015). Room for realignment: The working-class sympathy for Sweden Democrats. *Government and Opposition*, 50(4), 629–651. | Swedish working-class realignment. | — |
+| Kekkonen, A. & Ylä-Anttila, T. (2021). Affective blocs. *Electoral Studies*, 72, 102367. | Finnish bloc structure. | [10.1016/j.electstud.2021.102367](https://doi.org/10.1016/j.electstud.2021.102367) |
+| Westinen, J. (2015). *Cleavages in Contemporary Finland.* Åbo Akademi. | Finnish cleavage change. | [book] |
+
+### Southern Europe (ES, IT, PT, GR)
+
+| Reference | Contribution | DOI |
+|---|---|---|
+| Barnes, S. H., McDonough, P. & López Pina, A. (1985). The development of partisanship in new democracies: The case of Spain. *American Journal of Political Science*, 29(4), 695–720. | Classic study of partisanship formation after transition. | — |
+| Torcal, M. & Comellas, J. M. (2022). Affective polarisation in times of political instability and conflict: Spain from a comparative perspective. *South European Society and Politics*, 27(1). | Spanish trends with comparative benchmarking. | [10.1080/13608746.2022.2044236](https://doi.org/10.1080/13608746.2022.2044236) |
+| Orriols, L. & León, S. (2020). Looking for affective polarisation in Spain: PSOE and Podemos from conflict to coalition. *South European Society and Politics*, 25(3–4). | Intra-bloc polarisation and coalition effects. | — |
+| Rodon, T. (2022). Affective and territorial polarisation: The impact on vote choice in Spain. *South European Society and Politics*, 27(1), 147–169. | Territorial identity as a second polarisation axis. | — |
+| Bellucci, P., Maraffi, M. & Segatti, P. (2000). *PCI, PDS, DS: La trasformazione dell'identità politica della sinistra di governo.* Donzelli. | Party-identity transformation in Italy. | [book] |
+| Chiaramonte, A. & Emanuele, V. (2017). Party system volatility, regeneration and de-institutionalization. *Party Politics*, 23(4). | Italy in comparative volatility perspective. | — |
+| Lisi, M. (2015). *Party Change, Recent Democracies, and Portugal.* Lexington. | Portuguese party-voter linkage. | [book] |
+| Teperoglou, E. & Tsatsanis, E. (2014). Dealignment, de-legitimation and the implosion of the two-party system in Greece. *Journal of Elections, Public Opinion and Parties*, 24(2), 222–242. | The paradigmatic case of rapid dealignment under crisis. | — |
+| Tsatsanis, E., Teperoglou, E. & Seriatos, A. (2020). Two-party system collapse and party–voter realignment in times of crisis. *South European Society and Politics*, 25(3–4). | Greek realignment after 2012. | — |
+
+### France, Austria, Ireland
+
+| Reference | Contribution | DOI |
+|---|---|---|
+| Converse, P. E. & Dupeux, G. (1962). Politicization of the electorate in France and the United States. *Public Opinion Quarterly*, 26(1), 1–23. | The founding comparative statement of French partisan weakness. | — |
+| Haegel, F. (1993). Partisan ties. In Boy, D. & Mayer, N. (eds.), *The French Voter Decides.* | French partisanship in comparative perspective. | [book] |
+| Tiberj, V. (2017). Running to stand still: Cohort replacement and political change in France. | Generational account of French realignment. | — |
+| Plasser, F. & Ulram, P. A. (2006). *Wechselwahl und Wählerdynamik in Österreich.* | Austrian dealignment and volatility. | [book] |
+| Praprotnik, K. & Wagner, M. (2023). Affective polarization and coalition signals. *PSRM.* | Austrian coalition signalling experiment. | [10.1017/psrm.2023.33](https://doi.org/10.1017/psrm.2023.33) |
+| Marsh, M. (2006). Party identification in Ireland: An insecure anchor for a floating party system. *Electoral Studies*, 25(3), 489–508. | Irish partisanship without a class cleavage. | — |
+| Marsh, M., Sinnott, R., Garry, J. & Kennedy, F. (2008). *The Irish Voter.* Manchester UP. | Comprehensive Irish account. | [book] |
+
+---
+
+## 10. Coverage gaps you will need to fill
+
+Countries with comparatively thin English-language journal literature on partisanship specifically
+(as opposed to volatility or party systems): **Bulgaria, Romania, Croatia, Slovenia, Slovakia, the Baltic
+states**. For these, the productive entry points are the CEE volatility and cleavage literatures in §8,
+national election-study reports, and *East European Politics*, *Problems of Post-Communism* and
+*Europe-Asia Studies* rather than the mainstream comparative journals.
+
+Data infrastructures that anchor almost all of this work, and which are worth citing directly:
+CSES (Modules 1–5), the European Election Studies / Eurobarometer partisanship series, the ESS,
+national election studies (BES, GLES, DPES/NKO, SNES, Danish NES, CIS/CNEP, ITANES), and long-run
+household panels (SOEP, LISS, Understanding Society).
+
+
+
+# EU Partisanship Survey Projects and Datasets
+
+## Cross-national Programs
+
+| Project | Design | Span | Countries | Partisanship item | Link |
+|---|---|---|---|---|---|
+| European Social Survey (ESS) | Repeated cross-section, biennial | 2002– | All 25 at some point; BG, HR, EL, LV, RO, SK patchy by round | "Is there a particular political party you feel closer to than all the other parties?" → which → how close | [europeansocialsurvey.org](https://www.europeansocialsurvey.org/) |
+| Comparative Study of Electoral Systems (CSES) | Post-election modules appended to national election studies (Modules 1–6) | 1996– | Nearly all 25; continuous for DE, NL, SE, PL, CZ, IE, PT, ES | "Do you usually think of yourself as close to any particular party?" + degree of closeness | [cses.org](https://cses.org/) |
+| European Election Studies (EES) | Post-EP-election voter studies; panel components 1989, 2009 | 1979– | All EU members at time of fielding; UK to 2019 | Closeness battery, CSES-compatible | [europeanelectionstudies.net](https://europeanelectionstudies.net/) |
+| Eurobarometer (Standard EB) | Repeated cross-section, ~2×/year | 1973– | All EU members; UK to 2019 | Party attachment asked intermittently; thin after ~2000 | [GESIS EB Data Service](https://www.gesis.org/en/eurobarometer-data-service) |
+| Mannheim Eurobarometer Trend File | Harmonised EB trend file (ZA3521) | 1970–2002 | EU-15 | Harmonised party-closeness item across early waves | [search.gesis.org](https://search.gesis.org/research_data/ZA3521) |
+| ISSP | Annual repeated cross-section | 1985– | Most of the 25, varies by module | Party affiliation as standard harmonised background variable | [issp.org](https://issp.org/) |
+| European Values Study (EVS) | Repeated cross-section | 1981, 1990, 1999, 2008, 2017 | All 25 | Closeness / vote-propensity items; weaker and less consistent than ESS/CSES | [europeanvaluesstudy.eu](https://europeanvaluesstudy.eu/) |
+| CRONOS / CRONOS-2 | Probability-based cross-national online panel on ESS sample | 2016–18 (EE, UK, SI); 2021–22 (AT, HU, IT, PT) | 7 | ESS closeness item repeated across waves | [europeansocialsurvey.org](https://www.europeansocialsurvey.org/) |
+| Comparative National Elections Project (CNEP) | Election-based cross-sections | 1990– | DE, EL, ES, HU, IT, PT among EU cases | Party identification plus social-network transmission items | [u.osu.edu/cnep](https://u.osu.edu/cnep/) |
+| True European Voter | *Ex post* harmonisation of national election studies | 1950s–2010s | ~15 W/C European countries | Harmonised party-ID variable; best route to long back-series comparability | [CESSDA catalogue](https://datacatalogue.cessda.eu/) |
+
+## National Studies
+
+| Country | Project | Design | Span | Link |
+|---|---|---|---|---|
+| Austria | AUTNES (incl. Online Panel Study); predecessors 1986–2008 | Rolling cross-section + multi-wave panels | 2013– | [autnes.at](https://www.autnes.at/) |
+| Belgium | RepResent (EOS) | Multi-wave election panel | 2019– | [represent-project.be](https://www.represent-project.be/) |
+| Belgium | PartiRep Election Study; Belgian NES (ISPO/PIOP) | Cross-sections, panel waves 2014 | 1991– | [partirep.eu](https://www.partirep.eu/) |
+| Bulgaria | Bulgarian Election Study (CSES vehicle) | Election-triggered cross-sections; no continuous series | ~2001, 2014, 2021 | [cses.org](https://cses.org/) |
+| Croatia | Croatian Election Studies (FPZG Zagreb), harmonised file | 11 pre/post-election cycles | 1990–2024 | [CROSSDA](https://data.crossda.hr/dataset.xhtml?persistentId=doi:10.23669/IWHYLM) |
+| Czechia | Czech NES; *Naše společnost* continuous survey | Post-election cross-sections; monthly series | 1990–; 2002– | [cvvm.soc.cas.cz](https://cvvm.soc.cas.cz/en) |
+| Czechia | Czech Social Science Data Archive (CSDA) | Archive for CNES + CHPS | — | [archiv.soc.cas.cz](https://archiv.soc.cas.cz/en) |
+| Denmark | Danish National Election Study (DNES / Valgprojektet) | Cross-sections; 2-wave panel 2019→2022 | 1971– | [valgprojektet.dk](https://www.valgprojektet.dk/default.asp?l=eng) |
+| Estonia | Estonian National Election Study (Johan Skytte Institute, Tartu) | Post-election cross-sections | 2011, 2015, 2019, 2023 | [skytte.ut.ee](https://skytte.ut.ee/en) |
+| Finland | Finnish National Election Study (FNES) | Post-election cross-sections | 2003– (roots to 1948) | [Finnish Social Science Data Archive](https://www.fsd.tuni.fi/en/) |
+| France | CEVIPOF *Enquête Électorale Française*; *Baromètre de la confiance politique* | Large multi-wave election panels; annual barometer | 2002–; 2009– | [sciencespo.fr/cevipof](https://www.sciencespo.fr/cevipof/en.html) |
+| France | ELIPSS | Probability-based online panel | 2012– | [elipss.fr](https://www.elipss.fr/) |
+| Germany | GLES | Rolling cross-section + short- and long-term panels | 2009– | [gles-studie.de](https://gles-studie.de/) |
+| Germany | SOEP | Annual household panel; party ID since 1984 | 1984– | [diw.de/soep](https://www.diw.de/soep) |
+| Germany | ALLBUS | Biennial cross-section | 1980– | [gesis.org/allbus](https://www.gesis.org/en/allbus/allbus-home) |
+| Germany | GESIS Panel | Probability-based mixed-mode panel | 2013– | [gesis.org/gesis-panel](https://www.gesis.org/en/gesis-panel) |
+| Germany | Politbarometer | Monthly time series | 1977– | [forschungsgruppe.de](https://www.forschungsgruppe.de/) |
+| Greece | Hellenic/Greek National Election Studies (CSES vehicle) | Election-triggered; discontinuous | 2009, 2012, 2015 | [cses.org](https://cses.org/) |
+| Hungary | Hungarian Election Study (TK PTI); Election Panel Study 2018 | Cross-sections + 2018 multi-wave panel | 2014, 2018, 2022 | [politikatudomany.tk.hu](https://politikatudomany.tk.hu/en) |
+| Ireland | Irish National Election Study (INES) | 2002–07 panel; later cross-sections | 2002– | [ISSDA, UCD](https://www.ucd.ie/issda/) |
+| Italy | ITANES | Election cross-sections with panel components | 1990– (back-series to 1968) | [itanes.org](https://www.itanes.org/) |
+| Italy | CISE Osservatorio Politico | Repeated election surveys | 2000s– | [cise.luiss.it](https://cise.luiss.it/) |
+| Latvia | No continuous academic series; CSES Latvia | Election-triggered | 2010/11, 2014 | [cses.org](https://cses.org/) |
+| Latvia | SKDS omnibus / Latvijas Barometrs | Commercial time series | 1990s– | [skds.lv](https://www.skds.lv/) |
+| Lithuania | Lithuanian National Election Study (VU TSPMI) | Post-election cross-sections, CSES-linked | 1997– | [tspmi.vu.lt](https://www.tspmi.vu.lt/en/) |
+| Netherlands | Dutch Parliamentary Election Study (DPES/NKO, SKON) | Pre/post panel design; recent waves via LISS + I&O | 1971–2025 | [surveydata.nl](https://surveydata.nl/dutch-parliamentary-election-studies) |
+| Netherlands | DPES data deposits | Archive access | 1971– | [DANS Data Station SSH](https://ssh.datastations.nl/) |
+| Netherlands | LISS Panel | Probability online panel; annual Politics & Values module | 2007– | [lissdata.nl](https://www.lissdata.nl/) |
+| Poland | Polish National Election Study (PGSW) | Election cross-sections | 1997– | [pgsw.pl](https://www.pgsw.pl/) |
+| Poland | POLPAN | True panel, 5-year waves | 1988– | [polpan.org](https://polpan.org/) |
+| Poland | CBOS *Aktualne problemy i wydarzenia* | Monthly time series | 1982– | [cbos.pl](https://www.cbos.pl/EN/home_en/cbos_en.php) |
+| Portugal | Portuguese Election Study; *Barómetro da Qualidade da Democracia* | Election cross-sections; annual barometer | 2002–; 2008– | [ics.ulisboa.pt](https://www.ics.ulisboa.pt/) |
+| Romania | Romanian Election Studies (RES); CSES Romania | Election cross-sections | 1996– | [cses.org](https://cses.org/) |
+| Slovakia | CSES Slovakia (Comenius University) | Post-election cross-sections | 2010, 2016, 2020, 2023 | [cses.org](https://cses.org/) |
+| Slovenia | Slovenian Public Opinion Survey (SJM), hosts national election studies | Near-annual repeated cross-section | 1968– | [ADP, Ljubljana](https://www.adp.fdv.uni-lj.si/eng/) |
+| Spain | CIS *Barómetro* + pre/post-election studies | Monthly time series; election panels | 1979– | [cis.es](https://www.cis.es/) |
+| Sweden | Swedish National Election Study (Valundersökningen) | Rotating panel across consecutive elections | 1956– | [gu.se/en/snes](https://www.gu.se/en/snes) |
+| Sweden | SOM Institute national survey | Annual cross-section | 1986– | [gu.se/en/som-institute](https://www.gu.se/en/som-institute) |
+| Sweden | Medborgarpanelen (LORE) | Online panel | 2010– | [gu.se/en/lore](https://www.gu.se/en/lore) |
+| UK | British Election Study + BES Internet Panel | Election cross-sections; continuous multi-wave panel | 1964–; 2014– | [britishelectionstudy.com](https://www.britishelectionstudy.com/) |
+| UK | Understanding Society (UKHLS), incl. BHPS | Annual household panel; party support items | 1991– | [understandingsociety.ac.uk](https://www.understandingsociety.ac.uk/) |
+| UK | British Social Attitudes | Annual cross-section | 1983– | [natcen.ac.uk](https://natcen.ac.uk/british-social-attitudes) |
+
+
 # Setup
 
 ```{r}

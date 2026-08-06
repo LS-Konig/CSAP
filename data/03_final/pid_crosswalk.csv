@@ -1,0 +1,52 @@
+source,construct,original_variable,original_code,harmonised,note
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=1, leaner=-",attached,close
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=0, leaner=1",attached,leaner
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=0, leaner=0",not_attached,
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=0, leaner=7",not_attached,
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=0, leaner=8",not_attached,
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=0, leaner=9",not_attached,
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=0, leaner=-",not_attached,
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=7, leaner=-",dk_refused,
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=8, leaner=-",dk_refused,
+CSES (IMD + MOD6),pid_status,IMD3005_1/f3023_1 x IMD3005_2/f3023_2,"close=9, leaner=-",not_asked,
+Mannheim EB,pid_status,closepty,1,attached,VERY CLOSE
+Mannheim EB,pid_status,closepty,2,attached,FAIRLY CLOSE
+Mannheim EB,pid_status,closepty,3,attached,sympathizer
+Mannheim EB,pid_status,closepty,4,not_attached,NO PARTY
+Mannheim EB,pid_status,closepty,8,dk_refused,"DK,NA"
+Mannheim EB,pid_status,closepty,9,not_asked,inap
+Mannheim EB,pid_status,closepty,NA,not_asked,(absent)
+CSES (IMD + MOD6),voted,IMD3001_LH/f3010,0,FALSE,did not cast a ballot
+CSES (IMD + MOD6),voted,IMD3001_LH/f3010,1,TRUE,cast a ballot
+CSES (IMD + MOD6),voted,IMD3001_LH/f3010,9999993,FALSE,not registered on electoral lists
+CSES (IMD + MOD6),voted,IMD3001_LH/f3010,9999996,NA,not applicable: no LH election
+CSES (IMD + MOD6),voted,IMD3001_LH/f3010,9999997,NA,volunteered: refused
+CSES (IMD + MOD6),voted,IMD3001_LH/f3010,9999998,NA,volunteered: don't know
+CSES (IMD + MOD6),voted,IMD3001_LH/f3010,9999999,NA,missing
+Mannheim EB,voted,voteint / lastvote,0,NA,na
+Mannheim EB,voted,voteint / lastvote,990,TRUE,OTHER PARTY
+Mannheim EB,voted,voteint / lastvote,995,TRUE,BLANK-SPOIL VOTE
+Mannheim EB,voted,voteint / lastvote,996,FALSE,WOULD NOT VOTE / NOT VOTED
+Mannheim EB,voted,voteint / lastvote,997,NA,refused
+Mannheim EB,voted,voteint / lastvote,998,NA,DK
+Mannheim EB,voted,voteint / lastvote,999,NA,inap
+Mannheim EB,voted,voteint / lastvote,(any other code),TRUE,country-specific party code = a reported vote
+Mannheim EB,country_unit,nation1,1,FRA,france
+Mannheim EB,country_unit,nation1,2,BEL,belgium
+Mannheim EB,country_unit,nation1,3,NLD,netherlands
+Mannheim EB,country_unit,nation1,4,DEU-W,GERMANY-WEST
+Mannheim EB,country_unit,nation1,5,ITA,italy
+Mannheim EB,country_unit,nation1,6,LUX,luxembourg
+Mannheim EB,country_unit,nation1,7,DNK,denmark
+Mannheim EB,country_unit,nation1,8,IRL,ireland
+Mannheim EB,country_unit,nation1,9,GBR-GB,GREAT BRITAIN
+Mannheim EB,country_unit,nation1,10,GBR-NI,NORTHERN IRELAND
+Mannheim EB,country_unit,nation1,11,GRC,greece
+Mannheim EB,country_unit,nation1,12,ESP,spain
+Mannheim EB,country_unit,nation1,13,PRT,portugal
+Mannheim EB,country_unit,nation1,14,DEU-E,GERMANY-EAST
+Mannheim EB,country_unit,nation1,15,NOR,norway
+Mannheim EB,country_unit,nation1,16,FIN,finland
+Mannheim EB,country_unit,nation1,17,SWE,sweden
+Mannheim EB,country_unit,nation1,18,AUT,austria
+Mannheim EB,country_unit,nation1,19,CHE,switzerland

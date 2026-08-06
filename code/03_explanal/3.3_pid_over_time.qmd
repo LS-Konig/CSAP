@@ -1,0 +1,1478 @@
+---
+title: |
+  Code Notebook 3.3
+subtitle: |
+  Party attachment over time in EU member states: Mannheim Eurobarometer Trend File and CSES
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+# no randomness is used below, but the seed is set so the notebook is
+# reproducible if a sampling step is ever added
+set.seed(20260804)
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "ggpubr", # theme_pubr()
+  "haven", # read_dta() for the Stata trend file
+  "arrow", # parquet cache
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+This notebook recovers country-level distributions of **felt party attachment** over time
+in EU member states from two independent instruments, and keeps them as **side-by-side
+series**. Nothing is spliced, bridged or calibrated across sources.
+
+The quantity of primary interest is the share of respondents who **deny any party
+attachment yet report a vote** — the historical prevalence of the group this project calls
+*vote-anchored*.
+
+## Switches
+
+```{r}
+#| label: switches
+
+# "ever": any country that has ever been an EU/EC member enters with all of its
+#         available years (the UK is retained for its full run).
+# "from_accession": a country enters only from its accession year.
+eu_scope <- "ever"
+
+# Eurobarometer `closepty == 3` ("merely a sympathiser") counts as attached.
+# Set FALSE to recompute every table with sympathisers as not attached.
+sympathizer_as_attached <- TRUE
+
+# Country-year cells below this Kish effective N are flagged unreliable.
+min_eff_n <- 100
+
+# Read parsed sources from the parquet cache when it exists.
+use_cache <- TRUE
+```
+
+## Paths
+
+```{r}
+#| label: paths
+
+path_imd <- here(
+  "data", "01_raw", "external", "cses", "imd", "cses_imd.rdata"
+)
+path_mod6 <- here(
+  "data", "01_raw", "external", "cses", "mod6", "cses6.rdata"
+)
+path_eb <- here(
+  "data", "01_raw", "external",
+  "mannheim-eurobarometer-trend-file-1970-2002",
+  "ZA3521_v2-0-1.dta"
+)
+
+# `.gitignore` carries a blanket `*cache*` rule, so this directory is untracked
+# by design -- it holds derived artefacts only and is rebuilt from the raw files.
+dir_cache <- here("data", "02_processed", "pid_cache")
+if (!dir.exists(dir_cache)) {
+  dir.create(dir_cache, recursive = TRUE)
+}
+
+dir_final <- here("data", "03_final")
+```
+
+# Sources and what is in them
+
+Three files were inventoried. **CSES Module 5 is deliberately excluded**: the Integrated
+Module Dataset already contains it in full (114,714 rows flagged `IMD1008_MOD_5 == 1`,
+55 of its 56 election-study IDs present in IMD), so stacking the two would double-count
+every Module 5 election. Module 6 is disjoint from both.
+
+| | CSES IMD | CSES Module 6 | Mannheim EB Trend File |
+|---|---|---|---|
+| file | `cses_imd.rdata` | `cses6.rdata` | `ZA3521_v2-0-1.dta` |
+| dim | 395,797 x 406 | 33,871 x 676 | 1,134,384 x 146 |
+| name case | UPPER | **lower** | lower |
+| unit | respondent x election study | respondent x election study | respondent x EB wave |
+| span | elections 1996-2021 | elections 2022-2024 | waves 1970-2002 |
+
+CSES stores its metadata Stata-style at the **data-frame** level — `attr(d, "var.labels")`
+runs parallel to `names(d)`, and `attr(d, "label.table")` is a named list of value-label
+vectors. The per-column `attr(x, "label")` that `haven` would set is `NULL`, so a naive
+label search over the columns finds nothing.
+
+Module 6 **renumbers** the attachment battery to `f3023_*`. In Module 6, `f3005_*` is an
+unrelated item ("country better run by"). No variable code is assumed to carry across
+releases; each source is read and harmonised on its own terms.
+
+## Item wording and coding
+
+```{r}
+#| label: tbl-items
+#| tbl-cap: "Source variables carrying the attachment and vote constructs."
+
+tribble(
+  ~construct,            ~imd,            ~mod6,          ~eb,
+  "close to any party",  "IMD3005_1",     "f3023_1",      "closepty",
+  "leaner probe",        "IMD3005_2",     "f3023_2",      NA,
+  "which party",         "IMD3005_3",     "f3023_3",      "feelclo",
+  "strength",            "IMD3005_4",     "f3023_4",      "(in closepty)",
+  "turnout",             "IMD3001_LH",    "f3010",        "(from vote item)",
+  "vote, past election", "IMD3002_LH_PL", "f3011_lh_pl",  "lastvote",
+  "vote intention",      NA,              NA,             "voteint",
+  "ISO3",                "IMD1006_UNALPHA3", "f1006_unalpha3", "(from nation1)",
+  "EU member flag",      "IMD1006_EU",    "f1007_eu",     "(accession table)",
+  "fieldwork year",      "IMD1013_Y",     "f1019_y",      "year",
+  "election year",       "IMD1008_YEAR",  "f1009",        NA,
+  "survey id",           "IMD1004",       "f1004",        "eb",
+  "respondent id",       "IMD1005",       "f1003_1",      "id",
+  "weight used",         "IMD1010_1",     "f1101_1",      "wnation"
+) |>
+  knitr::kable()
+```
+
+The two instruments do **not** ask the same question.
+
+- **CSES** asks a binary — "do you usually think of yourself as close to any particular
+  party?" — and then probes those who say no with a leaner follow-up, then asks which
+  party and how close. Don't-know and refused are *volunteered and separately coded*
+  (`7` refused, `8` don't know), so the three-way harmonisation is directly supported and
+  nothing has to be reconstructed.
+- **Eurobarometer** asks a single degree-of-closeness item: very close / fairly close /
+  merely a sympathiser / not close to any party. Status and strength arrive in one
+  variable, and there is no leaner probe.
+
+The Eurobarometer bar is therefore lower and its categories are not nested the way CSES's
+are. Consistent with section E of `data/01_raw/external/external-data.md`: **compare
+slopes within a source, never levels across sources.**
+
+## Coverage: the binding constraint
+
+Substantive-response counts confirm that the Eurobarometer attachment item runs
+**1975-1994 only** — not the full 1970-2002 span of the file. `voteint` runs almost the
+whole span; `lastvote` is intermittent; `feelclo` is erratic and carries party codes
+rather than a status, so it is used for `pid_party` only and never as the status item.
+
+The consequence for this notebook: the Eurobarometer attachment x vote cross-tab exists
+for 1975-1994, and because CSES elections begin in 1996, **the two sources barely
+overlap**. The per-country level-offset comparison in the comparability section below is
+therefore mostly a documented absence rather than a table of offsets. That is a finding
+about the instruments, not a failure of the pipeline, and it is reported as such.
+
+# Scope tables
+
+`nation1` is a bespoke Eurobarometer code that `countrycode` does not know, so the mapping
+is written out explicitly. It is also the only variable that keeps **West and East
+Germany** and **Great Britain and Northern Ireland** apart — `nation2` pools both pairs,
+and is not used.
+
+```{r}
+#| label: eb-country-map
+
+eb_country_map <- tribble(
+  ~nation1, ~nation1_label,      ~country_unit, ~country_iso3, ~country_name,
+  1L,       "france",            "FRA",         "FRA",         "France",
+  2L,       "belgium",           "BEL",         "BEL",         "Belgium",
+  3L,       "netherlands",       "NLD",         "NLD",         "Netherlands",
+  4L,       "GERMANY-WEST",      "DEU-W",       "DEU",         "Germany (West)",
+  5L,       "italy",             "ITA",         "ITA",         "Italy",
+  6L,       "luxembourg",        "LUX",         "LUX",         "Luxembourg",
+  7L,       "denmark",           "DNK",         "DNK",         "Denmark",
+  8L,       "ireland",           "IRL",         "IRL",         "Ireland",
+  9L,       "GREAT BRITAIN",     "GBR-GB",      "GBR",         "Great Britain",
+  10L,      "NORTHERN IRELAND",  "GBR-NI",      "GBR",         "Northern Ireland",
+  11L,      "greece",            "GRC",         "GRC",         "Greece",
+  12L,      "spain",             "ESP",         "ESP",         "Spain",
+  13L,      "portugal",          "PRT",         "PRT",         "Portugal",
+  14L,      "GERMANY-EAST",      "DEU-E",       "DEU",         "Germany (East)",
+  15L,      "norway",            "NOR",         "NOR",         "Norway",
+  16L,      "finland",           "FIN",         "FIN",         "Finland",
+  17L,      "sweden",            "SWE",         "SWE",         "Sweden",
+  18L,      "austria",           "AUT",         "AUT",         "Austria",
+  19L,      "switzerland",       "CHE",         "CHE",         "Switzerland"
+)
+```
+
+Membership is defined on `country_iso3`, so the German and British units inherit the
+membership of their parent state. Norway and Switzerland have never been members and drop
+out. `exit_year` is carried because the UK left in 2020 and the `"ever"` scope has to be
+an explicit choice rather than an accident of coding.
+
+```{r}
+#| label: eu-accession
+
+eu_accession <- tribble(
+  ~country_iso3, ~accession_year, ~exit_year,
+  "BEL", 1958L, NA_integer_,
+  "DEU", 1958L, NA_integer_,
+  "FRA", 1958L, NA_integer_,
+  "ITA", 1958L, NA_integer_,
+  "LUX", 1958L, NA_integer_,
+  "NLD", 1958L, NA_integer_,
+  "DNK", 1973L, NA_integer_,
+  "IRL", 1973L, NA_integer_,
+  "GBR", 1973L, 2020L,
+  "GRC", 1981L, NA_integer_,
+  "ESP", 1986L, NA_integer_,
+  "PRT", 1986L, NA_integer_,
+  "AUT", 1995L, NA_integer_,
+  "FIN", 1995L, NA_integer_,
+  "SWE", 1995L, NA_integer_,
+  "CYP", 2004L, NA_integer_,
+  "CZE", 2004L, NA_integer_,
+  "EST", 2004L, NA_integer_,
+  "HUN", 2004L, NA_integer_,
+  "LVA", 2004L, NA_integer_,
+  "LTU", 2004L, NA_integer_,
+  "MLT", 2004L, NA_integer_,
+  "POL", 2004L, NA_integer_,
+  "SVK", 2004L, NA_integer_,
+  "SVN", 2004L, NA_integer_,
+  "BGR", 2007L, NA_integer_,
+  "ROU", 2007L, NA_integer_,
+  "HRV", 2013L, NA_integer_
+)
+
+eu_ever <- eu_accession$country_iso3
+```
+
+Note that East Germany appears in the Eurobarometer from 1990 and inherits Germany's 1958
+accession year. That is the correct treatment of the accession switch — the territory
+entered the Community through unification, not through an accession of its own — but it
+means the `"from_accession"` scope does not blank out the East German series. The two
+German units are never pooled by this notebook; the source keeps them apart and so do we.
+
+**CSES has no East/West split.** All German CSES studies are post-unification
+(`DEU_1998` onward) and `IMD1007` (sample component) is documented only as "see election
+study notes", so no generic respondent-level East/West indicator is available.
+Consequently the Germany split exists in the Eurobarometer series only, and CSES German
+panels are labelled `DEU`.
+
+# Ingest and cache
+
+Each source is parsed once, stripped of its labelled types (`haven_labelled` and the
+Stata-style `label.table` do not round-trip through parquet) and cached. The Eurobarometer
+file is 228 MB on disk; reading the twelve columns actually needed via `col_select` takes
+about two seconds rather than minutes.
+
+```{r}
+#| label: cache-helper
+
+# Read from parquet if cached, otherwise run `parse_fun()`, cache, return.
+cached_read <- function(name, parse_fun) {
+  f <- file.path(dir_cache, paste0(name, ".parquet"))
+  if (use_cache && file.exists(f)) {
+    message("cache hit: ", name)
+    return(arrow::read_parquet(f))
+  }
+  message("parsing from source: ", name)
+  d <- parse_fun()
+  arrow::write_parquet(d, f)
+  d
+}
+
+# CSES ships value labels in `label.table`; pull one out as a tidy tibble so the
+# crosswalk can be emitted from the same object the recoding uses.
+cses_value_labels <- function(d, v) {
+  lt <- attr(d, "label.table")[[v]]
+  if (is.null(lt)) {
+    return(tibble(code = integer(), code_label = character()))
+  }
+  tibble(code = as.integer(unname(lt)), code_label = names(lt))
+}
+```
+
+```{r}
+#| label: read-cses
+
+# One reader for both CSES releases: `vars` is a named vector mapping the shared
+# schema name -> the release-specific column name.
+read_cses <- function(path, obj_name, vars, expect_rows, expect_cols) {
+  env <- new.env()
+  load(path, envir = env)
+  d <- env[[obj_name]]
+
+  stopifnot(
+    is.data.frame(d),
+    nrow(d) == expect_rows,
+    ncol(d) == expect_cols,
+    all(vars %in% names(d))
+  )
+
+  # Assert that the codes this notebook recodes are exactly the codes the file
+  # declares, so a release that renumbers a category fails loudly here rather
+  # than silently falling through to `not_asked`.
+  declared <- sort(cses_value_labels(d, vars[["pid_close"]])$code)
+  stopifnot(identical(declared, c(0L, 1L, 7L, 8L, 9L)))
+
+  d[, unname(vars)] |>
+    as_tibble() |>
+    setNames(names(vars)) |>
+    mutate(across(everything(), \(x) {
+      a <- as.vector(x)
+      attributes(a) <- NULL
+      a
+    }))
+}
+
+vars_imd <- c(
+  survey_id     = "IMD1004",
+  respondent_id = "IMD1005",
+  iso3          = "IMD1006_UNALPHA3",
+  eu_flag       = "IMD1006_EU",
+  election_year = "IMD1008_YEAR",
+  field_year    = "IMD1013_Y",
+  weight        = "IMD1010_1",
+  pid_close     = "IMD3005_1",
+  pid_leaner    = "IMD3005_2",
+  pid_party     = "IMD3005_3",
+  pid_strength  = "IMD3005_4",
+  turnout       = "IMD3001_LH",
+  vote_party    = "IMD3002_LH_PL",
+  mod5_flag     = "IMD1008_MOD_5"
+)
+
+vars_mod6 <- c(
+  survey_id     = "f1004",
+  respondent_id = "f1003_1",
+  iso3          = "f1006_unalpha3",
+  eu_flag       = "f1007_eu",
+  election_year = "f1009",
+  field_year    = "f1019_y",
+  weight        = "f1101_1",
+  pid_close     = "f3023_1",
+  pid_leaner    = "f3023_2",
+  pid_party     = "f3023_3",
+  pid_strength  = "f3023_4",
+  turnout       = "f3010",
+  vote_party    = "f3011_lh_pl"
+)
+
+imd_raw <- cached_read("imd_raw", \() {
+  read_cses(path_imd, "cses_imd", vars_imd, 395797L, 406L)
+})
+
+mod6_raw <- cached_read("mod6_raw", \() {
+  read_cses(path_mod6, "cses6", vars_mod6, 33871L, 676L)
+})
+
+dim(imd_raw)
+dim(mod6_raw)
+```
+
+Module 6 carries three tiers of weight and **the tiers are not interchangeable**.
+`f1103_1` ("polity weight: sample") is identically 1 within a polity — it exists to make
+polities count equally in pooled analyses, not to correct a sample. Since every estimate
+below is a share *within* a country-year, the within-sample weight is the right one:
+`f1101_1` for Module 6, `IMD1010_1` for the IMD. Both are asserted to vary.
+
+```{r}
+#| label: check-weights
+
+stopifnot(
+  n_distinct(imd_raw$weight) > 1,
+  n_distinct(mod6_raw$weight) > 1
+)
+
+bind_rows(
+  tibble(source = "CSES IMD", w = imd_raw$weight),
+  tibble(source = "CSES MOD6", w = mod6_raw$weight)
+) |>
+  group_by(source) |>
+  summarise(
+    n_distinct = n_distinct(w),
+    min = min(w, na.rm = TRUE),
+    median = median(w, na.rm = TRUE),
+    max = max(w, na.rm = TRUE),
+    n_zero = sum(w == 0, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+The IMD is confirmed to contain Module 5 in full, which is why `cses5.rdata` is not read.
+
+```{r}
+#| label: mod5-containment
+
+imd_raw |>
+  count(in_module_5 = mod5_flag == 1) |>
+  mutate(share = n / sum(n))
+```
+
+```{r}
+#| label: read-eb
+
+read_eb <- function(path, expect_rows) {
+  d <- haven::read_dta(
+    path,
+    col_select = c(
+      study_id, id, year, eb, nation1,
+      closepty, feelclo, voteint, lastvote, wnation
+    )
+  )
+  stopifnot(nrow(d) == expect_rows)
+
+  d |>
+    transmute(
+      study_id = as.character(study_id),
+      respondent_id = as.numeric(id),
+      year = as.integer(year),
+      eb = as.numeric(eb),
+      nation1 = as.integer(nation1),
+      closepty = as.integer(closepty),
+      feelclo = as.numeric(feelclo),
+      voteint = as.numeric(voteint),
+      lastvote = as.numeric(lastvote),
+      weight = as.numeric(wnation)
+    )
+}
+
+eb_raw <- cached_read("eb_raw", \() read_eb(path_eb, 1134384L))
+
+dim(eb_raw)
+```
+
+# Harmonisation
+
+## Mapping objects
+
+Every recode below is driven by these tibbles, and `pid_crosswalk.csv` is written **from
+the same objects**. The crosswalk therefore cannot drift away from the code that produced
+the data.
+
+```{r}
+#| label: map-pid
+
+# CSES: the status is built from the pair (close, leaner), so the map is over the
+# pair rather than over a single code.
+map_cses_pid <- tribble(
+  ~pid_close, ~pid_leaner, ~pid_status,    ~pid_strength_lab,
+  1L,         NA_integer_, "attached",     "close",
+  0L,         1L,          "attached",     "leaner",
+  0L,         0L,          "not_attached", NA_character_,
+  0L,         7L,          "not_attached", NA_character_,
+  0L,         8L,          "not_attached", NA_character_,
+  0L,         9L,          "not_attached", NA_character_,
+  0L,         NA_integer_, "not_attached", NA_character_,
+  7L,         NA_integer_, "dk_refused",   NA_character_,
+  8L,         NA_integer_, "dk_refused",   NA_character_,
+  9L,         NA_integer_, "not_asked",    NA_character_
+)
+
+# the ingest asserted the file declares exactly these codes; assert the map
+# covers the same set, so the two checks cannot drift apart
+stopifnot(setequal(unique(map_cses_pid$pid_close), c(0L, 1L, 7L, 8L, 9L)))
+
+# Eurobarometer: status and strength arrive in one variable.
+map_eb_pid <- tribble(
+  ~closepty, ~code_label,    ~pid_status,    ~pid_strength_lab,
+  1L,        "VERY CLOSE",   "attached",     "very close",
+  2L,        "FAIRLY CLOSE", "attached",     "fairly close",
+  3L,        "sympathizer",  "attached",     "sympathizer",
+  4L,        "NO PARTY",     "not_attached", NA_character_,
+  8L,        "DK,NA",        "dk_refused",   NA_character_,
+  9L,        "inap",         "not_asked",    NA_character_,
+  NA_integer_, "(absent)",   "not_asked",    NA_character_
+)
+```
+
+`closepty == 3` ("merely a sympathiser") is coded **attached** and flagged, so the
+sensitivity check at the end can move it without touching anything else. It is the closest
+Eurobarometer analogue to a CSES leaner, which the CSES branching probe also counts as
+attached.
+
+```{r}
+#| label: map-vote
+
+# CSES turnout. 9999993 (not registered) is a genuine non-vote; refused/DK/missing
+# are unknown; 9999996 means the item does not apply to that study.
+map_cses_turnout <- tribble(
+  ~turnout,  ~code_label,                        ~voted,
+  0L,        "did not cast a ballot",            FALSE,
+  1L,        "cast a ballot",                    TRUE,
+  9999993L,  "not registered on electoral lists", FALSE,
+  9999996L,  "not applicable: no LH election",   NA,
+  9999997L,  "volunteered: refused",             NA,
+  9999998L,  "volunteered: don't know",          NA,
+  9999999L,  "missing",                          NA
+)
+
+# Eurobarometer vote items. Anything not listed here is a country-specific party
+# code and therefore counts as a reported vote.
+map_eb_vote <- tribble(
+  ~code,  ~code_label,        ~voted,        ~vote_party_valid,
+  0,      "na",               NA,            FALSE,
+  990,    "OTHER PARTY",      TRUE,          FALSE,
+  995,    "BLANK-SPOIL VOTE", TRUE,          FALSE,
+  996,    "WOULD NOT VOTE / NOT VOTED", FALSE, FALSE,
+  997,    "refused",          NA,            FALSE,
+  998,    "DK",               NA,            FALSE,
+  999,    "inap",             NA,            FALSE
+)
+```
+
+A blank or spoilt ballot (`995`) is counted as *having voted* — the respondent turned out
+— but never as a party choice. `990` ("other party") is likewise a reported vote without a
+usable party code.
+
+## Harmonisers
+
+```{r}
+#| label: harmonise-cses
+
+harmonise_cses <- function(d, source_label) {
+  d |>
+    mutate(
+      # the leaner probe is only asked of those who said "no", so it is NA-coded
+      # 9 elsewhere; collapse to NA before the join so the map stays readable
+      pid_leaner_j = if_else(pid_close == 0L, pid_leaner, NA_integer_),
+      pid_close_j = pid_close
+    ) |>
+    left_join(
+      map_cses_pid |> rename(pid_close_j = pid_close, pid_leaner_j = pid_leaner),
+      by = c("pid_close_j", "pid_leaner_j")
+    ) |>
+    left_join(map_cses_turnout, by = "turnout") |>
+    transmute(
+      source = source_label,
+      country_unit = iso3,
+      country_iso3 = iso3,
+      # The CSES time index is the ELECTION year, not the fieldwork year.
+      # Fieldwork routinely crosses a calendar boundary, so indexing on
+      # `IMD1013_Y` / `f1019_y` splits single election studies into two cells,
+      # one of them tiny (e.g. Belgium 1999/2000 at n = 4). The election year
+      # is what the study is a study of, and keeps one study in one cell.
+      year = as.integer(election_year),
+      election_year = as.integer(election_year),
+      field_year = if_else(field_year > 2100 | field_year < 1900,
+                           NA_integer_, as.integer(field_year)),
+      survey_id = as.character(survey_id),
+      respondent_id = as.character(respondent_id),
+      weight = as.numeric(weight),
+      eu_at_time = eu_flag == 1,
+      pid_status,
+      pid_strength = pid_strength_lab,
+      is_sympathizer = FALSE,
+      pid_party = if_else(pid_party >= 9999900, NA_real_, as.numeric(pid_party)),
+      voted,
+      vote_item_type = "past_vote",
+      vote_party = if_else(vote_party >= 9999900, NA_real_, as.numeric(vote_party))
+    )
+}
+
+cses_h <- bind_rows(
+  harmonise_cses(imd_raw, "CSES IMD"),
+  harmonise_cses(mod6_raw, "CSES MOD6")
+)
+
+stopifnot(!any(is.na(cses_h$pid_status)))
+count(cses_h, source, pid_status)
+```
+
+The CSES vote construct is **past vote in the lower-house election the study follows**.
+It is not a vote intention and the two are never merged.
+
+Two notes on the CSES time index. First, it is the **election year**: fieldwork routinely
+crosses a calendar boundary, so indexing on the fieldwork year splits a single election
+study into two cells, one of them near-empty. The fieldwork year is still carried as
+`field_year`. Second, a country that held two elections indexed to the same year, or that
+ran two studies of one election (`DEU12002` and `DEU22002`), is pooled into a single
+country-year — the series is descriptive and the alternative is an arbitrary tie-break.
+
+```{r}
+#| label: harmonise-eb
+
+# EB contributes two row-sets, one per vote construct, because the file carries
+# both `voteint` (intention) and `lastvote` (past vote). A country-year therefore
+# legitimately appears twice, distinguished by `vote_item_type`.
+harmonise_eb_one <- function(d, vote_col, vote_item_type_label) {
+  d |>
+    mutate(vote_code = .data[[vote_col]]) |>
+    left_join(map_eb_pid |> select(closepty, pid_status, pid_strength_lab),
+              by = "closepty") |>
+    left_join(map_eb_vote |> rename(vote_code = code),
+              by = "vote_code") |>
+    left_join(eb_country_map, by = "nation1") |>
+    transmute(
+      source = "Mannheim EB",
+      country_unit,
+      country_iso3,
+      year,
+      election_year = NA_integer_,
+      field_year = year,
+      survey_id = paste0("EB", eb),
+      respondent_id = as.character(respondent_id),
+      weight,
+      eu_at_time = NA,
+      # rows with a code absent from the map are country-specific party codes:
+      # a reported vote, with a usable party code
+      pid_status = if_else(is.na(pid_status), "not_asked", pid_status),
+      pid_strength = pid_strength_lab,
+      is_sympathizer = !is.na(closepty) & closepty == 3L,
+      pid_party = if_else(feelclo %in% map_eb_vote$code, NA_real_, feelclo),
+      voted = if_else(!is.na(vote_code) & !vote_code %in% map_eb_vote$code,
+                      TRUE, voted),
+      vote_item_type = vote_item_type_label,
+      vote_party = if_else(!is.na(vote_code) & !vote_code %in% map_eb_vote$code,
+                           vote_code, NA_real_)
+    )
+}
+
+eb_h <- bind_rows(
+  harmonise_eb_one(eb_raw, "voteint", "vote_intention"),
+  harmonise_eb_one(eb_raw, "lastvote", "past_vote")
+)
+
+stopifnot(!any(is.na(eb_h$pid_status)))
+count(eb_h, vote_item_type, pid_status)
+```
+
+## Stack, apply scope, apply the sympathiser switch
+
+```{r}
+#| label: stack
+
+pid_long <- bind_rows(cses_h, eb_h) |>
+  mutate(
+    # the switch is applied here, once, so every downstream table follows it
+    pid_status = if_else(
+      !sympathizer_as_attached & is_sympathizer, "not_attached", pid_status
+    ),
+    pid_status = factor(
+      pid_status,
+      levels = c("attached", "not_attached", "dk_refused", "not_asked")
+    )
+  ) |>
+  left_join(eu_accession, by = "country_iso3")
+
+n_before_scope <- nrow(pid_long)
+
+pid_long <- pid_long |>
+  filter(country_iso3 %in% eu_ever) |>
+  filter(
+    if (eu_scope == "ever") TRUE else year >= accession_year
+  )
+
+scope_label <- if (eu_scope == "ever") {
+  "EU member states (ever a member), all available years"
+} else {
+  "EU member states, from accession year onward"
+}
+
+tibble(
+  rows_before_scope = n_before_scope,
+  rows_after_scope = nrow(pid_long),
+  countries = n_distinct(pid_long$country_unit),
+  scope = scope_label
+)
+```
+
+An item that a survey never fielded and an item a respondent skipped are different things,
+and CSES codes both as `9`. `item_fielded` distinguishes them at the survey level: a
+survey counts as having fielded the battery if any respondent in it gave a substantive
+answer. Country-years in which the item was never fielded are dropped from the
+denominators; item nonresponse inside a fielded survey stays in as `not_asked` and is
+reported.
+
+```{r}
+#| label: item-fielded
+
+pid_long <- pid_long |>
+  group_by(source, survey_id, country_unit) |>
+  mutate(
+    item_fielded = any(pid_status %in% c("attached", "not_attached")),
+    vote_fielded = any(!is.na(voted))
+  ) |>
+  ungroup()
+
+pid_long |>
+  distinct(source, survey_id, country_unit, item_fielded) |>
+  count(source, item_fielded)
+```
+
+A second, subtler filter is needed on the vote side. In some early Eurobarometer waves the
+vote item records **no negative category at all** — the "would not vote" code is absent
+from the entire wave, across every country in it. Where that is true the item cannot
+distinguish a voter from a non-voter, and the share of non-attached respondents "reporting
+a vote" is mechanically 100% rather than estimated.
+
+The test is structural and applied at the **wave** level, not the country level, because
+the presence of a response code is a property of the questionnaire rather than of a
+country. A country-level test would wrongly flag compulsory-voting countries such as
+Belgium, where a near-100% turnout share is genuine.
+
+```{r}
+#| label: vote-negative-available
+
+pid_long <- pid_long |>
+  group_by(source, survey_id, vote_item_type) |>
+  mutate(vote_neg_available = any(voted == FALSE, na.rm = TRUE)) |>
+  ungroup()
+
+pid_long |>
+  filter(source == "Mannheim EB", vote_fielded) |>
+  distinct(year, survey_id, vote_item_type, vote_neg_available) |>
+  group_by(year, vote_item_type) |>
+  summarise(
+    waves = n(),
+    waves_without_negative = sum(!vote_neg_available),
+    .groups = "drop"
+  ) |>
+  filter(waves_without_negative > 0)
+```
+
+## Emit the crosswalk
+
+```{r}
+#| label: write-crosswalk
+
+crosswalk <- bind_rows(
+  map_cses_pid |>
+    transmute(
+      source = "CSES (IMD + MOD6)",
+      construct = "pid_status",
+      original_variable = "IMD3005_1/f3023_1 x IMD3005_2/f3023_2",
+      original_code = paste0("close=", pid_close, ", leaner=",
+                             ifelse(is.na(pid_leaner), "-", pid_leaner)),
+      harmonised = pid_status,
+      note = ifelse(is.na(pid_strength_lab), "", pid_strength_lab)
+    ),
+  map_eb_pid |>
+    transmute(
+      source = "Mannheim EB",
+      construct = "pid_status",
+      original_variable = "closepty",
+      original_code = ifelse(is.na(closepty), "NA", as.character(closepty)),
+      harmonised = pid_status,
+      note = code_label
+    ),
+  map_cses_turnout |>
+    transmute(
+      source = "CSES (IMD + MOD6)",
+      construct = "voted",
+      original_variable = "IMD3001_LH/f3010",
+      original_code = as.character(turnout),
+      harmonised = ifelse(is.na(voted), "NA", as.character(voted)),
+      note = code_label
+    ),
+  map_eb_vote |>
+    transmute(
+      source = "Mannheim EB",
+      construct = "voted",
+      original_variable = "voteint / lastvote",
+      original_code = as.character(code),
+      harmonised = ifelse(is.na(voted), "NA", as.character(voted)),
+      note = code_label
+    ),
+  tibble(
+    source = "Mannheim EB",
+    construct = "voted",
+    original_variable = "voteint / lastvote",
+    original_code = "(any other code)",
+    harmonised = "TRUE",
+    note = "country-specific party code = a reported vote"
+  ),
+  eb_country_map |>
+    transmute(
+      source = "Mannheim EB",
+      construct = "country_unit",
+      original_variable = "nation1",
+      original_code = as.character(nation1),
+      harmonised = country_unit,
+      note = nation1_label
+    )
+)
+
+write_csv(crosswalk, file.path(dir_final, "pid_crosswalk.csv"))
+nrow(crosswalk)
+```
+
+# Series breaks
+
+Breaks are carried in a tibble and drawn onto the plots, rather than described only in
+prose.
+
+```{r}
+#| label: tbl-breaks
+#| tbl-cap: "Documented series breaks and coverage limits."
+
+series_breaks <- tribble(
+  ~source,       ~year, ~break_label,
+  "Mannheim EB", 1975L, "closepty first fielded",
+  "Mannheim EB", 1995L, "closepty dropped from the Standard EB",
+  "CSES IMD",    1996L, "CSES series begins",
+  "CSES MOD6",   2022L, "Module 6 (advance release)"
+)
+
+series_breaks |> knitr::kable()
+```
+
+Additional breaks and filters that do not resolve to a single year:
+
+- **Eurobarometer `voteint`** is absent in 1998 and 2001; `lastvote` is fielded only in
+  1979 and 1982-1995. Gaps are left blank and never interpolated.
+- **No negative vote category in some early waves.** The "would not vote" code is entirely
+  absent from `voteint` in 1976 and 1979 (and near-absent in 1975), and from `lastvote` in
+  1982. In those waves the item cannot record a non-vote, so the headline share is 100% by
+  construction. Those country-years are marked unreliable by `vote_neg_available` and
+  dropped from the headline plot; they remain in the export, flagged, so the suppression is
+  auditable. This is the single most consequential filter in the notebook — without it the
+  headline series opens with a flat, entirely artefactual 100%.
+- **Zero recorded non-votes in a cell.** The wave-level test above is a statement about the
+  questionnaire, but the code was evidently offered in only some countries of a given wave:
+  several country-years still showed a flat 100% because that country recorded no non-vote
+  at all. A country-year containing not one non-vote cannot support an estimate of the
+  non-vote rate whatever the cause, so `n_no_vote > 0` is required as well. This does not
+  penalise genuinely high-turnout countries: Belgium, with compulsory voting, records
+  non-votes in every wave and is retained throughout.
+- **`feelclo`** (which party) is fielded erratically (1973, 1981, 1985-1994), so
+  `pid_party` is sparse for the Eurobarometer. It is not used to derive status.
+- **Skip patterns.** The CSES leaner probe (`_2`) is asked only of respondents who said
+  "no" to the first item; the "which party" and "how close" items only of those who ended
+  up attached. The Eurobarometer vote items are asked of the whole sample, but which of
+  `voteint` / `lastvote` was fielded varies by wave.
+- **Module 6 is an advance release.** Its country coverage will change on full release, so
+  every Module 6 point is provisional.
+- **Finland, Sweden and Austria** acceded in 1995, after `closepty` was dropped, so they
+  have no Eurobarometer attachment series at all under either scope.
+
+# Aggregation
+
+Shares are weighted; uncertainty uses the **Kish effective N**, $n_{\text{eff}} =
+(\sum w)^2 / \sum w^2$, in a Wilson interval. Neither source ships primary sampling units
+or strata, so a full `survey::svydesign` could only ever use the weights — which is
+exactly what this does. Using the effective rather than the nominal N is what makes the
+intervals design-corrected.
+
+```{r}
+#| label: helpers-agg
+
+eff_n <- function(w) {
+  w <- w[!is.na(w)]
+  if (sum(w^2) == 0) return(0)
+  sum(w)^2 / sum(w^2)
+}
+
+# Wilson score interval evaluated at the effective N
+wilson <- function(p, n, z = 1.96) {
+  n <- pmax(n, 1e-9)
+  denom <- 1 + z^2 / n
+  centre <- (p + z^2 / (2 * n)) / denom
+  halfw <- z * sqrt(p * (1 - p) / n + z^2 / (4 * n^2)) / denom
+  tibble(lower = pmax(0, centre - halfw), upper = pmin(1, centre + halfw))
+}
+```
+
+## Attachment shares by country-year
+
+```{r}
+#| label: agg-country-year
+
+# the two EB vote row-sets duplicate the attachment item, so the marginals are
+# computed on one of them only
+pid_marginal_base <- pid_long |>
+  filter(item_fielded) |>
+  filter(!(source == "Mannheim EB" & vote_item_type == "past_vote"))
+
+cy_n <- pid_marginal_base |>
+  group_by(source, country_unit, country_iso3, year) |>
+  summarise(
+    n_raw = n(),
+    n_eff = eff_n(weight),
+    w_total = sum(weight, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+pid_shares <- pid_marginal_base |>
+  group_by(source, country_unit, country_iso3, year, pid_status) |>
+  summarise(w = sum(weight, na.rm = TRUE), .groups = "drop") |>
+  complete(
+    nesting(source, country_unit, country_iso3, year),
+    pid_status,
+    fill = list(w = 0)
+  ) |>
+  group_by(source, country_unit, country_iso3, year) |>
+  mutate(share = w / sum(w)) |>
+  ungroup()
+
+pid_country_year <- pid_shares |>
+  select(-w) |>
+  pivot_wider(
+    names_from = pid_status, values_from = share, names_prefix = "share_"
+  ) |>
+  left_join(cy_n, by = c("source", "country_unit", "country_iso3", "year")) |>
+  mutate(reliable = n_eff >= min_eff_n) |>
+  arrange(source, country_unit, year)
+
+pid_country_year <- pid_country_year |>
+  bind_cols(wilson(pid_country_year$share_attached, pid_country_year$n_eff))
+
+head(pid_country_year)
+```
+
+```{r}
+#| label: tbl-thin-cells
+#| tbl-cap: "Country-years below the minimum effective N."
+
+pid_country_year |>
+  filter(!reliable) |>
+  select(source, country_unit, year, n_raw, n_eff) |>
+  arrange(n_eff) |>
+  head(20) |>
+  knitr::kable(digits = 1)
+```
+
+## Attachment x vote cross-tabulation
+
+This is the key quantity. The cross-tab is computed **separately for each
+`vote_item_type`**, never pooled across them.
+
+```{r}
+#| label: agg-crosstab
+
+pid_vote_crosstab <- pid_long |>
+  filter(item_fielded, vote_fielded, !is.na(voted)) |>
+  mutate(
+    cell = case_when(
+      pid_status == "attached"     &  voted ~ "attached_and_voted",
+      pid_status == "attached"     & !voted ~ "attached_and_no_vote",
+      pid_status == "not_attached" &  voted ~ "not_attached_but_voted",
+      pid_status == "not_attached" & !voted ~ "not_attached_and_no_vote",
+      pid_status == "dk_refused"   &  voted ~ "dk_attachment_and_voted",
+      pid_status == "dk_refused"   & !voted ~ "dk_attachment_and_no_vote",
+      TRUE ~ "not_asked"
+    )
+  ) |>
+  group_by(source, country_unit, country_iso3, year, vote_item_type) |>
+  mutate(
+    n_eff = eff_n(weight),
+    w_total = sum(weight, na.rm = TRUE),
+    vote_neg_available = all(vote_neg_available)
+  ) |>
+  group_by(source, country_unit, country_iso3, year, vote_item_type,
+           n_eff, w_total, vote_neg_available, cell) |>
+  summarise(w = sum(weight, na.rm = TRUE), n_raw = n(), .groups = "drop") |>
+  mutate(share = w / w_total)
+
+# The headline series. Computed directly from the respondent rows rather than
+# from the cross-tab, so the effective N is that of the non-attached subgroup
+# itself rather than a rescaling of the full-sample effective N.
+nonattached_voted <- pid_long |>
+  filter(item_fielded, vote_fielded, !is.na(voted), pid_status == "not_attached") |>
+  group_by(source, country_unit, country_iso3, year, vote_item_type) |>
+  summarise(
+    n_denom = n(),
+    n_eff = eff_n(weight),
+    w_denom = sum(weight, na.rm = TRUE),
+    w_voted = sum(weight[voted], na.rm = TRUE),
+    # a country-year is usable only if every wave behind it could record a
+    # non-vote; otherwise the share is 100% by construction
+    vote_neg_available = all(vote_neg_available),
+    # and, regardless of the questionnaire, a cell in which not one non-vote was
+    # actually recorded cannot support an estimate of the non-vote rate
+    n_no_vote = sum(!voted),
+    .groups = "drop"
+  ) |>
+  filter(n_denom > 0, w_denom > 0) |>
+  mutate(
+    share_voted = w_voted / w_denom,
+    reliable = n_eff >= min_eff_n & vote_neg_available & n_no_vote > 0
+  )
+
+nonattached_voted <- nonattached_voted |>
+  bind_cols(wilson(nonattached_voted$share_voted, nonattached_voted$n_eff))
+
+nonattached_voted |>
+  select(source, country_unit, year, vote_item_type, n_denom, n_eff, share_voted) |>
+  head(10)
+```
+
+## Pooled series
+
+Pooling across countries here is an **unweighted country average**: countries are not
+population-weighted, so every country counts once. Labelled as such wherever it appears.
+
+```{r}
+#| label: agg-pooled
+
+# The set of countries observed changes from year to year, especially in CSES
+# where a country contributes only in its election years. A pooled mean over a
+# shifting country set is not comparable across years, so years resting on
+# fewer than this many countries are not drawn.
+min_countries_pooled <- 3
+
+pooled_attach <- pid_country_year |>
+  filter(reliable) |>
+  group_by(source, year) |>
+  summarise(
+    countries = n(),
+    share_attached = mean(share_attached),
+    share_dk = mean(share_dk_refused),
+    .groups = "drop"
+  ) |>
+  filter(countries >= min_countries_pooled)
+
+pooled_nonattached_voted <- nonattached_voted |>
+  filter(reliable) |>
+  group_by(source, vote_item_type, year) |>
+  summarise(
+    countries = n(),
+    share_voted = mean(share_voted, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  filter(countries >= min_countries_pooled)
+
+head(pooled_attach)
+```
+
+# Comparability across the two instruments
+
+```{r}
+#| label: tbl-overlap
+#| tbl-cap: "Country-years carrying both an Eurobarometer and a CSES attachment estimate."
+
+overlap <- pid_country_year |>
+  mutate(family = if_else(source == "Mannheim EB", "EB", "CSES")) |>
+  distinct(country_unit, year, family) |>
+  count(country_unit, year) |>
+  filter(n > 1)
+
+overlap |> knitr::kable()
+```
+
+```{r}
+#| label: tbl-spans
+#| tbl-cap: "Observed year span per source."
+
+pid_country_year |>
+  group_by(source) |>
+  summarise(
+    first_year = min(year),
+    last_year = max(year),
+    country_years = n(),
+    countries = n_distinct(country_unit),
+    .groups = "drop"
+  ) |>
+  knitr::kable()
+```
+
+If the overlap table above is empty, that is the substantive result: the Eurobarometer
+attachment item ends in 1994 and the CSES series begins in 1996, so **the per-country
+level offset between the two instruments is not estimable from these data**. No bridged or
+spliced series is produced, and no constant instrument effect is assumed. Under this
+constraint the only defensible cross-source comparison is of *slopes within* each series.
+
+# Plots
+
+```{r}
+#| label: plot-setup
+
+pal_source <- c(
+  "Mannheim EB" = "#1B4F72",
+  "CSES IMD" = "#B7472A",
+  "CSES MOD6" = "#E39C34"
+)
+
+# Gaps must be visibly blank, but the two instruments have different natural
+# cadences: the Eurobarometer fields waves annually, while a CSES country is
+# observed only in its election years, typically three to five years apart.
+# Filling a common one-year grid would therefore shatter every CSES line into
+# unconnected dots, and connecting everything regardless would draw a line
+# across waves in which the item was never fielded.
+#
+# Instead a series is cut into segments wherever the gap between consecutive
+# observations exceeds what is normal for that source. Points are always drawn,
+# so isolated observations stay visible.
+max_gap_years <- c("Mannheim EB" = 2, "CSES IMD" = 6, "CSES MOD6" = 6)
+
+add_segments <- function(d, by = c("source", "country_unit")) {
+  d |>
+    arrange(across(all_of(c(by, "year")))) |>
+    group_by(across(all_of(by))) |>
+    mutate(
+      gap = year - lag(year),
+      seg = cumsum(is.na(gap) | gap > max_gap_years[source]),
+      series = paste(!!!syms(by), seg, sep = "|")
+    ) |>
+    ungroup()
+}
+```
+
+```{r}
+#| label: fig-pid-share-facets
+#| fig-cap: "Share reporting party attachment, by country and source. Ribbons are Wilson intervals on the Kish effective N. The dashed line is the don't-know/refused share. Gaps are years in which the item was not fielded and are left blank. Series are never spliced across sources."
+#| fig-width: 12
+#| fig-height: 14
+#| fig-dpi: 500
+
+d_fac <- pid_country_year |>
+  filter(reliable) |>
+  add_segments()
+
+ggplot(d_fac, aes(x = year, colour = source, fill = source)) +
+  geom_ribbon(
+    aes(ymin = lower, ymax = upper, group = series),
+    alpha = 0.18, colour = NA
+  ) +
+  geom_line(aes(y = share_attached, group = series), linewidth = 0.6) +
+  # several countries contribute a single election study; without points those
+  # series would render as nothing at all
+  geom_point(aes(y = share_attached), size = 0.7) +
+  geom_line(
+    aes(y = share_dk_refused, group = series),
+    linetype = "dashed", linewidth = 0.4, alpha = 0.8
+  ) +
+  geom_vline(
+    data = series_breaks,
+    aes(xintercept = year),
+    linetype = "dotted", colour = "grey55", linewidth = 0.3
+  ) +
+  facet_wrap(~country_unit, ncol = 4) +
+  scale_colour_manual(values = pal_source, name = NULL) +
+  scale_fill_manual(values = pal_source, name = NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    x = NULL, y = "share of respondents",
+    title = "Reported party attachment over time",
+    subtitle = paste0(
+      scope_label,
+      ". Solid: attached. Dashed: don't know / refused."
+    ),
+    caption = paste0(
+      "Sources kept separate; no splicing. Cells below an effective N of ",
+      min_eff_n, " are omitted."
+    )
+  ) +
+  theme_pubr(legend = "top") +
+  theme(panel.spacing = unit(0.6, "lines"))
+```
+
+```{r}
+#| label: fig-pid-composition
+#| fig-cap: "Composition of the attachment item over time: attached, not attached, and don't know/refused. Don't know is shown as its own band and is never folded into 'not attached'. Panels are separated by source so that no stack mixes instruments."
+#| fig-width: 12
+#| fig-height: 14
+#| fig-dpi: 500
+
+d_comp <- pid_shares |>
+  semi_join(
+    pid_country_year |> filter(reliable),
+    by = c("source", "country_unit", "year")
+  ) |>
+  filter(pid_status != "not_asked")
+
+ggplot(d_comp, aes(x = year, y = share, fill = pid_status)) +
+  geom_col(width = 1) +
+  # sources do not overlap in time, so one panel per country shows all of them
+  # without any stack ever mixing two instruments in the same bar
+  facet_wrap(~country_unit, ncol = 4) +
+  scale_fill_manual(
+    values = c(
+      attached = "#1B4F72",
+      not_attached = "#C7CCD1",
+      dk_refused = "#E39C34"
+    ),
+    name = NULL
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    x = NULL, y = NULL,
+    title = "Attachment / non-attachment / don't know, over time",
+    subtitle = scope_label
+  ) +
+  theme_pubr(legend = "top") +
+  theme(panel.spacing = unit(0.3, "lines"))
+```
+
+```{r}
+#| label: fig-nonattached-voted
+#| fig-cap: "The headline quantity: among respondents who denied any party attachment, the share who nonetheless report a vote. Past vote and vote intention are different constructs and are drawn distinctly; they are never merged. Gaps are left blank."
+#| fig-width: 12
+#| fig-height: 14
+#| fig-dpi: 500
+
+d_head <- nonattached_voted |>
+  filter(reliable) |>
+  add_segments(by = c("source", "country_unit", "vote_item_type"))
+
+ggplot(d_head, aes(x = year, y = share_voted, colour = source)) +
+  geom_ribbon(
+    aes(ymin = lower, ymax = upper, group = series, fill = source),
+    alpha = 0.15, colour = NA
+  ) +
+  geom_line(aes(linetype = vote_item_type, group = series), linewidth = 0.6) +
+  geom_point(aes(shape = vote_item_type), size = 1.1) +
+  facet_wrap(~country_unit, ncol = 4) +
+  scale_colour_manual(values = pal_source, name = NULL) +
+  scale_fill_manual(values = pal_source, name = NULL) +
+  scale_linetype_manual(
+    values = c(past_vote = "solid", vote_intention = "22"),
+    name = "vote item"
+  ) +
+  scale_shape_manual(
+    values = c(past_vote = 16, vote_intention = 1),
+    name = "vote item"
+  ) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    x = NULL, y = "share reporting a vote",
+    title = "Among the non-attached: share who nonetheless report a vote",
+    subtitle = paste0(
+      scope_label,
+      ". Eurobarometer asks vote intention and last vote; CSES asks past vote."
+    )
+  ) +
+  theme_pubr(legend = "top") +
+  theme(panel.spacing = unit(0.6, "lines"))
+```
+
+```{r}
+#| label: fig-pooled
+#| fig-cap: "Unweighted country averages. Countries are not population-weighted, so each country counts once and the level is not a population quantity for the EU as a whole. Because a CSES country contributes only in its election years, the set of countries behind each point changes; years resting on fewer than three countries are not drawn, and the remaining year-to-year movement still mixes real change with compositional change."
+#| fig-width: 10
+#| fig-height: 5
+#| fig-dpi: 500
+
+bind_rows(
+  pooled_attach |>
+    transmute(source, year, value = share_attached,
+              panel = "attached (all respondents)"),
+  pooled_nonattached_voted |>
+    transmute(source, year, value = share_voted,
+              panel = paste0("reports a vote (non-attached only), ", vote_item_type))
+) |>
+  ggplot(aes(x = year, y = value, colour = source, group = interaction(source, panel))) +
+  geom_line(linewidth = 0.7) +
+  facet_wrap(~panel, nrow = 1) +
+  scale_colour_manual(values = pal_source, name = NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    x = NULL, y = NULL,
+    title = "Unweighted country averages",
+    subtitle = scope_label,
+    caption = "Unweighted across countries -- not an EU population estimate."
+  ) +
+  theme_pubr(legend = "top")
+```
+
+# Coverage grid
+
+```{r}
+#| label: tbl-coverage
+#| tbl-cap: "Coverage grid: which source carries the attachment item and the vote item, by country and five-year period."
+
+# A (attachment) and V (vote) are marked PER SOURCE. Marking them per
+# country-period would let one source's attachment item and another source's
+# vote item combine into a spurious "A+V".
+coverage <- pid_long |>
+  mutate(period = paste0(5 * (year %/% 5), "-", 5 * (year %/% 5) + 4)) |>
+  group_by(country_unit, period, source) |>
+  summarise(
+    attach = any(item_fielded),
+    vote = any(vote_fielded),
+    .groups = "drop"
+  ) |>
+  mutate(
+    src_short = recode(
+      source,
+      "Mannheim EB" = "EB", "CSES IMD" = "IMD", "CSES MOD6" = "M6"
+    ),
+    mark = case_when(
+      attach & vote ~ paste0(src_short, "(A+V)"),
+      attach ~ paste0(src_short, "(A)"),
+      vote ~ paste0(src_short, "(V)"),
+      TRUE ~ NA_character_
+    )
+  ) |>
+  filter(!is.na(mark)) |>
+  group_by(country_unit, period) |>
+  summarise(mark = paste(sort(mark), collapse = " "), .groups = "drop") |>
+  pivot_wider(names_from = period, values_from = mark, values_fill = "")
+
+coverage |>
+  select(country_unit, sort(setdiff(names(coverage), "country_unit"))) |>
+  knitr::kable()
+```
+
+# Exports
+
+```{r}
+#| label: write-exports
+
+write_csv(pid_country_year, file.path(dir_final, "pid_country_year.csv"))
+write_csv(pid_vote_crosstab,
+          file.path(dir_final, "pid_vote_crosstab_country_year.csv"))
+
+list.files(dir_final, pattern = "^pid_") |> sort()
+```
+
+# Sensitivity: the sympathiser coding
+
+The one genuinely discretionary recode is Eurobarometer `closepty == 3`. Recomputing the
+attachment share with sympathisers moved to `not_attached` bounds how much it matters —
+and it matters a great deal, so this is reported as a headline result rather than a
+footnote.
+
+```{r}
+#| label: tbl-sympathizer
+#| tbl-cap: "Eurobarometer attachment share with and without sympathisers counted as attached."
+
+eb_sens <- pid_long |>
+  filter(source == "Mannheim EB", item_fielded,
+         vote_item_type == "vote_intention") |>
+  group_by(year) |>
+  summarise(
+    with_symp = sum(weight[pid_status == "attached"], na.rm = TRUE) /
+      sum(weight, na.rm = TRUE),
+    without_symp = sum(weight[pid_status == "attached" & !is_sympathizer],
+                       na.rm = TRUE) / sum(weight, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  mutate(difference = with_symp - without_symp)
+
+eb_sens |> knitr::kable(digits = 3)
+```
+
+```{r}
+#| label: sympathizer-magnitude
+
+tibble(
+  mean_with = mean(eb_sens$with_symp),
+  mean_without = mean(eb_sens$without_symp),
+  mean_difference = mean(eb_sens$difference),
+  min_difference = min(eb_sens$difference),
+  max_difference = max(eb_sens$difference)
+)
+```
+
+The middle category is not a rounding detail: "merely a sympathiser" accounts for roughly
+**thirty percentage points** of the Eurobarometer attachment share, and the measured level
+of European partisanship over 1975-1994 roughly *halves* depending on which side of the
+line it falls. The gap is also stable across the whole span, so it shifts the level of the
+series far more than its slope.
+
+This is itself evidence for the paper's argument rather than a nuisance. A single
+instrument, fielded unchanged, yields two defensible partisan shares that differ by a
+factor of about two, purely from where the analyst draws the line between attachment and
+non-attachment. That is precisely step 3 of the argument chain — coding choices shift the
+population of inference — visible inside one survey item.
+
+# Findings and caveats
+
+```{r}
+#| label: findings-numbers
+
+summary_stats <- list(
+  eb_years = range(pid_country_year$year[pid_country_year$source == "Mannheim EB"]),
+  cses_years = range(pid_country_year$year[pid_country_year$source != "Mannheim EB"]),
+  n_overlap = nrow(overlap),
+  n_thin = sum(!pid_country_year$reliable),
+  n_country_years = nrow(pid_country_year)
+)
+summary_stats
+```
+
+**Coverage limits.** The Eurobarometer attachment item is fielded 1975-1994 only. The
+trend file spans 1970-2002, but `closepty` is absent before 1975 and is dropped from the
+Standard Eurobarometer after 1994. The long-run attachment series therefore cannot be
+pushed back to the early 1970s, and the claim in
+`data/01_raw/external/external-data.md` that the explicit/vote-anchored split is
+constructible "back to the early 1970s" holds for the *vote* item alone, not for
+attachment. Austria, Finland and Sweden acceded in 1995 and so have no Eurobarometer
+attachment series under any scope.
+
+**Series breaks.** Marked on the plots: 1975 (item introduced), 1995 (item dropped), 1996
+(CSES begins), 2022 (Module 6). `voteint` is missing in 1998 and 2001; `lastvote` is
+fielded only in 1979 and 1982-1995. All gaps are left blank; nothing is interpolated.
+
+**Thin cells.** Country-years below an effective N of `r min_eff_n` are excluded from the
+plots and listed above. Effective N is the Kish quantity, so a country-year with a
+nominal N of several hundred can still fall below the threshold when the weights are
+dispersed.
+
+**Don't know is a category, not noise.** DK/refused is reported in every table and drawn
+as its own band. It is never folded into "not attached" — a respondent who declines to
+answer the attachment item is not a respondent who denies attachment, and the two move
+differently across waves and countries.
+
+**Two vote constructs.** CSES asks about past vote in the lower-house election the study
+follows. The Eurobarometer carries both a vote intention ("if there were a general
+election tomorrow") and a last-vote recall. These are different constructs, carried in
+`vote_item_type` and drawn distinctly throughout. A country-year can appear twice in the
+cross-tab exports, once per construct; they are never averaged together.
+
+**What the two instruments do and do not share.** They share a target construct — felt
+closeness to a party — and both separate a substantive denial from a don't-know. They do
+not share a question form: CSES asks a binary and then probes leaners, while the
+Eurobarometer asks a single graded item whose middle category ("merely a sympathiser") has
+no CSES equivalent. The Eurobarometer bar is lower. Levels are consequently **not**
+comparable across the two; only slopes within a source are. Because the two series do not
+overlap in time, this notebook cannot estimate the offset empirically, and does not
+pretend to: no bridged line is drawn anywhere.
+
+**Germany.** The Eurobarometer keeps West (`DEU-W`, from 1970) and East (`DEU-E`, from
+1990) apart via `nation1`, and this notebook preserves that split rather than pooling to
+`nation2`'s single "germany". CSES has no equivalent: all German CSES studies are
+post-unification and no generic respondent-level East/West indicator exists, so CSES
+German panels are labelled `DEU`. Great Britain and Northern Ireland are kept apart on the
+same principle.
+
+**Module 6 is provisional.** It is an advance release; its country coverage will change on
+full release and every Module 6 point should be re-run against the final version.
+
+**What this does not do.** Party codes are carried as codes, not resolved to party names —
+`IMD3005_3` is a CSES numeric code and Eurobarometer `feelclo` codes are country-specific.
+Resolution via Party Facts (`IMD5103_*` / `f5203_*`) is deferred until a section needs
+party-level attachment. Nothing here is a causal estimate; this is descriptive input to
+step 2 of the argument chain.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

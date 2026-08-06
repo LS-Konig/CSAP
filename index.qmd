@@ -13,6 +13,17 @@ draft: true
 draft-mode: visible
 ---
 
+
+Roter Faden:
+
+Zeitreihe Partisanship in Europe
+Great dealignment (or realignment?)
+Was sagt in welchen Ländern Partisanship voraus? Was sagt denial of partisanship voraus?
+Conditional composition of PIs influences subsample compositions of AP studies if PI used as filter question -> cross country differences in representativeness, degree of potential bias for comparative AP research
+
+
+
+
 <!--
 ROTER FADEN -- every section below serves the central claim; if a bullet does not
 move one of these steps, it belongs in the appendix.
@@ -97,6 +108,71 @@ EMPIRICAL CLAIM 1.
 - **Leaner overlap** estimated from the CSES branching probe -- the only source carrying it. Report the overlap; do not assume the groups are distinct.
 - **The design confound, stated here.** Target and measurement mode are perfectly confounded in these data: thermometers are vertical-attitudinal, the conjoint horizontal-behavioral, the diagonal is unobserved. The claim is therefore attitudinal vs. behavioral, full stop.
 - **The equivalence test is pre-specified here, before results.** ROPE in token units, justified against the size of β₁. Committing to it after seeing the posterior is worthless.
+
+### One framework, two outcomes {#sec-model}
+
+The attitudinal and behavioral results come from the same model.
+Only the outcome changes: a party rating in @sec-attitudinal, a token allocation in @sec-behavioral.
+Keeping the specification fixed across the two is what licenses the comparison the paper turns on, because any difference in the estimated type contrast is then a difference in the data rather than in the estimator applied to them.
+To make the two commensurable, thermometer ratings are rescaled from their original 0--100 range to 0--10, the range of the token allocations.
+Coefficients from both models are therefore in the same units, and a single region of practical equivalence serves both.
+
+Let $Y_{riac}$ denote an evaluation $r$ made by respondent $i$, who is anchored to party $a$ in country $c$.
+Two quantities describe each observation.
+$T_i \in \{0,1\}$ is the respondent's partisan type: $1$ for self-identified partisans, $0$ for vote-anchored respondents who deny attachment.
+$R_{ri}$ is the relationship between the respondent's anchor and the target being evaluated.
+In the ratings this is binary, since every rated party is either the anchor or not.
+In the games it has three levels -- co-partisan, out-partisan, and the no-cue control profile, which serves as the reference category -- because the conjoint includes profiles carrying no partisan attribute at all.
+
+Affective polarization is defined as a contrast between the two partisan categories, estimated separately for each type:
+
+$$
+\mathrm{AP}_t = \mathbb{E}\!\left[Y \mid R = \text{Co},\, T = t\right] - \mathbb{E}\!\left[Y \mid R = \text{Out},\, T = t\right]
+$$ {#eq-estimand}
+
+This is @reiljan2020fear's index logic -- in-group affect minus out-group affect -- embedded in a regression rather than computed as a per-respondent score, which is what allows the anchor to be held fixed while the reporting varies.
+Written as a linear predictor with a binary co-partisan indicator, the core specification is
+
+$$
+Y_{riac} = \alpha + \beta_1 \mathrm{Co}_{ri} + \beta_2 T_i + \beta_3 (\mathrm{Co}_{ri} \times T_i) + \boldsymbol{X}_{ri}'\boldsymbol{\gamma} + \varepsilon_{riac}
+$$ {#eq-core}
+
+so that $\mathrm{AP}_0 = \beta_1$ for vote-anchored respondents and $\mathrm{AP}_1 = \beta_1 + \beta_3$ for self-identified partisans, and the whole question of whether the coding rule matters reduces to $\beta_3$.
+$\boldsymbol{X}_{ri}$ carries the remaining conjoint attributes and the respondent covariates named above.
+Both accounts sketched in @sec-attachment predict $\beta_1 > 0$; they disagree only about $\beta_3$.
+An identity account, in which reported attachment marks a psychological group membership that intensifies in-group favoritism, predicts $\beta_3 > 0$ in both domains.
+A categorization account, in which knowing which side one is on suffices, predicts $\beta_3 \approx 0$ wherever the partisan cue is doing the work directly.
+
+Evaluations are nested within respondents, respondents are grouped by the party they are anchored to, and anchors sit within countries.
+We estimate @eq-core inside that structure, with varying intercepts at each level and varying slopes on both $\mathrm{Co}$ and $T$ at the anchor and country levels:
+
+\singlespacing
+$$
+\begin{aligned}
+Y_{riac} = {} & \alpha + \beta_1 \mathrm{Co}_{ri} + \beta_2 T_i + \beta_3 (\mathrm{Co}_{ri} \times T_i) + \boldsymbol{X}_{ri}'\boldsymbol{\gamma} \\
+& + u_{i0} \\
+& + v_{a0} + v_{a\mathrm{Co}} \mathrm{Co}_{ri} + v_{aT} T_i \\
+& + w_{c0} + w_{c\mathrm{Co}} \mathrm{Co}_{ri} + w_{cT} T_i \\
+& + \varepsilon_{riac}
+\end{aligned}
+$$ {#eq-multilevel}
+\doublespacing
+
+Anchors are parties *within* countries, so @eq-multilevel estimates the type contrast inside party-country cells rather than across them.
+This is the design's answer to the composition objection: a comparison of self-identified partisans in one party against vote-anchored respondents in another would confound reporting with everything that distinguishes the two parties, and the varying slopes on $\mathrm{Co}$ remove exactly that.
+Allowing the co-partisan slope to vary by anchor and by country also encodes a substantive expectation rather than a nuisance correction -- the magnitude of polarization plainly differs across parties and party systems, and partial pooling stabilizes the cells where it is thinly estimated instead of discarding them.
+We report the resulting country-varying estimates in @sec-attitudinal and @sec-behavioral, and take the cross-national spread in $\beta_3 + w_{cT}$ as the evidence on whether the coding rule matters more in some systems than others.
+
+We estimate the models with Hamiltonian Monte Carlo via Stan, through the `brms` package [@burkner2017brms].
+Priors are weakly informative and scaled to the 0--10 outcome: they exclude effects larger than the outcome range while remaining far more diffuse than the likelihood.
+The full specification -- prior distributions, covariance structure, convergence diagnostics, and prior predictive checks -- is in @sec-appendix-model.
+All reported quantities are derived by posterior simulation rather than from coefficients directly, so that uncertainty at every level propagates into them: for each draw we compute $\mathrm{AP}_t = \beta_1 + t\beta_3$ for the pooled estimate and $\mathrm{AP}_{c,t} = (\beta_1 + w_{c\mathrm{Co}}) + t(\beta_3 + w_{cT})$ for each country.
+The equivalence test in @sec-behavioral is conducted on the posterior of $\beta_3$ against the ROPE fixed above.
+
+Two boundaries on what this estimates.
+The partisan cue in the conjoint is randomized within respondent, so $\beta_1$ is a causal effect of the cue *within* each partisan type.
+The type contrast is not: $T$ is a self-report, not an assignment, and no amount of multilevel structure changes that.
+@eq-multilevel rules out composition as an explanation of $\beta_3$; it does not license the claim that attachment *causes* the difference, and @sec-panel rather than this model is where that question is put under pressure.
 
 ## Attitudinal result {#sec-attitudinal}
 
@@ -187,6 +263,73 @@ EMPIRICAL CLAIM 2. The load-bearing section.
 
 ## Appendix {.appendix}
 
+### Full model specification {#sec-appendix-model .appendix}
+
+This appendix states in full the model summarized in @sec-model.
+The same specification is estimated twice, once with the rescaled thermometer rating as the outcome and once with the token allocation, and nothing but the outcome differs between them.
+
+**Likelihood.** Both outcomes are bounded on $[0, 10]$ and discrete -- tokens by construction, ratings because the thermometer is answered in coarse increments.
+We nonetheless assume a Gaussian likelihood,
+
+$$
+Y_{riac} \sim \mathcal{N}(\mu_{riac}, \sigma^2),
+$$ {#eq-likelihood}
+
+with $\mu_{riac}$ given by @eq-multilevel.
+The bounds and discreteness violate the technical assumptions of that family, and the choice is a deliberate trade.
+Our quantities of interest are differences in conditional means, and the coefficients of @eq-core are exactly those differences on the original token scale, directly interpretable without a link function or a set of cutpoints standing between the estimate and the ROPE.
+Under a Normal likelihood the regression coefficients coincide with the ordinary least squares estimator, which remains consistent for $\mathbb{E}[Y \mid X]$ in large samples even when residuals are non-Normal or heteroskedastic [@wooldridge2010econometric; @white1980heteroskedasticity], and the sample here is large.
+The respondent-level varying intercept and the covariate set absorb much of the structured variance that bounding would otherwise push into the residual.
+Because this is a convenience and not a claim, @sec-appendix-robustness re-estimates both models with an ordinal likelihood; the substantive conclusion must not depend on @eq-likelihood.
+
+**Varying effects.** Respondent-level intercepts are
+
+$$
+u_{i0} \sim \mathcal{N}(0, \sigma^2_{u0}),
+$$ {#eq-re-respondent}
+
+and the anchor- and country-level effects are jointly Normal with unstructured covariance matrices, so that intercepts and slopes may be correlated:
+
+\singlespacing
+$$
+\begin{pmatrix} v_{a0} \\ v_{a\mathrm{Co}} \\ v_{aT} \end{pmatrix} \sim \mathcal{N}\!\left( \mathbf{0}, \Sigma_a \right),
+\qquad
+\begin{pmatrix} w_{c0} \\ w_{c\mathrm{Co}} \\ w_{cT} \end{pmatrix} \sim \mathcal{N}\!\left( \mathbf{0}, \Sigma_c \right),
+\qquad
+\varepsilon_{riac} \sim \mathcal{N}(0, \sigma^2).
+$$ {#eq-re-anchor-country}
+\doublespacing
+
+Both $\Sigma_a$ and $\Sigma_c$ are unstructured $3 \times 3$ matrices.
+Estimating the correlations rather than fixing them to zero is what lets parties and countries with high baseline warmth be distinguished from parties and countries with steep co-partisan slopes.
+
+We do **not** include a respondent-level varying slope on $R$.
+Within-respondent variation in the relationship categories is too thin to identify individual-specific cue sensitivities across six rounds, and forcing the term in trades a small reduction in bias for a large increase in estimation instability [@heisig2019you].
+Omitting it pushes heterogeneity in cue sensitivity to the anchor and country levels, where it is well identified, and leaves the remainder in the residual.
+
+**Priors.** All priors are weakly informative and scaled to the 0--10 outcome.
+
+| Parameter | Prior | Rationale |
+|:---|:---|:---|
+| Intercept $\alpha$ | $\mathcal{N}(5, 2)$ | Centered at the midpoint of the outcome range |
+| Fixed effects $\beta_k, \boldsymbol{\gamma}$ | $\mathcal{N}(0, 2)$ | Centered at no effect; ~95% of prior mass within $\pm 4$ units, a shift of 40% of the scale and far larger than anything reported in @hahm2024divided |
+| Varying-effect SDs | $\text{Half-}t(3, 0, 1)$ | Positive support with heavy tails: permits large group-level variability while shrinking toward zero |
+| Residual SD $\sigma$ | $\text{Half-}t(3, 0, 2)$ | As above, scaled to residual rather than group variation |
+| Correlation matrices $\Sigma_a, \Sigma_c$ | $\text{LKJ}(2)$ | Mildly favors weaker correlations, regularizing the $3 \times 3$ blocks |
+
+These priors are regularizing rather than informative: they rule out effects larger than the outcome range itself while remaining far more diffuse than the likelihood, so the posterior is data-driven.
+Prior predictive checks confirming that draws stay inside the admissible range are reported in @sec-appendix-robustness.
+
+**Estimation.** Models are fit by Hamiltonian Monte Carlo in Stan via `brms` [@rstan; @burkner2017brms; @burkner2017advanced; @burkner2021bayesian], with four chains of 4,000 iterations each (2,000 warmup), yielding 8,000 post-warmup draws.
+Convergence is assessed by rank-normalized $\hat{R} < 1.01$ and bulk and tail effective sample sizes above 1,000 [@vehtari2021rank]; trace plots and diagnostics are reported per model.
+We summarize posteriors by their median and 95% credible interval throughout.
+
+**Derived quantities.** Nothing is read off a coefficient table.
+For each posterior draw we compute the pooled contrast $\mathrm{AP}_t = \beta_1 + t\beta_3$ and the country-specific contrast $\mathrm{AP}_{c,t} = (\beta_1 + w_{c\mathrm{Co}}) + t(\beta_3 + w_{cT})$, and summarize the resulting distributions.
+Pooled predictions marginalize over the varying effects rather than conditioning on any particular party or country.
+The type gap is reported as the posterior of $\mathrm{AP}_1 - \mathrm{AP}_0 = \beta_3$, and the equivalence test in @sec-behavioral as the posterior mass of $\beta_3$ falling inside the ROPE fixed in @sec-design [@kruschke2018rejecting].
+Variance decompositions report the share of variance attributable to respondents, anchors, and countries.
+
 ### Individual-level moderators {.appendix}
 
 - Demoted from the main text. Labelled either preregistered or exploratory -- no middle option.
@@ -224,8 +367,11 @@ In both games respondents were shown a tabular overview of Player 2 after the in
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-distr-thermo >}}
 
-### Robustness {.appendix}
+### Robustness {#sec-appendix-robustness .appendix}
 
 - Attention check switched off (`apply_attention_check`), to show the sample rule does not drive the contrast.
 - Defector anchor coded both ways (§4), reported separately for ratings and allocations.
 - Response-style check: endpoint use on non-political 0--10 batteries, testing whether the attitudinal gap is partly a scale-use disposition.
+- **Likelihood.** Both models re-estimated with an ordinal (cumulative) likelihood, since the outcomes are bounded and discrete. The Gaussian specification in @sec-appendix-model is a convenience chosen for interpretability on the token scale; if the sign or the ROPE verdict on β₃ moves under the ordinal fit, the Gaussian results do not stand.
+- **Prior sensitivity.** Prior predictive draws checked to fall inside $[0, 10]$; fixed-effect and varying-effect SD priors widened and tightened by a factor of two to confirm the posterior is likelihood-driven.
+- **Varying-effects structure.** Refit without the anchor-level varying slopes, to show the type contrast is not an artifact of partial pooling across parties.
