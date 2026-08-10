@@ -11,78 +11,160 @@ format:
     slideNumber: true
     footer:  Tristan Muno and Thomas König   -- {{< meta date >}} --  How does reported partisan attachement influence affective polarization? 
     logo:  ./images/uma_ss.png 
-editor: visual
+editor: source
 preview-links: true
 ---
 
-## How does reported partisan attachement influence affective polarization? 
+## What Do We Mean When We Talk About Polarization?
 
-### A comparative study of 25 European democracies 
+### From Concept to Measurement to Democratic Consequences
 
-![]( ./images/uma_palace.png ){width="100%"}
-{{< meta author >}}<br>
-{{< meta date >}}
+![](./images/uma_palace.png){width="100%"} {{< meta author >}}<br> {{< meta date >}}
 
-# Introduction
+# Opening & Roadmap
 
-## Motivation
+## Hook
 
-- Bullet point 1
-- more details @ [Quarto Revealjs Documentation](https://quarto.org/docs/presentations/revealjs/)
+- In physics, "polarization" describes the *orientation* of a wave -- light waves aligned in one plane or the opposing alignment of charge (picture of light, magnet)
 
-------------------------------------------------------------------------
+- core origin meaning is about alignment, orientation
 
-## Relevance
+- no notions of conflict, hostility, pathology -> these arise from the social sciences' import of the term
 
-------------------------------------------------------------------------
+- We imported a word about alignment and turned it into a word about conflict -- and then started arguing about whether the thing is getting worse, without agreeing on what the thing is
 
-## Research Question
-
-# Theory
-
-## Prior Research
 
 ------------------------------------------------------------------------
 
-## Theoretical Framework
+## Agenda
+
+Central claim: Conceptual and measurement choices shape what we think we know about polarization -- and therefore what we can responsibly claim about its consequences for democracy
+
+1. The Concept
+2. From Political to Affective Polarization
+3. Social Identity Theory
+4. Measuring Affective Polarization
+5. Empirical Insights from Europe
+6. Debates on Normative Implications
+
+By the end I want you to be suspicious of any sentence of the form "polarization is increasing" that doesn't specify *what kind*.
+
+# Mapping the concept
+
+## Polarization is a family of concepts
+
+- Broadest socia-science usage: any orientation, alignment, separation, sorting or divergence of things, people, opinions, behaviors
+- Four mathematically distinct things people call polarization:
+  - Dispersion -- how spread out opinions are
+  - Bimodality -- whether the middle is emptying out
+  - Sorting / constraint -- whether previously independent divides become correlated (e.g. your position on abortion now predicts your position on climate)
+  - Distance -- how far apart group means are
+- key teaching point: these can move in opposite directions in the same dataset. A public can sort without dispersing. A distribution can spread without becoming bimodal.
 
 ------------------------------------------------------------------------
 
-## Argument
+## Three further axes
 
-# Research Design
+- Bipolar vs multipolar: nothing in the concept requires two camps or one dimension (e.g. IR vocabulary on unipolar, bipolar, multipolar world orders)
+- State vs. process: a snapshot ("Hungary is polarized") vs a dynamic ("polarization is increasing"). Public debate slides between these constantly. Different data requirements, different claims.
+- Object vs. Target: who or what (elites, legislators, mass public, voters, partisans) is polarized against whom or what?
+
+Most disagreements about polarization are disagreements about which facets of the above people mean when talking about polarization.
+
+# From ideological to affective polarization
+
+## The debate on political polarization
+
+- Polarization in (American) political science originally meant *ideological* polarization: divergence in positions on issues, or on overall left-right
+- Elite level: reasonably clear evidence of US congressional divergence since the 1970s
+- Mass level: fiercely contested through the 2000s. Fiorina: the public isn't polarized, it's better sorted: people haven't moved to extremes, they've moved to the party that matches views they already held. Abramowitz: Yes it is, especially the engaged
+- Key point: both were partly right, about different aspects of polarization 
 
 ------------------------------------------------------------------------
+
+## Affect, not ideology
+
+- @iyengar2012affect: stop asking whether people's *positions* diverge, ask how they *feel* about each other
+- Findings: inter-partisan dislike substantially exceeds substantive disagreement. @iyengar2015fear even show partisan discrimination exceeds discrimination by race in US
+- Working definition of affective polarization: "the tendency of people identifying as [...] to view opposing partisans negatively and copartisans positively" [@iyengar2015fear; @iyengar2019origins]
+- AP constitutes of two components: positive in-group affect (in-group favoritism) *and* negative out-group affect (out-group animosity)
+- This concept spread extraordinarily fast, and a big reason is the belief that it threatens democracy
+
+# Social Identity Theory
+
+## Why would affect exceed disagreement?
+
+- is people disagree only moderately on policy, why do they dislike each other so intensely?
+- because partisanship isn't (only) a summary of your positions. It's a group you belong to.
+- @tajfel1979integrative: Categorization -> Identification -> Comparison -> positive distinctiveness
+- Group membership becomes part of the self-concept, we (i.e. humans) seek favourable comparisons with out-groups because our self-esteem is partly bound up in the group's standing
+- The minimal group paradigm: even random and arbitrary group compositions produce in-group/out-group effects [@tajfel1971social]
+
+------------------------------------------------------------------------
+
+## Two implications + the European complication
+
+1. In-group love $\neq$ out-group hate [@brewer1999psychology]: in-group favoritism is the primary process, it does not require discrimination out-groups. The two are empirically and conceptually separable
+2. Partisanship as social identity / expressive partisanship: A party is something you are, not just a set of positions you hold
+3. Complications in multiparty Europe: Who is in- and who is out-group in a multiparty system [@rollicke2023polarisation]? Identity may span broader coalitions or camps rather than individual parties.
+
+# Measuring affective polarization
+
+## The workhorse
+
+- Feeling thermometers / like-dislike scales: rate each party 0-100 (or 0-10). AP = in-group score minus out-group score
+- Comparative extensions for multiparty settings: 
+  - @reiljan2020fear's Affective Polarization Index (API): in-group score minus average across all out-groups
+  - @wagner2021affective's Distance (average distance from most liked party) and Spread (SD of scores) measures
+- Why it dominates: intuitive, brief, universal scale, and already present in dozens of existing surveys
+
+## Two critiques that matter
+
+1. What is "affect"? "Like" and "dislike" blend emotion with cognitive and instrumental evaluation. They also collapse very different discrete emotions — anger, fear, disgust, contempt — which have quite different behavioural implications. As @bakker2024putting put it, whether these self-reports validly capture "affect" is an open question.
+2. Which target? @druckman2019we When asked about "Republicans," respondents picture elites and activists, not the moderate neighbour who rarely discusses politics. Specify the modal partisan and estimates drop sharply.
+
+-> a large share of measured "mass animosity" may be elite animosity wearing a costume
+
+## Refinements in AP literature
+
+- AP
+- Vertical @areal2024verticalvshorizontal / political [@reiljan2024patterns] (affect toward elites) and horizontal / social (affect toward citizens)
+- former also distinguished into party and leader AP [@reiljan2024patterns]
+- empirical literature: dislike of out-parties is consistently stronger than dislike of their ordinary *supporters*. Target choice matters!
+- Attitudinal vs behavioral: survey based self-reports of attitudes/feelings vs behavioral measures 
+
+# Empirics
 
 ## Data
 
+- @hahm2024divided. Cross-national conjoint experiment, 25 EU member states, ~29k respondents, fielded in 2019
+- ~1,100 per country, broadly representative on key sociodemographics
+
+## Design
+
+![Player 2 Profile Example. *Note:* Figure embedded from @hahm2024divided, Figure 1.](https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20240123150926403-0273:S0003055423000266:S0003055423000266_fig1.png){#fig-profile}
+
+## Measurement advantages
+
+- Explicitly horizontal: the co-player is presented as an ordinary co-national, not a party or a leader
+- Inclusion of a non-partisan baseline control condition allows decomposition of AP into ingroup favoritism and outgroup animosity
+- Conjoint experiments less prone to social desirability bias [@horiuchi2022does]
+- Randomization allows causal identification of displayed attributes on allocated token [@hainmueller2014causal]
+
+## Results
+
+
+##
+
+- Polarization is a family of concepts, not a thing
+- Measurement choices are theoretical choices
+- Whether AP is "bad for democracy" depends on which AP you mean
+
 ------------------------------------------------------------------------
 
-## Methods
-
-# Results
-
-------------------------------------------------------------------------
-
-## Results I
-
-------------------------------------------------------------------------
-
-## Results II
-
-# Conclusion
-
-------------------------------------------------------------------------
-
-## Summary
-
-------------------------------------------------------------------------
-
-## Implications
 
 # Thank you for your attention!
 
 ------------------------------------------------------------------------
 
 ## References
-
