@@ -15,6 +15,8 @@ editor: source
 preview-links: true
 ---
 
+To-Do: Fix title page, add pictures, focus on Hahm et al results first, my contrib as outlook
+
 ## What Do We Mean When We Talk About Polarization?
 
 ### From Concept to Measurement to Democratic Consequences
