@@ -307,6 +307,21 @@ eu25games2019 |>
 
 ## Partisan Relationship Category $R$
 
+$R$ is a function of the anchor $A$ and the party **displayed** in the round. The
+qualifier carries weight: a partner party is *drawn* in every round, but the treatment
+branch decides whether it ever reaches the screen. Partisanship is shown only in
+`1_conat_eustance_partisan` and `2_conat_partisan`; in `3_eunat_eustance` and
+`4_somenat` the draw is simply unused (see the upstream recode notebook,
+`eu25games2019/code/07_recode.qmd`). Comparing the anchor against an undisplayed draw
+labels 35,942 rows — a third of the partisan sample — as co- or out-partisan encounters
+in which the respondent saw no party at all, and attenuates every co-partisan contrast
+toward the no-cue mean. `der_outpartisan_comb` above already guards for this with
+`str_detect(cj_treatment, "partisan")`; $R$ uses the same guard.
+
+Rounds where no party was shown are therefore `NA`, with one exception: the co-national
+arm of `4_somenat` displays neither a party nor an EU stance, and serves as the no-cue
+control `None`.
+
 ```{r}
 #| label: partisan-relationship-category
 
@@ -316,6 +331,8 @@ eu25games2019 <- eu25games2019 |>
       # control group (no partisan cue but still conational)
       cj_treatment == "4_somenat" &
         cj_nationality_shown == "own_country" ~ "None",
+      # no party displayed -> not a partisan encounter, whatever was drawn
+      !str_detect(cj_treatment, "partisan") ~ NA_character_,
       # copartisan
       der_partisan_anchor == ext_cj_party_pf_name ~ "Co",
       # outpartisan
@@ -323,6 +340,10 @@ eu25games2019 <- eu25games2019 |>
     ),
     der_partisan_relationship = fct_relevel(der_partisan_relationship, "None")
   )
+
+# Co/Out must occur only in the two party-showing treatments
+eu25games2019 |>
+  count(cj_treatment, der_partisan_relationship)
 ```
 
 
@@ -372,7 +393,23 @@ stopifnot(
   ),
   # both games survive, three rounds each
   setequal(eu25games2019$meta_game, c("dict", "trust")),
-  setequal(eu25games2019$meta_round, 1:3)
+  setequal(eu25games2019$meta_round, 1:3),
+  # R is Co/Out only where a party was actually displayed -- the guard whose
+  # absence previously let a third of the sample be mislabelled
+  all(
+    str_detect(
+      eu25games2019$cj_treatment[
+        eu25games2019$der_partisan_relationship %in% c("Co", "Out")
+      ],
+      "partisan"
+    )
+  ),
+  # and None only in the co-national arm of the no-cue treatment
+  all(
+    eu25games2019$cj_treatment[
+      eu25games2019$der_partisan_relationship %in% "None"
+    ] == "4_somenat"
+  )
 )
 ```
 
