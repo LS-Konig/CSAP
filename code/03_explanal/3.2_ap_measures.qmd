@@ -741,8 +741,11 @@ ggplot(
 [I]t is the average absolute party like-dislike difference relative to each respondent's average party like-dislike score
 
 $$
-\text{Spread}_i = \sqrt{ \frac{ \sum_{p=1}^{P} ( \text{like}_{ip} - \overline{\text{like}}_{i})^2 } {n_p}}
+\text{Spread}_i = \sqrt{ \frac{ \sum_{p=1}^{P} ( \text{like}_{ip} - \overline{\text{like}}_{i})^2 } {n_p - 1}}
 $$
+
+i.e. the ordinary (sample) standard deviation of respondent $i$'s party ratings, which
+is what `sd()` computes in the chunk below. The denominator is $n_p - 1$, not $n_p$.
 
 ```{r}
 #| label: eu25-wagner-spread
