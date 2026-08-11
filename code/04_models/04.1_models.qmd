@@ -1,0 +1,1279 @@
+---
+title: |
+  Code Notebook 4.1
+subtitle: |
+  Bayesian Multilevel Models of Attitudinal and Behavioral Affective Polarization
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+This notebook implements the specification stated in `index.qmd`, @sec-model-spec and
+@sec-appendix-model: one backbone estimated twice, once with the token allocation as the
+outcome and once with the rescaled thermometer rating, differing only in the levels $R$
+can take and in the grouping structure wrapped around it.
+
+$$
+Y_{riac} = \alpha + \beta_1 R_{ri} + \beta_2 T_i + \beta_3 (R_{ri} \times T_i) + \boldsymbol{X}_{ri}'\boldsymbol{\gamma}
+         + u_{i0}
+         + v_{a0} + v_{aR} R_{ri} + v_{aT} T_i
+         + w_{c0} + w_{cR} R_{ri} + w_{cT} T_i + w_{c,RT}(R_{ri} \times T_i)
+         + \varepsilon_{riac}
+$$
+
+Nothing here is read off a coefficient table. The reported quantities are marginal means
+and contrasts between them,
+
+$$
+\mathrm{AP}_t = \mu_t(\mathrm{Co}) - \mu_t(\mathrm{Out}),
+\qquad
+\Delta = \mathrm{AP}_1 - \mathrm{AP}_0,
+$$
+
+computed per posterior draw and summarized afterwards.
+
+Robustness fits — the location-scale attitudinal model, the ordinal likelihood, the
+no-anchor-slopes refit, the defector recode and the full-sample attitudinal refit — belong
+to notebook 4.2 and are deliberately not run here.
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "brms",
+  "posterior",
+  "tidybayes",
+  "bayesplot",
+  "ggpubr",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Four chains, run in parallel.
+options(mc.cores = 4)
+
+# Fitted model objects live outside the tracked tree (see .gitignore).
+model_dir <- here("models")
+dir.create(model_dir, showWarnings = FALSE)
+```
+
+`smoke_test` is the switch between a fast structural check and the specification the
+manuscript commits to. The cache file name carries the flag, because `file_refit =
+"on_change"` compares the formula, data and priors -- not the sampler settings -- and
+would otherwise hand back a 500-iteration fit when a 4,000-iteration one was asked for.
+
+Where `cmdstanr` is available we use it, with within-chain threading. The bottleneck in
+both models is a Gaussian likelihood evaluated over tens of thousands of rows, which is
+precisely what `reduce_sum` splits across threads, so four chains of four threads occupy
+sixteen cores rather than four and cut the wall clock by roughly a factor of five. The
+backend is detected rather than hard-coded, and falls back to `rstan` with no threading if
+CmdStan is not installed, so the notebook runs either way.
+
+```{r}
+#| label: sampler-settings
+
+smoke_test <- TRUE # TRUE -> 2 chains x 500 iterations, for a structural check
+
+# prefer cmdstanr + threading; fall back to rstan if CmdStan is not installed
+has_cmdstan <- requireNamespace("cmdstanr", quietly = TRUE) &&
+  !is.null(tryCatch(cmdstanr::cmdstan_path(), error = function(e) NULL))
+
+n_threads <- 4
+
+sampler <- list(
+  chains = if (smoke_test) 2 else 4,
+  cores = if (smoke_test) 2 else 4,
+  iter = if (smoke_test) 500 else 4000,
+  warmup = if (smoke_test) 250 else 2000,
+  seed = 20260810,
+  control = list(adapt_delta = 0.95, max_treedepth = 12),
+  backend = if (has_cmdstan) "cmdstanr" else "rstan",
+  threads = if (has_cmdstan) threading(n_threads) else NULL
+)
+
+# cache path; the suffix keeps smoke and full fits from overwriting one another,
+# and the backend from silently reusing a fit compiled the other way
+model_file <- function(name) {
+  file.path(
+    model_dir,
+    paste0(name, if (smoke_test) "_smoke", if (has_cmdstan) "_mt")
+  )
+}
+
+list(
+  backend = sampler$backend,
+  chains = sampler$chains,
+  threads_per_chain = if (has_cmdstan) n_threads else 1,
+  cores_busy = sampler$cores * if (has_cmdstan) n_threads else 1,
+  iter = sampler$iter,
+  warmup = sampler$warmup
+)
+```
+
+# Load data
+
+```{r}
+#| label: load-data
+
+eu25games2019 <- readRDS(
+  here(
+    "data",
+    "03_final",
+    "eu25games2019.rds"
+  )
+)
+
+thermo_long <- readRDS(
+  here(
+    "data",
+    "03_final",
+    "thermo_long.rds"
+  )
+)
+```
+
+# Analysis frames
+
+Both frames are reduced to the columns the models use and given identical names for the
+three framework variables (`R`, `type`) and the three grouping factors (`pid`, `anchor`,
+`country`), so that every downstream function works on either.
+
+Out-partisan is the reference level of $R$ and vote-anchored the reference level of $T$,
+which makes $\beta_1^{\mathrm{Co}}$ the co-partisan effect among vote-anchored respondents
+and $\beta_3^{\mathrm{Co}}$ the difference in that effect between the types.
+
+## Behavioral frame
+
+The unit is a respondent-round. Rows enter when the respondent has a partisan type and the
+round has a defined relationship category, which after the correction to
+`der_partisan_relationship` in notebook 2.1 means: the two party-showing treatments, plus
+the co-national arm of `4_somenat` as the no-cue control.
+
+Two coding decisions deserve a note.
+
+*EU stance.* The treatment branch shows the EU-stance attribute only in
+`1_conat_eustance_partisan` and `3_eunat_eustance`. Since treatment 3 shows no party and
+so contributes no rows here, the retained rounds split into treatment 1 (party and EU
+stance), treatment 2 (party only) and the control (neither). Coding `eupos` with an
+explicit `not_shown` level identifies the EU-stance effect from the treatment 1 versus
+treatment 2 comparison, so the `None` contrast is adjusted for the absent attribute rather
+than confounded with it. Left uncoded, $\mu_t(\mathrm{None})$ would not be a clean no-cue
+baseline.
+
+*What is left out.* `cj_nationality_shown` is `own_country` in every retained row and so
+carries no information. Respondent-level covariates are omitted from both models on
+purpose: they are collinear with the respondent-level varying intercept and would
+contribute nothing to a within-person contrast. Partner age enters as a factor rather than
+a number, since it is a randomized attribute with five levels and nothing requires its
+effect to be linear.
+
+```{r}
+#| label: frame-behavioral
+
+dat_behav <- eu25games2019 |>
+  filter(
+    !is.na(der_partisan_type),
+    !is.na(der_partisan_relationship)
+  ) |>
+  transmute(
+    tokens = cj_pl2,
+    # relationship category R, out-partisan as reference
+    R = fct_relevel(factor(as.character(der_partisan_relationship)), "Out"),
+    # partisan type T, vote-anchored as reference
+    type = factor(
+      der_partisan_type,
+      levels = c(0, 1),
+      labels = c("vote_anchored", "explicit")
+    ),
+    # grouping factors
+    pid = factor(meta_pid),
+    anchor = factor(der_partisan_anchor),
+    country = factor(meta_country),
+    # session structure: game, and round position within game
+    game = fct_relevel(factor(meta_game), "dict"),
+    round = factor(meta_round),
+    # remaining design attributes
+    eupos = factor(
+      if_else(
+        cj_treatment %in% c("1_conat_eustance_partisan", "3_eunat_eustance"),
+        cj_eupos,
+        "not_shown"
+      ),
+      levels = c("not_shown", "eu_citizen", "not_eu_citizen")
+    ),
+    # hyphen replaced so the level survives into a readable coefficient name
+    cj_rel = factor(str_replace_all(cj_rel, "-", "_")),
+    cj_class = factor(cj_class),
+    cj_sex = factor(cj_sex),
+    cj_age = factor(cj_age)
+  )
+
+dat_behav |>
+  summarise(
+    rows = n(),
+    respondents = n_distinct(pid),
+    anchors = n_distinct(anchor),
+    countries = n_distinct(country)
+  )
+```
+
+## Attitudinal frame
+
+The unit is a respondent-party rating. Ratings are already rescaled from 0--100 to the
+0--10 range of the token allocations in notebook 3.2, so coefficients from the two models
+are in the same units.
+
+Two restrictions apply, both recorded in the checks below rather than asserted here. The
+United Kingdom is dropped, because its thermometer battery carries scores for one party
+only. And the primary sample keeps respondents who supply at least one co-partisan and at
+least one out-partisan rating, which is what it takes for the within-person contrast to be
+identified: a respondent with no rating of their own anchor contributes nothing to
+$\mathrm{AP}_t$ once they carry a varying intercept, but does pull $\mu_t(\mathrm{Out})$
+toward a population that $\mu_t(\mathrm{Co})$ is not averaged over. The full-sample refit
+is deferred to notebook 4.2.
+
+```{r}
+#| label: frame-attitudinal
+
+dat_attit_all <- thermo_long |>
+  filter(
+    !is.na(der_partisan_type),
+    !is.na(thermo_score),
+    meta_country != "United Kingdom"
+  ) |>
+  transmute(
+    thermo = thermo_score,
+    R = fct_relevel(
+      factor(if_else(thermo_party == der_partisan_anchor, "Co", "Out")),
+      "Out"
+    ),
+    type = factor(
+      der_partisan_type,
+      levels = c(0, 1),
+      labels = c("vote_anchored", "explicit")
+    ),
+    pid = factor(meta_pid),
+    anchor = factor(der_partisan_anchor),
+    country = factor(meta_country),
+    # rated party, crossed with the anchor grouping; also absorbs display
+    # position, which is fixed per party within a country
+    rated_party = factor(thermo_party)
+  )
+
+# primary sample: the within-person contrast must be identified
+dat_attit <- dat_attit_all |>
+  group_by(pid) |>
+  filter(any(R == "Co"), any(R == "Out")) |>
+  ungroup() |>
+  mutate(across(c(anchor, rated_party), droplevels))
+
+bind_rows(
+  dat_attit_all |> mutate(sample = "all rated"),
+  dat_attit |> mutate(sample = "primary (>=1 Co & >=1 Out)")
+) |>
+  group_by(sample, type) |>
+  summarise(
+    rows = n(),
+    respondents = n_distinct(pid),
+    .groups = "drop"
+  )
+```
+
+# Pre-estimation checks
+
+@sec-model-spec lists these under *To check before estimation*. Each decides something,
+and the ones that decide the most are run first.
+
+## 1. The no-cue baseline, $\mu_1(\mathrm{None}) - \mu_0(\mathrm{None})$
+
+Cheap and load-bearing. It decides how $\Delta \approx 0$ may be read. If the two types
+allocate alike when no partisan information is displayed at all, the type variable carries
+no general behavioral signature, and a small $\Delta$ cannot be attributed to two
+dissimilar populations happening to converge. If they do not, that level difference has to
+be interpreted before anything else.
+
+```{r}
+#| label: check-baseline-nocue
+
+baseline_nocue <- dat_behav |>
+  filter(R == "None") |>
+  group_by(type) |>
+  summarise(
+    mean_tokens = mean(tokens),
+    sd = sd(tokens),
+    n = n(),
+    .groups = "drop"
+  )
+
+baseline_nocue
+
+# raw difference and its standard error
+with(
+  baseline_nocue,
+  tibble(
+    baseline_gap = mean_tokens[type == "explicit"] -
+      mean_tokens[type == "vote_anchored"],
+    se = sqrt(sum(sd^2 / n))
+  )
+)
+```
+
+## 2. Cell counts, and where the evidence on $\beta_3$ actually comes from
+
+The conjoint party cue was constructed around the attachment item: among self-identified
+partisans, roughly half of all party-showing rounds display their own attachment party,
+whereas for vote-anchored respondents a match arises only by chance. The cue is still
+randomized *within* each type, so the co-partisan contrast remains a causal effect of the
+cue inside each type, but the assignment probability differs by type, and the
+vote-anchored respondents who do see a co-partisan profile are disproportionately anchored
+to large parties. That is what the anchor-level varying slope on $R$ is in the model to
+absorb.
+
+The practical consequence is that $\Delta$ rests on the co-partisan rounds of the
+vote-anchored group, and there are far fewer of them.
+
+```{r}
+#| label: check-cell-counts
+
+# how often the displayed party matched the respondent's own anchor
+eu25games2019 |>
+  filter(
+    str_detect(cj_treatment, "partisan"),
+    !is.na(der_partisan_type),
+    !is.na(ext_cj_party_pf_name)
+  ) |>
+  group_by(type = if_else(der_partisan_type == 1, "explicit", "vote_anchored")) |>
+  summarise(
+    party_cue_rounds = n(),
+    share_matching_anchor = mean(ext_cj_party_pf_name == der_partisan_anchor),
+    .groups = "drop"
+  )
+
+# rows and respondents behind each cell
+dat_behav |>
+  group_by(type, R) |>
+  summarise(
+    rows = n(),
+    respondents = n_distinct(pid),
+    mean_tokens = mean(tokens),
+    .groups = "drop"
+  ) |>
+  arrange(type, R)
+```
+
+## 3. Can the anchor level carry a varying slope on $R \times T$?
+
+An identification question, not a modelling preference: it requires both partisan types to
+be present in workable numbers *within* each party. The binding requirement is co-partisan
+rounds from both types in the same anchor.
+
+```{r}
+#| label: check-anchor-interaction
+
+anchor_feasibility <- dat_behav |>
+  filter(R == "Co") |>
+  count(country, anchor, type) |>
+  pivot_wider(
+    names_from = type,
+    values_from = n,
+    values_fill = 0
+  )
+
+anchor_feasibility |>
+  summarise(
+    anchors_with_co_rounds = n(),
+    both_types_present = sum(vote_anchored > 0 & explicit > 0),
+    both_types_ge_10 = sum(vote_anchored >= 10 & explicit >= 10)
+  )
+```
+
+Roughly half the anchors carry co-partisan rounds from one type only, so the interaction
+stays at the country level, exactly as written in @eq-multilevel. The party-level type gap
+is thereby assumed homogeneous, and that assumption is stated rather than hidden.
+
+## 4. Thermometer battery coverage
+
+The battery holds six parties per country, so respondents anchored to a party outside it
+supply no co-partisan rating. This is the restriction behind the primary attitudinal
+sample, and it does not fall evenly.
+
+```{r}
+#| label: check-battery-country
+
+battery_coverage <- dat_attit_all |>
+  distinct(country, pid, type, anchor) |>
+  left_join(
+    dat_attit_all |>
+      filter(R == "Co") |>
+      distinct(pid) |>
+      mutate(has_co = TRUE),
+    by = "pid"
+  ) |>
+  mutate(has_co = coalesce(has_co, FALSE)) |>
+  group_by(country, type) |>
+  summarise(
+    respondents = n(),
+    pct_no_co = 100 * mean(!has_co),
+    .groups = "drop"
+  ) |>
+  pivot_wider(
+    names_from = type,
+    values_from = c(respondents, pct_no_co)
+  ) |>
+  mutate(
+    type_gap = pct_no_co_vote_anchored - pct_no_co_explicit
+  ) |>
+  arrange(desc(pct_no_co_vote_anchored))
+
+battery_coverage |>
+  mutate(across(where(is.numeric), \(x) round(x, 1)))
+```
+
+```{r}
+#| label: check-battery-party
+
+# which anchors fall outside their country's battery, by respondents lost
+battery <- dat_attit_all |>
+  distinct(country, rated_party)
+
+dat_attit_all |>
+  distinct(country, pid, type, anchor) |>
+  anti_join(battery, by = c("country", "anchor" = "rated_party")) |>
+  count(country, anchor, sort = TRUE) |>
+  head(20)
+```
+
+The loss is concentrated in a handful of party systems, and within them it is far heavier
+for vote-anchored respondents than for self-identified partisans, because the battery
+covers the large established parties while vote-anchored respondents are more often
+anchored to newer or smaller ones. The country-level attitudinal estimates for the worst
+affected systems therefore rest on a narrowed and differentially selected base, and must be
+reported as such in @sec-attitudinal.
+
+## 5. Item non-response on the thermometer, by type
+
+Non-response on a party correlates with disliking it, so if the rates differ by type,
+listwise deletion selects in the direction that widens the attitudinal gap and the estimate
+would have to be reported as a bound.
+
+```{r}
+#| label: check-thermo-nonresponse
+
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = TRUE) |>
+  filter(!is.na(der_partisan_type)) |>
+  select(der_partisan_type, meta_country, num_range("q_thermo_", 1:6)) |>
+  pivot_longer(num_range("q_thermo_", 1:6)) |>
+  group_by(
+    country_set = if_else(
+      meta_country == "United Kingdom",
+      "United Kingdom",
+      "other 24"
+    ),
+    type = if_else(der_partisan_type == 1, "explicit", "vote_anchored")
+  ) |>
+  summarise(
+    ratings = n(),
+    pct_missing = 100 * mean(is.na(value)),
+    .groups = "drop"
+  )
+```
+
+## 6. Number of rated parties per country, and battery order
+
+The rated-party varying intercept is relied on to absorb display position, which holds only
+if the order of the battery really is identical within each country. It also matters how
+many parties each country contributes, since respondents in fragmented systems supply more
+out-partisan rows and so more weight in the pooled contrast.
+
+```{r}
+#| label: check-battery-structure
+
+# parties per country, and ratings per respondent
+thermo_long |>
+  group_by(meta_country) |>
+  summarise(
+    parties = n_distinct(thermo_party),
+    ratings_per_respondent = mean(table(meta_pid)),
+    .groups = "drop"
+  ) |>
+  arrange(parties)
+
+# each battery slot maps to exactly one party within a country
+eu25games2019 |>
+  distinct(meta_pid, .keep_all = TRUE) |>
+  select(meta_country, matches("^ext_q_thermo_[0-9]+_pf_name$")) |>
+  pivot_longer(-meta_country, names_to = "slot", values_to = "party") |>
+  group_by(meta_country, slot) |>
+  summarise(parties_in_slot = n_distinct(party, na.rm = TRUE), .groups = "drop") |>
+  count(parties_in_slot)
+```
+
+The United Kingdom is the exception that forces its own exclusion: its six battery slots
+are named, but only the first carries any scores, in both waves and already in the raw
+data. UK respondents supply one rating each and no within-person contrast, so the
+attitudinal model runs on 24 countries while the behavioral model keeps all 25.
+
+## 7. Reference levels
+
+The mapping from coefficients to estimands in @sec-model-spec assumes out-partisan is the
+reference level of $R$ and vote-anchored the reference level of $T$. Asserted rather than
+eyeballed.
+
+```{r}
+#| label: check-reference-levels
+
+stopifnot(
+  levels(dat_behav$R)[1] == "Out",
+  levels(dat_attit$R)[1] == "Out",
+  levels(dat_behav$type)[1] == "vote_anchored",
+  levels(dat_attit$type)[1] == "vote_anchored",
+  # three relationship levels in the games, two in the ratings
+  nlevels(dat_behav$R) == 3,
+  nlevels(dat_attit$R) == 2
+)
+
+list(R_behav = levels(dat_behav$R), R_attit = levels(dat_attit$R))
+```
+
+## 8. Covariate balance
+
+The remaining conjoint attributes are randomized independently of the partisan cue, so
+omitting them would not bias $\mathrm{AP}_t$. They are kept because @sec-behavioral
+benchmarks the partisan attribute against EU position, class and religion within the same
+conjoint. Balance is reported rather than assumed.
+
+```{r}
+#| label: check-balance
+
+dat_behav |>
+  select(type, R, eupos, cj_rel, cj_class, cj_sex, cj_age) |>
+  pivot_longer(-c(type, R), names_to = "attribute", values_to = "level") |>
+  count(type, R, attribute, level) |>
+  group_by(type, R, attribute) |>
+  mutate(share = round(n / sum(n), 3)) |>
+  ungroup() |>
+  select(-n) |>
+  pivot_wider(names_from = c(type, R), values_from = share) |>
+  arrange(attribute, level)
+```
+
+# Model specification
+
+## Priors
+
+Weakly informative and scaled to the 0--10 outcome, exactly as tabulated in
+@sec-appendix-model. They rule out effects larger than the outcome range itself while
+remaining far more diffuse than the likelihood.
+
+```{r}
+#| label: priors
+
+priors <- c(
+  # centred at the midpoint of the outcome range
+  prior(normal(5, 2), class = Intercept),
+  # centred at no effect; ~95% of prior mass within +/- 4 units
+  prior(normal(0, 2), class = b),
+  # positive support with heavy tails, shrinking toward zero
+  prior(student_t(3, 0, 1), class = sd),
+  prior(student_t(3, 0, 2), class = sigma),
+  # mildly favours weaker correlations, regularizing the covariance blocks
+  prior(lkj(2), class = cor)
+)
+
+priors
+```
+
+## Formulas
+
+Respondents receive a varying intercept only. Anchors receive an intercept and slopes on
+$R$ and on $T$ -- the slope on $R$ being the design's answer to the composition objection,
+since anchors are parties *within* countries and letting the slope vary by anchor estimates
+the type contrast inside party-country cells. Countries receive an intercept and slopes on
+$R$, on $T$ and on their interaction; that last term is not a nuisance but the source of
+every comparative quantity reported.
+
+Neither model carries a respondent-level varying slope on $R$. In the games that is a
+matter of power, with roughly two co-partisan rounds of six per respondent. In the ratings
+the term is not thinly identified but unidentified: each respondent supplies exactly one
+co-partisan rating, so a person-specific slope would absorb that single observation as a
+residual and leave the contrast determined by the prior.
+
+```{r}
+#| label: formulas
+
+# Behavioral: R has three levels; game is interacted with R and T so that the
+# agreement between the two instruments is a quantity with a posterior rather
+# than a visual comparison of two tables. Round position enters separately, so
+# that practice within an instrument stays visible.
+f_behav <- bf(
+  tokens ~ R * type * game + round +
+    eupos + cj_rel + cj_class + cj_sex + cj_age +
+    (1 | pid) +
+    (1 + R + type | anchor) +
+    (1 + R * type | country)
+)
+
+# Attitudinal: R is binary, there are no design attributes, and the rated party
+# enters as a further varying intercept crossed with the anchor grouping.
+f_attit <- bf(
+  thermo ~ R * type +
+    (1 | pid) +
+    (1 + R + type | anchor) +
+    (1 + R * type | country) +
+    (1 | rated_party)
+)
+
+list(behavioral = f_behav, attitudinal = f_attit)
+```
+
+Both outcomes are bounded on $[0, 10]$ and discrete, and a Gaussian likelihood is assumed
+anyway. The choice is a deliberate trade, argued in @sec-appendix-model: the quantities of
+interest are differences in conditional means, and under a Normal likelihood the
+coefficients are exactly those differences on the original token scale, with no link
+function or set of cutpoints standing between the estimate and its interpretation. Because
+this is a convenience and not a claim, notebook 4.2 re-estimates both models with an
+ordinal likelihood.
+
+## Prior predictive check
+
+Confirms that draws from the prior stay inside the admissible range before any data are
+used. Cheap, since no likelihood is evaluated.
+
+```{r}
+#| label: prior-predictive
+#| fig-cap: "Prior predictive draws, behavioral model."
+
+m_prior <- brm(
+  f_behav,
+  data = dat_behav,
+  family = gaussian(),
+  prior = priors,
+  sample_prior = "only",
+  chains = 2,
+  cores = 2,
+  iter = 500,
+  warmup = 250,
+  seed = sampler$seed,
+  backend = sampler$backend,
+  file = file.path(
+    model_dir,
+    paste0("m_prior_behavioral", if (has_cmdstan) "_cs")
+  ),
+  file_refit = "on_change"
+)
+
+pp_check(m_prior, ndraws = 50) +
+  coord_cartesian(xlim = c(-15, 25)) +
+  geom_vline(xintercept = c(0, 10), linetype = "dashed") +
+  labs(
+    subtitle = "Dashed lines mark the admissible range [0, 10]"
+  ) +
+  theme_pubr()
+```
+
+# Estimation
+
+Hamiltonian Monte Carlo in Stan through `brms`, four chains run in parallel and each
+threaded across four cores where CmdStan is available. Fits are cached to `models/`, which
+is untracked: each object is large, and regenerating it is a matter of re-running this
+notebook.
+
+```{r}
+#| label: fit-behavioral
+
+m_behav <- brm(
+  f_behav,
+  data = dat_behav,
+  family = gaussian(),
+  prior = priors,
+  chains = sampler$chains,
+  cores = sampler$cores,
+  iter = sampler$iter,
+  warmup = sampler$warmup,
+  seed = sampler$seed,
+  control = sampler$control,
+  backend = sampler$backend,
+  threads = sampler$threads,
+  file = model_file("m_behavioral"),
+  file_refit = "on_change"
+)
+```
+
+```{r}
+#| label: fit-attitudinal
+
+m_attit <- brm(
+  f_attit,
+  data = dat_attit,
+  family = gaussian(),
+  prior = priors,
+  chains = sampler$chains,
+  cores = sampler$cores,
+  iter = sampler$iter,
+  warmup = sampler$warmup,
+  seed = sampler$seed,
+  control = sampler$control,
+  backend = sampler$backend,
+  threads = sampler$threads,
+  file = model_file("m_attitudinal"),
+  file_refit = "on_change"
+)
+```
+
+# Convergence diagnostics
+
+Rank-normalized $\hat{R} < 1.01$ and bulk and tail effective sample sizes above 1,000, as
+committed to in @sec-model-spec. Reported as a summary that flags violations, rather than
+as a wall of output.
+
+```{r}
+#| label: diagnostics-table
+
+convergence_summary <- function(fit, label) {
+  d <- as_draws_df(fit) |>
+    summarise_draws("rhat", "ess_bulk", "ess_tail") |>
+    filter(!is.na(rhat))
+
+  np <- nuts_params(fit)
+  n_divergent <- sum(np$Value[np$Parameter == "divergent__"])
+
+  tibble(
+    model = label,
+    parameters = nrow(d),
+    max_rhat = max(d$rhat),
+    n_rhat_above_1.01 = sum(d$rhat > 1.01),
+    min_ess_bulk = min(d$ess_bulk),
+    n_ess_bulk_below_1000 = sum(d$ess_bulk < 1000),
+    min_ess_tail = min(d$ess_tail),
+    n_ess_tail_below_1000 = sum(d$ess_tail < 1000),
+    divergences = n_divergent
+  )
+}
+
+diagnostics <- bind_rows(
+  convergence_summary(m_behav, "behavioral"),
+  convergence_summary(m_attit, "attitudinal")
+)
+
+diagnostics
+```
+
+```{r}
+#| label: diagnostics-worst
+
+# the parameters that come closest to failing, per model
+worst_parameters <- function(fit, label) {
+  as_draws_df(fit) |>
+    summarise_draws("rhat", "ess_bulk", "ess_tail") |>
+    filter(!is.na(rhat)) |>
+    slice_min(ess_bulk, n = 10) |>
+    mutate(model = label, .before = 1)
+}
+
+bind_rows(
+  worst_parameters(m_behav, "behavioral"),
+  worst_parameters(m_attit, "attitudinal")
+)
+```
+
+```{r}
+#| label: fig-trace-behavioral
+#| fig-cap: "Trace plots, population-level parameters carrying the estimands (behavioral model)."
+
+mcmc_plot(
+  m_behav,
+  type = "trace",
+  variable = "^b_(Intercept|RCo|RNone|typeexplicit)",
+  regex = TRUE
+)
+```
+
+```{r}
+#| label: fig-trace-attitudinal
+#| fig-cap: "Trace plots, population-level parameters carrying the estimands (attitudinal model)."
+
+mcmc_plot(
+  m_attit,
+  type = "trace",
+  variable = "^b_(Intercept|RCo|typeexplicit)",
+  regex = TRUE
+)
+```
+
+```{r}
+#| label: fig-ppcheck
+#| fig-cap: "Posterior predictive checks. Both outcomes are bounded and discrete; the Gaussian likelihood is a convenience, and notebook 4.2 re-estimates both with an ordinal likelihood."
+
+ggarrange(
+  pp_check(m_behav, ndraws = 50) + labs(subtitle = "Behavioral (tokens)"),
+  pp_check(m_attit, ndraws = 50) + labs(subtitle = "Attitudinal (thermometer)"),
+  ncol = 2,
+  common.legend = TRUE
+)
+```
+
+# Derived quantities
+
+## How they are computed
+
+Two properties of the specification make this cheap and exact, and both are worth stating
+because they are the reason a small prediction grid suffices where G-computation over
+seventy-odd thousand rows would otherwise be needed.
+
+First, the model is linear with an identity link, so the population-level prediction *is*
+the mean marginalized over the Normal varying effects. `re_formula = NA` therefore gives
+the pooled quantity of @eq-marginal exactly, not an approximation to it.
+
+Second, every additive covariate cancels from a contrast taken within a type. $\mathrm{AP}_t$,
+$\Delta$, $\Delta_c$ and the in-group/out-group decomposition are consequently invariant to
+the values at which the conjoint attributes are held. Only the *levels* $\mu_t(R)$ depend
+on them, and those are reported at the reference level of each attribute, which -- because
+`eupos` has `not_shown` as its reference -- is a combination that occurs in the data rather
+than an extrapolation beyond it.
+
+The game is the one covariate that does not cancel, since it is interacted with $R$ and
+$T$. It is marginalized explicitly, with equal weights across the six game-by-round cells:
+every respondent played each cell exactly once, so uniform weights are the design
+distribution.
+
+```{r}
+#| label: prediction-grids
+
+# reference values for the attributes that cancel from every contrast,
+# kept as factors with the levels the model was fitted on
+behav_reference <- dat_behav |>
+  slice(1) |>
+  select(eupos, cj_rel, cj_class, cj_sex, cj_age) |>
+  mutate(across(everything(), \(x) factor(levels(x)[1], levels = levels(x))))
+
+grid_behav <- expand_grid(
+  R = factor(levels(dat_behav$R), levels = levels(dat_behav$R)),
+  type = factor(levels(dat_behav$type), levels = levels(dat_behav$type)),
+  game = factor(levels(dat_behav$game), levels = levels(dat_behav$game)),
+  round = factor(levels(dat_behav$round), levels = levels(dat_behav$round))
+) |>
+  bind_cols(behav_reference)
+
+grid_attit <- expand_grid(
+  R = factor(levels(dat_attit$R), levels = levels(dat_attit$R)),
+  type = factor(levels(dat_attit$type), levels = levels(dat_attit$type))
+)
+
+nrow(grid_behav)
+nrow(grid_attit)
+```
+
+`ap_draws()` turns a matrix of posterior expected values into the per-draw quantities of
+@eq-estimand and @eq-decomposition. Contrasts are formed on the matrix and only then
+reshaped, which keeps memory proportional to draws times cells rather than draws times
+rows.
+
+```{r}
+#| label: helper-ap-draws
+
+# ep   : draws x grid-rows matrix of posterior expected values
+# grid : the newdata that produced it
+# by   : optionally one grid column, to compute the quantities separately per level
+ap_draws <- function(ep, grid, by = NULL) {
+  grid <- mutate(grid, .col = row_number())
+  pieces <- if (is.null(by)) list(pooled = grid) else split(grid, grid[[by]])
+
+  imap(pieces, function(g, key) {
+    # marginal mean at relationship r for type t, averaged over the design cells
+    mu <- function(r, t) {
+      cols <- g$.col[g$R == r & g$type == t]
+      rowMeans(ep[, cols, drop = FALSE])
+    }
+
+    out <- tibble(
+      .draw = seq_len(nrow(ep)),
+      mu_co_0 = mu("Co", "vote_anchored"),
+      mu_out_0 = mu("Out", "vote_anchored"),
+      mu_co_1 = mu("Co", "explicit"),
+      mu_out_1 = mu("Out", "explicit")
+    ) |>
+      mutate(
+        ap_0 = mu_co_0 - mu_out_0,
+        ap_1 = mu_co_1 - mu_out_1,
+        delta = ap_1 - ap_0
+      )
+
+    # the no-cue control exists in the games only
+    if (any(g$R == "None")) {
+      out <- out |>
+        mutate(
+          mu_none_0 = mu("None", "vote_anchored"),
+          mu_none_1 = mu("None", "explicit"),
+          baseline_gap = mu_none_1 - mu_none_0,
+          ingroup_0 = mu_co_0 - mu_none_0,
+          ingroup_1 = mu_co_1 - mu_none_1,
+          outgroup_0 = mu_out_0 - mu_none_0,
+          outgroup_1 = mu_out_1 - mu_none_1
+        )
+    }
+
+    if (!is.null(by)) out[[by]] <- key
+    out
+  }) |>
+    list_rbind()
+}
+
+# posterior median, 95% credible interval, and the probability of a positive value
+summarise_quantities <- function(draws, by = NULL) {
+  draws |>
+    pivot_longer(
+      -c(.draw, all_of(by)),
+      names_to = "quantity",
+      values_to = "value"
+    ) |>
+    group_by(across(all_of(c(by, "quantity")))) |>
+    summarise(
+      median = median(value),
+      lower = quantile(value, 0.025),
+      upper = quantile(value, 0.975),
+      p_gt_0 = mean(value > 0),
+      .groups = "drop"
+    )
+}
+```
+
+## Pooled quantities
+
+@sec-behavioral fixes the reporting order, and it is not negotiable: the magnitude of
+$\mathrm{AP}_t$ comes first, for both types, and only then the contrast between them. Both
+partisan types discriminate substantially in favour of co-partisans; the question the paper
+turns on is whether that discrimination differs by type.
+
+```{r}
+#| label: pooled-behavioral
+
+ep_behav <- posterior_epred(
+  m_behav,
+  newdata = grid_behav,
+  re_formula = NA
+)
+
+draws_behav <- ap_draws(ep_behav, grid_behav)
+
+summarise_quantities(draws_behav) |>
+  filter(quantity %in% c("mu_co_0", "mu_out_0", "mu_co_1", "mu_out_1", "ap_0", "ap_1"))
+```
+
+```{r}
+#| label: pooled-behavioral-delta
+
+# the type contrast, and the diagnostic that licenses its reading
+summarise_quantities(draws_behav) |>
+  filter(quantity %in% c("delta", "baseline_gap"))
+```
+
+```{r}
+#| label: pooled-behavioral-decomposition
+
+# what the no-cue control buys: in-group and out-group components of AP
+summarise_quantities(draws_behav) |>
+  filter(str_detect(quantity, "^(ingroup|outgroup)_"))
+```
+
+```{r}
+#| label: pooled-attitudinal
+
+ep_attit <- posterior_epred(
+  m_attit,
+  newdata = grid_attit,
+  re_formula = NA
+)
+
+draws_attit <- ap_draws(ep_attit, grid_attit)
+
+summarise_quantities(draws_attit)
+```
+
+## Stability across the two games
+
+The order of the games was fixed rather than randomized: no respondent played the trust
+game first, so the game factor and position in the session are perfectly confounded. The
+game-specific estimates are therefore a stability check, not a contrast between allocation
+regimes. An estimate that does not vary across the two games is evidence that the result
+holds across two different allocation instruments and across sequence position at once. A
+difference could not be attributed to the strategic element of the trust game rather than
+to practice or fatigue, and is not interpreted as such.
+
+```{r}
+#| label: by-game
+
+draws_by_game <- ap_draws(ep_behav, grid_behav, by = "game")
+
+summarise_quantities(draws_by_game, by = "game") |>
+  filter(quantity %in% c("ap_0", "ap_1", "delta"))
+```
+
+## Country-specific quantities
+
+The country-level slope on $R \times T$ is what carries these: no other country-level term
+does, since the intercept and the slope on $T$ enter both conditional means and cancel from
+their difference, while the slope on $R$ shifts the level of polarization without touching
+how it varies by type.
+
+```{r}
+#| label: country-behavioral
+
+grid_behav_country <- expand_grid(
+  country = factor(levels(dat_behav$country), levels = levels(dat_behav$country)),
+  grid_behav
+)
+
+ep_behav_country <- posterior_epred(
+  m_behav,
+  newdata = grid_behav_country,
+  re_formula = ~ (1 + R * type | country),
+  allow_new_levels = FALSE
+)
+
+country_behav <- ap_draws(ep_behav_country, grid_behav_country, by = "country") |>
+  summarise_quantities(by = "country") |>
+  mutate(measurement = "Behavioral", .before = 1)
+
+country_behav |>
+  filter(quantity == "delta") |>
+  arrange(desc(median))
+```
+
+```{r}
+#| label: country-attitudinal
+
+grid_attit_country <- expand_grid(
+  country = factor(levels(dat_attit$country), levels = levels(dat_attit$country)),
+  grid_attit
+)
+
+ep_attit_country <- posterior_epred(
+  m_attit,
+  newdata = grid_attit_country,
+  re_formula = ~ (1 + R * type | country),
+  allow_new_levels = FALSE
+)
+
+country_attit <- ap_draws(ep_attit_country, grid_attit_country, by = "country") |>
+  summarise_quantities(by = "country") |>
+  mutate(measurement = "Attitudinal", .before = 1)
+
+country_attit |>
+  filter(quantity == "delta") |>
+  arrange(desc(median))
+```
+
+```{r}
+#| label: fig-country-delta
+#| fig-cap: "Country-specific type gap $\\Delta_c$, both measures. Points are posterior medians, bars 95% credible intervals."
+#| fig-dpi: 300
+
+bind_rows(country_behav, country_attit) |>
+  filter(quantity == "delta") |>
+  mutate(country = fct_reorder(country, median)) |>
+  ggplot(aes(x = median, y = country, colour = measurement)) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_pointrange(
+    aes(xmin = lower, xmax = upper),
+    position = position_dodge(width = 0.5),
+    size = 0.3
+  ) +
+  labs(
+    x = expression(Delta[c]),
+    y = NULL,
+    colour = "Measurement"
+  ) +
+  theme_pubr()
+```
+
+## Party-specific quantities
+
+The same construction at the anchor level. Note what it can and cannot show: the anchor
+grouping carries slopes on $R$ and on $T$ but not on their interaction, so $\mathrm{AP}_{a,t}$
+varies by party while $\Delta_a$ does not. That is the homogeneity assumption recorded in
+check 3, made visible rather than left implicit.
+
+```{r}
+#| label: anchor-behavioral
+
+# round cancels from every contrast, so one round level suffices here
+grid_behav_anchor <- expand_grid(
+  anchor = factor(levels(dat_behav$anchor), levels = levels(dat_behav$anchor)),
+  grid_behav |> filter(round == levels(dat_behav$round)[1])
+)
+
+ep_behav_anchor <- posterior_epred(
+  m_behav,
+  newdata = grid_behav_anchor,
+  re_formula = ~ (1 + R + type | anchor),
+  allow_new_levels = FALSE,
+  ndraws = min(2000, ndraws(m_behav))
+)
+
+anchor_behav <- ap_draws(ep_behav_anchor, grid_behav_anchor, by = "anchor") |>
+  summarise_quantities(by = "anchor") |>
+  mutate(measurement = "Behavioral", .before = 1)
+
+anchor_behav |>
+  filter(quantity %in% c("ap_0", "ap_1")) |>
+  slice_max(median, n = 10)
+```
+
+```{r}
+#| label: anchor-attitudinal
+
+grid_attit_anchor <- expand_grid(
+  anchor = factor(levels(dat_attit$anchor), levels = levels(dat_attit$anchor)),
+  grid_attit
+)
+
+ep_attit_anchor <- posterior_epred(
+  m_attit,
+  newdata = grid_attit_anchor,
+  re_formula = ~ (1 + R + type | anchor),
+  allow_new_levels = FALSE,
+  ndraws = min(2000, ndraws(m_attit))
+)
+
+anchor_attit <- ap_draws(ep_attit_anchor, grid_attit_anchor, by = "anchor") |>
+  summarise_quantities(by = "anchor") |>
+  mutate(measurement = "Attitudinal", .before = 1)
+
+anchor_attit |>
+  filter(quantity %in% c("ap_0", "ap_1")) |>
+  slice_max(median, n = 10)
+```
+
+## Variance decomposition
+
+The share of variance attributable to respondents, anchors and countries, as promised in
+@sec-appendix-model.
+
+```{r}
+#| label: variance-decomposition
+
+variance_shares <- function(fit, label) {
+  vc <- VarCorr(fit)
+
+  # intercept SD per grouping level; the residual block carries a single
+  # unnamed row rather than an "Intercept" one
+  intercept_sd <- map_dbl(vc, function(g) {
+    if (is.null(g$sd)) {
+      return(NA_real_)
+    }
+    if ("Intercept" %in% rownames(g$sd)) g$sd["Intercept", "Estimate"] else g$sd[1, "Estimate"]
+  })
+
+  tibble(
+    model = label,
+    component = if_else(names(intercept_sd) == "residual__", "residual", names(intercept_sd)),
+    variance = as.numeric(intercept_sd)^2
+  ) |>
+    filter(!is.na(variance)) |>
+    mutate(share = variance / sum(variance)) |>
+    arrange(desc(share))
+}
+
+bind_rows(
+  variance_shares(m_behav, "behavioral"),
+  variance_shares(m_attit, "attitudinal")
+)
+```
+
+# Save derived quantities
+
+The fits stay in the untracked `models/` directory; the summarized quantities are written
+to `data/03_final/`, so that the figures in @sec-attitudinal and @sec-behavioral, and
+notebook 4.2, can be built without refitting.
+
+```{r}
+#| label: save-quantities
+
+model_quantities <- list(
+  meta = list(
+    fitted_at = Sys.time(),
+    smoke_test = smoke_test,
+    sampler = sampler,
+    n_behavioral = nrow(dat_behav),
+    n_attitudinal = nrow(dat_attit),
+    countries_behavioral = nlevels(dat_behav$country),
+    countries_attitudinal = nlevels(dat_attit$country)
+  ),
+  diagnostics = diagnostics,
+  pooled = bind_rows(
+    summarise_quantities(draws_behav) |> mutate(measurement = "Behavioral"),
+    summarise_quantities(draws_attit) |> mutate(measurement = "Attitudinal")
+  ),
+  by_game = summarise_quantities(draws_by_game, by = "game"),
+  by_country = bind_rows(country_behav, country_attit),
+  by_anchor = bind_rows(anchor_behav, anchor_attit),
+  checks = list(
+    baseline_nocue = baseline_nocue,
+    anchor_feasibility = anchor_feasibility,
+    battery_coverage = battery_coverage
+  )
+)
+
+saveRDS(
+  model_quantities,
+  file = here(
+    "data",
+    "03_final",
+    "model_quantities.rds"
+  )
+)
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
