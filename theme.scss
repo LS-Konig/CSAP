@@ -74,3 +74,57 @@ $presentation-heading-color: #003056;
         right: 12px
       }
 
+
+/* Embedded Quarto figures: suppress the long analytic caption on slides */
+.reveal .embed-fig figcaption,
+.reveal .embed-fig .figure-caption,
+.reveal .embed-fig .quarto-figure figcaption { display: none; }
+.reveal .embed-fig img {
+  max-height: 392px !important;
+  width: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+/* Keep externally-sourced journal figures inside the slide */
+.reveal section img:not(.r-stretch) { max-height: 545px; object-fit: contain; }
+
+/* Figure captions on slides: small, muted, never wrapping to three lines */
+.reveal figcaption {
+  font-size: 0.42em;
+  color: #7F94A5;
+  text-align: center;
+  margin-top: 0.2em;
+}
+
+/* Two wide 4-panel journal figures stacked on one slide: keep both legible */
+.reveal .coal-stack img { max-height: 258px !important; width: auto; display: block; margin: 0 auto; }
+.reveal .coal-stack figure { margin: 0 0 0.15em 0; }
+
+/* Slide titles must not run under the top-right logo */
+.reveal .slides section > h1,
+.reveal .slides section > h2 {
+  padding-right: 210px;
+  font-size: 1.36em;
+  line-height: 1.15;
+}
+.reveal .slide-logo { max-height: 3.1em !important; }
+
+/* Figure captions: small, muted, never competing with the figure */
+.reveal .slides p.caption,
+.reveal .slides figcaption,
+.reveal .slides .quarto-float-caption,
+.reveal .slides .figure-caption {
+  font-size: 0.40em !important;
+  line-height: 1.25;
+  color: #7F94A5 !important;
+  text-align: center;
+  margin-top: 0.25em;
+}
+
+/* Quarto's .smaller rule sets h2 to 1.6em, which outranks the rule above and
+   makes headings on .smaller slides LARGER than on normal ones. Match them. */
+.reveal .slides section.smaller > h1,
+.reveal .slides section.smaller > h2 {
+  font-size: 1.36em;
+}
