@@ -452,7 +452,7 @@ household panels (SOEP, LISS, Understanding Society).
 | Mannheim Eurobarometer Trend File | Harmonised EB trend file (ZA3521) | 1970–2002 | EU-15 | Harmonised party-closeness item across early waves | [search.gesis.org](https://search.gesis.org/research_data/ZA3521) |
 | ISSP | Annual repeated cross-section | 1985– | Most of the 25, varies by module | Party affiliation as standard harmonised background variable | [issp.org](https://issp.org/) |
 | European Values Study (EVS) | Repeated cross-section | 1981, 1990, 1999, 2008, 2017 | All 25 | Closeness / vote-propensity items; weaker and less consistent than ESS/CSES | [europeanvaluesstudy.eu](https://europeanvaluesstudy.eu/) |
-| CRONOS / CRONOS-2 | Probability-based cross-national online panel on ESS sample | 2016–18 (EE, UK, SI); 2021–22 (AT, HU, IT, PT) | 7 | ESS closeness item repeated across waves | [europeansocialsurvey.org](https://www.europeansocialsurvey.org/) |
+| CRONOS / CRONOS-2 | Probability-based cross-national online panel on ESS sample; 6 waves each | 2016–18 (EE, UK, SI); Nov 2021–Mar 2023 (AT, BE, CZ, FI, FR, HU, IS, IT, PT, SI, SE, UK) | 3 + 12 | ESS closeness item repeated across waves | [europeansocialsurvey.org](https://www.europeansocialsurvey.org/) |
 | Comparative National Elections Project (CNEP) | Election-based cross-sections | 1990– | DE, EL, ES, HU, IT, PT among EU cases | Party identification plus social-network transmission items | [u.osu.edu/cnep](https://u.osu.edu/cnep/) |
 | True European Voter | *Ex post* harmonisation of national election studies | 1950s–2010s | ~15 W/C European countries | Harmonised party-ID variable; best route to long back-series comparability | [CESSDA catalogue](https://datacatalogue.cessda.eu/) |
 
@@ -502,6 +502,91 @@ household panels (SOEP, LISS, Understanding Society).
 | UK | British Election Study + BES Internet Panel | Election cross-sections; continuous multi-wave panel | 1964–; 2014– | [britishelectionstudy.com](https://www.britishelectionstudy.com/) |
 | UK | Understanding Society (UKHLS), incl. BHPS | Annual household panel; party support items | 1991– | [understandingsociety.ac.uk](https://www.understandingsociety.ac.uk/) |
 | UK | British Social Attitudes | Annual cross-section | 1983– | [natcen.ac.uk](https://natcen.ac.uk/british-social-attitudes) |
+
+## Panel Datasets with a Partisanship Item
+
+Filtered view of the two tables above: **only designs that re-interview the same respondents**,
+and only where a partisanship item (closeness, party ID, *Parteineigung*, or an equivalent
+party-attachment battery) is fielded. Repeated cross-sections, monthly time series and data
+archives are excluded even where the parent programme appears above — ESS, Eurobarometer, EVS,
+ISSP, SOM, ALLBUS, Politbarometer, CBOS, CIS *Barómetro*, SJM and *Naše společnost* are all out
+on that rule. Scope is the 25 countries of the analysis frame (EU-27 less CY/MT/LU, plus the UK).
+
+The table exists to make the section 7 choice and its coverage cost readable in one place: which
+of the 25 can support a within-person test of attachment movement, and which cannot.
+
+**Access marks follow the legend in `data/01_raw/external-data.md`:** ✅ on disk in this repo,
+⬜ identified but not downloaded, 🔒 registration / data-use agreement required.
+**⚠ in the last column** flags a cell not verified against a source — the note says what to check.
+
+### Cross-national panels
+
+| Project | Countries (of the 25) | Panel type | Waves / span | Partisanship item | Access | Check |
+|---|---|---|---|---|---|---|
+| **eu25games2019** (Hahm, Hilpert & König) — see [inventory §A](../data/01_raw/external-data.md) | All 25 | Election panel (EP 2019) | 3 waves, 2019 | Attachment item + vote choice (intended / hypothetical / past) | ✅ | — |
+| TRI-POL — see [inventory §B](../data/01_raw/external-data.md) | ES, IT, PT (+ AR, CL outside frame) | Online panel (opt-in Netquest, no weights) | 3 waves, Sept 2021 – Apr 2022 | Attachment item in all three waves; party/leader thermometers; incentivized trust game | ✅ | — |
+| [CRONOS-2](https://www.europeansocialsurvey.org/sites/default/files/2023-07/CRONOS2_user_guide_e01_0.pdf) | AT, BE, CZ, FI, FR, HU, IT, PT, SE, SI, UK — 11 (+ IS outside frame) | Probability online panel, recruited off ESS Round 10 | 6 waves, Nov 2021 – Mar 2023; HU completed waves 1–2 only | ESS closeness item carried from the R10 interview | ⬜ | ⚠ which panel waves repeat the closeness item |
+| [CRONOS-1](https://www.europeansocialsurvey.org/methodology/methodological-research/modes-data-collection/cronos) | EE, SI, UK | Probability online panel, recruited off ESS Round 8 | 6 waves, 2016–18 | ESS closeness item | ⬜ | ⚠ same |
+| [EES 2014 online panel](https://www.gesis.org/en/services/finding-and-accessing-data/international-survey-programs/ees-2014-study) | AT, DE, EL, ES, IT, PL, SE, UK — 8 | Election panel | EP wave (May 2014) matched to the subsequent first-order national election | Closeness battery, CSES-compatible | ⬜ 🔒 | ⚠ item presence in the panel waves specifically |
+
+The EES 1989 and 2009 panel components (listed under *Cross-national Programs* above) are older
+and thinner; the 2014 online panel is the one worth using, and it is Greece's only panel of any
+kind. The **EES 2024 voter study (ZA8868) is a post-election cross-section, not a panel**, and is
+excluded here despite appearing in the inventory.
+
+### National panels
+
+| Country | Project | Panel type | Waves / span | Partisanship item | Access | Check |
+|---|---|---|---|---|---|---|
+| Austria | [AUTNES Online Panel 2017–2024](https://doi.org/10.11587/HNUFCC) | Rolling online panel | Multi-wave, 2017–2024 | Party ID with strength, repeated as a core variable | ⬜ 🔒 | — |
+| Belgium | [RepResent Belgian Panel](https://link.springer.com/article/10.1057/s41304-023-00430-z) | Election panel | 4 waves: pre-2019 (N=7,351), post-2019 (N=3,909), +1 yr Apr 2020 (N=1,996), +2 yr Jun 2021 (N=1,119) | Party attachment within a ~250-variable representation battery | ⬜ | ⚠ exact closeness wording |
+| Belgium | [PartiRep Election Study](https://www.partirep.eu/) | Pre/post 2-wave | 2014 cycle | Party ID | ⬜ | ⚠ wave structure and item |
+| Bulgaria | — none identified — | — | — | — | — | ⚠ searched Aug 2026; the CSES vehicle is cross-sectional |
+| Croatia | — none identified — | — | — | — | — | ⚠ [Croatian Election Studies](https://data.crossda.hr/dataset.xhtml?persistentId=doi:10.23669/IWHYLM) are pre/post cross-sections, not a linked panel |
+| Czechia | [Czech Household Panel Survey (CHPS)](https://www.soc.cas.cz/en/publications/the-czech-household-panel-survey) | Household | 5 annual waves 2015–2019, 2 COVID collections 2020–21, wave 6 2023–24 | Party preference in the political-participation module; [analysed as panel data](https://journals.sagepub.com/doi/full/10.1177/14789299251410829) | ⬜ | ⚠ whether the item is closeness or vote intention, and its wave coverage |
+| Denmark | [DNES / Valgprojektet](https://www.valgprojektet.dk/default.asp?l=eng) | Pre/post 2-wave | 2019 → 2022 | Closeness with strength | ⬜ | ⚠ panel linkage across the two elections |
+| Estonia | — none identified — | — | — | — | — | covered only by CRONOS-1 above |
+| Finland | [Finnish online panel (Kekkonen & Ylä-Anttila)](https://www.frontiersin.org/journals/political-science/articles/10.3389/fpos.2022.920567/full) | Online panel | Multi-wave, around 2019 | Party like–dislike and partisan social distance | ⬜ | ⚠ wave count and whether released for secondary use |
+| France | [CEVIPOF *Enquête Électorale Française*](https://www.sciencespo.fr/cevipof/en.html) | Election panel | Large multi-wave panels per cycle, 2002– | Party closeness | ⬜ | ⚠ item constant across waves |
+| France | [ELIPSS](https://www.elipss.fr/) | Probability online panel | 2012– | Party closeness in the political modules | ⬜ 🔒 | ⚠ which modules carry it |
+| Germany | [GLES Panel 2016–2021](https://doi.org/10.4232/1.14114) | Rolling online panel | Multi-wave, 2016–2021 | *Parteineigung* with strength; party and leader scalometers | ⬜ 🔒 | ⚠ wave count |
+| Germany | [SOEP](https://www.diw.de/soep) | Household | Annual, 1984– | *Parteineigung* with strength, asked since 1984 | ⬜ 🔒 | — |
+| Germany | [GESIS Panel](https://www.gesis.org/en/gesis-panel) | Probability online panel, mixed-mode | 2013– | Party ID in the recurring political battery | ⬜ 🔒 | ⚠ item periodicity |
+| Greece | [Hellenic Panel — EES 2014](https://elnes.gr/node/1483) | Election panel | EP 2014 → subsequent national election | Closeness battery | ⬜ | ⚠ Greece's only panel; all other ELNES studies are cross-sections |
+| Hungary | [Election Panel Study 2018](https://politikatudomany.tk.hu/en) | Election panel | Multi-wave, 2018 cycle | Party preference | ⬜ | ⚠ wave count and item |
+| Ireland | [INES 2002–2007](https://www.ucd.ie/issda/) | Election panel | 2002 → 2007 | Party ID | ⬜ 🔒 | ⚠ item and linkage; later INES rounds are cross-sections |
+| Italy | [ITANES](https://www.itanes.org/) | Election panel (selected cycles) | Panel components within the 1990– series | Party ID | ⬜ | ⚠ which cycles carry a panel component |
+| Latvia | — none identified — | — | — | — | — | ⚠ searched Aug 2026; New Baltic Barometer is repeated cross-section |
+| Lithuania | — none identified — | — | — | — | — | ⚠ searched Aug 2026; LNES rounds are post-election cross-sections |
+| Netherlands | [LISS](https://www.lissdata.nl) | Probability online panel | Annual *Politics & Values* module, 2007– | Closeness; also like–dislike toward party *supporters* | ⬜ 🔒 | — |
+| Netherlands | [DPES / NKO](https://surveydata.nl/dutch-parliamentary-election-studies) | Pre/post 2-wave | 1971–2025 | Closeness with strength | ⬜ | ⚠ inter-election linkage |
+| Poland | [POLPAN](https://polpan.org/) | True panel, 5-year waves | 1988–2018 | Political-behaviour battery; a partisanship item is **not** confirmed for every wave | ⬜ | ⚠ verify the item wave by wave before relying on it |
+| Portugal | — none identified — | — | — | — | — | covered only by CRONOS-2 and TRI-POL above |
+| Romania | — none identified — | — | — | — | — | ⚠ searched Aug 2026; RES rounds are election cross-sections |
+| Slovakia | — none identified — | — | — | — | — | ⚠ searched Aug 2026; CSES Slovakia is cross-sectional, Volebný Kompas is VAA data |
+| Slovenia | — none identified — | — | — | — | — | covered only by CRONOS-1 and CRONOS-2 above |
+| Spain | [POLAT Panel](https://doi.org/10.34810/DATA1486) | Online panel | **12 waves, 2010–2020**, 4,633 respondents, 657 variables | Partisanship, explicitly among the fielded political variables | ⬜ | — |
+| Spain | [E-DEM](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7451797/) | Election panel | 2018–2019 | Partisanship plus party thermometers; built for affective polarisation | ⬜ | ⚠ wave count; already cited here via `@Torcal2022affective` and `@Torcal2023social` |
+| Spain | [CIS pre/post-election studies](https://www.cis.es/) | Pre/post 2-wave | 1979– | Party ID / *simpatía* | ⬜ | ⚠ which cycles are genuinely panelled |
+| Sweden | [SNES / Valundersökningen](https://www.gu.se/en/snes) | Rotating (consecutive elections) | 1956– | Party ID with strength | ⬜ | ⚠ rotation half-sample linkage |
+| Sweden | [Medborgarpanelen (LORE)](https://www.gu.se/en/lore) | Online panel | 2010– | Party sympathy / party ID | ⬜ 🔒 | ⚠ item wording and periodicity |
+| UK | [BES Internet Panel](https://doi.org/10.5255/UKDA-SN-8202-2) | Rolling online panel | Waves 1–29, 2014–, ~30k per wave | Party ID with strength; paradata enables satisficing checks | ⬜ 🔒 | — |
+| UK | [Understanding Society (UKHLS), incl. BHPS](https://www.understandingsociety.ac.uk/) | Household | Annual, 1991– | Party support and closeness items | ⬜ 🔒 | ⚠ item continuity across the BHPS → UKHLS transition |
+
+### Coverage
+
+Nineteen of the 25 have a national panel carrying a partisanship item, though depth varies by an
+order of magnitude: DE, UK, ES and NL have long multi-wave series (SOEP, BES IP, POLAT, LISS),
+while IE, EL and HU have a single historical panel each. **EE, PT and SI have no national panel**
+and are reachable only through CRONOS-1, CRONOS-2 or TRI-POL. **BG, HR, LV, LT, RO and SK have
+none at all** — the search returning nothing is itself the result, and it reproduces exactly the
+CEE and Baltic thinness noted in §10 above.
+
+For section 7 this narrows the field sharply. Only three sources put a repeated attachment measure
+and an affective-polarisation outcome on the same respondents — TRI-POL, E-DEM and
+`eu25games2019` itself — and only `eu25games2019` covers the full frame. Status, access and the
+transition-matrix gate for each candidate live in `data/01_raw/external-data.md` §C.1; this table
+is the literature-side map of what exists, not a record of what is on disk.
 
 
 # Setup
