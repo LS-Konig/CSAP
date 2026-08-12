@@ -83,10 +83,9 @@ I have built this for people who have not read this literature, so please stop m
 
 ::: {.columns}
 ::: {.column width="58%"}
-- Born in Mainz, Finished high school in 2018
+- Born in Mainz, finished high school in 2018
 - Helped logistically at an earlier version of (back then a bilateral) summer institute in 2018
-- B.Ed. History and Political Science and M.A. Political Science
-- Since 2025 PhD in Political Science, supervised by Thomas König
+- B.Ed. History & Pol. Science, M.A. Pol Science, since 2025 PhD at Uni Mannheim
 - The building I actually work in:
 :::
 
