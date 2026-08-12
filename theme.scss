@@ -101,6 +101,27 @@ $presentation-heading-color: #003056;
 .reveal .coal-stack img { max-height: 258px !important; width: auto; display: block; margin: 0 auto; }
 .reveal .coal-stack figure { margin: 0 0 0.15em 0; }
 
+/* Two embedded analysis figures side by side: cap tighter than a single embed */
+.reveal .embed-pair img { height: 336px !important; max-height: 336px !important; width: auto !important; max-width: 100% !important; }
+
+/* Small centred label above a paired figure, replacing the suppressed caption */
+.reveal .figlab {
+  display: block;
+  text-align: center;
+  font-size: 0.52em;
+  font-weight: 600;
+  color: #003056;
+  margin-bottom: 0.1em;
+}
+
+/* Single figure on a dissertation-paper slide, sitting under four bullets */
+.reveal .paper-fig img { height: 400px !important; max-height: 400px !important; width: auto !important; max-width: 100% !important; margin: 0 auto; display: block; }
+.reveal .paper-fig figure { margin: 0; }
+
+/* About-me photo sitting beside the bullets */
+.reveal .about-fig img { width: 100% !important; height: auto !important; max-height: 430px !important; border-radius: 4px; }
+.reveal .about-fig { padding-left: 44px; }
+
 /* Slide titles must not run under the top-right logo */
 .reveal .slides section > h1,
 .reveal .slides section > h2 {

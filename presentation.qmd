@@ -65,16 +65,36 @@ theme_schematic <- function(base = 13) {
 
 ![](./images/uma_palace.png){width="100%"}
 
-{{< meta author >}} -- joint work with Thomas König
+{{< meta author >}} -- Trilateral Summer Academy 2026, uOttawa
 
 {{< meta date >}}
 
 ::: {.notes}
-Thanks very much for having me. I am Tristan Muno, a doctoral researcher at the University of Mannheim, and this is joint work with Thomas König.
+Thanks very much for having me. The paper behind this talk is joint work with Thomas König.
 
-The title is a question, and I mean it as one. Over the next half hour I want to convince you that polarization is not one thing -- that it is a family of distinct phenomena sharing a name, and that which one you measure decides what you find.
+The title is a question and I mean it as one. Over the next half hour I want to convince you that polarization is not one thing -- that it is a family of distinct phenomena sharing a name, and that which one you measure decides what you find.
 
-I have built this for people who have not read this literature before, so please stop me if something is unclear.
+I have built this for people who have not read this literature, so please stop me if anything is unclear.
+:::
+
+------------------------------------------------------------------------
+
+## About me
+
+::: {.columns}
+::: {.column width="58%"}
+- Born in Mainz, Finished high school in 2018
+- Helped logistically at an earlier version of (back then a bilateral) summer institute in 2018
+- B.Ed. History and Political Science and M.A. Political Science
+- Since 2025 PhD in Political Science, supervised by Thomas König
+- The building I actually work in:
+:::
+
+::: {.column width="42%"}
+::: {.about-fig}
+![](https://www.sowi.uni-mannheim.de/media/_processed_/b/0/csm_Fakultaet_035_e8d212fdf4.jpg)
+:::
+:::
 :::
 
 ------------------------------------------------------------------------
@@ -86,14 +106,15 @@ I have built this for people who have not read this literature before, so please
 3. Social identity theory
 4. Measuring affective polarization
 5. Affective polarization in Europe -- @hahm2024divided
-6. Where I go from here
+6. Takeaways
+7. Where I go from here -- ongoing projects (if time)
 
 ::: {.notes}
-Here is the route. First the concept itself, which is really a family of concepts. Then the move that dominates the field today: from asking whether positions diverge to asking how people feel about each other. Third, the theory that explains why feelings run ahead of disagreement. Fourth, measurement -- the heart of the talk. Fifth, an overview of what affective polarization actually looks like in Europe, using a behavioral measure rather than the usual thermometer. And last, one slide on where I am taking this in my own work.
+Here is the route. The concept first, which is really a family of concepts. Then the move that dominates the field today: from whether positions diverge to how people feel about each other. Third, the theory that explains why feelings run ahead of disagreement. Fourth, measurement -- the heart of the talk. Fifth, what affective polarization looks like in Europe on a behavioral measure rather than the usual thermometer. Then the takeaways. And if there is time at the end, a few slides on my own ongoing projects.
 
 The central claim, out loud: polarization is not one thing. It is a family of distinct phenomena that share a name, and which one you measure decides what you find.
 
-And my one goal for you. By the end I want you to be suspicious of any sentence of the form "polarization is increasing" that doesn't specify *what kind*.
+My one goal for you. By the end I want you to be suspicious of any sentence of the form "polarization is increasing" that does not specify *what kind*.
 :::
 
 # The Concept
@@ -241,11 +262,11 @@ p_light | p_mag
 ::: {.notes}
 Let me start somewhere that is not political science at all.
 
-The word comes from physics, where it describes the orientation of a wave. Unpolarized light vibrates in every plane at once; you pass it through a filter and what comes out is aligned in one plane. Or think of a magnet: charge separated towards two poles.
+The word comes from physics, where it describes the orientation of a wave. Unpolarized light vibrates in every plane at once, and a filter aligns it to one. Or think of a magnet: charge separated towards two poles.
 
-Notice what is in that concept and what is not. What is in it is alignment, orientation, separation into poles. What is not in it is conflict. Polarized light waves are not fighting each other. There is no hostility in a magnet, and no pathology. All of that was added when the social sciences borrowed the term.
+What is in that concept is alignment and separation. What is not in it is conflict. Polarized light waves are not fighting each other, and there is no pathology in a magnet. Social science added all of that.
 
-So here is the line to take away from this slide: we imported a word about alignment and turned it into a word about conflict -- and then started arguing about whether the thing is getting worse, without agreeing on what the thing is.
+So we imported a word about alignment and turned it into a word about conflict, then started arguing about whether it is getting worse without agreeing on what it is.
 :::
 
 ------------------------------------------------------------------------
@@ -317,17 +338,11 @@ p_sort <- ggplot(d_sort, aes(x, y, colour = g)) +
 ```
 
 ::: {.notes}
-In its broadest usage, polarization refers to almost any alignment, separation, sorting or divergence. Too broad to be useful -- so, concretely, there are at least four mathematically distinct things carrying the name. Grey is "before" in each panel, navy is "after."
+In its broadest usage polarization covers almost any alignment, separation, sorting or divergence -- too broad to be useful. Concretely, there are at least four mathematically distinct things carrying the name. Grey is "before" in each panel, navy is "after."
 
-Dispersion is how spread out opinions are: take the variance, and if it grows people are further apart.
+Dispersion is how spread out opinions are. Bimodality asks whether the middle is emptying out, one hill becoming two camps. Sorting asks whether divides that used to be independent have become correlated: if your position on abortion now predicts your position on climate and it did not thirty years ago, the public has sorted -- notice that nobody moved on the horizontal axis. Distance is about group means.
 
-Bimodality asks whether the middle is emptying out -- whether the distribution has stopped being one hill and become two camps with a valley between.
-
-Sorting asks whether divides that used to be independent have become correlated. If knowing your position on abortion now predicts your position on climate, and it did not thirty years ago, the public has sorted -- even if nobody has become more extreme. Notice in that panel that nobody moved on the horizontal axis at all.
-
-Distance is about group means: how far apart the average Democrat and Republican sit.
-
-And here is the point. These can move in opposite directions in the same dataset. A public can sort without dispersing; a distribution can spread without becoming bimodal. So "is polarization increasing?" is not one question. It is four, and they can have four different answers in the same data.
+And here is the point. These can move in opposite directions in the same dataset. So "is polarization increasing?" is not one question. It is four, and they can have four different answers in the same data.
 :::
 
 ------------------------------------------------------------------------
@@ -390,15 +405,13 @@ p_bi | p_mu
 ::: {.notes}
 Three more distinctions, quickly.
 
-Bipolar versus multipolar. Nothing requires two camps or a single dimension -- in international relations we talk about unipolar, bipolar and multipolar orders quite happily. But polarization research grew up in the United States and often silently assumes two poles. In a European multiparty system that assumption is doing real work, and it is usually undefended.
+Bipolar versus multipolar. Nothing requires two camps -- in international relations we talk about unipolar and multipolar orders quite happily. But polarization research grew up in the United States and often silently assumes two poles. In a European multiparty system that assumption is doing real work, and it is usually undefended.
 
-State versus process. "Hungary is polarized" is a snapshot; "polarization is increasing" is a trend. Public debate slides between these constantly, and they have different data requirements -- for the second you need comparable measurements over time, which we often do not have. Hold on to this one; I come back to it at the end of section five.
+State versus process. "Hungary is polarized" is a snapshot, "polarization is increasing" is a trend, and the second needs comparable measurement over time that we often do not have. Hold on to this one -- I come back to it.
 
-Object versus target. Who is polarized: elites, legislators, the mass public? And against whom? Elite polarization in the US is well documented; mass polarization is contested.
+Object versus target. Who is polarized: elites, legislators, the mass public? And against whom? Elite polarization in the US is well documented, mass polarization is contested.
 
-So: most disagreements about polarization are disagreements about which facet people mean.
-
-Now, how did the field actually move -- from what people think to how they feel?
+So most disagreements about polarization are disagreements about which facet people mean. Now, how did the field move from what people think to how they feel?
 :::
 
 # From Political to Affective Polarization
@@ -414,11 +427,9 @@ Now, how did the field actually move -- from what people think to how they feel?
 ::: {.notes}
 When political scientists first said polarization, they meant ideological polarization: divergence on issues, or on left-right.
 
-At the elite level the evidence is clear. Look at roll-call voting in the US Congress and the parties have pulled apart steadily since the 1970s.
+At the elite level the evidence is clear -- roll-call voting in the US Congress has pulled apart steadily since the 1970s. The fight was about the mass public. Fiorina argued the public is not polarized but better sorted: people did not move to the extremes, they moved to the party matching views they already held. Conservative Democrats became Republicans, so the labels moved rather than the distribution. Abramowitz argued the opposite, especially among the engaged.
 
-The fight was about the mass public. Fiorina's position was that the public is not polarized, it is better sorted: people have not moved to the extremes, they have moved to the party matching views they already held. Conservative Democrats became Republicans. The distribution barely moved -- the labels moved. Abramowitz argued the opposite: it is polarized, especially among the engaged.
-
-And notice, with the vocabulary from two slides ago, that both were partly right about different things. Fiorina is mostly claiming something about dispersion and bimodality; Abramowitz partly about sorting, and about a specific subpopulation. They were not really answering the same question. That stalemate is part of why the field went looking somewhere else.
+With the vocabulary from two slides ago, both were partly right about different things. Fiorina is claiming something about dispersion and bimodality, Abramowitz about sorting and a specific subpopulation. They were not answering the same question, and that stalemate is part of why the field went looking somewhere else.
 :::
 
 ------------------------------------------------------------------------
@@ -435,15 +446,11 @@ And notice, with the vocabulary from two slides ago, that both were partly right
 ::: {.notes}
 The move that changed the field came from Iyengar and colleagues in 2012: stop asking whether positions diverge, start asking how people feel about each other. The slide title is their paper's title.
 
-The striking part is what they found. Inter-partisan dislike substantially exceeds substantive disagreement -- people who barely disagree on policy can dislike each other intensely. In a much-cited follow-up, Iyengar and Westwood showed that partisan discrimination in the US, in tasks like awarding a scholarship, exceeded discrimination by race.
+What they found is the striking part. Inter-partisan dislike substantially exceeds substantive disagreement -- people who barely disagree on policy can dislike each other intensely. In a much-cited follow-up, Iyengar and Westwood showed that partisan discrimination in the US, in tasks like awarding a scholarship, exceeded discrimination by race.
 
-Two things worth flagging in that definition, which is on the slide.
+Two things in that definition. First, "people identifying as partisans" -- somebody has to decide who counts, and that is exactly what my own work is about. Second, this has two components, not one: in-group favoritism and out-group animosity. A lot of writing collapses them into a single number.
 
-First, "people identifying as partisans." Somebody has to decide who counts. Hold that thought -- it is exactly what my own project is about, and it is my last substantive slide.
-
-Second, this has two components, not one: in-group favoritism and out-group animosity. Conceptually and, as we will see, empirically separable -- but a lot of writing collapses them into a single number.
-
-The concept spread extraordinarily fast. But first: why would feelings run so far ahead of disagreement?
+So why would feelings run so far ahead of disagreement?
 :::
 
 # Social Identity Theory
@@ -570,15 +577,11 @@ ggplot() +
 ::: {.notes}
 The puzzle: if people disagree only moderately on policy, why do they dislike each other so intensely?
 
-The answer social identity theory gives is that we are social animals. We do not just hold opinions; we understand ourselves through the groups we belong to. Tajfel and Turner's point is that group membership becomes part of the self-concept -- so our self-esteem is partly bound up in how our groups are doing.
+Social identity theory's answer is that we understand ourselves through the groups we belong to. Group membership becomes part of the self-concept, and two things then follow more or less automatically: we divide the world into us and them, and we favour our own side and derogate the other, largely without deciding to. One process, two components.
 
-Once that happens, two things follow more or less automatically. We divide the world into us and them. And we then favour our own side and derogate the other -- largely without deciding to. That is the whole mechanism, and both halves matter: the figure shows them as one process with two components, which is exactly the distinction I come back to in section five.
+The everyday version is sport. No policy disagreement required, no argument, no contact.
 
-The everyday version is sport. People who agree about absolutely everything else can dislike each other intensely over a club. Notice what is not required: no policy disagreement, no argument, no contact at all.
-
-And that is the striking part of the research. In the classic minimal group experiments, Tajfel assigned schoolboys to groups on a completely trivial basis -- in the best-known version, which abstract painter they said they preferred, and in some versions the assignment was explicitly random and they knew it. No history, no contact, nothing at stake. Asked to allocate points between an anonymous in-group and out-group member, they still favoured their own.
-
-So categorization alone is enough. A label suffices -- no felt attachment, no strong identity, no history required. Hold on to that: it is precisely what the European behavioural data will let us test in section five.
+And the striking part of the research. In Tajfel's minimal group experiments the assignment was trivial, in some versions explicitly random, and people still favoured their own. Categorization alone is enough -- a label suffices, with no felt attachment. Hold on to that, the European data will let us test it.
 :::
 
 ------------------------------------------------------------------------
@@ -592,15 +595,11 @@ So categorization alone is enough. A label suffices -- no felt attachment, no st
 ::: {.notes}
 Three implications, each of which matters later.
 
-First, partisanship as a social identity -- expressive partisanship. A party is something you are, not just a set of positions you hold. Closer to supporting a football club, to use the example from the last slide, than to filling in a policy questionnaire.
+First, partisanship as a social identity. A party is something you are, not just a set of positions -- closer to supporting a football club than to filling in a policy questionnaire.
 
-Second, Brewer's point: in-group love is not out-group hate. Favoritism towards your own group does not require derogating anybody -- the two are conceptually and empirically separable, and affective polarization is really the presence of both together. Which means that if your measure is a single difference score, you threw that distinction away before you started analyzing. Section five decomposes it, and that decomposition turns out to be the most interesting thing in the European data.
+Second, Brewer's point: in-group love is not out-group hate. The two are separable, and affective polarization is the presence of both. So a single difference score throws that distinction away before you start. The mirror image is negative partisanship -- for many European voters the clearest thing about their partisanship is which party they would never vote for.
 
-And the mirror image of the same point is negative partisanship: people who identify primarily *against* a party rather than with one. Abramowitz and Webster made the case for the US; Medeiros and Noël show it travels. Russo and Areal have recently connected it directly to affective polarization. For a European multiparty system this is not a footnote -- for many voters the clearest thing about their partisanship is which party they would never vote for.
-
-Third, Europe complicates the whole picture. In a two-party system the out-group is obvious. With seven parties, who is the out-group? All the others equally? Only the other side of the government-opposition divide? Roccas and Brewer's idea of social identity complexity is useful here: people hold multiple group memberships that overlap only partially, and identity may attach to a bloc or a coalition rather than to a single party. This is genuinely unsettled, it directly affects how you build any comparative measure, and it is worth keeping in mind for the coalition result later.
-
-Which brings us to measurement.
+Third, Europe complicates the picture. With seven parties, who is the out-group? Identity may attach to a bloc or a coalition rather than a single party. Keep that in mind for the coalition result later.
 :::
 
 # Measuring Affective Polarization
@@ -678,9 +677,9 @@ ggplot(pts, aes(v, -p)) +
 ```
 
 ::: {.notes}
-This instrument carries almost the entire literature. A feeling thermometer, or in Europe a like-dislike scale: rate each party from 0 to 100, or 0 to 10. The slide shows what a respondent sees. The simplest measure is then a difference -- your rating of your own party minus your rating of the other one.
+This instrument carries almost the entire literature. A feeling thermometer, or in Europe a like-dislike scale: rate each party from 0 to 100, or 0 to 10. The slide shows what a respondent sees. The simplest measure is then a difference -- your own party's rating minus the other one's.
 
-Why does the thermometer dominate? Practical reasons. One item per party, the scale travels across countries, and decisively, it already sits in dozens of surveys going back decades. You can do comparative work tomorrow without collecting anything. That convenience has a price -- but first, let me show you what it produces.
+Why does it dominate? Practical reasons. One item per party, the scale travels across countries, and decisively, it already sits in dozens of surveys going back decades. You can do comparative work tomorrow without collecting anything. That convenience has a price -- but first, let me show you what it produces.
 :::
 
 ------------------------------------------------------------------------
@@ -692,13 +691,11 @@ Why does the thermometer dominate? Practical reasons. One item per party, the sc
 ::: {.notes}
 This is the thermometer doing its work -- the figure from Iyengar, Sood and Lelkes, American National Election Studies data from 1978 to 2008.
 
-Four series, because they split Republicans and Democrats: the top pair is how partisans rate their *own* party, the bottom pair how they rate the *other* one.
+Four series, because they split Republicans and Democrats. The top pair is how partisans rate their *own* party, the bottom pair how they rate the *other* one.
 
-Read the top pair first. In-party ratings are essentially flat across thirty years, sitting around seventy to seventy-five. Now the bottom pair: out-party ratings start just below fifty in 1978 and fall to the mid-thirties by 2008.
+In-party ratings are essentially flat across thirty years, around seventy to seventy-five. Out-party ratings start just below fifty in 1978 and fall to the mid-thirties by 2008. So the gap widens substantially -- and almost entirely from the bottom lines. Americans have not come to love their own party more. They have come to dislike the other one considerably more.
 
-So the gap widens substantially -- and notice where the widening comes from. Almost entirely the bottom lines. Americans have not come to love their own party more. They have come to dislike the other one considerably more.
-
-This is the single most reproduced picture in the field, and it is why affective polarization became the dominant frame. It is also worth registering what you are looking at: a self-reported feeling about a party, from one country, with two parties. Every one of those three features is going to matter in a moment.
+This is the most reproduced picture in the field. But register what you are looking at: a self-reported feeling, about a party, from one country, with two parties. Every one of those three features matters in a moment.
 :::
 
 ------------------------------------------------------------------------
@@ -713,31 +710,64 @@ This is the single most reproduced picture in the field, and it is why affective
 # mean of all four = 6 exactly.
 ex <- data.frame(
   party = c("Party A", "Party B", "Party C", "Party D"),
-  like  = c(10, 9, 4, 1),
-  row   = 1:4
+  like = c(10, 9, 4, 1),
+  row = 1:4
 )
 
 thermo_base <- function(highlight = character(0)) {
   pts <- expand.grid(v = 0:10, row = 1:4)
   d <- ex
-  d$col  <- ifelse(d$party %in% highlight, accent, navy)
+  d$col <- ifelse(d$party %in% highlight, accent, navy)
   d$face <- ifelse(d$party %in% highlight, "bold", "plain")
 
   ggplot() +
-    geom_segment(data = d, aes(x = 0, xend = 10, y = -row, yend = -row),
-                 colour = grey1, linewidth = 0.3) +
-    geom_point(data = pts, aes(v, -row), shape = 21, size = 2.3,
-               fill = "white", colour = grey1, stroke = 0.5) +
+    geom_segment(
+      data = d,
+      aes(x = 0, xend = 10, y = -row, yend = -row),
+      colour = grey1,
+      linewidth = 0.3
+    ) +
+    geom_point(
+      data = pts,
+      aes(v, -row),
+      shape = 21,
+      size = 2.3,
+      fill = "white",
+      colour = grey1,
+      stroke = 0.5
+    ) +
     geom_point(data = d, aes(like, -row, colour = col), size = 3.8) +
-    geom_text(data = d, aes(-0.6, -row, label = party, colour = col,
-                            fontface = face), hjust = 1, size = 3.0) +
-    geom_text(data = d, aes(10.7, -row, label = like, colour = col,
-                            fontface = face), hjust = 0, size = 3.1) +
+    geom_text(
+      data = d,
+      aes(-0.6, -row, label = party, colour = col, fontface = face),
+      hjust = 1,
+      size = 3.0
+    ) +
+    geom_text(
+      data = d,
+      aes(10.7, -row, label = like, colour = col, fontface = face),
+      hjust = 0,
+      size = 3.1
+    ) +
     scale_colour_identity() +
-    annotate("text", x = 0, y = -4.72, label = "0  strongly dislike",
-             colour = grey2, size = 2.5, vjust = 1) +
-    annotate("text", x = 10, y = -4.72, label = "10  strongly like",
-             colour = grey2, size = 2.5, vjust = 1) +
+    annotate(
+      "text",
+      x = 0,
+      y = -4.72,
+      label = "0  strongly dislike",
+      colour = grey2,
+      size = 2.5,
+      vjust = 1
+    ) +
+    annotate(
+      "text",
+      x = 10,
+      y = -4.72,
+      label = "10  strongly like",
+      colour = grey2,
+      size = 2.5,
+      vjust = 1
+    ) +
     theme_schematic() +
     theme(plot.subtitle = element_text(colour = accent, face = "bold"))
 }
@@ -758,34 +788,51 @@ thermo_base <- function(highlight = character(0)) {
 dev_a <- transform(ex, d = 10 - like, mid = (like + 10) / 2)
 
 thermo_base("Party A") +
-  annotate("segment", x = 10, xend = 10, y = -4.5, yend = -0.5,
-           colour = grey2, linetype = "22", linewidth = 0.6) +
-  annotate("text", x = 10, y = -0.34, label = "your party = 10",
-           colour = grey2, size = 2.8, vjust = 0) +
-  geom_segment(data = subset(dev_a, d > 0),
-               aes(x = like, xend = 10, y = -row, yend = -row),
-               colour = grey2, linewidth = 0.7) +
-  geom_text(data = subset(dev_a, d > 0),
-            aes(mid, -row + 0.26, label = d),
-            colour = grey2, size = 2.8) +
+  annotate(
+    "segment",
+    x = 10,
+    xend = 10,
+    y = -4.5,
+    yend = -0.5,
+    colour = grey2,
+    linetype = "22",
+    linewidth = 0.6
+  ) +
+  annotate(
+    "text",
+    x = 10,
+    y = -0.34,
+    label = "your party = 10",
+    colour = grey2,
+    size = 2.8,
+    vjust = 0
+  ) +
+  geom_segment(
+    data = subset(dev_a, d > 0),
+    aes(x = like, xend = 10, y = -row, yend = -row),
+    colour = grey2,
+    linewidth = 0.7
+  ) +
+  geom_text(
+    data = subset(dev_a, d > 0),
+    aes(mid, -row + 0.26, label = d),
+    colour = grey2,
+    size = 2.8
+  ) +
   labs(subtitle = "distances, unsquared") +
   coord_cartesian(xlim = c(-3.4, 12.4), ylim = c(-5.3, 0.05))
 ```
 
-$$\text{API}_i \;=\; L_{\text{own}} - \overline{L}_{\text{others}} \;=\; \frac{1+6+9}{3} \;=\; \frac{16}{3} \;=\; \mathbf{5.33}$$
+$$\text{API}_i \;=\; L_{\text{own}} - \overline{L}_{\text{others}} \;=\; 10 - \frac{9+4+1}{3} \;=\; 10 - \frac{14}{3} \;=\; \mathbf{5.33}$$
 
 ::: {.notes}
-That American picture had two parties in it. In a European multiparty system the difference score has nowhere to go -- there is no single "the other party" to subtract. So people proposed extensions, and I want to show you three of them working on exactly the same data.
+That American picture had two parties in it. In multiparty Europe there is no single "the other party" to subtract, so people proposed extensions. Here are three of them working on exactly the same data.
 
-Here is one respondent rating four parties on the usual zero-to-ten scale. Party A gets a ten, Party B a nine, Party C a four, Party D a one. Those same four numbers stay on screen for all three of these slides.
+One respondent rating four parties zero to ten: A gets a ten, B a nine, C a four, D a one. Those numbers stay on screen for all three slides.
 
-Reiljan's index anchors on the party you identify with -- here Party A, the orange row, which this respondent also happens to rate highest. Measure the distance from A to each of the other three: one, six and nine. Average them. Sixteen over three, about 5.33.
+Reiljan's index anchors on the party you identify with, here Party A. As usually written it is your own party's rating minus the mean of all the others: ten, minus fourteen thirds. Walk it off the figure instead and you average the three distances of one, six and nine. Same number either way, about 5.33.
 
-Equivalently, and this is how it is usually written: your own party's rating minus the mean rating of all the others. Ten minus four and two-thirds. Same thing.
-
-Two things to notice for the next slide. The anchor party is excluded -- you do not average in the distance from A to itself. And the distances enter unsquared. Both of those matter in about thirty seconds.
-
-I am showing the unweighted version for legibility. In the published index each out-party is weighted by its vote share, which changes the number but not the logic.
+Two things for the next slide: the anchor is excluded, and the distances enter unsquared. The published index also weights each out-party by vote share, which changes the number but not the logic.
 :::
 
 ------------------------------------------------------------------------
@@ -805,16 +852,38 @@ I am showing the unweighted version for legibility. In the published index each 
 dev_d <- transform(ex, sq = (like - 10)^2, mid = (like + 10) / 2)
 
 thermo_base("Party A") +
-  annotate("segment", x = 10, xend = 10, y = -4.5, yend = -0.5,
-           colour = grey2, linetype = "22", linewidth = 0.6) +
-  annotate("text", x = 10, y = -0.34, label = "your most-liked party = 10",
-           colour = grey2, size = 2.8, vjust = 0) +
-  geom_segment(data = subset(dev_d, sq > 0),
-               aes(x = like, xend = 10, y = -row, yend = -row),
-               colour = grey2, linewidth = 0.7) +
-  geom_text(data = subset(dev_d, sq > 0),
-            aes(mid, -row + 0.26, label = sq),
-            colour = accent, fontface = "bold", size = 2.8) +
+  annotate(
+    "segment",
+    x = 10,
+    xend = 10,
+    y = -4.5,
+    yend = -0.5,
+    colour = grey2,
+    linetype = "22",
+    linewidth = 0.6
+  ) +
+  annotate(
+    "text",
+    x = 10,
+    y = -0.34,
+    label = "your most-liked party = 10",
+    colour = grey2,
+    size = 2.8,
+    vjust = 0
+  ) +
+  geom_segment(
+    data = subset(dev_d, sq > 0),
+    aes(x = like, xend = 10, y = -row, yend = -row),
+    colour = grey2,
+    linewidth = 0.7
+  ) +
+  geom_text(
+    data = subset(dev_d, sq > 0),
+    aes(mid, -row + 0.26, label = sq),
+    colour = accent,
+    fontface = "bold",
+    size = 2.8
+  ) +
   labs(subtitle = "the same distances, squared") +
   coord_cartesian(xlim = c(-3.4, 12.4), ylim = c(-5.3, 0.05))
 ```
@@ -822,24 +891,18 @@ thermo_base("Party A") +
 $$\text{Distance}_i \;=\; \sqrt{\frac{1+36+81}{3}} \;=\; \sqrt{\frac{118}{3}} \;=\; \mathbf{6.27}$$
 
 ::: {.notes}
-Exactly the same picture as the last slide. Same four ratings, same anchor -- Party A -- same three parties being measured against it. Only one thing has changed: the numbers on the segments are now *squared*. One, thirty-six, eighty-one, instead of one, six, nine.
+Exactly the same picture. Same ratings, same anchor, same three parties. One thing has changed: the numbers on the segments are now *squared*. One, thirty-six, eighty-one instead of one, six, nine. Average and take the square root: about 6.27.
 
-Average those and take the square root: a hundred and eighteen over three is thirty-nine and a third, square root about 6.27.
+So 5.33 on the last slide, 6.27 on this one, from identical data. Squaring inflates the score by roughly eighteen percent because it weights the parties furthest away -- Party D alone contributes eighty-one of the hundred and eighteen. That is a choice somebody made, not a fact about the respondent.
 
-So: 5.33 on the last slide, 6.27 on this one, from identical data. Squaring inflates the score by roughly eighteen percent, because it gives disproportionate weight to the parties furthest away. Party D, nine points below the anchor, contributes eighty-one of the hundred and eighteen -- nearly seventy percent of the total. On the previous slide it contributed nine of sixteen. That is the whole difference between the two measures, and it is a choice somebody made, not a fact about the respondent.
-
-Note the anchor party is excluded from the average, exactly as on the API slide -- three parties, denominator three.
-
-Two caveats I would flag if asked. First, it is conventionally called a "mean distance" measure, but as you can see the formula is a root-mean-square, not an arithmetic mean.
-
-Second, and more serious: this anchor is defined by the outcome itself. You pick whichever party the respondent rated highest, then measure how far everything else sits from it. That selects on the dependent variable, and it is mechanically inflationary. It is one of the four in-group codings I compare in the paper, and it is the one I trust least.
+One caveat. This anchor is defined by the outcome itself: you pick whichever party they rated highest, then measure distance from it. That selects on the dependent variable and is mechanically inflationary.
 :::
 
 ------------------------------------------------------------------------
 
 ## Spread: no anchor at all {.smaller}
 
-- @wagner2021affective: the **standard deviation** of your ratings -- root-mean-square deviation from your own mean
+- @wagner2021affective: the **sample standard deviation** of your ratings -- deviations from your own mean, squared, over $n-1$
 - No in-group required -- the only one of the three computable for a non-partisan
 - Same four ratings: API **5.33** · Distance **6.27** · Spread **4.24**
 
@@ -853,14 +916,37 @@ Second, and more serious: this anchor is defined by the outcome itself. You pick
 dev_s <- transform(ex, sq = (like - 6)^2, mid = (like + 6) / 2)
 
 thermo_base() +
-  annotate("segment", x = 6, xend = 6, y = -4.5, yend = -0.5,
-           colour = grey2, linetype = "22", linewidth = 0.6) +
-  annotate("text", x = 6, y = -0.34, label = "your own mean = 6",
-           colour = grey2, size = 2.8, vjust = 0) +
-  geom_segment(data = dev_s, aes(x = like, xend = 6, y = -row, yend = -row),
-               colour = grey2, linewidth = 0.7) +
-  geom_text(data = dev_s, aes(mid, -row + 0.26, label = sq),
-            colour = grey2, size = 2.8) +
+  annotate(
+    "segment",
+    x = 6,
+    xend = 6,
+    y = -4.5,
+    yend = -0.5,
+    colour = grey2,
+    linetype = "22",
+    linewidth = 0.6
+  ) +
+  annotate(
+    "text",
+    x = 6,
+    y = -0.34,
+    label = "your own mean = 6",
+    colour = grey2,
+    size = 2.8,
+    vjust = 0
+  ) +
+  geom_segment(
+    data = dev_s,
+    aes(x = like, xend = 6, y = -row, yend = -row),
+    colour = grey2,
+    linewidth = 0.7
+  ) +
+  geom_text(
+    data = dev_s,
+    aes(mid, -row + 0.26, label = sq),
+    colour = grey2,
+    size = 2.8
+  ) +
   labs(subtitle = "no anchor party: dispersion around the mean") +
   theme(plot.subtitle = element_text(colour = grey2, face = "bold")) +
   coord_cartesian(xlim = c(-3.4, 12.4), ylim = c(-5.3, 0.05))
@@ -869,17 +955,13 @@ thermo_base() +
 $$\text{Spread}_i \;=\; \sqrt{\frac{16+9+4+25}{3}} \;=\; \sqrt{18} \;=\; \mathbf{4.24}$$
 
 ::: {.notes}
-Third measure, same four ratings once more. Spread anchors on no party at all -- only on the respondent's own average, which here is exactly six. It is simply the standard deviation of how they rate the field.
+Third measure, same four ratings. Spread anchors on no party at all, only on the respondent's own average, which here is exactly six. It is the sample standard deviation of how they rate the field: deviations squared, over n minus one, square root 4.24.
 
-Squared deviations from that mean: sixteen, nine, four, twenty-five. That is fifty-four, over three -- the usual standard-deviation denominator, n minus one -- square root, 4.24.
+Two things to take away.
 
-Now the two things to take away.
+First, the three numbers together: 5.33, 6.27, 4.24. Identical input, three different answers, not even on a common scale. When a paper reports "affective polarization in country X is 4.2", that is meaningless until you know which measure produced it. That is this whole talk in one worked example.
 
-First, look at the three numbers together: 5.33, 6.27, 4.24. Identical input, three different answers -- and they are not even on a common scale, so you cannot rank them against each other. When a paper reports "affective polarization in country X is 4.2", that number is meaningless until you know which of these produced it. That is the argument of this whole talk, in one worked example.
-
-Second, and this is the one that leads into my own work. Notice what Spread does *not* need: an in-group. There is no anchor party, so you can compute it for anybody who rated the parties -- including someone who says they feel close to none of them. Every other measure on these three slides needs you to identify a party as theirs before you can compute anything at all.
-
-Which means somebody has to decide who counts as a partisan. Hold that thought -- it is my last slide.
+Second, notice what Spread does *not* need: an in-group. Every other measure here needs you to name a party as theirs first -- so somebody has to decide who counts as a partisan.
 :::
 
 ------------------------------------------------------------------------
@@ -895,13 +977,11 @@ Which means somebody has to decide who counts as a partisan. Hold that thought -
 ::: {.notes}
 Two critiques, both serious.
 
-The first is about the word affect. Asking how much you like or dislike a party gives you something that blends emotion with cognitive and instrumental evaluation. When I say I dislike a party, I might mean it disgusts me, or that I have read its tax policy and think it is wrong. Not the same mental state.
+The first is about the word affect. Asking how much you like or dislike a party blends emotion with cognitive and instrumental evaluation. When I say I dislike a party, I might mean it disgusts me, or that I have read its tax policy and think it is wrong. Not the same mental state. And it collapses discrete emotions that behave very differently: anger mobilizes, fear demobilizes, disgust and contempt go with avoidance. Squeezing that onto one line loses exactly the distinctions that would tell you what behavior to expect.
 
-And it collapses discrete emotions that behave very differently. Anger mobilizes -- angry people participate more. Fear demobilizes. Disgust and contempt go with avoidance and dehumanization. Squeezing that onto one line loses exactly the distinctions that would tell you what behavior to expect.
+The second is more damaging. Druckman and Levendusky asked what respondents picture when a survey says "Republicans." The answer is elites and activists, not the moderate neighbour who never brings politics up. Ask explicitly about ordinary voters and the estimated hostility drops sharply.
 
-The second critique is even more damaging. Druckman and Levendusky asked what respondents picture when a survey says "Republicans." The answer is elites and activists -- politicians, the loudest people on television -- not the moderate neighbor who never brings politics up. Ask explicitly about ordinary voters and the estimated hostility drops sharply.
-
-So, the uncomfortable conclusion at the bottom of the slide: a large share of measured "mass animosity" may be elite animosity wearing a costume. We may have spent a decade documenting that people dislike politicians and calling it a finding about society.
+So a large share of measured "mass animosity" may be elite animosity wearing a costume.
 :::
 
 ------------------------------------------------------------------------
@@ -996,19 +1076,13 @@ ggplot(cells, aes(x, y)) +
 ```
 
 ::: {.notes}
-The field responded to the target problem by splitting the concept -- and this grid is the single most important slide in the talk, because everything after it is a move between cells.
+This grid is the most important slide in the talk, because everything after it is a move between cells.
 
-The vertical axis is target. Vertical, or political, affective polarization is affect directed upwards, at parties and elites -- and that splits further, because how you feel about a party is not how you feel about its leader. Horizontal, or social, affective polarization is directed sideways, at ordinary citizens who support a different party. That is what would actually constitute social division: would I mind if my daughter married one, would I hire one, would I be friends with one. And the consistent finding is that out-parties are disliked considerably more than their ordinary supporters.
+The vertical axis is target. Vertical affective polarization is directed upwards, at parties and elites. Horizontal is directed sideways, at ordinary citizens who support a different party -- would I mind if my daughter married one, would I hire one. That is what would actually constitute social division, and out-parties are consistently disliked more than their ordinary supporters.
 
-The horizontal axis is measurement mode: what people say about themselves versus what they actually do when something is at stake. Self-reports are cheap to give and cheap to exaggerate.
+The horizontal axis is measurement mode: what people say versus what they do when something is at stake.
 
-Each cell names how you would actually measure that combination. Top right, behaviour aimed at parties and elites: candidate-choice conjoints, donation and campaign tasks, vote choice and turnout. Bottom right, behaviour aimed at ordinary citizens: allocation games capturing cooperation, solidarity and trust -- that is the Hahm design, and it is where section five lives -- but also observed behaviour like partner choice on online dating platforms, where Huber and Malhotra find strong partisan homophily, and hiring, where Gift and Gift find partisan discrimination in a randomized field experiment.
-
-Now look where the literature lives. Almost all of it is the top-left cell -- vertical and attitudinal. A self-reported feeling about a party. That is one cell of four, and we routinely talk as though it measured the whole grid.
-
-So target choice and mode choice do not add nuance. They change the magnitude of the phenomenon, and arguably change which phenomenon you are measuring at all.
-
-Section five goes to the opposite corner: bottom right. Horizontal and behavioral.
+Bottom right -- allocation games, dating, hiring -- is the Hahm design and where the next section lives. Now look where the literature lives: almost all of it top-left, and we talk as though it measured the whole grid.
 :::
 
 # Affective Polarization in Europe
@@ -1022,11 +1096,11 @@ Section five goes to the opposite corner: bottom right. Horizontal and behaviora
 - Rare combination: comparative scope **and** behavioral outcomes
 
 ::: {.notes}
-The data come from Hahm, Hilpert and König, published in the APSR in 2024: a cross-national conjoint experiment across all twenty-five EU member states, just under thirty thousand respondents, roughly twelve hundred per country, fielded between May and August 2019, broadly representative within each country on age and gender.
+The data come from Hahm, Hilpert and König, published in the APSR in 2024: a cross-national conjoint experiment across all twenty-five EU member states, just under thirty thousand respondents, roughly twelve hundred per country, fielded between May and August 2019.
 
-What makes it unusual is the combination. There is plenty of comparative survey work on affective polarization, and some very good behavioral experiments -- but those are mostly American and mostly one country at a time. Behavioral measures across twenty-five countries with a common instrument is rare, and it lets us ask whether the American findings travel.
+What makes it unusual is the combination. There is plenty of comparative survey work on affective polarization, and some very good behavioral experiments, but those are mostly American and mostly one country at a time. Behavioral measures across twenty-five countries with a common instrument is rare, and it lets us ask whether the American findings travel.
 
-To be clear about what I am doing in this section: I am not showing you my own results. This is a walk through their figures, as an overview of what affective polarization in Europe looks like when you measure it in the bottom-right cell of that grid instead of the top-left.
+To be clear about this section: these are not my results. It is a walk through their figures, showing what affective polarization in Europe looks like measured in the bottom-right cell of that grid instead of the top-left.
 :::
 
 ------------------------------------------------------------------------
@@ -1038,11 +1112,11 @@ To be clear about what I am doing in this section: I am not showing you my own r
 ::: {.notes}
 Respondents played two classic economic games against a described co-player, and this is the profile they saw.
 
-In the dictator game the respondent gets ten tokens and divides them between themselves and the other player. No strategy -- whatever you give away, you lose -- so what you give is a fairly clean measure of how much you care about that person. In the trust game what you send is tripled and the other player decides how much to return, so allocation there mixes generosity with an expectation about trustworthiness. Three rounds of each, six allocation decisions per respondent.
+In the dictator game the respondent gets ten tokens and divides them. No strategy -- whatever you give away, you lose -- so what you give is a fairly clean measure of how much you care about that person. In the trust game what you send is tripled and the other player decides how much to return, so it mixes generosity with an expectation about trustworthiness. Three rounds of each, six decisions per respondent.
 
-The crucial part is the profile. The co-player is described by six attributes at once -- gender, age, class, religion, nationality and partisanship -- randomized independently of each other. So the effect of party support on tokens received is a causal effect, cleanly separated from the rest. Party cannot be proxying for class or religion, because those are shown too.
+The crucial part is the profile. The co-player is described by six attributes at once -- gender, age, class, religion, nationality and partisanship -- randomized independently of each other. So the effect of party support on tokens received is causal and cleanly separated: party cannot be proxying for class or religion, because those are shown too.
 
-And notice who the co-player is. An ordinary person, a fellow citizen. Not a party. Not a politician.
+And notice who the co-player is. An ordinary person, a fellow citizen. Not a party, not a politician.
 :::
 
 ------------------------------------------------------------------------
@@ -1053,18 +1127,16 @@ And notice who the co-player is. An ordinary person, a fellow citizen. Not a par
 - Explicitly **behavioral**: tokens, not a self-reported feeling
 - A **non-partisan baseline** condition -- party simply not shown
 - So in-group favoritism and out-group derogation are estimated *separately*
-- Conjoints reduce social desirability bias [@horiuchi2022does]; randomization identifies causal effects [@hainmueller2014causal]
+- Conjoints reduce social desirability bias [@horiuchi2022does], and randomization identifies causal effects [@hainmueller2014causal]
 
 ::: {.notes}
 Four things this buys us, mapping onto the critiques from the last section.
 
-First, it is explicitly horizontal -- Druckman and Levendusky's objection answered by design rather than by caveat.
+First, it is explicitly horizontal -- Druckman and Levendusky's objection answered by design rather than by caveat. Second, it is behavioral: nobody has to tell you how they feel, you watch what they do with something they would rather keep.
 
-Second, it is behavioral. Nobody has to tell you how they feel; you watch what they do with something they would rather keep.
+Third, and this matters most for the next few slides, there is a condition where the co-player's party is simply not shown. Without that baseline you only ever see a difference between co-partisan and out-partisan, and a difference cannot tell you which side of it is doing the work. With it you can decompose: the extra you give a co-partisan is in-group favoritism, the less you give an out-partisan is out-group derogation. Brewer's distinction becomes measurable rather than merely conceptual.
 
-Third, and this is the part that matters most for the next few slides: there is a condition where the co-player's party is simply not shown. A non-partisan baseline. Without it you only ever see a difference between co-partisan and out-partisan, and a difference cannot tell you which side of it is doing the work. With it you can decompose: how much extra you give a co-partisan relative to that baseline is in-group favoritism; how much less you give an out-partisan is out-group derogation. Brewer's distinction from section three becomes measurable rather than merely conceptual.
-
-Fourth, conjoints are less prone to social desirability bias, because party is one attribute among many, and randomization means these are causal effects with well-understood estimation properties.
+Fourth, conjoints are less prone to social desirability bias, and randomization means these are causal effects.
 
 Now the results, in four figures.
 :::
@@ -1073,18 +1145,16 @@ Now the results, in four figures.
 
 ## Partisanship dominates every other divide
 
-![*Note:* Figure from @hahm2024divided, Figure 2. Pooled, J = 29,827; N = 178,936.](https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20240123150926403-0273:S0003055423000266:S0003055423000266_fig2.png){fig-align="center"}
+![*Note:* Figure from @hahm2024divided, Figure 2. Pooled, J = 29,827, N = 178,936.](https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20240123150926403-0273:S0003055423000266:S0003055423000266_fig2.png){fig-align="center"}
 
 ::: {.notes}
-Two panels: the dictator game on the left, the trust game on the right. Six rows, one per randomized attribute -- gender, age, class, religion, nationality, partisanship. The black dot at zero is the in-group, the reference category; the open dot with the interval is the out-group relative to it. The x-axis is tokens, out of ten.
+Two panels: the dictator game on the left, the trust game on the right. Six rows, one per randomized attribute. The black dot at zero is the in-group reference, the open dot with the interval is the out-group relative to it. The x-axis is tokens, out of ten.
 
-Read the bottom row first. An out-partisan receives about one full token less than a co-partisan -- 0.99 in the dictator game, 1.06 in the trust game. That is roughly a quarter of what a full in-group profile receives on average, so it is a large effect, not a detectable one.
+Read the bottom row first. An out-partisan receives about one full token less than a co-partisan -- 0.99 in the dictator game, 1.06 in the trust game. Roughly a quarter of what a full in-group profile receives, so a large effect, not merely a detectable one.
 
-Now read upwards, because the comparison is the point. Religion, the next largest divide in Europe, is less than half that -- 0.43 and 0.51. Nationality and class are around 0.12. Age smaller still. And gender does not reach significance at all.
+Now read upwards. Religion, the next largest divide in Europe, is less than half that. Nationality and class are around 0.12, and gender does not reach significance at all.
 
-So partisanship out-discriminates religion, nationality and class in a single design where all four were shown side by side and randomized independently. That is the strong version of the Iyengar and Westwood claim, and it holds outside the United States.
-
-Note also how similar the two panels are. Liking and trusting move together.
+So partisanship out-discriminates religion, nationality and class in a design where all four were shown side by side.
 :::
 
 ------------------------------------------------------------------------
@@ -1094,31 +1164,27 @@ Note also how similar the two panels are. Liking and trusting move together.
 ![*Note:* Figure from @hahm2024divided, Figure 3. Dots = dictator game, squares = trust game.](https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20240123150926403-0273:S0003055423000266:S0003055423000266_fig3.png){fig-align="center"}
 
 ::: {.notes}
-You might suspect a pooled result hides heterogeneity. So here is the same six-row plot repeated for every country separately -- twenty-five panels, dictator game as dots, trust game as squares.
+You might suspect a pooled result hides heterogeneity. So here is the same six-row plot repeated for every country separately -- dictator game as dots, trust game as squares.
 
-Do not try to read the numbers. Read the shape. The bottom row -- partisanship -- is the furthest-left estimate in every single panel. Twenty-five out of twenty-five.
+Do not try to read the numbers. Read the shape. The bottom row, partisanship, is the furthest-left estimate in every single panel. Twenty-five out of twenty-five.
 
-There is real variation in size: the partisan gap runs from about 0.57 tokens in Ireland to 1.50 in Hungary. And religion varies far more across countries than partisanship does, which is itself interesting -- the partisan divide is the most portable of the divides.
-
-But the ordering is remarkably stable. Whatever else differs across these party systems, partisanship is the sharpest line in all of them.
+There is real variation in size -- the partisan gap runs from about 0.57 tokens in Ireland to 1.50 in Hungary -- and religion varies far more across countries than partisanship does, which makes the partisan divide the most portable of the divides. But the ordering is remarkably stable.
 :::
 
 ------------------------------------------------------------------------
 
 ## In-group favoritism vs out-group derogation
 
-![*Note:* Figure from @hahm2024divided, Figure 4. Partisan identifiers only; J = 18,925; N = 77,456.](https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20240123150926403-0273:S0003055423000266:S0003055423000266_fig4.png){fig-align="center"}
+![*Note:* Figure from @hahm2024divided, Figure 4. Partisan identifiers only. J = 18,925, N = 77,456.](https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20240123150926403-0273:S0003055423000266:S0003055423000266_fig4.png){fig-align="center"}
 
 ::: {.notes}
 This is the figure I would keep if I could keep only one.
 
-The top row uses the no-information control group as the zero baseline -- that is the condition where partisanship was simply not shown. Against that baseline, learning that your co-player is a co-partisan raises what you give by 0.52 tokens in the dictator game and 0.60 in the trust game. Learning they are an out-partisan lowers it by 0.47 and 0.45.
+The top row uses the no-information control as the zero baseline. Against it, learning that your co-player is a co-partisan raises what you give by 0.52 tokens in the dictator game and 0.60 in the trust game. Learning they are an out-partisan lowers it by 0.47 and 0.45.
 
-The bottom row puts those two magnitudes side by side. Both are real. But in-group favoritism is at least as large as out-group derogation -- and in the trust game it is significantly larger, a difference of 0.15 with an interval from 0.02 to 0.27.
+The bottom row puts the two magnitudes side by side. Both are real, but in-group favoritism is at least as large as out-group derogation, and in the trust game significantly larger.
 
-Why that matters: the American literature has settled on the view that affective polarization is driven by out-group animus. Iyengar and Westwood, Westwood and colleagues, Carlin and Love -- the story is that partisans do not so much love their own side as hate the other one. In Europe, on a behavioral measure, that is not what you find. If anything the reverse.
-
-And this is exactly Brewer's distinction from section three, made empirical. Note that you can only see this because of the baseline condition. A thermometer difference score gives you one number and no way to decompose it -- both stories produce the same gap.
+That matters because the American literature has settled on out-group animus as the driver. In Europe, on a behavioral measure, that is not what you find. And you can only see it because of the baseline -- a thermometer difference score gives one number and no way to decompose it.
 :::
 
 ------------------------------------------------------------------------
@@ -1128,15 +1194,13 @@ And this is exactly Brewer's distinction from section three, made empirical. Not
 ![*Note:* Figure from @hahm2024divided, Figure 5. Circles = in-group favoritism, triangles = out-group derogation.](https://static.cambridge.org/binary/version/id/urn:cambridge.org:id:binary:20240123150926403-0273:S0003055423000266:S0003055423000266_fig5.png){fig-align="center"}
 
 ::: {.notes}
-Again, is the pooled result hiding something? Countries are ordered by overall level of affective polarization -- Hungary at the top, Ireland at the bottom. Circles are in-group favoritism, triangles are out-group derogation, dictator game on the left, trust game on the right.
+Again, is the pooled result hiding something? Countries are ordered by overall level of affective polarization, Hungary at the top and Ireland at the bottom. Circles are in-group favoritism, triangles out-group derogation, dictator game left and trust game right.
 
-In the dictator game, in-group favoritism is significantly different from zero in twenty of twenty-five countries; out-group derogation in only seventeen. In the trust game, twenty-two versus seventeen.
+In the dictator game, in-group favoritism differs from zero in twenty of twenty-five countries, out-group derogation in only seventeen. In the trust game, twenty-two versus seventeen. Comparing the two magnitudes directly, they are statistically indistinguishable in twenty-three of twenty-five countries.
 
-And comparing the two magnitudes directly: they are statistically indistinguishable in twenty-three of twenty-five countries in the dictator game. In-group exceeds out-group in point estimate in thirteen countries, but significantly so in only one -- the Netherlands.
+So the honest summary is not "Europeans love their own side more than they hate the other." It is that out-group derogation is not the dominant component, which is what the American literature would have led you to expect. The two are roughly equal partners.
 
-So the honest summary is not "Europeans love their own side more than they hate the other." It is: out-group derogation is not the dominant component, which is what the American literature would have led you to expect. The two are roughly equal partners.
-
-The spread down that left-hand axis is also what motivates the last piece.
+The spread down that left-hand axis is what motivates the last piece.
 :::
 
 ------------------------------------------------------------------------
@@ -1150,15 +1214,15 @@ The spread down that left-hand axis is also what motivates the last piece.
 :::
 
 ::: {.notes}
-Last piece, briefly, because it explains the variation you just saw. Both figures have four panels: dictator co-partisan, dictator out-partisan, trust co-partisan, trust out-partisan.
+Last piece, because it explains the variation you just saw. Both figures have four panels: dictator and trust, co-partisan and out-partisan.
 
 On the left, whether the party is currently in a coalition. Being in coalition lowers what you give a co-partisan slightly, from 4.67 to 4.48 tokens, and raises what you give an out-partisan, from 3.43 to 3.72.
 
-On the right, the same idea measured continuously -- years spent in coalition since 2000, and for out-partisans, years spent in coalition with that specific party. Same pattern, stronger and cleaner: co-partisan allocation falls by 0.35 tokens across the range, out-partisan allocation rises by 0.63, and here all four estimates are significant. The lines converge.
+On the right, the same idea measured continuously as years spent in coalition since 2000. Same pattern, stronger and cleaner: co-partisan allocation falls by 0.35 tokens across the range, out-partisan allocation rises by 0.63, and all four estimates are significant. The lines converge.
 
-So cooperation between parties narrows the gap from both directions at once -- less favoritism and less derogation together.
+So cooperation between parties narrows the gap from both directions at once.
 
-The part I find most striking is what is null. In the same models, district magnitude, the effective number of parties, elite polarization, GDP per capita and population size all do essentially nothing. The action is in the relationships between specific parties, not in institutional design. Which connects back to the point from section three about camps rather than parties in multiparty systems.
+What I find most striking is what is null. District magnitude, the effective number of parties, elite polarization, GDP per capita and population size all do essentially nothing. The action is in the relationships between specific parties, not in institutional design.
 :::
 
 ------------------------------------------------------------------------
@@ -1171,47 +1235,20 @@ The part I find most striking is what is null. In the same models, district magn
 - How any of this has moved since 2019 is a separate, open question
 
 ::: {.notes}
-Three honest caveats before I move on, and they are the same distinctions from section one, coming back around.
+Three honest caveats, and they are the distinctions from section one coming back around.
 
-First, this is 2019. Pre-COVID, pre-Ukraine, pre the inflation shock, pre much of the current radical-right wave. Whatever you think those events did to European politics, none of it is in here.
+First, this is 2019. Pre-COVID, pre-Ukraine, pre the inflation shock, pre much of the current radical-right wave. None of that is in here.
 
-Second -- remember state versus process -- this is a snapshot. One measurement. It can tell you that Hungary sits above Ireland; it cannot tell you whether either is rising. Nothing in this section licenses a sentence beginning "polarization is increasing."
+Second, remember state versus process: this is a snapshot. One measurement. It can tell you that Hungary sits above Ireland, not whether either is rising. Nothing here licenses a sentence beginning "polarization is increasing."
 
-Third, and most important for the argument of this talk: everything you just saw is one cell of that grid. Horizontal, because the co-player is an ordinary co-national rather than a party or a leader. And behavioral, because it is tokens rather than a self-report. That is precisely the opposite corner from where the literature usually stands. It is a better measure for the question of social division -- but it is not a complete measure of "polarization," and it should not be read as one.
+Third, and most important for the argument of this talk, everything you just saw is one cell of that grid. Horizontal, because the co-player is an ordinary co-national rather than a party or a leader. Behavioral, because it is tokens rather than a self-report. That is the opposite corner from where the literature usually stands -- a better measure for the question of social division, but not a complete measure of polarization.
 
-Which brings me, finally, to what I am doing with all this.
-:::
-
-# Where I Go From Here
-
-## Who counts as a partisan? {.smaller}
-
-- AP is measured **on partisans** -- someone must decide who counts
-- The usual filter: "do you feel close to a party?"
-- Yes-shares run from ~40% to over 80% across member states
-- So the choice moves the **population of inference** -- unevenly
-
-::: {.embed-fig}
-{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
-:::
-
-::: {.notes}
-One slide on my own work, and it is a question, not a result.
-
-To measure affective polarization you need an in-group. So you must decide who counts as a partisan, and the field's standard answer is: whoever says yes to "do you feel close to a party." Everybody who says no gets dropped from the analysis.
-
-In Europe that item has been suspect for sixty years. Converse and Dupeux noticed in France that attachment seems to report the vote rather than precede it; Thomassen made the same argument for the Netherlands. And look at the figure: the share of people who report an attachment runs from around forty percent in some member states to over eighty in others.
-
-Reading the bars: the white segments are people who report an attachment -- explicit partisans. The grey segments are people who deny any attachment but do report a party they vote for; they have a party, they simply decline to describe themselves as attached to it. The black segments have neither. Countries are sorted by the explicit share, so Denmark is at the top and Latvia at the bottom.
-
-So the coding rule does not just shrink the sample. It shrinks it by a different amount, and in a different direction, in every country. Your cross-national ranking of affective polarization is partly a ranking of how willing people are to say "yes, I feel close to a party." That is a population-of-inference problem, and it is largely made silently.
-
-What I am doing is holding the vote anchor constant and varying only whether attachment is reported -- comparing people who have the same party but describe their relationship to it differently. I am not going to show you results today; ask me afterwards.
+So what should you take away from all of this?
 :::
 
 # Takeaways
 
-## Is it bad for democracy? Depends which one you mean {.smaller}
+## Is it bad for democracy? Depends which one you mean
 
 - The concern: less compromise, lower institutional confidence [@finkel2020political]
 - The pushback: reducing animosity does **not** move democratic attitudes [@broockman2023doesaffective]
@@ -1220,28 +1257,20 @@ What I am doing is holding the vote anchor constant and varying only whether att
 - **One thermometer number cannot tell any of these apart**
 
 ::: {.notes}
-I am going to be quick here because of time, and I am happy to go into any of it in questions.
+I will be quick here, and I am happy to go into any of it in questions.
 
-The reason this concept spread so fast is the worry that it damages democracy: that polarized citizens become less willing to compromise, lose confidence in institutions, and question the legitimacy of elections they lose.
+The worry that made this concept spread is that it damages democracy: polarized citizens compromise less, lose confidence in institutions, and question elections they lose. Two mechanisms. Threat -- if the other camp looks worse than it really is, the cost of losing an election rises past what citizens will accept. And politicization -- democratic norms stop being rules everybody applies and become weapons applied selectively.
 
-Two mechanisms are usually offered. The first is threat. If the other camp looks more extreme and malicious than it really is -- and people wildly overestimate this -- the perceived cost of losing an election rises past what citizens will accept, and things they would otherwise reject start to look justified. The second is politicization: democratic norms stop being rules everybody applies and become weapons applied selectively. I am outraged by the procedural violation when the other side commits it, and remarkably relaxed when my own side does. The norm survives as rhetoric while dying as a constraint.
+Now the pushback. Broockman, Kalla and Westwood successfully reduced partisan animosity in experiments, and it did not move democratic attitudes. The causal chain is much weaker than the correlational literature implies.
 
-Now the pushback, which you should take seriously. Broockman, Kalla and Westwood successfully reduced partisan animosity in experiments -- and it did not move democratic attitudes in general. Voelkel and colleagues found much the same, although stronger interventions did reduce support for candidates who violate norms. So the causal chain from animosity to anti-democratic attitudes is much weaker than the correlational literature implies.
+And the inconvenient case. Suppose a party actually is anti-democratic. Intense dislike of it is a guardrail, not a pathology, and hostility towards radical-right parties in Europe is often strongest among the most democratically committed citizens. On the standard measure that person is severely polarized.
 
-And then the genuinely inconvenient case. Suppose a party actually is anti-democratic. Intense dislike of it is not a pathology -- it is a guardrail, citizens doing their job. And empirically, hostility towards radical-right parties in Europe is often strongest among the most democratically committed citizens. On the standard measure that person is severely polarized. Are we really prepared to call that a problem to be fixed?
-
-If affective polarization just means preferring your own side, that is ordinary partisan politics, not a pathology. Parties are supposed to favor their own agenda, and partisan attachment is what makes electoral accountability work. A public with no partisan preferences would not be a healthier democracy; it would be an unresponsive one.
-
-Two distinctions help. The first, from Mouffe: agonistic versus antagonistic conflict. In agonistic conflict I treat you as a legitimate adversary -- I want to beat you at the next election and I accept your right to compete and win. In antagonistic conflict you are an enemy, to be defeated rather than outvoted. Only the second is a democratic problem, and the feeling thermometer cannot tell them apart. It returns the same low number either way. The second is modifiable versus tenacious polarization -- whether the hostility responds to information and contact, or is entrenched and self-sustaining. Completely different policy implications, and again one number does not distinguish them.
-
-And here is the empirical version from section five. Disliking a party on a thermometer and withholding tokens from a neighbor are not the same phenomenon. Only the second looks like social breakdown; the first might just be a citizen with clear preferences. Vertical and horizontal affective polarization deserve different normative verdicts, and at the moment they get the same one.
-
-Back to the opening. I gave you four things that all get called polarization and said the disagreements are about which one people mean. The normative debate repeats that mistake one level up.
+Mouffe's distinction helps: a legitimate adversary versus an enemy. Only the second is a democratic problem, and the thermometer returns the same number either way.
 :::
 
 ------------------------------------------------------------------------
 
-## Takeaways
+## Five things to take with you
 
 - Polarization is a family of concepts, not a thing
 - Measurement choices are theoretical choices
@@ -1254,19 +1283,142 @@ Five things to take with you.
 
 Polarization is a family of concepts, not a thing -- dispersion, bimodality, sorting, distance, and then vertical, horizontal, attitudinal, behavioral on top. Ask which one before accepting any claim.
 
-Measurement choices are theoretical choices. Picking a thermometer over a behavioral task, or restricting your sample to self-identified partisans, is not a technical decision. It commits you, usually silently, to a theory of what partisanship is.
+Measurement choices are theoretical choices. Picking a thermometer over a behavioral task, or restricting your sample to self-identified partisans, commits you, usually silently, to a theory of what partisanship is.
 
-Target and mode both matter, and independently. The same people give you systematically different answers depending on which cell of that grid you stand in.
+Target and mode both matter, independently. The same people give systematically different answers depending on which cell you stand in.
 
-Substantively, the one European result I would want you to remember: measured behaviorally and horizontally, in-group favoritism is at least as large as out-group derogation. The American story about out-group animus does not simply travel.
+Substantively: measured behaviorally and horizontally, in-group favoritism is at least as large as out-group derogation. The American out-group-animus story does not simply travel.
 
-And whether affective polarization is bad for democracy depends entirely on which one you mean.
+And whether affective polarization is bad for democracy depends on which one you mean.
 
-So, back to my promise. If you leave suspicious of any sentence of the form "polarization is increasing" that does not specify what kind -- the talk did its job. Thank you, and I am happy to take questions.
+Back to my promise. If you leave suspicious of any sentence of the form "polarization is increasing" that does not specify what kind, the talk did its job.
+
+If we still have time, let me show you what I am working on myself.
 :::
 
+# Where I Go From Here
+
+## Who counts as a partisan... {.smaller}
+
+- AP is measured **on partisans** -- someone must decide who counts
+- The usual filter: "do you feel close to a party?"
+- Yes-shares run from ~40% to over 80% across member states
+- So the choice moves the **population of inference** -- unevenly
+
+::: {.embed-fig}
+{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
+:::
+
+::: {.notes}
+If we have the time, let me show you what I am working on. These are ongoing projects, and everything here is preliminary.
+
+To measure affective polarization you need an in-group, so you have to decide who counts as a partisan. The standard answer is whoever says yes to "do you feel close to a party." Everybody who says no gets dropped from the analysis.
+
+In Europe that item has been suspect for sixty years -- Converse and Dupeux noticed in France that attachment seems to report the vote rather than precede it.
+
+Reading the bars: white is people who report an attachment, grey is people who deny attachment but do report a party they vote for, black has neither. Countries are sorted by the white share, Denmark at the top and Latvia at the bottom, running from around forty percent to over eighty.
+
+So the coding rule does not just shrink the sample. It shrinks it by a different amount in every country, and that choice is usually made silently.
+:::
+
+------------------------------------------------------------------------
+
+## ...and how does this influence AP estimates? {.smaller}
+
+- Hold the vote anchor constant, vary only whether attachment is **reported**
+- **Attitudinal:** self-identified partisans sit higher on all three thermometer measures
+- **Behavioral:** both types withhold roughly 0.7--1.0 tokens from an out-partisan
+- **Preliminary** -- pooled cross-national descriptives, not yet the within-party test
+
+::: {.columns}
+::: {.column width="50%"}
+[Attitudinal (thermometer)]{.figlab}
+
+::: {.embed-fig .embed-pair}
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-thermo >}}
+:::
+:::
+
+::: {.column width="50%"}
+[Behavioral (tokens)]{.figlab}
+
+::: {.embed-fig .embed-pair}
+{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-cj >}}
+:::
+:::
+:::
+
+::: {.notes}
+So I hold the vote anchor constant and vary only whether attachment is reported, comparing people who have the same party but describe their relationship to it differently. In the legends, "Explicit" means self-identified and "Implicit" means vote-anchored.
+
+Left panel, the attitudinal side, on all three measures. Self-identified partisans sit clearly above the vote-anchored group on every one of them. That gap is large.
+
+Right panel, the token games. Read the level first: every partisan type withholds a substantial amount from an out-partisan, roughly seven tenths to a full token out of ten. Both groups discriminate, and neither is anywhere near zero. What differs between the two types is small next to that common effect.
+
+Two warnings. The panels are not on a common x-axis -- the left runs to six, the right to about one. And these are pooled descriptives, not the test. The honest version compares within party-country cells with an equivalence test, and that is what I am building now.
+:::
+
+------------------------------------------------------------------------
+
+## Partisan sorting and the Muslim penalty {.smaller}
+
+- The conjoint randomizes religion **and** partisanship independently -- the interaction is directly estimable
+- **Preliminary:** a Muslim cue costs a *co-partisan* more (--0.67 tokens) than an *out-partisan* (--0.41)
+- So the partisan gap **narrows**: 1.08 tokens for Christian targets, 0.81 for Muslim ones
+- **Planned:** reweight to the joint distribution of party $\times$ religion that actually exists, then test for floor effects
+
+::: {.paper-fig}
+![Estimated marginal means with 95% CIs, trust game. *Preliminary.*](./images/partyreliinteraction.png)
+:::
+
+::: {.notes}
+The second project takes the partisan divide as given and asks how it interacts with anti-Muslim bias. Planned work -- a preliminary finding, not a result I would defend yet.
+
+Religion and partisanship are randomized independently, so the interaction is estimable rather than confounded.
+
+Read the figure by rows: non-religious, Christian, Muslim. Blue triangles are co-partisan recipients, orange circles out-partisan, grey squares the no-party baseline. The numbers on the right are the co-partisan minus out-partisan contrast -- affective polarization in tokens.
+
+Now the puzzle. Going from a Christian to a Muslim recipient, a co-partisan loses about 0.67 tokens and an out-partisan about 0.41. The penalty lands harder on the person who shares your party, so the gap shrinks from 1.08 to 0.81 -- the opposite of what social sorting predicts.
+
+Two things to do before believing it: reweight to the joint distribution of party and religion that actually exists, and rule out floor effects on a bounded scale.
+
+Full caption: Allocation of tokens by respondents to co-partisan, non-partisan, and out-partisan recipients conditional on displayed religious attributes. Notes: This figure presents estimated marginal means and 95% confidence intervals. Gray dashed arrows indicate pairwise contrasts between co-partisans and out-partisans, with corresponding means and 95% confidence intervals shown on the right. These contrasts serve as a measure of partisan affective polarization. Estimates are derived from multilevel linear models with random intercepts for countries and respondents, based on the trust game. Full regression results are provided in Table ?? in Section C.1 of the Appendix.
+:::
+
+------------------------------------------------------------------------
+
+## Historical Muslim rule and anti-Muslim bias {.smaller}
+
+- Respondents are **geocoded** -- linkable to regions once under Muslim rule
+- Question: is behavioral anti-Muslim bias *attenuated* where contact ran for centuries?
+- Treatment as a **probabilistic surface**, not a crisp polygon -- source uncertainty carried into the estimate
+- **Planned, no estimates yet** -- the map shows the variation and coverage the design rests on
+
+::: {.paper-fig}
+![Historical extent and duration of Muslim rule. Black points are georeferenced respondents. *Planned project -- no estimates yet.*](./images/hmr.png)
+:::
+
+::: {.notes}
+The third project steps back and asks where the baseline of anti-Muslim bias comes from in the first place. This is the least developed of the three: the design exists, the historical data are being built, and there are no estimates yet.
+
+Large parts of Europe were under Muslim rule for extended periods -- Al-Andalus from 711 to 1492, Ottoman Europe from the fourteenth century into the twentieth.
+
+The hypothesis runs against the usual direction. Extending contact theory across historical time, sustained co-presence should have left cultural residues that make the category "Muslim" more associatively complex, blunting threat-based radical-right appeals. If that is right, the token penalty should be smaller in historical contact zones, not larger.
+
+The methodological piece is the treatment. The persistence literature draws crisp polygons and treats them as known, when frontier zones were contested and the sources vary enormously. I build a probabilistic raster instead, and carry that uncertainty into the estimate.
+
+The map shows the spatial variation and that the survey covers it -- each black dot is a respondent.
+
+That is where I am headed. Thank you, and I am happy to take questions.
+
+Full caption: Historical Extent and Duration of Muslim Rule in Europe and Georeferenced Survey Respondents. Colored regions delineate areas historically under Muslim rule, with color intensity (alpha) indicating the duration of governance. Black points represent the georeferenced locations of individual survey respondents. This map illustrates the substantial spatial variation in historical contact across Europe and the empirical coverage for examining its enduring effects. Data Sources: Historical Muslim rule operationalized by author based on extensive literature review (Table 1), survey data from Hahm, Hilpert, and König (2024).
+:::
 
 # Thank you for your attention!
+
+I warmly welcome any feedback, ideas, or critical thoughts ❤
+
+<a href="https://github.com/dertristan" target="_blank" style="text-decoration: none; margin-left: 10px;"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"> <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/> </svg> </a> <a href="mailto:tristan.muno@uni-mannheim.de" style="text-decoration: none; margin-left: 5px;"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16"> <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/> </svg> </a>
 
 ------------------------------------------------------------------------
 
