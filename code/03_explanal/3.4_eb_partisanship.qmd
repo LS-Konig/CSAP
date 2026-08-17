@@ -1,0 +1,790 @@
+---
+title: |
+  Code Notebook 3.4
+subtitle: |
+  Partisanship items and party attachment over time in the Eurobarometer
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+bibliography: ../../references.bib
+---
+
+<!--
+Scope: the Eurobarometer files in data/01_raw/external/eb/ ONLY.
+
+Notebook 3.3 also reads the Mannheim trend file, but stacks it with CSES and is
+built around the attachment x vote cross-tab. This notebook is deliberately
+self-contained and EB-only: it inventories the partisanship items across all
+four EB files and plots the attachment share. The two overlap on the Mannheim
+leg; neither depends on the other.
+-->
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "haven", # read_dta() for the Stata files
+  "ggpubr", # theme_pubr()
+  "knitr", # kable()
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+This notebook does two things:
+
+1. **Inventories** every partisanship-related survey item in the four Eurobarometer
+   files, with its verbatim question wording, so wording changes are visible rather
+   than assumed away.
+2. **Plots** the share of respondents reporting a party attachment over time, pooled
+   and by country.
+
+Both feed steps 2 and 3 of the argument chain: whether the attachment item cleanly
+identifies partisans in Europe, and how much the answer depends on where the analyst
+draws the line.
+
+## Switches
+
+```{r}
+#| label: switches
+
+# FALSE keeps every country unit the files contain. Norway is the only non-member
+# that actually answers the attachment item; Switzerland and Turkey are named in
+# the filter below so a later source that does carry them is handled too.
+eu_only <- FALSE
+
+# Country-year cells below this many respondents are dropped from the figures.
+min_n <- 100
+```
+
+## Paths
+
+```{r}
+#| label: paths
+
+dir_eb <- here("data", "01_raw", "external", "eb")
+
+path_mannheim <- file.path(
+  dir_eb, "mannheim-eurobarometer-trend-file-1970-2002", "ZA3521_v2-0-1.dta"
+)
+path_harmonised <- file.path(
+  dir_eb, "eb-2004-2011", "harmonised_EB_2004-2021_v3-0-0.dta"
+)
+path_ceeb <- file.path(dir_eb, "ceeb", "ZA3648.dta")
+
+dir_final <- here("data", "03_final")
+
+stopifnot(file.exists(path_mannheim, path_harmonised, path_ceeb))
+```
+
+# What is in the four files
+
+| file | rows x cols | attachment item | fielded |
+|---|---|---|---|
+| `ZA3521_v2-0-1.dta` (Mannheim trend file 1970-2002) | 1,134,384 x 146 | `closepty` | 1975-1994 |
+| `harmonised_EB_2004-2021_v3-0-0.dta` | 1,098,773 x 257 | `party_att_deg` | 2009 only |
+| `953_new.dta` (raw EB 95.3, 2021) | x 114 | -- | -- |
+| `ZA3648.dta` (CEEB trends 1990-1997) | 125,875 x 280 | -- | -- |
+
+Three of these facts are worth stating before any code runs, because they bound
+everything below.
+
+- **The attachment series is 1975-1994 plus a single 2009 point.** The Mannheim file
+  spans 1970-2002 but `closepty` is absent before 1975 and after 1994. The harmonised
+  file spans 2004-2021 but carries `party_att_deg` in exactly one wave, EB 71.3.
+  1995-2008 is an empirical blank, and it is left blank.
+- **`953_new.dta` is redundant.** It is the raw single wave EB 95.3 (2021), already
+  contained in the harmonised file, and it carries no partisanship item beyond
+  left-right placement. It is inventoried below and then not used.
+- **The CEEB has no attachment item at all.** It asks vote intention and past vote, but
+  never closeness or affinity. That absence is a finding about the instrument, so the
+  CEEB appears in the item table and in no figure.
+
+`Trends_EBs_1970-2021.xlsx` additionally lists the item as fielded in EB 44.2 (spring
+1996). That wave is in neither file -- the Mannheim file jumps from EB 44.1 to EB 45.1
+-- so it cannot be recovered here. This is asserted against the data below rather than
+taken on trust.
+
+# Source registry
+
+Two plain tibbles drive everything downstream. **Adding a further dataset later means
+adding one row to each** and nothing else: the reader, the recode, the aggregation and
+the figures are all written against the shared schema rather than against a particular
+file.
+
+```{r}
+#| label: registry-sources
+
+# One row per source file that actually carries an attachment item.
+eb_sources <- tribble(
+  ~source,      ~path,           ~v_wave, ~v_year, ~v_country, ~v_attach,       ~v_weight, ~n_expect,
+  "Mannheim",   path_mannheim,   "eb",    "year",  "nation1",  "closepty",      "wnation", 1134384L,
+  "Harmonised", path_harmonised, "ebid",  "year",  "country",  "party_att_deg", "wnation", 1098773L
+)
+
+eb_sources |>
+  select(source, v_attach, n_expect) |>
+  kable()
+```
+
+The CEEB and `953_new.dta` are deliberately absent from this registry: they carry no
+attachment item, so there is nothing for the reader to read. They are inventoried in
+the item table instead.
+
+```{r}
+#| label: registry-codes
+
+# One row per source x response code. This object is both the recode and the
+# published crosswalk, so the two cannot drift apart.
+eb_codes <- tribble(
+  ~source,      ~code, ~code_label,                    ~status,        ~strength,
+  "Mannheim",   1L,    "very close",                   "attached",     "very",
+  "Mannheim",   2L,    "fairly close",                 "attached",     "fairly",
+  "Mannheim",   3L,    "merely a sympathizer",         "attached",     "sympathizer",
+  "Mannheim",   4L,    "close to no particular party", "not_attached", NA,
+  "Mannheim",   8L,    "DK, NA",                       "dk_refused",   NA,
+  "Mannheim",   9L,    "inapplicable",                 "not_asked",    NA,
+  "Harmonised", 1L,    "very involved",                "attached",     "very",
+  "Harmonised", 2L,    "fairly involved",              "attached",     "fairly",
+  "Harmonised", 3L,    "merely sympathizer",           "attached",     "sympathizer",
+  "Harmonised", 4L,    "no affinities with any party", "not_attached", NA,
+  "Harmonised", 8L,    "DK",                           "dk_refused",   NA,
+  "Harmonised", 9L,    "inapplicable",                 "not_asked",    NA
+)
+
+eb_codes |> kable()
+```
+
+# Reading
+
+```{r}
+#| label: read-helpers
+
+# The two files code non-substantive answers differently. Mannheim uses plain
+# numeric 8 (DK/NA) and 9 (inapplicable); the harmonised file uses haven tagged
+# NAs, "d" for don't know and "i" for inapplicable. Map both onto 8/9 so one code
+# scheme covers both sources. An *untagged* NA means the item was not fielded in
+# that wave at all, and stays NA so it can be dropped rather than counted.
+as_code <- function(x) {
+  tag <- na_tag(x)
+  code <- as.integer(x)
+  code[!is.na(tag) & tag == "d"] <- 8L
+  code[!is.na(tag) & tag == "i"] <- 9L
+  code
+}
+
+# Codes 4 and 14 are both labelled "Germany" in both files. They are West and
+# East Germany and must not collapse into one panel. Everything else can use the
+# file's own value labels, which differ between the two sources (Mannheim code 19
+# is Switzerland, harmonised code 19 is Cyprus), so no shared country map exists.
+country_name <- function(x) {
+  code <- as.integer(x)
+  label <- str_to_title(as.character(as_factor(x)))
+  case_when(
+    code == 4L ~ "Germany (West)",
+    code == 14L ~ "Germany (East)",
+    .default = label
+  )
+}
+```
+
+```{r}
+#| label: read-sources
+
+# Reads one row of `eb_sources` into the shared schema. `col_select` is what keeps
+# this cheap: the harmonised file is 1.1 GB on disk but these five columns read in
+# a couple of seconds.
+read_eb_source <- function(s) {
+  d <- read_dta(
+    s$path,
+    col_select = all_of(c(s$v_wave, s$v_year, s$v_country, s$v_attach, s$v_weight))
+  )
+  stopifnot(nrow(d) == s$n_expect)
+
+  tibble(
+    source  = s$source,
+    wave    = as.numeric(d[[s$v_wave]]),
+    year    = as.integer(d[[s$v_year]]),
+    country = country_name(d[[s$v_country]]),
+    code    = as_code(d[[s$v_attach]]),
+    weight  = as.numeric(d[[s$v_weight]])
+  )
+}
+
+eb_raw <- eb_sources |>
+  split(~source) |>
+  map(read_eb_source) |>
+  list_rbind()
+
+dim(eb_raw)
+```
+
+```{r}
+#| label: join-codes
+
+# `code` is NA exactly where the item was not fielded; those rows leave the data.
+eb <- eb_raw |>
+  filter(!is.na(code)) |>
+  left_join(eb_codes, by = c("source", "code"))
+
+stopifnot(!any(is.na(eb$status)))
+count(eb, source, status)
+```
+
+# The partisanship items
+
+## Question wording
+
+The table below is the point of this notebook. Wording is transcribed verbatim from the
+codebooks -- `ZA3521_cod_v2-0-1.pdf` (pp. 237, 240-244, 262) for the Mannheim file,
+`Trends_EBs_1970-2021.xlsx` sheet *15 Partisanship and elections* for the harmonised
+file, `ZA3648_cod.pdf` for the CEEB -- and one row is one wording era, so a change in
+wording produces a new row rather than a footnote.
+
+```{r}
+#| label: tbl-items
+#| tbl-cap: "Partisanship-related items across the four Eurobarometer files, one row per wording era."
+
+eb_items <- tribble(
+  ~file, ~variable, ~construct, ~era, ~wording, ~categories, ~note,
+
+  "Mannheim", "closepty", "party attachment", "EB4-EB9 (1975-1978)",
+  "Do you consider yourself a supporter to any particular political party? If so, do you feel yourself to be very involved in this party, fairly involved or merely a sympathizer?",
+  "1 very involved; 2 fairly involved; 3 merely a sympathizer; 4 no affinities with any party; 8 DK/NA; 9 inap",
+  "Supporter/involvement wording. Not the same stimulus as the closeness wording that replaces it.",
+
+  "Mannheim", "closepty", "party attachment", "since EB10 (1978-1994)",
+  "Do you consider yourself to be close to any particular party? <IF YES> Do you feel yourself to be very close to this party, fairly close or merely a sympathizer?",
+  "1 very close; 2 fairly close; 3 merely a sympathizer; 4 close to no particular party; 8 DK/NA; 9 inap",
+  "English versions ask an ABSOLUTE question, French-derived versions a RELATIVE one ('closer to one party than to the others'). Codebook fn. 119.",
+
+  "Mannheim", "closepty", "party attachment", "EB16 (1981)",
+  "<Follow-up question after the respondents have been asked to choose a party to which they feel close to> Do you consider yourself to be very close to this party, fairly close or merely a sympathizer?",
+  "as since EB10",
+  "Question ORDER break, not a wording break: attachment is asked after the party has already been named.",
+
+  "Mannheim", "closepty", "party attachment", "not asked",
+  "--", "--",
+  "EB39, EB40, EB41 not asked in Finland; EB42 not asked in Finland, Sweden and Austria (codebook fn. 120).",
+
+  "Mannheim", "feelclo", "which party", "ECS73, EB16",
+  "Generally speaking, do you feel closer to one of the <national> political parties than the others? If yes, which one?",
+  "country-specific party codes",
+  "Note this is the RELATIVE form, in English. In ECS73 it was used in place of vote intention.",
+
+  "Mannheim", "feelclo", "which party", "EB23-EB29",
+  "Generally speaking, which political party do you feel closer to?",
+  "country-specific party codes",
+  "EB29 asked in Ireland and Northern Ireland only.",
+
+  "Mannheim", "feelclo", "which party", "since EB30",
+  "<To those who say code 1 (very close), 2 (fairly close) or 3 (merely a sympathiser) in CLOSEPTY> To which party do you feel close?",
+  "country-specific party codes",
+  "Filtered on closepty, so it identifies the party of attached respondents only.",
+
+  "Mannheim", "voteint", "vote intention", "main wording",
+  "If there were a 'general election' tomorrow (say if contact is under 18 years: and you had a vote), which party would you support?",
+  "country-specific party codes; 990 other; 995 blank/spoilt; 996 would not vote; 997 refused; 998 DK; 999 inap",
+  "EB41 onward say 'vote for' rather than 'support'. Many country-specific code collapses -- see codebook fn. 125.",
+
+  "Mannheim", "inclvote", "leaning vote", "since EB7",
+  "<If DK or NA in VOTEINT> Which party would you be inclined to vote for?",
+  "as voteint",
+  "A follow-up on the VOTE item, not on attachment. Asked only in GB/IRL/NIRL for several waves.",
+
+  "Mannheim", "lastvote", "past vote", "since EB30",
+  "Which party did you vote for at the last general election in (year of last general election)?",
+  "as voteint",
+  "Earlier waves are country-restricted: EB18-27 Belgium only, EB24-29 Spain and Portugal only.",
+
+  "Mannheim", "party", "party membership", "since EB32A",
+  "Are you yourself or is someone in your household a member of a political party?",
+  "0 not mentioned; 1 mentioned; 8 DK/NA",
+  "Only the respondent-is-member category is in the trend file. Substantive answers 1988-1991 only.",
+
+  "Mannheim", "lrs", "left-right", "throughout",
+  "In political matters people talk of 'the left' and 'the right'. How would you place your views on this scale?",
+  "1 left ... 10 right",
+  "Not a partisanship item; carried for context.",
+
+  "Harmonised", "party_att_deg", "party attachment", "EB71.3 (2009)",
+  "Do you consider yourself to be close to any particular party? If so, do you feel yourself to be very close to this party, fairly close, or merely a sympathizer?",
+  "1 very involved; 2 fairly involved; 3 merely sympathizer; 4 no affinities with any party",
+  "The xlsx gives the CLOSENESS wording but the delivered value labels are the INVOLVEMENT ones, i.e. the EB4-EB9 family. Treat the 2009 point as not strictly comparable to 1978-1994.",
+
+  "Harmonised", "lr", "left-right", "1970-2021",
+  "In political matters people talk of 'the left' and 'the right'. How would you place your views on this scale?",
+  "1 left ... 10 right",
+  "Not a partisanship item; carried for context.",
+
+  "Harmonised", "voteprob_nat_sc", "vote probability", "2002-2004",
+  "Supposing a (national/general election) were being held tomorrow, can you tell me on a scale of 1 to 10 how likely it is that you would vote in that election?",
+  "1 definitely not vote ... 10 definitely vote",
+  "Turnout propensity, not party choice.",
+
+  "EB 95.3 (953_new)", "(none)", "party attachment", "2021",
+  "--", "--",
+  "No partisanship item. attach_cntry / attach_eur are attachment to COUNTRY and to EUROPE, not to a party. Redundant with the harmonised file.",
+
+  "CEEB", "(none)", "party attachment", "1990-1997",
+  "--", "--",
+  "NO closeness, affinity or attachment item exists anywhere in the CEEB trend file. The construct was never fielded in Central and Eastern Europe under this instrument.",
+
+  "CEEB", "V77", "franchise", "CEEB5-8 (1994-1997)",
+  "<Ask only those of voting age> Do you have the right to vote in (our country) at General Elections?",
+  "1 have right; 2 do not have right; 8 DK; 9 NA",
+  "Filter for the vote-intention items.",
+
+  "CEEB", "V78", "turnout intention", "CEEB3-4 (1992-1993)",
+  "If there was a 'General Election' today (say if contact under voting age or not allowed to vote 'and you had a vote'), would you go and vote in the next 'General Election'?",
+  "1 yes I would vote; 2 no I would not vote; 8 DK; 9 no answer",
+  "Substantive answers in 1991-1993 only, and not for every country.",
+
+  "CEEB", "V79-V117", "vote intention", "CEEB5-7 (1994-1996)",
+  "<Ask only those who have right to vote> If there were a general election tomorrow, which party or block would you vote for, or might you be inclined to vote for?",
+  "country-specific party codes",
+  "One column PER COUNTRY (V79-V100 intention, V101-V117 inclination); they must be coalesced before use.",
+
+  "CEEB", "V118", "past vote", "CEEB1 (1990)",
+  "And which party did you vote for on <date of last election>?",
+  "country-specific party codes",
+  "GDR 1990 (Volkskammerwahl) in the documented wave.",
+
+  "CEEB", "V74-V76", "left-right", "1990-1997",
+  "In political matters, people talk of the 'left' and the 'right'. How would you place your views on this scale?",
+  "11-point, 3-point and 10-point versions in separate variables",
+  "Not a partisanship item; three incompatible scalings."
+)
+
+eb_items |> kable()
+```
+
+Three entries in that table carry most of the weight:
+
+- The item **changes stimulus** between EB 9 and EB 10, from *supporter / involved* to
+  *close*. The 1975-1978 points therefore do not measure quite the same thing as the
+  points after them.
+- **EB 16 asks the item in a different order**, after the respondent has already named a
+  party. Prior naming is exactly the kind of thing that moves a reported attachment.
+- The **absolute/relative asymmetry across language versions** means the item is not
+  even measurement-equivalent *within* a wave. English-derived questionnaires ask
+  whether the respondent is close to a party; French-derived ones ask whether they are
+  closer to one party than to the others. The second is a far lower bar, and the
+  difference is a documented property of the instrument
+  [@sinnott1995variations; @katz1985measuring; @schmitt1989onparty], not a country
+  effect.
+
+## Coverage: which waves actually fielded the item
+
+```{r}
+#| label: tbl-coverage-year
+#| tbl-cap: "Attachment item by source and year. Years with n_substantive = 0 are years the item was not fielded."
+
+coverage_year <- eb_raw |>
+  group_by(source, year) |>
+  summarise(
+    waves = n_distinct(wave),
+    n = n(),
+    n_substantive = sum(code %in% 1:4, na.rm = TRUE),
+    n_countries = n_distinct(country[code %in% 1:4]),
+    .groups = "drop"
+  )
+
+coverage_year |> kable()
+```
+
+```{r}
+#| label: tbl-coverage-country
+#| tbl-cap: "First and last year the attachment item was answered, by country unit."
+
+eb |>
+  filter(status %in% c("attached", "not_attached")) |>
+  group_by(source, country) |>
+  summarise(
+    first_year = min(year),
+    last_year = max(year),
+    years = n_distinct(year),
+    n = n(),
+    .groups = "drop"
+  ) |>
+  arrange(source, country) |>
+  kable()
+```
+
+Country entry into the Mannheim series is staggered -- Greece from 1981, Spain and
+Portugal from 1985, East Germany and Norway from 1990 -- so a pooled level is not
+comparable year to year without also reading the country count. Norway is the only
+non-member that ever answers the item, in 1990-1994; `eu_only` is `FALSE`, so it stays.
+The 2009 wave adds the 2004 and 2007 accession states, which is the only reason Central
+and Eastern Europe appears at all.
+
+```{r}
+#| label: check-eb442
+
+# The xlsx documents EB 44.2 (spring 1996) as fielding the item. Assert against
+# the data whether that wave is present at all, so the discrepancy is in the
+# output rather than in a comment.
+mannheim_waves <- eb_raw$wave[eb_raw$source == "Mannheim"]
+
+tibble(
+  claim = "EB 44.2 (wave 442) present in the Mannheim file",
+  rows_found = sum(mannheim_waves == 442),
+  waves_in_range_430_470 = paste(
+    sort(unique(mannheim_waves[mannheim_waves %in% 430:470])),
+    collapse = ", "
+  )
+) |>
+  kable()
+```
+
+# Two definitions of "attached"
+
+The Mannheim item folds status and strength into one variable, and its middle category
+-- *merely a sympathiser* -- is a genuine coding choice rather than a rounding detail.
+Both readings are carried as columns and both are plotted, so the choice is visible in
+the figures instead of being buried in a switch.
+
+```{r}
+#| label: definitions
+
+eb <- eb |>
+  mutate(
+    attached_broad = status == "attached",
+    attached_narrow = status == "attached" & strength %in% c("very", "fairly")
+  )
+
+# `dk_refused` is never folded into `not_attached`: declining to answer is not the
+# same as denying attachment. `not_asked` leaves the denominator entirely.
+eb_base <- eb |> filter(status != "not_asked")
+
+count(eb, status, strength)
+```
+
+```{r}
+#| label: write-crosswalk
+
+write_csv(eb_codes, file.path(dir_final, "eb_item_crosswalk.csv"))
+write_csv(eb_items, file.path(dir_final, "eb_item_wording.csv"))
+
+list.files(dir_final, pattern = "^eb_") |> sort()
+```
+
+# Attachment shares
+
+Shares are weighted by `wnation`, the within-country weight, which is the right one for
+a share computed inside a country. Aggregation is to the **year**, not the wave: within
+a year the waves differ in whether they fielded the item, and an annual series is what
+the figures need.
+
+```{r}
+#| label: agg-country-year
+
+by_country_year <- eb_base |>
+  group_by(source, country, year) |>
+  summarise(
+    n = n(),
+    broad = weighted.mean(attached_broad, weight),
+    narrow = weighted.mean(attached_narrow, weight),
+    dk = weighted.mean(status == "dk_refused", weight),
+    .groups = "drop"
+  ) |>
+  filter(n >= min_n)
+
+if (eu_only) {
+  by_country_year <- by_country_year |>
+    filter(!country %in% c("Norway", "Switzerland", "Turkey"))
+}
+
+head(by_country_year)
+```
+
+```{r}
+#| label: agg-pooled
+
+# Unweighted mean ACROSS country units: every country counts once, so this is not
+# an EU population quantity. The country set changes across years, so n_countries
+# is carried alongside every point.
+pooled <- by_country_year |>
+  group_by(source, year) |>
+  summarise(
+    n_countries = n(),
+    broad = mean(broad),
+    narrow = mean(narrow),
+    .groups = "drop"
+  )
+
+pooled |> kable(digits = 3)
+```
+
+```{r}
+#| label: long-for-plots
+
+# One row per source x country x year x definition, which is the shape both
+# figures want.
+to_long <- function(d) {
+  d |>
+    pivot_longer(c(broad, narrow), names_to = "definition", values_to = "share") |>
+    mutate(definition = factor(
+      definition,
+      levels = c("broad", "narrow"),
+      labels = c("incl. sympathisers", "very + fairly close only")
+    ))
+}
+
+shares_long <- to_long(by_country_year)
+pooled_long <- to_long(pooled)
+```
+
+```{r}
+#| label: plot-setup
+
+pal_definition <- c(
+  "incl. sympathisers" = "#1B4F72",
+  "very + fairly close only" = "#B7472A"
+)
+
+# Wording and question-order breaks, drawn onto the pooled figure.
+breaks <- tribble(
+  ~year, ~label,
+  1978L, "EB10: 'involved' -> 'close'",
+  1981L, "EB16: asked after party named"
+)
+```
+
+## Pooled
+
+```{r}
+#| label: fig-eb-pooled
+#| fig-cap: "Share of respondents reporting a party attachment, unweighted mean across country units. Blue counts 'merely a sympathiser' as attached; red counts only 'very' and 'fairly' close. The 1995-2008 gap is years in which no file carries the item, and is left blank. The 2009 point is a single wave (EB 71.3) and is not a trend. Dotted lines mark the wording change at EB10 and the question-order change at EB16; points left of 1978 come from a differently worded item."
+#| fig-width: 9
+#| fig-height: 5
+#| fig-dpi: 300
+
+ggplot(pooled_long, aes(x = year, y = share, colour = definition)) +
+  geom_vline(
+    data = breaks, aes(xintercept = year),
+    linetype = "dotted", colour = "grey55"
+  ) +
+  # A source contributing a single year has nothing to connect, so the line layer
+  # is drawn only from series with more than one year. The points layer still
+  # draws everything, which is how the isolated 2009 observation stays visible.
+  geom_line(
+    data = ~ filter(.x, n() > 1, .by = c(source, definition)),
+    aes(group = interaction(source, definition)), linewidth = 0.7
+  ) +
+  geom_point(size = 1.6) +
+  scale_colour_manual(values = pal_definition, name = NULL) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  scale_x_continuous(breaks = seq(1975, 2010, 5), expand = expansion(mult = 0.04)) +
+  labs(
+    x = NULL, y = "share reporting attachment",
+    title = "Reported party attachment in the Eurobarometer, 1975-2009",
+    subtitle = "Unweighted mean across country units, so not an EU population estimate",
+    caption = "Mannheim trend file 1975-1994; harmonised EB 2004-2021 for 2009 (EB 71.3)."
+  ) +
+  theme_pubr(legend = "top")
+```
+
+```{r}
+#| label: tbl-sympathiser-gap
+#| tbl-cap: "How much of the attachment share is the sympathiser category."
+
+pooled |>
+  mutate(gap = broad - narrow) |>
+  summarise(
+    mean_broad = mean(broad),
+    mean_narrow = mean(narrow),
+    mean_gap = mean(gap),
+    min_gap = min(gap),
+    max_gap = max(gap)
+  ) |>
+  kable(digits = 3)
+```
+
+## By country
+
+```{r}
+#| label: fig-eb-countries
+#| fig-cap: "Share reporting a party attachment by country unit. Same two definitions as the pooled figure. West and East Germany, and Great Britain and Northern Ireland, are kept apart -- the source separates them and pooling them is irreversible. Country-year cells below the minimum respondent count are dropped."
+#| fig-width: 12
+#| fig-height: 12
+#| fig-dpi: 300
+
+ggplot(shares_long, aes(x = year, y = share, colour = definition)) +
+  geom_line(
+    data = ~ filter(.x, n() > 1, .by = c(source, country, definition)),
+    aes(group = interaction(source, definition)), linewidth = 0.5
+  ) +
+  geom_point(size = 0.8) +
+  facet_wrap(~country, ncol = 5) +
+  scale_colour_manual(values = pal_definition, name = NULL) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  scale_x_continuous(expand = expansion(mult = 0.08)) +
+  labs(
+    x = NULL, y = "share reporting attachment",
+    title = "Reported party attachment by country, 1975-2009",
+    subtitle = paste0(
+      "Cells below n = ", min_n, " dropped. Isolated 2009 points are EB 71.3."
+    )
+  ) +
+  theme_pubr(legend = "top") +
+  theme(panel.spacing = unit(0.6, "lines"))
+```
+
+## Composition
+
+```{r}
+#| label: fig-eb-composition
+#| fig-cap: "Full composition of the attachment item: the two strong categories, the sympathiser category, outright denial, and don't know/refused. The distance between the two lines in the figures above is exactly the sympathiser band shown here. Don't know is drawn as its own band and is never folded into 'not attached'."
+#| fig-width: 12
+#| fig-height: 12
+#| fig-dpi: 300
+
+composition <- eb_base |>
+  mutate(category = case_when(
+    strength == "very" ~ "very close / involved",
+    strength == "fairly" ~ "fairly close / involved",
+    strength == "sympathizer" ~ "merely a sympathiser",
+    status == "not_attached" ~ "no party",
+    status == "dk_refused" ~ "don't know / refused"
+  )) |>
+  group_by(source, country, year, category) |>
+  summarise(w = sum(weight), .groups = "drop_last") |>
+  mutate(share = w / sum(w)) |>
+  ungroup() |>
+  semi_join(by_country_year, by = c("source", "country", "year")) |>
+  mutate(category = factor(category, levels = c(
+    "very close / involved", "fairly close / involved", "merely a sympathiser",
+    "no party", "don't know / refused"
+  )))
+
+ggplot(composition, aes(x = year, y = share, fill = category)) +
+  geom_col(width = 1) +
+  facet_wrap(~country, ncol = 5) +
+  scale_fill_manual(
+    values = c(
+      "very close / involved" = "#12324A",
+      "fairly close / involved" = "#2E7BA6",
+      "merely a sympathiser" = "#9EC9DE",
+      "no party" = "#C7CCD1",
+      "don't know / refused" = "#E39C34"
+    ),
+    name = NULL
+  ) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = NULL, y = NULL,
+    title = "Composition of the attachment item by country, 1975-2009",
+    subtitle = "The gap between the two lines above is the light blue band here"
+  ) +
+  theme_pubr(legend = "top") +
+  theme(panel.spacing = unit(0.4, "lines"))
+```
+
+# Findings and caveats
+
+```{r}
+#| label: findings-numbers
+
+list(
+  years_mannheim = range(by_country_year$year[by_country_year$source == "Mannheim"]),
+  years_harmonised = range(by_country_year$year[by_country_year$source == "Harmonised"]),
+  country_years = nrow(by_country_year),
+  countries = n_distinct(by_country_year$country),
+  cells_below_min_n = eb_base |>
+    count(source, country, year) |>
+    filter(n < min_n) |>
+    nrow()
+)
+```
+
+**The series has a hole in the middle, and it is not fixable from these files.** The
+attachment item runs 1975-1994 and then reappears once, in 2009. Nothing in the `eb`
+directory covers 1995-2008. The gap is left blank in both figures; no interpolation and
+no bridging line is drawn.
+
+**EB 44.2 is documented but absent.** The harmonised codebook lists spring 1996 as
+fielding the item. That wave is not in the Mannheim trend file, which jumps from EB 44.1
+to EB 45.1, and it falls before the harmonised file's 2004 start. The 1996 observation
+exists somewhere in the GESIS archive as a standalone study; it is simply not here.
+
+**The item is not one item.** It changes from a supporter/involvement stimulus to a
+closeness stimulus at EB 10, is asked in a different position in EB 16, and reverts to
+the involvement value labels in 2009. On top of that, English- and French-derived
+questionnaires ask absolute and relative versions of the question respectively, so the
+instrument is not measurement-equivalent across countries within a single wave
+[@sinnott1995variations; @katz1985measuring; @schmitt1989onparty]. Any cross-country
+comparison of attachment *levels* from this source inherits that asymmetry.
+
+**The sympathiser category is a coding decision worth a large share of the answer.**
+The table above quantifies it: moving "merely a sympathiser" from attached to not
+attached changes the measured European partisan share substantially, from one instrument
+fielded unchanged. That is step 3 of the argument chain visible inside a single item,
+and it is the reason both definitions are plotted rather than one being chosen.
+
+**Don't know is kept separate.** A respondent who declines the attachment item is not a
+respondent who denies attachment. `dk_refused` is reported in the composition figure and
+never merged into `not_attached`.
+
+**The CEEB cannot contribute.** It carries vote intention and past vote but no
+attachment item of any kind, so the whole of Central and Eastern Europe is missing from
+the attachment series until the 2009 wave brings the 2004 and 2007 accession states in
+for one observation.
+
+**What this notebook does not do.** It does not build the attachment x vote cross-tab
+(that is notebook 3.3), does not resolve party codes to party names, and estimates
+nothing causal. The country-specific CEEB vote-intention columns (`V79`-`V117`) are
+inventoried but not coalesced. Adding a further source means adding one row to
+`eb_sources` and its codes to `eb_codes`.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

@@ -173,7 +173,7 @@ Four ingroup codings are compared in section 8: identity only; recall-maximizing
 `data/01_raw/external/` holds supporting sources, separate from the primary analysis file `data/01_raw/eu25games2019.rds`:
 
 - `cses/imd/` — CSES Integrated Module Dataset. The only source carrying the branching closeness probe, so the sole basis for the leaner-overlap estimate in section 4 and for splitting "no attachment" into leaners vs. true non-partisans.
-- `cses/mod5/` — CSES Module 5 (2016–2021). Closest module in time to the 2019 Hahm et al. fieldwork; use for period-matched attachment shares.
+- `cses/mod5/` — CSES Module 5 (2016–2021). **Fully contained in the IMD** — all 56 election studies, 114,714 rows matching `IMD1008_MOD_5 == 1` exactly — so default to IMD + Module 6 and never stack Module 5 on the IMD. Reach for it only for Module-5-specific variables the IMD does not harmonise. Matching study IDs across releases needs care: the IMD splits two-elections-in-one-year (`DEU12002`/`DEU22002`, `GRC12015`/`GRC22015`) and regional samples (`BELF`/`BELW` 1999 and 2019), so Module 5's `GRC_2015` is the IMD's `GRC22015`, not a missing study.
 - `cses/mod6/` — CSES Module 6 (2021–2026). **Advance release only** — coverage will change on full release, so any Module 6 result is provisional.
 - `mannheim-eurobarometer-trend-file-1970-2002/` — long-run attachment decline; carries both attachment and party preference, so the split is constructible back to the early 1970s. Item coverage varies by wave — verify wave by wave.
 - `carlin-love-2018/`, `westwood-et-al-2015/` — partisan trust-game and partisan-IAT reference studies; out-of-sample benchmarks for the behavioral result.

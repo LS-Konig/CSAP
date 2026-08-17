@@ -85,10 +85,23 @@ section needs.
 Source: <https://cses.org/data-download/download-data-documentation/>
 
 **The IMD already contains Module 5 in full** — 114,714 of its 395,797 rows carry
-`IMD1008_MOD_5 == 1`, exactly the row count of `cses5.rdata`, and 55 of Module 5's 56
-election-study IDs appear in the IMD. Stacking IMD and Module 5 double-counts every Module 5
+`IMD1008_MOD_5 == 1`, exactly the row count of `cses5.rdata`, and **all 56** of Module 5's
+election studies are present. Stacking IMD and Module 5 double-counts every Module 5
 election. Module 6 shares no study IDs with either. Default to **IMD + Module 6**; reach for
 `cses5.rdata` only when you need Module-5-specific variables the IMD does not harmonise.
+
+An earlier version of this note said 55 of 56 IDs matched, implying Greece 2015 was unique
+to Module 5. That was a **naming artefact**, corrected in
+`code/03_explanal/3.5_cses_partisanship.qmd`, which prints the evidence. Greece held two
+elections in 2015 and the IMD splits them (`GRC12015` January, 1,008 rows; `GRC22015`
+September, 1,078 rows) while Module 5 carries one `GRC_2015` — of exactly 1,078 rows, i.e.
+the IMD's September study. **The IMD departs from `POL_YEAR` IDs in two ways**, and both
+bite when matching study IDs across releases:
+
+- *two elections in one year* — `DEU12002`/`DEU22002`, `GRC12015`/`GRC22015`
+- *regional samples* — `BELF1999`/`BELW1999` and `BELF2019`/`BELW2019` (Flanders/Wallonia).
+  Wallonia 1999 never fielded the attachment item, so a Belgium-1999 cell is Flanders only,
+  at a `close` share of 0.95 — an outlier to treat as an administration artefact.
 
 Practical notes, verified against the files:
 

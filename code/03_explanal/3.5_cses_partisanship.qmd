@@ -1,0 +1,988 @@
+---
+title: |
+  Code Notebook 3.5
+subtitle: |
+  Partisanship items and party attachment over time in the CSES
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+bibliography: ../../references.bib
+---
+
+<!--
+Scope: the CSES files in data/01_raw/external/cses/ ONLY.
+
+Companion to 3.4_eb_partisanship.qmd, which does the same for the Eurobarometer.
+Notebook 3.3 also reads the IMD and Module 6, but stacks them with the Mannheim
+Eurobarometer and is built around the attachment x vote cross-tab. This notebook
+is deliberately self-contained and CSES-only.
+-->
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "ggpubr", # theme_pubr()
+  "knitr", # kable()
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+This notebook does two things, in the same order as notebook 3.4 does them for the
+Eurobarometer:
+
+1. **Inventories** the partisanship battery in the CSES releases, with verbatim question
+   wording, so wording changes and skip patterns are visible rather than assumed away.
+2. **Plots** the share of respondents reporting a party attachment over time, pooled and
+   by polity.
+
+The CSES matters more than the Eurobarometer for this project's argument, because it is
+the only source carrying the **branching probe**: *close to any party?* → *a little
+closer to one party than the others?* → *which party?* → *how close?* That branch is
+what section 4 needs to estimate the overlap between leaners and the paper's
+vote-anchored group.
+
+One cross-notebook observation is worth stating up front, because it is an argument
+rather than a detail. The CSES leaner probe is *"Do you feel yourself a little closer to
+one of the political parties than the others?"* — the **relative** form. Notebook 3.4
+established, from Mannheim codebook footnote 119, that English-derived Eurobarometer
+questionnaires asked the absolute question while French-derived ones asked exactly this
+relative one [@sinnott1995variations; @katz1985measuring; @schmitt1989onparty]. So the
+Eurobarometer pooled, inside a single variable and inconsistently across countries,
+respondents that the CSES deliberately keeps in separate branches.
+
+## Switches
+
+```{r}
+#| label: switches
+
+# TRUE keeps polities the CSES flags as being in continental Europe. Note this is
+# a CONTINENT flag, not an EU-membership flag: Norway, Switzerland, Iceland,
+# Russia, Belarus, Ukraine and Turkiye are all retained. Set FALSE for all 62.
+europe_only <- TRUE
+
+# Polity-year cells below this many respondents are dropped from the figures.
+min_n <- 100
+
+# A study must have fielded an item for at least this share of the respondents it
+# applies to before that item's definition is plotted for that study.
+min_item_share <- 0.9
+```
+
+## Paths
+
+```{r}
+#| label: paths
+
+dir_cses <- here("data", "01_raw", "external", "cses")
+
+path_imd <- file.path(dir_cses, "imd", "cses_imd.rdata")
+path_mod5 <- file.path(dir_cses, "mod5", "cses5.rdata")
+path_mod6 <- file.path(dir_cses, "mod6", "cses6.rdata")
+
+dir_final <- here("data", "03_final")
+
+stopifnot(file.exists(path_imd, path_mod5, path_mod6))
+```
+
+# What is in the three files
+
+| file | rows x cols | battery | coverage |
+|---|---|---|---|
+| `imd/cses_imd.rdata` | 395,797 x 406 | `IMD3005_1..4` | 59 polities, 230 studies, elections 1996-2021 (modules 1-5) |
+| `mod6/cses6.rdata` | 33,871 x 676 | `f3023_1..4` | 17 polities, 18 studies, elections 2022-2024 |
+| `mod5/cses5.rdata` | 114,714 x 605 | `E3024_1..4` | fully contained in the IMD; read below only to prove that |
+
+Releases used: IMD Phase 4 [@cses2024imd], Module 5 Full Release [@cses2023module5],
+Module 6 Second Advance Release [@cses2025module6].
+
+**Both the IMD and Module 6 are preliminary releases.** Module 6 is labelled an advance
+release, which the project inventory already records. Less obviously, the IMD Phase 4
+codebook says the same of itself: the IMD "is being released in a phased way. Thus, this
+release is an advance version of the dataset, and thus lacks some of the checking,
+documentation, and inclusion of certain variables that are expected with the Full
+Release." Every number below should be re-run against the eventual full releases.
+
+Unlike the Eurobarometer, the CSES battery is **stable**: the four items carry identical
+codes and identical question wording across all three releases. What varies is not the
+instrument but *which studies fielded which item*, and that turns out to be the binding
+constraint.
+
+# Source registry
+
+Two plain tibbles drive everything downstream. **Adding a further release means adding
+one row to `cses_sources`** and nothing else — the codes are shared, so `cses_codes` only
+grows if a release ever renumbers a category.
+
+```{r}
+#| label: registry-sources
+
+cses_sources <- tribble(
+  ~source, ~path,     ~object,    ~v_study,  ~v_iso3,            ~v_name,       ~v_eu,        ~v_year,        ~v_weight,   ~v_close,    ~v_leaner,   ~v_strength, ~n_expect,
+  "IMD",   path_imd,  "cses_imd", "IMD1004", "IMD1006_UNALPHA3", "IMD1006_NAM", "IMD1006_EU", "IMD1008_YEAR", "IMD1010_1", "IMD3005_1", "IMD3005_2", "IMD3005_4", 395797L,
+  "MOD6",  path_mod6, "cses6",    "f1004",   "f1006_unalpha3",   "f1006_nam",   "f1007_eu",   "f1009",        "f1101_1",   "f3023_1",   "f3023_2",   "f3023_4",   33871L
+)
+
+cses_sources |>
+  select(source, v_close, v_leaner, v_strength, n_expect) |>
+  kable()
+```
+
+Module 5 is deliberately **absent** from the registry: it is a strict subset of the IMD,
+which the next section demonstrates rather than assumes.
+
+```{r}
+#| label: registry-codes
+
+# The four battery items share two code schemes, identical in every release, so the
+# map is over the item rather than over the source.
+cses_codes <- tribble(
+  ~item,      ~code, ~code_label,                ~meaning,
+  "close",    0L,    "no",                       "no",
+  "close",    1L,    "yes",                      "yes",
+  "close",    7L,    "volunteered: refused",     "refused",
+  "close",    8L,    "volunteered: don't know",  "dont_know",
+  "close",    9L,    "missing / not asked",      "missing",
+  "leaner",   0L,    "no",                       "no",
+  "leaner",   1L,    "yes",                      "yes",
+  "leaner",   7L,    "volunteered: refused",     "refused",
+  "leaner",   8L,    "volunteered: don't know",  "dont_know",
+  "leaner",   9L,    "missing / not asked",      "missing",
+  "strength", 1L,    "very close",               "very",
+  "strength", 2L,    "somewhat close",           "somewhat",
+  "strength", 3L,    "not very close",           "not_very",
+  "strength", 7L,    "volunteered: refused",     "refused",
+  "strength", 8L,    "volunteered: don't know",  "dont_know",
+  "strength", 9L,    "missing / not asked",      "missing"
+)
+
+cses_codes |> kable()
+```
+
+Note that code `9` conflates **"missing"** with **"not applicable: item not asked"** —
+the IMD codebook maps CSES Module 1's codes `9` and `0` onto a single IMD `9`. A `9` is
+therefore not evidence that a respondent skipped the item; it may mean the study never
+fielded it. That is why the availability flags below are computed at the study level
+rather than inferred from respondent-level missingness.
+
+# Reading
+
+```{r}
+#| label: read-helpers
+
+# `load()` drops named objects into an environment. Module 6's file also contains a
+# stray `.Traceback`, so select the object by name rather than taking whatever is
+# there. (CSES stores its metadata Stata-style at the DATA FRAME level:
+# attr(d, "var.labels") runs parallel to names(d) and attr(d, "label.table") holds
+# the value labels. The per-column attribute haven would set is NULL, so a naive
+# column-label search finds nothing.)
+load_cses <- function(path, object) {
+  env <- new.env()
+  load(path, envir = env)
+  env[[object]]
+}
+
+# Columns carry vestigial attributes that differ between releases and would upset
+# the row bind, so reduce each to a plain vector.
+plain <- function(x) {
+  out <- as.vector(x)
+  attributes(out) <- NULL
+  out
+}
+```
+
+```{r}
+#| label: read-sources
+
+# Reads one row of `cses_sources` into the shared schema, one row per respondent.
+read_cses_source <- function(s) {
+  d <- load_cses(s$path, s$object)
+  stopifnot(nrow(d) == s$n_expect)
+
+  tibble(
+    source   = s$source,
+    study    = plain(d[[s$v_study]]),
+    iso3     = plain(d[[s$v_iso3]]),
+    name_raw = plain(d[[s$v_name]]),
+    eu       = as.integer(plain(d[[s$v_eu]])),
+    year     = as.integer(plain(d[[s$v_year]])),
+    weight   = as.numeric(plain(d[[s$v_weight]])),
+    close    = as.integer(plain(d[[s$v_close]])),
+    leaner   = as.integer(plain(d[[s$v_leaner]])),
+    strength = as.integer(plain(d[[s$v_strength]]))
+  )
+}
+
+cses_raw <- cses_sources |>
+  split(~source) |>
+  map(read_cses_source) |>
+  list_rbind()
+
+dim(cses_raw)
+```
+
+Polity **names are not stable across releases**, so every panel and every grouping keys
+on ISO3. The IMD calls Turkiye "Turkey" and Module 6 calls it "Turkiye"; the IMD's Czech
+label carries a slash. Keying on the name would split one country into two panels.
+
+```{r}
+#| label: polity-labels
+
+# One label per ISO3. The default is the name the source supplies; these two are
+# written out because the releases disagree or the supplied name is awkward.
+polity_overrides <- tribble(
+  ~iso3, ~polity,
+  "TUR", "Türkiye",
+  "CZE", "Czechia"
+)
+
+polity_labels <- cses_raw |>
+  distinct(iso3, name_raw) |>
+  slice_head(n = 1, by = iso3) |>
+  left_join(polity_overrides, by = "iso3") |>
+  mutate(polity = coalesce(polity, name_raw)) |>
+  select(iso3, polity)
+
+cses_raw <- cses_raw |>
+  left_join(polity_labels, by = "iso3") |>
+  select(-name_raw)
+
+# assert the keying worked: one label per ISO3 and one ISO3 per label
+stopifnot(
+  n_distinct(polity_labels$iso3) == nrow(polity_labels),
+  n_distinct(polity_labels$polity) == nrow(polity_labels)
+)
+
+nrow(polity_labels)
+```
+
+# Module 5 is contained in the IMD
+
+The project inventory (`data/01_raw/external-data.md`) and notebook 3.3 both record that
+55 of Module 5's 56 election-study IDs appear in the IMD, implying one study is unique to
+Module 5. **That is a naming artefact, not a coverage gap**, and the table below is the
+evidence.
+
+Greece held two parliamentary elections in 2015. The IMD splits them into `GRC12015`
+(January) and `GRC22015` (September); Module 5 carries a single `GRC_2015`. Comparing row
+counts identifies which one it is. The IMD applies the same convention to Germany 2002.
+
+```{r}
+#| label: mod5-containment
+#| tbl-cap: "Evidence that Module 5 adds nothing to the IMD."
+
+mod5 <- load_cses(path_mod5, "cses5")
+stopifnot(nrow(mod5) == 114714L)
+
+imd_studies <- cses_raw$study[cses_raw$source == "IMD"]
+mod5_studies <- plain(mod5$E1004)
+
+imd_mod5_flag <- plain(load_cses(path_imd, "cses_imd")$IMD1008_MOD_5)
+
+tribble(
+  ~check, ~value,
+  "rows in cses5.rdata", as.character(nrow(mod5)),
+  "IMD rows flagged IMD1008_MOD_5 == 1", as.character(sum(imd_mod5_flag == 1)),
+  "Module 5 study IDs", as.character(n_distinct(mod5_studies)),
+  "Module 5 IDs matching an IMD ID literally",
+  as.character(sum(unique(mod5_studies) %in% unique(imd_studies))),
+  "Module 5 IDs with no literal IMD match",
+  paste(setdiff(unique(mod5_studies), unique(imd_studies)), collapse = ", "),
+  "IMD IDs using the split-election convention",
+  paste(sort(unique(imd_studies[grepl("^[A-Z]{3}[0-9]", imd_studies)])), collapse = ", "),
+  "rows: Module 5 GRC_2015", as.character(sum(mod5_studies == "GRC_2015")),
+  "rows: IMD GRC12015 (January)", as.character(sum(imd_studies == "GRC12015")),
+  "rows: IMD GRC22015 (September)", as.character(sum(imd_studies == "GRC22015")),
+  "Module 6 IDs also present in the IMD",
+  as.character(sum(unique(cses_raw$study[cses_raw$source == "MOD6"]) %in% unique(imd_studies)))
+) |>
+  kable()
+
+rm(mod5, imd_mod5_flag)
+```
+
+Module 5's `GRC_2015` has exactly the row count of the IMD's `GRC22015`, the total row
+counts agree exactly, and Module 6 shares no study with the IMD. Module 5 is therefore
+read no further: stacking it on the IMD would double-count 56 election studies. The
+correct default is **IMD + Module 6**, which is what the registry does.
+
+# The partisanship battery
+
+## Question wording
+
+Wording is transcribed verbatim from the IMD codebook `imd/ZA7481_cdb_2_variables.pdf`
+(the `IMD3005_*` entries) and cross-checked against the standalone module
+questionnaires — `mod5/ZA7557_q_micro.pdf` Q22a-d and `mod6/ZA7748_q_micro.pdf` Q23a-d.
+The four question texts are **identical across all three releases**.
+
+```{r}
+#| label: tbl-items
+#| tbl-cap: "The CSES party-identification battery: wording, codes, skip pattern and known deviations."
+
+cses_items <- tribble(
+  ~variable, ~construct, ~wording, ~categories, ~asked_of, ~note,
+
+  "IMD3005_1 / E3024_1 / f3023_1", "attachment status",
+  "Do you usually think of yourself as close to any particular party?",
+  "0 no; 1 yes; 7 volunteered refused; 8 volunteered DK; 9 missing / not asked",
+  "everyone",
+  "MODULES 1 and 2 asked whether the respondent was close to 'any particular POLITICAL party' -- a documented wording deviation inside the IMD. Standalone names: A3004, B3028, C3020_1, D3018_1, E3024_1. Not fielded in BELW1999, LVA_2018, TUN_2019.",
+
+  "IMD3005_2 / E3024_2 / f3023_2", "leaner probe",
+  "Do you feel yourself a little closer to one of the political parties than the others?",
+  "0 no; 1 yes; 7 volunteered refused; 8 volunteered DK; 9 missing / not asked",
+  "respondents who did NOT say yes at _1",
+  "The RELATIVE form of the question, and a far lower bar than _1. This is the item the Eurobarometer's French-derived questionnaires used as their MAIN attachment item (see notebook 3.4). Standalone names: A3010, B3034.",
+
+  "IMD3005_3 / E3024_3 / f3023_3", "which party",
+  "Which party do you feel closest to?",
+  "party codes (IMD codebook part 3); 9999988 none; 9999990-92 other; 9999997 refused; 9999998 DK; 9999999 missing",
+  "respondents who said yes at _1 OR at _2",
+  "MODULES 1 and 2 asked 'Which party is that?', with a follow-up for respondents naming more than one party, and a further follow-up for respondents naming a party bloc. Party codes are carried as codes here and never resolved to names.",
+
+  "IMD3005_4 / E3024_4 / f3023_4", "attachment strength",
+  "Do you feel very close to this party, somewhat close, or not very close?",
+  "1 very close; 2 somewhat close; 3 not very close; 7 volunteered refused; 8 volunteered DK; 9 missing / not asked",
+  "respondents who named a party at _3",
+  "Standalone names: A3012, B3036.",
+
+  "(all four)", "long vs. short version",
+  "--", "--", "MODULES 1 and 2 only",
+  "Modules 1 and 2 fielded a LONG and a SHORT version of the battery depending on whether party blocs or electoral alliances formed for that election. The long version additionally asked bloc identifiers which affiliated party they identify with most.",
+
+  "(all four)", "inconsistent responses",
+  "--", "--", "MODULE 1 in particular",
+  "CSES folds inconsistent answers into the binary rather than dropping them: 'Yes, no party identified' is coded 1, 'No, party identified' is coded 0. Respondents who named a party at _3 without feeling close at _1 or closer at _2, and respondents who gave a strength at _4 without naming a party at _3, are documented and 'remain unchanged'.",
+
+  "(all four)", "code 9 is ambiguous",
+  "--", "--", "all releases",
+  "Code 9 conflates 'missing' with 'not applicable: item not asked'. Study-level availability must therefore be established from the data, which the coverage section does."
+)
+
+cses_items |> kable()
+```
+
+Two of those rows carry most of the weight.
+
+- **The leaner probe is a different question, not a weaker version of the same one.** `_1`
+  asks whether the respondent *usually thinks of themselves* as close to a party — a
+  self-concept. `_2` asks whether they feel *a little closer to one party than the
+  others* — a comparative judgement anyone with mild preferences can answer yes to. That
+  the CSES needs two items to do what the Eurobarometer did with one graded item is the
+  measurement point of both notebooks.
+- **The branch is documented as leaky, and CSES leaves it that way.** The codebook states
+  the intended skip pattern and then records that respondents violate it in both
+  directions. That is quantified below.
+
+```{r}
+#| label: tbl-branch-leak
+#| tbl-cap: "Observed cross-tabulation of the first item against the leaner probe. The intended pattern puts everyone answering yes at _1 into the 9 column."
+
+cses_raw |>
+  mutate(
+    close = factor(close, levels = c(0, 1, 7, 8, 9)),
+    leaner = factor(leaner, levels = c(0, 1, 7, 8, 9))
+  ) |>
+  count(close, leaner) |>
+  pivot_wider(names_from = leaner, values_from = n, values_fill = 0, names_prefix = "leaner_") |>
+  kable()
+```
+
+Respondents in the `close = 1` row with a substantive leaner code (`0` or `1`) were asked
+a question they should have skipped; respondents in the `close = 0` row coded `9` were
+*not* asked a question they should have received. The second group is the larger problem,
+and it is a property of whole election studies rather than of individuals.
+
+## Coverage
+
+```{r}
+#| label: tbl-coverage-year
+#| tbl-cap: "Battery coverage by source and election year."
+
+cses_raw |>
+  summarise(
+    studies = n_distinct(study),
+    polities = n_distinct(iso3),
+    n = n(),
+    n_substantive = sum(close %in% 0:1),
+    .by = c(source, year)
+  ) |>
+  arrange(source, year) |>
+  kable()
+```
+
+```{r}
+#| label: tbl-coverage-polity
+#| tbl-cap: "Election studies per polity, with the European flag the switch uses."
+
+cses_raw |>
+  summarise(
+    studies = n_distinct(study),
+    first_year = min(year),
+    last_year = max(year),
+    n = n(),
+    europe = any(eu %in% 0:1),
+    ever_eu_member = any(eu == 1),
+    .by = c(iso3, polity)
+  ) |>
+  arrange(desc(europe), polity) |>
+  kable()
+```
+
+## Studies that are not one polity-year
+
+The IMD uses two conventions that put more than one election study under a single
+polity-year. Both are visible in the study IDs, and both matter for how a panel should be
+read.
+
+```{r}
+#| label: tbl-split-studies
+#| tbl-cap: "Election studies whose IDs depart from the POL_YEAR convention: regional samples and two elections in one year."
+
+cses_raw |>
+  filter(substr(study, 4, 4) != "_") |>
+  summarise(
+    n = n(),
+    n_substantive = sum(close %in% 0:1),
+    .by = c(study, polity, year)
+  ) |>
+  mutate(
+    convention = if_else(
+      grepl("^[A-Z]{3}[A-Z]", study),
+      "regional sample",
+      "two elections in one year"
+    )
+  ) |>
+  arrange(study) |>
+  kable()
+```
+
+**Belgium is sampled by region**, `BELF` (Flanders) and `BELW` (Wallonia), in both 1999
+and 2019. Because Wallonia 1999 never fielded the item, the Belgian 1999 cell below rests
+on Flanders alone — and at a `close` share far above anything else in the data. It should
+be read as a Flemish study with an apparent administration problem, not as a Belgian
+attachment level. Belgium 2019 pools both regions and is unremarkable.
+
+Germany 2002 and Greece 2015 are the other convention: two genuine election studies
+indexed to one year, pooled here into a single cell rather than tie-broken arbitrarily.
+
+## Item availability, per election study
+
+This is the consequential table. Because code `9` cannot distinguish an unasked item from
+a skipped one, availability is established per study from the share of the relevant base
+that produced a substantive answer.
+
+```{r}
+#| label: availability
+
+availability <- cses_raw |>
+  summarise(
+    n_base_close = sum(close %in% 0:1),
+    # the probe applies to respondents who said no at _1
+    n_base_probe = sum(close == 0),
+    n_probed = sum(close == 0 & leaner %in% 0:1),
+    # the strength item applies to respondents who said yes at _1
+    n_base_strength = sum(close == 1),
+    n_strength = sum(close == 1 & strength %in% 1:3),
+    .by = c(source, study)
+  ) |>
+  mutate(
+    probe_share = if_else(n_base_probe > 0, n_probed / n_base_probe, NA),
+    strength_share = if_else(n_base_strength > 0, n_strength / n_base_strength, NA),
+    item_fielded = n_base_close > 0,
+    probe_available = !is.na(probe_share) & probe_share >= min_item_share,
+    strength_available = !is.na(strength_share) & strength_share >= min_item_share
+  )
+
+availability |>
+  summarise(
+    studies = n(),
+    item_fielded = sum(item_fielded),
+    probe_available = sum(probe_available),
+    strength_available = sum(strength_available),
+    .by = source
+  ) |>
+  kable()
+```
+
+```{r}
+#| label: tbl-no-item
+#| tbl-cap: "Election studies that never fielded the first item at all."
+
+availability |>
+  filter(!item_fielded) |>
+  select(source, study, n_base_close) |>
+  kable()
+```
+
+Those three are exactly the studies the IMD codebook names — "Data are unavailable for
+BELGIUM-WALLONIA (1999), LATVIA (2018) and TUNISIA (2019)" — so the codebook claim
+verifies against the data.
+
+```{r}
+#| label: tbl-no-probe
+#| tbl-cap: "Election studies where the leaner probe is unusable. The close and strength lines are still drawn for these; only the leaner line is suppressed."
+
+availability |>
+  filter(item_fielded, !probe_available) |>
+  left_join(distinct(cses_raw, study, polity, year), by = "study") |>
+  select(source, study, polity, year, n_base_probe, n_probed, probe_share) |>
+  arrange(probe_share, study) |>
+  kable(digits = 3)
+```
+
+```{r}
+#| label: tbl-no-strength
+#| tbl-cap: "Election studies where the strength item is unusable among respondents who said yes at the first item."
+
+availability |>
+  filter(item_fielded, !strength_available) |>
+  left_join(distinct(cses_raw, study, polity, year), by = "study") |>
+  select(source, study, polity, year, n_base_strength, n_strength, strength_share) |>
+  arrange(strength_share, study) |>
+  kable(digits = 3)
+```
+
+Norway is the clearest case: the probe is absent from **all** of its election studies, so
+Norway has no leaner estimate at any point in the CSES. Slovenia and Latvia lose most of
+theirs. Finland and Ireland lose the strength item instead. Treating an unasked probe as
+"not a leaner" would push these countries' leaner shares to their close-only shares and
+manufacture cross-national variation out of questionnaire administration, which is why
+each definition is suppressed independently.
+
+# Three definitions of "attached"
+
+```{r}
+#| label: definitions
+
+cses <- cses_raw |>
+  left_join(
+    availability |> select(source, study, item_fielded, probe_available, strength_available),
+    by = c("source", "study")
+  ) |>
+  filter(item_fielded) |>
+  mutate(
+    # `strong` is conditioned on the FIRST item only, never on the branch, so it
+    # does not inherit the probe's availability problem.
+    def_close = close == 1,
+    def_leaner = close == 1 | leaner == 1,
+    def_strong = close == 1 & strength %in% 1:2
+  )
+
+if (europe_only) {
+  cses <- cses |> filter(eu %in% 0:1)
+}
+
+# The denominator is respondents who answered the first item substantively. A
+# refusal or a don't-know is reported as its own category and never folded into
+# "not attached".
+cses_base <- cses |> filter(close %in% c(0, 1, 7, 8))
+
+tibble(
+  rows = nrow(cses),
+  rows_in_denominator = nrow(cses_base),
+  polities = n_distinct(cses$iso3),
+  studies = n_distinct(cses$study),
+  scope = if (europe_only) "continental Europe" else "all polities"
+) |>
+  kable()
+```
+
+```{r}
+#| label: write-exports
+
+write_csv(cses_codes, file.path(dir_final, "cses_item_crosswalk.csv"))
+write_csv(cses_items, file.path(dir_final, "cses_item_wording.csv"))
+write_csv(availability, file.path(dir_final, "cses_item_availability.csv"))
+
+list.files(dir_final, pattern = "^cses_") |> sort()
+```
+
+# Attachment shares
+
+Shares are weighted by the **within-sample** weight (`IMD1010_1` / `f1101_1`), which is
+the right one for a share computed inside a polity. Module 6's `f1103_1` is a polity
+weight, identically 1 within a polity, and would be equivalent to running unweighted.
+
+The CSES time index is the **election year**, not a calendar series: a polity contributes
+only when it holds an election, typically three to five years apart. Two polity-years rest
+on two elections each — Germany 2002 and Greece 2015 — and are pooled into one cell.
+
+```{r}
+#| label: agg-polity-year
+
+# A definition's share is NA where its availability flag is FALSE, so the line
+# breaks rather than dipping toward a value the study cannot support.
+by_polity_year <- cses_base |>
+  summarise(
+    n = n(),
+    close_only = weighted.mean(def_close, weight),
+    with_leaners = if (all(probe_available)) weighted.mean(def_leaner, weight) else NA,
+    strong = if (all(strength_available)) weighted.mean(def_strong, weight) else NA,
+    dk = weighted.mean(close %in% c(7, 8), weight),
+    .by = c(source, iso3, polity, year)
+  ) |>
+  filter(n >= min_n)
+
+# Within a polity-year the three definitions are nested by construction: being
+# very/somewhat close implies saying yes at the first item, which implies saying
+# yes at the first item or the probe. Assert it, so a recode that broke the
+# nesting could not pass silently.
+stopifnot(
+  with(by_polity_year, all(strong <= close_only, na.rm = TRUE)),
+  with(by_polity_year, all(close_only <= with_leaners, na.rm = TRUE))
+)
+
+head(by_polity_year)
+```
+
+```{r}
+#| label: agg-pooled
+
+# The pooled series is computed on polity-years where ALL THREE definitions are
+# available, not on each definition's own subset. Averaging each line over
+# whichever studies happen to carry its item makes the three lines means of
+# different populations, and they then cross: in 2008 the polities missing the
+# strength item are low-attachment ones, so dropping them lifted the `strong`
+# mean above the `close only` mean -- an ordering that is impossible within any
+# single cell. A common base keeps the three lines comparable.
+pooled_base <- by_polity_year |>
+  filter(!is.na(with_leaners), !is.na(strong))
+
+pooled <- pooled_base |>
+  summarise(
+    n_polities = n(),
+    close_only = mean(close_only),
+    with_leaners = mean(with_leaners),
+    strong = mean(strong),
+    .by = year
+  ) |>
+  arrange(year)
+
+# the common base must restore the nesting at the pooled level too
+stopifnot(with(pooled, all(strong <= close_only & close_only <= with_leaners)))
+
+pooled |> kable(digits = 3)
+```
+
+```{r}
+#| label: tbl-pooled-base
+#| tbl-cap: "Polity-years excluded from the pooled figure because one of the three items was not fielded. They remain in the by-polity figure, where the affected line is simply absent."
+
+by_polity_year |>
+  filter(is.na(with_leaners) | is.na(strong)) |>
+  mutate(
+    missing = case_when(
+      is.na(with_leaners) & is.na(strong) ~ "probe and strength",
+      is.na(with_leaners) ~ "leaner probe",
+      .default = "strength"
+    )
+  ) |>
+  select(polity, year, n, missing) |>
+  arrange(polity, year) |>
+  kable()
+```
+
+The pooled series is a much weaker object than the Eurobarometer's. Every point rests on
+whichever handful of polities happened to hold an election that year, and the set turns
+over almost completely between adjacent years, so year-to-year movement mixes real change
+with composition. `n_polities` is reported alongside every point for that reason, and the
+common base above means it is the same count for all three lines.
+
+```{r}
+#| label: long-for-plots
+
+to_long <- function(d) {
+  d |>
+    pivot_longer(
+      c(close_only, with_leaners, strong),
+      names_to = "definition", values_to = "share"
+    ) |>
+    mutate(definition = factor(
+      definition,
+      levels = c("with_leaners", "close_only", "strong"),
+      labels = c("close or leaner", "close only", "close and very/somewhat")
+    ))
+}
+
+shares_long <- to_long(by_polity_year) |> filter(!is.na(share))
+pooled_long <- to_long(pooled) |> filter(!is.na(share))
+```
+
+```{r}
+#| label: plot-setup
+
+pal_definition <- c(
+  "close or leaner" = "#E39C34",
+  "close only" = "#1B4F72",
+  "close and very/somewhat" = "#B7472A"
+)
+```
+
+## Pooled
+
+```{r}
+#| label: fig-cses-pooled
+#| fig-cap: "Share of respondents reporting a party attachment under three readings of the branching battery, unweighted mean across polities. Orange counts anyone who says they are close OR a little closer to one party than the others; blue counts only those who say they are close; red counts those who say they are close and describe it as very or somewhat close. All three lines are computed on the same polity-years -- those that fielded every item -- so they are directly comparable and remain properly nested. Points are election years, not calendar observations, and the set of polities behind each point changes from year to year."
+#| fig-width: 9
+#| fig-height: 5
+#| fig-dpi: 300
+
+ggplot(pooled_long, aes(x = year, y = share, colour = definition)) +
+  geom_line(linewidth = 0.7) +
+  geom_point(size = 1.6) +
+  scale_colour_manual(values = pal_definition, name = NULL) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  labs(
+    x = NULL, y = "share reporting attachment",
+    title = "Reported party attachment in the CSES, elections 1996-2024",
+    subtitle = paste0(
+      "Unweighted mean across polities -- ",
+      if (europe_only) "continental Europe" else "all polities",
+      ". Not an EU or a world population estimate."
+    ),
+    caption = "CSES IMD Phase 4 (elections 1996-2021) and Module 6 second advance release (2022-2024)."
+  ) +
+  theme_pubr(legend = "top")
+```
+
+```{r}
+#| label: tbl-definition-gaps
+#| tbl-cap: "How much the reading of the battery moves the measured partisan share. Computed on the common base, so the three columns describe the same polity-years."
+
+pooled |>
+  summarise(
+    mean_close_only = mean(close_only),
+    mean_with_leaners = mean(with_leaners),
+    mean_strong = mean(strong),
+    leaner_gap = mean(with_leaners) - mean(close_only),
+    strength_gap = mean(close_only) - mean(strong)
+  ) |>
+  kable(digits = 3)
+```
+
+## By polity
+
+```{r}
+#| label: fig-cses-countries
+#| fig-cap: "Share reporting a party attachment by polity, under the same three readings. Points are election years. A missing line means the study did not field the item that definition needs, not a value of zero -- Norway has no leaner line at all, and Finland and Ireland lose the strength line in some years. Cells below the minimum respondent count are dropped."
+#| fig-width: 12
+#| fig-height: 14
+#| fig-dpi: 300
+
+ggplot(shares_long, aes(x = year, y = share, colour = definition)) +
+  geom_line(
+    data = ~ filter(.x, n() > 1, .by = c(iso3, definition)),
+    aes(group = interaction(iso3, definition)), linewidth = 0.5
+  ) +
+  geom_point(size = 0.9) +
+  facet_wrap(~polity, ncol = 5) +
+  scale_colour_manual(values = pal_definition, name = NULL) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  scale_x_continuous(expand = expansion(mult = 0.08)) +
+  labs(
+    x = NULL, y = "share reporting attachment",
+    title = "Reported party attachment by polity, elections 1996-2024",
+    subtitle = paste0("Cells below n = ", min_n, " dropped. A missing line is an unfielded item.")
+  ) +
+  theme_pubr(legend = "top") +
+  theme(panel.spacing = unit(0.6, "lines"))
+```
+
+## The branch, decomposed
+
+This is the figure the design section needs. The **leaner-only** band is the population
+whose overlap with the paper's vote-anchored group section 4 has to estimate: respondents
+who deny thinking of themselves as close to a party, but concede feeling a little closer
+to one than the others.
+
+```{r}
+#| label: fig-cses-branch
+#| fig-cap: "The branching battery decomposed. Close: said yes at the first item. Leaner only: said no at the first item but yes to the probe. Neither: said no to both. DK / refused: volunteered a non-answer at the first item. Only studies with a usable probe appear, because the leaner-only band is not estimable otherwise."
+#| fig-width: 12
+#| fig-height: 14
+#| fig-dpi: 300
+
+branch <- cses_base |>
+  filter(probe_available) |>
+  mutate(branch = case_when(
+    close == 1 ~ "close",
+    close == 0 & leaner == 1 ~ "leaner only",
+    close == 0 & leaner == 0 ~ "neither",
+    close == 0 ~ "probe DK / refused",
+    .default = "DK / refused at first item"
+  )) |>
+  summarise(w = sum(weight), .by = c(iso3, polity, year, branch)) |>
+  mutate(share = w / sum(w), .by = c(iso3, year)) |>
+  semi_join(by_polity_year, by = c("iso3", "year")) |>
+  mutate(branch = factor(branch, levels = c(
+    "close", "leaner only", "neither",
+    "probe DK / refused", "DK / refused at first item"
+  )))
+
+ggplot(branch, aes(x = year, y = share, fill = branch)) +
+  geom_col(width = 1.4) +
+  facet_wrap(~polity, ncol = 5) +
+  scale_fill_manual(
+    values = c(
+      "close" = "#1B4F72",
+      "leaner only" = "#E39C34",
+      "neither" = "#C7CCD1",
+      "probe DK / refused" = "#8C6E4A",
+      "DK / refused at first item" = "#6E4A6E"
+    ),
+    name = NULL
+  ) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = NULL, y = NULL,
+    title = "Where respondents fall in the CSES branching battery",
+    subtitle = "Only polity-years with a usable leaner probe. The orange band is the leaner population."
+  ) +
+  theme_pubr(legend = "top") +
+  theme(panel.spacing = unit(0.4, "lines"))
+```
+
+```{r}
+#| label: tbl-leaner-size
+#| tbl-cap: "The headline quantity: among respondents who deny being close to any party, the share who nonetheless concede being a little closer to one."
+
+cses_base |>
+  filter(probe_available, close == 0) |>
+  summarise(
+    n = n(),
+    leaner_share = weighted.mean(leaner == 1, weight),
+    .by = c(iso3, polity)
+  ) |>
+  filter(n >= min_n) |>
+  arrange(desc(leaner_share)) |>
+  kable(digits = 3)
+```
+
+# Findings and caveats
+
+```{r}
+#| label: findings-numbers
+
+list(
+  scope = if (europe_only) "continental Europe" else "all polities",
+  polities = n_distinct(by_polity_year$iso3),
+  polity_years = nrow(by_polity_year),
+  year_range = range(by_polity_year$year),
+  cells_without_leaner = sum(is.na(by_polity_year$with_leaners)),
+  cells_without_strength = sum(is.na(by_polity_year$strong))
+)
+```
+
+**The reading of the battery moves the answer as much as the country does.** The table
+above quantifies the two gaps: adding leaners raises the measured partisan share
+substantially, and requiring "very" or "somewhat" close lowers it substantially again.
+This is the CSES counterpart of what notebook 3.4 found in the Eurobarometer, where the
+"merely a sympathiser" category alone was worth 31 percentage points. Two sources, two
+instruments, same conclusion: the partisan share is as much a coding decision as a
+measurement.
+
+**But the CSES at least makes the decision visible.** The Eurobarometer folded status and
+strength into one variable, so an analyst has to decide what "merely a sympathiser" means
+with no further information. The CSES asks separate questions and codes refusals and
+don't-knows apart from substantive denials, so all three readings are constructible from
+the data rather than assumed.
+
+**The leaner probe is missing for whole election studies, and this is easy to get wrong.**
+Norway never fielded it — not in any of its studies — and Slovenia, Latvia, Belgium and
+Switzerland 2007 lose most or all of theirs. Because code `9` conflates "not asked" with
+"missing", a naive `leaner == 1` test silently treats those respondents as non-leaners and
+drives the leaner share down to the close-only share. The per-study availability flags
+exist to prevent exactly that, and the affected studies are listed above and exported to
+`cses_item_availability.csv`.
+
+**The strength item fails on a different set of studies**, so the two suppressions are
+independent: Belgium-Flanders 1999, Finland 2015 and 2019, Ireland 2011, Slovenia 1996
+have none among the close, and Hungary 2002 has essentially none.
+
+**Module 5 adds nothing.** It is a strict subset of the IMD; the apparently missing
+`GRC_2015` is the IMD's `GRC22015`, the September 2015 Greek election, and the IMD's
+split-election naming convention (`GRC12015`/`GRC22015`, `DEU12002`/`DEU22002`) is what
+made the ID counts look short. The repo's "55 of 56" note is corrected accordingly.
+
+**The battery is stable, but Modules 1 and 2 are not quite.** They asked about "any
+particular *political* party", fielded long and short versions depending on whether party
+blocs formed, and folded inconsistent answers into the binary. Early IMD points therefore
+carry more measurement noise than later ones.
+
+**The branch is leaky and CSES leaves it that way.** Respondents named parties without
+reporting closeness, and reported strength without naming a party. The codebook documents
+this and says the data "remain unchanged". Nothing here repairs it either; the cross-tab
+above reports its size.
+
+**Both releases used here are preliminary.** Module 6 is a second advance release whose
+country coverage will change; the IMD Phase 4 codebook describes itself in the same terms.
+Re-run against the full releases.
+
+**Two elections in one year, and one polity sampled by region.** Germany 2002 and Greece
+2015 each contribute two election studies indexed to the same year and are pooled into one
+polity-year; the alternative is an arbitrary tie-break, and this series is descriptive.
+Belgium is different: the IMD samples it regionally in 1999 and 2019. Belgium 2019 pools
+Flanders and Wallonia harmlessly, but **Wallonia 1999 never fielded the item**, so the
+Belgian 1999 cell is Flanders alone, at a `close` share of 0.95 — the highest value
+anywhere in these data and almost certainly an administration artefact rather than a
+finding. That study also lacks both the probe and the strength item. Do not read the
+Belgian 1999 point as a national level.
+
+**What this notebook does not do.** It does not cross-tabulate attachment against vote
+recall (that is notebook 3.3), does not resolve party codes to party names — the Party
+Facts identifiers `IMD5103_*` / `f5203_*` are present but untouched — and estimates
+nothing causal. Adding a release means one row in `cses_sources`.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

@@ -1,0 +1,17 @@
+item,code,code_label,meaning
+close,0,no,no
+close,1,yes,yes
+close,7,volunteered: refused,refused
+close,8,volunteered: don't know,dont_know
+close,9,missing / not asked,missing
+leaner,0,no,no
+leaner,1,yes,yes
+leaner,7,volunteered: refused,refused
+leaner,8,volunteered: don't know,dont_know
+leaner,9,missing / not asked,missing
+strength,1,very close,very
+strength,2,somewhat close,somewhat
+strength,3,not very close,not_very
+strength,7,volunteered: refused,refused
+strength,8,volunteered: don't know,dont_know
+strength,9,missing / not asked,missing

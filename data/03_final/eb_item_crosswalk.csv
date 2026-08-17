@@ -1,0 +1,13 @@
+source,code,code_label,status,strength
+Mannheim,1,very close,attached,very
+Mannheim,2,fairly close,attached,fairly
+Mannheim,3,merely a sympathizer,attached,sympathizer
+Mannheim,4,close to no particular party,not_attached,NA
+Mannheim,8,"DK, NA",dk_refused,NA
+Mannheim,9,inapplicable,not_asked,NA
+Harmonised,1,very involved,attached,very
+Harmonised,2,fairly involved,attached,fairly
+Harmonised,3,merely sympathizer,attached,sympathizer
+Harmonised,4,no affinities with any party,not_attached,NA
+Harmonised,8,DK,dk_refused,NA
+Harmonised,9,inapplicable,not_asked,NA
