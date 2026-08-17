@@ -92,7 +92,7 @@ path_mod6 <- here(
   "data", "01_raw", "external", "cses", "mod6", "cses6.rdata"
 )
 path_eb <- here(
-  "data", "01_raw", "external",
+  "data", "01_raw", "external", "eb",
   "mannheim-eurobarometer-trend-file-1970-2002",
   "ZA3521_v2-0-1.dta"
 )
@@ -110,9 +110,14 @@ dir_final <- here("data", "03_final")
 # Sources and what is in them
 
 Three files were inventoried. **CSES Module 5 is deliberately excluded**: the Integrated
-Module Dataset already contains it in full (114,714 rows flagged `IMD1008_MOD_5 == 1`,
-55 of its 56 election-study IDs present in IMD), so stacking the two would double-count
+Module Dataset already contains it in full (114,714 rows flagged `IMD1008_MOD_5 == 1`, and
+all 56 of its election studies present in IMD), so stacking the two would double-count
 every Module 5 election. Module 6 is disjoint from both.
+
+An earlier version of this passage said 55 of 56 IDs matched. That was a naming artefact:
+the IMD splits Greece 2015 into `GRC12015` and `GRC22015` while Module 5 carries a single
+`GRC_2015`, which is the IMD's `GRC22015` (1,078 rows in both). See
+`code/03_explanal/3.5_cses_partisanship.qmd`, which prints the evidence.
 
 | | CSES IMD | CSES Module 6 | Mannheim EB Trend File |
 |---|---|---|---|
