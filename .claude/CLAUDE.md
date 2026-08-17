@@ -4,79 +4,100 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Comparative study of affective polarization (AP) across 25 European democracies (~29,800 respondents), using the thermometer ratings and conjoint trust/dictator games from Hahm, Hilpert & König (2024). Authors: Tristan Muno and Thomas König, University of Mannheim.
+Comparative study of **the role of partisanship for affective polarization (AP) across 25 European democracies**, using the thermometer ratings and conjoint trust/dictator games from Hahm, Hilpert & König (2024). Authors: Tristan Muno and Thomas König, University of Mannheim. Targeted at APSR/general-interest.
 
-The paper is targeted at APSR/general-interest. Its subject is a measurement choice: AP is estimated on partisans, so someone must decide who counts as one. The study holds the partisan anchor constant and varies only whether the respondent *reports* attachment, comparing self-identified partisans against vote-anchored respondents who deny feeling close to any party. See `## The paper` for the argument, section structure, and what is deliberately out of scope.
+The general question: **what does partisanship do for affective polarization in Europe?** AP is estimated on partisans, so someone must first decide who counts as one — and in Europe the party-attachment item is a contested basis for that decision. The project holds the partisan anchor constant and varies only whether the respondent *reports* attachment, comparing self-identified partisans against vote-anchored respondents who deny feeling close to any party, on an attitudinal measure (thermometers) and a behavioral one (conjoint games).
 
-## The paper
+**The specific claim, the argument chain and the section structure are open.** Read `### Status` below before treating anything in `## The paper` as settled.
 
-### Central claim
+## The paper (provisional)
 
-Every section serves this claim. Recorded verbatim — do not paraphrase it away:
+### Status
 
-> Vote-anchored partisans who deny feeling close to a party discriminate against out-partisans just as much as self-identified partisans do — yet they report substantially less party-directed animus. Self-reported attachment inflates measured polarization without corresponding to any additional discrimination in behavior.
+*Last revised 2026-08-17.*
 
-### Phrasing rule (critical)
+The exploratory analyses were rerun on this project's own processed dataset, which applies a **stricter attention check** than the pre-migration frame the earlier documentation was written against. Under that frame, **explicit partisans show more behavioral AP than vote-anchored ones** — not the same amount. The earlier "no behavioral gap" reading does not survive, and neither does the conclusion built on it.
 
-**Never** write the behavioral result as "no behavioral AP" or as "attachment does not correspond to behavioral discrimination." Both partisan types show large, credibly non-zero copartisan effects in the games (β₁). The finding is that this effect does **not differ by type** (β₃ ≈ 0).
+The question this raises is the one the project is now organized around: if attachment *does* track behavioral discrimination, **how much does it add over the vote anchor, and is that addition large enough to justify attachment as the field's default selection filter?** A small but real increment supports a different paper than a large one, and both are still on the table.
 
-- The results section must report the magnitude of β₁ **before** discussing β₃, so the reader sees the effect exists before being told it does not vary.
-- β₁ is also the paper's primary evidence that the instrument has power — cite it when addressing the "the null reflects weak design" objection.
+What this means for work in this repo:
+
+- **Do not write toward a fixed conclusion.** No section may assume a direction for the type contrast, either way.
+- The argument chain and nine-section structure below are **one candidate framing, not a specification.** They are retained under `### One candidate framing` because the objections they anticipate are still live, not because the structure is committed.
+- New analyses are **exploratory unless the notes say otherwise**, and belong in a notebook or the appendix until they earn main-text space.
+- Report results as estimates with their uncertainty, not as verdicts.
+
+### What is settled
+
+These constrain work regardless of how the findings come out.
+
+- **The design.** Hold the partisan anchor constant, vary only whether attachment is reported. This is what separates the project from a comparison of partisans against non-partisans.
+- **The taxonomy.** Self-identified partisans / vote-anchored respondents / non-partisans. Non-partisans have no defensible anchor and are excluded from any contrast requiring one.
+- **Terminology.** The manuscript says **vote-anchored**; never "leaners" (they come from an attitudinal probe, not vote recall), never "implicit partisans" in prose. The variable levels stay `implicit` — translate in prose, do not rename the data.
+- **The design confound.** Target and measurement mode are perfectly confounded in the Hahm et al. data: thermometers are vertical-attitudinal, the conjoint is horizontal-behavioral, so the diagonal is unobserved. Any claim is therefore **attitudinal vs. behavioral**, never vertical vs. horizontal. State this in the design section, not in limitations.
+- **Reporting order.** Report the magnitude of the co-partisan effect (β₁) *before* any statement about how it differs by type (β₃). This holds whichever way β₃ goes: the reader has to see that the effect exists before being told anything about its variation.
+- **Inference discipline.** A difference is not established by non-overlapping intervals, any more than a null is established by overlapping ones. Whichever direction the contrast runs, the inferential claim gets tested — a pre-specified ROPE if the claim is equivalence, a justified effect-size benchmark if the claim is a difference.
 
 β₁/β₃ index the linear predictor sketched at `notes2.qmd:68`: `outcome = α + β₁·copartisan + β₂·type + β₃·copartisan×type`.
 
-### Argument chain (roter Faden)
+### Standing rule
+
+Before adding any analysis to the manuscript, ask whether it bears on the general question — what partisanship does for AP in Europe. If not, it belongs in the appendix. Analyses run "to see whether they pay off" are exploratory by definition and go in the appendix or a separate document.
+
+### One candidate framing (superseded — do not treat as settled)
+
+Everything in this subsection was written when the behavioral contrast looked null. **Step 6 of the chain broke**: the attitudinal gap is still there, but the behavioral gap is not zero, so step 7 ("attachment behaves like a reporting disposition, not an identity") no longer follows. Steps 1–5 are unaffected — they are about how the field selects partisans, not about what the contrast turns out to be.
+
+It is kept because the *objections* it anticipates — comparability, defectors, leaner overlap, weak design, ten hypothetical tokens, thin panel movement — are live whichever direction the result goes, and because the section structure is a reasonable starting point for whatever the paper becomes. Do not cite the claim below as a finding.
+
+#### Central claim (superseded)
+
+> Vote-anchored partisans who deny feeling close to a party discriminate against out-partisans just as much as self-identified partisans do — yet they report substantially less party-directed animus. Self-reported attachment inflates measured polarization without corresponding to any additional discrimination in behavior.
+
+#### Argument chain (roter Faden)
 
 1. AP is measured on partisans, so someone must decide who counts.
 2. In Europe the attachment item does not cleanly identify partisans (Converse & Dupeux; Thomassen — attachment reports the vote rather than preceding it; attachment shares range ~41% LV to ~85% DK).
 3. Coding choices therefore shift the population of inference differently in each country.
 4. The literature makes this choice, mostly silently. → **EMPIRICAL CLAIM 1**
 5. Whether it distorts conclusions is answerable: hold the anchor constant, vary the reporting.
-6. Answer depends on the measure — large attitudinal gap, no behavioral gap. → **EMPIRICAL CLAIM 2**
-7. Therefore attachment behaves like a reporting disposition, not an identity.
+6. ~~Answer depends on the measure — large attitudinal gap, no behavioral gap.~~ **BROKEN.** The behavioral gap is not zero; the open question is its size relative to the attitudinal one.
+7. ~~Therefore attachment behaves like a reporting disposition, not an identity.~~ **Does not follow from 6 as it now stands.**
 
-Sections 3, 6, 7 are load-bearing. Sections 2 and 4 make them necessary. Sections 5 and 8 are calibration. Everything else is appendix.
+Steps 1–5 still hold. Whether 3, 6 and 7 remain the load-bearing ones depends on what replaces 6.
 
-### Section structure
+#### Section structure
 
 1. **Introduction** — claim in the first paragraph. Names what it contradicts: standard coding practice and the identity literature.
 2. **What attachment measures in Europe** — 3–4 pages, not a review. Engages Bankert/Huddy expressive partisanship as the strongest counter. Key distinction: attachment as a binary *selection filter* vs. as a graded identity measure. Taxonomy (PIDs / vote-anchored / non-partisans) as a figure.
 3. **Coding practice in comparative AP research** — EMPIRICAL CLAIM 1. Census (not sample) of comparative/European AP articles in a named journal set over defined years, hand-coded on two dimensions only: ingroup criterion, non-identifier treatment. Target ~40 papers. *Journal set and year range are not yet fixed — Tristan will specify.*
 4. **Design: holding the anchor constant** — the section referees will attack. See assumptions below.
-5. **Attitudinal result** — explicit/implicit gap in thermometer AP. Framed as the *contrast case*, not the finding; concede the partly mechanical correlation between the attachment item and the thermometer. Country heterogeneity as one figure here, not a separate section.
-6. **Behavioral result** — EMPIRICAL CLAIM 2. The null, properly tested.
+5. **Attitudinal result** — explicit/implicit gap in thermometer AP; concede the partly mechanical correlation between the attachment item and the thermometer. Country heterogeneity as one figure here, not a separate section.
+6. **Behavioral result** — EMPIRICAL CLAIM 2. The type contrast in the games, properly tested.
 7. **Does attachment do work, or mark prior investment?** — within-person panel leg. MAIN TEXT, not appendix.
 8. **What this does to comparative estimates** — four ingroup codings, country rank correlations.
 9. **Discussion** — measurement implication first; theory implication ceilinged; limitations owned.
 
-### Assumptions and how each is tackled
+#### Assumptions and how each is tackled
 
 - **Groups not otherwise comparable.** Party-within-country varying intercepts and slopes; contrast estimated inside party-country cells. Report balance. State plainly: rules out composition, does NOT identify a causal effect.
 - **Recall-maximizing rule assigns anchor by fiat for defectors** (attachment party ≠ vote party). Code both anchors for defectors; test which predicts ratings and allocations.
 - **Vote-anchored ≠ leaners.** Leaners come from an attitudinal probe, ours from vote recall. Use the CSES branching probe to estimate overlap. The paper uses the neutral term "vote-anchored" and discusses the relation to leaners explicitly.
-- **A null needs an equivalence test.** Pre-specified ROPE in token units, justified against the size of the copartisan main effect. Report posterior mass inside the ROPE. Overlapping intervals are not evidence of equivalence.
-- **Null could be weak design.** Benchmark the partisan attribute against EU position, class, and religion within the same conjoint.
+- **The inferential claim needs a test, whichever way it goes.** If the contrast is null, a pre-specified ROPE in token units, justified against the size of the copartisan main effect, with the posterior mass inside it reported. If the contrast is a difference, a benchmark saying what size would matter, fixed before the posterior is seen.
+- **Design could be too weak to detect what it is asked about.** Benchmark the partisan attribute against EU position, class, and religion within the same conjoint. β₁ itself shows the instrument has power; the benchmark now speaks to *magnitude* rather than to power.
 - **Ten hypothetical tokens may not be where identity shows up.** Unresolvable. Concede in the discussion before a referee raises it.
 - **Panel leg may lack within-person movement.** Check the attachment transition matrix BEFORE committing to section 7. If thin, drop the section rather than report underpowered results.
 - **Rank correlations across codings may be ~0.95.** Committed in advance to reporting either way — a deflationary result is still a contribution. Note that most-liked-party coding selects on the outcome and is mechanically inflationary.
-
-### Design confound (stated in section 4, not in limitations)
-
-Target and measurement mode are perfectly confounded in the Hahm et al. data: thermometers are vertical-attitudinal, the conjoint is horizontal-behavioral, so the diagonal cannot be separated. The claim is therefore **attitudinal vs. behavioral**, never vertical vs. horizontal.
 
 ### Dropped, demoted, promoted
 
 Recorded so none of it creeps back:
 
 - **DROPPED: the LLM literature-classification pipeline** (200 hand-coded papers, classifier validation, per-dimension κ thresholds, OSF preregistration of the coding scheme). Replaced by the hand-coded census in section 3. The pipeline remains viable as a separate standalone paper — the Part I/Part II notes stay in the repo (`index.qmd`, see `### Documents`), flagged out of scope for this manuscript.
-- **DROPPED: vertical/horizontal as the headline framing.** Retained only as a conceptual 2×2 inside section 6, explaining why the answer splits.
-- **DEMOTED: identity vs. categorization debate.** Still generates the competing predictions in the theory section, but the adjudication claim moves to the discussion with an explicit ceiling: the design cannot separate attachment *creating* investment from *marking* it.
+- **DROPPED: vertical/horizontal as the headline framing.** Retained only as a conceptual 2×2 inside section 6, explaining why the answer splits by measure.
 - **DEMOTED: individual-level moderators.** Appendix, labelled either preregistered or exploratory — no middle option. Not a third results section.
 - **PROMOTED: external panel data** from robustness to main text (section 7). One country, done properly, beats several done shallowly.
-
-### Standing rule
-
-Before adding any analysis to the manuscript, ask whether it changes step 7 of the argument chain. If not, it belongs in the appendix. Analyses run "to see whether they pay off" are exploratory by definition and go in the appendix or a separate document.
+- **REOPENED (2026-08-17): identity vs. categorization.** This was demoted to the discussion with a ceiling on what the design could say. A behavioral gap between partisan types is exactly the pattern the identity side predicts, so the debate is load-bearing again — but the ceiling stands: the design still cannot separate attachment *creating* investment from *marking* it.
 
 ## Stack
 
@@ -130,7 +151,7 @@ data/03_final/eu25games2019.rds  ──►  data/03_final/thermo_long.rds  (writ
 | `code/00_helper/` | Utility scripts: `copyR.R` (refresh the raw file from a sibling clone), `glftrackeR.R` (auto-LFS tracking) |
 | `code/01_preparation/` | `1.1_datasets.qmd` only: load the published release, clean, fold in the French questionnaire fork, reshape the games wide→long |
 | `code/02_key_variables/` | Partisan identity variable construction (explicit vs. implicit partisans, anchor) |
-| `code/03_explanal/` | Descriptive analyses (3.1) and AP measurement (3.2) — these two are the featured notebooks |
+| `code/03_explanal/` | Descriptive analyses (3.1) and AP measurement (3.2) — the two featured notebooks. Then the external-source leg: 3.3 stacks CSES and the Mannheim Eurobarometer for the attachment × vote cross-tab, while 3.4 (Eurobarometer) and 3.5 (CSES) are self-contained per-source item inventories and attachment-share series. 3.3 overlaps 3.4/3.5 on their shared files; none of the three depends on the others |
 | `code/04_models/` | Bayesian regression models via brms |
 | `code/literature-overview.qmd` | Systematic coding of comparative AP studies |
 
@@ -158,9 +179,9 @@ Four ingroup codings are compared in section 8: identity only; recall-maximizing
 
 ### Documents
 
-- `index.qmd` — primary manuscript (`draft: true`, draft mode visible). Now a **skeleton**: the nine sections above as headers, each with a *Purpose* and a *What must hold* bullet group, plus the retained figure embeds and appendix material. No prose except the abstract and the experimental-setup passage. Write into it section by section; keep the two bullet groups until a section is actually drafted. The argument chain is repeated as a non-rendering comment at the top of the file.
+- `index.qmd` — primary manuscript (`draft: true`, draft mode visible). Still a **skeleton**: nine section headers, each with a *Purpose* and a *What must hold* bullet group, plus the retained figure embeds and appendix material. No prose except the abstract and the experimental-setup passage. Write into it section by section; keep the two bullet groups until a section is actually drafted. **The title, abstract and outline are working drafts, not commitments** — a `STATUS` comment at the top of the file carries the same warning as `### Status` above, and the superseded argument chain sits beneath it so it cannot creep back in silently.
   - The old full-text draft (superseded vertical/horizontal framing) and the dropped **LLM literature-classification pipeline** (Part I: Project Roadmap, Part II: Coding Scheme) were removed from `index.qmd`; both are in git history, last present at `c854c4a`. The pipeline remains viable as a separate standalone paper but is **out of scope for this manuscript** — do not revive it into section 3, which is hand-coded.
-- `data/01_raw/external-data.md` — **the data inventory.** Every dataset the project uses or plans to use, with a collected / not-downloaded / access-gated status mark, the role each source plays in the argument chain, and the cross-source comparability caveats. Section 7 panel candidates are listed there. Update it whenever a dataset is downloaded, moved, or ruled out; it used to live in `index.qmd` and must not drift back there.
+- `data/01_raw/external-data.md` — **the data inventory.** Every dataset the project uses or plans to use, with a collected / not-downloaded / access-gated status mark, the role each source plays, and the cross-source comparability caveats. Section 7 panel candidates are listed there. Update it whenever a dataset is downloaded, moved, or ruled out; it used to live in `index.qmd` and must not drift back there.
 - `presentation.qmd` — RevealJS slides with University of Mannheim SCSS theme (`theme.scss`)
 - `notes.qmd` / `notes2.qmd` — working research notes; contains the partisan taxonomy framework and variable construction logic. The restructuring brief this file records is pasted at `notes2.qmd:261`–394; note that everything in `notes2.qmd` *above* that brief predates it and describes the superseded vertical/horizontal framing.
 - `code/code-template.qmd` — boilerplate for new analysis notebooks (tidyverse + here + sessioninfo setup)
@@ -175,12 +196,15 @@ Four ingroup codings are compared in section 8: identity only; recall-maximizing
 - `cses/imd/` — CSES Integrated Module Dataset. The only source carrying the branching closeness probe, so the sole basis for the leaner-overlap estimate in section 4 and for splitting "no attachment" into leaners vs. true non-partisans.
 - `cses/mod5/` — CSES Module 5 (2016–2021). **Fully contained in the IMD** — all 56 election studies, 114,714 rows matching `IMD1008_MOD_5 == 1` exactly — so default to IMD + Module 6 and never stack Module 5 on the IMD. Reach for it only for Module-5-specific variables the IMD does not harmonise. Matching study IDs across releases needs care: the IMD splits two-elections-in-one-year (`DEU12002`/`DEU22002`, `GRC12015`/`GRC22015`) and regional samples (`BELF`/`BELW` 1999 and 2019), so Module 5's `GRC_2015` is the IMD's `GRC22015`, not a missing study.
 - `cses/mod6/` — CSES Module 6 (2021–2026). **Advance release only** — coverage will change on full release, so any Module 6 result is provisional.
-- `mannheim-eurobarometer-trend-file-1970-2002/` — long-run attachment decline; carries both attachment and party preference, so the split is constructible back to the early 1970s. Item coverage varies by wave — verify wave by wave.
+- `eb/` — the Eurobarometer family: the Mannheim trend file 1970–2002, the harmonised 2004–2021 file, raw EB 95.3, and the Central & Eastern EB 1990–1997. Long-run attachment decline. **This directory is git-ignored** (1.4 GB) — re-download it from GESIS using the links in the inventory. The attachment item runs 1975–1994 plus a single 2009 wave, and the CEEB carries none at all; verify coverage wave by wave.
+- `tripol/` — TRI-POL three-wave panel (ES/PT/IT + AR/CL). The only external source with an attitudinal *and* a behavioral AP measure on the same respondents. See `tripol/tripol.md` before touching it.
 - `carlin-love-2018/`, `westwood-et-al-2015/` — partisan trust-game and partisan-IAT reference studies; out-of-sample benchmarks for the behavioral result.
+
+Notebooks 3.4 (Eurobarometer) and 3.5 (CSES) inventory the partisanship items in these sources and export their recode maps to `data/03_final/{eb,cses}_item_*.csv`, so the recode and the documentation cannot drift apart.
 
 Codebook PDFs sit alongside each dataset on disk but are untracked — `.gitignore` has a blanket `*.pdf` rule.
 
-**The section 7 panel is not yet chosen or downloaded.** Candidates, with links and notes, are in the inventory under "Section 7 panel candidates": GLES Panel 2016–2021 (DE), BES Internet Panel (UK), LISS (NL), POLAT (ES, 12 waves), AUTNES Online Panel (AT), TRI-POL (ES/PT/IT), Finnish panel. The choice is gated on the attachment transition matrix — check within-person movement before committing, and exactly one gets downloaded.
+**The section 7 panel is not yet chosen.** Candidates, with links and notes, are in the inventory under "Section 7 panel candidates": GLES Panel 2016–2021 (DE), BES Internet Panel (UK), LISS (NL), POLAT (ES, 12 waves), AUTNES Online Panel (AT), TRI-POL (ES/PT/IT), Finnish panel. TRI-POL is already on disk and has cleared the movement gate (18–23% switch attachment status per wave); that does not settle the choice. The gate is the attachment transition matrix — check within-person movement before committing, and exactly one candidate gets used.
 
 ### Output
 
@@ -190,7 +214,9 @@ Quarto writes rendered output to `_manuscript/` (git-ignored). Notebooks embed r
 
 Large files (>100 MB) must be tracked with LFS — GitHub rejects larger plain blobs outright. Use `code/00_helper/glftrackeR.R` (run from the repo root) to auto-track any file exceeding the threshold before committing; it appends literal relative paths to `.gitattributes`, not globs.
 
-Currently LFS-tracked: `data/01_raw/external/mannheim-eurobarometer-trend-file-1970-2002/ZA3521_v2-0-1.dta` (228 MB) and `data/01_raw/external/cses/mod6/cses6.rdata` (89 MB).
+**Not everything large belongs in the repo at all.** `data/01_raw/external/eb/` is git-ignored wholesale: 1.4 GB, of which the harmonised 2004–2021 file alone is 1.1 GB, against a `.git` already past 3 GB. It is freely re-downloadable from GESIS, so it stays local. Apply the same test before LFS-tracking anything new — if a source is large *and* re-downloadable, ignore it and document the link in the inventory instead.
+
+Currently LFS-tracked: `data/01_raw/external/cses/mod6/cses6.rdata` (89 MB), and that is all. The Mannheim trend file was LFS-tracked until it moved into `eb/`; the blob remains in history at its old path.
 
 Two caveats:
 

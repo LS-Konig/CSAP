@@ -1,8 +1,11 @@
 ---
+# WORKING TITLE -- the paper's specific claim is not fixed; see the STATUS comment below.
 title: |
-  Reported Attachment, Revealed Discrimination: What the Party-Closeness Item Selects On in Europe
+  What Partisanship Does for Affective Polarization in Europe
+# DRAFT ABSTRACT -- states the question and the design only. It asserts no result,
+# deliberately, and gets rewritten once the estimates are final.
 abstract: |
-  Affective polarization is estimated on partisans, so someone must decide who counts as one. In Europe that decision usually rests on a single self-report -- whether a respondent says they feel close to a party -- an item whose prevalence ranges from roughly 41% to 85% across countries. We hold the partisan anchor constant and vary only the reporting: self-identified partisans are compared against vote-anchored respondents who deny feeling close to any party, using thermometer ratings and conjoint trust and dictator games from 25 European democracies (N = 22,858). Both groups favor co-partisans strongly in the games, and by indistinguishable amounts; the same respondents differ substantially in party-directed animus on the thermometers. Self-reported attachment inflates measured polarization without corresponding to any additional discrimination in behavior. It behaves like a reporting disposition, not an identity.
+  Affective polarization is estimated on partisans, so someone must decide who counts as one. In Europe that decision usually rests on a single self-report -- whether a respondent says they feel close to a party -- an item whose prevalence ranges from roughly 41% to 85% across countries. What that self-report contributes, over and above simply having a party to be anchored to, is an open question. We hold the partisan anchor constant and vary only the reporting: self-identified partisans are compared against vote-anchored respondents who deny feeling close to any party, using thermometer ratings and conjoint trust and dictator games from 25 European democracies (N = 22,858). The comparison is reported on both measures, attitudinal and behavioral, and set against what the choice of coding rule does to comparative estimates of polarization across those countries.
 execute:
   echo: false
   warning: false
@@ -14,42 +17,80 @@ draft-mode: visible
 ---
 
 
-Roter Faden:
-
-Zeitreihe Partisanship in Europe
-Great dealignment (or realignment?)
-Was sagt in welchen Ländern Partisanship voraus? Was sagt denial of partisanship voraus?
-Conditional composition of PIs influences subsample compositions of AP studies if PI used as filter question -> cross country differences in representativeness, degree of potential bias for comparative AP research
-
-
-
-
 <!--
-ROTER FADEN -- every section below serves the central claim; if a bullet does not
-move one of these steps, it belongs in the appendix.
+================================================================================
+STATUS -- 2026-08-17.  Read this before writing into any section below.
+================================================================================
+
+THE GENERAL QUESTION
+  What does partisanship do for affective polarization in Europe?  AP is estimated
+  on partisans, so someone must first decide who counts as one, and in Europe the
+  party-attachment item is a contested basis for that decision.  The design holds
+  the partisan anchor constant and varies only whether attachment is REPORTED.
+
+WHAT CHANGED
+  The exploratory analyses were rerun on this project's own processed dataset,
+  which applies a stricter attention check than the pre-migration frame.  Under
+  that frame explicit partisans show MORE behavioral AP than vote-anchored ones --
+  not the same amount.  The earlier "no behavioral gap" reading does not survive.
+
+  The open question is therefore how much attachment adds over the vote anchor,
+  and whether that increment is large enough to justify attachment as the field's
+  default selection filter.  A small but real increment supports a different paper
+  than a large one.  Both are still on the table.
+
+THE NINE HEADERS BELOW ARE A PROVISIONAL OUTLINE, NOT A COMMITTED STRUCTURE.
+  Do not write toward a fixed conclusion.  No section may assume a direction for
+  the type contrast, either way.  Report estimates with their uncertainty, not
+  verdicts.  See `.claude/CLAUDE.md`, "### Status", for the full version.
+
+WHAT STILL HOLDS REGARDLESS
+  - Attitudinal vs. behavioral, never vertical vs. horizontal: target and mode are
+    perfectly confounded in these data, so the diagonal is unobserved.
+  - "Vote-anchored" in prose.  Never "leaners", never "implicit partisans".
+  - Report the magnitude of the co-partisan effect (b1) before any statement about
+    how it differs by type (b3).  This holds whichever way b3 goes.
+  - Overlapping intervals do not establish a null; non-overlapping ones do not
+    establish a difference.  Either claim gets tested against a threshold fixed
+    before the posterior is seen.
+
+LIVE THREADS -- Tristan's notes, kept because the widened question makes them more
+relevant, not less:
+  Zeitreihe Partisanship in Europe.
+  Great dealignment (or realignment?).
+  Was sagt in welchen Ländern Partisanship voraus?  Was sagt denial of
+  partisanship voraus?
+  Conditional composition of PIs influences subsample compositions of AP studies
+  if PI used as filter question -> cross-country differences in representativeness,
+  degree of potential bias for comparative AP research.
+
+SUPERSEDED -- the argument chain this skeleton was built around.  Kept so it is not
+reintroduced by accident.  Steps 1-5 still hold; 6 broke and 7 no longer follows.
   1. AP is measured on partisans, so someone must decide who counts.
   2. In Europe the attachment item does not cleanly identify partisans.
   3. Coding choices therefore shift the population of inference, differently per country.
   4. The literature makes this choice, mostly silently.            -> EMPIRICAL CLAIM 1
   5. Whether it distorts conclusions is answerable: hold the anchor constant, vary the reporting.
-  6. Answer depends on the measure -- large attitudinal gap, no behavioral gap. -> EMPIRICAL CLAIM 2
-  7. Therefore attachment behaves like a reporting disposition, not an identity.
-Load-bearing: 3, 6, 7. Necessary: 2, 4. Calibration: 5, 8.
+  6. BROKEN -- was "large attitudinal gap, no behavioral gap".  The behavioral gap
+     is not zero; its size relative to the attitudinal one is the open question.
+  7. DOES NOT FOLLOW from 6 as it now stands -- was "attachment behaves like a
+     reporting disposition, not an identity".
 -->
 
 ## Introduction {#sec-intro}
 
 **Purpose**
 
-- State the central claim in the first paragraph, before any literature.
-- Name what it contradicts: standard coding practice in comparative AP research, and the identity/expressive-partisanship account of what attachment does.
+- State the question in the first paragraph, before any literature: what does reporting attachment add, once the respondent already has a party to be anchored to?
+- Name what is at stake: standard coding practice in comparative AP research treats the attachment item as the filter, and the identity/expressive-partisanship account supplies the reason it should be.
 - Establish that "who counts as a partisan" is a consequential measurement choice, not a technical footnote.
-- Set up the two empirical claims (§3 coding practice, §6 the behavioral null) as the contribution.
+- Set up the two empirical claims (§3 coding practice, §6 the type contrast in behavior) as the contribution.
+- *(Open: the specific claim this section argues for is not fixed -- see the STATUS comment at the top of this file.)*
 
 **What must hold**
 
 - The claim is stated as *attitudinal vs. behavioral*, never vertical vs. horizontal.
-- The magnitude of the co-partisan effect (β₁) is previewed *before* the reader is told it does not vary by type (β₃) -- otherwise the null reads as "nothing happens".
+- The magnitude of the co-partisan effect (β₁) is previewed *before* anything is said about how it varies by type (β₃) -- otherwise the reader cannot size the variation against the thing it varies.
 - The contribution is framed as measurement, not as adjudicating identity vs. categorization; the theory payoff is ceilinged in §9.
 - "Vote-anchored" throughout; never "leaners", never "implicit partisans" in prose.
 
@@ -57,7 +98,7 @@ Load-bearing: 3, 6, 7. Necessary: 2, 4. Calibration: 5, 8.
 
 **Purpose**
 
-- Makes step 2 of the chain: the attachment item does not cleanly identify partisans in Europe. Without this the paper is a null result about nothing.
+- Makes step 2 (one of the steps that survived): the attachment item does not cleanly identify partisans in Europe. Without this there is no reason to care how the two types compare.
 - Fixes the taxonomy used everywhere after: self-identified partisans / vote-anchored respondents / non-partisans.
 - Draws the key distinction: attachment used as a *binary selection filter* vs. attachment as a *graded identity measure*. The paper's target is the former.
 - Engages Bankert/Huddy expressive partisanship as the strongest counter-position, on its own terms.
@@ -65,7 +106,8 @@ Load-bearing: 3, 6, 7. Necessary: 2, 4. Calibration: 5, 8.
 **What must hold**
 
 - Converse & Dupeux and Thomassen carry the conceptual point: in Europe the attachment report follows the vote rather than preceding it.
-- The cross-national spread in attachment shares is *shown*, not asserted (~41% LV to ~85% DK) -- @fig-impl-expl-distribution below; long-run decline from the Mannheim Trend File / CSES if it earns its space.
+- The cross-national spread in attachment shares is *shown*, not asserted (~41% LV to ~85% DK) -- @fig-impl-expl-distribution below; the long-run series from the Eurobarometer and the CSES is built in `code/03_explanal/3.4_eb_partisanship.qmd` and `3.5_cses_partisanship.qmd`, to be drawn on if it earns its space.
+- The sharpest version of step 2 is already in hand from those notebooks: the measured European partisan share moves by ~31 points depending on where the Eurobarometer's "merely a sympathiser" category is placed, and the CSES leaner probe moves it comparably. The item's reading is as consequential as the country.
 - 3--4 pages, not a review. Anything not bearing on "filter or identity?" is cut.
 - Vote-anchored ≠ leaners is stated here as terminology; the empirical overlap estimate is deferred to §4.
 - Figure: the taxonomy itself (PIDs / vote-anchored / non-partisans), showing what each coding rule keeps and drops.
@@ -107,7 +149,7 @@ EMPIRICAL CLAIM 1.
 - **Defectors** (attachment party ≠ vote party) are otherwise assigned an anchor by fiat. Code both anchors and test which predicts ratings and allocations.
 - **Leaner overlap** estimated from the CSES branching probe -- the only source carrying it. Report the overlap; do not assume the groups are distinct.
 - **The design confound, stated here.** Target and measurement mode are perfectly confounded in these data: thermometers are vertical-attitudinal, the conjoint horizontal-behavioral, the diagonal is unobserved. The claim is therefore attitudinal vs. behavioral, full stop.
-- **The equivalence test is pre-specified here, before results.** ROPE in token units, justified against the size of β₁. Committing to it after seeing the posterior is worthless.
+- **The decision threshold is pre-specified here, before results.** A ROPE in token units, justified against the size of β₁, serves both readings: posterior mass inside it supports equivalence, and a $\Delta$ that clears it is a difference large enough to matter. Fixing it after seeing the posterior is worthless either way, which is why it is set here and not in §6.
 
 ### Model specification {#sec-model-spec}
 
@@ -313,15 +355,16 @@ The type contrast is not: $T$ is a self-report, not an assignment, and no amount
 
 **Purpose**
 
-- The *contrast case*, not the finding: establishes that there is a large, consistent gap to be explained, which §6 then fails to find in behavior.
+- Estimates the type contrast on the attitudinal measure: how much more party-directed animus self-identified partisans report than vote-anchored ones, inside party-country cells.
+- Supplies the comparison quantity for §6. Which of the two sections carries the headline depends on how the two contrasts come out, and is not decided here.
 - Absorbs country heterogeneity -- one figure here, not a separate section.
 
 **What must hold**
 
 - Concede up front that the attachment item and the thermometer are partly mechanically related; a reader who spots this before the paper does will discount the rest.
-- The gap must hold *inside* party-country cells, not only pooled -- otherwise it is composition.
+- Whatever gap is found must hold *inside* party-country cells, not only pooled -- otherwise it is composition.
 - Consistency across the 25 countries shown once, with the magnitude variation described rather than modelled a second time.
-- Framing discipline: this section is a benchmark for §6. It is not the headline.
+- Reported on the same scale-relative terms as §6, so the two contrasts can be compared rather than each being described in its own units.
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-thermo >}}
 
@@ -330,20 +373,21 @@ The type contrast is not: $T$ is a self-report, not an assignment, and no amount
 ## Behavioral result {#sec-behavioral}
 
 ::: {.callout-note}
-EMPIRICAL CLAIM 2. The load-bearing section.
+EMPIRICAL CLAIM 2. The estimand: how much the co-partisan effect in the games differs between self-identified and vote-anchored partisans.
 :::
 
 **Purpose**
 
-- Establishes that the discrimination is there in both groups and does not differ by type -- the empirical core of step 6, and the whole basis for step 7.
+- Estimates the type contrast on the behavioral measure -- the counterpart to §5, and the section that decides what the paper can say about what attachment adds.
+- *(Open: the exploratory rerun on the stricter-attention-check frame points to a non-zero difference in the direction of self-identified partisans. Its size, and whether it survives the party-country cell structure, is what this section establishes.)*
 
 **What must hold**
 
-- **Order is not negotiable.** Report the magnitude of β₁ first: both partisan types favor co-partisans substantially and credibly. Only then report β₃ ≈ 0.
-- The null is *tested*, not inferred: posterior mass inside the pre-specified ROPE. Overlapping credible intervals are not evidence of equivalence and must not be presented as such.
-- Answer "your null reflects weak design" twice over: β₁ itself shows the instrument has power, and the partisan attribute is benchmarked against EU position, class, and religion within the same conjoint.
+- **Order is not negotiable.** Report the magnitude of β₁ first: both partisan types favor co-partisans substantially and credibly. Only then report β₃, whatever it turns out to be. The reader has to be able to size the difference against the effect it is a difference in.
+- The inferential claim is *tested*, not eyeballed, against a threshold fixed before the posterior is seen: a ROPE in token units if the claim is equivalence, a justified benchmark for what would count as a meaningful difference if it is not. Overlapping credible intervals do not establish a null and non-overlapping ones do not establish a difference.
+- Benchmark the partisan attribute against EU position, class, and religion within the same conjoint. Under a null this answers "your design is too weak"; under a difference it says how large that difference is in terms a reader already has a feel for. Either way it belongs here.
 - Country-level results shown to be consistent with the pooled estimate, without turning into a second heterogeneity section.
-- The vertical/horizontal 2×2 survives here and only here, as a conceptual device explaining why the answer splits by measure. It is not the paper's framing.
+- The vertical/horizontal 2×2 survives here and only here, as a conceptual device for reading the two measures against each other. It is not the paper's framing.
 
 {{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-cj >}}
 
@@ -359,7 +403,7 @@ EMPIRICAL CLAIM 2. The load-bearing section.
 **What must hold**
 
 - **Gate, checked before the section is written:** the attachment transition matrix must show real within-person movement. If it is thin, drop the section rather than report an underpowered result.
-- One country, one panel, done properly -- see the candidate list in `data/01_raw/external-data.md`. Exactly one gets downloaded.
+- One country, one panel, done properly -- see the candidate list in `data/01_raw/external-data.md`. TRI-POL is already on disk and has cleared the movement gate; exactly one candidate gets used.
 - Cross-source comparability caveats stated: different instrument, different context, not a replication of the games.
 - Ceiling stated explicitly: the design cannot separate attachment *creating* investment from *marking* it.
 
@@ -367,7 +411,7 @@ EMPIRICAL CLAIM 2. The load-bearing section.
 
 **Purpose**
 
-- Calibration: turns the finding into the quantity a comparative researcher actually faces when choosing a coding rule.
+- Calibration: turns the result of §5 and §6 into the quantity a comparative researcher actually faces when choosing a coding rule. Stands on its own whichever way that result goes.
 
 **What must hold**
 
@@ -385,8 +429,8 @@ EMPIRICAL CLAIM 2. The load-bearing section.
 
 **What must hold**
 
-- Measurement: cross-national differences in AP levels partly reflect national differences in willingness to say "close to", not only differences in polarization.
-- Theory: the pattern fits categorization sufficiency in the behavioral domain, but the design cannot adjudicate identity vs. categorization. Say so before a referee does.
+- Measurement: cross-national differences in AP levels partly reflect national differences in willingness to say "close to", not only differences in polarization. This holds whichever way the type contrast comes out -- it follows from §3 and §8, not from §6.
+- Theory: the identity-vs-categorization debate is back in play, because a behavioral gap between partisan types is the pattern the identity side predicts. The ceiling stands regardless: the design cannot separate attachment *creating* investment from *marking* it. Say so before a referee does.
 - Limitations conceded before they are raised: ten hypothetical tokens may not be where identity shows up; a single 2019 cross-section speaks to level, not trend; the conjoint labels identities that real encounters only cue; the attitudinal measures are party-targeted only.
 
 \singlespacing
@@ -465,7 +509,7 @@ We summarize posteriors by their median and 95% credible interval throughout.
 For each posterior draw we compute the marginal means of @eq-marginal and @eq-marginal-country and form the contrasts of @eq-estimand and @eq-country-quantities from them, summarizing the resulting distributions.
 In coefficient terms the pooled contrast is $\mathrm{AP}_t = \beta_1^{\mathrm{Co}} + t\beta_3^{\mathrm{Co}}$ and the country-specific contrast $\mathrm{AP}_{c,t} = (\beta_1^{\mathrm{Co}} + w_{c\mathrm{Co}}) + t(\beta_3^{\mathrm{Co}} + w_{c,\mathrm{Co} \times T})$, with out-partisan as the reference level of $R$.
 Pooled predictions marginalize over the varying effects rather than conditioning on any particular party or country.
-The type gap is reported as the posterior of $\Delta = \mathrm{AP}_1 - \mathrm{AP}_0$, and the equivalence test in @sec-behavioral as the posterior mass of $\Delta$ falling inside the ROPE fixed in @sec-design [@kruschke2018rejecting].
+The type gap is reported as the posterior of $\Delta = \mathrm{AP}_1 - \mathrm{AP}_0$, and the decision in @sec-behavioral as the posterior mass of $\Delta$ falling inside versus outside the ROPE fixed in @sec-design [@kruschke2018rejecting] -- the same threshold reads as equivalence when the mass is inside it and as a difference that matters when it is not.
 Variance decompositions report the share of variance attributable to respondents, anchors, and countries.
 
 ### Individual-level moderators {.appendix}

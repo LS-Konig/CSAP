@@ -67,7 +67,9 @@ and from the upstream repo's `data/01_raw/Wave{1,2,3}.rds`.
 ## B. External data — collected
 
 All under `data/01_raw/external/`. The "Role" column states what the source is for in this
-paper; numbers refer to the argument chain and section structure in `.claude/CLAUDE.md`.
+paper; section and step numbers refer to the **provisional** outline in `.claude/CLAUDE.md`,
+which is one candidate framing rather than a fixed structure — read `### Status` there first.
+A source's role here is a note on why it was collected, not a commitment about where it lands.
 
 ### CSES — Comparative Study of Electoral Systems
 
@@ -79,7 +81,7 @@ section needs.
 | Status | Path | Files | Role and caveats |
 |---|---|---|---|
 | ✅ | `cses/imd/` | `cses_imd.rdata` (18 MB) + 5 codebook PDFs (ZA7481) | Integrated Module Dataset: ~395k respondents, 230 elections, 59 polities. **Section 4:** estimate the overlap between vote-anchored respondents and leaners. **Argument step 2:** cross-national variation in attachment shares. |
-| ✅ | `cses/mod5/` | `cses5.rdata` (9 MB) + 9 codebook/questionnaire PDFs (ZA7557) | Module 5 (2016–2021). Closest module in time to the 2019 Hahm et al. fieldwork — use for period-matched comparison of attachment shares. |
+| ✅ | `cses/mod5/` | `cses5.rdata` (9 MB) + 9 codebook/questionnaire PDFs (ZA7557) | Module 5 (2016–2021), the module closest in time to the 2019 Hahm et al. fieldwork. **Adds nothing on its own — it is a strict subset of the IMD** (see below). Reach for it only for Module-5-specific variables the IMD does not harmonise; for period-matched attachment shares, filter the IMD on `IMD1008_MOD_5 == 1`. |
 | ✅ | `cses/mod6/` | `cses6.rdata` (89 MB) + 7 codebook PDFs (ZA7748) | Module 6 (2021–2026). **Advance release only** — the full release is pending, country coverage will change. Treat any Module 6 result as provisional and re-run on the final release. |
 
 Source: <https://cses.org/data-download/download-data-documentation/>
@@ -124,38 +126,144 @@ Practical notes, verified against the files:
 - CSES has **no East/West Germany split**: all German studies are post-unification and `IMD1007`
   (sample component) is documented only as "see election study notes".
 
-### Mannheim Eurobarometer Trend File 1970–2002
+⚠️ **The branching probe is missing for whole election studies, and code `9` hides it.** Verified
+in `code/03_explanal/3.5_cses_partisanship.qmd`, which exports per-study availability flags to
+`data/03_final/cses_item_availability.csv`:
 
-| Status | Path | Files | Role and caveats |
+- Code `9` conflates "not asked" with "missing", so a naive `leaner == 1` test silently counts
+  every respondent in an affected study as a non-leaner and drives the leaner share down to the
+  close-only share. **This is the single easiest way to get the leaner-overlap estimate wrong.**
+- **Norway never fielded the probe** — not in any of its studies. Slovenia, Latvia, Belgium and
+  Switzerland 2007 lose most or all of theirs.
+- The **strength** item fails on a *different* set of studies — Belgium-Flanders 1999, Finland
+  2015 and 2019, Ireland 2011, Slovenia 1996 have none among the close, Hungary 2002 essentially
+  none — so the two suppressions are independent and must be flagged separately.
+- Any pooled series has to be computed on a **common base** of studies carrying all the items
+  being compared. Averaging each definition over whichever studies happen to carry its item makes
+  the lines means of different populations, and they then cross in ways impossible within any
+  single cell.
+- **The branch is leaky and CSES leaves it that way**: respondents named parties without reporting
+  closeness, and reported strength without naming a party. The codebook documents this and says
+  the data "remain unchanged".
+- Modules 1 and 2 asked about "any particular *political* party", fielded long and short versions
+  depending on whether party blocs formed, and folded inconsistent answers into the binary. Early
+  IMD points carry more measurement noise than later ones.
+- Reading the battery moves the answer as much as the country does: adding leaners raises the
+  measured partisan share substantially, requiring "very" or "somewhat" close lowers it
+  substantially again. Same conclusion as the Eurobarometer's sympathiser category, from a
+  cleaner instrument — the CSES at least asks the questions separately, so all three readings are
+  constructible rather than assumed.
+
+### Eurobarometer
+
+Everything under `data/01_raw/external/eb/`. **This whole directory is git-ignored** — 1.4 GB
+on disk, freely re-downloadable from GESIS after registration. It exists on the analysis
+machine and not in the repo; a fresh clone must re-download it from the links below. See
+[Storage and Git LFS](#storage-and-git-lfs).
+
+| Status | Path | File | Size |
 |---|---|---|---|
-| ✅ 🔒 | `mannheim-eurobarometer-trend-file-1970-2002/` | `ZA3521_v2-0-1.dta` (228 MB) + codebook PDF | Ed. 2.0.1: 86 waves, 145 variables, 1,134,384 cases, Western Europe. Free after GESIS registration. **Argument step 2:** the long-run attachment decline. Carries **both** party attachment and party preference, so the explicit / vote-anchored split is constructible from 1975 — no other source reaches back that far. |
+| ✅ 🔒 | `eb/mannheim-eurobarometer-trend-file-1970-2002/` | `ZA3521_v2-0-1.dta` | 218 MB |
+| ✅ 🔒 | `eb/eb-2004-2011/` | `harmonised_EB_2004-2021_v3-0-0.dta` | 1.1 GB |
+| ✅ 🔒 | `eb/eb-2004-2011/` | `953_new.dta` (raw EB 95.3, 2021) + `EB_953.do` | 17 MB |
+| ✅ 🔒 | `eb/ceeb/` | `ZA3648.dta` (Central & Eastern EB trends, 1990–1997) | 62 MB |
 
-Variables, verified against the file (`code/03_explanal/3.3_pid_over_time.qmd`):
+Also on disk, alongside the data: `Trends_EBs_1970-2021.xlsx` (the wave-by-item coverage
+grid), `ERRATA_harmonised_EB_2004-2021.txt`, `User_Guide_Harmonized_Eurobarometer_2004-2021.pdf`,
+the codebook PDFs, and a `citation.bib` in each subdirectory carrying the canonical citation.
 
-- `closepty` — the attachment item, carrying **status and strength in one variable**:
-  `1` very close, `2` fairly close, `3` merely a sympathiser, `4` no party, `8` DK/NA, `9` inap.
+Sources and citations:
+
+- Mannheim trend file — Schmitt, Scholz, Leim & Moschner, ed. 2.0.1, ZA3521, DOI
+  [10.4232/1.10074](https://doi.org/10.4232/1.10074).
+  <https://search.gesis.org/research_data/ZA3521>
+- Harmonized Eurobarometer 2004–2021 — Russo & Bräutigam, v3.0.0, DOI
+  [10.7802/2539](https://doi.org/10.7802/2539).
+- Central and Eastern Eurobarometer 1990–1997 (Trends CEEB1–8) — ZA3648, DOI
+  [10.4232/1.3648](https://doi.org/10.4232/1.3648).
+- Standard EB 95.3 (2021) raw file — ZA7783, distributed here as `953_new.dta` with its
+  harmonisation do-file.
+
+**Role.** Argument step 2: the long-run trajectory of party attachment in Europe, and — more
+usefully — a demonstration that the measured partisan share is as much a coding decision as a
+measurement. The Mannheim file carries both attachment and party preference, so an explicit /
+vote-anchored split is constructible for the years the attachment item was fielded.
+
+#### What the item actually covers
+
+Verified in `code/03_explanal/3.4_eb_partisanship.qmd`, which inventories all four files:
+
+- **The series is 1975–1994 plus a single 2009 wave, and the hole is not fixable from these
+  files.** `closepty` in the Mannheim file is absent before 1975 and from 1995 onward;
+  `party_att_deg` in the harmonised file is fielded in 2009 only (EB 71.3). Nothing on disk
+  covers 1995–2008. The gap is left blank in the figures — no interpolation, no bridging line.
+  The 2009 point is one wave and is not a trend.
+- **EB 44.2 (spring 1996) is documented but absent.** The harmonised codebook lists it as
+  fielding the item. It is not in the Mannheim trend file, which jumps EB 44.1 → EB 45.1, and
+  it falls before the harmonised file's 2004 start. It exists as a standalone GESIS study.
+- **The CEEB carries no attachment item at all** — vote intention and past vote only. Central
+  and Eastern Europe is therefore absent from the attachment series until the 2009 wave brings
+  the 2004 and 2007 accession states in for one observation.
+- Austria, Finland and Sweden acceded in 1995, after the item was dropped, so they have **no**
+  Eurobarometer attachment series.
+- `voteint` covers 1970–2002 but is absent in 1998 and 2001; `lastvote` is fielded only in 1979
+  and 1982–1995.
+
+#### Why "the attachment item" is not one item
+
+- The stimulus changes from supporter/involvement to closeness at **EB 10**, the question is
+  asked in a different position at **EB 16**, and 2009 reverts to the earlier involvement value
+  labels. Points left of 1978 come from a differently worded item.
+- **English- and French-derived questionnaires ask different questions.** The English version
+  asks the absolute form, the French the relative one ("closer to one party than the others").
+  Documented at Mannheim codebook footnote 119 and in
+  [@sinnott1995variations; @katz1985measuring; @schmitt1989onparty]. The instrument is therefore
+  not measurement-equivalent across countries **within a single wave**, and any cross-country
+  comparison of attachment *levels* from this source inherits the asymmetry.
+- **`closepty` folds status and strength into one variable**: `1` very close, `2` fairly close,
+  `3` merely a sympathiser, `4` no party, `8` DK/NA, `9` inap. Moving "merely a sympathiser"
+  across the attached / not-attached line changes the measured European partisan share by
+  roughly **31 percentage points**, from one instrument fielded unchanged. Both readings are
+  plotted in 3.4 rather than one being chosen. DK/refusal is reported separately and never
+  folded into "not attached" — declining the item is not denying attachment.
+
+#### Other variables, verified against the files
+
 - `feelclo` — *which* party the respondent feels close to (country-specific party codes). Not a
   status item; fielded erratically.
-- `voteint` — vote intention; `lastvote` — last vote (past-vote recall); `inclvote` — inclination
-  to vote. **Two different constructs; never merge them.**
-- `nation1` is the country identifier to use: it separates West (`4`) from East (`14`) Germany and
-  Great Britain (`9`) from Northern Ireland (`10`). `nation2` pools both pairs irrecoverably.
+- `voteint` — vote intention; `lastvote` — last vote (past-vote recall); `inclvote` —
+  inclination to vote. **Three different constructs; never merge them.**
+- `nation1` is the country identifier to use: it separates West (`4`) from East (`14`) Germany
+  and Great Britain (`9`) from Northern Ireland (`10`). `nation2` pools both pairs irrecoverably,
+  and 3.4 keeps them apart for exactly this reason.
 - Weights: `wsample`, `wnation` (within-country — the right one for national shares), `weuro`
   (weights countries to EU population).
+- The harmonised file codes non-substantive answers as **haven tagged NAs** (`d` don't know,
+  `i` inapplicable) where Mannheim uses plain numeric `8`/`9`. An *untagged* NA means the item
+  was not fielded in that wave at all. 3.4 maps both schemes onto one code set; do not assume
+  either convention when reading a new file.
+- Country codes are **not shared across files**: Mannheim code `19` is Switzerland, harmonised
+  code `19` is Cyprus. Use each file's own value labels.
+- ⚠️ The harmonised file ships an errata note: `mem` / `ben` (EU membership good/bad and
+  benefit) are wrong or switched in EB 90.3, 91.5 and 95.3, and possibly other waves. An update
+  is pending from the provider. Not used by this project so far — check before it is.
 
-**Coverage correction.** The attachment item runs **1975–1994 only**, not the full span of the
-file. Substantive-response counts are zero for `closepty` before 1975 and from 1995 onward; the
-earlier claim that the explicit / vote-anchored split reaches "back to the early 1970s" holds for
-the *vote* item alone. `voteint` covers 1970–2002 but is absent in 1998 and 2001; `lastvote` is
-fielded only in 1979 and 1982–1995. Austria, Finland and Sweden acceded in 1995, after `closepty`
-was dropped, so they have **no** Eurobarometer attachment series at all.
+The attachment battery is largely dropped from the Standard Eurobarometer after 2002, so the
+Mannheim file ends at a genuine discontinuity rather than an arbitrary cut.
 
-Other caveats: item wording varies across waves and is documented in the codebook; **not all trend
-variables are present in all waves** — verify item coverage wave by wave before building a
-series. The attachment battery is largely dropped from the Standard Eurobarometer after 2002,
-so this file ends at a genuine discontinuity, not an arbitrary cut.
+### Derived item crosswalks
 
-Source: <https://search.gesis.org/research_data/ZA3521> (DOI 10.4232/1.10074)
+Written to `data/03_final/` by the two inventory notebooks. They are the same objects the
+notebooks recode with, exported rather than re-typed, so the recode and the documentation
+cannot drift apart. Small, tracked in the repo, and safe to read without the source data.
+
+| File | Written by | Contents |
+|---|---|---|
+| `eb_item_crosswalk.csv` | 3.4 | One row per Eurobarometer source × response code: `code_label`, the `status` it maps to (`attached` / `not_attached` / `dk_refused` / `not_asked`) and the `strength` it implies. |
+| `eb_item_wording.csv` | 3.4 | One row per partisanship item × wording era across all four EB files, with verbatim wording, categories and notes. |
+| `cses_item_crosswalk.csv` | 3.5 | One row per battery item × code (`close`, `leaner`, `strength`), identical across all three CSES releases. |
+| `cses_item_wording.csv` | 3.5 | Verbatim wording of the four battery items, with what each is asked of — the branch structure made explicit. |
+| `cses_item_availability.csv` | 3.5 | **One row per election study**, with `probe_available` / `strength_available` flags and the underlying counts. Consult this before any leaner or strength calculation. |
 
 ### Partisan discrimination / behavioral reference studies
 
@@ -245,7 +353,7 @@ against a real transition matrix rather than assumed.
 
 | Status | Dataset | Coverage | Link | Notes |
 |---|---|---|---|---|
-| ⬜ 🔒 | Standard Eurobarometer, post-2002 | 2002– | <https://www.gesis.org/en/eurobarometer-data-service> | Attachment battery largely dropped → discontinuity where the Mannheim trend file ends. |
+| ✅ 🔒 | Standard Eurobarometer, post-2002 | 2004–2021 | see [Eurobarometer](#eurobarometer) · <https://www.gesis.org/en/eurobarometer-data-service> | **Collected** as the harmonised 2004–2021 file. It confirms the discontinuity rather than repairing it: the attachment item appears in **one wave only** (2009, EB 71.3), and nothing covers 1995–2008. EB 44.2 (1996) is documented as fielding the item and would need downloading separately. |
 | ⬜ 🔒 | ISSP background variables | 1985– | <https://www.gesis.org/en/issp> | Party affiliation as a standard background item. |
 | ⬜ 🔒 | Politbarometer (DE) | monthly, 1977– | <https://www.gesis.org/en/elections-home/politbarometer> | Monthly *Parteineigung* with a cumulative file. Within-year variation no cross-national source matches; one of the two longest constant-wording stretches available. |
 | ⬜ | British Election Study | 1964– | <https://www.britishelectionstudy.com> | Longest continuous national election series. |
@@ -288,6 +396,14 @@ Listed so they are not mistaken for collectable data.
   bar); CSES asks whether you *usually think of yourself* as close, then probes leaners.
   Non-attachment rates differ systematically as a result — compare slopes within a source,
   never levels across sources.
+- **The Eurobarometer is not even equivalent to itself.** English-derived questionnaires ask the
+  absolute question, French-derived ones the relative one, within the same wave and the same
+  variable. So the EB pooled — inconsistently, and across countries — respondents that the CSES
+  deliberately keeps in separate branches (`close` vs. `leaner`). This is the sharpest case of
+  the rule above: an EB cross-country *level* comparison is partly comparing two instruments,
+  and no recode fixes it after the fact. See
+  [@sinnott1995variations; @katz1985measuring; @schmitt1989onparty] and notebook 3.5, which
+  states the CSES side of the comparison.
 - **Mode transitions bite this construct hardest.** The vote-anchored group is defined by a
   negative answer on one item and a positive on another, exactly where self-completion vs.
   interviewer effects are strongest. EES moved online, national studies migrated to web
@@ -311,15 +427,24 @@ Listed so they are not mistaken for collectable data.
 
 ## Storage and Git LFS
 
-Files over 100 MB must be tracked with Git LFS — GitHub rejects larger plain blobs outright.
-Currently LFS-tracked:
+Three tiers, in order of preference:
 
-- `data/01_raw/external/mannheim-eurobarometer-trend-file-1970-2002/ZA3521_v2-0-1.dta` (228 MB)
-- `data/01_raw/external/cses/mod6/cses6.rdata` (89 MB)
+1. **Not in the repo at all.** If a source is large *and* freely re-downloadable, ignore it and
+   document the link here instead. `data/01_raw/external/eb/` is the case that set the rule:
+   1.4 GB, of which the harmonised 2004–2021 file alone is 1.1 GB, against a `.git` already past
+   3 GB. `.gitignore` carries `/data/01_raw/external/eb/`, and a fresh clone re-downloads the
+   four files from the GESIS links in [the Eurobarometer section](#eurobarometer).
+2. **LFS**, for tracked files over ~50 MB. Currently that is
+   `data/01_raw/external/cses/mod6/cses6.rdata` (89 MB), and nothing else. The Mannheim trend
+   file was LFS-tracked until it moved into `eb/`; its blob remains in history at the old path,
+   which is why ignoring the directory stops future growth rather than reversing past growth.
+3. **Plain blobs** for everything smaller.
 
 `code/00_helper/glftrackeR.R` appends entries for files over 100 MB, but its threshold is the
-*hard* limit — `cses6.rdata` at 89 MB sits under it and had to be added by hand. Anything in
-the 50–100 MB band needs the same treatment.
+*hard* GitHub limit — `cses6.rdata` at 89 MB sat under it and had to be added by hand. Anything
+in the 50–100 MB band needs the same treatment. And a file already `git add`-ed as a plain blob
+stays plain even after `.gitattributes` gains its entry: `git rm --cached <file>`, stage
+`.gitattributes`, re-add, then verify with `git check-attr filter -- <file>`.
 
 **Codebook PDFs are not in the repo.** `.gitignore` carries a blanket `*.pdf` rule, so every
 `ZA*_cdb_*.pdf` and questionnaire under `external/` exists on disk but is untracked. Re-download
