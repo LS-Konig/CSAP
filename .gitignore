@@ -42,3 +42,7 @@ models/
 
 # Quarto knitr intermediates (left behind by interrupted renders)
 *.rmarkdown
+
+# Eurobarometer source files: 1.4 GB on disk, kept local and re-downloadable from
+# GESIS. See data/01_raw/external-data.md for the four sources and their links.
+/data/01_raw/external/eb/
