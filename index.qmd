@@ -30,3 +30,5 @@ over time development of PID effect on AP
 
 estimate within party contrast using multilevel modelling, how does attachement (vs denied attachement) increase AP?
 
+to-do:
+  - finish data collection and survey items overview (EES, CSES, ESS)
