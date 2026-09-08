@@ -1305,7 +1305,7 @@ If we still have time, let me show you what I am working on myself.
 - So the choice moves the **population of inference** -- unevenly
 
 ::: {.embed-fig}
-{{< embed code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution >}}
+<!-- embed removed with the notebooks (backup commit 4651e2c): code/03_explanal/3.1_descr_anal.qmd#fig-impl-expl-distribution -->
 :::
 
 ::: {.notes}
@@ -1334,7 +1334,7 @@ So the coding rule does not just shrink the sample. It shrinks it by a different
 [Attitudinal (thermometer)]{.figlab}
 
 ::: {.embed-fig .embed-pair}
-{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-thermo >}}
+<!-- embed removed with the notebooks (backup commit 4651e2c): code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-thermo -->
 :::
 :::
 
@@ -1342,7 +1342,7 @@ So the coding rule does not just shrink the sample. It shrinks it by a different
 [Behavioral (tokens)]{.figlab}
 
 ::: {.embed-fig .embed-pair}
-{{< embed code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-cj >}}
+<!-- embed removed with the notebooks (backup commit 4651e2c): code/03_explanal/3.2_ap_measures.qmd#fig-eu25-ap-comparison-cj -->
 :::
 :::
 :::

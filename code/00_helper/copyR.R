@@ -5,8 +5,8 @@
 # or use double backslashes (\\).
 # Refreshes the local copy of the published dataset from a sibling clone of
 # https://github.com/LS-Konig/eu25games2019 (DOI 10.5281/zenodo.21294634).
-# If you do not have that clone, use the `download_fresh` flag in
-# code/01_preparation/1.1_datasets.qmd instead, which fetches over HTTPS.
+# If you do not have that clone, download it over HTTPS from the Zenodo record
+# instead.
 source_file_path <- "C:/R/research/eu25games2019/data/03_final/eu25games2019.rds"
 # source_file_path <- "C:/R/logistics/glftrackeR/glftrackeR.R"
 
