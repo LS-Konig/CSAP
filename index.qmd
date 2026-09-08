@@ -1,5 +1,4 @@
 ---
-# WORKING TITLE -- the framing is being restarted; the notes below are the current direction.
 title: |
   Partisanship and Political Polarization in Europe
 execute:
