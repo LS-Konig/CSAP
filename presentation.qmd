@@ -1252,7 +1252,7 @@ So what should you take away from all of this?
 - The concern: less compromise, lower institutional confidence [@finkel2020political]
 - The pushback: reducing animosity does **not** move democratic attitudes [@broockman2023doesaffective]
 - The guardrail case: hostility to anti-democratic parties may be healthy [@harteveld2022affective]
-- Agonistic vs antagonistic -- adversary or enemy [@Mouffe2013agonistics]
+- Agonistic vs antagonistic -- adversary or enemy [@mouffe2013agonistics]
 - **One thermometer number cannot tell any of these apart**
 
 ::: {.notes}

@@ -1,0 +1,207 @@
+# EES
+
+## PID
+
+| EES Voter Study | Item |
+|------|------|
+| 2024 | Q19 |
+| 2019 | Q25 |
+| 2014 | QPP21 |
+| 2009 | Q87 |
+| 2004 | Q30 |
+
+## Vote choice
+
+| EES Voter Study | Item EP | Item Nat |
+|------|------|------|
+| 2024 | Q6 | Q8 |
+| 2019 | Q7 | Q9 |
+| 2014 | QP2  | QPP5 |
+| 2009 | Q25 | Q27 |
+| 2004 | Q10 | Q11 |
+
+## Like/Dislike rating
+
+| EES Voter Study | Item |
+|------|------|
+| 2024 | Q20 |
+| 2019 | / |
+| 2014 | / |
+| 2009 | / |
+| 2004 | / |
+
+## Propensity to vote
+
+| EES Voter Study | Item |
+|------|------|
+| 2024 | Q9 |
+| 2019 | Q10 |
+| 2014 | QPP8 |
+| 2009 | Q39 |
+| 2004 | Q12 |
+
+## LR Placement Parties
+
+| EES Voter Study | Item |
+|------|------|
+| 2024 | Q11  |
+| 2019 | Q13  |
+| 2014 | QPP14 |
+| 2009 | Q47 |
+| 2004 | Q14 |
+
+## EU Placement Parties
+
+| EES Voter Study | Item |
+|------|------|
+| 2024 | Q18 |
+| 2019 | Q24 |
+| 2014 | QPP19 |
+| 2009 | Q81 |
+| 2004 | Q22  |
+
+# CSES
+
+## PID
+
+| CSES Module | Item | 
+|------|------|
+| 6 (2021–2026) | `f3023` | 
+| 5 (2016–2021) | `IMD3005_1`–`_4` | 
+| 4 (2011–2016) | `IMD3005_1`–`_4` | 
+| 3 (2006–2011) | `IMD3005_1`–`_4` | 
+| 2 (2001–2006) | `IMD3005_1`–`_4` |
+| 1 (1996–2001) | `IMD3005_1`–`_4` | 
+
+## Vote choice
+
+| CSES Module | Item |
+|------|------|
+| 6 | `f3011` | 
+| 5 | `E3013_LH_PL` |
+| 4 | `D3006_LH_PL` |
+| 3 | `C3023_LH_PL` |
+| 2 | `B3006_1` |
+| 1 | `A2030` | 
+| In IMD | `IMD3002_LH_PL` | `IMD3002_PR_1` | `IMD3004_LH_PL` |
+
+## Like/Dislike rating
+
+| CSES Module | Item | In IMD |
+|------|------|------|
+| 6 | `f3018_a`–`f3018_i` | / |
+| 5 | `E3017_A`–`E3017_I` | `IMD3008_A`–`_I` |
+| 4 | `D3011_A`–`D3011_I` | `IMD3008_A`–`_I` |
+| 3 | `C3009_A`–`C3009_I` | `IMD3008_A`–`_I` |
+| 2 | `B3037_A`–`B3037_I` | `IMD3008_A`–`_I` |
+| 1 | `A3020_A`–`A3020_I` | `IMD3008_A`–`_I` |
+
+## Propensity to vote
+
+| CSES Module | Item |
+|------|------|
+| 1–6 | / |
+
+CSES never fielded a per-party PTV item; the like/dislike battery is its substitute.
+
+## LR Placement Parties
+
+| CSES Module | Item | In IMD |
+|------|------|------|
+| 6 | `f3020_a`–`f3020_i` | / |
+| 5 | `E3019_A`–`E3019_I` | `IMD3007_A`–`_I` |
+| 4 | `D3013_A`–`D3013_I` | `IMD3007_A`–`_I` |
+| 3 | `C3011_A`–`C3011_I` | `IMD3007_A`–`_I` |
+| 2 | `B3038_A`–`B3038_I` | `IMD3007_A`–`_I` |
+| 1 | `A3032_A`–`A3032_I` | `IMD3007_A`–`_I` |
+
+## EU Placement Parties
+
+| CSES Module | Item |
+|------|------|
+| 1–6 | / |
+
+No EU-placement item exists. The nearest thing is the **optional alternative scale**,
+fielded in Modules 5 and 6 only (`E3021_A`–`E3021_I` / `f3021_a`–`f3021_i`, self at
+`E3022` / `f3021_r`). Its content is study-specific — EU integration in only some studies
+— and it is not carried into the IMD.
+
+## Coverage
+
+IMD Phase 4 stacks Modules 1–5 (395,797 × 406; 230 studies; elections 1996–2021), and
+Module 5 is **fully contained** in it (114,714 rows, `IMD1008_MOD_5 == 1`), so the two are
+never stacked. Module 6 is an **advance release** (33,871 × 676; 18 studies), its names are
+**lowercase**, and it **renumbers** the PID battery to `f3023_*` — `f3005_*` there is an
+unrelated item. The PID battery was not fielded in `BELW1999`, `LVA_2018`, `TUN_2019`.
+Code `9` conflates "missing" with "not asked", so per-study availability has to be read off
+the data: see `data/03_final/cses_item_availability.csv` and
+`data/03_final/cses_item_wording.csv`.
+
+# Eurobarometer
+
+Rows are the four collected files, newest coverage first. See
+`data/01_raw/external-data.md` for provenance and `data/03_final/eb_item_wording.csv` for
+wording and value codes.
+
+## PID
+
+| EB file | Item |
+|------|------|
+| EB 95.3 (2021) | / |
+| Harmonised 2004–2021 | `party_att_deg` (EB71.3, 2009 only) |
+| CEEB 1990–1997 | / |
+| Mannheim trend 1970–2002 | `closepty` (status + strength); `feelclo` (party named) |
+
+## Vote choice
+
+| EB file | Item EP | Item Nat |
+|------|------|------|
+| EB 95.3 (2021) | / | / |
+| Harmonised 2004–2021 | / | / |
+| CEEB 1990–1997 | / | `V79`–`V100` (intention, per country); `V101`–`V117` (inclined to); `V118` (last national) |
+| Mannheim trend 1970–2002 | `euvonext` | `voteint`; `inclvote`; `lastvote` |
+
+## Like/Dislike rating
+
+| EB file | Item |
+|------|------|
+| all four | / |
+
+No party-rating battery exists in any collected Eurobarometer file.
+
+## Propensity to vote
+
+| EB file | Item |
+|------|------|
+| all four | / |
+
+The near-misses are **turnout** propensity, not per-party PTV: `voteprob_nat_sc` and
+`voteprob_sc` (harmonised, 2002–2004), `particip` (Mannheim, EP), `V78` (CEEB).
+
+## LR Placement Parties
+
+| EB file | Item |
+|------|------|
+| all four | / |
+
+Self-placement only: `lrs` (Mannheim), `lr` (harmonised and EB 95.3), `V74`/`V75`/`V76`
+(CEEB).
+
+## EU Placement Parties
+
+| EB file | Item |
+|------|------|
+| all four | / |
+
+## Coverage
+
+The attachment item runs **1975–1994** (EB4–EB42) in the Mannheim file, plus the single
+**EB71.3 (2009)** point in the harmonised file — and the 2009 delivered value labels are
+the *involvement* family, not *closeness*, so that point is not strictly comparable.
+There is a further wording break inside the Mannheim series: EB4–EB9 ask about
+*supporter/involvement*, EB10 onward about *closeness*, and English versions ask the
+absolute form where French-derived ones ask the relative (codebook fn. 119). Not asked in
+FI for EB39–41, nor in FI/SE/AT for EB42. The **CEEB carries no attachment item at all**.
+`attach_cntry` / `attach_eur` in EB 95.3 and the harmonised file are attachment to country
+and to Europe, not to a party. `data/01_raw/eb/` is git-ignored (1.4 GB) — re-download
+from GESIS using the links in the inventory.

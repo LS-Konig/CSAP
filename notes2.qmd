@@ -1,0 +1,394 @@
+---
+title: "CSAP Research Notes: Updated Structure & Modeling Strategy"
+subtitle: "Comparative Study of Affective Polarization"
+author: "Tristan Muno"
+date: "February 13, 2026"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+---
+
+# Project Evolution Summary
+
+**Project Code:** CSAP - Comparative Study of Affective Polarization
+
+## Version History
+
+1. **December 2024 (CSSR_Muno.pdf):** Causal identification approach
+   - Attempted to approximate causal identification of hypothetical intervention on partisan type
+   - **Decision:** Too complicated to sell; moved away from this framing
+
+2. **February 11, 2026 (index.pdf):** Measurement & conceptualization approach
+   - Shifted toward measurement and conceptualization story
+   - Three-study design (thermometer, behavioral, sorting)
+   - **Supervisor feedback:** Risk of overwhelming readers; sorting literature opens too many doors
+   - **Recommendation:** Include substantial question/analysis beyond exploratory measurement
+
+3. **Current Version (February 13, 2026):** Streamlined measurement + substantive extension
+   - **Core focus:** Explicit vs implicit partisans; vertical (thermometer) vs horizontal (token) AP
+   - **Measurement framework:** Reiljan's API logic for consistent comparison
+   - **Key empirical pattern:** Significant difference between explicit/implicit in vertical AP, but NOT in horizontal AP
+   - **Extension:** Move beyond descriptive aggregations to rigorous modeling + substantive drivers
+
+---
+
+# New Framing & Core Research Questions
+
+## Primary Research Question
+
+**How do explicit and implicit partisans differ in their levels of vertical (attitudinal) versus horizontal (behavioral) affective polarization across European multiparty democracies?**
+
+## Conceptual Framework
+
+### Partisan Type Classification
+- **Explicit partisans:** Respondents reporting psychological attachment to a party
+- **Implicit partisans:** Respondents denying partisan attachment but reporting vote choice
+- **Partisan anchor:** Vote choice serves as anchor for AP measurement (consistent with Reiljan)
+
+### AP Dimensions
+- **Vertical/Political AP:** Party-targeted attitudes (thermometer ratings)
+- **Horizontal/Social AP:** Citizen-targeted behavior (token allocation in trust game)
+
+### Measurement Logic (Reiljan's API)
+- **Copartisan indicator:** 1 if evaluated party = respondent's partisan anchor, 0 otherwise
+- **Averaging across outgroups:** Consistent comparison between vertical and horizontal AP
+- **Data structure:** Multiple rows per respondent (one per party/profile evaluation)
+
+---
+
+# Modeling Strategy
+
+## Basic Model Structure
+
+### Core Linear Predictor
+```
+Outcome (Thermo/Token) = α + β₁·copartisan + β₂·type + β₃·copartisan×type + ε
+```
+
+**Where:**
+- `Outcome`: Either thermometer score (0-10) or token allocation (0-10)
+- `copartisan`: 1 if evaluated party = partisan anchor, 0 otherwise
+- `type`: 1 if explicit partisan, 0 if implicit partisan
+- `β₁`: Main effect of copartisanship (baseline AP for implicit partisans)
+- `β₂`: Main effect of being explicit partisan (difference in baseline affect)
+- `β₃`: **KEY PARAMETER** - Interaction effect (difference in AP between types)
+
+### Multilevel Extension
+
+**Random effects structure:**
+- Random intercepts: Respondent level (`meta_pid`) + Country level (`country`)
+- Random slopes at country level: All β parameters (β₁, β₂, β₃)
+- **Rationale:** Account for clustering, allow cross-national heterogeneity in effects
+
+**Implementation:** `brms` package for full Bayesian uncertainty propagation
+
+---
+
+# Main Analyses
+
+## Analysis 1: Vertical AP (Thermometer Ratings)
+
+### Objectives
+1. **Pooled analysis:** Show that explicit partisans exhibit higher vertical AP than implicit partisans at population level
+2. **Country-specific:** Estimate AP conditional on type for each country separately
+3. **Visualization:** Posterior distributions of expected values simulated from MLM
+
+### Expected Pattern
+- **Hypothesis:** β₃ > 0 for thermometer outcomes
+- **Interpretation:** Explicit partisan attachment amplifies attitudinal polarization toward parties
+
+## Analysis 2: Horizontal AP (Token Allocation)
+
+### Objectives
+1. **Pooled analysis:** Show that gap between explicit/implicit does NOT exist in behavioral AP
+2. **Country-specific:** Confirm null effect holds across all 25 countries
+3. **Visualization:** Parallel structure to Analysis 1 for direct comparison
+
+### Expected Pattern
+- **Hypothesis:** β₃ ≈ 0 for token outcomes
+- **Interpretation:** Behavioral discrimination emerges from partisan categorization regardless of subjective attachment
+
+---
+
+# Substantive Extensions
+
+## Extension 1: Individual-Level Drivers of AP
+
+### Research Question
+**What individual-level variables drive vertical and/or horizontal AP?**
+
+### Model Specification
+```
+Outcome = β₁·copartisan + β₂·covariate + β₃·copartisan×covariate + ε
+```
+(+ multilevel extension as above)
+
+### Analytical Strategy
+1. **Literature review:** Identify covariates presumed to correlate with AP
+   - Ideological extremity
+   - Political interest/sophistication
+   - Social identity strength
+   - Perceived threat from outgroups
+   - Democratic norms/values
+   - Social trust
+   - Media consumption patterns
+
+2. **Estimation:** Run separate models for each covariate × outcome combination
+
+3. **Comparison:** Test whether covariates better predict vertical vs horizontal AP
+
+4. **Visualization:** Conditional effect plots showing how AP varies across covariate values
+
+### Key Question
+Do the same individual characteristics drive both attitudinal and behavioral polarization, or are they distinct phenomena with different psychological/social roots?
+
+---
+
+## Extension 2: Drivers of Type Differences in Vertical AP
+
+### Research Questions
+- **Ambitious:** What drives the difference in vertical AP between explicit and implicit partisans? (Why does the gap exist?)
+- **Modest:** What individual characteristics moderate vertical AP differences?
+
+### Model Specification
+```
+Outcome = β₁·copartisan + β₂·type + β₃·covariate + β₄·copartisan×type×covariate + ε
+```
+(+ multilevel extension)
+
+### Interpretation of Triple Interaction (β₄)
+- **β₄ > 0:** The explicit-implicit gap in AP is larger among those with higher covariate values
+- **β₄ < 0:** The explicit-implicit gap in AP is smaller among those with higher covariate values
+- **β₄ ≈ 0:** The gap does not vary systematically with the covariate
+
+### Candidate Moderators
+- **Identity consolidation:** Does the gap emerge only among those with aligned social identities?
+- **Ideological clarity:** Is the gap stronger for those with clearer left-right positions?
+- **Political engagement:** Does active participation amplify the role of subjective attachment?
+- **Partisan context:** Does the gap depend on party system fragmentation or polarization?
+
+### Analytical Challenges
+- **Complexity:** Triple interactions require careful interpretation
+- **Visualization:** Marginal effects plots at different covariate values
+- **Statistical power:** May need to focus on strongest theoretical candidates
+
+---
+
+# Presentation Strategy
+
+## Main Paper
+- **Focus:** Streamlined presentation of core findings (Analyses 1 & 2)
+- **Models:** Present reduced-form results; relegate full specifications to appendix
+- **Figures:** Posterior simulation-based visualizations
+  - Pooled estimates with credible intervals
+  - Small multiples showing country-specific patterns
+  - Conditional effect plots for substantive extensions
+
+## Appendix
+- **Full Bayesian hierarchical model specification**
+- **Mathematical formalization of all estimands**
+- **Diagnostic plots (trace plots, R-hat, ESS)**
+- **Robustness checks:**
+  - Alternative priors
+  - Subset analyses (e.g., only stable democracies)
+  - Alternative AP measures (if available)
+  - Sensitivity to party-size weighting assumptions
+
+---
+
+# Key Advantages of This Approach
+
+1. **Conceptual clarity:** Sharp distinction between vertical/horizontal and explicit/implicit
+2. **Consistent measurement:** Reiljan's framework applied uniformly across both AP types
+3. **Causal leverage:** Interaction terms isolate conditional effects cleanly
+4. **Uncertainty quantification:** Full Bayesian approach propagates all sources of uncertainty
+5. **Comparative scope:** Multilevel structure allows principled cross-national inference
+6. **Substantive depth:** Extensions move beyond measurement toward theory testing
+
+---
+
+# Open Questions & Next Steps
+
+## Immediate Tasks
+1. **Literature review for Extension 1:** Compile list of theoretically motivated covariates
+2. **Data exploration:** Check distributions and missingness for potential covariates
+3. **Prior specification:** Develop weakly informative priors for all parameters
+4. **Computational setup:** Test models on subset of data to ensure convergence
+
+## Methodological Considerations
+1. **Measurement invariance:** Do thermometer scales function equivalently across countries?
+2. **Selection into types:** Could confounding explain observed differences? (Less of a concern with interaction-focused approach)
+3. **Party system heterogeneity:** Should model include party-level random effects?
+4. **Weighting strategy:** Confirm party-size weighting is appropriate for research question
+
+## Theoretical Development
+1. **Mechanisms:** What causal pathways link explicit attachment to vertical (but not horizontal) AP?
+2. **Scope conditions:** When should we expect partisan type to matter more or less?
+3. **Normative implications:** What do findings mean for democratic health in multiparty systems?
+
+---
+
+# Timeline (Tentative)
+
+- **Week 1-2:** Literature review for covariates; finalize model specifications
+- **Week 3-4:** Run main analyses (1 & 2); generate core visualizations
+- **Week 5-6:** Extension 1 (individual-level drivers)
+- **Week 7-8:** Extension 2 (moderators of type differences) [if feasible]
+- **Week 9-10:** Draft main results; assemble appendix
+- **Week 11-12:** Revisions; prepare for supervisor meeting
+
+---
+
+# Notes to Self
+
+- **Keep it focused:** Don't let extensions balloon; supervisor warned about scope
+- **Visualize early:** Posterior simulations should guide narrative, not just illustrate it
+- **Country variation:** Acknowledge heterogeneity but don't get lost in 25 separate stories
+- **Check assumptions:** Party-size weighting, scale equivalence, random effects structure
+- **Write as you go:** Don't wait until all analyses are done to start drafting
+
+---
+
+*Last updated: February 13, 2026*
+*Next review with supervisor: [TBD]*
+
+
+---
+
+Update `CLAUDE.md` to replace the paper's high-level structure with the revised
+version below. This is a strategic restructuring, not an edit — the old outline
+(explicit/implicit partisan comparison presented as a vertical vs. horizontal AP
+finding) is superseded.
+
+Preserve everything in CLAUDE.md unrelated to paper structure: build commands,
+Quarto/renv setup, file layout, data paths, coding conventions. Replace or add
+sections covering the paper's argument, structure, and analysis plan.
+
+## Context for the change
+
+The paper is being retargeted at APSR/general-interest. The old framing led with
+a vertical-vs-horizontal AP asymmetry. That framing is dropped because target and
+measurement mode are perfectly confounded in the Hahm et al. (2024) data:
+thermometers are vertical-attitudinal, the conjoint is horizontal-behavioral, so
+the diagonal cannot be separated. The claim is now attitudinal vs. behavioral,
+with the confound stated in the design section rather than in limitations.
+
+## Central claim (record this verbatim; every section serves it)
+
+Vote-anchored partisans who deny feeling close to a party discriminate against
+out-partisans just as much as self-identified partisans do — yet they report
+substantially less party-directed animus. Self-reported attachment inflates
+measured polarization without corresponding to any additional discrimination in
+behavior.
+
+CRITICAL PHRASING RULE: never write the behavioral result as "no behavioral
+AP" or "attachment does not correspond to behavioral discrimination". Both
+partisan types show large, credibly non-zero copartisan effects in the games
+(β₁). The finding is that this effect does NOT differ by type (β₃ ≈ 0). The
+results section must report the magnitude of β₁ before discussing β₃, so the
+reader sees the effect exists before being told it does not vary. The β₁ main
+effect is also the paper's primary evidence that the instrument has power —
+cite it when addressing the "null reflects weak design" objection.
+
+## Argument chain (record as the paper's roter Faden)
+
+1. AP is measured on partisans, so someone must decide who counts.
+2. In Europe the attachment item does not cleanly identify partisans (Converse &
+   Dupeux; Thomassen — attachment reports the vote rather than preceding it;
+   attachment shares range ~41% LV to ~85% DK).
+3. Coding choices therefore shift the population of inference differently in each
+   country.
+4. The literature makes this choice, mostly silently. → EMPIRICAL CLAIM 1
+5. Whether it distorts conclusions is answerable: hold the anchor constant, vary
+   the reporting.
+6. Answer depends on the measure — large attitudinal gap, no behavioral gap.
+   → EMPIRICAL CLAIM 2
+7. Therefore attachment behaves like a reporting disposition, not an identity.
+
+Sections 3, 6, 7 of the paper are load-bearing. 2 and 4 make them necessary.
+5 and 8 are calibration. Everything else is appendix.
+
+## Section structure to record
+
+1. **Introduction** — claim in the first paragraph. Names what it contradicts:
+   standard coding practice and the identity literature.
+2. **What attachment measures in Europe** — 3-4 pages, not a review. Engages
+   Bankert/Huddy expressive partisanship as the strongest counter. Key
+   distinction: attachment as binary *selection filter* vs. as graded identity
+   measure. Taxonomy (PIDs / vote-anchored / non-partisans) as a figure.
+3. **Coding practice in comparative AP research** — EMPIRICAL CLAIM 1. Census
+   (not sample) of comparative/European AP articles in a named journal set,
+   defined years, hand-coded on two dimensions only: ingroup criterion,
+   non-identifier treatment. Target ~40 papers.
+4. **Design: holding the anchor constant** — the section referees will attack.
+   See assumptions below.
+5. **Attitudinal result** — explicit/implicit gap in thermometer AP. Framed as
+   the *contrast case*, not the finding; concede the partly mechanical
+   correlation between attachment item and thermometer. Country heterogeneity
+   as one figure here, not a separate section.
+6. **Behavioral result** — EMPIRICAL CLAIM 2. The null, properly tested.
+7. **Does attachment do work, or mark prior investment?** — within-person panel
+   leg. MAIN TEXT, not appendix.
+8. **What this does to comparative estimates** — four ingroup codings, country
+   rank correlations.
+9. **Discussion** — measurement implication first; theory implication ceilinged;
+   limitations owned.
+
+## Assumptions and how each is tackled (record explicitly — this is the part I
+## keep losing track of)
+
+- **Groups not otherwise comparable.** Party-within-country varying intercepts
+  and slopes; contrast estimated inside party-country cells. Report balance.
+  State plainly: rules out composition, does NOT identify a causal effect.
+- **Recall-maximizing rule assigns anchor by fiat for defectors** (attachment
+  party ≠ vote party). Code both anchors for defectors; test which predicts
+  ratings and allocations.
+- **Vote-anchored ≠ leaners.** Leaners come from an attitudinal probe, ours from
+  vote recall. Use CSES branching probe to estimate overlap. Paper uses neutral
+  term "vote-anchored", discusses relation to leaners explicitly.
+- **A null needs an equivalence test.** Pre-specified ROPE in token units,
+  justified against the size of the copartisan main effect. Report posterior
+  mass inside the ROPE. Overlapping intervals are not evidence of equivalence.
+- **Null could be weak design.** Benchmark partisan attribute against EU
+  position, class, religion within the same conjoint.
+- **Ten hypothetical tokens may not be where identity shows up.** Unresolvable.
+  Concede in discussion before a referee raises it.
+- **Panel leg may lack within-person movement.** Check the attachment transition
+  matrix BEFORE committing to the section. If thin, drop it rather than report
+  underpowered results.
+- **Rank correlations across codings may be ~0.95.** Commit in advance to
+  reporting either way. A deflationary result is still a contribution. Note that
+  most-liked-party coding selects on the outcome and is mechanically
+  inflationary.
+
+## Explicitly dropped or demoted (record so it doesn't creep back)
+
+- **DROPPED: the LLM literature-classification pipeline** (200 hand-coded papers,
+  classifier validation, per-dimension κ thresholds, OSF preregistration of the
+  coding scheme). Replaced by the hand-coded census in section 3. The pipeline
+  remains viable as a separate standalone paper — keep the Part I/Part II notes
+  in the repo, flagged as out of scope for this manuscript.
+- **DROPPED: vertical/horizontal as the headline framing.** Retained only as a
+  conceptual 2x2 inside section 6 explaining why the answer splits.
+- **DEMOTED: identity vs. categorization debate.** Still generates the competing
+  predictions in the theory section, but the adjudication claim moves to the
+  discussion with an explicit ceiling: the design cannot separate attachment
+  creating investment from marking it.
+- **DEMOTED: individual-level moderators.** Appendix, labelled either
+  preregistered or exploratory — no middle option. Not a third results section.
+- **PROMOTED: external panel data** from robustness to main text (section 7).
+  One country, done properly, beats several done shallowly.
+
+## Standing rule to add
+
+Before adding any analysis to the manuscript, ask whether it changes step 7 of
+the argument chain. If not, it belongs in the appendix. Analyses run "to see
+whether they pay off" are exploratory by definition and go in the appendix or a
+separate document.
+
+Keep CLAUDE.md's existing tone and formatting conventions. Report back with a
+summary of what you changed and anything in the old structure you were unsure
+whether to preserve.

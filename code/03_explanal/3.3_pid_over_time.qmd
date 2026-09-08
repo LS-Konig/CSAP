@@ -494,6 +494,24 @@ map_cses_pid <- tribble(
 # covers the same set, so the two checks cannot drift apart
 stopifnot(setequal(unique(map_cses_pid$pid_close), c(0L, 1L, 7L, 8L, 9L)))
 
+# `pid_strength_lab` above records WHICH BRANCH a respondent came down (close vs
+# leaner), not how strongly they hold the attachment. The intensity item is a
+# separate variable, IMD3005_4 / f3023_4, asked only of those who named a party.
+# It is kept as its own column because the branch label would otherwise overwrite
+# it, and because the intensity series is the quantity D17 turns on: dealignment
+# in the Eurobarometer era is a decline in intensity that the binary attached /
+# not-attached filter cannot see, and this is the item that tests whether the
+# same holds on the CSES.
+map_cses_intensity <- tribble(
+  ~pid_strength_code, ~pid_intensity,
+  1L,                 "very close",
+  2L,                 "somewhat close",
+  3L,                 "not very close",
+  7L,                 NA_character_,
+  8L,                 NA_character_,
+  9L,                 NA_character_
+)
+
 # Eurobarometer: status and strength arrive in one variable.
 map_eb_pid <- tribble(
   ~closepty, ~code_label,    ~pid_status,    ~pid_strength_lab,
@@ -582,6 +600,14 @@ harmonise_cses <- function(d, source_label) {
       weight = as.numeric(weight),
       eu_at_time = eu_flag == 1,
       pid_status,
+      # The raw IMD3005_4 / f3023_4 intensity, recoded and kept separate from the
+      # branch label. This MUST be computed before `pid_strength` is reassigned
+      # below: inside transmute a later expression sees the newly created column,
+      # so reading `pid_strength` after the reassignment would silently return the
+      # branch label instead of the intensity code.
+      pid_intensity = map_cses_intensity$pid_intensity[
+        match(pid_strength, map_cses_intensity$pid_strength_code)
+      ],
       pid_strength = pid_strength_lab,
       is_sympathizer = FALSE,
       pid_party = if_else(pid_party >= 9999900, NA_real_, as.numeric(pid_party)),
@@ -639,6 +665,12 @@ harmonise_eb_one <- function(d, vote_col, vote_item_type_label) {
       # a reported vote, with a usable party code
       pid_status = if_else(is.na(pid_status), "not_asked", pid_status),
       pid_strength = pid_strength_lab,
+      # In the Eurobarometer, status and intensity arrive in one variable, so the
+      # intensity column is the same labels. It is created anyway, under the same
+      # name as the CSES one, so the strength series below can be written once.
+      # The two are NOT comparable in level -- different wording, and the CSES asks
+      # intensity only of those who already said "close" (D10).
+      pid_intensity = pid_strength_lab,
       is_sympathizer = !is.na(closepty) & closepty == 3L,
       pid_party = if_else(feelclo %in% map_eb_vote$code, NA_real_, feelclo),
       voted = if_else(!is.na(vote_code) & !vote_code %in% map_eb_vote$code,
@@ -1054,6 +1086,167 @@ pooled_nonattached_voted <- nonattached_voted |>
   filter(countries >= min_countries_pooled)
 
 head(pooled_attach)
+```
+
+## Balanced panel: holding the country set constant
+
+`min_countries_pooled` puts a floor under each year, but a floor is not
+comparability. A year can clear it on a different set of countries than the year
+it is being compared with, and over a long window that difference accumulates
+into an apparent trend — or hides a real one.
+
+It understates one here. Over the same twenty Eurobarometer years the country set
+grows from ten to fifteen (Greece 1981, Spain and Portugal 1986, East Germany
+1990), and the entrants carry higher attachment, so the unbalanced mean makes the
+decline look about two points shallower than it is. **D17** therefore requires
+that any series reported as a trend be computed on a constant set. Both are
+computed below so the contrast is visible rather than asserted.
+
+The country set is the smaller of the two traps. The larger one is the **window**:
+comparing the first and last year rather than period means turns this same decline
+into an apparent null, because 1975 sits at a local low and 1994 at a local high.
+That is why the contrast below is computed on five-year means, and why D17 asks
+for the country set, the denominator, the availability restriction and the window
+all to be held constant.
+
+```{r}
+#| label: agg-pooled-balanced
+
+# a country enters the balanced panel for a source only if it is observed in
+# every year that source covers. This is deliberately strict: for CSES, where a
+# country appears only in its election years, almost nothing survives it, and
+# that is the correct answer -- CSES cannot support a balanced annual series.
+balanced_units <- pid_country_year |>
+  filter(reliable) |>
+  group_by(source) |>
+  mutate(n_years_source = n_distinct(year)) |>
+  group_by(source, country_unit) |>
+  filter(n_distinct(year) == first(n_years_source)) |>
+  ungroup() |>
+  distinct(source, country_unit)
+
+pooled_attach_balanced <- pid_country_year |>
+  filter(reliable) |>
+  semi_join(balanced_units, by = c("source", "country_unit")) |>
+  group_by(source, year) |>
+  summarise(
+    countries = n(),
+    share_attached = mean(share_attached),
+    share_dk = mean(share_dk_refused),
+    .groups = "drop"
+  )
+
+# The contrast that motivates D17: same years, same source, two country sets.
+#
+# Endpoints are compared as FIVE-YEAR PERIOD MEANS, not as single years. Single
+# years are noisy enough to reverse the reading: on the Eurobarometer, 1994 is a
+# local high and 1975 a local low, so a 1975-vs-1994 comparison shows a decline of
+# under two points where the period means show ten. A conclusion that depends on
+# which year sits at the edge of the window is not a trend.
+period_span <- 5
+
+pooled_contrast <- bind_rows(
+  pooled_attach |> mutate(panel = "unbalanced"),
+  pooled_attach_balanced |> mutate(panel = "balanced")
+) |>
+  group_by(source, panel) |>
+  # a source needs two non-overlapping windows for the contrast to mean anything;
+  # CSES MOD6 spans a single year and is dropped here rather than reported as NA
+  filter(max(year) - min(year) >= 2 * period_span) |>
+  mutate(
+    period = case_when(
+      year < min(year) + period_span ~ "early",
+      year > max(year) - period_span ~ "late",
+      TRUE ~ NA_character_
+    )
+  ) |>
+  filter(!is.na(period)) |>
+  group_by(source, panel, period) |>
+  summarise(
+    years = paste(min(year), max(year), sep = "-"),
+    countries = max(countries),
+    share = 100 * mean(share_attached),
+    .groups = "drop"
+  ) |>
+  pivot_wider(
+    names_from = period, values_from = c(years, countries, share)
+  ) |>
+  mutate(change_pp = share_late - share_early)
+
+pooled_contrast
+```
+
+```{r}
+#| label: tbl-panel-contrast
+#| tbl-cap: "Attachment change over the same years, on a shifting versus a constant country set."
+
+pooled_contrast |>
+  knitr::kable(digits = 1)
+```
+
+## Attachment intensity
+
+The binary attached / not-attached split is what the affective-polarization
+literature uses to select partisans. It is not what moved most over this period.
+The series below decomposes the attached side by intensity, as a share of all
+respondents giving a substantive answer, so that the intensity categories and the
+unattached share sum to one and can be read against each other.
+
+The Eurobarometer and the CSES are **separate series with different instruments**:
+the Eurobarometer folds intensity and status into one item, while the CSES asks
+intensity only of respondents who already said they feel close, and the wordings
+differ. Compare the shape of each within its own source; never the levels across
+them (D10).
+
+```{r}
+#| label: agg-intensity
+
+intensity_base <- pid_marginal_base |>
+  filter(pid_status %in% c("attached", "not_attached")) |>
+  mutate(
+    intensity_cat = if_else(
+      pid_status == "not_attached", "none", pid_intensity
+    )
+  ) |>
+  filter(!is.na(intensity_cat))
+
+intensity_country_year <- intensity_base |>
+  group_by(source, country_unit, country_iso3, year, intensity_cat) |>
+  summarise(w = sum(weight, na.rm = TRUE), .groups = "drop") |>
+  group_by(source, country_unit, country_iso3, year) |>
+  mutate(share = w / sum(w)) |>
+  ungroup()
+
+# pooled on the balanced panel only, per D17
+intensity_pooled <- intensity_country_year |>
+  semi_join(balanced_units, by = c("source", "country_unit")) |>
+  group_by(source, year, intensity_cat) |>
+  summarise(countries = n(), share = mean(share), .groups = "drop")
+
+intensity_pooled |>
+  filter(source == "Mannheim EB") |>
+  mutate(period = case_when(
+    year <= 1979 ~ "1975-79",
+    year >= 1990 ~ "1990-94",
+    TRUE ~ NA_character_
+  )) |>
+  filter(!is.na(period)) |>
+  group_by(intensity_cat, period) |>
+  summarise(share = 100 * mean(share), .groups = "drop") |>
+  pivot_wider(names_from = period, values_from = share) |>
+  mutate(change_pp = `1990-94` - `1975-79`)
+```
+
+```{r}
+#| label: tbl-intensity-eb
+#| tbl-cap: "Eurobarometer attachment by intensity, balanced panel, as a share of substantive responses."
+
+intensity_pooled |>
+  filter(source == "Mannheim EB") |>
+  select(year, intensity_cat, share) |>
+  mutate(share = 100 * share) |>
+  pivot_wider(names_from = intensity_cat, values_from = share) |>
+  knitr::kable(digits = 1)
 ```
 
 # Comparability across the two instruments

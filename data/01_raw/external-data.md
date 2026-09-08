@@ -12,6 +12,7 @@ The manuscript (`index.qmd`) no longer carries a dataset list — it points here
 | ✅ | On disk in this repo |
 | ⬜ | Identified, not yet downloaded |
 | 🔒 | Requires registration, application, or a data-use agreement before download |
+| ❌ | Considered and **ruled out** — kept so it is not re-proposed, with the reason stated |
 
 Sizes are approximate. Codebook PDFs are present on disk but **not in the repo** —
 `.gitignore` contains a blanket `*.pdf` rule (see [Storage and Git LFS](#storage-and-git-lfs)).
@@ -78,13 +79,19 @@ alongside vote recall. That makes it the sole basis for decomposing "no attachme
 leaners and true non-partisans, and therefore for the leaner-overlap estimate the design
 section needs.
 
-| Status | Path | Files | Role and caveats |
-|---|---|---|---|
-| ✅ | `cses/imd/` | `cses_imd.rdata` (18 MB) + 5 codebook PDFs (ZA7481) | Integrated Module Dataset: ~395k respondents, 230 elections, 59 polities. **Section 4:** estimate the overlap between vote-anchored respondents and leaners. **Argument step 2:** cross-national variation in attachment shares. |
-| ✅ | `cses/mod5/` | `cses5.rdata` (9 MB) + 9 codebook/questionnaire PDFs (ZA7557) | Module 5 (2016–2021), the module closest in time to the 2019 Hahm et al. fieldwork. **Adds nothing on its own — it is a strict subset of the IMD** (see below). Reach for it only for Module-5-specific variables the IMD does not harmonise; for period-matched attachment shares, filter the IMD on `IMD1008_MOD_5 == 1`. |
-| ✅ | `cses/mod6/` | `cses6.rdata` (89 MB) + 7 codebook PDFs (ZA7748) | Module 6 (2021–2026). **Advance release only** — the full release is pending, country coverage will change. Treat any Module 6 result as provisional and re-run on the final release. |
+| Status | Path | Version on disk | Files | Role and caveats |
+|---|---|---|---|---|
+| ✅ | `cses/imd/` | `VER2024-FEB-27` | `cses_imd.rdata` (18 MB) + 5 codebook PDFs (ZA7481) | Integrated Module Dataset: 395,797 × 406, 230 elections, 59 polities, Modules 1–5 integrated. This is the **Phase 4** release and the current one — no Phase 5 announced as of Aug 2026. **Section 4:** estimate the overlap between vote-anchored respondents and leaners. **Argument step 2:** cross-national variation in attachment shares. |
+| ✅ | `cses/mod5/` | — | `cses5.rdata` (9 MB) + 9 codebook/questionnaire PDFs (ZA7557) | Module 5 (2016–2021), the module closest in time to the 2019 Hahm et al. fieldwork. **Adds nothing on its own — it is a strict subset of the IMD** (see below). Reach for it only for Module-5-specific variables the IMD does not harmonise; for period-matched attachment shares, filter the IMD on `IMD1008_MOD_5 == 1`. |
+| ✅ | `cses/mod6/` | `VER2025-DEC-16` | `cses6.rdata` (89 MB) + 7 codebook PDFs (ZA7748) | Module 6 (2021–2026), 33,871 × 676, 18 studies. This is the **Second Advance Release** (Dec 2025) — current, but still an advance release: the full release is pending and country coverage will change. Treat any Module 6 result as provisional and re-run on the final release. |
 
 Source: <https://cses.org/data-download/download-data-documentation/>
+
+**CSES holdings are complete and current; nothing to download.** Verified Aug 2026 by reading
+the version variables in the files themselves — `IMD1002_VER` in `cses_imd.rdata`, `f1002_ver`
+in `cses6.rdata` — not from the release pages. Modules 1–4 need no standalone download because
+the IMD integrates Modules 1–5. Recorded as D16 in `DECISIONS.md`, with both version strings, so
+that a future re-download is a deliberate act with a visible diff rather than a silent upgrade.
 
 **The IMD already contains Module 5 in full** — 114,714 of its 395,797 rows carry
 `IMD1008_MOD_5 == 1`, exactly the row count of `cses5.rdata`, and **all 56** of Module 5's
@@ -154,6 +161,33 @@ in `code/03_explanal/3.5_cses_partisanship.qmd`, which exports per-study availab
   cleaner instrument — the CSES at least asks the questions separately, so all three readings are
   constructible rather than assumed.
 
+#### The common base: how many studies carry all three items at once
+
+Any trend that compares affect across coding rules needs the attachment item, a vote item and a
+party-affect measure **in the same study**. The IMD carries all three — `IMD3005_1`–`_4` (the
+full branching battery), `IMD3002_LH_PL` (vote choice, current lower house, party list) and
+`IMD3008_A`–`_I` (like–dislike, 9 parties) — so the question is coverage, not availability.
+
+Counted on the file (study-year kept when a majority of respondents answer substantively,
+treating `7`/`8`/`9` and the `9999992`–`9999999` and `95`–`99` bands as non-substantive):
+
+| Scope | Study-years with all three | Span | Polities |
+|---|---|---|---|
+| All polities | **149 of 230** | 1996–2021 | 45 |
+| Within the 25-country frame | **82 of 105** | 1996–2021 | **22 of 25** |
+
+Per-country counts in the frame: DEU 8, CZE 7, NLD 6, FIN/GRC/POL/SWE 5, BEL/DNK/ESP/PRT/SVN 4,
+AUT/HUN/LVA/SVK 3, BGR/LTU/ROU 2, EST/HRV/ITA 1. **France, Ireland and the United Kingdom carry
+no study-year with all three** — the single largest coverage cost of using the IMD this way.
+
+Two caveats belong with the number. It is a **crude study-level flag**, not the per-item
+availability audit that `cses_item_availability.csv` provides, and it keys on **party A only**
+for like–dislike, so a study offering the battery for parties B–I but not A would be
+undercounted. Re-derive rather than cite these figures if they become load-bearing.
+
+The span starts at 1996 because the CSES itself does, which is why the pre-1996 leg has to come
+from somewhere else — see [C.6](#c6-long-run-ap-backbones-candidate-undecided).
+
 ### Eurobarometer
 
 Everything under `data/01_raw/external/eb/`. **This whole directory is git-ignored** — 1.4 GB
@@ -193,14 +227,28 @@ vote-anchored split is constructible for the years the attachment item was field
 
 Verified in `code/03_explanal/3.4_eb_partisanship.qmd`, which inventories all four files:
 
-- **The series is 1975–1994 plus a single 2009 wave, and the hole is not fixable from these
-  files.** `closepty` in the Mannheim file is absent before 1975 and from 1995 onward;
-  `party_att_deg` in the harmonised file is fielded in 2009 only (EB 71.3). Nothing on disk
-  covers 1995–2008. The gap is left blank in the figures — no interpolation, no bridging line.
-  The 2009 point is one wave and is not a trend.
-- **EB 44.2 (spring 1996) is documented but absent.** The harmonised codebook lists it as
-  fielding the item. It is not in the Mannheim trend file, which jumps EB 44.1 → EB 45.1, and
-  it falls before the harmonised file's 2004 start. It exists as a standalone GESIS study.
+- **The item was fielded in 1970, every half-year from 1975 fall to 1994 fall, spring 1996, and
+  autumn 2009 — and in no other wave.** This is the full list, read off the wave-by-variable
+  grid in `Trends_EBs_1970-2021.xlsx` (sheet `1 Trends`, row `party_att_deg`, where a cell
+  carries the source variable number and a blank means not fielded). **Nothing exists for
+  1997–2008**, so the hole is a property of the Eurobarometer programme, not of what happens to
+  be on disk. The gap is left blank in the figures — no interpolation, no bridging line. The
+  2009 point is one wave and is not a trend.
+- **The consequence is settled: the pre-1996 long-run series cannot come from the Eurobarometer.**
+  There are no unfielded waves left to hunt for, so a national-election-study harmonisation has
+  to carry the trend. See [C.6 Long-run AP backbones](#c6-long-run-ap-backbones-candidate-undecided).
+  Recorded as D15 in `DECISIONS.md`.
+- **1970 fields a two-category variant** (`1 deeply` / `3 only a little`, recoded by Mannheim to
+  align with later versions), which `closepty` does not reach — hence the earlier note that the
+  Mannheim series starts in 1975. The 1970 point is not comparable to the four-category item and
+  is not a fourth reading of it.
+- **EB 44.2bis (ZA2828, Jan–Mar 1996) is the one recoverable wave.** The trends grid confirms
+  spring 1996 fields the item; the wave is absent from the Mannheim trend file, which jumps
+  EB 44.1 → EB 45.1, and falls before the harmonised file's 2004 start. It exists as a
+  standalone GESIS study and is the only download that would extend the series.
+  ⚠ Two dates to reconcile before relying on the 2009 point: the harmonised file locates it in
+  **EB 71.3, which fielded in spring 2009**, while the trends grid places the item in **autumn
+  2009**. One of the two is mislabelled; check which wave the responses actually come from.
 - **The CEEB carries no attachment item at all** — vote intention and past vote only. Central
   and Eastern Europe is therefore absent from the attachment series until the 2009 wave brings
   the 2004 and 2007 accession states in for one observation.
@@ -208,6 +256,49 @@ Verified in `code/03_explanal/3.4_eb_partisanship.qmd`, which inventories all fo
   Eurobarometer attachment series.
 - `voteint` covers 1970–2002 but is absent in 1998 and 2001; `lastvote` is fielded only in 1979
   and 1982–1995.
+
+#### What the series actually shows
+
+**Frame, stated first because every number here depends on it:** computed from
+`data/02_processed/pid_cache/eb_raw.parquet` on the raw `nation1` units, restricted to the 20
+years the item was fielded, denominator = substantive responses (`closepty` 1–4, so DK excluded),
+weighted within country, then an **unweighted mean over countries** per D12. The **balanced
+panel** is the 10 `nation1` units present in all 20 of those years.
+
+| Category | 1975–79 | 1990–94 | Change | Relative |
+|---|---|---|---|---|
+| Very close | 10.1% | 7.9% | −2.2pp | **−22%** |
+| Fairly close | 18.5% | 17.7% | −0.8pp | −4% |
+| Merely a sympathiser | 34.9% | 28.1% | −6.8pp | −20% |
+| **Any attachment (the binary filter)** | **63.5%** | **53.7%** | **−9.8pp** | **−15%** |
+
+**What the country set is worth.** On the *unbalanced* series — same frame, same denominator,
+country set growing 10 → 15 as Greece (1981), Spain and Portugal (1986) and East Germany (1990)
+enter — the same comparison gives 63.5% → 55.6%, a decline of **−7.9pp**. So composition masks
+about **two points of a ten-point fall**. It is a real distortion and it is worth holding the
+set constant (D17), but on this series it does **not** flip the sign.
+
+**The finding replicates on the project's own frame.** `pid_country_year.csv` applies the
+EU-scope rule (D3), `country_unit` rather than `nation1` (D11) and keeps DK in the denominator
+(D7). Levels there run ~2–3 points lower, as the DK share implies, and the change is the same:
+**61% → 51% balanced (−9.9pp)** and 61% → 52% unbalanced (−8.9pp), computed by
+`3.3_pid_over_time.qmd` (`pooled_contrast`). Two frames, one conclusion.
+
+⚠ **Compare period means, not endpoint years.** A 1975-vs-1994 comparison on the project frame
+shows a fall of only 1.6pp, because 1975 sits at a local low and 1994 at a local high; the
+five-year period means show ten. An earlier draft of this file quoted the endpoint figure and
+read the series as flat. A conclusion that depends on which year sits at the edge of the window
+is not a trend, and `pooled_contrast` now uses period means for that reason.
+
+Two substantive points follow, and both bear on the paper rather than on data management:
+
+- **Dealignment here is disproportionately a decline in intensity.** "Very close" loses 22% of
+  its 1975–79 level against 15% for the binary. The gap is real but moderate — it should be
+  stated as a difference in rate, not as "the binary is flat", which it is not.
+- **Any single headline number is meaningless without its coding rule *and* its frame.** D2
+  records that moving "merely a sympathiser" across the line moves the measured share by ~31
+  points; the frame choice above is worth another 8. A figure quoted without both is
+  unfalsifiable, not merely imprecise.
 
 #### Why "the attachment item" is not one item
 
@@ -315,6 +406,21 @@ no Party Facts crosswalk. No file approaches the LFS threshold — largest is 4.
 
 ## C. External data — planned
 
+### C.0 Collection order
+
+What to download next, in order, as of 2026-08-18. Everything below is *planned*; the reasoning
+for each sits in its own subsection.
+
+| # | Source | Why this position | Where |
+|---|---|---|---|
+| 1 | **ESS R1–R11** | Free, and the only continuous 2002–2024 attachment + vote-recall series covering the frame. Highest value per unit of effort. Composition only — never affect (D18). | [C.2](#c2-cross-national-attitudinal-infrastructures) |
+| 2 | **West European Voter** | The pre-1996 affect backbone, and the only Gate 1b candidate confirmed to carry thermometers before 1996. Licence still to check. | [C.6](#c6-long-run-ap-backbones-candidate-undecided) |
+| 3 | **EB 44.2bis (ZA2828)** | Cheap, and the only recoverable Eurobarometer attachment wave. Adds one point, not a series (D15). | [Eurobarometer](#eurobarometer) |
+| 4 | **TEV (ZA5054) / EES** | Only if WEV fails Gate 1b on coverage or licence. | [C.6](#c6-long-run-ap-backbones-candidate-undecided) |
+| — | ~~EU Open Data Portal~~ | **Ruled out** — aggregates only, microdata is at GESIS (D19). | [C.2](#c2-cross-national-attitudinal-infrastructures) |
+
+Nothing on this list is needed for Gate 1c, which runs on the CSES already on disk.
+
 Not downloaded, with one exception noted below. Links and notes carried over from the
 manuscript inventory.
 
@@ -345,9 +451,10 @@ against a real transition matrix rather than assumed.
 
 | Status | Dataset | Coverage | Link | Notes |
 |---|---|---|---|---|
+| ⬜ 🔒 | **European Social Survey R1–R11** — **priority collection** | 2002–2024, ~30 countries | <https://www.europeansocialsurvey.org/data-portal> | **The 2002–2024 composition and taxonomy series.** Carries "closer to a particular party than all others" + strength + vote recall (`prtcl*` / `prtv*`), so the explicit / vote-anchored split is constructible on the same respondents, continuously, across the frame — the only free source that does this after 2002. **Constraint, not a dismissal: it has no party thermometers**, so it may carry the composition legs and may never enter an affect estimate (D18). R11 = 31 countries; R12 (2025/26) goes mixed-mode → expect a break. |
 | ⬜ 🔒 | European Election Study 2024 (ZA8868) | 27 member states, 25,904 R | <https://search.gesis.org/research_data/ZA8868> | PTVs rather than thermometers; items linkable to CHES. |
-| ⬜ 🔒 | EES series 1989–2019 | Five-yearly, EU-wide | <https://www.gesis.org/en/services/finding-and-accessing-data/international-survey-programs/european-election-studies> | Closeness + strength + EP and national vote recall. Long series with consistent core items. |
-| ⬜ 🔒 | European Social Survey R1–R11 | 2002–2024, ~30 countries | <https://www.europeansocialsurvey.org/data-portal> | **No party thermometers** — not an AP source. Use for classifying explicit vs. vote-anchored partisans and for trust/participation outcomes. "Closer to a particular party than all others" + strength + vote recall. R11 = 31 countries; R12 (2025/26) goes mixed-mode → expect a break. |
+| ⬜ 🔒 | EES series 1989–2019 | Five-yearly, EU-wide | <https://www.gesis.org/en/services/finding-and-accessing-data/international-survey-programs/european-election-studies> | Closeness + strength + EP and national vote recall. Long series with consistent core items. ⚠ Its affect measure is a propensity-to-vote battery, **not** a thermometer. |
+| ❌ | ~~EU Open Data Portal~~ | — | <https://data.europa.eu> | **Ruled out, Aug 2026.** It publishes *aggregated* Eurobarometer tables; the microdata lives at GESIS. Aggregates cannot support a respondent-level attachment × vote cross-tab, which is what the taxonomy requires. Recorded so it is not re-proposed. |
 
 ### C.3 Partisanship over time
 
@@ -374,6 +481,57 @@ against a real transition matrix rather than assumed.
 | ⬜ | MAPP party membership | 1945–2014, 31 countries | <https://zenodo.org/record/61234> · <https://link.springer.com/article/10.1057/s41304-016-0098-z> | 6,307 membership observations across 397 parties. Organizational counterpart to declared attachment. |
 | ⬜ | Electoral volatility (Emanuele et al.) | national since 1945; EP since 1979 | <https://access.gesis.org/sharing/2739/5793> | Behavioral counterpart: volatility as revealed weak attachment. |
 | ⬜ | Party Facts | — | <https://partyfacts.org> | Party ID crosswalk for merging any of the above. |
+| ⬜ | Political Parties Crosswalk | cross-national surveys | [10.1080/2474736X.2022.2048957](https://doi.org/10.1080/2474736X.2022.2048957) | Maps the party codes used *inside* cross-national surveys (CSES, ESS, EB, EVS, ISSP and others) onto Party Facts IDs. Directly useful because `eu25games2019` already carries PF IDs on every party-bearing item, so this is the join key for putting any new source alongside the primary data. |
+
+### C.6 Long-run AP backbones (candidate, undecided)
+
+The Eurobarometer cannot carry the pre-1996 series (see D15 in `DECISIONS.md` and the
+Eurobarometer section above), and the CSES starts in 1996. Anything reaching further back
+has to be an *ex post*
+harmonisation of national election studies. Three exist. **None is on disk, and none has been
+chosen** — they are recorded here as co-equal candidates to be decided on measured coverage
+rather than on documentation.
+
+| Status | Source | Coverage | Affect measure | Access |
+|---|---|---|---|---|
+| ⬜ | **West European Voter (WEV)** | 182 election studies, 16 West European democracies, 1961–2020, 464,033 R | Harmonised **party and leader thermometers** — the only candidate confirmed to carry an affect measure before 1996 | SWISSUbase, DOI [10.48573/38dd-gn73](https://doi.org/10.48573/38dd-gn73) (versioned: `10.48573/rhdr-2923`). Licence not yet checked. |
+| ⬜ 🔒 | **True European Voter (ZA5054)** | 23 countries, *ex post* harmonisation of national election studies | Original (`O*`) and recoded (`R*`) variables; **thermometer coverage unverified** | GESIS, registration — <https://access.gesis.org/dbk/71116> |
+| ⬜ 🔒 | **EES voter studies 1989–2024** | EU-wide, five-yearly, all members at time of fielding; reaches CEE from 2004 | Closeness, vote choice, past vote and **propensity to vote** — ⚠ PTV is *not* a thermometer | GESIS, free after registration |
+
+**The ESS is not a candidate here.** It is the strongest source in [C.2](#c2-cross-national-attitudinal-infrastructures)
+and carries no affect measure at all, so it cannot compete on the Gate 1b criterion below —
+which is item *co-occurrence including a party-affect measure*. ESS carries the composition legs;
+these three compete to carry the affect trend. Do not merge the two roles.
+
+⚠ **Construct warning, and it is the trap here.** A thermometer, a like–dislike scale and a
+propensity-to-vote battery are three different instruments. PTV asks how likely you are ever to
+vote for a party, which is not how warmly you feel toward it; the two correlate but are not the
+same quantity, and pooling them would manufacture a series no instrument measures. This is the
+same rule as [E. Comparability caveats](#e-comparability-caveats) and D10 — compare slopes within
+a source, never levels across sources.
+
+#### Comparison protocol
+
+Fixed here so that the choice, when it is made, is made on evidence and not on whichever
+codebook was read most recently. For each of the three, record on a common template:
+
+1. **Item co-occurrence** — in how many study-years do a party-affect measure, an attachment item
+   and a vote item all appear *together*? Not "does the project carry it" but the same
+   study-level intersection used for the CSES common base above.
+2. **Construct** — thermometer, like–dislike, PTV or sympathy, recorded per study-year, never
+   assumed constant across the span of a source.
+3. **Frame coverage** — how many of the 25, and whether it reaches CEE at all.
+4. **Span**, and specifically what it does with 1995–2008.
+5. **Overlap with CSES 1996–2021** — a source that only duplicates the CSES window adds nothing
+   to a trend leg. The value of each candidate is entirely in the pre-1996 years and in FRA, IRL
+   and GBR, which the IMD common base misses.
+6. **Licence and access cost.**
+
+**Decision rule, fixed in advance:** the source that maximises **pre-1996 study-years carrying
+all three items** wins, with construct consistency as the tie-break. If none reaches
+meaningfully before 1996, then the trend leg is CSES-only from 1996 and the Eurobarometer stands
+as a separate, non-spliced attachment series — which D10 already requires, and which is a
+reportable result rather than a failure.
 
 ---
 

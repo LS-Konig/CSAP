@@ -1,7 +1,7 @@
 ---
 # WORKING TITLE -- the paper's specific claim is not fixed; see the STATUS comment below.
 title: |
-  What Partisanship Does for Affective Polarization in Europe
+  Partisanship and Political Polarization in Europe
 # DRAFT ABSTRACT -- states the question and the design only. It asserts no result,
 # deliberately, and gets rewritten once the estimates are final.
 abstract: |
@@ -15,6 +15,26 @@ execute:
 draft: true
 draft-mode: visible
 ---
+
+
+US literature party-over-policy vs policy-over-party debate -> is it group identity itself or does group membership signal ideological/policy position that are being disliked? 
+
+In Europe, different notion of partisanship
+
+then section partisanship in Europe (over time, using EES data) (feel close vs denying)
+
+over time development of PID (great dealignment or realignment?)
+
+PID and perceived ideological polarization: over time development of PID effect on perceived policy positions of parties
+
+section on multiple facets of AP (2x2 matrix), we have attitudinal vertical over time, horizontal behavioral at one time experimentally cross-nationally
+
+then triangulation research design: match / correlate EES/EU25 data in 2019 via thermo scores
+
+over time development of PID effect on AP
+
+estimate within party contrast using multilevel modelling, how does attachement (vs denied attachement) increase AP?
+
 
 
 <!--

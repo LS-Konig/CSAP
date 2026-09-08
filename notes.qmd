@@ -940,4 +940,8 @@ Finally, the trust-game results underscore a broader measurement implication: si
 -> Literature:
 	- expressive vs instrumental partisanship
 	- party-over-policy/expressive/SIT
+	  -> DEVELOPED: see `PAPER-DESIGN.md`, candidate B ("Identity vs. position -- the
+	     party-over-policy debate"). Reframed 2026-08-19 around Orr & Huber, Orr/Fowler/Huber
+	     and Dias & Lelkes, using the ideological placement batteries and the randomised
+	     party label in the conjoint. Do not develop the argument here as well.
 	- explicit vs implicit identity
