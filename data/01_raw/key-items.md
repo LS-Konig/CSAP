@@ -540,7 +540,7 @@ best describes how probable it is that you will ever vote for [Party 1]?
 
 ## LR Placement Parties
 
-
+### Overview
 
 | EES Voter Study | Item |
 |------|------|
@@ -549,6 +549,205 @@ best describes how probable it is that you will ever vote for [Party 1]?
 | 2014 | QPP14 |
 | 2009 | Q47 |
 | 2004 | Q14 |
+
+### Wording and Coding
+
+#### 2024
+
+Q11 And about where would you place the following political parties on this scale? Which number from 0 to 10, where '0' means "left" and '10' means "right" best describes these parties?
+
+RANDOMISE - ONE ANSWER PER LINE
+
+[PARTY LIST D, limited to 7 parties]
+0 - left
+1 2 3 4 5 6 7 8 9 10 - right
+Don't
+know
+how to
+place the
+party
+Party 1 0 1 2 3 4 5 6 7 8 9 10 98
+Party 2 0 1 2 3 4 5 6 7 8 9 10 98
+Party 3 0 1 2 3 4 5 6 7 8 9 10 98
+Party 4 0 1 2 3 4 5 6 7 8 9 10 98
+Party 5 0 1 2 3 4 5 6 7 8 9 10 98
+Party 6 0 1 2 3 4 5 6 7 8 9 10 98
+Party 7 0 1 2 3 4 5 6 7 8 9 10 98
+
+#### 2019
+
+And about where would you place the following political parties on this scale?
+Which number from 0 to 10, where '0' means "left" and '10' means "right" best describes these parties?
+0 Left
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10 Right
+Don't know how to place the party
+
+#### 2014
+
+QPP14 QPP14
+0
+Left
+1 2 3 4 5 6 7 8 9 10
+Righ
+t
+Refu
+sal
+(SP
+ONT
+ANE
+OUS
+)
+Don’
+t
+kno
+w
+the
+party
+(SP
+ONT
+ANE
+OUS
+)
+Don’
+t
+kno
+w
+wher
+e to
+plac
+e the
+party
+(SP
+ONT
+ANE
+OUS
+)
+0
+Gau
+che
+1 2 3 4 5 6 7 8 9 10
+Droit
+e
+Refu
+s
+(SP
+ONT
+ANE
+)
+Ne
+conn
+aît
+pas
+le
+parti
+(SP
+ONT
+ANE
+)
+Ne
+sait
+pas
+où
+situe
+r le
+parti
+(SP
+ONT
+ANE
+)
+1 Part
+y 1
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 1 Parti
+1
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+2 Part
+y 2
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 2 Parti
+2
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+3 Part
+y 3
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 3 Parti
+3
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+4 Part
+y 4
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 4 Parti
+4
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+5 Part
+y 5
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 5 Parti
+5
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+6 Part
+y 6
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 6 Parti
+6
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+7 Part
+y 7
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 7 Parti
+7
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+8 Part
+y 8
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+
+#### 2009
+
+Q47. And about where would you place the following parties on this scale?
+INTERVIEWER: ROTATE ‐ START THE ROTATION ACCORDING TO THE ROTATION LIST,
+MARK THE STARTING POINT OF THE ROTATION BY “R”, CONTINUE TO READ OUT THE
+ITEMS FROM THE ROTATION STARTING POINT DOWNWARDS ‐ READ OUT ALL THE
+ITEMS
+How about the (Party X)? Which number from 0 to 10, where 0 means “left” and 10 means “right” best
+describes (Party X)?
+Question repeated for all parties in the list
+And for (Party Y)?
+If R does not know a party code 88 “Don’t know party” or R is unable to place a party
+please code 89 “Don’t know where to place party”
+0 left 1 2 3 4 5 6 7 8 9 10
+right REF
+Don’t
+know
+party
+Don’t
+know
+where
+to
+place
+party
+a. Labour 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+b. Conservatives 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+c. Liberal Democrats 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+d. Scottish National Party 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+e. Plaid Cymru 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+f. UK Independence Party 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+g. British National Party 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+h. Green Party 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+
+#### 2004
+
+Q14 In political matters people talk of "the left" and "the right". What is your position? Please indicate your
+views using any number on a 10-point-scale. On this scale, where 1 means "left" and 10 means "right," which
+number best describes your position?
+1 left
+2
+...
+10 right
+97 refused
+98 dk
+99 na
 
 ## EU Placement Parties
 
