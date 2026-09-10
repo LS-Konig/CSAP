@@ -64,6 +64,8 @@
 
 ## PID
 
+### Overview
+
 | CSES Module | Item | 
 |------|------|
 | 6 (2021–2026) | `f3023` | 
@@ -72,6 +74,121 @@
 | 3 (2006–2011) | `IMD3005_1`–`_4` | 
 | 2 (2001–2006) | `IMD3005_1`–`_4` |
 | 1 (1996–2001) | `IMD3005_1`–`_4` | 
+
+### Wording and Coding
+
+#### IMD
+
+---------------------------------------------------------------------------
+IMD3005_1 >>> PARTY IDENTIFICATION: ARE YOU CLOSE TO ANY POLITICAL PARTY
+---------------------------------------------------------------------------
+Do you usually think of yourself as close to any particular
+party?
+..................................................................
+0. NO
+1. YES
+7. VOLUNTEERED: REFUSED
+8. VOLUNTEERED: DON'T KNOW
+9. MISSING
+
+---------------------------------------------------------------------------
+IMD3005_2 >>> PARTY IDENTIFICATION: DO YOU FEEL CLOSER TO ONE PARTY
+---------------------------------------------------------------------------
+Do you feel yourself a little closer to one of the political
+parties than the others?
+..................................................................
+0. NO
+1. YES
+7. VOLUNTEERED: REFUSED
+8. VOLUNTEERED: DON'T KNOW
+9. MISSING
+
+---------------------------------------------------------------------------
+IMD3005_3 >>> PARTY IDENTIFICATION: WHO
+---------------------------------------------------------------------------
+Which party do you feel closest to?
+..................................................................
+0000001-9000000. [SEE CODEBOOK PART 3 FOR PARTY AND LEADER
+NUMERIC CODES]
+9999988. NONE OF THE CANDIDATES/PARTIES
+9999989. INDEPENDENT CANDIDATE
+9999990. OTHER LEFT WING CANDIDATE/PARTY
+(NOT FURTHER SPECIFIED)
+9999991. OTHER RIGHT WING CANDIDATE/PARTY
+(NOT FURTHER SPECIFIED)
+9999992. OTHER CANDIDATE/PARTY (NOT FURTHER SPECIFIED)
+9999997. VOLUNTEERED: REFUSED
+9999998. VOLUNTEERED: DON'T KNOW
+9999999. MISSING
+
+---------------------------------------------------------------------------
+IMD3005_4 >>> PARTY IDENTIFICATION: HOW CLOSE
+---------------------------------------------------------------------------
+Do you feel very close to this party, somewhat close, or
+not very close?
+..................................................................
+1. VERY CLOSE
+2. SOMEWHAT CLOSE
+3. NOT VERY CLOSE
+7. VOLUNTEERED: REFUSED
+8. VOLUNTEERED: DON'T KNOW
+9. MISSING
+
+#### Mod6
+
+---------------------------------------------------------------------------
+F3023_1 >>> Q23a. PARTY ID: ARE YOU CLOSE TO ANY POLITICAL PARTY
+---------------------------------------------------------------------------
+Q23a. Do you usually think of yourself as close to any particular
+party?
+..................................................................
+0. NO
+1. YES -> GO TO Q23c
+7. VOLUNTEERED: REFUSED
+8. VOLUNTEERED: DON'T KNOW
+9. MISSING
+
+---------------------------------------------------------------------------
+F3023_2 >>> Q23b. PARTY ID: DO YOU FEEL CLOSER TO ONE PARTY
+---------------------------------------------------------------------------
+Q23b. Do you feel yourself a little closer to one of the political
+parties than the others?
+..................................................................
+0. NO -> GO TO QUESTION AFTER Q23d
+1. YES
+7. VOLUNTEERED: REFUSED -> GO TO QUESTION AFTER Q23d
+8. VOLUNTEERED: DON'T KNOW -> GO TO QUESTION AFTER Q23d
+9. MISSING
+
+---------------------------------------------------------------------------
+F3023_3 >>> Q23c. PARTY ID: WHICH PARTY DO YOU FEEL CLOSEST TO
+---------------------------------------------------------------------------
+Q23c. Which party do you feel closest to?
+..................................................................
+000001-999987. [PLEASE PROVIDE PARTY CODES]
+999988. NONE OF THE CANDIDATES/PARTIES
+999989. INDEPENDENT CANDIDATE
+999990. OTHER LEFT-WING CANDIDATE/PARTY
+(NOT FURTHER SPECIFIED)
+999991. OTHER RIGHT-WING CANDIDATE/PARTY
+(NOT FURTHER SPECIFIED)
+999992. OTHER CANDIDATE/PARTY (NOT FURTHER SPECIFIED)
+999997. VOLUNTEERED: REFUSED
+999998. VOLUNTEERED: DON'T KNOW
+999999. MISSING
+
+---------------------------------------------------------------------------
+F3023_4 >>> Q23d. PARTY ID: DEGREE OF CLOSENESS TO THIS PARTY
+---------------------------------------------------------------------------
+Q23d. Do you feel very close to this party, somewhat close, or not
+very close?
+..................................................................
+1. VERY CLOSE
+2. SOMEWHAT CLOSE
+3. NOT VERY CLOSE
+7. VOLUNTEERED: REFUSED
+8. VOLUNTEERED: DON'T KNOW
+9. MISSING
 
 ## Vote choice
 
