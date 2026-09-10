@@ -751,6 +751,8 @@ number best describes your position?
 
 ## EU Placement Parties
 
+### Overview
+
 | EES Voter Study | Item |
 |------|------|
 | 2024 | Q18 |
@@ -758,6 +760,228 @@ number best describes your position?
 | 2014 | QPP19 |
 | 2009 | Q81 |
 | 2004 | Q22  |
+
+### Wording and Coding
+
+#### 2024
+
+Q18 And about where would you place the following parties on this scale, where 0 means European unification “has already gone too far” and 10 means “should be pushed further”?
+
+RANDOMISE - ONE ANSWER PER LINE
+
+Unication
+has
+already
+gone too
+far
+1 2 3 4 5 6 7 8 9
+10 -
+unification
+should be
+pushed
+further
+Don't
+know
+how to
+place the
+party
+Party 1 0 1 2 3 4 5 6 7 8 9 10 98
+Party 2 0 1 2 3 4 5 6 7 8 9 10 98
+Party 3 0 1 2 3 4 5 6 7 8 9 10 98
+Party 4 0 1 2 3 4 5 6 7 8 9 10 98
+Party 5 0 1 2 3 4 5 6 7 8 9 10 98
+Party 6 0 1 2 3 4 5 6 7 8 9 10 98
+Party 7 0 1 2 3 4 5 6 7 8 9 10 98
+
+#### 2019
+
+Q24a And about where would you place the following parties on this scale, where 0 means “already gone too far” and 10 means “should be pushed further”?
+
+0 Unification has already gone too far
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10 Unification should be pushed further
+Don't know how to place the party
+
+Conservative Party
+Labour Party 
+Liberal Democrats 
+Green Party 
+
+Q24b And about where would you place the following parties on this scale, where 0 means “already gone too far” and 10 means “should be pushed further”?
+
+0 Unification has already gone too far
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10 Unification should be pushed further
+Don't know how to place the party
+
+Scottish National Party 
+United Kingdom Independent Party (UKIP)
+The Brexit Party
+
+#### 2014
+
+And about where would you place the following political parties on this scale from 0 to 10,
+where '0' means the political party "has already gone too far" and '10' means it "should be
+pushed further"?
+
+QPP19 What number on this scale best describes...?
+
+(SHOW SCREEN - READ OUT - ONE ANSWER PER LINE)
+
+0
+Has
+alrea
+dy
+gone
+too
+far
+1 2 3 4 5 6 7 8 9 10
+Sho
+uld
+be
+push
+ed
+furth
+er
+Refu
+sal
+(SP
+ONT
+ANE
+OUS
+)
+Don’
+t
+kno
+w
+the
+party
+(SP
+ONT
+ANE
+OUS
+)
+DK
+
+1 Part
+y 1
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+ Part
+y 2
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+3 Part
+y 3
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+4 Part
+y 4
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+5 Part
+y 5
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+6 Part
+y 6
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+7 Part
+y 7
+1 2 3 4 5 6 7 8 9 10 11 12 13 14
+ Part
+y 8
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+
+#### 2009
+
+Q81. And about where would you place the following parties on this scale?
+INTERVIEWER: ROTATE – START THE ROTATION ACCORDING TO THE ROTATION LIST,
+MARK THE STARTING POINT OF THE ROTATION BY “R”, CONTINUE TO READ OUT THE
+ITEMS FROM THE ROTATION STARTING POINT DOWNWARDS– READ OUT ALL THE
+ITEMS
+How about the (Party X)? Which number from 0 to 10, where 0 means “already gone too far” and 10
+means “should be pushed further” best describes (party X)?
+Question repeated for all parties in the list
+And for (Party Y)?
+If R does not know a party code ‘88’ Don’t know party or if R is unable to place a party
+please code ‘89’ “Don’t know where to place party”.
+0
+unificatio
+n has
+already
+gone too
+far
+1 2 3 4 5 6 7 8 9
+10
+unificat
+ion
+should
+be
+pushed
+further
+REF Don’t
+know
+party
+Don’t
+know
+where
+to
+place
+party
+a. Labour 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+b. Conservatives 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+c. Liberal Democrats 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+d. Scottish National Party 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+e. Plaid Cymru 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+f. UK Independence Party 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+g. British National Party 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+h. Green Party 0 1 2 3 4 5 6 7 8 9 10 77 88 89
+
+#### 2004
+
+Q22 Some say European unification should be pushed further. Others say it already has gone too far. What
+is your opinion? Please indicate your views using a 10-point-scale. On this scale, 1 means unification 'has
+already gone too far' and 10 means it 'should be pushed further'. What number on this scale best describes
+your position? <Source: EES99>
+1 unification has already gone too far
+2
+...
+10 unification should be pushed further
+98 dk
+99 na
+Q22_1 And about where would you place the following parties on this scale? How about the [Party 1]?
+1 unification has already gone too far
+2
+...
+10 unification should be pushed further
+98 dk
+99 na
+Q22_2 [Party 2]?
+1 unification has already gone too far
+2
+...
+10 unification should be pushed further
+98 dk
+99 na
+Q22_x [Party x]?
+1 unification has already gone too far
+2
+...
+10 unification should be pushed further
+98 dk
+99 na
 
 # CSES
 
