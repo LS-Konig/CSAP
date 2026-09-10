@@ -2,6 +2,8 @@
 
 ## PID
 
+### Overview
+
 | EES Voter Study | Item |
 |------|------|
 | 2024 | Q19 |
@@ -9,6 +11,176 @@
 | 2014 | QPP21 |
 | 2009 | Q87 |
 | 2004 | Q30 |
+
+### Wording and Coding
+
+#### 2024
+
+Q19 Do you consider yourself to be close to any particular party? If so, which party do you feel close to?
+
+ONE ANSWER ONLY
+
+No, I do not feel close to any party 1
+Party A 2
+Party B 3
+Party C 4
+Party D 5
+Party E 6
+Party F 7
+Party G 8
+Party H 9
+Party I 10
+Party J 11
+Party K 12 
+Party L 13
+Party M 14
+Other 90
+Don’t know 98
+
+#### 2019
+
+Q25 Do you consider yourself to be close to any particular party? If so, which party do you feel close to?   
+
+No, you do not feel close to any party
+... parties
+Other
+Don't know
+
+Q26 Do you feel yourself to be very close to this party, fairly close or merely a sympathiser?
+Very close
+Fairly close
+Merely a sympathiser
+Don't know
+
+
+#### 2014
+
+QPP21 Do you consider yourself to be close to any particular political party? If so, which party do you feel close to?
+
+(DO NOT SHOW SCREEN – DO NOT READ OUT – ONE ANSWER ONLY)
+
+No, you do not feel close to any political party 1
+Party 1 2
+Party 2 3
+Party 3 4
+Party 4 5
+Party 5 6
+Party 6 7
+Party 7 8
+Party 8 9
+Party 9 10
+Party 10 11
+Party 11 12 
+Party 12 13 
+Party 13 14
+Party 14 15 
+Party 15 16
+Party 16 17
+Party 17 18
+Party 18 19
+Party 19 20
+Party 20 21
+Party 21 22
+Party 22 23
+Party 23 24
+Party 24 25
+Party 25 26
+Party 26 27
+Party 27 28
+Party 28 29
+Party 29 30
+Party 30 31
+Party 31 32
+Party 32 33
+Party 33 34
+Other (SPONTANEOUS) 35
+Refusal (SPONTANEOUS) 36
+DK 37
+
+
+QPP22 Do you feel yourself to be very close to this party, fairly close, or merely a sympathiser?
+
+(ONE ANSWER ONLY)
+
+Very close 1
+Fairly close 2
+Merely a sympathiser 3
+Refusal (SPONTANEOUS) 4
+DK 5
+
+#### 2009
+
+Q87. Do you consider yourself to be close to any particular party? If so, which party do you feel close to?
+[OPEN ENDED ANSWER, DO NOT READ OUT, ONLY ONE ANSWER IS POSSIBLE]
+INTERVIEWER: If R choosing a joint list/coalition (of two or more parties) and the parties
+on that joint list are included separately among the answer options, ask whether R
+preferred one of those parties in particular and, if so, code separate party instead of list.
+00 ‐ no, does not feel close to any party GO TO Q89
+01 ‐ Labour
+02 ‐ Conservatives
+03 ‐ Liberal Democrats
+04 ‐ Scottish National Party
+05 ‐ Plaid Cymru
+06 ‐ UK Independence Party
+07 ‐ British National Party
+08 ‐ Green Party
+20 ‐ [OTHER, SPECIFY]: ____________________________
+77 ‐ [REFUSED] GO TO Q89
+88 ‐ [DK] GO TO Q89
+
+Q88. Do you feel yourself to be very close to this party, fairly close, or merely a sympathiser?
+[DO NOT READ OUT]
+1 ‐ very close
+2 ‐ fairly close
+3 ‐ merely a sympathiser
+7 ‐ [REFUSED]
+8 ‐ [DK]
+9 ‐ [NAP]
+
+[if R does not feel close to a party (Q87: = 0 or Q87: = DK or Refused)]
+Q89. Do you feel yourself a little closer to one of the political parties than others?
+[DO NOT READ OUT]
+1 ‐ yes
+2 ‐ no GO TO Q91
+7 ‐ [REFUSED] GO TO Q91
+8 ‐ [DK] GO TO Q91
+9 ‐ [NAP] GO TO Q91
+[if Q89: = Yes]
+Q90. Which party is that?
+[OPEN ENDED ANSWER, DO NOT READ OUT, ONLY ONE ANSWER IS POSSIBLE]
+INTERVIEWER: If R choosing a joint list/coalition (of two or more parties) and the parties
+on that joint list are included separately among the answer options, ask whether R
+preferred one of those parties in particular and, if so, code separate party instead of list.
+01 ‐ Labour
+02 ‐ Conservatives
+03 ‐ Liberal Democrats
+04 ‐ Scottish National Party
+05 ‐ Plaid Cymru
+06 ‐ UK Independence Party
+07 ‐ British National Party
+08 ‐ Green Party
+20 ‐ [OTHER, SPECIFY]: ____________________________
+77 ‐ [REFUSED]
+88 ‐ [DK]
+99 ‐ [NAP]
+
+#### 2004
+
+Q30 Do you consider yourself to be close to any particular party? If so, which party do you feel close to?
+<Source Q30a+b: EES89, EES94, and EES99>
+1 Party 1
+2 Party 2
+...
+96 no
+97 refused GO TO Q31
+98 dk
+99 na
+Q30a Do you feel yourself to be very close to this party, fairly close, or merely a sympathiser?
+1 very close
+2 fairly close
+3 merely a sympathiser
+8 dk
+9 na
 
 ## Vote choice
 
