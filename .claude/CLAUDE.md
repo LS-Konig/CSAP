@@ -27,7 +27,7 @@ Retrieve from history when a specific piece of prior work is wanted. Do not rest
 
 ## Stack
 
-- **R 4.5.3** — packages come from the user library (`C:/Users/Tris/AppData/Local/R/win-library/4.5`). There is deliberately **no renv** during active development; it will be re-introduced with `renv::init()` only when the directory is frozen for replication. Do not add `.Rprofile`, `renv/`, or `renv.lock` back before then.
+- **R 4.6.1** at `C:\Program Files\R\R-4.6.1\bin\Rscript.exe`, **not on `PATH`**. Packages come from the user library (`C:/Users/Tris/AppData/Local/R/win-library/4.6`). Two traps: `C:\Program Files\R\R-4.5.2` is a broken partial install (DLLs only, no `Rscript.exe`), and the 421-package `win-library/4.5` **cannot be loaded by 4.6** — compiled packages fail at `rlang.dll`. Install into 4.6 rather than trying to reuse it. There is deliberately **no renv** during active development; it will be re-introduced with `renv::init()` only when the directory is frozen for replication. Do not add `.Rprofile`, `renv/`, or `renv.lock` back before then.
 - **Quarto 1.9.36** for all documents
 - **brms** for Bayesian multilevel regression (Stan-based)
 - **ggplot2 / ggpubr / ggrepel / ggdag** for visualization
@@ -35,12 +35,17 @@ Retrieve from history when a specific piece of prior work is wanted. Do not rest
 
 ## Commands
 
-```bash
+Because R is not on `PATH`, bare `quarto render` fails with "Unable to locate an installed version of R". Point Quarto at R first — `QUARTO_R` takes the **bin directory**, not the executable, and must be a real shell variable (it is ignored in a Quarto `_environment` file):
+
+```powershell
+$env:PATH = "C:\Program Files\R\R-4.6.1\bin;" + $env:PATH
+$env:QUARTO_R = "C:\Program Files\R\R-4.6.1\bin"
+
 quarto render index.qmd         # manuscript
 quarto render presentation.qmd  # RevealJS deck
 ```
 
-Quarto is configured with `freeze: auto`; delete `_freeze/` to force a full re-render. Rendered output goes to `_manuscript/` (git-ignored).
+Quarto is configured with `freeze: auto`; delete the notebook's subdirectory under `_freeze/` to force re-execution (`--no-freeze` is not accepted on a single-file render — Quarto passes it through to pandoc, which errors). Rendered output goes to `_manuscript/` (git-ignored).
 
 ## Repo layout
 
@@ -49,12 +54,13 @@ Quarto is configured with `freeze: auto`; delete `_freeze/` to force a full re-r
 | `index.qmd` | The manuscript. Currently YAML front matter plus Tristan's direction notes — no prose, no sections |
 | `presentation.qmd` | RevealJS slides, University of Mannheim SCSS theme (`theme.scss`). Three figure embeds are commented out where the notebooks that produced them were deleted |
 | `code/code-template.qmd` | Boilerplate for a new analysis notebook (tidyverse + here + sessioninfo). Numbered notebooks go in `code/`, following the old `NN_topic/N.N_name.qmd` convention |
+| `code/01_preparation/1.1_ess_to_parquet.qmd` | Converts the raw ESS CSV to a partitioned Parquet dataset. Raw-layer format conversion only — no cleaning, no recoding. Idempotent: re-renders cheaply once the output is current |
 | `code/00_helper/` | `copyR.R` (refresh the raw file from a sibling clone), `glftrackeR.R` (auto-LFS tracking) |
 | `data/` | See below |
 | `references.bib` | APSR-format bibliography (~2,000 entries) |
 | `images/` | Figures used by the deck |
 
-There is no analysis code in the repo. It was written in `code/01_preparation/` through `code/04_models/` and lives only in git history — the derived data files it produced are still on disk (see below), so a new pipeline can start from those or from the raw release.
+There is no *analysis* code in the repo — only the ESS conversion notebook above. The old pipeline was written in `code/01_preparation/` through `code/04_models/` and lives only in git history; the derived data files it produced are still on disk (see below), so a new pipeline can start from those or from the raw release.
 
 ## Data
 
@@ -86,7 +92,8 @@ On disk, **git-ignored**, freely re-downloadable from GESIS / cses.org:
 
 - `data/01_raw/cses/{imd,mod5,mod6}/` — CSES Integrated Module Dataset, Module 5 (2016–2021, fully contained in the IMD), Module 6 (2021–2026, advance release only). The IMD is the only source carrying the branching closeness probe. Matching study IDs across releases needs care: the IMD splits two-elections-in-one-year (`DEU12002`/`DEU22002`, `GRC12015`/`GRC22015`) and regional samples (`BELF`/`BELW`)
 - `data/01_raw/eb/` — Eurobarometer: Mannheim trend file 1970–2002, harmonised 2004–2021, EB 95.3, Central & Eastern EB 1990–1997 (1.4 GB). The attachment item runs 1975–1994 plus a single 2009 wave; the CEEB carries none — verify coverage wave by wave
-- `data/01_raw/ees/{1999,2004,2009,2014,2019,2024}/` — European Election Studies. `data/01_raw/key-items.md` maps the PID, vote choice, like/dislike and PTV items to their per-wave question numbers
+- `data/01_raw/ees/{1999,2004,2009,2014,2019,2024}/` — European Election Studies. `data/01_raw/key-items.qmd` maps the PID, vote choice, like/dislike and PTV items to their per-wave question numbers
+- `data/01_raw/ess/` — European Social Survey, a Data Wizard subset of the cumulative file: `Datafile-subset.csv` (1.5 GB, 430,581 × 2,836, rounds 1–11, 222 country × round cells) plus its codebook HTML, **which is the variable reference** — do not re-document ESS variables elsewhere. `code/01_preparation/1.1_ess_to_parquet.qmd` converts the CSV to `data/01_raw/ess/parquet/`, hive-partitioned `cntry=<X>/essround=<N>/`, ZSTD, missing codes untouched; read it with `arrow::open_dataset()` or DuckDB `read_parquet(..., hive_partitioning = true)` rather than touching the CSV. Round 10 is two stacked samples (`ESS10e03_3` and the self-completion `ESS10SCe03_2`) sharing `essround == 10`, separable only by `name`
 - `data/01_raw/external/tripol/` — TRI-POL three-wave panel (ES/PT/IT + AR/CL); see `tripol.md`. The only external source with an attitudinal *and* a behavioral AP measure on the same respondents
 - `data/01_raw/external/{carlin-love-2018,westwood-et-al-2015}/` — partisan trust-game and partisan-IAT reference studies
 

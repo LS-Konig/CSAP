@@ -1,0 +1,796 @@
+---
+title: |
+  CSAP Code Notebook 1.1
+subtitle: |
+  ESS cumulative datafile: CSV to partitioned Parquet
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+This notebook converts the raw ESS extract `data/01_raw/ess/Datafile-subset.csv`
+(1.5 GB, 2,836 columns, 430,581 rows, rounds 1-11) into a ZSTD-compressed Parquet
+dataset partitioned by `cntry` and `essround`.
+
+**It is a pure format conversion. Nothing is cleaned, recoded, filtered or dropped.**
+Every ESS missing code (7/8/9, 66/77/88/99, 6666/7777/8888/9999 and the wider variants)
+survives untouched, because the correct code depends on each variable's field width and
+that decision belongs in a later layer, not in the raw one.
+
+The point of the exercise is column pruning. Any given analysis touches a few dozen of
+the 2,836 variables; Parquet lets a reader fetch exactly those, from exactly the
+countries it needs, without parsing 1.5 GB of text.
+
+What this notebook does:
+
+1. Checks whether the Parquet dataset is already current, and skips everything if so.
+2. Freezes the CSV schema once, using full-file type inference.
+3. Audits that inference for the one failure mode that would silently corrupt data.
+4. Streams the CSV into partitioned Parquet without ever holding it in R memory.
+5. Publishes the result atomically and records what it did.
+6. Validates row counts, column counts, schema, on-disk size and read performance.
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+# A fresh R 4.6 user library has no CRAN mirror configured, and this notebook may be
+# the first thing ever run against it. Without this, install.packages() errors out in
+# a non-interactive session.
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+# Install and load required packages
+#
+# dplyr rather than the whole tidyverse: the only tidy verbs used here are filter(),
+# select() and collect() in the arrow demo read, which does not justify pulling the
+# metapackage into a virgin library.
+p_required <- c(
+  "here",
+  "DBI",
+  "duckdb",
+  "arrow",
+  "dplyr",
+  "knitr",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+# Paths and Parameters
+
+All paths are anchored on the project root with `here::here()`, so the notebook renders
+from anywhere and never calls `setwd()`.
+
+`conversion_mode` selects the write strategy. `"staged"` materialises the CSV into an
+on-disk DuckDB table and then writes one round at a time; `"direct"` is the simpler
+single-shot `COPY` straight off the CSV. Why `"staged"` is the default is explained
+under *Conversion*.
+
+```{r}
+#| label: paths
+
+csv_path      <- here::here("data", "01_raw", "ess", "Datafile-subset.csv")
+ess_dir       <- dirname(csv_path)
+pq_root       <- file.path(ess_dir, "parquet")
+pq_tmp        <- file.path(ess_dir, ".parquet-tmp")
+manifest_path <- file.path(ess_dir, "parquet-manifest.rds")
+
+# Behaviour switches
+conversion_mode     <- "staged"  # "staged" (default) or "direct"
+audit_leading_zeros <- TRUE      # one extra CSV scan; see Type-Inference Audit
+duckdb_threads      <- 8L
+duckdb_memory       <- "32GB"
+
+# Scratch space for the staging database and any spill. Outside the repo.
+scratch_dir <- file.path(tempdir(), "ess_convert")
+dir.create(scratch_dir, recursive = TRUE, showWarnings = FALSE)
+stage_db  <- file.path(scratch_dir, "ess_stage.duckdb")
+spill_dir <- file.path(scratch_dir, "duckdb_spill")
+
+# DuckDB wants forward slashes inside SQL string literals on Windows.
+sqlp <- function(x) gsub("\\\\", "/", x)
+
+knitr::kable(
+  data.frame(
+    parameter = c(
+      "csv_path", "pq_root", "manifest_path", "conversion_mode",
+      "audit_leading_zeros", "duckdb_threads", "duckdb_memory", "scratch_dir"
+    ),
+    value = c(
+      csv_path, pq_root, manifest_path, conversion_mode,
+      audit_leading_zeros, duckdb_threads, duckdb_memory, scratch_dir
+    )
+  ),
+  row.names = FALSE
+)
+```
+
+# Is the Parquet Dataset Already Current?
+
+The conversion is expensive and the input never changes on its own, so a re-render
+should cost seconds, not minutes.
+
+Three guards have to agree before the conversion is skipped. The manifest records the
+CSV's size and mtime at conversion time, so a swapped or truncated input is caught even
+if its mtime is preserved. The file count must still match. And the *oldest* Parquet
+part must postdate the CSV -- `min()`, not `max()`, because "newer than the CSV" read
+loosely would happily pass a dataset in which one early partition is stale.
+
+```{r}
+#| label: idempotency-check
+
+csv_mtime <- file.mtime(csv_path)
+csv_size  <- file.size(csv_path)
+
+pq_files <- if (dir.exists(pq_root)) {
+  list.files(pq_root, pattern = "[.]parquet$", recursive = TRUE, full.names = TRUE)
+} else {
+  character(0)
+}
+
+up_to_date <- FALSE
+if (length(pq_files) > 0 && file.exists(manifest_path)) {
+  manifest <- readRDS(manifest_path)
+  up_to_date <-
+    isTRUE(manifest$csv_size == csv_size) &&
+    isTRUE(manifest$csv_mtime == csv_mtime) &&
+    isTRUE(manifest$n_files == length(pq_files)) &&
+    min(file.mtime(pq_files)) > csv_mtime
+}
+
+if (up_to_date) {
+  message("Parquet dataset is current (", length(pq_files),
+          " files). Skipping conversion.")
+} else {
+  message("Parquet dataset is missing or stale. Converting.")
+}
+```
+
+# Freezing the CSV Schema
+
+## Why full-file inference is not optional here
+
+DuckDB's CSV sniffer normally reads a sample. On this file a sample gets two things
+wrong, and both would be silent:
+
+- `idno` reaches 510,130,400,606, which overflows a 32-bit integer. A sample that saw
+  only small IDs would pick the narrow type.
+- Fifteen columns hold quoted ISO country and language codes -- `cntbrtha`, `ctzshipa`,
+  `fbrncnt`, `lnghomb`, `lnghom2`, `mbrncnt` and their variants -- with values like
+  `"000"` and `"01"` sitting alongside `"ABK"` and `"AE"`. **DuckDB strips quotes before
+  it decides a type**, so a sample that happened to see only the numeric-looking values
+  would type the column as an integer and turn `"000"` into `0`. Reading the whole file
+  finds the alphabetic values and keeps the column as text.
+
+`sample_size = -1` reads the entire file for inference. It costs one full scan, once.
+
+## Sniffing once and reusing the result
+
+`sniff_csv()` returns a `Prompt` column holding a complete, ready-to-run `read_csv()`
+call with the full `columns={...}` struct already written out. Using DuckDB's own
+generated clause removes any chance of a hand-built schema disagreeing with what the
+sniffer actually found, and every later query reuses that one frozen clause -- so no
+subsequent read can re-infer anything differently.
+
+```{r}
+#| label: connect-duckdb
+#| eval: !expr '!up_to_date'
+
+con <- DBI::dbConnect(duckdb::duckdb())
+
+invisible(DBI::dbExecute(con, "SET preserve_insertion_order = false"))
+invisible(DBI::dbExecute(con, paste0("SET threads = ", duckdb_threads)))
+invisible(DBI::dbExecute(con, paste0("SET memory_limit = '", duckdb_memory, "'")))
+invisible(DBI::dbExecute(con, paste0("SET temp_directory = '", sqlp(spill_dir), "'")))
+invisible(DBI::dbExecute(con, "SET max_temp_directory_size = '60GB'"))
+invisible(DBI::dbExecute(con, "SET partitioned_write_max_open_files = 256"))
+invisible(DBI::dbExecute(con, "SET partitioned_write_flush_threshold = 65536"))
+
+knitr::kable(
+  DBI::dbGetQuery(con, "
+    SELECT name, value FROM duckdb_settings()
+    WHERE name IN ('threads', 'memory_limit', 'temp_directory',
+                   'preserve_insertion_order',
+                   'partitioned_write_max_open_files',
+                   'partitioned_write_flush_threshold')
+    ORDER BY name"),
+  row.names = FALSE
+)
+```
+
+```{r}
+#| label: sniff-schema
+#| eval: !expr '!up_to_date'
+
+t_sniff <- system.time({
+  DBI::dbExecute(con, paste0(
+    "CREATE OR REPLACE TEMP TABLE ess_sniff AS ",
+    "SELECT * FROM sniff_csv('", sqlp(csv_path), "', sample_size = -1)"
+  ))
+})
+
+# The generated FROM clause is 150-250 KB of SQL. Build queries with paste0(), never
+# sprintf() -- a stray '%' in that text would be read as a format specifier.
+from_clause <- DBI::dbGetQuery(con, "SELECT Prompt FROM ess_sniff")$Prompt
+from_clause <- sub(";[[:space:]]*$", "", from_clause)
+
+schema_csv <- DBI::dbGetQuery(con, "
+  SELECT row_number() OVER () AS pos,
+         s.col.name AS column_name,
+         s.col.type AS column_type
+  FROM (SELECT unnest(Columns) AS col FROM ess_sniff) s")
+
+message("Sniff took ", round(t_sniff[["elapsed"]], 1), " s; ",
+        nrow(schema_csv), " columns inferred.")
+message("Generated FROM clause is ", format(nchar(from_clause), big.mark = ","),
+        " characters. First 300:")
+message(substr(from_clause, 1, 300))
+```
+
+```{r}
+#| label: schema-type-summary
+#| eval: !expr '!up_to_date'
+
+knitr::kable(
+  as.data.frame(sort(table(schema_csv$column_type), decreasing = TRUE)),
+  col.names = c("inferred type", "columns"),
+  row.names = FALSE
+)
+```
+
+## Type-Inference Audit
+
+Full-file inference handles the quoted-code columns, but it cannot help where a column
+is *genuinely* all-numeric and still carries a leading zero. An ISCO occupation code
+like `0110` would be read as `110` -- a different occupation -- with no error raised.
+
+The audit below reads the file once with `all_varchar = true` and asks, for every column
+the sniffer typed as an integer, whether any value has a leading zero. It is pure string
+comparison with no casting, so it is cheap. Any column it names is rewritten to
+`VARCHAR` in the frozen clause before the write.
+
+```{r}
+#| label: leading-zero-audit
+#| eval: !expr '!up_to_date && audit_leading_zeros'
+
+int_cols <- schema_csv$column_name[
+  schema_csv$column_type %in% c("BIGINT", "INTEGER", "HUGEINT", "SMALLINT", "TINYINT")
+]
+
+offenders <- character(0)
+if (length(int_cols) > 0) {
+  aggs <- paste0(
+    'max(CASE WHEN length("', int_cols, '") > 1 AND ("', int_cols,
+    '" LIKE \'0%\' OR "', int_cols, '" LIKE \'-0%\') THEN 1 ELSE 0 END) AS "',
+    int_cols, '"'
+  )
+  t_audit <- system.time({
+    lz <- DBI::dbGetQuery(con, paste0(
+      "SELECT ", paste(aggs, collapse = ", "),
+      " FROM read_csv('", sqlp(csv_path), "', all_varchar = true)"
+    ))
+  })
+  vals <- unlist(lz)
+  offenders <- names(lz)[!is.na(vals) & vals == 1L]
+  message("Audited ", length(int_cols), " integer-typed columns in ",
+          round(t_audit[["elapsed"]], 1), " s.")
+}
+
+if (length(offenders) > 0) {
+  message("Leading zeros found -- forcing these columns to VARCHAR:")
+  print(offenders)
+} else {
+  message("No integer-typed column carries a leading zero. Nothing to patch.")
+}
+```
+
+`edition` needs an override the audit cannot find. It holds version labels -- `"2.3"`,
+`"4.6"`, `"6.7"` -- which parse cleanly as numbers, so the sniffer types them `DOUBLE`.
+They are labels, not quantities, and pinning them to `VARCHAR` preserves the literal.
+That is preservation, not recoding.
+
+`proddate` and fifteen interview date/time columns are typed `DATE` and `TIMESTAMP`, and
+that is left alone. The parse is unambiguous and correct -- `23.11.2023` becomes
+`2023-11-23`, `02.07.2026` becomes `2026-07-02`, so the sniffer has read the day-first
+format the right way round -- and a date column is the honest type for a date. It is
+recorded here as a decision rather than left to be discovered later.
+
+One thing deliberately *not* set: `nullstr = ''`. DuckDB already maps an unquoted empty
+field to `NULL`, which is what the CSV means. Setting `nullstr` would additionally
+collapse a quoted `""` into `NULL`, conflating "empty string" with "missing" -- a
+semantic change, and out of scope for a format conversion.
+
+```{r}
+#| label: patch-schema
+#| eval: !expr '!up_to_date'
+
+force_varchar <- unique(c(offenders, "edition"))
+
+patch_type <- function(clause, col, new_type = "VARCHAR") {
+  pattern <- paste0("('", col, "'[[:space:]]*:[[:space:]]*)'[^']*'")
+  sub(pattern, paste0("\\1'", new_type, "'"), clause)
+}
+
+for (cl in force_varchar) {
+  from_clause <- patch_type(from_clause, cl)
+  schema_csv$column_type[schema_csv$column_name == cl] <- "VARCHAR"
+}
+
+message("Forced to VARCHAR: ", paste(force_varchar, collapse = ", "))
+```
+
+# Conversion
+
+## Why the obvious single COPY is not used
+
+The natural statement is one `COPY ... TO ... (PARTITION_BY (cntry, essround))` reading
+straight from the CSV. On this file that is a real risk of an out-of-memory kill, for a
+reason specific to its shape.
+
+DuckDB's partitioned writer keeps a 2,048-row buffer per partition per thread. At 2,836
+columns that is roughly 46 MB per buffer, and this file has **222** non-empty
+`cntry` x `essround` cells. Eight threads times 222 partitions is on the order of 80 GB
+of allocator memory, which cannot spill to disk. Two defaults compound it:
+`partitioned_write_flush_threshold` is 524,288 rows -- more than the entire file -- so
+no thread ever flushes early, and `partitioned_write_max_open_files` is 100, below 222.
+
+The fix is not to shrink the buffer but to cut how many partitions are open at once.
+Staging the CSV into an on-disk DuckDB table and then writing one round at a time means
+each `COPY` touches only the 18-23 countries present in that round. It also makes schema
+consistency structural rather than hopeful: all eleven writes read the same table, so
+there is no second inference pass that could disagree with the first.
+
+The cost is two full CSV scans either way, because the frozen clause means the write
+pass sniffs nothing.
+
+```{r}
+#| label: stage-table
+#| eval: !expr '!up_to_date && conversion_mode == "staged"'
+
+if (file.exists(stage_db)) unlink(stage_db, force = TRUE)
+invisible(DBI::dbExecute(con, paste0("ATTACH '", sqlp(stage_db), "' AS stage")))
+
+t_stage <- system.time({
+  DBI::dbExecute(con, paste0(
+    "CREATE OR REPLACE TABLE stage.ess_raw AS SELECT * ", from_clause
+  ))
+})
+
+n_staged <- DBI::dbGetQuery(con, "SELECT count(*) AS n FROM stage.ess_raw")$n
+message("Staged ", format(n_staged, big.mark = ","), " rows in ",
+        round(t_stage[["elapsed"]], 1), " s (",
+        round(file.size(stage_db) / 1024^3, 2), " GB on disk).")
+```
+
+```{r}
+#| label: partitioned-copy
+#| eval: !expr '!up_to_date'
+
+if (dir.exists(pq_tmp)) unlink(pq_tmp, recursive = TRUE, force = TRUE)
+
+copy_opts <- paste(
+  "FORMAT PARQUET",
+  "PARTITION_BY (cntry, essround)",
+  "COMPRESSION zstd",
+  "APPEND true",
+  sep = ", "
+)
+
+t_write <- system.time({
+  if (conversion_mode == "staged") {
+    rounds <- DBI::dbGetQuery(
+      con, "SELECT DISTINCT essround FROM stage.ess_raw ORDER BY essround"
+    )$essround
+    written <- vapply(rounds, function(k) {
+      n <- DBI::dbExecute(con, paste0(
+        "COPY (SELECT * FROM stage.ess_raw WHERE essround = ", k, ") ",
+        "TO '", sqlp(pq_tmp), "' (", copy_opts, ")"
+      ))
+      message("  round ", k, ": ", format(n, big.mark = ","), " rows")
+      as.numeric(n)
+    }, numeric(1))
+    n_rows_written <- sum(written)
+  } else {
+    n_rows_written <- as.numeric(DBI::dbExecute(con, paste0(
+      "COPY (SELECT * ", from_clause, ") ",
+      "TO '", sqlp(pq_tmp), "' (", copy_opts, ")"
+    )))
+  }
+})
+
+message("Wrote ", format(n_rows_written, big.mark = ","), " rows in ",
+        round(t_write[["elapsed"]], 1), " s.")
+```
+
+# Publishing the Dataset
+
+The write goes to `.parquet-tmp/` and is renamed to `parquet/` only once it has
+succeeded. That is what makes the idempotency guard trustworthy: a `parquet/` directory
+can only exist if a run finished, so there is no half-written state to detect. The
+leading dot keeps `arrow` from treating an in-progress directory as part of the dataset.
+
+DuckDB has to release its file handles before the rename, or Windows refuses it.
+
+```{r}
+#| label: rename-and-manifest
+#| eval: !expr '!up_to_date'
+
+duckdb_version <- as.character(utils::packageVersion("duckdb"))
+DBI::dbDisconnect(con, shutdown = TRUE)
+
+if (dir.exists(pq_root)) unlink(pq_root, recursive = TRUE, force = TRUE)
+ok <- file.rename(pq_tmp, pq_root)
+if (!ok) {
+  Sys.sleep(2)
+  ok <- file.rename(pq_tmp, pq_root)
+}
+stopifnot("directory rename failed - .parquet-tmp left in place" = ok)
+
+pq_files <- list.files(pq_root, pattern = "[.]parquet$",
+                       recursive = TRUE, full.names = TRUE)
+
+manifest <- list(
+  csv_path       = "data/01_raw/ess/Datafile-subset.csv",
+  csv_size       = csv_size,
+  csv_mtime      = csv_mtime,
+  n_rows_csv     = n_rows_written,
+  n_cols         = nrow(schema_csv),
+  n_files        = length(pq_files),
+  parquet_bytes  = sum(file.size(pq_files)),
+  mode           = conversion_mode,
+  forced_varchar = force_varchar,
+  elapsed_sniff  = unname(t_sniff[["elapsed"]]),
+  elapsed_write  = unname(t_write[["elapsed"]]),
+  duckdb_version = duckdb_version,
+  r_version      = R.version.string,
+  converted_at   = Sys.time(),
+  schema         = schema_csv
+)
+saveRDS(manifest, manifest_path)
+
+# Scratch space is outside the repo, but there is no reason to leave gigabytes behind.
+unlink(scratch_dir, recursive = TRUE, force = TRUE)
+
+message("Published ", length(pq_files), " Parquet files to ", pq_root)
+```
+
+# Validation
+
+Everything below runs on every render, warm or cold, reading only the Parquet dataset
+and the manifest. The CSV is never touched again.
+
+```{r}
+#| label: validation-connect
+
+con <- DBI::dbConnect(duckdb::duckdb())
+manifest <- readRDS(manifest_path)
+pq_files <- list.files(pq_root, pattern = "[.]parquet$",
+                       recursive = TRUE, full.names = TRUE)
+pq_glob  <- sqlp(file.path(pq_root, "**", "*.parquet"))
+
+hive_args <- paste0(
+  "hive_partitioning = true, ",
+  "hive_types = {'cntry': 'VARCHAR', 'essround': 'BIGINT'}"
+)
+```
+
+## Row Counts
+
+The Parquet count comes from the file footers, not the data pages, so it is a metadata
+read. It must equal the row count the conversion reported.
+
+```{r}
+#| label: validate-rows
+
+n_parquet <- DBI::dbGetQuery(con, paste0(
+  "SELECT count(*) AS n FROM read_parquet('", pq_glob, "', ", hive_args, ")"
+))$n
+
+knitr::kable(
+  data.frame(
+    source = c("CSV (rows written at conversion)", "Parquet (footer count)"),
+    rows   = format(c(manifest$n_rows_csv, n_parquet), big.mark = ",")
+  ),
+  row.names = FALSE
+)
+
+stopifnot("row count mismatch between CSV and Parquet" =
+            n_parquet == manifest$n_rows_csv)
+message("Row counts agree: ", format(n_parquet, big.mark = ","))
+```
+
+## Columns and Schema
+
+Two column counts are worth printing, because they differ for a good reason.
+`WRITE_PARTITION_COLUMNS` defaults to false, so `cntry` and `essround` are *not* stored
+inside the files -- they are encoded in the directory names and restored on read. A
+single file therefore reports 2,834 columns while the dataset reports 2,836.
+
+The restored partition keys are appended at the end of the schema, whereas in the CSV
+`essround` is column 2 and `cntry` is column 6. So the check is set equality of names,
+not position.
+
+```{r}
+#| label: validate-cols
+
+schema_pq <- DBI::dbGetQuery(con, paste0(
+  "DESCRIBE SELECT * FROM read_parquet('", pq_glob, "', ", hive_args, ")"
+))
+schema_one <- DBI::dbGetQuery(con, paste0(
+  "DESCRIBE SELECT * FROM read_parquet('", sqlp(pq_files[1]), "', hive_partitioning = false)"
+))
+
+knitr::kable(
+  data.frame(
+    measure = c("dataset, hive keys restored", "single file, as stored",
+                "CSV, at conversion"),
+    columns = c(nrow(schema_pq), nrow(schema_one), manifest$n_cols)
+  ),
+  row.names = FALSE
+)
+
+stopifnot(
+  "column names differ between CSV and Parquet" =
+    setequal(manifest$schema$column_name, schema_pq$column_name)
+)
+message("All ", nrow(schema_pq), " column names round-trip intact.")
+```
+
+```{r}
+#| label: schema-summary
+
+knitr::kable(
+  as.data.frame(sort(table(schema_pq$column_type), decreasing = TRUE)),
+  col.names = c("stored type", "columns"),
+  row.names = FALSE
+)
+```
+
+The complete schema follows. It is long, so it sits in a scrolling panel. The
+authoritative variable reference remains the ESS codebook that ships beside the CSV,
+`data/01_raw/ess/Datafile-subset codebook.html`.
+
+::: {style="max-height: 500px; overflow-y: auto; font-size: 0.8em;"}
+
+```{r}
+#| label: schema-table
+
+knitr::kable(
+  data.frame(
+    pos    = seq_len(nrow(schema_pq)),
+    column = schema_pq$column_name,
+    type   = schema_pq$column_type
+  ),
+  row.names = FALSE
+)
+```
+
+:::
+
+## On-Disk Size
+
+```{r}
+#| label: validate-size
+
+csv_bytes <- manifest$csv_size
+pq_bytes  <- sum(file.size(pq_files))
+mean_mb   <- pq_bytes / length(pq_files) / 1024^2
+
+knitr::kable(
+  data.frame(
+    measure = c("CSV", "Parquet (total)", "compression ratio",
+                "Parquet files", "mean file size"),
+    value = c(
+      paste0(round(csv_bytes / 1024^3, 2), " GB"),
+      paste0(round(pq_bytes / 1024^3, 2), " GB"),
+      paste0(round(csv_bytes / pq_bytes, 1), "x"),
+      format(length(pq_files), big.mark = ","),
+      paste0(round(mean_mb, 2), " MB")
+    )
+  ),
+  row.names = FALSE
+)
+
+if (mean_mb < 5) {
+  message(
+    "Note: mean partition is ", round(mean_mb, 2), " MB. With ", nrow(schema_pq),
+    " columns, a large share of each file is Parquet footer metadata rather than ",
+    "data. This layout is chosen for partition pruning, not scan throughput. If ",
+    "whole-dataset scans ever dominate, partitioning on cntry alone (~40 files) ",
+    "would cut the metadata overhead substantially."
+  )
+}
+```
+
+## Timed Demo Read
+
+The point of the conversion, measured. Six columns out of 2,836, one country out of the
+partition tree: `cntry == "DE"` touches 11 files of 222, and only the requested column
+chunks are read from each.
+
+`clsprty` and `prtdgcl` are the two-item partisan-attachment battery this project is
+built on, `lrscale` is the ideology anchor, and `cntry` / `essround` / `idno` are the
+key.
+
+```{r}
+#| label: demo-duckdb
+
+demo_cols <- c("cntry", "essround", "idno", "clsprty", "prtdgcl", "lrscale")
+
+t_duck <- system.time({
+  demo_duck <- DBI::dbGetQuery(con, paste0(
+    "SELECT ", paste(demo_cols, collapse = ", "),
+    " FROM read_parquet('", pq_glob, "', ", hive_args, ")",
+    " WHERE cntry = 'DE'"
+  ))
+})
+
+message("DuckDB: ", nrow(demo_duck), " rows x ", ncol(demo_duck),
+        " cols in ", round(t_duck[["elapsed"]], 3), " s")
+
+knitr::kable(as.data.frame(table(demo_duck$essround)),
+             col.names = c("essround", "rows"), row.names = FALSE)
+```
+
+```{r}
+#| label: demo-arrow
+
+if (requireNamespace("arrow", quietly = TRUE)) {
+  ds <- arrow::open_dataset(pq_root, format = "parquet")
+  t_arrow <- system.time({
+    demo_arrow <- ds |>
+      dplyr::filter(cntry == "DE") |>
+      dplyr::select(dplyr::all_of(demo_cols)) |>
+      dplyr::collect()
+  })
+  message("arrow:  ", nrow(demo_arrow), " rows x ", ncol(demo_arrow),
+          " cols in ", round(t_arrow[["elapsed"]], 3), " s")
+
+  # Free cross-engine consistency check.
+  a <- as.data.frame(demo_arrow)
+  a <- a[order(a$essround, a$idno), demo_cols]
+  d <- demo_duck[order(demo_duck$essround, demo_duck$idno), demo_cols]
+  message("arrow and duckdb agree: ",
+          isTRUE(all.equal(a, d, check.attributes = FALSE)))
+} else {
+  message("arrow is not installed; skipping the arrow route. ",
+          "The duckdb route above covers the same ground.")
+}
+```
+
+## Missing Codes and Wide Values Survived
+
+Spot checks on what a careless conversion would have broken: the quoted language code
+`"000"` must still be a string, the widest `idno` must not have been truncated into a
+narrower integer type, the `clsprty` missing codes must still be sitting in the data
+rather than having been turned into `NA`, and `edition` must still read as a label.
+
+```{r}
+#| label: validate-fidelity
+
+fidelity <- DBI::dbGetQuery(con, paste0(
+  "SELECT
+     max(idno)                                    AS max_idno,
+     count(*) FILTER (WHERE lnghom2 = '000')      AS lnghom2_000,
+     count(*) FILTER (WHERE clsprty IN (7, 8, 9)) AS clsprty_missing_codes,
+     count(DISTINCT edition)                      AS n_editions,
+     count(DISTINCT name)                         AS n_source_files
+   FROM read_parquet('", pq_glob, "', ", hive_args, ")"
+))
+
+knitr::kable(
+  data.frame(
+    check = c("max(idno), expected 510130400606",
+              "rows with lnghom2 == '000' kept as text",
+              "rows where clsprty still carries code 7/8/9",
+              "distinct edition labels (VARCHAR, not DOUBLE)",
+              "distinct source files, expected 12"),
+    value = format(as.numeric(fidelity[1, ]), big.mark = ",", scientific = FALSE)
+  ),
+  row.names = FALSE
+)
+```
+
+The twelfth source file is the reason `essround` alone does not identify a sample. ESS
+round 10 was released as two of them -- `ESS10e03_3` and the self-completion
+`ESS10SCe03_2` -- and both carry `essround == 10`, so they land in the same partitions
+and are separable only by `name`. Nothing is filtered here; it is simply a fact any
+later layer has to know.
+
+```{r}
+#| label: validate-round10
+
+knitr::kable(
+  DBI::dbGetQuery(con, paste0(
+    "SELECT name, essround, count(*) AS rows, count(DISTINCT cntry) AS countries
+     FROM read_parquet('", pq_glob, "', ", hive_args, ")
+     GROUP BY name, essround ORDER BY essround, name"
+  )),
+  format.args = list(big.mark = ","),
+  row.names = FALSE
+)
+```
+
+# Conversion Record
+
+```{r}
+#| label: print-manifest
+
+knitr::kable(
+  data.frame(
+    field = c("converted at", "mode", "source CSV", "CSV size", "rows", "columns",
+              "partitions", "Parquet size", "forced to VARCHAR",
+              "sniff time", "write time", "duckdb", "R"),
+    value = c(
+      format(manifest$converted_at, "%Y-%m-%d %H:%M:%S"),
+      manifest$mode,
+      manifest$csv_path,
+      paste0(round(manifest$csv_size / 1024^3, 2), " GB"),
+      format(manifest$n_rows_csv, big.mark = ","),
+      format(manifest$n_cols, big.mark = ","),
+      format(manifest$n_files, big.mark = ","),
+      paste0(round(manifest$parquet_bytes / 1024^3, 2), " GB"),
+      paste(manifest$forced_varchar, collapse = ", "),
+      paste0(round(manifest$elapsed_sniff, 1), " s"),
+      paste0(round(manifest$elapsed_write, 1), " s"),
+      manifest$duckdb_version,
+      manifest$r_version
+    )
+  ),
+  row.names = FALSE
+)
+```
+
+```{r}
+#| label: validation-disconnect
+
+DBI::dbDisconnect(con, shutdown = TRUE)
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

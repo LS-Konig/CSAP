@@ -1,3 +1,16 @@
+---
+title: |
+  Key Items
+subtitle: |
+  Partisanship, vote choice and party-rating items across the EES, CSES and ESS
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    toc-depth: 3
+---
+
 # EES
 
 ## PID
@@ -989,3 +1002,241 @@ unrelated item. The PID battery was not fielded in `BELW1999`, `LVA_2018`, `TUN_
 Code `9` conflates "missing" with "not asked", so per-study availability has to be read off
 the data: see `data/03_final/cses_item_availability.csv` and
 `data/03_final/cses_item_wording.csv`.
+
+# ESS
+
+Rows are ESS rounds, newest first. The source is a Data Wizard subset of the cumulative
+file covering **25 countries**; `data/01_raw/ess/Datafile-subset codebook.html` carries
+the wording and value labels reproduced below. See `## Coverage` for the derived Parquet
+dataset.
+
+Unlike EES and CSES, ESS names its party items **per country**. The battery root is a
+filter question asked of everyone, and the party actually named is recorded in a
+country-specific variable — `prtclde` for Germany, `prtclat` for Austria — re-lettered
+whenever a country's party list changes between rounds (`prtclade`, `prtclbde`, …).
+Those families are given at family level below, not enumerated; there are 220 `prtcl*`,
+224 `prtv*` and 95 `prtmb*` variables.
+
+Note the differing field widths: the filter items code missing as `7`/`8`/`9`, the
+party-name items as `66`/`77`/`88`/`99`.
+
+## PID
+
+### Overview
+
+| ESS Round | Closeness | Strength | Party named |
+|---|---|---|---|
+| 11 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 10 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 9 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 8 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 7 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 6 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 5 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 4 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 3 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 2 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+| 1 | `clsprty` | `prtdgcl` | `prtcl<cc>` |
+
+Party membership is a separate battery of the same shape — `mmbprty` (filter) and
+`prtmb<cc>` (party named) — but it was **fielded in rounds 1–5 only** and is empty from
+round 6 on.
+
+### Wording and Coding
+
+These are core-module items and the wording is constant across rounds, so it is given
+once.
+
+#### All rounds
+
+**clsprty** Is there a particular political party you feel closer to than all the other
+parties?
+
+*ASK ALL*
+
+| Code | Label |
+|---|---|
+| 1 | Yes |
+| 2 | No |
+| 7 | Refusal* |
+| 8 | Don't know* |
+| 9 | No answer* |
+
+**prtcl\<cc\>** Which one? (\<country\>)
+
+*ASK IF `clsprty` = 1*
+
+| Code | Label |
+|---|---|
+| 1–n | country-specific party list, see codebook |
+| 66 | Not applicable* |
+| 77 | Refusal* |
+| 88 | Don't know* |
+| 99 | No answer* |
+
+**prtdgcl** How close do you feel to this party? Do you feel that you are …
+
+*ASK IF PARTY GIVEN AT B24 (codes 01 to xx) — READ OUT…*
+
+| Code | Label |
+|---|---|
+| 1 | Very close |
+| 2 | Quite close |
+| 3 | Not close |
+| 4 | Not at all close |
+| 6 | Not applicable* |
+| 7 | Refusal* |
+| 8 | Don't know* |
+| 9 | No answer* |
+
+#### Rounds 1–5 only
+
+**mmbprty** Are you a member of any political party?
+
+*ASK ALL*
+
+| Code | Label |
+|---|---|
+| 1 | Yes |
+| 2 | No |
+| 7 | Refusal* |
+| 8 | Don't know* |
+| 9 | No answer* |
+
+**prtmb\<cc\>** Which one? (\<country\>) — country-specific party list, coded as
+`prtcl<cc>`.
+
+*) Missing value
+
+## Vote choice
+
+### Overview
+
+| ESS Round | Turnout | Party voted |
+|---|---|---|
+| 11 | `vote` | `prtv<cc>` |
+| 10 | `vote` | `prtv<cc>` |
+| 9 | `vote` | `prtv<cc>` |
+| 8 | `vote` | `prtv<cc>` |
+| 7 | `vote` | `prtv<cc>` |
+| 6 | `vote` | `prtv<cc>` |
+| 5 | `vote` | `prtv<cc>` |
+| 4 | `vote` | `prtv<cc>` |
+| 3 | `vote` | `prtv<cc>` |
+| 2 | `vote` | `prtv<cc>` |
+| 1 | `vote` | `prtv<cc>` |
+
+Recall is of the **last national election**, not a European one. Countries with two
+ballots carry both — `prtvde1` and `prtvde2` for the German first and second vote.
+
+### Wording and Coding
+
+#### All rounds
+
+**vote** Some people don't vote nowadays for one reason or another. Did you vote in the
+last [country] national election in [month/year]?
+
+| Code | Label |
+|---|---|
+| 1 | Yes |
+| 2 | No |
+| 3 | Not eligible to vote |
+| 7 | Refusal* |
+| 8 | Don't know* |
+| 9 | No answer* |
+
+**prtv\<cc\>** Which party did you vote for in that election? (\<country\>)
+
+*ASK IF `vote` = 1*
+
+| Code | Label |
+|---|---|
+| 1–n | country-specific party list, see codebook |
+| 66 | Not applicable* |
+| 77 | Refusal* |
+| 88 | Don't know* |
+| 99 | No answer* |
+
+*) Missing value
+
+## Like/Dislike rating
+
+| ESS Round | Item |
+|---|---|
+| all rounds | / |
+
+No party like/dislike battery has ever been fielded in ESS.
+
+## Propensity to vote
+
+| ESS Round | Item |
+|---|---|
+| all rounds | / |
+
+No per-party PTV battery exists. The near-miss is turnout propensity, not propensity to
+vote *for a party*.
+
+## LR Placement Parties
+
+| ESS Round | Item |
+|---|---|
+| all rounds | / |
+
+Self-placement only, in every round: **lrscale**, "In politics people sometimes talk of
+'left' and 'right'. Using this card, where would you place yourself on this scale, where
+0 means the left and 10 means the right?"
+
+| Code | Label |
+|---|---|
+| 0–10 | 0 = Left … 10 = Right |
+| 77 | Refusal* |
+| 88 | Don't know* |
+| 99 | No answer* |
+
+Respondents are never asked to place the parties.
+
+## EU Placement Parties
+
+| ESS Round | Item |
+|---|---|
+| all rounds | / |
+
+Self-placement only: **euftf**, "Now thinking about the European Union, some say
+European unification should go further. Others say it has already gone too far. Using
+this card, what number on the scale best describes your position?"
+
+| Code | Label |
+|---|---|
+| 0–10 | 0 = Unification already gone too far … 10 = Unification should go further |
+| 77 | Refusal* |
+| 88 | Don't know* |
+| 99 | No answer* |
+
+Fielded in rounds 2–4 and 6–11; **absent in rounds 1 and 5**. There is no
+party-placement counterpart in any round.
+
+## Coverage
+
+The extract is `data/01_raw/ess/Datafile-subset.csv` — 430,581 respondents × 2,836
+variables, ESS rounds 1–11, **25 countries**: AT, BE, BG, CZ, DE, DK, EE, ES, FI, FR,
+GB, GR, HR, HU, IE, IT, LT, LV, NL, PL, PT, RO, SE, SI, SK. Country coverage is uneven —
+BE, DE, ES, FI, FR, GB, HU, IE, NL, PL, PT, SE and SI appear in all eleven rounds, while
+RO appears in one and LV in four.
+
+Round 10 is **two stacked samples**: `ESS10e03_3` (31,067 respondents, 17 countries) and
+the self-completion `ESS10SCe03_2` (18,386, 6 countries). Both carry `essround == 10`, so
+`essround` alone does not identify a sample; only `name` separates them. Twelve source
+files in total, one per round except for that split.
+
+`code/01_preparation/1.1_ess_to_parquet.qmd` converts the CSV to
+`data/01_raw/ess/parquet/`, hive-partitioned as `cntry=<X>/essround=<N>/` across 222
+country × round cells, ZSTD-compressed, 123 MB against the CSV's 1.53 GB. It is a format
+conversion only: **no cleaning, no recoding, no filtering**, and every missing code
+survives untouched — which is why the field widths noted above matter when reading it.
+Types come from full-file inference, so the quoted code columns (`lnghom2`, `ctzshipa`,
+`cntbrtha` and the rest) stay text rather than being read as numbers and losing their
+leading zeros. Read it with `arrow::open_dataset()` or DuckDB
+`read_parquet(..., hive_partitioning = true)` rather than parsing the CSV again.
+
+`data/01_raw/ess/` is git-ignored; the extract is re-downloadable from the ESS Data
+Wizard at <https://ess.sikt.no/>.

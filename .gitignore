@@ -43,8 +43,10 @@ models/
 # Quarto knitr intermediates (left behind by interrupted renders)
 *.rmarkdown
 
-# Raw external survey sources (Eurobarometer, CSES, EES): ~1.6 GB on disk, kept
-# local and freely re-downloadable from GESIS / cses.org.
+# Raw external survey sources (Eurobarometer, CSES, EES, ESS): ~3.2 GB on disk,
+# kept local and freely re-downloadable from GESIS / cses.org / europeansocialsurvey.org.
+# For ESS this covers the 1.5 GB CSV extract, its codebook and the derived Parquet tree.
 /data/01_raw/eb/
 /data/01_raw/cses/
 /data/01_raw/ees/
+/data/01_raw/ess/
