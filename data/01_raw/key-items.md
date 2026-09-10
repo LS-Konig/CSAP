@@ -184,6 +184,8 @@ Q30a Do you feel yourself to be very close to this party, fairly close, or merel
 
 ## Vote choice
 
+### Overview
+
 | EES Voter Study | Item EP | Item Nat |
 |------|------|------|
 | 2024 | Q6 | Q8 |
@@ -191,6 +193,217 @@ Q30a Do you feel yourself to be very close to this party, fairly close, or merel
 | 2014 | QP2  | QPP5 |
 | 2009 | Q25 | Q27 |
 | 2004 | Q10 | Q11 |
+
+### Wording and Coding
+
+#### 2024
+
+Q6 Which party did you vote for in the European Parliament elections?
+
+ONE ANSWER ONLY
+
+[PARTY LIST A, EP vote recall]
+Party 1 1
+Party 2 2
+3 3
+4 4
+5 5
+6 6 
+7 7
+Other party 90
+Did vote blank or nil 96
+Do not remember 98
+
+
+Q8 Which party did you vote for at the [General Election] of [Year of Last General Election]?
+
+ONE ANSWER ONLY
+
+[PARTY LIST B]
+Party 1 1
+Party 2 2
+3 3
+4 4
+5 5
+6 6 
+7 7
+Other party 90
+Did vote blank or nil 96
+Do not remember 98
+
+#### 2019
+
+Q7 Which party did you vote for in the European Parliament elections?
+
+[Party list]
+other party
+did vote blanc or nil
+do not remember
+
+Q9 Which party did you vote for at the General Election of 2017?
+
+[Party list]
+
+other party
+did vote blanc or nil
+did not vote
+do not remember
+
+#### 2014
+
+QP2 Which party did you vote for in these recent European Parliament elections?
+
+(SHOW SCREEN – READ OUT – ONE ANSWER ONLY)
+
+Party 1 
+Party 2 
+Party 3 
+Party 4 
+Party 5 
+Party 6 
+Party 7 
+Party 8 
+Party 9 
+Party 10 
+Party 11
+Party 12
+Party 13 
+Party 14 
+Party 15 
+Party 16 
+Party 17 
+Party 18 
+Party 19 
+Party 20 
+Party 21 
+Party 22 
+Party 23 
+Party 24 
+Party 25 
+Party 26 
+Party 27
+Party 28 
+Party 29 
+Party 30 
+Party 31 
+Party 32 
+Party 33 
+Other (SPONTANEOUS) 34
+Voted blank (SPONTANEOUS) 35 
+Refusal 36
+DK 37
+
+
+QPP5 Which party did you vote for in these last parliamentary elections?
+
+(SHOW SCREEN – READ OUT – ONE ANSWER ONLY)
+
+Party 1 
+Party 2 
+Party 3 
+Party 4 
+Party 5 
+Party 6 
+Party 7 
+Party 8 
+Party 9 
+Party 10 
+Party 11
+Party 12
+Party 13 
+Party 14 
+Party 15 
+Party 16 
+Party 17 
+Party 18 
+Party 19 
+Party 20 
+Party 21 
+Party 22 
+Party 23 
+Party 24 
+Party 25 
+Party 26 
+Party 27
+Party 28 
+Party 29 
+Party 30 
+Party 31 
+Party 32 
+Party 33 
+Other (SPONTANEOUS) 34
+Voted blank (SPONTANEOUS) 35 
+Refusal 36
+DK 37
+
+#### 2009
+
+Q25. Which party did you vote for?
+[OPEN ENDED ANSWER, DO NOT READ OUT, ONLY ONE ANSWER IS POSSIBLE]
+INTERVIEWER: If R voted for a joint list/coalition (of two or more parties) and the parties
+on that joint list are included separately among the answer options, ask whether R
+preferred one of those parties in particular and, if so, code separate party instead of list.
+01 ‐ Labour
+02 ‐ Conservatives
+03 ‐ Liberal Democrats
+04 ‐ Scottish National Party
+05 ‐ Plaid Cymru
+06 ‐ UK Independence Party
+07 ‐ British National Party
+08 ‐ Green Party
+20 ‐ [OTHER, SPECIFY]: ____________________________
+77 ‐ [REFUSED]
+88 ‐ [DK]
+94 ‐ [voted blank ]
+95 ‐ [spoiled vote]
+96 ‐ [did not vote]
+99 ‐ [NAP]
+
+
+Q27. Which party did you vote for at the General Election of 2005?
+[OPEN ENDED ANSWER, DO NOT READ OUT, ONLY ONE ANSWER IS POSSIBLE]
+9
+INTERVIEWER: If R voted for a joint list/coalition (of two or more parties) and the parties
+on that joint list are included separately among the answer options, ask whether R
+preferred one of those parties in particular and, if so, code separate party instead of list.
+01 ‐ Labour
+02 ‐ Conservatives
+03 ‐ Liberal Democrats
+04 ‐ Scottish National Party
+05 ‐ Plaid Cymru
+06 ‐ UK Independence Party
+07 ‐ British National Party
+08 ‐ Green Party
+20 ‐ [OTHER, SPECIFY]: ____________________________
+77 ‐ [REFUSED]
+88 ‐ [DK]
+93 ‐ [Was not eligible/old enough]
+94 ‐ [voted blank ]
+95 ‐ [spoiled vote]
+96 ‐ [did not vote]
+
+#### 2004
+
+Q10 Which party did you vote for?
+1 Party 1
+2 Party 2
+...
+95 refused
+96 did vote blanc or nil
+97 did not vote
+98 do not remember
+99 no answer
+
+
+Q11 Which party did you vote for at the [General Election] of [Year of Last General Election]?
+1 Party 1
+2 Party 2
+...
+95 refused
+96 did vote blanc or nil
+97 did not vote
+98 do not remember
+99 no answer
 
 ## Like/Dislike rating
 
