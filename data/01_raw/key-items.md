@@ -430,6 +430,8 @@ Party 7 supporters 0 1 2 3 4 5 6 7 8 9 10 98
 
 ## Propensity to vote
 
+### Overview
+
 | EES Voter Study | Item |
 |------|------|
 | 2024 | Q9 |
@@ -438,7 +440,107 @@ Party 7 supporters 0 1 2 3 4 5 6 7 8 9 10 98
 | 2009 | Q39 |
 | 2004 | Q12 |
 
+### Wording and Coding
+
+#### 2024
+
+Q9 We have a number of parties in <country> each of which would like to get your vote. How probable is it that you will ever vote for the following parties? Please answer on a scale where 0 means "not at all probable" and 10 means "very probable".
+
+RANDOMISE - ONE ANSWER PER LINE
+
+PARTY LIST C, PTV list up to 10 parties 0 - not at all probable 1 2 3 4 5 6 7 8 9 10 - very probable Don't know
+Party 1 0 1 2 3 4 5 6 7 8 9 10 98
+Party 2 0 1 2 3 4 5 6 7 8 9 10 98
+Party 3 0 1 2 3 4 5 6 7 8 9 10 98
+Party 4 0 1 2 3 4 5 6 7 8 9 10 98
+Party 5 0 1 2 3 4 5 6 7 8 9 10 98
+Party 6 0 1 2 3 4 5 6 7 8 9 10 98
+Party 7 0 1 2 3 4 5 6 7 8 9 10 98
+Party 8 0 1 2 3 4 5 6 7 8 9 10 98
+Party 9 0 1 2 3 4 5 6 7 8 9 10 98
+Party 10 0 1 2 3 4 5 6 7 8 9 10 98
+
+#### 2019
+
+We have a number of parties in Britain each of which would like to get your vote. How probable is it that you will ever vote for the following parties?
+Please answer on a scale where 0 means "not at all probable" and 10 means "very probable".
+
+0 not at all probable
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10 very probable
+Don’t know the party
+
+Conservative Party
+Labour Party 
+Liberal Democrats 
+Green Party 
+
+#### 2014
+
+QPP8 If you think of …, what mark out of ten best describes how probable it is that you will ever vote for this party?
+
+(SHOW SCREEN - READ OUT - ONE ANSWER OER LINE)
+
+0 Not at all probable 1 2 3 4 5 6 7 8 9 10 Very probable Refusal (SPONTANEOUS) Don’t know how the party (SPONTANEOUS) DK
+
+| Party 1 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+| Party 2 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+| Party 3 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+| Party 4 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+| Party 5 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+| Party 6 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+| Party 7 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+| Party 8 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+
+#### 2009
+
+Q39. We have a number of parties in Britain, each of which would like to get your vote. How probable is it that you will ever vote for the following parties? Please specify your views on a scale where 0 means “not at all probable” and 10 means “very probable”.
+
+INTERVIEWER: ROTATE ‐ START THE ROTATION ACCORDING TO THE ROTATION LIST, MARK THE STARTING POINT OF THE ROTATION BY “R”, CONTINUE TO READ OUT THE ITEMS FROM THE ROTATION STARTING POINT DOWNWARDS ‐ READ OUT ALL THE ITEMS.
+
+If you think of (Party X): what mark out of ten best describes how probable it is that you will ever vote for (Party X)?
+
+Question repeated for all parties in the list.
+
+And (Party Y): what mark from 0 to ten best describes how probable it is that you will ever vote for (Party Y)?
+
+If R does not know a party, code 88 “Don’t know party”. If R is unable to place a party, please code 89 “Don’t know where to place party”.
+
+| Party | 0 not at all probable | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 very probable | REF (77) | Don’t know party (88) | Don’t know where to place party (89) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| a. Labour | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 77 | 88 | 89 |
+| b. Conservatives | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 77 | 88 | 89 |
+| c. Liberal Democrats | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 77 | 88 | 89 |
+| d. Scottish National Party | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 77 | 88 | 89 |
+| e. Plaid Cymru | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 77 | 88 | 89 |
+| f. UK Independence Party | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 77 | 88 | 89 |
+| g. British National Party | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 77 | 88 | 89 |
+| h. Green Party | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 77 | 88 | 89 |
+
+#### 2004
+
+Q12_1 We have a number of parties in [country] each of which would like to get your vote. How probable is
+it that you will ever vote for the following parties? Please specify your views on a 10-point-scale where 1
+means "not at all probable" and 10 means "very probable". If you think of [Party 1]: what mark out of ten
+best describes how probable it is that you will ever vote for [Party 1]?
+1 not at all probable
+2
+...
+10 very probable
+98 dk
+99 na
+
 ## LR Placement Parties
+
+
 
 | EES Voter Study | Item |
 |------|------|
