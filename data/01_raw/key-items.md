@@ -415,6 +415,19 @@ Q11 Which party did you vote for at the [General Election] of [Year of Last Gene
 | 2009 | / |
 | 2004 | / |
 
+Q20 Now, we’d like to know what you think about supporters of different political parties. How much do you like or dislike the supporters of each political party?
+
+RANDOMISE - ONE ANSWER PER LINE
+
+[PARTY LIST D, limited to 7 parties] 0 - Strongly Dislike 1 2 3 4 5 6 7 8 9 10 - Strongly like Don't know
+Party 1 supporters 0 1 2 3 4 5 6 7 8 9 10 98
+Party 2 supporters 0 1 2 3 4 5 6 7 8 9 10 98
+Party 3 supporters 0 1 2 3 4 5 6 7 8 9 10 98
+Party 4 supporters 0 1 2 3 4 5 6 7 8 9 10 98
+Party 5 supporters 0 1 2 3 4 5 6 7 8 9 10 98
+Party 6 supporters 0 1 2 3 4 5 6 7 8 9 10 98
+Party 7 supporters 0 1 2 3 4 5 6 7 8 9 10 98
+
 ## Propensity to vote
 
 | EES Voter Study | Item |
