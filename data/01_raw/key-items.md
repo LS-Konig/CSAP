@@ -460,6 +460,8 @@ CSES never fielded a per-party PTV item; the like/dislike battery is its substit
 
 ## LR Placement Parties
 
+### Overview
+
 | CSES Module | Item | In IMD |
 |------|------|------|
 | 6 | `f3020_a`–`f3020_i` | / |
@@ -468,6 +470,79 @@ CSES never fielded a per-party PTV item; the like/dislike battery is its substit
 | 3 | `C3011_A`–`C3011_I` | `IMD3007_A`–`_I` |
 | 2 | `B3038_A`–`B3038_I` | `IMD3007_A`–`_I` |
 | 1 | `A3032_A`–`A3032_I` | `IMD3007_A`–`_I` |
+
+### Wording and Coding
+
+#### IMD
+
+---------------------------------------------------------------------------
+IMD3007_A >>> IDEOLOGY: LEFT-RIGHT - PARTY A
+IMD3007_B >>> IDEOLOGY: LEFT-RIGHT - PARTY B
+IMD3007_C >>> IDEOLOGY: LEFT-RIGHT - PARTY C
+IMD3007_D >>> IDEOLOGY: LEFT-RIGHT - PARTY D
+IMD3007_E >>> IDEOLOGY: LEFT-RIGHT - PARTY E
+IMD3007_F >>> IDEOLOGY: LEFT-RIGHT - PARTY F
+IMD3007_G >>> IDEOLOGY: LEFT-RIGHT - PARTY G (OPTIONAL)
+IMD3007_H >>> IDEOLOGY: LEFT-RIGHT - PARTY H (OPTIONAL)
+IMD3007_I >>> IDEOLOGY: LEFT-RIGHT - PARTY I (OPTIONAL)
+---------------------------------------------------------------------------
+Placement of Parties A-I on a 0-10 left-right scale.
+..................................................................
+00. LEFT
+01.
+02.
+03.
+04.
+05.
+06.
+07.
+08.
+09.
+10. RIGHT
+95. VOLUNTEERED: HAVEN'T HEARD OF LEFT-RIGHT
+96. VOLUNTEERED: HAVEN'T HEARD OF PARTY
+97. VOLUNTEERED: REFUSED
+98. VOLUNTEERED: DON'T KNOW WHERE TO PLACE
+99. MISSING
+
+#### Mod6
+
+---------------------------------------------------------------------------
+F3020_A >>> Q18a. IDEOLOGY: LEFT-RIGHT - PARTY A
+F3020_B >>> Q18b. IDEOLOGY: LEFT-RIGHT - PARTY B
+F3020_C >>> Q18c. IDEOLOGY: LEFT-RIGHT - PARTY C
+F3020_D >>> Q18d. IDEOLOGY: LEFT-RIGHT - PARTY D
+F3020_E >>> Q18e. IDEOLOGY: LEFT-RIGHT - PARTY E
+F3020_F >>> Q18f. IDEOLOGY: LEFT-RIGHT - PARTY F
+F3020_G >>> Q18g. IDEOLOGY: LEFT-RIGHT - ADDITIONAL - PARTY G
+F3020_H >>> Q18h. IDEOLOGY: LEFT-RIGHT - ADDITIONAL - PARTY H
+F3020_I >>> Q18i. IDEOLOGY: LEFT-RIGHT - ADDITIONAL - PARTY I
+---------------------------------------------------------------------------
+Q18a-i. In politics people sometimes talk of left and right. Where
+would you place [PARTY A] on a scale from 0 to 10 where 0
+means the left and 10 means the right?
+Using the same scale, where would you place [PARTY B]?
+Where would you place [PARTY C]?
+Where would you place [PARTY D]?
+Where would you place [PARTY E]?
+Where would you place [PARTY F]?
+..................................................................
+00. LEFT
+01.
+02.
+03.
+04.
+05.
+06.
+07.
+08.
+09.
+10. RIGHT
+95. VOLUNTEERED: HAVEN'T HEARD OF LEFT-RIGHT
+96. VOLUNTEERED: HAVEN'T HEARD OF PARTY
+97. VOLUNTEERED: REFUSED
+98. VOLUNTEERED: DON'T KNOW WHERE TO PLACE
+99. MISSING
 
 ## EU Placement Parties
 
