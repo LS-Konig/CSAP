@@ -294,7 +294,7 @@ COALITION CODES]
 
 ## Like/Dislike rating
 
-
+### Overview
 
 | CSES Module | Item | In IMD |
 |------|------|------|
@@ -304,6 +304,151 @@ COALITION CODES]
 | 3 | `C3009_A`–`C3009_I` | `IMD3008_A`–`_I` |
 | 2 | `B3037_A`–`B3037_I` | `IMD3008_A`–`_I` |
 | 1 | `A3020_A`–`A3020_I` | `IMD3008_A`–`_I` |
+
+### Wording and Coding
+
+#### IMD
+
+---------------------------------------------------------------------------
+IMD3008_A >>> LIKE-DISLIKE - PARTY A
+IMD3008_B >>> LIKE-DISLIKE - PARTY B
+IMD3008_C >>> LIKE-DISLIKE - PARTY C
+IMD3008_D >>> LIKE-DISLIKE - PARTY D
+IMD3008_E >>> LIKE-DISLIKE - PARTY E
+IMD3008_F >>> LIKE-DISLIKE - PARTY F
+IMD3008_G >>> LIKE-DISLIKE - PARTY G (OPTIONAL)
+IMD3008_H >>> LIKE-DISLIKE - PARTY H (OPTIONAL)
+IMD3008_I >>> LIKE-DISLIKE - PARTY I (OPTIONAL)
+---------------------------------------------------------------------------
+Likeability rating of Parties A-I on a 0-10 scale.
+..................................................................
+00. STRONGLY DISLIKE
+01.
+02.
+03.
+04.
+05.
+06.
+07.
+08.
+09.
+10. STRONGLY LIKE
+96. HAVEN'T HEARD OF PARTY
+97. VOLUNTEERED: REFUSED
+98. DON'T KNOW ENOUGH ABOUT/DON'T KNOW WHERE TO RATE
+99. MISSING
+
+---------------------------------------------------------------------------
+IMD3009_A >>> LIKE-DISLIKE - LEADER A
+IMD3009_B >>> LIKE-DISLIKE - LEADER B
+IMD3009_C >>> LIKE-DISLIKE - LEADER C
+IMD3009_D >>> LIKE-DISLIKE - LEADER D
+IMD3009_E >>> LIKE-DISLIKE - LEADER E
+IMD3009_F >>> LIKE-DISLIKE - LEADER F
+IMD3009_G >>> LIKE-DISLIKE - LEADER G (OPTIONAL)
+IMD3009_H >>> LIKE-DISLIKE - LEADER H (OPTIONAL)
+IMD3009_I >>> LIKE-DISLIKE - LEADER I (OPTIONAL)
+---------------------------------------------------------------------------
+Likeability rating of Leaders A-I on a 0-10 scale.
+..................................................................
+00. STRONGLY DISLIKE
+01.
+02.
+03.
+04.
+05.
+06.
+07.
+08.
+09.
+10. STRONGLY LIKE
+96. HAVEN'T HEARD OF LEADER
+97. VOLUNTEERED: REFUSED
+98. DON'T KNOW ENOUGH ABOUT/DON'T KNOW WHERE TO RATE
+99. MISSING
+
+#### Mod6
+
+---------------------------------------------------------------------------
+F3018_A >>> Q16a. LIKE-DISLIKE - PARTY A
+F3018_B >>> Q16b. LIKE-DISLIKE - PARTY B
+F3018_C >>> Q16c. LIKE-DISLIKE - PARTY C
+F3018_D >>> Q16d. LIKE-DISLIKE - PARTY D
+F3018_E >>> Q16e. LIKE-DISLIKE - PARTY E
+F3018_F >>> Q16f. LIKE-DISLIKE - PARTY F
+F3018_G >>> Q16g. LIKE-DISLIKE - ADDITIONAL - PARTY G
+F3018_H >>> Q16h. LIKE-DISLIKE - ADDITIONAL - PARTY H
+F3018_I >>> Q16i. LIKE-DISLIKE - ADDITIONAL - PARTY I
+---------------------------------------------------------------------------
+Q16a-i. I'd like to know what you think about each of our
+political parties. After I read the name of a political
+party, please rate it on a scale from 0 to 10, where 0
+means you strongly dislike that party and 10 means that
+you strongly like that party. If I come to a party you
+haven't heard of or you feel you do not know enough about,
+just say so. The first party is [PARTY A].
+Using the same scale, where would you place, [PARTY B]?
+Using the same scale, where would you place, [PARTY C]?
+Using the same scale, where would you place, [PARTY D]?
+Using the same scale, where would you place, [PARTY E]?
+Using the same scale, where would you place, [PARTY F]?
+..................................................................
+00. STRONGLY DISLIKE
+01.
+02.
+03.
+04.
+05.
+06.
+07.
+08.
+09.
+10. STRONGLY LIKE
+96. HAVEN'T HEARD OF PARTY
+97. VOLUNTEERED: REFUSED
+98. DON'T KNOW ENOUGH ABOUT/DON'T KNOW WHERE TO RATE
+99. MISSING
+
+---------------------------------------------------------------------------
+F3019_A >>> Q17a. LIKE-DISLIKE - LEADER A
+F3019_B >>> Q17b. LIKE-DISLIKE - LEADER B
+F3019_C >>> Q17c. LIKE-DISLIKE - LEADER C
+F3019_D >>> Q17d. LIKE-DISLIKE - LEADER D
+F3019_E >>> Q17e. LIKE-DISLIKE - LEADER E
+F3019_F >>> Q17f. LIKE-DISLIKE - LEADER F
+F3019_G >>> Q17g. LIKE-DISLIKE - ADDITIONAL - LEADER G
+F3019_H >>> Q17h. LIKE-DISLIKE - ADDITIONAL - LEADER H
+F3019_I >>> Q17i. LIKE-DISLIKE - ADDITIONAL - LEADER I
+---------------------------------------------------------------------------
+Q17a-i. And what do you think of the Presidential candidates/party
+leaders? After I read the name of a Presidential
+candidate/party leader, please rate them on a scale from 0
+to 10, where 0 means you strongly dislike that candidate
+and 10 means that you strongly like that candidate. If I
+come to a Presidential candidate/party leader you haven't
+heard of or you feel you do not know enough about, just
+say so. The first is [LEADER A].
+Using the same scale, where would you place, [LEADER B]?
+Using the same scale, where would you place, [LEADER C]?
+Using the same scale, where would you place, [LEADER D]?
+Using the same scale, where would you place, [LEADER E]?
+Using the same scale, where would you place, [LEADER F]?
+..................................................................
+00. STRONGLY DISLIKE
+01.
+02.
+03.
+04.
+05.
+06.
+07.
+08.
+09.
+10. STRONGLY LIKE
+96. HAVEN'T HEARD OF LEADER
+97. VOLUNTEERED: REFUSED
+98. DON'T KNOW ENOUGH ABOUT/DON'T KNOW WHERE TO RATE
+99. MISSING
 
 ## Propensity to vote
 
