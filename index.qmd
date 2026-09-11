@@ -31,3 +31,10 @@ estimate within party contrast using multilevel modelling, how does attachement 
 
 to-do:
   - finish data collection and survey items overview (EES, CSES, ESS)
+
+
+
+  EES -> PTV
+  CSES -> party & leader like/dislike
+  ESS -> PID only
+  eu25 -> party thermo and cj
