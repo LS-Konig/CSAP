@@ -33,7 +33,7 @@ options(width = 80)
 p_required <- c(
   "tidyverse",
   "here",
-  "haven",
+  "arrow",
   "sessioninfo"
 )
 packages <- rownames(installed.packages())
@@ -47,21 +47,241 @@ rm(p_required, p_to_install, packages)
 
 # Load ESS Data
 
+The source is the partitioned Parquet dataset written by notebook 1.1, not the 1.5 GB CSV it
+was built from. The whole point of that conversion is that a reader fetches only the columns
+it needs, so nothing here parses the extract again.
+
 ```{r}
 #| label: load-ess-data
 
+# Partitioned Parquet, never the CSV
+ess <- open_dataset(
+  here(
+    "data",
+    "01_raw",
+    "ess",
+    "parquet"
+  ),
+  partitioning = hive_partition(cntry = utf8(), essround = int64())
+)
+
+ess
 ```
 
 # Select PID and other key Variables
 
+The attachment item is `clsprty` -- *is there a particular political party you feel closer to
+than all the other parties?* -- a core item asked of everyone, with wording and coding constant
+across all eleven rounds: `1` yes, `2` no, `7` refusal, `8` don't know, `9` no answer. Unlike
+the EES and CSES files it carries no `NA` at all, and no country-round cell is missing it, so
+nothing has to be dropped.
+
+The `name` column is kept because it is the only thing separating round 10's two stacked
+samples, which the caveats below depend on.
+
 ```{r}
 #| label: select
 
+# Four columns of 430,581 rows
+ess_pid <- ess |>
+  select(cntry, essround, name, clsprty) |>
+  collect() |>
+  mutate(
+    round = essround,
+    country = cntry,
+    # 1 yes, 2 no, 8 dk, 7/9 refused
+    pid_cat = case_when(
+      clsprty == 1 ~ "Close to a party",
+      clsprty == 2 ~ "No attachment",
+      clsprty == 8 ~ "Don't know",
+      .default = "Refused or no answer"
+    )
+  ) |>
+  select(round, country, name, pid_cat)
 ```
 
-# Join to Long Format 
+# Join to Long Format
+
+There is nothing to join: the ESS arrives as one long file, the extract already holds exactly
+the project's 25 democracies, and country identifiers are already alpha-2. The country filter
+below is therefore a no-op, kept as a guard and for symmetry with notebooks 1.2 and 1.3.
+
+```{r}
+#| label: bind
+
+ess_pid <- ess_pid |>
+  # Extract already holds the 25
+  filter(
+    country %in%
+      c(
+        "AT",
+        "BE",
+        "BG",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GB",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LV",
+        "NL",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      )
+  ) |>
+  mutate(
+    # Fix category order for the legend
+    pid_cat = factor(
+      pid_cat,
+      levels = c(
+        "Close to a party",
+        "No attachment",
+        "Don't know",
+        "Refused or no answer"
+      )
+    )
+  )
+
+# Respondents and countries per round
+ess_pid |>
+  summarise(
+    respondents = n(),
+    countries = n_distinct(country),
+    .by = round
+  ) |>
+  arrange(round)
+```
 
 # Plot Share of Respondents reporting PID (incl. other), denying PID and Don't Know
+
+The x-axis is the ESS round rather than the fieldwork year. Year is derivable but not usable
+as an axis: it lives in `inwyr` for rounds 1--2, `inwyys` for rounds 3--9 and `inwds` for
+rounds 10--11, and the 18,386 respondents of round 10's self-completion sample carry no
+interview date at all. The modal fieldwork year is therefore shown only as a label under each
+round.
+
+```{r}
+#| label: shares
+
+# Pooled share within each round
+shares_pooled <- ess_pid |>
+  count(round, pid_cat) |>
+  group_by(round) |>
+  mutate(share = n / sum(n)) |>
+  ungroup()
+
+# Share within each country-round
+shares_country <- ess_pid |>
+  count(country, round, pid_cat) |>
+  group_by(country, round) |>
+  mutate(share = n / sum(n)) |>
+  ungroup()
+
+shares_pooled
+```
+
+Four things are worth keeping in view when reading the figures.
+
+First, **round 10 mixes two survey modes**. It is two stacked samples sharing `essround == 10`:
+the face-to-face `ESS10e03_3` in 17 countries and the self-completion `ESS10SCe03_2` in Austria,
+Germany, Spain, Latvia, Poland and Sweden. The self-completion half returns 51.2% close to a
+party against the face-to-face half's 40.5%, and offers no refusal or don't-know code at all --
+zero of each, against 703 in the face-to-face half -- which is why the round-10 don't-know share
+is the lowest in the series. Because the two samples cover disjoint sets of countries, mode is
+fully confounded with country composition there, and the gap cannot be attributed to mode alone.
+
+Second, **`clsprty` is a filter item, not a party name**. The party actually named is recorded
+separately in the country-specific `prtcl<cc>` family. As in notebook 1.3, this series is
+therefore not level-comparable with the EES series in notebook 1.2 -- only its movement is.
+
+Third, **the refusal band is not comparable across the three notebooks**. The ESS uses codes
+`7` and `9` sparingly, 0.2% to 1.5% per round, against 4% to 7% in the EES. That difference is
+coding practice, not respondents.
+
+Fourth, **the panel is unbalanced**. Between 18 and 23 of the 25 countries appear per round.
+Thirteen appear in all eleven rounds; Romania appears in one (round 4), Latvia in four and
+Croatia in five. The faceted figure exists to make this visible.
+
+```{r}
+#| label: plot-pooled
+#| fig-width: 9
+#| fig-height: 5
+
+# Pooled trend, four categories
+ggplot(shares_pooled, aes(x = round, y = share, colour = pid_cat)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2.2) +
+  scale_x_continuous(
+    breaks = 1:11,
+    labels = c(
+      "1\n2002",
+      "2\n2004",
+      "3\n2006",
+      "4\n2008",
+      "5\n2011",
+      "6\n2012",
+      "7\n2014",
+      "8\n2016",
+      "9\n2018",
+      "10\n2021",
+      "11\n2023"
+    )
+  ) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Reported party attachment in the ESS, rounds 1-11",
+    subtitle = "Unweighted shares, pooled over 25 European democracies",
+    x = "ESS round and modal fieldwork year",
+    y = "Share of respondents",
+    colour = NULL,
+    caption = "Round 10 pools a face-to-face and a self-completion sample."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: plot-country
+#| fig-width: 11
+#| fig-height: 11
+
+# Same trend, one panel per country
+ggplot(shares_country, aes(x = round, y = share, colour = pid_cat)) +
+  geom_line(linewidth = 0.5) +
+  geom_point(size = 1.1) +
+  facet_wrap(vars(country), ncol = 5) +
+  scale_x_continuous(breaks = c(1, 6, 11)) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Reported party attachment in the ESS by country, rounds 1-11",
+    subtitle = "Unweighted shares; gaps mark rounds in which a country was not surveyed",
+    x = "ESS round",
+    y = "Share of respondents",
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+Read next to the other two notebooks, the ESS series declines from 50.9% to 43.1% close to a
+party, moving in the same direction as the CSES series in notebook 1.3 (44.5% to 40.4%) and
+against the EES series in notebook 1.2 (55.9% to 66.3%). Two of the three sources agree; the
+EES is the one that does not, and its late waves are also the ones carrying the mode break
+described there.
 
 # Session Info
 
@@ -88,6 +308,3 @@ message(paste(
 "
 ))
 ```
-
-
-  

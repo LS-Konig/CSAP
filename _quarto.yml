@@ -7,6 +7,7 @@ project:
     - code/01_preparation/1.1_ess_to_parquet.qmd
     - code/01_preparation/1.2_ees_pid_over_time.qmd
     - code/01_preparation/1.3_cses_pid_over_time.qmd
+    - code/01_preparation/1.4_ess_pid_over_time.qmd
 
 # Only the notebooks listed here are rendered by the project. Without this block
 # Quarto auto-discovers every .qmd and .md in the tree, including data provenance
@@ -17,6 +18,7 @@ manuscript:
     - code/01_preparation/1.1_ess_to_parquet.qmd
     - code/01_preparation/1.2_ees_pid_over_time.qmd
     - code/01_preparation/1.3_cses_pid_over_time.qmd
+    - code/01_preparation/1.4_ess_pid_over_time.qmd
 
 execute:
   freeze: auto
@@ -31,15 +33,6 @@ author:
         city: Mannheim
         state: BW
         postal-code: 68159
-  - name: Thomas König
-    orcid: 0000-0002-1797-6662
-    email: koenig@uni-mannheim.de
-    affiliations: 
-      - name: University of Mannheim
-        address: A 5, 6 – Raum A 353
-        city: Mannheim
-        state: BW
-        postal-code: 68159 
 
 bibliography: references.bib
 biblio-style: apsr
