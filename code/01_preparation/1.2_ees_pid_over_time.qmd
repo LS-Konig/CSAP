@@ -1,8 +1,8 @@
 ---
 title: |
-  Code Notebook
+  CSAP Code Notebook 1.2
 subtitle: |
-  How does reported partisan attachement influence affective polarization?: A comparative study of 25 European democracies
+  EES voter studies: reported party attachment, 2004-2024
 date: last-modified
 date-format: MMMM D, YYYY
 format:
@@ -21,7 +21,7 @@ execute:
 
 ```{r}
 #| label: setup
-
+#| 
 # To track render duration
 start_time <- Sys.time()
 
@@ -80,7 +80,7 @@ ees_2014 <- read_dta(
   )
 )
 
-ess_2019 <- read_dta(
+ees_2019 <- read_dta(
   here(
     "data",
     "01_raw",
@@ -90,7 +90,7 @@ ess_2019 <- read_dta(
   )
 )
 
-ess_2024 <- read_csv2(
+ees_2024 <- read_csv2(
   here(
     "data",
     "01_raw",
@@ -103,24 +103,295 @@ ess_2024 <- read_csv2(
 
 # Select PID and other key Variables
 
+The PID item is the same question in every wave -- *do you consider yourself to be close to
+any particular party?* -- but the archived coding differs wave by wave, and in 2004, 2014 and
+2019 it also differs from the questionnaire reproduced in `data/01_raw/key-items.qmd`. The
+codes used below were read off the files themselves.
+
+Two of the variable choices are not the obvious ones. In 2019 the raw `Q25` codes *no, not
+close to any party* with a country-specific value (`101` in Austria, `2801` in the UK), so
+the harmonised `Q25n` is used instead. In 2024 the reverse holds: `q19n` and `q19_ees` do not
+follow the 2019 scheme, so the raw `q19` is used.
+
 ```{r}
-#| label: select
+#| label: select-2004
 
-# 2024
+# 2004: PID item is v211
+ees_2004 <- ees_2004 |>
+  # Item unfielded in BE, LT
+  filter(!is.na(v211)) |>
+  mutate(
+    year = 2004,
+    country_raw = as.character(as_factor(country)),
+    # 94 no PID, 99 dk/na, 95 refused
+    pid_cat = case_when(
+      v211 == 94 ~ "No attachment",
+      v211 == 99 ~ "Don't know",
+      v211 == 95 ~ "Refused or no answer",
+      .default = "Named a party"
+    )
+  ) |>
+  select(year, country_raw, pid_cat)
+```
 
-ess_2024 <- ess_2024 |>
-  select(
-    year,
-    resp_id,
-    countrycode,
-    country_alpha2,
-    q19
+```{r}
+#| label: select-2009
+
+# 2009: PID item is q87
+ees_2009 <- ees_2009 |>
+  mutate(
+    year = 2009,
+    country_raw = as.character(as_factor(t102)),
+    # 0 no, 88 dk, 77 refused, 99 nap
+    pid_cat = case_when(
+      q87 == 0 ~ "No attachment",
+      q87 == 88 ~ "Don't know",
+      q87 %in% c(77, 99) ~ "Refused or no answer",
+      .default = "Named a party"
+    )
+  ) |>
+  select(year, country_raw, pid_cat)
+```
+
+```{r}
+#| label: select-2014
+
+# 2014: PID item is qpp21
+ees_2014 <- ees_2014 |>
+  mutate(
+    year = 2014,
+    country_raw = as.character(as_factor(countrycode)),
+    # 1 no, -9 dk, -8 refused
+    pid_cat = case_when(
+      qpp21 == 1 ~ "No attachment",
+      qpp21 == -9 ~ "Don't know",
+      qpp21 == -8 ~ "Refused or no answer",
+      .default = "Named a party"
+    )
+  ) |>
+  select(year, country_raw, pid_cat)
+```
+
+```{r}
+#| label: select-2019
+
+# 2019: harmonised PID item is Q25n
+ees_2019 <- ees_2019 |>
+  mutate(
+    year = 2019,
+    country_raw = as.character(as_factor(countrycode)),
+    # 0 no, 98 dk, no refusal
+    pid_cat = case_when(
+      Q25n == 0 ~ "No attachment",
+      Q25n == 98 ~ "Don't know",
+      .default = "Named a party"
+    )
+  ) |>
+  select(year, country_raw, pid_cat)
+```
+
+```{r}
+#| label: select-2024
+
+# 2024: PID item is q19
+ees_2024 <- ees_2024 |>
+  mutate(
+    year = 2024,
+    country_raw = country_alpha2,
+    # 1 no, 98 dk, no refusal
+    pid_cat = case_when(
+      q19 == 1 ~ "No attachment",
+      q19 == 98 ~ "Don't know",
+      .default = "Named a party"
+    )
+  ) |>
+  select(year, country_raw, pid_cat)
+```
+
+# Join to Long Format
+
+Country identifiers are spelled differently in every wave -- lowercase names in 2004, `The
+Netherlands` in 2009 and 2014, `Czech Rep.` in 2019, alpha-2 codes with `EL` for Greece in
+2024 -- so all of them are mapped onto ISO2 before the waves are stacked. In 2004 Britain and
+Northern Ireland are two separate units; both are mapped to `GB` so that the wave is
+comparable with 2009--2019, which field the UK as one.
+
+```{r}
+#| label: bind
+
+ees_pid <- bind_rows(ees_2004, ees_2009, ees_2014, ees_2019, ees_2024) |>
+  mutate(
+    # Map every spelling to ISO2
+    country = recode_values(
+      str_to_lower(country_raw),
+      c("austria", "at") ~ "AT",
+      c("belgium", "be") ~ "BE",
+      c("bulgaria", "bg") ~ "BG",
+      c("croatia", "hr") ~ "HR",
+      c("cyprus", "cy") ~ "CY",
+      c("czech republic", "czech rep.", "cz") ~ "CZ",
+      c("denmark", "dk") ~ "DK",
+      c("estonia", "ee") ~ "EE",
+      c("finland", "fi") ~ "FI",
+      c("france", "fr") ~ "FR",
+      c("germany", "de") ~ "DE",
+      c("greece", "el") ~ "GR",
+      c("hungary", "hu") ~ "HU",
+      c("ireland", "ie") ~ "IE",
+      c("italy", "it") ~ "IT",
+      c("latvia", "lv") ~ "LV",
+      c("lithuania", "lt") ~ "LT",
+      c("luxembourg", "lu") ~ "LU",
+      c("malta", "mt") ~ "MT",
+      c("netherlands", "the netherlands", "nl") ~ "NL",
+      c("poland", "pl") ~ "PL",
+      c("portugal", "pt") ~ "PT",
+      c("romania", "ro") ~ "RO",
+      c("slovakia", "sk") ~ "SK",
+      c("slovenia", "si") ~ "SI",
+      c("spain", "es") ~ "ES",
+      c("sweden", "se") ~ "SE",
+      c("britain", "northern ireland", "united kingdom") ~ "GB"
+    ),
+    # Fix category order for the legend
+    pid_cat = factor(
+      pid_cat,
+      levels = c(
+        "Named a party",
+        "No attachment",
+        "Don't know",
+        "Refused or no answer"
+      )
+    )
+  ) |>
+  # Keep the project's 25 democracies
+  filter(
+    country %in%
+      c(
+        "AT",
+        "BE",
+        "BG",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GB",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LV",
+        "NL",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      )
+  ) |>
+  select(year, country, pid_cat)
+
+# Respondents and countries per wave
+ees_pid |>
+  summarise(
+    respondents = n(),
+    countries = n_distinct(country),
+    .by = year
   )
 ```
 
-# Join to Long Format 
-
 # Plot Share of Respondents reporting PID (incl. other), denying PID and Don't Know
+
+```{r}
+#| label: shares
+
+# Pooled share across the 25
+shares_pooled <- ees_pid |>
+  count(year, pid_cat) |>
+  group_by(year) |>
+  mutate(share = n / sum(n)) |>
+  ungroup()
+
+# Share within each country
+shares_country <- ees_pid |>
+  count(year, country, pid_cat) |>
+  group_by(year, country) |>
+  mutate(share = n / sum(n)) |>
+  ungroup()
+
+shares_pooled
+```
+
+Three things are worth keeping in view when reading the figures.
+
+First, **the survey mode changes between 2014 and 2019**. The 2004--2014 waves are
+interviewer-administered, while 2019 and 2024 are online panels that offer no refusal option
+at all. The *Refused or no answer* series therefore ends after 2014 by design rather than
+because respondents stopped refusing, and the don't-know share rises across the same seam.
+Movement over that boundary is not cleanly attributable to respondents.
+
+Second, **the 2004 don't-know category is contaminated**. The archived `v211` codes `99` as
+`d/k, n/a`, merging don't-know with no-answer, so the 2004 don't-know share is an upper bound
+and its refusal share is correspondingly understated.
+
+Third, **the set of countries is not fixed**. Bulgaria, Croatia and Romania are absent in 2004
+(Croatia also in 2009), Belgium and Lithuania carry no PID data in 2004, and Great Britain is
+absent in 2024. The pooled line is therefore not a balanced panel; the faceted figure below
+shows where the gaps fall.
+
+```{r}
+#| label: plot-pooled
+#| fig-width: 8
+#| fig-height: 5
+
+# Pooled trend, four categories
+ggplot(shares_pooled, aes(x = year, y = share, colour = pid_cat)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2.2) +
+  scale_x_continuous(breaks = c(2004, 2009, 2014, 2019, 2024)) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Reported party attachment in the EES, 2004-2024",
+    subtitle = "Unweighted shares, pooled over 25 European democracies",
+    x = NULL,
+    y = "Share of respondents",
+    colour = NULL,
+    caption = "No refusal option was offered in 2019 and 2024."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: plot-country
+#| fig-width: 11
+#| fig-height: 11
+
+# Same trend, one panel per country
+ggplot(shares_country, aes(x = year, y = share, colour = pid_cat)) +
+  geom_line(linewidth = 0.5) +
+  geom_point(size = 1.1) +
+  facet_wrap(vars(country), ncol = 5) +
+  scale_x_continuous(breaks = c(2004, 2014, 2024)) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Reported party attachment in the EES by country, 2004-2024",
+    subtitle = "Unweighted shares; gaps mark waves in which a country was not surveyed",
+    x = NULL,
+    y = "Share of respondents",
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
 
 # Session Info
 
@@ -147,6 +418,3 @@ message(paste(
 "
 ))
 ```
-
-
-  

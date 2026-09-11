@@ -1,8 +1,8 @@
 ---
 title: |
-  Code Notebook
+  CSAP Code Notebook 1.3
 subtitle: |
-  How does reported partisan attachement influence affective polarization?: A comparative study of 25 European democracies
+  CSES IMD and module 6: reported party attachment, 1996-2024
 date: last-modified
 date-format: MMMM D, YYYY
 format:
@@ -47,10 +47,16 @@ rm(p_required, p_to_install, packages)
 
 # Load CSES Data
 
+Both releases are `.rdata` archives, so `load()` is called for its side effect: it creates the
+object `cses_imd` (modules 1--5) and the object `cses6` (module 6) in the environment rather
+than returning them. The module 6 archive also carries a stray `.Traceback` object, which is
+ignored.
+
 ```{r}
 #| label: load-cses-data
 
-cses_1_5 <- load(
+# Creates the object cses_imd
+load(
   here(
     "data",
     "01_raw",
@@ -60,7 +66,8 @@ cses_1_5 <- load(
   )
 )
 
-cses_6 <- load(
+# Creates the object cses6
+load(
   here(
     "data",
     "01_raw",
@@ -73,21 +80,257 @@ cses_6 <- load(
 
 # Select PID and other key Variables
 
-```{r}
-#| label: select
+The attachment item is the same question in both releases -- *do you usually think of yourself
+as close to any particular party?* -- and shares one coding: `1` yes, `0` no, `8` don't know,
+`7` refused and `9` missing. Only the variable names differ, and they differ completely: the
+IMD uses upper-case `IMD`-prefixed names, module 6 lower-case `f`-prefixed ones.
 
+CSES asks a follow-up probe of everyone who does not say yes (*do you feel yourself a little
+closer to one of the political parties than the others?*, `IMD3005_2` / `f3023_2`). That probe
+is deliberately **not** used here: the base item alone is the analogue of the EES question in
+notebook 1.2, and the probe is unfielded in nine of the studies below.
+
+```{r}
+#| label: select-imd
+
+# IMD: base PID item is IMD3005_1
 cses_imd <- cses_imd |>
-  select(
-    IMD3005_1,
-    # country,
-    # id,
-    # date
-  )
+  mutate(
+    # Module flags are study-level
+    module = case_when(
+      IMD1008_MOD_1 == 1 ~ 1,
+      IMD1008_MOD_2 == 1 ~ 2,
+      IMD1008_MOD_3 == 1 ~ 3,
+      IMD1008_MOD_4 == 1 ~ 4,
+      IMD1008_MOD_5 == 1 ~ 5
+    ),
+    study = IMD1004,
+    country = IMD1006_UNALPHA2,
+    year = IMD1008_YEAR,
+    close = IMD3005_1,
+    # 1 yes, 0 no, 8 dk, 7/9 refused
+    pid_cat = case_when(
+      close == 1 ~ "Close to a party",
+      close == 0 ~ "No attachment",
+      close == 8 ~ "Don't know",
+      .default = "Refused or no answer"
+    )
+  ) |>
+  select(module, study, country, year, close, pid_cat)
 ```
 
-# Join to Long Format 
+```{r}
+#| label: select-mod6
+
+# Module 6: base PID item is f3023_1
+cses_mod6 <- cses6 |>
+  mutate(
+    module = 6,
+    study = f1004,
+    # Module 6 codes Slovenia SL
+    country = if_else(f1006_unalpha2 == "SL", "SI", f1006_unalpha2),
+    year = f1010_y,
+    close = f3023_1,
+    # 1 yes, 0 no, 8 dk, 7/9 refused
+    pid_cat = case_when(
+      close == 1 ~ "Close to a party",
+      close == 0 ~ "No attachment",
+      close == 8 ~ "Don't know",
+      .default = "Refused or no answer"
+    )
+  ) |>
+  select(module, study, country, year, close, pid_cat)
+```
+
+# Join to Long Format
+
+The two releases do not overlap -- the IMD's latest election is 2021, module 6 begins in 2022
+-- so no study is counted twice. Country identifiers are already alpha-2 in both files, so
+unlike the EES in notebook 1.2 no name lookup is needed; the one exception is module 6's `SL`
+for Slovenia, corrected above.
+
+Two studies never fielded the item at all and are dropped whole rather than counted as
+missing: `BELW1999` (Wallonia) and `LVA_2018`. Both are caught from the data, by dropping any
+study in which every case is coded `9`.
+
+```{r}
+#| label: bind
+
+cses_pid <- bind_rows(cses_imd, cses_mod6) |>
+  # Drop studies never fielding the item
+  filter(!all(close == 9), .by = study) |>
+  # Keep the project's 25 democracies
+  filter(
+    country %in%
+      c(
+        "AT",
+        "BE",
+        "BG",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GB",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LV",
+        "NL",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      )
+  ) |>
+  mutate(
+    # Fix category order for the legend
+    pid_cat = factor(
+      pid_cat,
+      levels = c(
+        "Close to a party",
+        "No attachment",
+        "Don't know",
+        "Refused or no answer"
+      )
+    )
+  ) |>
+  select(module, study, country, year, pid_cat)
+
+# Respondents, studies and countries per module
+cses_pid |>
+  summarise(
+    respondents = n(),
+    studies = n_distinct(study),
+    countries = n_distinct(country),
+    .by = module
+  ) |>
+  arrange(module)
+```
 
 # Plot Share of Respondents reporting PID (incl. other), denying PID and Don't Know
+
+Unlike the EES, the CSES has no fixed fieldwork years: each study follows a national election,
+so the 25 countries contribute 109 country-years scattered between 1996 and 2024. The pooled
+figure therefore runs over the six CSES modules, each of which is a defined five-year window,
+while the country panels keep the election year on the x-axis.
+
+Three country-years are fielded as two studies each and are pooled into one point: Belgium 2019
+(Flanders and Wallonia), Germany 2002, and the two Greek elections of 2015. Belgium 1999 is
+not pooled, because the Walloon half of it never fielded the item.
+
+```{r}
+#| label: shares
+
+# Pooled share within each module
+shares_pooled <- cses_pid |>
+  count(module, pid_cat) |>
+  group_by(module) |>
+  mutate(share = n / sum(n)) |>
+  ungroup()
+
+# Share within each country-year
+shares_country <- cses_pid |>
+  count(country, year, pid_cat) |>
+  group_by(country, year) |>
+  mutate(share = n / sum(n)) |>
+  ungroup()
+
+shares_pooled
+```
+
+Six things are worth keeping in view when reading the figures.
+
+First, **close to a party is not the same as naming a party**. The CSES item is binary; the
+party itself is asked at a separate variable (`IMD3005_3`). A respondent can be close to a
+party here without ever naming one, so this series is not level-comparable with the EES series
+in notebook 1.2 -- only its movement is.
+
+Second, **the leaner probe is excluded**, and it is large. Respondents who say no to the base
+item but yes to the follow-up probe are between 15% and 25% of all respondents depending on
+the module. The *No attachment* band therefore contains a substantial layer of leaners, and
+its level should not be read as the share with no partisan leaning whatsoever.
+
+Third, **code `9` conflates missing with not asked**. The *Refused or no answer* band mixes
+true item nonresponse with study-level gaps in administration, and only studies in which every
+single case is `9` are dropped.
+
+Fourth, **modules 1 and 2 used deviating wording**, asking about any particular *political*
+party. That deviation sits exactly under the first two points of the pooled line.
+
+Fifth, **CSES folds inconsistent answers into the binary** rather than dropping them: a "yes"
+with no party identified is coded `1` and a "no" with a party identified is coded `0`, and
+neither is corrected here.
+
+Sixth, **the panel is unbalanced and the unit is an election, not a year**. Between 8 and 19 of
+the 25 countries appear per module; Estonia and Croatia contribute a single study each, while
+Czechia, Germany, Poland and Portugal contribute seven. The faceted figure exists to make this
+visible.
+
+```{r}
+#| label: plot-pooled
+#| fig-width: 8
+#| fig-height: 5
+
+# Pooled trend, four categories
+ggplot(shares_pooled, aes(x = module, y = share, colour = pid_cat)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2.2) +
+  scale_x_continuous(
+    breaks = 1:6,
+    labels = c(
+      "1\n1996-2001",
+      "2\n2001-2006",
+      "3\n2006-2011",
+      "4\n2011-2016",
+      "5\n2016-2021",
+      "6\n2021-2026"
+    )
+  ) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Reported party attachment in the CSES, modules 1-6",
+    subtitle = "Unweighted shares, pooled over 25 European democracies",
+    x = "CSES module",
+    y = "Share of respondents",
+    colour = NULL,
+    caption = "The branching leaner probe is not used."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: plot-country
+#| fig-width: 11
+#| fig-height: 11
+
+# Same trend, one panel per country
+ggplot(shares_country, aes(x = year, y = share, colour = pid_cat)) +
+  geom_line(linewidth = 0.5) +
+  geom_point(size = 1.1) +
+  facet_wrap(vars(country), ncol = 5) +
+  scale_x_continuous(breaks = c(2000, 2010, 2020)) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Reported party attachment in the CSES by country, 1996-2024",
+    subtitle = "Unweighted shares; each point is one national election study",
+    x = NULL,
+    y = "Share of respondents",
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
 
 # Session Info
 
@@ -114,6 +357,3 @@ message(paste(
 "
 ))
 ```
-
-
-  

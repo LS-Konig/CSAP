@@ -1,0 +1,93 @@
+---
+title: |
+  CSAP Code Notebook 1.4
+subtitle: |
+  ESS rounds 1-11: reported party attachment over time
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "haven",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+# Load ESS Data
+
+```{r}
+#| label: load-ess-data
+
+```
+
+# Select PID and other key Variables
+
+```{r}
+#| label: select
+
+```
+
+# Join to Long Format 
+
+# Plot Share of Respondents reporting PID (incl. other), denying PID and Don't Know
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
+
+
+  

@@ -43,6 +43,10 @@ models/
 # Quarto knitr intermediates (left behind by interrupted renders)
 *.rmarkdown
 
+# Quarto manuscript notebook intermediates (regenerated on render)
+*.out.ipynb
+*.embed.ipynb
+
 # Raw external survey sources (Eurobarometer, CSES, EES, ESS): ~3.2 GB on disk,
 # kept local and freely re-downloadable from GESIS / cses.org / europeansocialsurvey.org.
 # For ESS this covers the 1.5 GB CSV extract, its codebook and the derived Parquet tree.

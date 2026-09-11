@@ -1,9 +1,24 @@
 project:
   type: manuscript
-  resources: 
+  resources:
     - robots.txt
+  render:
+    - index.qmd
+    - code/01_preparation/1.1_ess_to_parquet.qmd
+    - code/01_preparation/1.2_ees_pid_over_time.qmd
+    - code/01_preparation/1.3_cses_pid_over_time.qmd
 
-execute: 
+# Only the notebooks listed here are rendered by the project. Without this block
+# Quarto auto-discovers every .qmd and .md in the tree, including data provenance
+# stubs and the deck. Add a notebook here to include it.
+manuscript:
+  article: index.qmd
+  notebooks:
+    - code/01_preparation/1.1_ess_to_parquet.qmd
+    - code/01_preparation/1.2_ees_pid_over_time.qmd
+    - code/01_preparation/1.3_cses_pid_over_time.qmd
+
+execute:
   freeze: auto
 
 author:
