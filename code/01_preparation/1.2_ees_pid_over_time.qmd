@@ -113,6 +113,19 @@ close to any party* with a country-specific value (`101` in Austria, `2801` in t
 the harmonised `Q25n` is used instead. In 2024 the reverse holds: `q19n` and `q19_ees` do not
 follow the 2019 scheme, so the raw `q19` is used.
 
+Left--right self-placement -- *in political matters people talk of "the left" and "the right";
+what is your position?* -- is carried through the same chunks, for the final section of this
+notebook. Nothing between here and that section uses it. Its item number moves as much as the
+PID item's does: `v134` in 2004, `q46` in 2009, `qpp13` in 2014, `Q11` in 2019 and `q10` in
+2024. Two of those need more than a missing-code filter. The 2014 file stores the scale as
+`1`--`11` for 0--10, so it is shifted down by one; and 2004 is the only wave fielded on
+1--10 rather than 0--10, so it is stretched onto the common scale with `(x - 1) * 10 / 9`.
+That stretch is linear and multiplies the 2004 spread by exactly 10/9, which is a decision
+about comparability and not a finding -- it is written as its own line so that deleting it
+restores the raw 1--10 and replacing it with `NA_real_` drops the wave, neither of which
+touches anything else. The 20 zeroes in the 2004 Swedish file fall outside the fielded range
+and are dropped with the missing codes.
+
 ```{r}
 #| label: select-2004
 
@@ -129,9 +142,13 @@ ees_2004 <- ees_2004 |>
       v211 == 99 ~ "Don't know",
       v211 == 95 ~ "Refused or no answer",
       .default = "Named a party"
-    )
+    ),
+    # LR self-placement is v134, fielded 1-10 with stray 0s in Sweden
+    lr = if_else(as.numeric(v134) %in% 1:10, as.numeric(v134), NA_real_),
+    # The only 1-10 wave, stretched onto the 0-10 of every later one
+    lr = (lr - 1) * 10 / 9
   ) |>
-  select(year, country_raw, pid_cat)
+  select(year, country_raw, pid_cat, lr)
 ```
 
 ```{r}
@@ -148,9 +165,11 @@ ees_2009 <- ees_2009 |>
       q87 == 88 ~ "Don't know",
       q87 %in% c(77, 99) ~ "Refused or no answer",
       .default = "Named a party"
-    )
+    ),
+    # LR self-placement is q46, 0-10 with 77, 88 and 98 missing
+    lr = if_else(as.numeric(q46) %in% 0:10, as.numeric(q46), NA_real_)
   ) |>
-  select(year, country_raw, pid_cat)
+  select(year, country_raw, pid_cat, lr)
 ```
 
 ```{r}
@@ -167,9 +186,11 @@ ees_2014 <- ees_2014 |>
       qpp21 == -9 ~ "Don't know",
       qpp21 == -8 ~ "Refused or no answer",
       .default = "Named a party"
-    )
+    ),
+    # LR self-placement is qpp13, stored 1-11 for 0-10
+    lr = if_else(as.numeric(qpp13) %in% 1:11, as.numeric(qpp13) - 1, NA_real_)
   ) |>
-  select(year, country_raw, pid_cat)
+  select(year, country_raw, pid_cat, lr)
 ```
 
 ```{r}
@@ -185,9 +206,11 @@ ees_2019 <- ees_2019 |>
       Q25n == 0 ~ "No attachment",
       Q25n == 98 ~ "Don't know",
       .default = "Named a party"
-    )
+    ),
+    # LR self-placement is Q11, 0-10 with 97 and 98 missing
+    lr = if_else(as.numeric(Q11) %in% 0:10, as.numeric(Q11), NA_real_)
   ) |>
-  select(year, country_raw, pid_cat)
+  select(year, country_raw, pid_cat, lr)
 ```
 
 ```{r}
@@ -203,9 +226,11 @@ ees_2024 <- ees_2024 |>
       q19 == 1 ~ "No attachment",
       q19 == 98 ~ "Don't know",
       .default = "Named a party"
-    )
+    ),
+    # LR self-placement is q10, 0-10 with 98 missing
+    lr = if_else(as.numeric(q10) %in% 0:10, as.numeric(q10), NA_real_)
   ) |>
-  select(year, country_raw, pid_cat)
+  select(year, country_raw, pid_cat, lr)
 ```
 
 # Join to Long Format
@@ -295,7 +320,7 @@ ees_pid <- bind_rows(ees_2004, ees_2009, ees_2014, ees_2019, ees_2024) |>
         "SK"
       )
   ) |>
-  select(year, country, pid_cat)
+  select(year, country, pid_cat, lr)
 
 # Respondents and countries per wave
 ees_pid |>
@@ -392,6 +417,216 @@ ggplot(shares_country, aes(x = year, y = share, colour = pid_cat)) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom")
 ```
+
+# Plot Spread of Left-Right Self-Placement among Partisans and Deniers
+
+The figures above count people. This one measures how spread out they are. The question is
+whether respondents who name a party occupy a wider or a narrower band of the left--right
+scale than respondents who say they feel close to none, and whether that difference moves
+across the five waves.
+
+Two things the figure is not. It is not the distance *between* the groups: two groups can
+share a mean and differ only in spread, which is roughly what happens here. And a standard
+deviation cannot tell a wide unimodal distribution from a bimodal one -- two distributions
+that look nothing alike can share an SD -- so nothing below speaks to sorting, or to
+polarisation in any of its senses. It is one descriptive cut.
+
+Don't-know and refusal are dropped throughout this section; the contrast is between the two
+substantive answers only.
+
+Before the spread, the coverage, because it is the constraint everything else here sits
+inside.
+
+```{r}
+#| label: lr-coverage
+
+# Who answers the placement item at all, by wave and attachment
+lr_coverage <- ees_pid |>
+  filter(pid_cat %in% c("Named a party", "No attachment")) |>
+  summarise(
+    respondents = n(),
+    placed = mean(!is.na(lr)),
+    .by = c(year, pid_cat)
+  ) |>
+  arrange(year, pid_cat)
+
+lr_coverage
+```
+
+Between 92.7% and 95.7% of respondents who name a party place themselves on the scale,
+against 71.9% to 83.8% of those who name none -- a gap of ten to twenty-one points, present
+in all five waves and widest in 2014. The standard deviations below are therefore computed on
+a self-selected subset, and the selection is *different in the two groups*: the deniers who
+do answer are the more engaged end of that group, which is exactly the end whose placements
+should look most partisan-like. The direction of the resulting bias cannot be signed from the
+data. Dropping the least engaged could narrow the denier spread, if what goes is arbitrary
+mid-scale answers, or widen it, if what goes is default fives. The table is printed rather
+than hidden so that the size of the problem is visible.
+
+The mode break described above runs through this table too. The 2019 and 2024 online panels
+offer a don't-know option but no interviewer to probe with, and the wave with the worst
+denier coverage is 2014, the last interviewer-administered one -- so the coverage series does
+not line up with the mode seam in any simple way, and neither does the spread series below.
+
+```{r}
+#| label: lr-select
+
+# Partisans and deniers with a usable placement
+ees_lr <- ees_pid |>
+  filter(pid_cat %in% c("Named a party", "No attachment"), !is.na(lr)) |>
+  mutate(
+    group = factor(
+      if_else(pid_cat == "Named a party", "Partisans", "Deniers"),
+      levels = c("Partisans", "Deniers")
+    ),
+    # Keep all 25 panels in the faceted figure
+    country = factor(country, levels = sort(unique(ees_pid$country)))
+  )
+```
+
+The pooled figure takes the standard deviation over all respondents of a group in a wave,
+pooling respondents the same way the share figures above do. The faceted figure takes it
+within each country-wave. Cells of a single respondent are dropped because `sd()` is
+undefined there, and the ten thinnest are printed so their size is visible. That table is
+what this section uses in place of confidence bands: at these sample sizes the sampling error
+of a standard deviation is small enough that the movement worth arguing about is
+compositional, not statistical -- but two of the country-wave cells are genuinely thin, and
+are named below.
+
+```{r}
+#| label: lr-sd
+
+# Pooled spread within each wave
+sd_pooled <- ees_lr |>
+  summarise(
+    respondents = n(),
+    sd_lr = sd(lr),
+    .by = c(year, group)
+  ) |>
+  arrange(year, group)
+
+# Spread within each country-wave
+sd_country <- ees_lr |>
+  summarise(
+    respondents = n(),
+    sd_lr = sd(lr),
+    .by = c(country, year, group)
+  ) |>
+  # sd() is undefined below two respondents
+  filter(respondents >= 2)
+
+sd_pooled
+
+# Thinnest cells behind the faceted figure
+sd_country |>
+  slice_min(respondents, n = 10)
+```
+
+The pooled statistic is the one vulnerable to the unbalanced panel -- 20 countries in 2004,
+24 in 2009, 25 in 2014 and 2019, 24 in 2024 -- so it is recomputed below over only the
+nineteen countries present in all five waves. If the two versions move together, entry and
+exit are not driving the trend; if they diverge, composition is.
+
+```{r}
+#| label: lr-balanced
+
+# Countries surveyed in every wave
+balanced <- ees_lr |>
+  summarise(waves = n_distinct(year), .by = country) |>
+  filter(waves == n_distinct(ees_lr$year)) |>
+  pull(country)
+
+# Same pooled statistic over that fixed set
+ees_lr |>
+  filter(country %in% balanced) |>
+  summarise(
+    countries = n_distinct(country),
+    respondents = n(),
+    sd_lr = sd(lr),
+    .by = c(year, group)
+  ) |>
+  arrange(year, group)
+```
+
+Four things are worth keeping in view when reading the figures.
+
+First, **the 2004 point sits on a stretched scale**. That wave is the only one fielded on
+1--10, and the linear stretch onto 0--10 multiplies its standard deviation by exactly 10/9:
+the partisan figure of 2.88 is 2.59 on the raw scale, the denier figure of 2.25 is 2.03. The
+stretch is an assumption about how respondents use a 1--10 scale, not a measurement, so the
+2004 point should not be read on its own.
+
+Second, **the groups are not fixed populations**. The share naming a party rises across the
+five waves -- that is precisely what the figures above document -- so the marginal respondent
+crosses between the two groups over time. A change in a group's spread can therefore be
+compositional rather than attitudinal, and a standard deviation cannot tell the two readings
+apart.
+
+Third, **pooling mixes two variances**. The pooled standard deviation contains both the
+spread within countries and the differences between countries in mean position, and the
+country set is not fixed. The balanced-panel table above and the faceted figure below are the
+two checks on that; neither is a correction.
+
+Fourth, **two country-wave cells are too thin to read**. Estonia's 2004 deniers number nine
+respondents and Italy's thirty-six; every other cell in the series runs into the hundreds.
+Those two points are plotted because dropping them silently would be worse, but the Estonian
+one in particular carries no information.
+
+```{r}
+#| label: plot-lr-pooled
+#| fig-width: 8
+#| fig-height: 5
+
+# Pooled spread, two groups
+ggplot(sd_pooled, aes(x = year, y = sd_lr, colour = group)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2.2) +
+  scale_x_continuous(breaks = c(2004, 2009, 2014, 2019, 2024)) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Spread of left-right self-placement in the EES, 2004-2024",
+    subtitle = "Unweighted standard deviation on a 0-10 scale, pooled over 25 democracies",
+    x = NULL,
+    y = "Standard deviation of self-placement",
+    colour = NULL,
+    caption = "The 2004 scale is stretched from 1-10 onto 0-10; non-placers are excluded."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: plot-lr-country
+#| fig-width: 11
+#| fig-height: 11
+
+# Same spread, one panel per country
+ggplot(sd_country, aes(x = year, y = sd_lr, colour = group)) +
+  geom_line(linewidth = 0.5) +
+  geom_point(size = 1.1) +
+  facet_wrap(vars(country), ncol = 5, drop = FALSE) +
+  scale_x_continuous(breaks = c(2004, 2014, 2024)) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Spread of left-right self-placement in the EES by country, 2004-2024",
+    subtitle = "Unweighted standard deviations; gaps mark waves without a usable cell",
+    x = NULL,
+    y = "Standard deviation of self-placement",
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+The two series do not cross. Respondents who name a party are the more dispersed group in
+every wave, at a standard deviation between 2.79 and 2.98 against the deniers' 2.05 to 2.25,
+a gap running from 0.59 scale points in 2024 to 0.84 in 2014. Neither series has much of a
+trend of its own: the partisan one drifts from 2.88 in 2004 to 2.81 in 2024 with a peak in
+2009, the denier one dips to 2.05 in 2014 and returns to 2.22. The balanced-panel table
+above reproduces both series to within a tenth of a scale point at every wave, so the
+country set entering and leaving is not what the pooled line is showing.
 
 # Session Info
 

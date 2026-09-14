@@ -90,6 +90,14 @@ closer to one of the political parties than the others?*, `IMD3005_2` / `f3023_2
 is deliberately **not** used here: the base item alone is the analogue of the EES question in
 notebook 1.2, and the probe is unfielded in nine of the studies below.
 
+Left--right self-placement -- *where would you place yourself on a scale from 0 to 10, where
+0 means the left and 10 means the right?* -- is carried through the same chunks, for the final
+section of this notebook. Nothing between here and that section uses it. It is `IMD3006` in
+the IMD and `f3020_r` in module 6, 0--10 in both, with `95` haven't heard of left-right, `97`
+refused, `98` don't know where to place and `99` missing. Note that these are the *self*
+items: the party-placement battery documented in `data/01_raw/key-items.qmd` is `IMD3007_A`
+onwards, and is not used here.
+
 ```{r}
 #| label: select-imd
 
@@ -114,9 +122,11 @@ cses_imd <- cses_imd |>
       close == 0 ~ "No attachment",
       close == 8 ~ "Don't know",
       .default = "Refused or no answer"
-    )
+    ),
+    # Whitelisting the scale drops 95, 97, 98 and 99 in one go
+    lr = if_else(as.numeric(IMD3006) %in% 0:10, as.numeric(IMD3006), NA_real_)
   ) |>
-  select(module, study, country, year, close, pid_cat)
+  select(module, study, country, year, close, pid_cat, lr)
 ```
 
 ```{r}
@@ -137,9 +147,11 @@ cses_mod6 <- cses6 |>
       close == 0 ~ "No attachment",
       close == 8 ~ "Don't know",
       .default = "Refused or no answer"
-    )
+    ),
+    # Same scale, lower-case name
+    lr = if_else(as.numeric(f3020_r) %in% 0:10, as.numeric(f3020_r), NA_real_)
   ) |>
-  select(module, study, country, year, close, pid_cat)
+  select(module, study, country, year, close, pid_cat, lr)
 ```
 
 # Join to Long Format
@@ -202,7 +214,7 @@ cses_pid <- bind_rows(cses_imd, cses_mod6) |>
       )
     )
   ) |>
-  select(module, study, country, year, pid_cat)
+  select(module, study, country, year, pid_cat, lr)
 
 # Respondents, studies and countries per module
 cses_pid |>
@@ -331,6 +343,231 @@ ggplot(shares_country, aes(x = year, y = share, colour = pid_cat)) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom")
 ```
+
+# Plot Spread of Left-Right Self-Placement among Partisans and Deniers
+
+The figures above count people. This one measures how spread out they are. The question is
+whether respondents who say they feel close to a party occupy a wider or a narrower band of
+the left--right scale than respondents who say they do not, and whether that difference moves
+across the six modules.
+
+Two things the figure is not. It is not the distance *between* the groups: two groups can
+share a mean and differ only in spread, which is roughly what happens here. And a standard
+deviation cannot tell a wide unimodal distribution from a bimodal one -- two distributions
+that look nothing alike can share an SD -- so nothing below speaks to sorting, or to
+polarisation in any of its senses. It is one descriptive cut.
+
+Don't-know and refusal are dropped throughout this section; the contrast is between the two
+substantive answers only.
+
+Before the spread, the coverage, because it is the constraint everything else here sits
+inside.
+
+```{r}
+#| label: lr-coverage
+
+# Who answers the placement item at all, by module and attachment
+lr_coverage <- cses_pid |>
+  filter(pid_cat %in% c("Close to a party", "No attachment")) |>
+  summarise(
+    respondents = n(),
+    placed = mean(!is.na(lr)),
+    .by = c(module, pid_cat)
+  ) |>
+  arrange(module, pid_cat)
+
+lr_coverage
+```
+
+Between 91.6% and 95.3% of respondents close to a party place themselves on the scale,
+against 75.9% to 85.8% of those who are not -- a gap of ten to sixteen points, present in all
+six modules. The standard deviations below are therefore computed on a self-selected subset,
+and the selection is *different in the two groups*: the deniers who do answer are the more
+engaged end of that group, which is exactly the end whose placements should look most
+partisan-like. The direction of the resulting bias cannot be signed from the data. Dropping
+the least engaged could narrow the denier spread, if what goes is arbitrary mid-scale
+answers, or widen it, if what goes is default fives. The table is printed rather than hidden
+so that the size of the problem is visible.
+
+No study has to be dropped for this section. The two studies that never fielded the
+attachment item are already gone from `cses_pid`; of those remaining, every one carries usable
+placements, so the exclusion set here is exactly the item-level nonresponse above and nothing
+more.
+
+```{r}
+#| label: lr-select
+
+# Partisans and deniers with a usable placement
+cses_lr <- cses_pid |>
+  filter(pid_cat %in% c("Close to a party", "No attachment"), !is.na(lr)) |>
+  mutate(
+    group = factor(
+      if_else(pid_cat == "Close to a party", "Partisans", "Deniers"),
+      levels = c("Partisans", "Deniers")
+    ),
+    # Keep all 25 panels in the faceted figure
+    country = factor(country, levels = sort(unique(cses_pid$country)))
+  )
+```
+
+The pooled figure takes the standard deviation over all respondents of a group in a module,
+pooling respondents the same way the share figure above does, and the faceted figure takes it
+within each country-year -- which in the CSES means within each election study. Cells of a
+single respondent are dropped because `sd()` is undefined there, and the ten thinnest are
+printed so their size is visible. That table is what this section uses in place of confidence
+bands: at these sample sizes the sampling error of a standard deviation is small enough that
+the movement worth arguing about is compositional, not statistical.
+
+```{r}
+#| label: lr-sd
+
+# Pooled spread within each module
+sd_pooled <- cses_lr |>
+  summarise(
+    respondents = n(),
+    studies = n_distinct(study),
+    countries = n_distinct(country),
+    sd_lr = sd(lr),
+    .by = c(module, group)
+  ) |>
+  arrange(module, group)
+
+# Spread within each country-year
+sd_country <- cses_lr |>
+  summarise(
+    respondents = n(),
+    sd_lr = sd(lr),
+    .by = c(country, year, group)
+  ) |>
+  # sd() is undefined below two respondents
+  filter(respondents >= 2)
+
+sd_pooled
+
+# Thinnest cells behind the faceted figure
+sd_country |>
+  slice_min(respondents, n = 10)
+```
+
+The pooled statistic is the one vulnerable to the unbalanced panel, and the CSES panel is the
+most unbalanced of the three sources: 14 countries in module 1, rising to 19 in modules 3 and
+5, and only 8 in the advance release of module 6. The balanced check below is correspondingly
+weak -- exactly three of the twenty-five countries appear in all six modules -- so it is
+printed as a direction of travel rather than as a test.
+
+```{r}
+#| label: lr-balanced
+
+# Countries appearing in every module
+balanced <- cses_lr |>
+  summarise(modules = n_distinct(module), .by = country) |>
+  filter(modules == n_distinct(cses_lr$module)) |>
+  pull(country)
+
+balanced
+
+# Same pooled statistic over that fixed set
+cses_lr |>
+  filter(country %in% balanced) |>
+  summarise(
+    countries = n_distinct(country),
+    respondents = n(),
+    sd_lr = sd(lr),
+    .by = c(module, group)
+  ) |>
+  arrange(module, group)
+```
+
+Four things are worth keeping in view when reading the figures.
+
+First, **the deniers here include the leaners**. The branching probe is not used in this
+notebook, so the 15% to 25% of respondents who say they feel a little closer to one party
+than the others sit inside *No attachment*. Those are people with a real if weak partisan
+leaning, counted on the denier side. The gap between the two lines below is therefore
+narrower than the same gap in notebooks 1.2 and 1.4 would be for that reason alone, and the
+three are not comparable in level.
+
+Second, **placements are measured just after an election**. Every CSES study follows a
+national election, so the scale is answered when left--right is at its most crystallised and
+most campaign-primed. The pooled x-axis is the module window rather than a year, so a single
+point averages elections up to five years apart as well as countries, and how polarising the
+particular elections in a window happened to be is inside the point.
+
+Third, **the groups are not fixed populations**. The share close to a party moves across the
+modules -- that is what the figure above documents -- so the marginal respondent crosses
+between the two groups over time, and a change in a group's spread can be compositional
+rather than attitudinal.
+
+Fourth, **pooling mixes two variances**. The pooled standard deviation contains both the
+spread within countries and the differences between countries in mean position, and the
+country set changes every module. The faceted figure below is the check on that; it is not a
+correction.
+
+```{r}
+#| label: plot-lr-pooled
+#| fig-width: 8
+#| fig-height: 5
+
+# Pooled spread, two groups
+ggplot(sd_pooled, aes(x = module, y = sd_lr, colour = group)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2.2) +
+  scale_x_continuous(
+    breaks = 1:6,
+    labels = c(
+      "1\n1996-2001",
+      "2\n2001-2006",
+      "3\n2006-2011",
+      "4\n2011-2016",
+      "5\n2016-2021",
+      "6\n2021-2026"
+    )
+  ) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Spread of left-right self-placement in the CSES, modules 1-6",
+    subtitle = "Unweighted standard deviation on a 0-10 scale, pooled over 25 democracies",
+    x = "CSES module",
+    y = "Standard deviation of self-placement",
+    colour = NULL,
+    caption = "Deniers include the leaners; non-placers are excluded."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: plot-lr-country
+#| fig-width: 11
+#| fig-height: 11
+
+# Same spread, one panel per country
+ggplot(sd_country, aes(x = year, y = sd_lr, colour = group)) +
+  geom_line(linewidth = 0.5) +
+  geom_point(size = 1.1) +
+  facet_wrap(vars(country), ncol = 5, drop = FALSE) +
+  scale_x_continuous(breaks = c(2000, 2010, 2020)) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Spread of left-right self-placement in the CSES by country, 1996-2024",
+    subtitle = "Unweighted standard deviations; each point is one national election study",
+    x = NULL,
+    y = "Standard deviation of self-placement",
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+The two series do not cross. Respondents close to a party are the more dispersed group in
+every module, at a standard deviation of 2.63 against the deniers' 2.03 in module 1 and 3.02
+against 2.19 in module 6. Both series rise across the six modules and the partisan one rises
+faster, so the gap widens from 0.60 to 0.83 scale points. The three-country balanced check
+moves the same way, and the thinnest country-year cell in the series holds 78 respondents, so
+neither the trend nor the gap is an artefact of a handful of small cells -- but module 6 is an
+advance release covering eight countries, and its point should not be read as the others are.
 
 # Session Info
 

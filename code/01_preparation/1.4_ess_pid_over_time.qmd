@@ -79,12 +79,17 @@ nothing has to be dropped.
 The `name` column is kept because it is the only thing separating round 10's two stacked
 samples, which the caveats below depend on.
 
+`lrscale` -- *in politics people sometimes talk of "left" and "right"; where would you place
+yourself on this scale?* -- is pulled in the same step, for the final section of this
+notebook. It is a 0--10 self-placement asked in every round, with `77` refusal, `88` don't
+know and `99` no answer. Nothing between here and that section uses it.
+
 ```{r}
 #| label: select
 
-# Four columns of 430,581 rows
+# Five columns of 430,581 rows
 ess_pid <- ess |>
-  select(cntry, essround, name, clsprty) |>
+  select(cntry, essround, name, clsprty, lrscale) |>
   collect() |>
   mutate(
     round = essround,
@@ -95,9 +100,11 @@ ess_pid <- ess |>
       clsprty == 2 ~ "No attachment",
       clsprty == 8 ~ "Don't know",
       .default = "Refused or no answer"
-    )
+    ),
+    # Whitelisting the scale drops 77, 88 and 99 in one go
+    lr = if_else(lrscale %in% 0:10, as.numeric(lrscale), NA_real_)
   ) |>
-  select(round, country, name, pid_cat)
+  select(round, country, name, pid_cat, lr)
 ```
 
 # Join to Long Format
@@ -282,6 +289,240 @@ party, moving in the same direction as the CSES series in notebook 1.3 (44.5% to
 against the EES series in notebook 1.2 (55.9% to 66.3%). Two of the three sources agree; the
 EES is the one that does not, and its late waves are also the ones carrying the mode break
 described there.
+
+# Plot Spread of Left-Right Self-Placement among Partisans and Deniers
+
+The figures above count people. This one measures how spread out they are. The question is
+whether respondents who say they feel close to a party occupy a wider or a narrower band of
+the left--right scale than respondents who say they do not, and whether that difference moves
+across the eleven rounds.
+
+Two things the figure is not. It is not the distance *between* the groups: two groups can
+share a mean and differ only in spread, which is roughly what happens here. And a standard
+deviation cannot tell a wide unimodal distribution from a bimodal one -- two distributions
+that look nothing alike can share an SD -- so nothing below speaks to sorting, or to
+polarisation in any of its senses. It is one descriptive cut.
+
+Don't-know and refusal are dropped throughout this section; the contrast is between the two
+substantive answers only.
+
+Before the spread, the coverage, because it is the constraint everything else here sits
+inside.
+
+```{r}
+#| label: lr-coverage
+
+# Who answers the placement item at all, by round and attachment
+lr_coverage <- ess_pid |>
+  filter(pid_cat %in% c("Close to a party", "No attachment")) |>
+  summarise(
+    respondents = n(),
+    placed = mean(!is.na(lr)),
+    .by = c(round, pid_cat)
+  ) |>
+  arrange(round, pid_cat)
+
+# Twenty-two rows, so past a tibble's default print
+print(lr_coverage, n = Inf)
+
+# Round 10 splits by sample as well as by attachment
+ess_pid |>
+  filter(round == 10, pid_cat %in% c("Close to a party", "No attachment")) |>
+  summarise(
+    respondents = n(),
+    placed = mean(!is.na(lr)),
+    .by = c(name, pid_cat)
+  ) |>
+  arrange(name, pid_cat)
+```
+
+Between 78% and 85% of deniers place themselves in a given round, against 94% to 96% of
+partisans -- a gap of roughly fifteen points, present in every one of the eleven rounds. The
+standard deviations below are therefore computed on a self-selected subset, and the selection
+is *different in the two groups*: the deniers who do answer are the more engaged end of that
+group, which is exactly the end whose placements should look most partisan-like. The
+direction of the resulting bias cannot be signed from the data. Dropping the least engaged
+could narrow the denier spread, if what goes is arbitrary mid-scale answers, or widen it, if
+what goes is default fives. The table is printed rather than hidden so that the size of the
+problem is visible.
+
+The second table splits round 10 by sample. Both of its stacked samples carry `lrscale`, so
+neither has to be set aside: coverage runs 93.1% among deniers and 97.2% among partisans in
+the self-completion `ESS10SCe03_2`, against 81.5% and 95.1% in the face-to-face
+`ESS10e03_3`. That is a diagnostic, not a mode effect -- the two samples cover disjoint sets
+of countries, so mode and composition cannot be separated here any more than they could for
+the attachment shares above.
+
+```{r}
+#| label: lr-select
+
+# Partisans and deniers with a usable placement
+ess_lr <- ess_pid |>
+  filter(pid_cat %in% c("Close to a party", "No attachment"), !is.na(lr)) |>
+  mutate(
+    group = factor(
+      if_else(pid_cat == "Close to a party", "Partisans", "Deniers"),
+      levels = c("Partisans", "Deniers")
+    ),
+    # Keep all 25 panels in the faceted figure
+    country = factor(country, levels = sort(unique(ess_pid$country)))
+  )
+```
+
+The pooled figure takes the standard deviation over all respondents of a group in a round,
+pooling respondents the same way the share figures above do. The faceted figure takes it
+within each country-round. Cells of a single respondent are dropped because `sd()` is
+undefined there; in practice none come close to that, and the ten thinnest are printed so
+their size is visible. That table is what this section uses in place of confidence bands: at
+these sample sizes the sampling error of a standard deviation is small enough that the
+movement worth arguing about is compositional, not statistical.
+
+```{r}
+#| label: lr-sd
+
+# Pooled spread within each round
+sd_pooled <- ess_lr |>
+  summarise(
+    respondents = n(),
+    sd_lr = sd(lr),
+    .by = c(round, group)
+  ) |>
+  arrange(round, group)
+
+# Spread within each country-round
+sd_country <- ess_lr |>
+  summarise(
+    respondents = n(),
+    sd_lr = sd(lr),
+    .by = c(country, round, group)
+  ) |>
+  # sd() is undefined below two respondents
+  filter(respondents >= 2)
+
+print(sd_pooled, n = Inf)
+
+# Thinnest cells behind the faceted figure
+sd_country |>
+  slice_min(respondents, n = 10)
+```
+
+The pooled statistic is the one vulnerable to the unbalanced panel, so it is recomputed below
+over only the countries surveyed in every round. If the two versions move together, entry and
+exit are not driving the trend; if they diverge, composition is.
+
+```{r}
+#| label: lr-balanced
+
+# Countries surveyed in every round
+balanced <- ess_lr |>
+  summarise(rounds = n_distinct(round), .by = country) |>
+  filter(rounds == n_distinct(ess_lr$round)) |>
+  pull(country)
+
+# Same pooled statistic over that fixed set
+ess_lr |>
+  filter(country %in% balanced) |>
+  summarise(
+    countries = n_distinct(country),
+    respondents = n(),
+    sd_lr = sd(lr),
+    .by = c(round, group)
+  ) |>
+  arrange(round, group) |>
+  print(n = Inf)
+```
+
+Three things are worth keeping in view when reading the figures.
+
+First, **the groups are not fixed populations**. The share close to a party moves across the
+rounds -- that is precisely what the figures above document -- so the marginal respondent
+crosses between the two groups over time. A change in a group's spread can therefore be
+compositional rather than attitudinal, and a standard deviation cannot tell the two readings
+apart.
+
+Second, **pooling mixes two variances**. The pooled standard deviation contains both the
+spread within countries and the differences between countries in mean position, and the
+country set is not fixed. The balanced-panel table above and the faceted figure below are the
+two checks on that; neither is a correction.
+
+Third, **the nonresponse gap is not an ESS peculiarity**. Measured on the same base, the
+three sources land in the same place: 72% to 86% of deniers place themselves against 92% to
+96% of partisans, in the EES of notebook 1.2 and the CSES of notebook 1.3 as much as here.
+The gap is a property of the item, not of any one survey, so it is not something a change of
+source would fix.
+
+```{r}
+#| label: plot-lr-pooled
+#| fig-width: 9
+#| fig-height: 5
+
+# Pooled spread, two groups
+ggplot(sd_pooled, aes(x = round, y = sd_lr, colour = group)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2.2) +
+  scale_x_continuous(
+    breaks = 1:11,
+    labels = c(
+      "1\n2002",
+      "2\n2004",
+      "3\n2006",
+      "4\n2008",
+      "5\n2011",
+      "6\n2012",
+      "7\n2014",
+      "8\n2016",
+      "9\n2018",
+      "10\n2021",
+      "11\n2023"
+    )
+  ) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Spread of left-right self-placement in the ESS, rounds 1-11",
+    subtitle = "Unweighted standard deviation on a 0-10 scale, pooled over 25 democracies",
+    x = "ESS round and modal fieldwork year",
+    y = "Standard deviation of self-placement",
+    colour = NULL,
+    caption = "Respondents who did not place themselves are excluded."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: plot-lr-country
+#| fig-width: 11
+#| fig-height: 11
+
+# Same spread, one panel per country
+ggplot(sd_country, aes(x = round, y = sd_lr, colour = group)) +
+  geom_line(linewidth = 0.5) +
+  geom_point(size = 1.1) +
+  facet_wrap(vars(country), ncol = 5, drop = FALSE) +
+  scale_x_continuous(breaks = c(1, 6, 11)) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(
+    title = "Spread of left-right self-placement in the ESS by country, rounds 1-11",
+    subtitle = "Unweighted standard deviations; gaps mark rounds without a usable cell",
+    x = "ESS round",
+    y = "Standard deviation of self-placement",
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+The two series do not cross. Partisans are the more dispersed group in every round, at a
+standard deviation of 2.39 against the deniers' 1.80 in round 1, and 2.59 against 1.84 in
+round 11. Both drift upward across the eleven rounds, but not equally: the partisan series
+gains 0.20 scale points over the period against the denier series' 0.04, so the gap between
+them widens from 0.59 to 0.75. Both peak in round 10 -- the round whose two stacked samples
+cover disjoint country sets, so that peak is the one point in the series that should not be
+read on its own. Over the thirteen countries surveyed in every round the same two series run
+2.39 to 2.59 and 1.79 to 1.84, within 0.05 of the full ones throughout, so entry and exit are
+not what the pooled lines are showing.
 
 # Session Info
 
