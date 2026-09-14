@@ -38,3 +38,46 @@ to-do:
   CSES -> party & leader like/dislike
   ESS -> PID only
   eu25 -> party thermo and cj
+
+
+Partisanship and Polarization in Europe
+
+The notion of polarization has been omnipresent in the literature of the last decade, although (or maybe because of) it is an inherently vague and ambiguous concept.
+
+Whereas earlier research focused on the alignment (or separation) in the broadest sense of ideological positions, be it at the elite or mass level, the seminal contribution by @iyengar2012affect has led to an "affective turn" in the literature.
+
+Highlighting the notion of partisanship as a social identity, affective polarization has originally been defined as the tendency of partisans to like their fellow copartisans and dislike outpartisans, respectively.
+
+Though the on a fundamental level inherently human notion, namely that people like some people more than others, is itself little surprising, the worry was caused more by an observed increase in this affective gap, which has been theorized to hinder political cooperation across party lines, thus ultimately harming the core of democratic life itself.
+
+Since the introduction of affective polarization, a productive research agenda spent vast efforts on studying its causes, consequences, dynamics and measurement itself.
+
+Yet, recent studies call for more cautious interpretations of the underlying group notion attached to the Social Identity Theory (SIT) framework, which served (and still serves) as the theoretical basis for most affective polarization studies (and, therefore, most *polarization* studies in recent years).
+
+Specifically, a recent debate in the American literature called into question if the measured affective gaps between partisans is a consequence of group attachements *per se*, or whether those group attachement serve as a cue signalling a respective policy/ideological position.
+
+The fundamental issue is that both the party-over-policy and policy-over-party accounts yield, for most applied research designs, observationally equivalent outcomes.
+
+In this study, I aim to shed light on the relationship between partisan affiliation (alias *partisanship*) and political polarization in Europe.
+
+Covering multiple facets of ideological and affective polarization, I study how partisanship -- reporting an attachement to a political party -- is associated with different types of polarization.
+
+As a start, I review and summarize the different notions of the term polarization.
+
+I then proceed to summarize the history of the notion of partisanship in Europe.
+
+Empirically, I combine existing data from ongoing large scale survey projects from the European Election Study, the Comparative Study on Electoral Systems and the European Social Survey with a cross-national experimental dataset from 2019.
+
+In a first study, I trace the distribution of partisanship across Euroepean electorates in the first quarter of the 21st century.
+Whereas the notion of the "great dealignment" has been the dominant description of the post WW2 period for Western Europe, I try to conceptually disentangle party membership, party affiliation, and stated party preference (via standard vote choice items). 
+The (preliminary) first impression shows no uniform trend across Europe regarding partisanship, with large variation between different survey project, all of which use slightly different approaches for capturing respondents' feelings of attachement.
+
+In a second study, I investigate the relationship between partisanship and ideological polarization on two dimensions, the left-right and European integration dimension.
+
+In a third study, I take a closer look at how partisanship impacts *perceived* ideological polarization of their respective party systems.
+
+In a fourth study, I then turn to affective polarization, specifically *horizontal* affective polarization, directed towards parties (as opposed to *partisans*).
+
+In a fifth study, I compare experimentally measured *vertical* affective polarization among partisans and deniers.
+
+This study makes multiple contributions: First, it is the most comprehensive study of political polarization in Europe, focusing on its various facets (actual and perceived ideological, vertical and horizontal affective), applying both a dynamic and static lense.
