@@ -19,6 +19,7 @@ manuscript:
     - code/01_preparation/1.2_ees_pid_over_time.qmd
     - code/01_preparation/1.3_cses_pid_over_time.qmd
     - code/01_preparation/1.4_ess_pid_over_time.qmd
+    - code/01_preparation/1.5_eu25_pid.qmd
 
 execute:
   freeze: auto
