@@ -58,6 +58,10 @@ Specifically, a recent debate in the American literature called into question if
 
 The fundamental issue is that both the party-over-policy and policy-over-party accounts yield, for most applied research designs, observationally equivalent outcomes.
 
+What further complicates this issue is that the measurement on partisanship mixes up the terms "affiliation", "attachement", "closeness" and "identity", though each might create different responses.
+Few (if any, at this point I haven't seen any) ask directly if respondents *identify* with a party, more commong are question wordings using *attachement* or *feeling close*.
+Though beyond the scope of this study, future research could use experimental designs to examine how these various types, all of which aim to capture *emotional/subjective/felt* attachement/identification to a party, yield different response patterns.
+
 In this study, I aim to shed light on the relationship between partisan affiliation (alias *partisanship*) and political polarization in Europe.
 
 Covering multiple facets of ideological and affective polarization, I study how partisanship -- reporting an attachement to a political party -- is associated with different types of polarization.
