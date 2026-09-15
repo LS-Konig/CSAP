@@ -1,0 +1,310 @@
+---
+title: |
+  Code Notebook 1.5
+subtitle: |
+  EU25 Games Data PID Distribution 
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "ggh4x",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+# Load Data
+
+```{r}
+#| label: load-eu25-data
+
+eu25games <- read_rds(
+  here(
+    "data",
+    "01_raw",
+    "eu25games2019.rds"
+  )
+)
+```
+
+
+# Select PID and other key Variables
+
+The PID item is the same as used by the EES:
+"Do you consider yourself to be close to any particular party? If so, which party do you feel close to?"
+
+The central "No, I do not feel close to any political party" response is condensed to value "none" in the harmonized variable used below.
+
+```{r}
+#| label: select-vars
+
+eu25games <- eu25games |>
+  # only keep respondents who passed att check
+  filter(
+    der_att_check_3
+  ) |>
+  select(
+    # Country
+    meta_country,
+    # party id matched to partyfacts
+    ext_q_party_id_pf_name,
+    # lr self
+    q_lr_self,
+    # eu self
+    q_euint_self
+  )
+```
+
+# PID Shares
+
+At this point, treating "other" as reported attachement (just not of the listed parties).
+
+```{r}
+#| label: shares
+
+# Pooled shares
+shares_pooled <- eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  count(pid) |>
+  mutate(
+    share = n / sum(n),
+    meta_country = "EU25"
+  ) |>
+  relocate(meta_country, .before = pid)
+
+# Shares within country
+shares_country <- eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  group_by(meta_country) |>
+  count(pid) |>
+  mutate(share = n / sum(n)) |>
+  ungroup()
+
+# bind for plotting
+toplot <- shares_pooled |>
+  bind_rows(shares_country)
+```
+
+```{r}
+#| label: fig-pooled
+#| fig-width: 8
+#| fig-height: 5
+
+# Pooled shares
+ggplot(toplot, aes(y = meta_country, x = share, fill = pid)) +
+  geom_col(position = "fill") +
+  scale_colour_brewer(palette = "Dark2") +
+  theme_minimal()
+```
+
+
+# LR Pos by PID Type
+
+```{r}
+#| label: lrpos-by-pid-pooled
+
+# how many missings in lr self per type
+eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  group_by(pid) |>
+  summarise(
+    sum(is.na(q_lr_self)),
+    sum(!is.na(q_lr_self))
+  )
+
+# summary stats per type
+eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  group_by(pid) |>
+  summarise(
+    mean_lr = mean(q_lr_self, na.rm = T),
+    sd_lr = sd(q_lr_self, na.rm = T),
+    nobs = n()
+  )
+
+# density per type
+eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  ggplot(
+    aes(x = q_lr_self, fill = pid)
+  ) +
+  geom_histogram(position = "dodge")
+
+# or alternatively
+eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  ggplot(
+    aes(x = q_lr_self, fill = pid)
+  ) +
+  # geom_histogram() +
+  geom_density() +
+  facet_wrap(~pid)
+```
+
+```{r}
+#| label: lrpos-by-pid-bycountry
+
+# how many missings in lr self per type
+eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  group_by(meta_country, pid) |>
+  summarise(
+    sum(is.na(q_lr_self)),
+    sum(!is.na(q_lr_self))
+  ) |>
+  ungroup()
+
+# summary stats per type
+eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  group_by(meta_country, pid) |>
+  summarise(
+    mean_lr = mean(q_lr_self, na.rm = T),
+    sd_lr = sd(q_lr_self, na.rm = T),
+    nobs = n()
+  ) |>
+  ungroup()
+
+# density per type
+eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  ggplot(
+    aes(x = q_lr_self, fill = pid)
+  ) +
+  geom_histogram(position = "dodge") +
+  facet_wrap(~meta_country)
+
+# or alternatively
+eu25games |>
+  mutate(
+    pid = case_when(
+      ext_q_party_id_pf_name == "none" ~ "No attachement",
+      is.na(ext_q_party_id_pf_name) ~ "Answer Missing",
+      .default = "Named a party"
+    )
+  ) |>
+  # rm missing
+  filter(pid != "Answer Missing") |>
+  ggplot(
+    aes(x = q_lr_self, fill = pid)
+  ) +
+  # geom_histogram() +
+  geom_density(alpha = 0.7) +
+  facet_wrap(~meta_country)
+```
+
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
+
+
+  
