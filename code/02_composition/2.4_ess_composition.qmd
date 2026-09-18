@@ -550,8 +550,9 @@ ess_tree |>
 ```{r}
 #| label: crosswalk
 
-# Pair-level crosswalk for inspection
+# Pair-level crosswalk, stable order
 name_pairs |>
+  arrange(cntry, att_norm, vote_norm, att_label, vote_label) |>
   write_csv(here("data", "02_processed", "ess_party_crosswalk.csv"))
 ```
 
