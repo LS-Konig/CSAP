@@ -159,13 +159,33 @@ tree_counts <- function(df, ...) {
 # Format a count with thousands separators
 fmt_n <- function(n) format(n, big.mark = ",", scientific = FALSE, trim = TRUE)
 
+# Unique node-id prefix per diagram
+# Mermaid lays out nodes by element id; trees on one page sharing ids
+# ("root", "a_yes") can take each other's positions.
+tree_prefix <- function() {
+  i <- getOption("pid_tree.counter", 0) + 1
+  options(pid_tree.counter = i)
+  paste0("t", i, "_")
+}
+
 # Build one flowchart from node counts
 mermaid_tree <- function(counts, leaner = NULL) {
+  id <- tree_prefix()
+
   # Boxes, with grey class for DK and not-fielded
   boxes <- counts |>
     dplyr::arrange(match(node, tree_nodes$node)) |>
     dplyr::mutate(
-      box = paste0("  ", node, "(\"", label, "<br>N = ", fmt_n(n), "\")"),
+      box = paste0(
+        "  ",
+        id,
+        node,
+        "(\"",
+        label,
+        "<br>N = ",
+        fmt_n(n),
+        "\")"
+      ),
       box = dplyr::if_else(
         stringr::str_detect(node, "a_dk|_nf$"),
         paste0(box, ":::muted"),
@@ -180,10 +200,12 @@ mermaid_tree <- function(counts, leaner = NULL) {
     dplyr::mutate(
       edge = paste0(
         "  ",
+        id,
         parent,
         " -->|\"",
         sprintf("%.1f%%", 100 * share),
         "\"| ",
+        id,
         node
       )
     )
@@ -193,11 +215,13 @@ mermaid_tree <- function(counts, leaner = NULL) {
   if (!is.null(leaner) && "a_no" %in% counts$node) {
     lean <- c(
       paste0(
-        "  lean[\"Leaner probe fielded, not used:<br>",
+        "  ",
+        id,
+        "lean[\"Leaner probe fielded, not used:<br>",
         leaner,
         "\"]:::note"
       ),
-      "  a_no -.- lean"
+      paste0("  ", id, "a_no -.- ", id, "lean")
     )
   }
 
@@ -258,7 +282,13 @@ lazy_script <- '
 <script>
 window.addEventListener("load", () => {
   let n = 0;
-  let busy = Promise.resolve();
+  // Start after Quarto has drawn its own blocks
+  const quartoDone = () => new Promise((resolve) => {
+    const check = () =>
+      document.querySelector("pre.mermaid-js") ? setTimeout(check, 100) : resolve();
+    check();
+  });
+  let busy = quartoDone();
   // Draw every lazy block now visible
   const draw = () => {
     busy = busy.then(async () => {
