@@ -55,6 +55,7 @@ Quarto is configured with `freeze: auto`; delete the notebook's subdirectory und
 | `presentation.qmd` | RevealJS slides, University of Mannheim SCSS theme (`theme.scss`). Three figure embeds are commented out where the notebooks that produced them were deleted |
 | `code/code-template.qmd` | Boilerplate for a new analysis notebook (tidyverse + here + sessioninfo). Numbered notebooks go in `code/`, following the old `NN_topic/N.N_name.qmd` convention |
 | `code/01_preparation/1.1_ess_to_parquet.qmd` | Converts the raw ESS CSV to a partitioned Parquet dataset. Raw-layer format conversion only — no cleaning, no recoding. Idempotent: re-renders cheaply once the output is current |
+| `code/02_composition/2.1`–`2.4` | Partisan composition trees (attachment → vote → same party) for eu25games, EES, CSES, ESS: Mermaid flowcharts pooled / by period / by country / country × period, plus leaf-share plots. Shared helpers in `code/00_helper/pid_tree.R`. Rendered as plain pages, not manuscript notebooks (see comment in `_quarto.yml`) |
 | `code/00_helper/` | `copyR.R` (refresh the raw file from a sibling clone), `glftrackeR.R` (auto-LFS tracking) |
 | `data/` | See below |
 | `references.bib` | APSR-format bibliography (~2,000 entries) |

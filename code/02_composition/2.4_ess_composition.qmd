@@ -1,0 +1,729 @@
+---
+title: |
+  CSAP Code Notebook 2.4
+subtitle: |
+  ESS rounds 1-11: partisan composition trees
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+The flowcharts are Mermaid diagrams written by R code; trees inside tabs are drawn the first time their tab is opened.
+Notebook 2.1 explains the tree itself; it is the same in all four composition notebooks.
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "arrow",
+  "rvest",
+  "stringi",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Shared tree helpers
+source(here("code", "00_helper", "pid_tree.R"))
+```
+
+# Load ESS Data
+
+The partitioned Parquet dataset from notebook 1.1, as in notebook 1.4.
+
+```{r}
+#| label: load-ess-data
+
+# Partitioned Parquet, never the CSV
+ess <- open_dataset(
+  here("data", "01_raw", "ess", "parquet"),
+  partitioning = hive_partition(cntry = utf8(), essround = int64())
+)
+```
+
+# The Party Problem
+
+The ESS asks both items as a filter followed by a party:
+
+- **Attachment:** `clsprty` -- *is there a particular political party you feel closer to than all the other parties?* -- then *which one?* in `prtcl<cc>`.
+- **Vote:** `vote` -- *did you vote in the last national election?* -- then *which party did you vote for?* in `prtv<cc>`.
+
+The party variables are **country-specific**, and re-lettered whenever a country's party list changes (`prtclde`, `prtclade`, `prtclbde`, ...).
+More importantly, the attachment list and the vote list are **numbered independently**: the same party can be `3` on one and `5` on the other.
+The Parquet file carries only the numbers.
+So the numbers have to be turned back into party names, and the names compared.
+
+The names come from the value labels in the ESS codebook (`data/01_raw/ess/Datafile-subset codebook.html`).
+Each `prtcl*` and `prtv*` variable is one block there, with a table of codes and labels.
+
+Two countries record more than one vote.
+Germany has a first (constituency) and a second (list) vote, and the **second** vote (`prtv*de2`) is used, as it decides the seat distribution.
+Lithuania has a multi-member list vote and two single-member constituency rounds, and the **list** vote (`prtv*lt1`) is used.
+
+```{r}
+#| label: codebook-labels
+
+# One block per party variable
+codebook <- read_html(
+  here("data", "01_raw", "ess", "Datafile-subset codebook.html")
+)
+blocks <- html_elements(
+  codebook,
+  xpath = "//h3[starts-with(@id,'prtcl') or starts-with(@id,'prtv')]/.."
+)
+
+# Code-label pairs per variable
+party_labels <- blocks |>
+  map(\(b) {
+    tibble(
+      variable = html_attr(html_element(b, "h3"), "id"),
+      value = as.integer(html_text2(html_elements(b, "td.nowrap"))),
+      label = html_text2(html_elements(b, "td:not(.nowrap)"))
+    )
+  }) |>
+  list_rbind() |>
+  # Missing codes carry no party
+  filter(value < 66)
+
+party_labels |>
+  summarise(variables = n_distinct(variable), labels = n())
+```
+
+Names are compared after normalising them: lower case, accents removed, punctuation turned into spaces.
+Two families of labels are not parties.
+*Other* answers ("Other", "Andet - other", "Independent candidate", ...) name something, but nothing that can be matched, so they count as *not matchable*.
+*Non-votes* on the vote list ("Blank paper", "Invalid", "Did not vote", ...) count as *no vote reported*.
+Both are caught by patterns over the normalised labels, and the full list of what the patterns catch is printed so it can be checked by eye.
+
+```{r}
+#| label: label-classes
+
+# Lower case, no accents or punctuation
+normalise_party <- function(x) {
+  x |>
+    stri_trans_general("Latin-ASCII") |>
+    str_to_lower() |>
+    str_replace_all("[^a-z0-9]+", " ") |>
+    str_squish()
+}
+
+party_labels <- party_labels |>
+  mutate(
+    norm = normalise_party(label),
+    # Named, but not a party
+    is_other = str_detect(
+      norm,
+      "^(other|andet|altro|druga|98 other)\\b|^independents?( candidate| nir| self nominated)?$"
+    ),
+    # Ballots that are not a vote
+    is_novote = str_detect(
+      norm,
+      "blank|^invalid|invalid (vote|ballot)|^nul+$|spoil|did not vote|don t know if|branco|nulo|none of them"
+    )
+  )
+
+# What the patterns catch
+party_labels |>
+  filter(is_other | is_novote) |>
+  count(is_other, is_novote, label, sort = TRUE) |>
+  print(n = Inf)
+```
+
+# Select Attachment and Vote Items
+
+For every country, the one attachment variable and the one vote variable that apply to a respondent are the only non-empty ones among the country's party variables.
+So the country's variables are stacked long, the empty cells are dropped, and the variable name is kept to look the label up.
+This runs country by country, to keep the Parquet reads narrow.
+
+```{r}
+#| label: select
+
+# One country at a time
+read_country <- function(cc) {
+  lc <- str_to_lower(cc)
+
+  # Vote list per country
+  vote_pattern <- case_when(
+    cc == "DE" ~ paste0("^prtv[a-z]?", lc, "2$"),
+    cc == "LT" ~ paste0("^prtv[a-z]?", lc, "1$"),
+    .default = paste0("^prtvt[a-z]?", lc, "$")
+  )
+
+  raw <- ess |>
+    filter(cntry == cc) |>
+    select(
+      cntry,
+      essround,
+      name,
+      idno,
+      clsprty,
+      vote,
+      matches(paste0("^prtcl[a-z]?", lc, "$")),
+      matches(vote_pattern)
+    ) |>
+    collect() |>
+    mutate(
+      row = row_number(),
+      # Some lists are stored as text
+      across(starts_with("prt"), as.integer)
+    )
+
+  # Attachment party, long
+  att <- raw |>
+    select(row, starts_with("prtcl")) |>
+    pivot_longer(
+      -row,
+      names_to = "att_var",
+      values_to = "att_value",
+      values_drop_na = TRUE
+    )
+
+  # Vote party, long
+  vot <- raw |>
+    select(row, starts_with("prtv")) |>
+    pivot_longer(
+      -row,
+      names_to = "vote_var",
+      values_to = "vote_value",
+      values_drop_na = TRUE
+    )
+
+  raw |>
+    select(row, cntry, essround, name, idno, clsprty, vote) |>
+    left_join(att, by = "row") |>
+    left_join(vot, by = "row")
+}
+
+ess_raw <- map(countries_25, read_country) |>
+  list_rbind()
+
+# One row per respondent
+stopifnot(nrow(ess_raw) == nrow(ess |> filter(cntry %in% countries_25)))
+```
+
+# Harmonise to the Tree
+
+**Attachment** is `clsprty`: `1` yes, `2` no, `7`/`8`/`9` DK.
+**Vote** is reported if `vote` is `1` and the party answer is a party or an *other* answer; a non-vote label, `66`--`99`, or no voting at all (`vote` `2`, not eligible `3`, or missing) means *no vote reported*.
+
+```{r}
+#| label: harmonise
+
+# Label lookups for both items
+att_lookup <- party_labels |>
+  select(
+    att_var = variable,
+    att_value = value,
+    att_label = label,
+    att_norm = norm,
+    att_other = is_other
+  )
+vote_lookup <- party_labels |>
+  select(
+    vote_var = variable,
+    vote_value = value,
+    vote_label = label,
+    vote_norm = norm,
+    vote_other = is_other,
+    vote_novote = is_novote
+  )
+
+ess_tree <- ess_raw |>
+  left_join(att_lookup, by = c("att_var", "att_value")) |>
+  left_join(vote_lookup, by = c("vote_var", "vote_value")) |>
+  mutate(
+    country = cntry,
+    # Level 1: attachment
+    att = case_when(
+      clsprty == 1 ~ "yes",
+      clsprty == 2 ~ "no",
+      .default = "dk"
+    ),
+    # Level 2: a party or other vote
+    vote = if_else(
+      vote == 1 & !is.na(vote_label) & !vote_novote,
+      "yes",
+      "no",
+      missing = "no"
+    )
+  )
+```
+
+# Matching Party Names
+
+Comparing the names exactly is far too strict.
+The two lists of one country and round often spell the same party differently -- "PP" against "Partido Popular (PP)", "SMER-Social Democracy" against "Smer – SD", "Fidesz (Fidesz Magyar Polgári Párt)" against "Fidesz - KDNP" -- and an exact comparison scores all of these as *different party*.
+So a pair of names counts as the same party if one of four rules holds, tried in this order:
+
+1. **Exact:** the normalised names are identical.
+2. **Acronym:** an acronym written in capitals in one label ("PP", "SMER", "HDZ") occurs as a word in the other.
+3. **First word:** both names start with the same distinctive word of at least four letters ("fidesz", "sojusz"), after dropping generic words such as *party*, *social*, *democratic* or a country adjective.
+4. **Contained:** a name that is a single word occurs as a word in the other ("podemos" in "unidos podemos").
+
+Rules 2 to 4 credit a vote for an **electoral alliance** that carries the party's name or acronym ("Fidesz - KDNP", "HDZ, HSLS") as a vote for the party.
+The EES, CSES and eu25games notebooks compare codes and do not do this, so the ESS *same party* share is not directly comparable with theirs; see the caveats.
+
+Every pair matched by rules 2 to 4 is printed below, so that false matches can be spotted.
+The `name_overrides` table then forces individual pairs either way.
+
+```{r}
+#| label: match-rules
+
+# Words that identify no party
+generic_words <- c(
+  "the",
+  "of",
+  "and",
+  "for",
+  "a",
+  "i",
+  "na",
+  "za",
+  "de",
+  "la",
+  "le",
+  "les",
+  "del",
+  "di",
+  "per",
+  "des",
+  "du",
+  "van",
+  "voor",
+  "fur",
+  "und",
+  "party",
+  "parti",
+  "partido",
+  "partij",
+  "partei",
+  "partia",
+  "partiya",
+  "partidul",
+  "part",
+  "strana",
+  "stranka",
+  "puolue",
+  "partiet",
+  "parties",
+  "social",
+  "socialist",
+  "democratic",
+  "democrats",
+  "democracy",
+  "christian",
+  "liberal",
+  "liberals",
+  "national",
+  "people",
+  "peoples",
+  "popular",
+  "union",
+  "alliance",
+  "coalition",
+  "movement",
+  "list",
+  "new",
+  "green",
+  "greens",
+  "left",
+  "right",
+  "centre",
+  "center",
+  "citizens",
+  "civic",
+  "united",
+  "hrvatska",
+  "hrvatski",
+  "slovenska",
+  "ceska",
+  "polska",
+  "polskie",
+  "magyar",
+  "magyarorszag",
+  "balgarska",
+  "bulgarian",
+  "lietuvos",
+  "latvijas",
+  "eesti",
+  "suomen",
+  "svenska",
+  "dansk",
+  "danish",
+  "irish",
+  "movimento",
+  "bloco",
+  "coligacao",
+  "koalicja",
+  "koalitsia",
+  "koalice",
+  "alianta",
+  "narodna",
+  "demokratska",
+  "socijaldemokratska",
+  "erakond",
+  "eestimaa",
+  "jauna",
+  "lithuania",
+  "folkeparti",
+  "labour",
+  "lithuanian",
+  "slovak",
+  "slovenian",
+  "czech",
+  "hungarian",
+  "croatian",
+  "polish",
+  "estonian",
+  "latvian",
+  "finnish",
+  "swedish",
+  "dutch",
+  "german",
+  "french",
+  "spanish",
+  "portuguese",
+  "italian",
+  "greek",
+  "british",
+  "belgian",
+  "austrian",
+  "romanian"
+)
+
+# Capitalised acronyms in a label
+label_acronyms <- function(label) {
+  label |>
+    str_extract_all("\\b\\p{Lu}[\\p{Lu}\\d]+\\b") |>
+    map(normalise_party)
+}
+
+# Distinctive words of a name
+name_words <- function(norm) {
+  str_split(norm, " ") |>
+    map(\(w) w[!w %in% generic_words])
+}
+
+# One row per distinct name pair
+name_pairs <- ess_tree |>
+  filter(att == "yes", vote == "yes", !is.na(att_norm)) |>
+  filter(!att_other, !vote_other) |>
+  distinct(cntry, att_label, att_norm, vote_label, vote_norm) |>
+  mutate(
+    att_acr = label_acronyms(att_label),
+    vote_acr = label_acronyms(vote_label),
+    att_all = str_split(att_norm, " "),
+    vote_all = str_split(vote_norm, " "),
+    att_words = name_words(att_norm),
+    vote_words = name_words(vote_norm),
+    rule = case_when(
+      att_norm == vote_norm ~ "exact",
+      map2_lgl(att_acr, vote_all, \(a, b) any(a %in% b)) |
+        map2_lgl(vote_acr, att_all, \(a, b) any(a %in% b)) ~ "acronym",
+      map2_lgl(
+        att_words,
+        vote_words,
+        \(a, b) {
+          length(a) > 0 && length(b) > 0 && a[1] == b[1] && nchar(a[1]) >= 4
+        }
+      ) ~ "first word",
+      !str_detect(att_norm, " ") &
+        nchar(att_norm) >= 4 &
+        map2_lgl(att_norm, vote_all, \(a, b) a %in% b) ~ "contained",
+      .default = "none"
+    )
+  ) |>
+  select(cntry, att_label, att_norm, vote_label, vote_norm, rule)
+
+# How pairs were matched
+name_pairs |>
+  count(rule)
+```
+
+The table lists every pair matched by a rule other than *exact*, with the number of respondents behind it.
+This is the audit trail for the matching: a pair that names two different parties belongs in `name_overrides` with `same = FALSE`.
+
+```{r}
+#| label: fuzzy-audit
+
+# Non-exact matches, by weight
+ess_tree |>
+  inner_join(
+    name_pairs |> filter(!rule %in% c("exact", "none")),
+    by = c("cntry", "att_label", "att_norm", "vote_label", "vote_norm")
+  ) |>
+  count(cntry, rule, att_label, vote_label, sort = TRUE) |>
+  print(n = Inf, width = Inf)
+```
+
+```{r}
+#| label: overrides
+
+# Force individual pairs either way
+name_overrides <- tribble(
+  ~cntry , ~att_norm                                 , ~vote_norm                              , ~same ,
+  # "PP" is only the party prefix
+  "BG"   , "pp red zakonnost i spravedlivost rzs"    , "pp ataka"                              , FALSE ,
+  # Venstre and Radikale Venstre differ
+  "DK"   , "venstre"                                 , "det radikale venstre"                  , FALSE ,
+  # Two different freedom parties
+  "LT"   , "party freedom and justice lt"            , "freedom party lp"                      , FALSE ,
+  # Same party, other transliteration
+  "BG"   , "dvizhenie za prava i svobodi dps"        , "dvijenie za prava i svobodi"           , TRUE  ,
+  # Party inside its own alliance
+  "BG"   , "balgarska sotsialisticheska partiya bsp" , "koalitziia za balgariia"               , TRUE  ,
+  "BG"   , "pp ataka"                                , "koalitziia ataka"                      , TRUE  ,
+  "BG"   , "sds"                                     , "koalitziia ods"                        , TRUE  ,
+  "PL"   , "platforma obywatelska"                   , "koalicja obywatelska"                  , TRUE  ,
+  "CZ"   , "kdu csl christian democratic p"          , "koalice christian dem freedom union"   , TRUE  ,
+  "FR"   , "lr les republicains"                     , "les republicains et l udi"             , TRUE  ,
+  "FR"   , "renaissance ex la republique en marche"  , "ensemble lrem modem et horizons"       , TRUE  ,
+  "IT"   , "forza italia"                            , "popolo delle liberta pdl"              , TRUE  ,
+  # Renamed party, earlier name
+  "FR"   , "lr les republicains"                     , "ump union pour un mouvement populaire" , TRUE  ,
+  "BE"   , "cd v"                                    , "cvp"                                   , TRUE  ,
+  "BE"   , "mouvement reformateur mr"                , "prl fdf"                               , TRUE
+)
+
+name_pairs <- name_pairs |>
+  left_join(name_overrides, by = c("cntry", "att_norm", "vote_norm")) |>
+  mutate(same = coalesce(same, rule != "none"))
+
+# Level 3: rule-based name match
+ess_tree <- ess_tree |>
+  left_join(
+    name_pairs |> select(cntry, att_label, vote_label, same),
+    by = c("cntry", "att_label", "vote_label")
+  ) |>
+  mutate(
+    match = case_when(
+      att != "yes" | vote != "yes" ~ NA,
+      is.na(att_norm) | att_other | vote_other ~ "unmatchable",
+      same ~ "same",
+      .default = "different"
+    )
+  )
+```
+
+The names that remain unmatched are the other half of the audit.
+For every attachment name, the table gives the vote name its holders most often report when no rule links the two.
+Most rows are genuine switches or parties that did not stand; a row where both names plainly describe one party (a renamed party, a spelling no rule catches) belongs in `name_overrides` with `same = TRUE`.
+
+```{r}
+#| label: unmatched-names
+
+# Most common unmatched pair per name
+ess_tree |>
+  filter(match == "different") |>
+  count(cntry, essround, att_label, vote_label, sort = TRUE) |>
+  slice_max(n, n = 1, by = c(cntry, essround, att_label), with_ties = FALSE) |>
+  arrange(desc(n)) |>
+  print(n = 40, width = Inf)
+```
+
+```{r}
+#| label: crosswalk
+
+# Pair-level crosswalk for inspection
+name_pairs |>
+  write_csv(here("data", "02_processed", "ess_party_crosswalk.csv"))
+```
+
+The pair-level crosswalk is written to `data/02_processed/ess_party_crosswalk.csv`: every attachment/vote name pair that occurs among attached voters, with the rule that matched it (or `none`) and the final decision.
+
+```{r}
+#| label: round-labels
+
+ess_tree <- ess_tree |>
+  mutate(
+    # Round with modal fieldwork year
+    round = factor(
+      essround,
+      levels = 1:11,
+      labels = c(
+        "R1 2002",
+        "R2 2004",
+        "R3 2006",
+        "R4 2008",
+        "R5 2011",
+        "R6 2012",
+        "R7 2014",
+        "R8 2016",
+        "R9 2018",
+        "R10 2021",
+        "R11 2023"
+      )
+    )
+  ) |>
+  select(
+    round,
+    essround,
+    country,
+    name,
+    att,
+    vote,
+    match,
+    att_label,
+    vote_label
+  )
+```
+
+# Checks
+
+```{r}
+#| label: checks
+
+# Levels by round
+ess_tree |>
+  count(essround, att, vote, match) |>
+  pivot_wider(names_from = essround, values_from = n) |>
+  print(n = Inf)
+
+# Same-party share per country-round
+ess_tree |>
+  filter(match %in% c("same", "different")) |>
+  summarise(
+    same = round(mean(match == "same"), 2),
+    .by = c(country, essround)
+  ) |>
+  pivot_wider(names_from = essround, values_from = same, names_sort = TRUE) |>
+  arrange(country) |>
+  print(n = Inf)
+```
+
+# Pooled Tree
+
+All 25 countries and all eleven rounds.
+
+```{r}
+#| label: tree-pooled
+#| output: asis
+
+ess_tree |>
+  tree_counts() |>
+  mermaid_tree() |>
+  emit_mermaid()
+```
+
+# Trees by Round
+
+```{r}
+#| label: tree-round
+#| output: asis
+
+ess_tree |>
+  tree_counts(round) |>
+  emit_tree_tabset(by = "round", level = 2)
+```
+
+# Trees by Country
+
+All rounds pooled within each country.
+
+```{r}
+#| label: tree-country
+#| output: asis
+
+ess_tree |>
+  tree_counts(country) |>
+  emit_tree_tabset(by = "country", level = 2)
+```
+
+# Country by Round
+
+Each bar is one country-round; blues report an attachment, oranges report none, greys are DK.
+Missing bars are rounds in which a country was not surveyed.
+
+```{r}
+#| label: fig-leaves
+#| fig-width: 11
+#| fig-height: 11
+
+# Leaf shares per country-round
+ess_tree |>
+  mutate(essround = factor(essround, levels = 1:11)) |>
+  plot_leaf_shares(x = essround, facet = country) +
+  scale_x_discrete(breaks = c("1", "6", "11"), drop = FALSE) +
+  labs(
+    title = "Partisan composition in the ESS by country and round, 2002-2023",
+    subtitle = "Unweighted shares; the vote is the last national election",
+    x = "ESS round"
+  )
+```
+
+```{r}
+#| label: tree-country-round
+#| output: asis
+
+ess_tree |>
+  tree_counts(country, round) |>
+  emit_nested_tabset(outer = "country", inner = "round", level = 2)
+```
+
+# Leaner Probes
+
+The ESS has no leaner probe.
+`clsprty` already asks for a party one feels *closer to than all the other parties*, a comparative wording that other surveys use for the probe itself, not for the base item.
+Its only follow-up is the strength of closeness (`prtdgcl`), asked of those who named a party.
+So the ESS *Close to a party* box is closer to "attachment or leaning" than the EES or CSES base items are, and no tree here carries a dashed note.
+
+# Caveats
+
+- **The vote is the last national election**, which can lie up to four or five years before the interview.
+- **Round 10 pools two modes** (face-to-face and self-completion) on disjoint country sets, see notebook 1.4.
+- **Matching is by name, not by code.** The rules catch spelling variants but are heuristics; the two audit tables above are the record of what they decided, and `name_overrides` corrects individual pairs.
+  Renamed parties are not linked by any rule; the largest cases (UMP and LR, CVP and CD&V, PRL-FDF and MR) are linked by hand in `name_overrides`, smaller ones remain *different party*.
+- **Alliances count as the same party here**, when the list carries the party's name or acronym (Fidesz and Fidesz-KDNP, the SDP inside Croatia's Restart coalition, the French parties inside NUPES).
+  The EES, CSES and eu25games notebooks compare party codes and count such votes as *different party*, so the ESS *same party* share runs higher for this reason alone.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

@@ -1,0 +1,387 @@
+---
+title: |
+  CSAP Code Notebook 2.3
+subtitle: |
+  CSES IMD and module 6: partisan composition trees
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+The flowcharts are Mermaid diagrams written by R code; trees inside tabs are drawn the first time their tab is opened.
+Notebook 2.1 explains the tree itself; it is the same in all four composition notebooks.
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Shared tree helpers
+source(here("code", "00_helper", "pid_tree.R"))
+```
+
+# Load CSES Data
+
+As in notebook 1.3, `load()` creates `cses_imd` (modules 1--5) and `cses6` (module 6) as a side effect.
+
+```{r}
+#| label: load-cses-data
+
+# Creates the object cses_imd
+load(here("data", "01_raw", "cses", "imd", "cses_imd.rdata"))
+
+# Creates the object cses6
+load(here("data", "01_raw", "cses", "mod6", "cses6.rdata"))
+```
+
+# Select Attachment and Vote Items
+
+**Attachment** is the base item -- *do you usually think of yourself as close to any particular party?* -- coded `1` yes, `0` no, `7` refused, `8` don't know, `9` missing.
+The party is asked separately (*which party do you feel closest to?*), so a respondent can be close to a party without a usable party code; such respondents land in *not matchable* at the last level.
+
+**Vote** is the vote in the **current lower-house election**, the election the study follows.
+The party-list vote is used where the system has one; in systems without a list vote (code `9999995`, e.g. Britain and France) the district-candidate vote replaces it.
+Where the study followed no lower-house election at all (code `9999996`, e.g. the French presidential study of 2022), the vote branch reads *vote item not fielded*.
+Blank or invalid ballots, refusals, don't know and abstention count as *no vote reported*.
+Abstention and missing share the code `9999999`, so they cannot be told apart.
+
+**Match.** Attachment party and vote are recorded on the same harmonised CSES party codes, so the codes are compared directly.
+Codes `9999988`--`9999992` (none of the parties, independent, other left/right/unspecified) name something that is not a codeable party and count as *not matchable*.
+
+The branching leaner probe (`IMD3005_2` / `f3023_2`) is carried along only to flag where it exists.
+
+```{r}
+#| label: select-imd
+
+# IMD codes are seven digits
+cses_imd_tree <- cses_imd |>
+  transmute(
+    # Module flags are study-level
+    module = case_when(
+      IMD1008_MOD_1 == 1 ~ 1,
+      IMD1008_MOD_2 == 1 ~ 2,
+      IMD1008_MOD_3 == 1 ~ 3,
+      IMD1008_MOD_4 == 1 ~ 4,
+      IMD1008_MOD_5 == 1 ~ 5
+    ),
+    study = IMD1004,
+    country = IMD1006_UNALPHA2,
+    year = IMD1008_YEAR,
+    close = IMD3005_1,
+    probe = IMD3005_2,
+    party = IMD3005_3,
+    vote_pl = IMD3002_LH_PL,
+    vote_dc = IMD3002_LH_DC,
+    other_from = 9999988
+  ) |>
+  # Drop archive label tables
+  as.list() |>
+  as_tibble()
+```
+
+```{r}
+#| label: select-mod6
+
+# Module 6 codes are six digits
+cses_mod6_tree <- cses6 |>
+  transmute(
+    module = 6,
+    study = f1004,
+    # Module 6 codes Slovenia SL
+    country = if_else(f1006_unalpha2 == "SL", "SI", f1006_unalpha2),
+    year = f1010_y,
+    close = f3023_1,
+    probe = f3023_2,
+    party = f3023_3,
+    vote_pl = f3011_lh_pl,
+    vote_dc = f3011_lh_dc,
+    other_from = 999988
+  ) |>
+  # Drop archive label tables
+  as.list() |>
+  as_tibble()
+```
+
+# Harmonise to the Tree
+
+Both releases share one coding scheme, differing only in the number of digits, so they are stacked first and classified once.
+The offset `other_from` holds the first non-party code of each release.
+As in notebook 1.3, the two studies that never fielded the attachment item (`BELW1999`, `LVA_2018`) are dropped whole.
+
+```{r}
+#| label: harmonise
+
+cses_tree <- bind_rows(cses_imd_tree, cses_mod6_tree) |>
+  # Drop studies never fielding the item
+  filter(!all(close == 9), .by = study) |>
+  # Keep the project's 25 democracies
+  filter(country %in% countries_25) |>
+  mutate(
+    # List vote, else district vote
+    vote_code = if_else(vote_pl == other_from + 7, vote_dc, vote_pl),
+    # Level 1: attachment
+    att = case_when(
+      close == 1 ~ "yes",
+      close == 0 ~ "no",
+      .default = "dk"
+    ),
+    # Level 2: vote, 8 = no election
+    vote = case_when(
+      vote_code == other_from + 8 ~ "not_fielded",
+      vote_code == other_from + 7 ~ "not_fielded",
+      vote_code < other_from + 5 ~ "yes",
+      .default = "no"
+    ),
+    # Level 3: shared party codes
+    match = case_when(
+      att != "yes" | vote != "yes" ~ NA,
+      party >= other_from | vote_code >= other_from ~ "unmatchable",
+      party == vote_code ~ "same",
+      .default = "different"
+    ),
+    module = factor(module),
+    year = factor(year)
+  ) |>
+  select(
+    module,
+    study,
+    country,
+    year,
+    att,
+    vote,
+    match,
+    probe,
+    party,
+    vote_code
+  )
+
+# Respondents, studies and countries per module
+cses_tree |>
+  summarise(
+    respondents = n(),
+    studies = n_distinct(study),
+    countries = n_distinct(country),
+    .by = module
+  ) |>
+  arrange(module)
+```
+
+# Checks
+
+The first table crosses the tree levels by module.
+The second gives, per election study, the share naming the *same* party among attached voters whose two codes are both real parties, sorted from the lowest.
+The low end of that list is dominated by German studies, where the two most frequent mismatches -- `2760002` against `2760001`, and `2760003` against `2760001` -- are together several times larger than all other German mismatch pairs listed.
+That pattern fits a vote coded for the CDU/CSU union against an attachment coded for CDU or CSU separately, and should be checked against part 3 of the CSES codebook before it is corrected.
+Romanian studies show the same pattern around electoral alliances.
+
+```{r}
+#| label: checks
+
+# Levels by module
+cses_tree |>
+  count(module, att, vote, match) |>
+  pivot_wider(names_from = module, values_from = n) |>
+  print(n = Inf)
+
+# Same-party share per study
+cses_tree |>
+  filter(match %in% c("same", "different")) |>
+  summarise(
+    pairs = n(),
+    same = round(mean(match == "same"), 2),
+    .by = study
+  ) |>
+  arrange(same) |>
+  print(n = 15)
+
+# Most frequent German mismatches
+cses_tree |>
+  filter(country == "DE", match == "different") |>
+  count(party, vote_code, sort = TRUE) |>
+  slice_head(n = 6)
+```
+
+# Pooled Tree
+
+All 25 countries and all six modules.
+The unit is the respondent, and each study contributes its own sample size, so countries with more or larger studies weigh more.
+
+```{r}
+#| label: tree-pooled
+#| output: asis
+
+cses_tree |>
+  tree_counts() |>
+  mermaid_tree(leaner = "IMD3005_2 / f3023_2 (not in every study)") |>
+  emit_mermaid()
+```
+
+# Trees by Module
+
+Each module is a five-year window of national elections, so the module is the natural time unit for a pooled series.
+
+```{r}
+#| label: tree-module
+#| output: asis
+
+cses_tree |>
+  mutate(module = fct_relabel(module, \(x) paste("Module", x))) |>
+  tree_counts(module) |>
+  emit_tree_tabset(
+    by = "module",
+    level = 2,
+    leaner = "IMD3005_2 / f3023_2 (not in every study)"
+  )
+```
+
+# Trees by Country
+
+All studies of a country pooled.
+
+```{r}
+#| label: tree-country
+#| output: asis
+
+cses_tree |>
+  tree_counts(country) |>
+  emit_tree_tabset(
+    by = "country",
+    level = 2,
+    leaner = "IMD3005_2 / f3023_2 (not in every study)"
+  )
+```
+
+# Country by Election Study
+
+In the CSES the natural cell is the election study, not a calendar year.
+Three country-years hold two studies each (Belgium 2019 as Flanders and Wallonia, Germany 2002, Greece 2015); the bars pool them, the trees keep them apart.
+
+```{r}
+#| label: probe-studies
+
+# Studies where the probe was asked
+probe_studies <- cses_tree |>
+  filter(att == "no") |>
+  summarise(fielded = any(probe %in% c(0, 1)), .by = study) |>
+  filter(fielded) |>
+  pull(study)
+
+# Probe note only where fielded
+lean_study <- function(counts) {
+  if (counts$study[1] %in% probe_studies) "IMD3005_2 / f3023_2"
+}
+```
+
+```{r}
+#| label: fig-leaves
+#| fig-width: 11
+#| fig-height: 11
+
+# Leaf shares per country-year
+cses_tree |>
+  plot_leaf_shares(x = year, facet = country) +
+  scale_x_discrete(
+    breaks = as.character(seq(1996, 2024, 4)),
+    labels = \(x) str_sub(x, 3, 4)
+  ) +
+  labs(
+    title = "Partisan composition in the CSES by country and election, 1996-2024",
+    subtitle = "Unweighted shares; the vote is the current lower-house vote",
+    x = "Election year (19.. / 20..)"
+  )
+```
+
+```{r}
+#| label: tree-country-study
+#| output: asis
+
+cses_tree |>
+  tree_counts(country, study) |>
+  emit_nested_tabset(
+    outer = "country",
+    inner = "study",
+    level = 2,
+    leaner = lean_study
+  )
+```
+
+# Leaner Probes
+
+The CSES is the one source here with a leaner probe in almost every study: *do you feel yourself a little closer to one of the political parties than the others?* (`IMD3005_2`, `f3023_2`), asked of everyone who does not say yes to the base item.
+The table lists the studies in which the probe was **not** fielded for the *no attachment* group.
+Among the rest, a large share of the *No attachment* box are leaners -- notebook 1.3 puts them at 15% to 25% of all respondents -- which a later version of the tree can split off.
+
+```{r}
+#| label: probe-table
+
+# Studies without the probe
+cses_tree |>
+  distinct(module, study) |>
+  filter(!study %in% probe_studies) |>
+  arrange(module, study)
+```
+
+# Caveats
+
+- **The vote is a national lower-house vote**, measured right after the election; the EES and eu25games notebooks use a European Parliament vote.
+- **Abstention and missing share code `9999999`**, so *no vote reported* mixes both.
+- **Close is not naming.** Respondents close to a party with no usable party code are in *not matchable*.
+- **CSES folds inconsistent answers into the binary** (notebook 1.3): a "yes" with no party is kept as yes, a "no" with a party as no.
+- **Union and alliance codes** push German and Romanian studies towards *different party*, see the checks above.
+- **Module 6 is an advance release** covering eight of the 25 countries.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

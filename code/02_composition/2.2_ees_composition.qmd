@@ -1,0 +1,436 @@
+---
+title: |
+  CSAP Code Notebook 2.2
+subtitle: |
+  EES voter studies 2004-2024: partisan composition trees
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+The flowcharts are Mermaid diagrams written by R code; trees inside tabs are drawn the first time their tab is opened.
+Notebook 2.1 explains the tree itself; it is the same in all four composition notebooks.
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "haven",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Shared tree helpers
+source(here("code", "00_helper", "pid_tree.R"))
+```
+
+# Load EES Data
+
+The same five files as in notebook 1.2.
+
+```{r}
+#| label: load-ees-data
+
+ees_2004 <- read_dta(
+  here("data", "01_raw", "ees", "2004", "ZA4566.dta")
+)
+
+ees_2009 <- read_sav(
+  here("data", "01_raw", "ees", "2009", "ZA5055_v1-1-1.sav")
+)
+
+ees_2014 <- read_dta(
+  here("data", "01_raw", "ees", "2014", "ZA5160_v4-1-0.dta")
+)
+
+ees_2019 <- read_dta(
+  here("data", "01_raw", "ees", "2019", "ZA7581_v2-0-1.dta")
+)
+
+ees_2024 <- read_csv2(
+  here("data", "01_raw", "ees", "2024", "ZA8868_v1-0-0.csv")
+)
+```
+
+# Select Attachment and Vote Items
+
+The attachment item is the same question in every wave -- *do you consider yourself to be close to any particular party? If so, which party do you feel close to?* -- and it names the party in the same step.
+The vote item is the **European Parliament vote** of the election the study accompanies, since the EES is fielded right after each European election.
+Every wave also carries a recall of the last **national** general election, which is not used here but could replace the EP vote in a later variant:
+
+| Wave | Attachment | EP vote (used) | National recall (not used) | Leaner probe |
+|---|---|---|---|---|
+| 2004 | `v211` | `v112` | `v113` | none |
+| 2009 | `q87` | `q25` | `q27` | `q89` / `q90` |
+| 2014 | `qpp21_ees` | `qp2_ees` | `qpp5_ees` | none |
+| 2019 | `Q25n` | `Q7n` | `Q9n` | none |
+| 2024 | `q19` (party: `q19n`) | `q6` (party: `q6n`) | `q8` | none |
+
+The difficult part is the party comparison, because the party codes of the two items do not line up in every file.
+Which code to compare was decided by checking, wave by wave and country by country, how often attached voters named the same code on both items.
+
+- **2004** codes both items on one country-specific list (`1`, `2`, ...), so the raw codes compare directly.
+- **2009** codes both items with the same seven-digit EES party codes.
+- **2014** raw codes are shifted against each other (`qpp21` counts parties from `2`, because `1` is "no"; `qp2` counts from `1`), so the harmonised `_ees` versions are used, which share the seven-digit codes.
+- **2019** raw codes do not line up at all; the unified `n` versions (`Q25n`, `Q7n`) do, and match better than the `_EES` codes in Estonia, Lithuania, Slovenia and Sweden.
+- **2024** raw codes are shifted in the same way as 2014.
+  The unified `q19n` and `q6n` line up, but they code some named parties as "other" (`90`) where the raw item has a party.
+  So attachment and vote are *classified* from the raw `q19` and `q6`, as in notebook 1.2, and the unified codes are used only for the *comparison*.
+  A party that the unified coding lacks becomes *not matchable*.
+
+The attachment categories follow notebook 1.2, with one difference: don't know, refusal and missing are pooled into the tree's grey *DK* box.
+
+```{r}
+#| label: select-2004
+
+# 2004: v211 attachment, v112 EP vote
+ees_2004 <- ees_2004 |>
+  # Item unfielded in BE, LT
+  filter(!is.na(v211)) |>
+  transmute(
+    year = 2004,
+    country_raw = as.character(as_factor(country)),
+    a = as.numeric(v211),
+    v = as.numeric(v112),
+    # 94 no, 95 refused, 99 dk/na
+    att = case_when(
+      a == 94 ~ "no",
+      a %in% c(95, 99) ~ "dk",
+      .default = "yes"
+    ),
+    # 1-89 parties, 90 other
+    vote = if_else(v %in% 1:90, "yes", "no"),
+    att_party = if_else(a %in% 1:89, as.character(a), NA),
+    vote_party = if_else(v %in% 1:89, as.character(v), NA)
+  )
+```
+
+```{r}
+#| label: select-2009
+
+# 2009: q87 attachment, q25 EP vote
+ees_2009 <- ees_2009 |>
+  transmute(
+    year = 2009,
+    country_raw = as.character(as_factor(t102)),
+    a = as.numeric(q87),
+    v = as.numeric(q25),
+    # 0 no, 77/99 refused, 88 dk
+    att = case_when(
+      a == 0 ~ "no",
+      is.na(a) | a %in% c(77, 88, 99) ~ "dk",
+      .default = "yes"
+    ),
+    # Seven-digit parties, 20/98 other
+    vote = if_else(v > 1000 | v %in% c(20, 98), "yes", "no", missing = "no"),
+    att_party = if_else(a > 1000, as.character(a), NA),
+    vote_party = if_else(v > 1000, as.character(v), NA)
+  )
+```
+
+```{r}
+#| label: select-2014
+
+# 2014: harmonised qpp21_ees, qp2_ees
+ees_2014 <- ees_2014 |>
+  transmute(
+    year = 2014,
+    country_raw = as.character(as_factor(countrycode)),
+    a = as.numeric(qpp21_ees),
+    v = as.numeric(qp2_ees),
+    # 0 no, 77 refused, 88 dk
+    att = case_when(
+      a == 0 ~ "no",
+      is.na(a) | a %in% c(77, 88, 99) ~ "dk",
+      .default = "yes"
+    ),
+    # Seven-digit parties, 20/98 other
+    vote = if_else(v > 1000 | v %in% c(20, 98), "yes", "no", missing = "no"),
+    att_party = if_else(a > 1000, as.character(a), NA),
+    vote_party = if_else(v > 1000, as.character(v), NA)
+  )
+```
+
+```{r}
+#| label: select-2019
+
+# 2019: unified Q25n, Q7n
+ees_2019 <- ees_2019 |>
+  transmute(
+    year = 2019,
+    country_raw = as.character(as_factor(countrycode)),
+    a = as.numeric(Q25n),
+    v = as.numeric(Q7n),
+    # 0 no, 98 dk, no refusal
+    att = case_when(
+      a == 0 ~ "no",
+      is.na(a) | a == 98 ~ "dk",
+      .default = "yes"
+    ),
+    # 0 no vote, 96 blank, 98/99 missing
+    vote = if_else(v %in% c(1:19, 20, 90), "yes", "no", missing = "no"),
+    att_party = if_else(a %in% 1:19, as.character(a), NA),
+    vote_party = if_else(v %in% 1:19, as.character(v), NA)
+  )
+```
+
+```{r}
+#| label: select-2024
+
+# 2024: raw q19/q6, unified for parties
+ees_2024 <- ees_2024 |>
+  transmute(
+    year = 2024,
+    country_raw = country_alpha2,
+    a = q19,
+    v = q6,
+    # 1 no, 98 dk, no refusal
+    att = case_when(
+      a == 1 ~ "no",
+      is.na(a) | a == 98 ~ "dk",
+      .default = "yes"
+    ),
+    # 91 blank, 96 no vote, 98 dk
+    vote = if_else(v > 1000 | v == 90, "yes", "no", missing = "no"),
+    att_party = if_else(q19n %in% 1:87, as.character(q19n), NA),
+    vote_party = if_else(q6n %in% 1:87, as.character(q6n), NA)
+  )
+```
+
+# Harmonise to the Tree
+
+Country names are mapped onto ISO2 exactly as in notebook 1.2, with Britain and Northern Ireland pooled into `GB` in 2004.
+Party codes are only ever compared within one respondent, so it does not matter that the unified codes of 2019 and 2024 are country-specific indices rather than unique party codes.
+
+```{r}
+#| label: bind
+
+ees_tree <- bind_rows(ees_2004, ees_2009, ees_2014, ees_2019, ees_2024) |>
+  mutate(
+    # Map every spelling to ISO2
+    country = recode_values(
+      str_to_lower(country_raw),
+      c("austria", "at") ~ "AT",
+      c("belgium", "be") ~ "BE",
+      c("bulgaria", "bg") ~ "BG",
+      c("croatia", "hr") ~ "HR",
+      c("cyprus", "cy") ~ "CY",
+      c("czech republic", "czech rep.", "cz") ~ "CZ",
+      c("denmark", "dk") ~ "DK",
+      c("estonia", "ee") ~ "EE",
+      c("finland", "fi") ~ "FI",
+      c("france", "fr") ~ "FR",
+      c("germany", "de") ~ "DE",
+      c("greece", "el") ~ "GR",
+      c("hungary", "hu") ~ "HU",
+      c("ireland", "ie") ~ "IE",
+      c("italy", "it") ~ "IT",
+      c("latvia", "lv") ~ "LV",
+      c("lithuania", "lt") ~ "LT",
+      c("luxembourg", "lu") ~ "LU",
+      c("malta", "mt") ~ "MT",
+      c("netherlands", "the netherlands", "nl") ~ "NL",
+      c("poland", "pl") ~ "PL",
+      c("portugal", "pt") ~ "PT",
+      c("romania", "ro") ~ "RO",
+      c("slovakia", "sk") ~ "SK",
+      c("slovenia", "si") ~ "SI",
+      c("spain", "es") ~ "ES",
+      c("sweden", "se") ~ "SE",
+      c("britain", "northern ireland", "united kingdom") ~ "GB"
+    )
+  ) |>
+  # Keep the project's 25 democracies
+  filter(country %in% countries_25) |>
+  mutate(
+    # Level 3: compare within country
+    match = case_when(
+      att != "yes" | vote != "yes" ~ NA,
+      is.na(att_party) | is.na(vote_party) ~ "unmatchable",
+      att_party == vote_party ~ "same",
+      .default = "different"
+    ),
+    year = factor(year)
+  ) |>
+  select(year, country, att, vote, match, a, v)
+
+# Respondents and countries per wave
+ees_tree |>
+  summarise(
+    respondents = n(),
+    countries = n_distinct(country),
+    .by = year
+  )
+```
+
+# Checks
+
+The first table crosses the tree levels by wave.
+The second is the alignment check described above: among respondents who report both an attachment and a comparable vote, the share naming the *same* party, by country and wave.
+A cell far below its neighbours points to a coding problem rather than to voters; the ones that remain low are discussed under the caveats.
+
+```{r}
+#| label: checks
+
+# Levels by wave
+ees_tree |>
+  count(year, att, vote, match) |>
+  pivot_wider(names_from = year, values_from = n) |>
+  print(n = Inf)
+
+# Same-party share among comparable pairs
+ees_tree |>
+  filter(match %in% c("same", "different")) |>
+  summarise(same = round(mean(match == "same"), 2), .by = c(country, year)) |>
+  pivot_wider(names_from = year, values_from = same) |>
+  arrange(country) |>
+  print(n = Inf)
+```
+
+# Pooled Tree
+
+All 25 countries and all five waves.
+The panel of countries is unbalanced (see notebook 1.2), so this tree mixes different country sets.
+
+```{r}
+#| label: tree-pooled
+#| output: asis
+
+ees_tree |>
+  tree_counts() |>
+  mermaid_tree(leaner = "q89, 2009 wave only") |>
+  emit_mermaid()
+```
+
+# Trees by Wave
+
+```{r}
+#| label: tree-wave
+#| output: asis
+
+# Probe only fielded in 2009
+lean_2009 <- function(counts) {
+  if (as.character(counts$year[1]) == "2009") "q89 (then q90 for the party)"
+}
+
+ees_tree |>
+  tree_counts(year) |>
+  emit_tree_tabset(by = "year", level = 2, leaner = lean_2009)
+```
+
+# Trees by Country
+
+All five waves pooled within each country.
+
+```{r}
+#| label: tree-country
+#| output: asis
+
+ees_tree |>
+  tree_counts(country) |>
+  emit_tree_tabset(by = "country", level = 2, leaner = "q89, 2009 wave only")
+```
+
+# Country by Wave
+
+Each bar is one country-wave; blues report an attachment, oranges report none, greys are DK.
+Missing bars are waves in which a country was not surveyed, or (Belgium and Lithuania 2004) did not field the attachment item.
+
+```{r}
+#| label: fig-leaves
+#| fig-width: 11
+#| fig-height: 11
+
+# Leaf shares per country-wave
+ees_tree |>
+  plot_leaf_shares(x = year, facet = country) +
+  scale_x_discrete(labels = \(x) str_sub(x, 3, 4)) +
+  labs(
+    title = "Partisan composition in the EES by country and wave, 2004-2024",
+    subtitle = "Unweighted shares; the vote is the European Parliament vote",
+    x = "Wave (20..)"
+  )
+```
+
+```{r}
+#| label: tree-country-wave
+#| output: asis
+
+ees_tree |>
+  tree_counts(country, year) |>
+  emit_nested_tabset(
+    outer = "country",
+    inner = "year",
+    level = 2,
+    leaner = lean_2009
+  )
+```
+
+# Leaner Probes
+
+Only the 2009 wave follows the attachment item with a leaner probe: `q89` (*do you feel yourself a little closer to one of the political parties than others?*), asked of everyone who said no, don't know or refused at `q87`, and `q90` for the party.
+The other four waves ask only the strength of attachment of those who named a party (`v212`, `q88`, `qpp22`, `Q26`), which is not a probe.
+In the trees, the 2009 *No attachment* box therefore still contains the respondents who would have been classed as leaners.
+
+# Caveats
+
+- **The vote is an EP vote.** European elections are second-order: turnout is low and sincere voting for small parties is common, so *no vote reported* and *different party* are both larger than they would be with a national recall.
+  The national recall is listed in the table above for a later comparison.
+- **Mode changes between 2014 and 2019**, from interviewer-administered to online panels with no refusal option (see notebook 1.2).
+- **Electoral alliances count as different parties.** Where a party runs inside a joint list, an attachment to the party and a vote for the list do not share a code.
+  This is visible in the alignment table: Croatia 2014 (HDZ against the HDZ-led coalition list), Romania 2014 and 2019, Poland 2019 (the European Coalition list), Portugal 2014, and Italy and Portugal 2004 sit far below the other cells.
+  These are codings, not voters, and a crosswalk from members to lists would move them into *same party*.
+- **The 2004 DK category** also contains no-answers, as noted in notebook 1.2.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

@@ -1,0 +1,364 @@
+---
+title: |
+  CSAP Code Notebook 2.1
+subtitle: |
+  eu25games 2019: partisan composition trees
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+The flowcharts in this notebook are Mermaid diagrams written by R code.
+The trees visible when the page opens are drawn by Quarto; those inside tabs are drawn by a small script the first time their tab is opened, because a diagram in a hidden tab cannot be laid out (see `code/00_helper/pid_tree.R`).
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Shared tree helpers
+source(here("code", "00_helper", "pid_tree.R"))
+```
+
+# The Tree
+
+Every composition notebook (2.1 to 2.4) sorts respondents into the same sequential tree, following the typology in the notes of `index.qmd`.
+
+1. **Attachment.** Does the respondent report feeling close to a party?
+   The answer is *yes* (a party is named, including "other"), *no*, or *don't know / refused / missing*.
+   The last group gets its own grey box so that the shares at every level add up to 100%.
+2. **Vote.** Does the respondent report a party vote?
+   *No vote reported* collects non-voters, blank or invalid ballots, don't know, refusals and missing answers.
+   Where a survey wave never asked the vote item, the branch reads *vote item not fielded* instead, so that "not asked" is not confused with "did not answer".
+3. **Match.** Only for respondents who report both, the two parties are compared: *same party*, *different party*, or *not matchable*, when either side is "other" or an unlisted party.
+
+Two leaves are named after the typology: *no attachment, vote reported* is the **vote-anchored** group (the data files call it *implicit*), and *no attachment, no vote* is the non-partisan group.
+Leaner probes are deliberately **not** part of the tree.
+Where a survey carries one, a dashed note hangs off the *No attachment* box so that it can be picked up later.
+
+Every box gives the number of respondents, and every arrow gives the share of the box above it.
+
+# Load Data
+
+The source is the published harmonised release, not the old analysis frame in `data/03_final/`.
+As in notebook 1.5, only respondents who passed the attention check (`der_att_check_3`) are kept.
+
+```{r}
+#| label: load-eu25-data
+
+eu25games <- read_rds(
+  here(
+    "data",
+    "01_raw",
+    "eu25games2019.rds"
+  )
+) |>
+  # Attention-check passers, as in 1.5
+  filter(der_att_check_3)
+```
+
+# Select Attachment and Vote Items
+
+The attachment item is the EES wording -- *do you consider yourself to be close to any particular political party? If so, which party do you feel close to?* -- asked in all three waves.
+French respondents in wave 2 answered a separate French version of every party item (`q_party_id_fra` and friends), so those columns are coalesced into the main ones.
+
+The vote item concerns the **European Parliament election of May 2019** and exists only in waves 2 and 3.
+Wave 2 was fielded around the election and asks for the intended vote, the vote already cast, or a hypothetical vote; wave 3 asks for the vote cast or a hypothetical vote.
+They are coalesced in the order intention, hypothetical, past -- the recall-maximising rule of the old pipeline (`code/02_key_variables/2.1_key_variables.qmd`, commit `4651e2c`).
+Wave 1 carries no vote item at all.
+
+Every party answer comes with a Party Facts name (`ext_*_pf_name`).
+Non-party answers carry a literal sentinel string instead, and parties missing from Party Facts are marked `[og]` -- those are real parties and are kept as such.
+So the sentinel strings are matched literally rather than by testing for a missing Party Facts ID.
+
+```{r}
+#| label: sentinels
+
+# Non-party answers in Party Facts
+pf_no_party <- c(
+  "none",
+  "dont-know",
+  "refused",
+  "did-not-vote",
+  "blank-invalid",
+  "not-eligible"
+)
+
+# Named, but not a codeable party
+pf_other <- c("other", "other-country", "independent")
+
+# Sentinels actually present
+eu25games |>
+  transmute(
+    pid = coalesce(ext_q_party_id_pf_name, ext_q_party_id_fra_pf_name)
+  ) |>
+  filter(pid %in% c(pf_no_party, pf_other) | is.na(pid)) |>
+  count(pid)
+```
+
+The attachment item has no don't-know code.
+A respondent either names a party, says "none", or leaves it empty; the empty answers are what the grey *DK / missing* box counts.
+
+```{r}
+#| label: select-vars
+
+eu25_tree <- eu25games |>
+  transmute(
+    wave = meta_wave,
+    country_name = meta_country,
+    # French wave-2 items folded in
+    pid = coalesce(ext_q_party_id_pf_name, ext_q_party_id_fra_pf_name),
+    # Intention, hypothetical, past
+    vote_party = coalesce(
+      ext_q_vote_choice_intended_pf_name,
+      ext_q_vote_choice_hypo_pf_name,
+      ext_q_vote_choice_past_pf_name,
+      ext_q_vote_choice_hypo_fra_pf_name,
+      ext_q_vote_choice_past_fra_pf_name
+    )
+  )
+```
+
+# Harmonise to the Tree
+
+```{r}
+#| label: harmonise
+
+eu25_tree <- eu25_tree |>
+  mutate(
+    # Country names to ISO2
+    country = recode_values(
+      country_name,
+      "Austria" ~ "AT",
+      "Belgium" ~ "BE",
+      "Bulgaria" ~ "BG",
+      "Croatia" ~ "HR",
+      "Czechia" ~ "CZ",
+      "Denmark" ~ "DK",
+      "Estonia" ~ "EE",
+      "Finland" ~ "FI",
+      "France" ~ "FR",
+      "Germany" ~ "DE",
+      "Greece" ~ "GR",
+      "Hungary" ~ "HU",
+      "Ireland" ~ "IE",
+      "Italy" ~ "IT",
+      "Latvia" ~ "LV",
+      "Lithuania" ~ "LT",
+      "Netherlands" ~ "NL",
+      "Poland" ~ "PL",
+      "Portugal" ~ "PT",
+      "Romania" ~ "RO",
+      "Slovakia" ~ "SK",
+      "Slovenia" ~ "SI",
+      "Spain" ~ "ES",
+      "Sweden" ~ "SE",
+      "United Kingdom" ~ "GB"
+    ),
+    # Level 1: attachment
+    att = case_when(
+      is.na(pid) | pid %in% c("dont-know", "refused") ~ "dk",
+      pid %in% pf_no_party ~ "no",
+      .default = "yes"
+    ),
+    # Level 2: vote, unasked in wave 1
+    vote = case_when(
+      wave == 1 ~ "not_fielded",
+      is.na(vote_party) | vote_party %in% pf_no_party ~ "no",
+      .default = "yes"
+    ),
+    # Level 3: same Party Facts name?
+    match = case_when(
+      att != "yes" | vote != "yes" ~ NA,
+      pid %in% pf_other | vote_party %in% pf_other ~ "unmatchable",
+      pid == vote_party ~ "same",
+      .default = "different"
+    ),
+    wave = factor(paste("Wave", wave))
+  ) |>
+  select(wave, country, att, vote, match, pid, vote_party)
+
+# Every country mapped
+stopifnot(all(eu25_tree$country %in% countries_25))
+```
+
+# Checks
+
+The raw answers behind each tree level, printed so that any unexpected code is visible.
+The first table crosses the three levels by wave, the second lists the most frequent attachment/vote pairs that end up as *different party*.
+
+```{r}
+#| label: checks
+
+# Levels by wave
+eu25_tree |>
+  count(wave, att, vote, match) |>
+  print(n = Inf)
+
+# Most common mismatches
+eu25_tree |>
+  filter(match == "different") |>
+  count(country, pid, vote_party, sort = TRUE) |>
+  slice_head(n = 15)
+```
+
+The unit here is the **respondent-wave**, not the person.
+The panel re-interviews part of the sample, so a respondent who took part in two waves is counted twice in the pooled tree, and the attachment item may be answered differently each time.
+Attention-check passers also include a few within-wave duplicates of the same panelist, which the published frame does not remove.
+
+```{r}
+#| label: panel-structure
+
+# Waves per panelist
+eu25games |>
+  count(meta_pid, name = "rows") |>
+  count(rows, name = "panelists")
+```
+
+# Pooled Tree
+
+All 25 countries and all three waves.
+Because wave 1 never asked the vote item, a third of the pooled sample sits in the grey *vote item not fielded* boxes; the per-wave trees below separate this out.
+
+```{r}
+#| label: tree-pooled
+#| output: asis
+
+eu25_tree |>
+  tree_counts() |>
+  mermaid_tree() |>
+  emit_mermaid()
+```
+
+# Trees by Wave
+
+```{r}
+#| label: tree-wave
+#| output: asis
+
+eu25_tree |>
+  tree_counts(wave) |>
+  emit_tree_tabset(by = "wave", level = 2)
+```
+
+# Trees by Country
+
+All three waves pooled within each country.
+
+```{r}
+#| label: tree-country
+#| output: asis
+
+eu25_tree |>
+  tree_counts(country) |>
+  emit_tree_tabset(by = "country", level = 2)
+```
+
+# Country by Wave
+
+The figure compares the leaves of the tree across countries and waves.
+Each bar is one country-wave, and each colour one leaf: blues are respondents who report an attachment, oranges those who report none, and greys the DK and not-fielded groups.
+The Mermaid trees below it give the exact counts for every cell.
+
+```{r}
+#| label: fig-leaves
+#| fig-width: 11
+#| fig-height: 11
+
+# Leaf shares per country-wave
+eu25_tree |>
+  mutate(wave = fct_relabel(wave, \(x) str_remove(x, "Wave "))) |>
+  plot_leaf_shares(x = wave, facet = country) +
+  labs(
+    title = "Partisan composition in eu25games by country and wave",
+    subtitle = "Unweighted shares of attention-check passers",
+    x = "Wave"
+  )
+```
+
+```{r}
+#| label: tree-country-wave
+#| output: asis
+
+eu25_tree |>
+  tree_counts(country, wave) |>
+  emit_nested_tabset(outer = "country", inner = "wave", level = 2)
+```
+
+# Leaner Probes
+
+The eu25games questionnaire carries no leaner probe.
+The only follow-up to the attachment item is its strength (`q_party_closeness`: very close, fairly close, merely a sympathiser), asked of those who name a party and only in wave 1.
+So no tree in this notebook has a dashed note.
+
+| Item | Waves | Leaner probe |
+|---|---|---|
+| `q_party_id` (attachment) | 1, 2, 3 | none |
+| `q_party_closeness` (strength) | 1 | not a probe: asked of those who named a party |
+
+# Caveats
+
+- **The vote is a European Parliament vote**, and in wave 2 mostly an intended or hypothetical one.
+  Comparing it with a national-election recall in the CSES and ESS notebooks means comparing different quantities.
+- **Wave 1 has no vote.** Its trees stop at the attachment level.
+- **Respondent-waves, not persons.** See the panel table above.
+- **Matching on Party Facts names** treats an electoral alliance and its member party as different parties when Party Facts codes them separately.
+  The mismatch table above is dominated by such pairs: Fidesz against the Fidesz–KDNP list in Hungary, Civic Platform against the European Coalition in Poland, Podemos against Unidas Podemos in Spain, PLUS against the USR-PLUS alliance in Romania.
+  A member-to-list crosswalk would move these into *same party*; genuine switches (e.g. Conservative attachment, Brexit Party vote in Britain) would stay.
+- **Panel duplicates.** A handful of panelists appear many times over (one 29 times), which the attention-check filter does not remove.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
