@@ -85,3 +85,60 @@ In a fourth study, I then turn to affective polarization, specifically *horizont
 In a fifth study, I compare experimentally measured *vertical* affective polarization among partisans and deniers.
 
 This study makes multiple contributions: First, it is the most comprehensive study of political polarization in Europe, focusing on its various facets (actual and perceived ideological, vertical and horizontal affective), applying both a dynamic and static lense.
+
+
+
+On the term "polarization."
+Etymological roots in ancient Europe:
+Greek: "Polos" refers to the pivot, axis, or fixed point around which a sphere turns
+Latin: Polus (classical) & Polaris (medieval): pertaining to the poles of the earth
+French physicist Etienne Louis Malus coined Polariser in early 1800s
+
+physical (light) polarization, magnetism etc.
+
+post WWII: social and political notion, Arthur Koestler, Lipset and Parsons
+
+2024 merriam webster word of the year 2024: "division into two sharply distinct opposites; especially, a state in which the opinions, beliefs, or interests of a group or society no longer range along a continuum but become concentrated at opposing extremes." [Merriam Webster](https://www.merriam-webster.com/wordplay/word-of-the-year-2024)
+
+But when is a division a division, when is it sharply distinct? The above definition mixes state and process understanding.
+Also the magnetic metaphor (of magnetic poles) induces the image of opposing forces.
+In a social context, that notion is contaminated with negative normative evaluation.
+
+
+
+
+
+Typonomy of partisanship
+
+reports attachement: yes or no
+reports vote: yes or no
+
+which yields 4 different cell options
+
+
+            rep vote
+re att   y  y
+         n  n
+
+what makes this of course more complicated: leaner questions, multiple PID. 
+But (CHECK) many survey start or use binary questions.
+
+So the interesting part is, how do respondents that report attachement differ along multiple polarization dimensions if they have the same partisan anchor compared to those that *deny* such an attachement if directly asked.
+
+so sequentially its a tree:
+
+| report attachement | report vote |
+| -- | -- |
+| yes | yes, same | -> explicit partisan
+| yes | yes, but other | -> partisan strategic/inconsequential voter?
+| no | yes | -> implicit partisan (no attachement but preference revealed)
+| no | no | -> non-partisan
+
+
+ultimate goals:
+over time ideological contrast
+over time perception contrast
+over time vertical contrast
+cross national horizontal behavioral contrast
+
+where contrasts are estimated within party (and country)
