@@ -230,3 +230,6 @@ Overall McElreath/Gelman approach: Start from the scientific data-generating sto
 ## common approach: hierarchical modeling
 
 though the distribution of types various tremendously across countries, posterior uncertainties will reflect that appropriately -- e.g. for Denmark, there isn't much too learn, since most respondents are explicit partisans, hence the uncertainty (posterior variances) should be wider for Denmark.
+
+## Under what assumptions can this be interpreted as *causal* contrast?
+
