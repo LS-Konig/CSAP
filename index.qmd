@@ -110,6 +110,22 @@ In a social context, that notion is contaminated with negative normative evaluat
 
 Typonomy of partisanship
 
+at its core, I use a .
+
+The question is: What is the net contribution of partisanship *itself* on various forms of political polarization?
+
+For this, I focus on the contrast between respondents that do report an attachement (hereafter refered to as explicit partisans) from respondents that *deny* such an attachement, i.e., select the response "No, I don't feel attached to any political party", but report a preference via vote choice items, hereafter refered to implicit partisans.
+
+This contrast allows to estimate the effect of partisan attachement within party (and country), accounting for between-party variation in polarization outcomes.
+
+The key challenge to causal interpretation of this contrast is that partisan attachement is not random -- there are factors correlated with partisan attachement.
+
+If those factors influence both the choice of reporting partisan affiliation and polarization outcomes, this induces counfounding bias, potentially yielding misleading associations between partisan affiliation and polarization.
+
+Hence, in a first step, I review the the notion and history of partisanship in Europe, with a special focus on determinants of partisanship.
+
+Building on this, I examine empirically which variables are associated with reporting a partisanship in the first place, to identify possible control variables.
+
 reports attachement: yes or no
 reports vote: yes or no
 
@@ -142,3 +158,64 @@ over time vertical contrast
 cross national horizontal behavioral contrast
 
 where contrasts are estimated within party (and country)
+
+
+### Ideological Polarization
+
+how to measure at respondent level? distance from center? distance from overall (country=?) mean/median? all?
+
+aggregate: standard deviation of lr scale -> descr fig, individual level then brms analysis
+
+LR primarily, EU also (less data though)
+
+over time available
+
+$Y_{ipct}$ as outcome, respondent $i$ anchored in party $p$ from country $c$ at time $t$.
+
+modelled as a function of partisan type $T_i$ (1/0) with party, country and time random slopes (nested) and random intercepts
+
+### perceived ideological party polarization
+
+respondent level standard deviation of party placements, lr and EU (where available)
+
+over time available
+
+$Y_{ipct}$ as outcome, respondent $i$ anchored in party $p$ from country $c$ at time $t$.
+
+modelled as a function of partisan type $T_i$ (1/0) with party, country and time random slopes (nested) and random intercepts
+
+### vertical affective polarization
+
+thermometer (CSES, eu25), PTV/like-dislike (EES),
+
+API primary, other measures robustness
+
+over time available
+
+$Y_{ipct}$ as outcome (thermometer score), respondent $i$ anchored in party $p$ from country $c$ at time $t$.
+
+modelled as a function of partisan anchor (1 for ingroup, 0 else), partisan type $T_i$ (1/0) with party, country and time random slopes (nested) and random intercepts
+
+QoI: $AP = E(Y | Co) - E(Y | Out)$, $\Delta AP = E(AP | Explicit) - E(AP | implicit)$, where the hierarchical structure ensures this contrast *within* parties (and, logically, countries) 
+
+### horizontal behavioral AP
+
+dictator/trust games
+
+API equivalent
+
+$Y_{ipct}$ as outcome (token allocation), respondent $i$ anchored in party $p$ from country $c$ at time $t$.
+
+modelled as a function of partisan anchor (1 for ingroup, 0 else), partisan type $T_i$ (1/0) with party, country and time random slopes (nested) and random intercepts
+
+QoI: $AP = E(Y | Co) - E(Y | Out)$, $\Delta AP = E(AP | Explicit) - E(AP | implicit)$, where the hierarchical structure ensures this contrast *within* parties (and, logically, countries) 
+
+Scientific theory: Treat the 0–10 token allocation as a single underlying “how much should I give?” decision. The recipient attributes shift the desired allocation, which can sometimes reach the lower boundary of 0. Thus, 0 is not necessarily a qualitatively different behavioral state.
+Starting model: A beta-binomial is a sensible first model because the outcome is discrete and bounded at 0–10, while allowing more dispersion than a simple binomial. It lets the attributes influence the underlying propensity to allocate tokens.
+Model checking: Use posterior predictive checks to see whether the beta-binomial can reproduce the observed zero mass and the distribution from 1–10. Check this both overall and across experimental conditions/covariates.
+Hurdle model: Don't introduce a hurdle merely because there are many zeros. It implies a different generative story: first decide whether to give anything, then decide how much. Consider it if the beta-binomial systematically underpredicts zeros despite fitting the positive allocations well.
+Alternative: Given that the positive allocations look approximately Normal, a latent continuous allocation model could be an interesting sensitivity/alternative model: an underlying continuous willingness-to-give gets mapped onto the integer 0–10 scale.
+Overall McElreath/Gelman approach: Start from the scientific data-generating story, fit a few plausible models, and use PPCs to identify models that fail. Don't assume that the model with the best-looking fit has thereby been proven to represent the true psychological mechanism.
+
+## common approach: hierarchical modeling
+
