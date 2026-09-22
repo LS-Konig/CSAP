@@ -233,3 +233,41 @@ though the distribution of types various tremendously across countries, posterio
 
 ## Under what assumptions can this be interpreted as *causal* contrast?
 
+## Theoretical Implications and Empirical Tests
+
+The explicit–implicit contrast ($\Delta$) serves as a diagnostic. The identity
+and policy accounts of partisanship predict different *profiles* of $\Delta$
+across the four polarization outcomes, so the pattern across outcomes
+constitutes the test.
+
+| Outcome | Identity account predicts | Policy account predicts |
+|---|---|---|
+| Ideological extremity | Small or modest $\Delta$ | Large $\Delta$ (attachment reflects stronger policy commitment) |
+| Perceived polarization | $\Delta > 0$ beyond actual positions (partisan lens exaggerates distances) | $\Delta$ tracks actual party placements; no excess perception |
+| Vertical AP (toward parties) | Large $\Delta$, robust to adjusting for policy distance | $\Delta$ shrinks substantially once policy distance is adjusted for |
+| Horizontal AP (toward ordinary partisans) | Large $\Delta$, possibly exceeding vertical, since ordinary partisans carry little policy information | Small $\Delta$, since ordinary partisans are weak policy signals |
+
+: Competing predictions of the identity and policy accounts across polarization outcomes {#tbl-predictions}
+
+### Test 1: Estimate $\Delta$ with and without policy adjustment
+
+For each outcome, the within-party contrast is estimated twice: unadjusted,
+and conditional on the respondent's own ideological distance to the relevant
+parties (left–right, and EU integration where available). The identity
+account predicts that the affective $\Delta$s survive adjustment; the policy
+account predicts they largely vanish. The central figure is a single
+coefficient plot with the four outcomes, each showing both estimates.
+
+### Test 2: Measure perception bias directly
+
+Perceived polarization is constructed relative to a benchmark: sample-mean
+placements, expert placements (e.g., Chapel Hill Expert Survey), or
+manifesto-based positions. The quantity of interest is whether explicit
+partisans' perceived spread *exceeds* the benchmark more than implicit
+partisans' does. Greater overestimation among explicit partisans supports
+the identity lens.
+
+### Test 3: Compare horizontal and vertical AP
+
+Within the 2019 data, where both types are measurable, $\Delta$ for dislike of
+parties
