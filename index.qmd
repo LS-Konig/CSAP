@@ -271,3 +271,10 @@ the identity lens.
 
 Within the 2019 data, where both types are measurable, $\Delta$ for dislike of
 parties
+
+
+timeline: estimate for hahmetal data, have results and presentation until oktober 7th, ideally: partisan attachement gap for allocation games less than for thermometer, revision due to stricter attention check, etc.
+
+Standardization of effects to compare attitudinal and behavioral, posterior differences in contrast between the two as probability statement
+
+for HMS presentation: conceptual analytical section on polarization (see other talk or seminar), then focus on affective polarization, then the empirical contrast, conclusion: term "polarization" is vague, speaking of "the polarization" does not make sense, and normative notion (more polarization = bad) is not linear (see one curvilinear paper), rather U-shaped, 
