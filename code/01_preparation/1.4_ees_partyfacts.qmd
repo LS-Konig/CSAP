@@ -1,0 +1,1865 @@
+---
+title: |
+  CSAP Code Notebook 1.4
+subtitle: |
+  EES party items coded to Party Facts
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+This notebook gives the party items of the five EES voter studies (2004–2024) in the 25 democracies a pair of Party Facts variables, as notebooks 1.2 and 1.3 do for the ESS and the CSES:
+
+- `ext_<item>_pf_name`: the Party Facts core name, `"<EES label> [og]"` for a party that is not in Party Facts, or a sentinel for a non-party answer;
+- `ext_<item>_pf_id`: the Party Facts id, `NA` for `[og]` and sentinels.
+
+The items (question numbers in `data/01_raw/key-items.qmd`):
+
+| Stub | 2004 | 2009 | 2014 | 2019 | 2024 | Item |
+|------|------|------|------|------|------|------|
+| `pid` | `v211` | `q87` | `qpp21_ees` | `Q25` | `q19_recoded` | party closest to |
+| `pid_lean` | | `q90` | | | | not close, but closer to |
+| `vote_ep` | `v112` | `q25` | `qp2_ees` | `Q7` | `q6_recoded` | EP vote |
+| `vote_ep_hyp` | | `q26` | | | | EP vote had R voted |
+| `vote_local` | | `q26b` | | | | local vote (BE, IE) |
+| `vote_nat` | `v113` | `q27` | `qpp5_ees` | `Q9` | `q8_recoded` | last national vote |
+| `vote_intent` | `v114` | `q28` | `qpp6_ees` | | `q1a_recoded` | national vote intention |
+| `ptv_1`… | `v115`… | `q39_p1`… | `qpp8_1`… | `q10_1`… | `q9_1`… | propensity to vote, party 1… |
+| `lr_1`… | `v135`… | `q47_p1`… | `qpp14_1`… | `q13_1`… | `q11_1`… | left-right placement, party 1… |
+| `like_1`… | | | | | `q20_1`… | like-dislike of the party's supporters |
+
+For the batteries, `ext_ptv_<k>_pf_*` names the party behind position *k* of the respondent's country list, so that `ptv_3` can be read next to the rating it identifies.
+The party-competence items (2004 `v029`, 2019 `Q2`) and the EU-placement batteries are not coded.
+
+Each wave has its own party codes, and the choice of variable follows what the release offers:
+
+- **2004** codes every item on one list per country (`1`, `2`, ...), sometimes a second list for the batteries. The data carry only "party 1", "party 2" as labels; the names are in the codebook (`ZA4566_cod.pdf`, "Country specific codes"), transcribed to `data/02_processed/ees2004_party_lists.csv` below.
+- **2009** codes the answer items with seven-digit EES party codes; the battery positions resolve to them through `ZA5055_party_codes_v2.xls`.
+- **2014** has the seven-digit codes in the `_ees` variables (the raw ones count "Party 1", "Party 2"); the batteries resolve through `ZA5160_cp.xlsx`.
+- **2019** raw variables carry the party names as value labels; the batteries resolve to raw `Q7` codes through `ZA7581_cp.csv`. The `_EES` versions are not used, because they fold smaller parties into "other (recoded by EES team)".
+- **2024** `*_recoded` variables share one harmonised code per party, which `ZA8868_Party_Codes.csv` resolves to a name, the battery positions and a Party Facts code. The `_ees` versions fold smaller parties into "other" as in 2019.
+
+Belgium fields a Flemish and a Walloon party list; the battery lists follow the interview language.
+
+Two outputs, both in `data/02_processed/`:
+
+- `ees_party_pf.csv`: the crosswalk, one row per wave × country × region × variable × code, with the EES label and the `source` of the coding (`link`, `name`, `hand`, `special`, `undocumented`); `region` separates Flanders and Wallonia, and Northern Ireland in 2004;
+- `ees_party_pf.parquet`: one row per respondent (`wave`, `row`, `respondent`, `cntry`, `region`) with the `ext_*` variables. `row` is the position in the wave's file, because the 2004 respondent id is not unique.
+
+# Setup
+
+```{r}
+#| label: setup
+
+start_time <- Sys.time()
+options(width = 80)
+
+p_required <- c(
+  "tidyverse",
+  "here",
+  "haven",
+  "readxl",
+  "arrow",
+  "stringi",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+source(here("code", "00_helper", "pid_tree.R")) # countries_25
+source(here("code", "00_helper", "pf_code.R"))
+
+ees_dir <- here("data", "01_raw", "ees")
+```
+
+# Load EES Data
+
+The same five files as in notebooks 1.5 and 2.2, plus each wave's party-code file.
+
+```{r}
+#| label: load
+
+ees_2004 <- read_dta(file.path(ees_dir, "2004", "ZA4566.dta"))
+ees_2009 <- read_sav(file.path(ees_dir, "2009", "ZA5055_v1-1-1.sav"))
+ees_2014 <- read_dta(file.path(ees_dir, "2014", "ZA5160_v4-1-0.dta"))
+ees_2019 <- read_dta(file.path(ees_dir, "2019", "ZA7581_v2-0-1.dta"))
+ees_2024 <- read_csv2(
+  file.path(ees_dir, "2024", "ZA8868_v1-0-0.csv"),
+  show_col_types = FALSE,
+  guess_max = 1e5
+)
+
+# Country names and codes to ISO2 (as in notebook 2.2)
+to_iso2 <- function(x) {
+  recode_values(
+    str_to_lower(x),
+    c("austria", "at") ~ "AT",
+    c("belgium", "be") ~ "BE",
+    c("bulgaria", "bg") ~ "BG",
+    c("croatia", "hr") ~ "HR",
+    c("cyprus", "cy") ~ "CY",
+    c("czech republic", "czech rep.", "czechia", "cz") ~ "CZ",
+    c("denmark", "dk") ~ "DK",
+    c("estonia", "ee") ~ "EE",
+    c("finland", "fi") ~ "FI",
+    c("france", "fr") ~ "FR",
+    c("germany", "de") ~ "DE",
+    c("greece", "el", "gr") ~ "GR",
+    c("hungary", "hu") ~ "HU",
+    c("ireland", "ie") ~ "IE",
+    c("italy", "it") ~ "IT",
+    c("latvia", "lv") ~ "LV",
+    c("lithuania", "lt") ~ "LT",
+    c("luxembourg", "lu") ~ "LU",
+    c("malta", "mt") ~ "MT",
+    c("netherlands", "the netherlands", "nl") ~ "NL",
+    c("poland", "pl") ~ "PL",
+    c("portugal", "pt") ~ "PT",
+    c("romania", "ro") ~ "RO",
+    c("slovakia", "sk") ~ "SK",
+    c("slovenia", "si") ~ "SI",
+    c("spain", "es") ~ "ES",
+    c("sweden", "se") ~ "SE",
+    c("britain", "northern ireland", "united kingdom", "uk", "gb") ~ "GB"
+  )
+}
+
+# Value labels of a labelled variable, as code-label pairs
+value_labels <- function(x) {
+  l <- attr(x, "labels")
+  tibble(code = as.numeric(unname(l)), label = names(l))
+}
+```
+
+# Answer Items
+
+One long frame per wave: respondent × item, with the code as recorded.
+
+```{r}
+#| label: answers
+
+stack_items <- function(df) {
+  df |>
+    pivot_longer(
+      -c(wave, row, respondent, cntry, region),
+      names_to = "stub",
+      values_to = "code",
+      values_drop_na = TRUE
+    )
+}
+
+respondents_04 <- ees_2004 |>
+  transmute(
+    wave = 2004L,
+    row = row_number(),
+    respondent = as.character(idnum),
+    country04 = as.character(as_factor(country)),
+    cntry = to_iso2(country04),
+    # Northern Ireland has its own 2004 list
+    region = if_else(country04 == "northern ireland", "Northern Ireland", NA)
+  )
+
+ans_04 <- ees_2004 |>
+  transmute(
+    wave = 2004L,
+    row = row_number(),
+    respondent = as.character(idnum),
+    cntry = to_iso2(as.character(as_factor(country))),
+    region = if_else(as.character(as_factor(country)) == "northern ireland", "Northern Ireland", NA),
+    pid = as.numeric(v211),
+    vote_ep = as.numeric(v112),
+    vote_nat = as.numeric(v113),
+    vote_intent = as.numeric(v114)
+  ) |>
+  stack_items()
+
+ans_09 <- ees_2009 |>
+  transmute(
+    wave = 2009L,
+    row = row_number(),
+    respondent = as.character(t100),
+    cntry = to_iso2(as.character(as_factor(t102))),
+    region = case_match(
+      as.character(as_factor(t103)),
+      "BE_Flanders" ~ "Flanders",
+      "BE_Wallon" ~ "Wallonia"
+    ),
+    pid = as.numeric(q87),
+    pid_lean = as.numeric(q90),
+    vote_ep = as.numeric(q25),
+    vote_ep_hyp = as.numeric(q26),
+    vote_local = as.numeric(q26b),
+    vote_nat = as.numeric(q27),
+    vote_intent = as.numeric(q28)
+  ) |>
+  stack_items()
+
+ans_14 <- ees_2014 |>
+  transmute(
+    wave = 2014L,
+    row = row_number(),
+    respondent = as.character(respid),
+    cntry = to_iso2(as.character(as_factor(countrycode))),
+    region = if_else(
+      cntry == "BE",
+      case_match(
+        as.character(as_factor(p13_intlang)),
+        "Dutch" ~ "Flanders",
+        "French" ~ "Wallonia"
+      ),
+      NA
+    ),
+    pid = as.numeric(qpp21_ees),
+    vote_ep = as.numeric(qp2_ees),
+    vote_nat = as.numeric(qpp5_ees),
+    vote_intent = as.numeric(qpp6_ees)
+  ) |>
+  stack_items()
+
+ans_19 <- ees_2019 |>
+  transmute(
+    wave = 2019L,
+    row = row_number(),
+    respondent = as.character(serial),
+    cntry = to_iso2(as.character(as_factor(countrycode))),
+    region = case_match(
+      as.character(as_factor(meta_lang_be)),
+      "Flamish" ~ "Flanders",
+      "French" ~ "Wallonia"
+    ),
+    pid = as.numeric(Q25),
+    vote_ep = as.numeric(Q7),
+    vote_nat = as.numeric(Q9)
+  ) |>
+  stack_items()
+
+ans_24 <- ees_2024 |>
+  transmute(
+    wave = 2024L,
+    row = row_number(),
+    respondent = as.character(resp_id),
+    cntry = to_iso2(country_alpha2),
+    region = if_else(
+      cntry == "BE",
+      case_match(meta_lang, "nl" ~ "Flanders", "fr" ~ "Wallonia"),
+      NA
+    ),
+    pid = as.numeric(q19_recoded),
+    vote_ep = as.numeric(q6_recoded),
+    vote_nat = as.numeric(q8_recoded),
+    vote_intent = as.numeric(q1a_recoded)
+  ) |>
+  stack_items()
+
+answers <- bind_rows(ans_04, ans_09, ans_14, ans_19, ans_24) |>
+  filter(cntry %in% countries_25)
+
+# The variable behind each stub
+item_vars <- tribble(
+  ~wave, ~stub, ~variable,
+  2004L, "pid", "v211",
+  2004L, "vote_ep", "v112",
+  2004L, "vote_nat", "v113",
+  2004L, "vote_intent", "v114",
+  2009L, "pid", "q87",
+  2009L, "pid_lean", "q90",
+  2009L, "vote_ep", "q25",
+  2009L, "vote_ep_hyp", "q26",
+  2009L, "vote_local", "q26b",
+  2009L, "vote_nat", "q27",
+  2009L, "vote_intent", "q28",
+  2014L, "pid", "qpp21_ees",
+  2014L, "vote_ep", "qp2_ees",
+  2014L, "vote_nat", "qpp5_ees",
+  2014L, "vote_intent", "qpp6_ees",
+  2019L, "pid", "Q25",
+  2019L, "vote_ep", "Q7",
+  2019L, "vote_nat", "Q9",
+  2024L, "pid", "q19_recoded",
+  2024L, "vote_ep", "q6_recoded",
+  2024L, "vote_nat", "q8_recoded",
+  2024L, "vote_intent", "q1a_recoded"
+)
+
+answers <- answers |>
+  left_join(item_vars, by = c("wave", "stub"))
+
+count(answers, wave, name = "answers")
+```
+
+# Labels
+
+## 2004: the codebook lists
+
+The 2004 codebook prints one party list per country, and for France, Germany and Spain a second list for some of the batteries; each list names the variables it applies to.
+The lists were read from the PDF with `pdftotext -layout` and parsed line by line (the parser is kept below, not run); two entries whose number the layout moved onto the next line (Italy 18, Latvia 21) were joined back, and Denmark's second code 7, a duplicate of code 9, was dropped.
+
+```{r}
+#| label: lists-2004-parse
+#| eval: false
+
+x <- system2(
+  "pdftotext",
+  c("-enc", "UTF-8", "-layout", shQuote(file.path(ees_dir, "2004", "ZA4566_cod.pdf")), "-"),
+  stdout = TRUE
+)
+s <- grep("^COUNTRY SPECIFIC CODES:", x)[1]
+e <- grep("APPENDIX 3", x)
+e <- e[e > s][1]
+x <- x[(s + 1):(e - 1)]
+x <- x[!str_detect(x, "^\\s*$|^\\s*- [0-9]+ -\\s*$|European Election Study 2004\\s*$")]
+countries_04 <- "Austria|Belgium|Britain|Cyprus|Czech Republic|Denmark|Estonia|Finland|France|Germany|Greece|Hungary|Ireland|Italy|Latvia|Lithuania|Luxembourg|Malta|Northern Ireland|Poland|Portugal|Slovakia|Slovenia|Spain|Sweden|The Netherlands"
+out <- list()
+cn <- NA
+sc <- "all"
+pending <- NA
+for (l in x) {
+  if (str_detect(l, "^\\s*Party List:")) {
+    sc <- str_trim(str_remove(l, "^\\s*Party List:"))
+    next
+  }
+  hd <- str_match(l, paste0("^(", countries_04, "):\\s*(.*)$"))
+  if (!is.na(hd[1])) {
+    cn <- hd[2]
+    sc <- "all"
+    pending <- if (hd[3] != "" && !str_starts(hd[3], fixed("("))) hd[3] else NA
+    next
+  }
+  m <- str_match(l, "^\\s*([0-9]+)\\s+(.+?)\\s*$")
+  if (!is.na(m[1])) {
+    out[[length(out) + 1]] <- tibble(country = cn, scope = sc, code = as.integer(m[2]), label = m[3])
+    next
+  }
+  if (str_detect(l, "^\\s*[0-9]+\\s*$") && !is.na(pending)) {
+    out[[length(out) + 1]] <- tibble(country = cn, scope = sc, code = as.integer(str_trim(l)), label = pending)
+    pending <- NA
+    next
+  }
+  pending <- str_trim(l)
+}
+bind_rows(out) |>
+  distinct(country, scope, code, .keep_all = TRUE) |>
+  write_csv(here("data", "02_processed", "ees2004_party_lists.csv"))
+```
+
+A list's scope names the variables it covers ("all" for a country with a single list).
+
+```{r}
+#| label: lists-2004
+
+lists_04 <- read_csv(
+  here("data", "02_processed", "ees2004_party_lists.csv"),
+  show_col_types = FALSE
+)
+
+# Variables a scope covers: single names and v115-v128 style ranges
+expand_scope <- function(scope) {
+  if (scope == "all") {
+    return(NA_character_)
+  }
+  ranges <- str_match_all(scope, "v([0-9]+)\\s*-\\s*v([0-9]+)")[[1]]
+  singles <- str_extract_all(str_remove_all(scope, "v[0-9]+\\s*-\\s*v[0-9]+"), "v[0-9]+")[[1]]
+  c(
+    singles,
+    unlist(map2(as.integer(ranges[, 2]), as.integer(ranges[, 3]), \(a, b) sprintf("v%03d", a:b)))
+  )
+}
+
+scopes_04 <- lists_04 |>
+  distinct(country, scope) |>
+  mutate(variable = map(scope, expand_scope)) |>
+  unnest(variable)
+
+# The codebook writes "Austria", "The Netherlands"; the data "austria", "netherlands"
+lists_04 <- lists_04 |>
+  mutate(country = str_remove(str_to_lower(country), "^the "))
+scopes_04 <- scopes_04 |>
+  mutate(country = str_remove(str_to_lower(country), "^the "))
+
+# Label of each list code for each variable of a country
+labels_04 <- respondents_04 |>
+  distinct(country04, cntry, region) |>
+  filter(cntry %in% countries_25) |>
+  cross_join(tibble(variable = c("v112", "v113", "v114", "v211", sprintf("v%03d", c(115:128, 135:148))))) |>
+  left_join(scopes_04, by = c("country04" = "country", "variable"), relationship = "many-to-many") |>
+  # a country with a single list covers every variable
+  mutate(scope = coalesce(scope, "all")) |>
+  inner_join(lists_04, by = c("country04" = "country", "scope"), relationship = "many-to-many") |>
+  select(country04, cntry, region, variable, code, label)
+
+stopifnot(
+  nrow(labels_04) == nrow(distinct(labels_04, country04, variable, code)),
+  # every 2004 country of the 25 has a list
+  setequal(unique(labels_04$cntry), intersect(unique(respondents_04$cntry), countries_25))
+)
+count(labels_04, cntry, region, name = "labels") |>
+  print(n = Inf)
+```
+
+## 2009–2024: value labels and party-code files
+
+```{r}
+#| label: labels-waves
+
+labels_vl <- bind_rows(
+  map(c("q87", "q90", "q25", "q26", "q26b", "q27", "q28"), \(v) {
+    value_labels(ees_2009[[v]]) |> mutate(wave = 2009L, variable = v)
+  }),
+  map(c("qpp21_ees", "qp2_ees", "qpp5_ees", "qpp6_ees"), \(v) {
+    value_labels(ees_2014[[v]]) |> mutate(wave = 2014L, variable = v)
+  }),
+  map(c("Q25", "Q7", "Q9"), \(v) {
+    value_labels(ees_2019[[v]]) |> mutate(wave = 2019L, variable = v)
+  })
+)
+
+# 2024: the party-code file
+pc_24 <- read_delim(
+  file.path(ees_dir, "2024", "ZA8868_Party_Codes.csv"),
+  delim = ";",
+  col_types = cols(.default = col_character()),
+  name_repair = "unique_quiet"
+)
+names(pc_24) <- str_trim(names(pc_24))
+pc_24 <- pc_24 |>
+  transmute(
+    region = case_match(Country, "Belgium-Flanders" ~ "Flanders", "Belgium-Wallonia" ~ "Wallonia"),
+    un = as.integer(`Country Code`),
+    code = as.numeric(`Harmonized Numerical 2024 Code...11`),
+    label = str_squish(`Party Name`),
+    english = str_squish(`Name (English)`),
+    acronym = str_squish(Acronym),
+    position = as.integer(`PARTY in Q9, Q11, Q18, Q20 (Party Placement Scales)`),
+    q9 = Q9,
+    q11 = Q11,
+    q20 = Q20,
+    ees_code = as.numeric(`EES 2019/2014/2009 Code`),
+    pf_hint = as.integer(`Party Facts Code`)
+  ) |>
+  left_join(
+    ees_2024 |>
+      distinct(un = as.integer(countrycode), cntry = to_iso2(country_alpha2)),
+    by = "un"
+  )
+
+labels_24 <- pc_24 |>
+  distinct(cntry, code, label) |>
+  mutate(wave = 2024L)
+
+# A code carries one label within a wave and country
+stopifnot(nrow(labels_24) == nrow(distinct(labels_24, cntry, code)))
+```
+
+# Battery Lists
+
+Position *k* of a battery names the same party in every battery of a wave (the party-code files list one row per party, with the PTV, left-right and like-dislike variables in the same row).
+Each position is resolved to a party code of the wave's answer items, whose label then identifies it.
+
+```{r}
+#| label: batteries
+
+# 2004: position k is list code k, on the list covering that battery
+battery_04 <- labels_04 |>
+  filter(variable %in% sprintf("v%03d", c(115:128, 135:148))) |>
+  mutate(
+    battery = if_else(variable <= "v128", "ptv", "lr"),
+    position = as.integer(str_sub(variable, 2)) - if_else(battery == "ptv", 114L, 134L)
+  ) |>
+  filter(code == position) |>
+  transmute(wave = 2004L, cntry, region, battery, position, variable, code, label)
+
+# 2009: ZA5055_party_codes_v2.xls, one block per country; Belgium repeats
+# positions, Flanders first
+xls_09 <- read_excel(
+  file.path(ees_dir, "2009", "ZA5055_party_codes_v2.xls"),
+  col_types = "text",
+  .name_repair = "unique_quiet"
+) |>
+  select(iso = 1, ptv = 3, lr = 4, english = 7, code = 8) |>
+  # Denmark's party 1 sits on the row that carries the country name
+  mutate(iso = if_else(str_detect(iso, "^[A-Z]{2}$"), iso, to_iso2(iso))) |>
+  filter(!is.na(iso), !is.na(ptv) | !is.na(lr)) |>
+  mutate(
+    cntry = if_else(iso == "UK", "GB", iso),
+    region = if_else(
+      cntry == "BE",
+      if_else(cumsum(cntry == "BE" & ptv == "Q39_p1") == 1, "Flanders", "Wallonia"),
+      NA
+    ),
+    code = as.numeric(code)
+  )
+
+battery_09 <- xls_09 |>
+  pivot_longer(c(ptv, lr), names_to = "battery", values_to = "variable", values_drop_na = TRUE) |>
+  transmute(
+    wave = 2009L,
+    cntry,
+    region,
+    battery,
+    position = as.integer(str_extract(variable, "[0-9]+$")),
+    variable = str_to_lower(variable),
+    code,
+    english
+  )
+
+# 2014: ZA5160_cp.xlsx, Belgium in two blocks with their own headers
+xls_14 <- read_excel(
+  file.path(ees_dir, "2014", "ZA5160_cp.xlsx"),
+  col_types = "text",
+  .name_repair = "unique_quiet"
+) |>
+  select(iso = 1, ptv = 3, lr = 4, english = 7, code = 10) |>
+  mutate(
+    block = if_else(str_detect(iso, "^Belgium - "), str_remove(iso, "^Belgium - "), NA)
+  ) |>
+  fill(block) |>
+  filter(str_detect(iso, "^[A-Z]{2}$"), !is.na(ptv) | !is.na(lr)) |>
+  mutate(
+    cntry = if_else(iso == "UK", "GB", iso),
+    region = if_else(cntry == "BE", block, NA),
+    code = as.numeric(code)
+  )
+
+battery_14 <- xls_14 |>
+  pivot_longer(c(ptv, lr), names_to = "battery", values_to = "variable", values_drop_na = TRUE) |>
+  transmute(
+    wave = 2014L,
+    cntry,
+    region,
+    battery,
+    position = as.integer(str_extract(variable, "[0-9]+$")),
+    variable,
+    code,
+    english
+  )
+
+# 2019: ZA7581_cp.csv (Latin-1), positions to raw Q7 codes
+cp_19 <- read_csv(
+  file.path(ees_dir, "2019", "ZA7581_cp.csv"),
+  locale = locale(encoding = "latin1"),
+  col_types = cols(.default = col_character())
+)
+
+battery_19 <- cp_19 |>
+  transmute(
+    cntry = if_else(Coutnry_short == "UK", "GB", Coutnry_short),
+    region = if_else(cntry == "BE", Region, NA),
+    ptv = Q10_PTV,
+    lr = Q13_left_right,
+    code = as.numeric(Q7),
+    english = `English name`,
+    questionnaire = Party_name_questionnaire
+  ) |>
+  pivot_longer(c(ptv, lr), names_to = "battery", values_to = "variable", values_drop_na = TRUE) |>
+  transmute(
+    wave = 2019L,
+    cntry,
+    region,
+    battery,
+    position = as.integer(str_extract(variable, "[0-9]+$")),
+    variable = str_to_lower(variable),
+    code,
+    english,
+    questionnaire
+  )
+
+# 2024: the party-code file names the variables per position
+battery_24 <- pc_24 |>
+  filter(!is.na(position)) |>
+  pivot_longer(c(q9, q11, q20), names_to = "item", values_to = "variable", values_drop_na = TRUE) |>
+  transmute(
+    wave = 2024L,
+    cntry,
+    region,
+    battery = recode_values(item, "q9" ~ "ptv", "q11" ~ "lr", "q20" ~ "like"),
+    position,
+    variable = str_to_lower(variable),
+    code
+  )
+
+batteries <- bind_rows(battery_04, battery_09, battery_14, battery_19, battery_24) |>
+  filter(cntry %in% countries_25)
+
+# One party per wave, country, region and battery variable
+stopifnot(
+  nrow(batteries) == nrow(distinct(batteries, wave, cntry, region, variable))
+)
+count(batteries, wave, battery) |>
+  pivot_wider(names_from = battery, values_from = n)
+```
+
+# Cells
+
+Every answer code and every battery position becomes one cell with a label: from the codebook lists (2004), the value labels (2009–2019), or the party-code file (2024).
+Battery positions without a label in the answer items (a party asked about but not on the answer list) take the party-code file's own name.
+
+```{r}
+#| label: cells
+
+cells_answers <- answers |>
+  count(wave, cntry, region, variable, code, name = "n") |>
+  left_join(
+    labels_04 |> transmute(wave = 2004L, cntry, region, variable, code, label_04 = label),
+    by = c("wave", "cntry", "region", "variable", "code")
+  ) |>
+  left_join(
+    labels_vl |> rename(label_vl = label),
+    by = c("wave", "variable", "code")
+  ) |>
+  left_join(
+    labels_24 |> rename(label_24 = label),
+    by = c("wave", "cntry", "code")
+  ) |>
+  mutate(
+    label = coalesce(label_04, label_vl, label_24),
+    kind = "answer"
+  ) |>
+  select(wave, cntry, region, variable, code, label, n, kind)
+
+# Labels of every code in a wave, for the battery positions
+code_labels <- bind_rows(
+  labels_vl |>
+    # 2009 and 2014 batteries point to the answer codes; 2019 to raw Q7
+    filter(wave != 2019L | variable == "Q7") |>
+    distinct(wave, code, label) |>
+    filter(!duplicated(cbind(wave, code))),
+  labels_24 |> distinct(wave, code, label)
+)
+
+cells_batteries <- batteries |>
+  left_join(code_labels, by = c("wave", "code")) |>
+  mutate(
+    label = coalesce(if_else(wave == 2004L, label.x, NA), label.y, questionnaire, english),
+    n = NA_integer_,
+    kind = "battery"
+  ) |>
+  select(wave, cntry, region, variable, code, label, n, kind)
+
+cells <- bind_rows(cells_answers, cells_batteries) |>
+  mutate(key = norm_key(label))
+
+cells |>
+  filter(is.na(label)) |>
+  count(wave, kind, variable, code)
+
+count(cells, wave, kind)
+```
+
+# Non-Party Codes
+
+The non-party codes differ by wave (and in 2004 and 2009 by item); they come from the value labels, the 2004 codebook's "general codes", and for 2024, which has no labels, from the questionnaire and the open "other" answers behind codes 89 (independent candidates) and 97 (refusals).
+Codes that stand for a missing or inapplicable answer stay `NA`.
+
+```{r}
+#| label: special
+
+special <- bind_rows(
+  # 2004 (codebook "general codes"; 94 is "no party-ID" on v211, "no right to vote" on v113)
+  tribble(
+    ~code, ~pf_name,
+    -1, NA,
+    90, "other",
+    91, "none",
+    95, "refused",
+    96, "blank-invalid",
+    98, "dont-know", # do not remember
+    99, NA # d/k, n/a
+  ) |>
+    cross_join(tibble(variable = c("v211", "v112", "v113", "v114"))) |>
+    bind_rows(
+      tribble(
+        ~variable, ~code, ~pf_name,
+        "v211", 94, "none",
+        "v113", 94, "not-eligible",
+        "v112", 97, "did-not-vote",
+        "v113", 97, "did-not-vote",
+        "v114", 97, "will-not-vote"
+      )
+    ) |>
+    mutate(wave = 2004L),
+  # 2009
+  tribble(
+    ~code, ~pf_name,
+    0, "none",
+    20, "other",
+    66, "none",
+    77, "refused",
+    88, "dont-know",
+    93, "not-eligible",
+    94, "blank-invalid",
+    95, "blank-invalid",
+    96, "did-not-vote",
+    98, "other",
+    99, NA
+  ) |>
+    cross_join(tibble(variable = c("q87", "q90", "q25", "q26", "q26b", "q27", "q28"))) |>
+    # on q90, 98 is "unavailable"
+    mutate(pf_name = if_else(variable == "q90" & code == 98, NA, pf_name), wave = 2009L),
+  # 2014 (_ees codes)
+  tribble(
+    ~code, ~pf_name,
+    0, "none",
+    20, "other", # other (recoded by EES team)
+    77, "refused",
+    88, "dont-know",
+    94, "blank-invalid",
+    96, "did-not-vote",
+    98, "other",
+    99, NA
+  ) |>
+    cross_join(tibble(variable = c("qpp21_ees", "qp2_ees", "qpp5_ees", "qpp6_ees"))) |>
+    mutate(wave = 2014L),
+  # 2019 (raw codes; the "not close" answer of Q25 is a country code, see hand map)
+  tribble(
+    ~variable, ~code, ~pf_name,
+    "Q25", 90, "other",
+    "Q25", 98, "dont-know",
+    "Q7", 0, "did-not-vote",
+    "Q7", 90, "other",
+    "Q7", 96, "blank-invalid",
+    "Q7", 98, "dont-know",
+    "Q7", 99, NA,
+    "Q7", 9999, "did-not-vote",
+    "Q9", 90, "other",
+    "Q9", 96, "blank-invalid",
+    "Q9", 97, "did-not-vote",
+    "Q9", 98, "dont-know",
+    "Q9", 99, NA
+  ) |>
+    mutate(wave = 2019L),
+  # 2024 (*_recoded)
+  tribble(
+    ~code, ~pf_name,
+    88, "none",
+    89, "independent",
+    90, "other",
+    91, "blank-invalid",
+    96, "did-not-vote",
+    97, "refused",
+    98, "dont-know"
+  ) |>
+    cross_join(tibble(variable = c("q19_recoded", "q6_recoded", "q8_recoded", "q1a_recoded"))) |>
+    # on the vote intention, 96 is "would not vote"
+    mutate(
+      pf_name = if_else(variable == "q1a_recoded" & code == 96, "will-not-vote", pf_name),
+      wave = 2024L
+    )
+) |>
+  select(wave, variable, code, pf_name)
+
+stopifnot(nrow(special) == nrow(distinct(special, wave, variable, code)))
+```
+
+# Party Facts Links
+
+Three sources point a party code to Party Facts directly:
+
+- the 2024 party-code file has a Party Facts column;
+- Party Facts links the 2014 EES codes (dataset `ees14`);
+- the 2024 file and the 2019 code file give each party its seven-digit EES code (used 2009–2019), so the first two sources reach the other waves through it.
+
+Every such hint is checked against the names Party Facts holds for the party, as in notebook 1.3; failed hints go to the hand map.
+
+```{r}
+#| label: links
+
+core <- pf_core()
+
+# Every name Party Facts holds for the parties of the 25 countries
+pf_names <- read_csv(
+  file.path(pf_dir, "partyfacts-external-parties.csv"),
+  col_types = cols(.default = col_character())
+) |>
+  transmute(country, pf_id = as.integer(partyfacts_id), name_short, name, name_english) |>
+  bind_rows(
+    core |>
+      transmute(country, pf_id, name_short = pf_short, name = pf_name, name_english = pf_english)
+  ) |>
+  filter(!is.na(pf_id), country %in% pf_iso3) |>
+  pivot_longer(c(name_short, name, name_english), values_to = "nk", values_drop_na = TRUE) |>
+  mutate(
+    nk = normalise_party(nk),
+    cntry = names(pf_iso3)[match(country, pf_iso3)]
+  ) |>
+  filter(nchar(nk) >= 2) |>
+  inner_join(
+    core |>
+      filter(is.na(technical)) |>
+      select(pf_id, pf_name),
+    by = "pf_id"
+  ) |>
+  distinct(cntry, nk, pf_id, pf_name)
+
+# EES seven-digit code to Party Facts
+ees_pf <- bind_rows(
+  pf_links("ees14", core) |>
+    filter(is.na(technical)) |>
+    transmute(ees_code = as.numeric(dataset_party_id), pf_id),
+  pc_24 |>
+    filter(!is.na(ees_code), !is.na(pf_hint)) |>
+    transmute(ees_code, pf_id = pf_hint)
+) |>
+  distinct() |>
+  # codes linked to two parties give no hint
+  filter(n() == 1, .by = ees_code)
+
+# The EES code of each 2019 raw code (Q7 and Q9 share codes with Q7_EES /
+# Q9_Q25_EES; Q25 raw is the column q25)
+ees_19 <- bind_rows(
+  cp_19 |> transmute(variable = "Q7", code = as.numeric(Q7), ees_code = as.numeric(Q7_EES)),
+  cp_19 |> transmute(variable = "Q9", code = as.numeric(Q9), ees_code = as.numeric(Q9_Q25_EES)),
+  cp_19 |> transmute(variable = "Q25", code = as.numeric(q25), ees_code = as.numeric(Q9_Q25_EES))
+) |>
+  filter(!is.na(code), !is.na(ees_code)) |>
+  distinct()
+
+hints <- bind_rows(
+  # 2009 and 2014: the code is the EES code
+  cells |>
+    filter(wave %in% c(2009L, 2014L), code > 1e6) |>
+    inner_join(ees_pf, by = c("code" = "ees_code")),
+  # 2019: through the code file
+  cells |>
+    filter(wave == 2019L, kind == "answer") |>
+    inner_join(ees_19, by = c("variable", "code")) |>
+    inner_join(ees_pf, by = "ees_code"),
+  cells |>
+    filter(wave == 2019L, kind == "battery") |>
+    inner_join(
+      filter(ees_19, variable == "Q7") |> select(-variable),
+      by = "code",
+      relationship = "many-to-many"
+    ) |>
+    inner_join(ees_pf, by = "ees_code"),
+  # 2024: the file's own Party Facts code
+  cells |>
+    filter(wave == 2024L) |>
+    inner_join(
+      pc_24 |>
+        filter(!is.na(pf_hint)) |>
+        distinct(cntry, code, pf_id = pf_hint),
+      by = c("cntry", "code")
+    )
+) |>
+  distinct(wave, cntry, key, label, pf_id) |>
+  left_join(select(core, pf_id, pf_name, technical), by = "pf_id") |>
+  filter(is.na(technical), !is.na(pf_name))
+
+hint_check <- hints |>
+  mutate(nl = normalise_party(label), nl2 = normalise_party(str_remove_all(label, "\\([^)]*\\)"))) |>
+  left_join(distinct(pf_names, pf_id, nk), by = "pf_id", relationship = "many-to-many") |>
+  summarise(
+    ok = any(
+      contains_words(nl, nk) | contains_words(nk, nl) |
+        contains_words(nl2, nk) | contains_words(nk, nl2),
+      na.rm = TRUE
+    ),
+    .by = c(wave, cntry, key, label, pf_id, pf_name)
+  )
+
+# A label that passes for exactly one party
+map_link <- hint_check |>
+  filter(ok) |>
+  distinct(wave, cntry, key, pf_name, pf_id) |>
+  filter(n() == 1, .by = c(wave, cntry, key)) |>
+  mutate(source = "link")
+
+tibble(
+  hinted = n_distinct(hints$wave, hints$cntry, hints$key),
+  passed = nrow(map_link),
+  failed = nrow(distinct(filter(hint_check, !ok), wave, cntry, key))
+)
+```
+
+Labels without a passing hint are matched by exact normalised name, with and without a parenthesised part, against every name Party Facts holds for a party of the same country; the match must be unique.
+
+```{r}
+#| label: name-match
+
+map_name <- cells |>
+  filter(!is.na(label)) |>
+  distinct(wave, cntry, key, label) |>
+  anti_join(map_link, by = c("wave", "cntry", "key")) |>
+  mutate(
+    nl = normalise_party(label),
+    nl2 = normalise_party(str_remove_all(label, "\\([^)]*\\)"))
+  ) |>
+  pivot_longer(c(nl, nl2), names_to = "form", values_to = "nk") |>
+  inner_join(pf_names, by = c("cntry", "nk"), relationship = "many-to-many") |>
+  distinct(wave, cntry, key, pf_name, pf_id) |>
+  filter(n() == 1, .by = c(wave, cntry, key)) |>
+  mutate(source = "name")
+
+nrow(map_name)
+```
+
+# Hand Map
+
+Everything else is coded by hand, keyed by wave, country and label, so one row covers every item on which a label occurs.
+
+```{r}
+#| label: hand-map
+
+map_hand <- tribble(
+  ~wave, ~cntry, ~label, ~pf_name, ~pf_id,
+  2004L, "AT", "Die LINKE", "Die LINKE [og]", NA,
+  2004L, "AT", "Liste H.-P. Martin", "Liste Dr. Hans-Peter Martin", 1708L,
+  2004L, "BE", "CD&V - Christen-Democratisch & Vlaams", "Christen-Democratisch en Vlaams", 604L,
+  2004L, "BE", "PS", "Parti Socialiste", 500L,
+  2004L, "BE", "RESIST", "RESIST [og]", NA,
+  2004L, "BE", "SP.A-SPIRIT - Socialistische Partij. Anders", "Socialistische Partij Anders / Sociaal-Liberale Partij / Spirit", 1586L,
+  2004L, "BE", "VB - Vlaams Blok", "Vlaams Blok / Belang", 553L,
+  2004L, "BE", "VLD - Vlaamse Liberalen en Democraten", "Partij voor Vrijheid en Vooruitgang — Open Vlaamse Liberalen en Democraten", 49L,
+  2004L, "CZ", "Akce za zrušení Senátu a proti vytunelování důchodových fondů", "Akce za zrušení Senátu a proti vytunelování důchodových fondů [og]", NA,
+  2004L, "CZ", "BPS - Balbínova poetická strana", "BPS - Balbínova poetická strana [og]", NA,
+  2004L, "CZ", "CZ - Cesta změny", "CZ - Cesta změny [og]", NA,
+  2004L, "CZ", "HA - Humanistická aliance", "HA - Humanistická aliance [og]", NA,
+  2004L, "CZ", "Helax-Ostrava se baví", "Helax-Ostrava se baví [og]", NA,
+  2004L, "CZ", "KDU-CSL - Krestanska-demokraticka strana-Ceskoslovenska strana lidova", "Křesťanská a demokratická unie / Československá strana lidová", 676L,
+  2004L, "CZ", "KSČM - Komunistická strana Čech a Moravy", "Komunistická strana Cech a Moravy", 1728L,
+  2004L, "CZ", "Koalice US-DEU (5), KDU-ČSL (2) [only in v113 ]", "Čtyřkoalice", 6202L, # 2002 KDU-CSL/US-DEU Koalice; PF Four-Coalition entry (ESS maps same answer here)
+  2004L, "CZ", "NDS - Národně demokratická stran", "NDS - Národně demokratická stran [og]", NA,
+  2004L, "CZ", "NEZ - Hnutí Nezávislí", "Nezávislí", 1425L,
+  2004L, "CZ", "Naděje", "Naděje [og]", NA,
+  2004L, "CZ", "ODA - Občanská demokratická aliance", "Občanská demokratická aliance", 1008L,
+  2004L, "CZ", "ODS - Občanská demokratická strana", "Občanská demokratická strana", 466L,
+  2004L, "CZ", "PB - Pravý blok", "Pravý Blok", 904L,
+  2004L, "CZ", "RMS - Republikáni Miroslava Sládka", "Republikanska Miroslava Sladka", 972L,
+  2004L, "CZ", "Republikáni", "Republikáni [og]", NA,
+  2004L, "CZ", "SDS - Strana demokratického socialismu", "SDS - Strana demokratického socialismu [og]", NA,
+  2004L, "CZ", "SNK - Sdružení nezávislých a Evropští demokraté", "SNK Evropští demokraté", 751L, # SNK-ED joint list 2004, merged party 2006; PF SNK-ED rather than SNK (884)
+  2004L, "CZ", "SPR-RSČ - Sdruzeni pro republiky – Republikanska strana Ceskoslovenska", "Sdružení pro Republiku — Republikánská strana Československa", 1657L,
+  2004L, "CZ", "SV-SOS - Strana venkova – spojené občanské síly", "SV-SOS - Strana venkova – spojené občanské síly [og]", NA,
+  2004L, "CZ", "SZ - Strana zelených (Greens)", "Strana zelených", 1554L,
+  2004L, "CZ", "SZR - Strana zdravého rozumu", "Strana zdravého rozumu", 8923L,
+  2004L, "CZ", "Sdružení nestraníků", "Sdružení nestraníků [og]", NA,
+  2004L, "CZ", "SŽJ - Strana za životní jistoty", "Důchodci za životní jistoty", 670L, # SZJ = renamed DZJ (Duchodci za zivotni jistoty)
+  2004L, "CZ", "ULD - Unie liberálních demokratů CZ (18), US-DEU (5), ODA (19) [only in v029 and v211 ]", "ULD - Unie liberálních demokratů CZ (18), US-DEU (5), ODA (19) [only in v029 and v211 ] [og]", NA, # ULD joint list of US-DEU and ODA 2004; no PF alliance entry
+  2004L, "CZ", "US-DEU - Unie svobody", "Unie svobody / Demokratická unie", 104L,
+  2004L, "CZ", "VPB - Volba pro budoucnost", "VPB - Volba pro budoucnost [og]", NA,
+  2004L, "CZ", "ČSNS - Česká strana národně sociální", "[ Liberální / Česká ] strana národně sociální", 1813L,
+  2004L, "CZ", "ČSS - Československá strana socialistická", "ČSS - Československá strana socialistická [og]", NA, # Czechoslovak Socialist Party, separate from CSNS (1813)
+  2004L, "CZ", "ČSSD - Česká strana sociálně demokratická", "Česká strana sociálně demokratická", 177L,
+  2004L, "DE", "Bündnis 90/Die Grünen", "Bündnis 90 / Die Grünen", 1816L,
+  2004L, "DE", "Die Frauen", "Die Frauen [og]", NA,
+  2004L, "DE", "Die Grauen", "Die Grauen — Graue Panther", 1652L,
+  2004L, "DE", "Die Tierschutzpartei", "Tierschutzpartei", 749L,
+  2004L, "DE", "Familienpartei", "Familienpartei [og]", NA, # Familien-Partei only has technical 1-percent id in PF
+  2004L, "DE", "PDS", "Partei des Demokratischen Sozialismus", 86L,
+  2004L, "DE", "Partei bibeltreuer Christen", "Partei bibeltreuer Christen [og]", NA,
+  2004L, "DE", "Schill", "Schill [og]", NA, # Schill party only has technical 1-percent id in PF
+  2004L, "DK", "Centre Democratic Party", "Centrumdemokraterne", 800L,
+  2004L, "DK", "Christian Peoples Party / The Christian Democrats", "Kristeligt Folkeparti / Kristendemokraterne", 53L,
+  2004L, "DK", "Conservative Peoples Party", "Konservative Folkeparti", 536L,
+  2004L, "DK", "Democratic Renewal", "Democratic Renewal [og]", NA,
+  2004L, "DK", "Leftwing Alliance", "Enhedslisten / De Rød-Grønne", 1527L, # Leftwing Alliance read as Enhedslisten (Red-Green Alliance)
+  2004L, "DK", "Progressive Party", "Fremskridtspartiet", 1601L,
+  2004L, "DK", "The Minority Party", "The Minority Party [og]", NA,
+  2004L, "DK", "The Movement of June", "JuniBevægelsen", 1421L,
+  2004L, "DK", "The pople’s movement against EU", "Folkebevægelsen mod EU", 333L,
+  2004L, "EE", "Eesti Demokraatlik Partei", "Eesti Demokraatlik Partei [og]", NA,
+  2004L, "EE", "Eestimaa Rahvaliit", "Eestimaa Rahvalliit", 110L,
+  2004L, "EE", "Mõni muu erakond", "other", NA, # label means 'some other party'
+  2004L, "ES", "CC (Coalición Europea) (Leer partidos)", "CC (Coalición Europea) (Leer partidos) [og]", NA,
+  2004L, "ES", "Ecologist Party", "Ecologist Party [og]", NA, # unclear which Spanish green party (Los Verdes ran with PSOE in 2004)
+  2004L, "ES", "EdP (Europa de los Pueblos) (Leer partidos)", "Europa de los Pueblos — Verdes", 1643L, # 2004 EdP coalition; PF entry Europa de los Pueblos - Verdes 2004-2009
+  2004L, "ES", "Galeusca – Pueblos de Europa (Leer partidos)", "Galeusca – Pueblos de Europa (Leer partidos) [og]", NA,
+  2004L, "ES", "IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds)", "IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds) [og]", NA, # IU and ICV separate in PF, no alliance entry
+  2004L, "ES", "PP (Partido Popular)", "Alianza-Partido Popular / Partido Popular", 441L,
+  2004L, "ES", "PP (Partido Popular) / UPN (Unión del Pueblo Navarro)", "PP (Partido Popular) / UPN (Unión del Pueblo Navarro) [og]", NA, # UPN separate party in PF (722), no PP-UPN alliance entry
+  2004L, "ES", "Regional Party of Center", "other", NA, # generic grouping, not one party
+  2004L, "ES", "Regional Party of Left", "other", NA, # generic grouping, not one party
+  2004L, "FI", "KD: Suomen Kristillisdemokraatit (Christian Democrats in Finland)", "Kristillisdemokraatit", 703L,
+  2004L, "FI", "KESK: Suomen Keskusta (Center Party of Finland)", "Maalaisliitto / Keskusta", 901L,
+  2004L, "FI", "KOK: Kansallinen Kokoomus (National Coalition Party)", "Kansallinen Kokoomus", 495L,
+  2004L, "FI", "Liberaalit (Liberals)", "Liberaalinen kansanpuolue", 249L,
+  2004L, "FI", "PS: Perussuomalaiset (True Finns)", "Suomen Puolue / Perussuomalaiset", 1689L,
+  2004L, "FI", "RKP: Ruotsalainen kansanpuolue (Swedish People’s Party)", "Ruotsalainen Kansanpuolue / Svenska Folkepartiet i Finland", 1229L,
+  2004L, "FI", "SDP: Suomen Sosialidemokraattinen Puolue (Finnish Social Democratic Party)", "Suomen Sosialidemokraattinen Puolue", 1303L,
+  2004L, "FI", "SKP: Suomen Kommunistinen Puolue (Communist Party of Finland)", "Suomen Kommunistinen Puolue", 7030L,
+  2004L, "FI", "VAS: Vasemmistoliitto (Left Alliance)", "Vasemmistoliitto", 1044L,
+  2004L, "FI", "VIHR: Vihreä liitto (Green League)", "Vihreä Liitto", 479L,
+  2004L, "FR", "Extrême gauche – EXTG (LO/ LCR) (Lutte Ouvrière / Ligue Communiste Révolutionnaire)", "extrême gauche", 1594L, # LO/LCR joint far-left list; PF extreme-gauche grouping entry
+  2004L, "FR", "FN, MNR (Front national, Mouvement National Républicain)", "FN, MNR (Front national, Mouvement National Républicain) [og]", NA, # two separate parties, no alliance entry
+  2004L, "FR", "MPF, RPF (Mouvement Pour la France / Rassemblement Pour la France", "MPF, RPF (Mouvement Pour la France / Rassemblement Pour la France [og]", NA, # two separate parties, no alliance entry
+  2004L, "FR", "Pôle républicain de Jean-Pierre Chevènement", "Mouvement des citoyens / Pôle républicain", 3156L,
+  2004L, "FR", "UDF", "Union pour la démocratie française", 213L,
+  2004L, "FR", "UMP", "Union pour un mouvement populaire", 1595L,
+  2004L, "FR", "UMP + DVD", "UMP + DVD [og]", NA, # UMP plus divers droite; no alliance entry
+  2004L, "GB", "Christian Alliance", "Christian Alliance [og]", NA,
+  2004L, "GB", "George Galloway", "Respect — The Unity Coalition", 1082L, # Galloway headed Respect list in 2004
+  2004L, "GB", "Independent Candidate", "independent", NA,
+  2004L, "GB", "Liberal Democrats", "Liberal Democrats", 1388L,
+  2004L, "GB", "Scottish Socialist Party", "Scottish Socialist Party [og]", NA, # SSP only has technical 1-percent id in PF
+  2004L, "GB", "Ulster Unionist Party – UUP", "Ulster Unionist Party", 1366L,
+  2004L, "GR", "CHRYSSI AVGI", "Laïkós Sýndesmos / Chrysí Avgí", 1660L,
+  2004L, "GR", "Democratic Periphery Union", "Democratic Periphery Union [og]", NA,
+  2004L, "GR", "ENOSSI KENTROON", "Enosi Kentroon", 2510L,
+  2004L, "GR", "Green party", "Oikologoi Prasinoi", 378L, # Ecologist Greens (founded 2002; PF year_first 2007)
+  2004L, "GR", "MERA", "MERA [og]", NA,
+  2004L, "GR", "New Democracy (ΝΔ: Nea Dimokratia)", "Néa Đimokratía", 794L,
+  2004L, "GR", "Patriot coalition", "Patriot coalition [og]", NA,
+  2004L, "GR", "Women for other Europe", "Women for other Europe [og]", NA,
+  2004L, "GR", "Ìera", "Ìera [og]", NA,
+  2004L, "GR", "ΚΚΕ (Kommunistiko Komma Ellados)", "Kommounistikó Kómma Elládas", 48L,
+  2004L, "GR", "ΣΥΝ (ΣΥΝΑΣΠΙΣΜΟΣ: Sinaspismos tis Aristeras ke ti Proodu)", "Synaspismós tīs Aristerás", 516L,
+  2004L, "HU", "FKgP, Independent Small Holders Party", "Független Kisgazdapárt", 1294L,
+  2004L, "HU", "Fidesz-MPP, Fidesz-Hungarian Civic Alliance", "Fidesz — Magyar Polgári Szövetség", 1691L,
+  2004L, "HU", "Joint list of Fidesz-MPP (1) and MDF (2) [only in v113]", "Fidesz — Magyar Demokrata Fórum", 8266L,
+  2004L, "HU", "MDF, Hungarian Democratic Forum", "Magyar Demokrata Fórum", 1697L,
+  2004L, "HU", "MIÉP, Party of Hungarian Justice and Life", "Magyar Igazság és Élet Pártja", 1597L,
+  2004L, "HU", "MNSZ, Hungarian National Alliance", "MNSZ, Hungarian National Alliance [og]", NA,
+  2004L, "HU", "MP, Workers Party", "Magyar Kommunista Munkáspárt", 859L, # Munkaspart = renamed Hungarian Communist Workers' Party
+  2004L, "HU", "MSZP, Hungarian Socialist Party", "Magyar Szocialista Párt", 1408L,
+  2004L, "HU", "SZDP, Social Democratic Party", "Magyarországi Szociáldemokrata Párt", 1726L,
+  2004L, "HU", "SZDSZ, Alliance of Free Democrats", "Szabad Demokraták Szövetsége", 910L,
+  2004L, "HU", "ÖMCP, Center Party", "Centrumpárt", 1779L,
+  2004L, "IE", "FF: Fianna Fail", "Fianna Fáil", 1055L,
+  2004L, "IE", "FG: Fine Gael", "Fine Gael", 1288L,
+  2004L, "IE", "GP: Green Party", "Green Party-Comhaontas Glas", 1775L,
+  2004L, "IE", "Independent Candidate", "independent", NA,
+  2004L, "IE", "Lab: Labour Party", "Páirti Lucht Oibre", 562L,
+  2004L, "IE", "SF: Sinn Fein", "Sinn Féin (Provisional)", 4L,
+  2004L, "IT", "AN-Alleanza nazionale (Fini)", "Alleanza Nazionale", 813L,
+  2004L, "IT", "Alleanza Popolare - UDEUR (Mastella)", "Unione Democratici per l'Europa", 115L,
+  2004L, "IT", "Alternativa Sociale con Alessandra Mussolini", "Alternativa Sociale Mussolini", 327L,
+  2004L, "IT", "DS-Democratici di sinistra (Fassino)", "Democratici di Sinistra", 878L,
+  2004L, "IT", "Forza Italia (Berlusconi)", "Forza Italia", 1626L,
+  2004L, "IT", "Girasole [Verdi (5), SDI(6) only in v113]", "Il Girasole", 1782L, # Verdi+SDI; PF has duplicate 3743, used 1782 (ESS/EU-NED)
+  2004L, "IT", "Lista Uniti nell’ULIVO [ DS(2), MARGHERITA(3), SDI(6) only in v112]", "L'Ulivo", 1737L, # Uniti nell'Ulivo 2004 list; PF L'Ulivo alliance
+  2004L, "IT", "Radicali /Lista Bonino (Capezzone)", "Lista Bonino", 2134L, # Lista Bonino (Radicals' electoral list)
+  2004L, "IT", "SDI (Boselli)", "Socialisti Democratici Italiani", 750L,
+  2004L, "IT", "Udc (Follini e Buttiglione)", "Unione dei Democratici Cristiani e Democratici di Centro", 1758L,
+  2004L, "LT", "Coalition of LLRA and LRS", "Coalition of LLRA and LRS [og]", NA, # joint LLRA-LRS list, no alliance entry
+  2004L, "LT", "LCS", "Liberalų ir centro sąjunga", 1193L, # LCS merged into LiCS 2003; n=114 in 2004 vote items implies LiCS
+  2004L, "LT", "LDP", "Tvarka ir teisingumas — Liberalų Demokratų Partija", 237L, # Paksas Liberal Democratic Party
+  2004L, "LT", "NCP", "NCP [og]", NA,
+  2004L, "LT", "TPP", "Tautos pažangos partija", 51L,
+  2004L, "LV", "All together [only in v029]", "All together [only in v029] [og]", NA,
+  2004L, "LV", "Communists", "Communists [og]", NA,
+  2004L, "LV", "Future Party", "Future Party [og]", NA,
+  2004L, "LV", "Latviesu Partija (Latvian Party)", "Latviesu Partija (Latvian Party) [og]", NA,
+  2004L, "LV", "PCTVL (For Human Rights in a United Latvia)", "Par cilvēka tiesībām vienotā Latvijā", 176L,
+  2004L, "LV", "Russian National Bolshevik Party", "Russian National Bolshevik Party [og]", NA,
+  2004L, "LV", "Tevzemei un Brovobai/ LNNK (For Fatherland and Freedom)", "Tēvzemei un Brīvībai / LNNK", 1704L,
+  2004L, "LV", "United Social Democratic Welfare Party", "Sociāldemokrātiskā Labklājības partija", 680L, # renamed Social Democratic Welfare Party
+  2004L, "NL", "Democratisch Europa", "Democratisch Europa [og]", NA,
+  2004L, "NL", "Europa Transparent", "Europa Transparant", 523L,
+  2004L, "NL", "Joint List of ChristenUnie (7) and SGP (8) [only in v112 ]", "ChristenUnie — Staatkundig Gereformeerde Partij", 6758L,
+  2004L, "NL", "Leefbaar Nederland / Leefbar Europa", "Leefbaar Nederland", 1420L, # Leefbaar Europa was LN's 2004 EP list
+  2004L, "NL", "Nieuw Rechts", "Nieuw Rechts [og]", NA, # Nieuw Rechts only has technical 1-percent id in PF
+  2004L, "NL", "Partij voor het Noorden", "Partij voor het Noorden [og]", NA,
+  2004L, "NL", "Respect Nu", "Respect Nu [og]", NA,
+  2004L, "PL", "\"Together for the Future\"", "\"Together for the Future\" [og]", NA,
+  2004L, "PL", "AWS-P – Solidarity: Electoral Action of the Right", "Akcja Wyborcza Solidarność Prawicy", 863L,
+  2004L, "PL", "All-Polish Citizens Caucus \"OKO\"", "All-Polish Citizens Caucus \"OKO\" [og]", NA,
+  2004L, "PL", "Confederation Defense Movement of the Unemployed", "Confederation Defense Movement of the Unemployed [og]", NA,
+  2004L, "PL", "Democratic Left Alliance (7) and Labor Union (8) [only in v112 and v113]", "Sojusz Lewicy Demokratycznej — Unia Pracy", 6183L,
+  2004L, "PL", "KPEiR-PLD Coalition - National Party of Retirees and Pensioners", "KPEiR-PLD Coalition - National Party of Retirees and Pensioners [og]", NA, # KPEiR-PLD coalition list, no alliance entry
+  2004L, "PL", "LPR - League of Polish Families", "Liga Polskich Rodzin", 1768L,
+  2004L, "PL", "National Electoral Committee of Voters", "Narodowy Komitet Wyborczy Wyborców", 1549L,
+  2004L, "PL", "PO - Civic Platform", "Platforma Obywatelska", 1117L,
+  2004L, "PL", "PPP - Polish Labor Party", "Polska Partia Pracy", 3699L,
+  2004L, "PL", "PSL - Polish People’s Party", "Polskie Stronnictwo Ludowe", 602L,
+  2004L, "PL", "PiS - Law and Justice", "Prawo i Sprawiedliwość", 1565L,
+  2004L, "PL", "SDPL - Social-Democracy of Poland", "Socjaldemokracja Polska", 1328L,
+  2004L, "PL", "SLD - Democratic Left Alliance", "Sojusz Lewicy Demokratycznej", 57L,
+  2004L, "PL", "SRP - Self-Defense of the Republic of Poland (Sambroona)", "Samoobrona Rzeczypospolitej Polskiej", 727L,
+  2004L, "PL", "UP - Labor Union", "Unia Pracy", 1104L,
+  2004L, "PL", "UPR - Union of Real Politics", "Unia Polityki Realnej", 283L,
+  2004L, "PL", "UW - Freedom Union", "Unia Wolności", 8268L,
+  2004L, "PT", "Coligação: PSD (6), CDS - PP (2), Força Portugal [only in v112]", "Coligação: PSD (6), CDS - PP (2), Força Portugal [only in v112] [og]", NA, # PSD/CDS-PP Forca Portugal coalition, no PF alliance entry
+  2004L, "PT", "Numa coligação PSD/CDS [only in v114]", "Numa coligação PSD/CDS [only in v114] [og]", NA, # PSD/CDS-PP Forca Portugal coalition, no PF alliance entry
+  2004L, "PT", "PSD", "Partido Popular Democrático / Partido Social Democrata", 1359L,
+  2004L, "SE", "Centre Party", "Bondeförbundet / Centerpartiet", 199L,
+  2004L, "SE", "Peoples Party, liberals", "Folkpartiet liberalerna / Liberalerna", 1274L,
+  2004L, "SE", "more than one party mentioned [only in v029]", "other", NA, # multiple parties mentioned
+  2004L, "SI", "DESUS - demokratska stranka upokojencev Slovenije", "Demokratična stranka upokojencev Slovenije", 467L,
+  2004L, "SI", "LDS (2) + DESUS (1) [only in v112]", "LDS (2) + DESUS (1) [only in v112] [og]", NA, # LDS-DeSUS joint EP list, no alliance entry
+  2004L, "SI", "NSI - krscanska ljudska stranka", "Nova Slovenija — Krščanska ljudska stranka", 1618L,
+  2004L, "SI", "SDS - slovenska demokratska stranka", "Slovenska demokratska stranka", 472L,
+  2004L, "SI", "SJN - Slovenija je naša", "Slovenija je naša", 740L,
+  2004L, "SI", "ZLSD - združeno listo socialnih demokratov", "Socialni demokrati / Združena lista socialnih demokratov", 1403L,
+  2004L, "SK", "Aktívne ženy - OS Slovenska", "Aktívne ženy - OS Slovenska [og]", NA,
+  2004L, "SK", "KSS (Komunistická strana Slovenska)", "Komunistická strana Slovenska", 340L,
+  2004L, "SK", "Maïarská federalistická strana", "Maïarská federalistická strana [og]", NA,
+  2004L, "SK", "SDĽ (Strana demokratick ej ľavice)", "Strana demokratickej ľavice", 1242L,
+  2004L, "SK", "SNS (Slovenská národná strana) / Pravá SNS", "SNS (Slovenská národná strana) / Pravá SNS [og]", NA, # SNS and PSNS separate parties, no alliance entry
+  2004L, "SK", "Slovenská udová strana", "Slovenská udová strana [og]", NA,
+  2009L, "AT", "Junge Liberale", "Junge Liberale [og]", NA,
+  2009L, "BE", "SLP (was Spirit)", "Sociaal-Liberale Partij", 7015L,
+  2009L, "BE", "Vlaams Belang", "Vlaams Belang", 1968L,
+  2009L, "BG", "Български Народен Съюз", "Balgarski Naroden Sajuz", 263L,
+  2009L, "BG", "Българско национално движение ВМРО", "VMRO — Bulgarsko Natsionalno Dvizhenie", 2056L,
+  2009L, "BG", "ГЕРБ - Граждани за европейско развитие на България", "Grazhdani za evropeysko razvitie na Balgariya", 760L,
+  2009L, "BG", "ДПС - Движение за права и свободи", "Dvizhenie za prava i svobodi", 982L,
+  2009L, "BG", "Движение Напред", "Движение Напред [og]", NA,
+  2009L, "BG", "Зелените", "Зелените [og]", NA, # The Greens (2008) not in PF; not Zelena Partija (659)
+  2009L, "BG", "ЛИДЕР", "Lider", 265L,
+  2009L, "BG", "НДСВ - Национално движение за стабилност и възход", "Nacionalno dviženie (Simeon Vtori) za stabilnost i văzhod", 374L,
+  2009L, "BG", "Национален съюз Атака", "Natsionalen Sǎyuz Ataka", 1793L,
+  2009L, "BG", "ОБП - Обединение на българските патриоти", "ОБП - Обединение на българските патриоти [og]", NA,
+  2009L, "BG", "Обединени Демократични Сили", "Obedineni Demokratichni Sili", 1183L,
+  2009L, "BG", "Ред  законност и справедливост", "Red, zakonnost i spravedlivost", 272L,
+  2009L, "CZ", "Libertas.cz", "Libertas.cz [og]", NA,
+  2009L, "CZ", "Národní strana", "Národní strana [og]", NA,
+  2009L, "DE", "Die Grauen", "Die Grauen — Graue Panther", 1652L, # PF entry ends 2008 (party dissolved); only referent
+  2009L, "DE", "Die Tierschutzpartei (Tierschutz)", "Tierschutzpartei", 749L,
+  2009L, "DE", "Die Violetten - für spirituelle Politik", "Die Violetten - für spirituelle Politik [og]", NA,
+  2009L, "DE", "Familie", "Familie [og]", NA,
+  2009L, "DE", "Ökologisch-Demokratische Partei, ÖDP", "Ökologisch-Demokratische Partei", 7345L,
+  2009L, "EE", "Dimitri Klenski", "independent", NA, # independent EP candidate 2009
+  2009L, "EE", "Eestimaa Rahvaliit", "Eestimaa Rahvalliit", 110L,
+  2009L, "EE", "Indrek Tarand", "independent", NA, # Tarand ran as independent EP candidate
+  2009L, "EE", "Martin Helme", "independent", NA, # independent EP candidate 2009
+  2009L, "ES", "Alternativa española", "Alternativa española [og]", NA,
+  2009L, "ES", "Apa Andalusian Party", "Partidu Andalucista", 1497L,
+  2009L, "ES", "Aralar", "Aralar [og]", NA,
+  2009L, "ES", "CEU Coalicion por Europa", "CEU Coalicion por Europa [og]", NA, # CiU/PNV/CC alliance, no PF alliance entry
+  2009L, "ES", "Falange Española Tradicionalista y de las Juntas de Ofensiva Nacional Sindicalista FET-JONS", "Falange Española Tradicionalista y de las Juntas de Ofensiva Nacional Sindicalista FET-JONS [og]", NA, # modern FE-JONS, not the Francoist FET (5778)
+  2009L, "ES", "IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds)", "IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds) [og]", NA, # IU-ICV joint list; no PF alliance entry
+  2009L, "ES", "Iniciativa Internacionalista – La Solidaridad entre los Pueblos II–SP", "Iniciativa Internacionalista — La Solidaridad entre los Pueblos", 1141L,
+  2009L, "ES", "Izquierda Anticaplitalista-Revolta Global (IZAN-RG)", "Izquierda Anticaplitalista-Revolta Global (IZAN-RG) [og]", NA,
+  2009L, "ES", "Libertas-Ciudadanos de Espana", "Libertas-Ciudadanos de Espana [og]", NA, # Libertas+Cs joint list
+  2009L, "ES", "Nueva Canarias es un partido político nacionalista , de centro izquierda , en Canarias", "Nueva Canarias es un partido político nacionalista , de centro izquierda , en Canarias [og]", NA,
+  2009L, "ES", "Partido Aragonés PAR", "Partido Aragonés Regionalista", 946L,
+  2009L, "ES", "Partit dels Socialistes de Catalunya, PSC", "Partit dels Socialistes de Catalunya", 586L,
+  2009L, "FI", "Liberaalit", "Liberaalinen kansanpuolue", 249L,
+  2009L, "FR", "Le front de gauche (Le parti de gauche + PCF)", "Front de Gauche", 4363L,
+  2009L, "FR", "Le parti de gauche", "Parti de Gauche", 8359L,
+  2009L, "FR", "Libertas", "Libertas [og]", NA,
+  2009L, "FR", "MoDem", "Mouvement démocrate", 496L,
+  2009L, "FR", "UMP", "Union pour un mouvement populaire", 1595L,
+  2009L, "GB", "Animals Count", "Animals Count [og]", NA,
+  2009L, "GB", "Christian Party", "Christian Party [og]", NA,
+  2009L, "GB", "England Democrats", "English Democrats", 1675L,
+  2009L, "GB", "Scottish Socialist Party SSP", "Scottish Socialist Party SSP [og]", NA,
+  2009L, "GB", "Solidarity – Scotlands Socialist Movement", "Solidarity – Scotlands Socialist Movement [og]", NA,
+  2009L, "GR", "ΚΚΕ", "Kommounistikó Kómma Elládas", 48L,
+  2009L, "GR", "ΛΑΟΣ", "Laïkós Orthódoxos Synagermós", 965L,
+  2009L, "GR", "ΝΔ", "Néa Đimokratía", 794L,
+  2009L, "GR", "ΟΙΚΟΛΟΓΟΙ – ΠΡΑΣΙΝΟΙ", "Oikologoi Prasinoi", 378L,
+  2009L, "GR", "ΠΑΣΟΚ", "Panellinio Sosialistikó Kínima", 1468L,
+  2009L, "GR", "ΣΥΡΙΖΑ", "Synaspismós Rizospastikís Aristerás", 301L,
+  2009L, "HU", "KDNP, Kereszténydemokrata Néppárt", "Kereszténydemokrata Néppárt", 1412L,
+  2009L, "HU", "MDF, Magyar Demokrata Fórum", "Magyar Demokrata Fórum", 1697L,
+  2009L, "HU", "Magyar Igazság és Élet Pártja MIÉP", "Magyar Igazság és Élet Pártja", 1597L,
+  2009L, "HU", "SZDSZ, Szabad Demokraták Szövetsége", "Szabad Demokraták Szövetsége", 910L,
+  2009L, "IE", "An independent candidate*", "independent", NA,
+  2009L, "IE", "Libertas", "Libertas Ireland", 880L,
+  2009L, "IE", "Sinn Fein", "Sinn Féin (Provisional)", 4L,
+  2009L, "IT", "Alleanza Nazionale, AN", "Alleanza Nazionale", 813L,
+  2009L, "IT", "Partito Comunista dei Lavoratori PCL", "Partito Comunista dei Lavoratori PCL [og]", NA,
+  2009L, "IT", "Partito Pensionati PP", "Partito Pensionati", 772L,
+  2009L, "IT", "Partito Radicale /Bonino-Pannella", "Radicali Italiani", 8248L, # Lista Bonino-Pannella = Radicali Italiani
+  2009L, "IT", "Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU", "Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU [og]", NA, # PRC-PdCI 2009 joint list; no PF alliance entry
+  2009L, "IT", "Sinistra Arcobaleno", "Sinistra Arcobaleno [og]", NA, # 2008 alliance, not in PF
+  2009L, "LT", "Lietuvos valstiečių liaudininkų sąjunga", "Lietuvos valstiečių ir žaliųjų sąjunga / Lietuvos valstiečių liaudininkų sąjunga", 1490L,
+  2009L, "LT", "Tautos prisikėlimo partija", "Tautos prisikėlimo partija", 347L,
+  2009L, "LT", "Žemai?i? partija", "Žemaičių partija", 1291L,
+  2009L, "LV", "Apvienība “Tēvzemei un Brīvībai”/LNNK", "Tēvzemei un Brīvībai / LNNK", 1704L,
+  2009L, "LV", "Latvijas Atdzimsanas partija (LA)", "Latvijas Atdzimsanas partija (LA) [og]", NA,
+  2009L, "LV", "Latvijas Pirmās partijas un partijas “Latvijas Ceļš” vēlēšanu apvienība", "Latvijas Pirmā partija / Latvijas Ceļš", 461L,
+  2009L, "LV", "Libertas", "Libertas.lv", 367L,
+  2009L, "LV", "Ricibas partija (Rp)", "Ricibas partija (Rp) [og]", NA,
+  2009L, "NL", "Europese Klokkenluiderspartij (EKP)", "Europese Klokkenluiderspartij (EKP) [og]", NA,
+  2009L, "NL", "Libertas", "Libertas [og]", NA,
+  2009L, "NL", "Lijst Pim Fortuyn, LPF", "Lijst Pim Fortuyn", 1528L, # PF entry ends 2004; party defunct by 2009
+  2009L, "NL", "Newropeans", "Newropeans [og]", NA,
+  2009L, "NL", "Solidara", "Solidara [og]", NA,
+  2009L, "NL", "Trots op Nederland TON (Verdonk)", "Trots op Nederland", 1656L,
+  2009L, "PL", "Koalicyjny Komitet Wyborczy Porozumienie dla Przyszłości - CentroLewica (PD+SDPL+Zieloni 2004)", "Koalicyjny Komitet Wyborczy Porozumienie dla Przyszłości - CentroLewica (PD+SDPL+Zieloni 2004) [og]", NA, # PD+SDPL+Greens joint list; no PF alliance entry
+  2009L, "PL", "Koalicyjny Komitet Wyborczy Sojusz Lewicy Demokratycznej (SLD) - Unia Pracy (UP)", "Sojusz Lewicy Demokratycznej — Unia Pracy", 6183L,
+  2009L, "PL", "Liga Polskich Rodzin, LPR", "Liga Polskich Rodzin", 1768L,
+  2009L, "PL", "Partia Kobiet", "Partia Kobiet [og]", NA,
+  2009L, "PL", "Polska Partia Socjalistyczna, PPS", "Polska Partia Socjalistyczna, PPS [og]", NA, # PF 4354 is the 1892-1948 PPS, not the modern one
+  2009L, "PL", "Samoobrona Rzeczpospolitej Polskiej (SO)", "Samoobrona Rzeczypospolitej Polskiej", 727L,
+  2009L, "PT", "CDS-PP Centro Democratico e Social - Partido Popular", "Centro Democrático e Social / Partido Popular", 1308L, # hint 1359 (PSD) wrong
+  2009L, "PT", "Movimento Merito e Sociedade (MMS)", "Movimento Merito e Sociedade (MMS) [og]", NA,
+  2009L, "RO", "Elena Basescu", "independent", NA, # Basescu ran as independent EP candidate
+  2009L, "RO", "Partidul Conservator, PC", "Partidul Conservator / Partidul Umanist Român", 1443L,
+  2009L, "RO", "Partidul Democrat-Liberal, PD-L", "Partidul Democrat-Liberal", 660L,
+  2009L, "RO", "Partidul Naţional Ţărănesc Creştin Democrat, PNŢ-CD", "Partidul Naţional Ţărănesc Creştin Democrat", 1750L,
+  2009L, "SI", "KSS - Krascanski Socialisti Slovenje", "KSS - Krascanski Socialisti Slovenje [og]", NA,
+  2009L, "SI", "NLPB - Neodvisna Lista za Pravice Bolnikov", "NLPB - Neodvisna Lista za Pravice Bolnikov [og]", NA,
+  2009L, "SI", "Slovenski krščanski demokrati, SKD", "Slovenski krščanski demokrati", 644L, # SKD merged into SLS in 2000; PF entry is that party
+  2009L, "SI", "ZZ - Zdruzeni Zeleni", "ZZ - Zdruzeni Zeleni [og]", NA, # United Greens, not Zeleni Slovenije (1494)
+  2009L, "SK", "KDS", "KDS [og]", NA,
+  2009L, "SK", "Slobodné forum – SF", "Slobodné fórum", 137L,
+  2009L, "SK", "Strana zelených SZ", "Strana zelených [na Slovensku]", 1569L,
+  2014L, "BE", "Flemish Interest", "Vlaams Belang", 1968L,
+  2014L, "BG", "Bulgaria Without Censorship", "Balgarija bes Zensura", 3188L,
+  2014L, "CZ", "National Socialists - 21st Century Left", "National Socialists - 21st Century Left [og]", NA,
+  2014L, "EE", "Independent", "independent", NA, # Tarand, independent candidate
+  2014L, "ES", "Coalition for Europe (CiU (1724007) + EAJ-PNV (1724902) + CC (1724907) + others)", "Coalition for Europe (CiU (1724007) + EAJ-PNV (1724902) + CC (1724907) + others) [og]", NA, # CiU/PNV/CC alliance, no PF alliance entry
+  2014L, "ES", "Left for The Right to Decide (Coalition ERC (1724905) + others)", "Left for The Right to Decide (Coalition ERC (1724905) + others) [og]", NA, # ERC-led alliance, no PF alliance entry
+  2014L, "FR", "Arise the Republic", "Debout la France", 3207L,
+  2014L, "FR", "Europe Ecology - The Greens", "Europe Écologie — Les Verts", 5650L, # PF ees14 link points to Les Verts (1108); label is EELV
+  2014L, "FR", "Union for a Popular Movement", "Union pour un mouvement populaire", 1595L,
+  2014L, "GR", "Olive Tree-Democratic Alignment", "Olive Tree-Democratic Alignment [og]", NA, # Elia 2014 alliance; hint 7909 KINAL (2017) wrong
+  2014L, "GR", "Olive Tree-Democratic Alignment (Coalition PASOK (1300313) + others)", "Olive Tree-Democratic Alignment (Coalition PASOK (1300313) + others) [og]", NA, # Elia 2014 alliance; hint 7909 KINAL (2017) wrong
+  2014L, "HR", "Coalition HDZ (1191511) + HSP AS (1191613)+HSS (1191810)+others", "Coalition HDZ (1191511) + HSP AS (1191613)+HSS (1191810)+others [og]", NA, # HDZ-led coalition; no PF alliance entry
+  2014L, "HR", "Coalition HDZ + HSP AS + BUZ + HSS + ZDS + HDS", "Coalition HDZ + HSP AS + BUZ + HSS + ZDS + HDS [og]", NA, # HDZ-led coalition; no PF alliance entry
+  2014L, "HR", "Coalition NF + HSLS (1191410)  + PGS + RI", "Coalition NF + HSLS (1191410)  + PGS + RI [og]", NA,
+  2014L, "HR", "Coalition NF + HSLS + PGS + RI", "Coalition NF + HSLS + PGS + RI [og]", NA,
+  2014L, "HR", "Croatian Party of Rights", "Croatian Party of Rights [og]", NA, # codes cover both HSP (253) and HSP-AS (3706)
+  2014L, "HR", "Croation People's Party", "Hrvatska narodna stranka — Liberalni Demokrati", 799L,
+  2014L, "HU", "Together 2014 - Dialogue for Hungary", "Together 2014 - Dialogue for Hungary [og]", NA, # E14-PM joint list; no PF alliance entry
+  2014L, "IT", "Coalition NCD (1380633) + UDC (1380633) + PPI", "Coalition NCD (1380633) + UDC (1380633) + PPI [og]", NA, # NCD-UDC joint list; no PF alliance entry
+  2014L, "IT", "Coalition NCD+UDC+PPI", "Coalition NCD+UDC+PPI [og]", NA, # NCD-UDC joint list; no PF alliance entry
+  2014L, "LV", "For Fatherland and Freedom - National Independence Movement of Latvia", "Tēvzemei un Brīvībai / LNNK", 1704L, # PF ees14 link; TB/LNNK within National Alliance by 2014
+  2014L, "PL", "Europa Plus Social Movement", "Europa Plus Social Movement [og]", NA,
+  2014L, "RO", "Conservative Party", "Partidul Conservator / Partidul Umanist Român", 1443L,
+  2014L, "RO", "Democratic Liberal Party", "Partidul Democrat-Liberal", 660L,
+  2014L, "RO", "Electoral Alliance PSD (1642300) + UNPR + PC (1642600)", "Electoral Alliance PSD (1642300) + UNPR + PC (1642600) [og]", NA, # PSD+UNPR+PC alliance; 6153 is PSD+PC 2008-10
+  2014L, "SI", "Coalition New Slovenia + Slovenian People's Party", "Coalition New Slovenia + Slovenian People's Party [og]", NA, # NSi+SLS joint list; no PF alliance entry
+  2014L, "SI", "Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521))", "Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521)) [og]", NA, # NSi+SLS joint list; no PF alliance entry
+  2019L, "AT", "Die Weißen", "Die Weißen [og]", NA,
+  2019L, "AT", "EUROPA", "EUROPA [og]", NA, # 1 Europa (Voggenhuber) 2019 list
+  2019L, "AT", "KPÖ Plus", "KPÖ Plus [og]", NA, # KPÖ+Junge Grüne 2017 alliance; no PF alliance entry
+  2019L, "AT", "Liste Roland Düringer", "Liste Roland Düringer — Meine Stimme GILT", 6138L,
+  2019L, "AT", "Nein, ich stehe keiner Partei nahe", "none", NA,
+  2019L, "BE", "Nee, ik voel mij met geen enkele partij verbonden", "none", NA,
+  2019L, "BE", "Vlaams Belang", "Vlaams Belang", 1968L,
+  2019L, "BG", "Алтернатива за българско възраждане (АБВ", "Alternativa za balgarsko vazrazhdane", 3187L,
+  2019L, "BG", "Алтернатива за българско възраждане (АБВ)", "Alternativa za balgarsko vazrazhdane", 3187L,
+  2019L, "BG", "Българско национално движение (ВМРО)", "VMRO — Bulgarsko Natsionalno Dvizhenie", 2056L,
+  2019L, "BG", "ВМРО – Българско национално движение (ВМРО)", "VMRO — Bulgarsko Natsionalno Dvizhenie", 2056L,
+  2019L, "BG", "Воля", "Volya", 5863L,
+  2019L, "BG", "ГЕРБ, Граждани за европейско развитие на Бъ", "Grazhdani za evropeysko razvitie na Balgariya", 760L,
+  2019L, "BG", "Граждани за европейско развитие на Българи", "Grazhdani za evropeysko razvitie na Balgariya", 760L,
+  2019L, "BG", "Да, България(ДБ)", "Da Bulgaria", 5861L,
+  2019L, "BG", "Движение за права и свободи (ДПС)", "Dvizhenie za prava i svobodi", 982L,
+  2019L, "BG", "Демократи за отговорност, свобода и толеран", "Demokrati za Otgovornost, Svoboda i Tolerantnost", 5860L,
+  2019L, "BG", "Демократи за силна България (ДСБ)", "Demokrati za Silna Balgarija", 1195L,
+  2019L, "BG", "Демократична България (ДБ)", "Demokratichna Bulgaria", 9083L,
+  2019L, "BG", "Коалиция за България (КБ)", "Koalicija za Balgarija — BSP za Bŭlgariya", 1665L, # BSP-led coalition; PF alliance entry
+  2019L, "BG", "Национален съюз Атака (АТАКА)", "Natsionalen Sǎyuz Ataka", 1793L,
+  2019L, "BG", "Национален фронт за спасение на България (Н", "Natzionalen Front za Spasenie na Bulgaria", 2057L,
+  2019L, "BG", "Не, не се чувствате близък/а до която и да е п", "none", NA,
+  2019L, "BG", "Реформаторски блок (РБ)", "Reformatorski Blok", 3189L,
+  2019L, "CZ", "Ne, žádná politická strana Vám nepřijde blízká", "none", NA,
+  2019L, "DE", "Familien-Partei", "Familien-Partei [og]", NA,
+  2019L, "DE", "Nein, ich stehe keiner Partei nahe", "none", NA,
+  2019L, "DK", "1 Nej, du føler ikke, at dine holdninger ligger tæt op ad et af de politiske p", "none", NA,
+  2019L, "EE", "Eesti Konservatiivne Rahvaerakond (EKRE)", "Eesti Konservatiivne Rahvaerakond", 4094L,
+  2019L, "EE", "Ei, Te ei tunne end lähedasena mitte ühegi poliitilise erakonnaga", "none", NA,
+  2019L, "EE", "üksikkandidaat (sõltumatu kandidaat)", "independent", NA,
+  2019L, "ES", "Coalición por una Europa Solidaria (CEUS (EAJ-PNV+CCa-PNC+CxG+El PI+DV+GBAI)", "Coalición por una Europa Solidaria (CEUS (EAJ-PNV+CCa-PNC+CxG+El PI+DV+GBAI) [og]", NA,
+  2019L, "ES", "Compromís per Europa/Compromiso por Europa (CPE)", "Compromís per Europa/Compromiso por Europa (CPE) [og]", NA, # 2019 EP coalition (Compromís, BNG et al.); hint UPyD wrong
+  2019L, "ES", "EH Bildu", "Euskal Herria Bildu / Reunir Euskal Herria", 5668L,
+  2019L, "ES", "Junts per Catalunya", "Junts per Catalunya", 7421L, # also covers 2019 JxCat-PDeCAT list on Q9; mapped to party 7421
+  2019L, "ES", "Navarra Suma", "Navarra Suma [og]", NA, # UPN-PP-Cs alliance
+  2019L, "ES", "No, no se considera próximo/a a ningún partido", "none", NA,
+  2019L, "FI", "Ei, en tunne mitään puoluetta läheiseksi", "none", NA,
+  2019L, "FI", "Eläinoikeuspuolue (EOP)", "Eläinoikeuspuolue (EOP) [og]", NA,
+  2019L, "FI", "Feministinen puolue (FP)", "Feministinen puolue (FP) [og]", NA,
+  2019L, "FI", "Itsenäisyyspuolue (IPU)", "Itsenäisyyspuolue (IPU) [og]", NA,
+  2019L, "FI", "Kansalaispuolue (KP)", "Kansalaispuolue (KP) [og]", NA,
+  2019L, "FI", "Kommunistinen Työväenpuolue - Rauhan ja Sosialismin puolesta (KTP)", "Kommunistinen Työväenpuolue - Rauhan ja Sosialismin puolesta (KTP) [og]", NA,
+  2019L, "FI", "Liberaalipuolue - Vapaus valita (LIBE)", "Liberaalipuolue - Vapaus valita (LIBE) [og]", NA,
+  2019L, "FI", "Piraattipuolue (PIR)", "Piraattipuolue / Piratpartiet", 9148L,
+  2019L, "FI", "Seitsemän tähden liike (STL)", "Seitsemän tähden liike (STL) [og]", NA,
+  2019L, "FI", "Suomen Kansa Ensin (SKE)", "Suomen Kansa Ensin (SKE) [og]", NA,
+  2019L, "FR", "Europe Ecologie - Les Verts (EELV)", "Europe Écologie — Les Verts", 5650L,
+  2019L, "FR", "Europe Ecologie Les Verts (EELV)", "Europe Écologie — Les Verts", 5650L,
+  2019L, "FR", "La Liste Alliance jaune, menée par Francis Lalanne", "La Liste Alliance jaune, menée par Francis Lalanne [og]", NA,
+  2019L, "FR", "La Liste du Parti communiste français, menée par Ian Brossat", "Parti communiste française", 1251L,
+  2019L, "FR", "La liste Debout La France, menée par Nicolas Dupont-Aignan", "Debout la France", 3207L,
+  2019L, "FR", "La liste Europe Ecologie, menée par Yannick Jadot", "Europe Écologie — Les Verts", 5650L,
+  2019L, "FR", "La liste Génération.s et Dème-Diem 25, menée par Benoît Hamon", "La liste Génération.s et Dème-Diem 25, menée par Benoît Hamon [og]", NA, # joint Génération.s + DiEM25 list
+  2019L, "FR", "La liste Lutte Ouvrirère, menée par Nathalie Arthaud", "Lutte ouvrière", 617L,
+  2019L, "FR", "La liste Patriote et Gilets jaunes, menée par Florian Philippot", "La liste Patriote et Gilets jaunes, menée par Florian Philippot [og]", NA, # Les Patriotes not in PF
+  2019L, "FR", "La liste Urgence écologie, menée par Dominique Bourg", "La liste Urgence écologie, menée par Dominique Bourg [og]", NA,
+  2019L, "FR", "La liste des Républicains, menée par François Xavier Bellamy", "Les Républicains", 8168L,
+  2019L, "FR", "La liste pour le Frexit, menée par François Asselineau", "Union Populaire Républicaine", 7344L, # Asselineau list = UPR
+  2019L, "FR", "Les Républicains (LR)", "Les Républicains", 8168L,
+  2019L, "FR", "MoDem", "Mouvement démocrate", 496L,
+  2019L, "FR", "Non, vous ne vous sentez pas proche d'un parti politique", "none", NA,
+  2019L, "FR", "Nouvelle donne", "Nouvelle donne [og]", NA,
+  2019L, "FR", "Parti radical de gauche", "Parti radical de gauche", 1783L,
+  2019L, "FR", "Place publique", "Place publique [og]", NA,
+  2019L, "FR", "Régionalistes", "Régionalistes [og]", NA, # generic regionalist category, not a party
+  2019L, "GB", "Change UK – The Independent Group", "Change UK", 7365L,
+  2019L, "GB", "Independent", "independent", NA,
+  2019L, "GB", "No, you do not feel close to any party", "none", NA,
+  2019L, "GR", "Ένωση Κεντρώων", "Enosi Kentroon", 2510L,
+  2019L, "GR", "Ένωση Κεντρώων (ΕΚ)", "Enosi Kentroon", 2510L,
+  2019L, "GR", "Όχι, δεν βρίσκομαι κοντά σε κανένα κόμμα", "none", NA,
+  2019L, "GR", "ΑΝΕΞΑΡΤΗΤΟΙ ΕΛΛΗΝΕΣ", "Anexartitoi Ellines", 1651L,
+  2019L, "GR", "Ανεξάρτητοι Έλληνες (ΑΝΕΛ)", "Anexartitoi Ellines", 1651L,
+  2019L, "GR", "Ανεξάρτητοι Έλληνες- Εθνική Πατριωτική Συμ", "Anexartitoi Ellines", 1651L,
+  2019L, "GR", "Δημοκρατική Συμπαράταξη (ΔΗΣΥ)", "Δημοκρατική Συμπαράταξη (ΔΗΣΥ) [og]", NA, # 2015 PASOK-DIMAR alliance, predecessor of KINAL 7909; no PF entry
+  2019L, "GR", "ΕΝΩΣΗ ΚΕΝΤΡΩΝ", "Enosi Kentroon", 2510L,
+  2019L, "GR", "Ελληνική Λύση", "Elliniki Lisi", 7347L,
+  2019L, "GR", "ΚΙΝΑΛ", "Kinima Allagis", 7909L,
+  2019L, "GR", "ΚΚΕ", "Kommounistikó Kómma Elládas", 48L,
+  2019L, "GR", "Κίνημα Αλλαγής (ΚΙΝΑΛ)", "Kinima Allagis", 7909L,
+  2019L, "GR", "Κομμουνιστικό Κόμμα Ελλάδας (ΚΚΕ)", "Kommounistikó Kómma Elládas", 48L,
+  2019L, "GR", "ΛΑΙΚΗ ΕΝΟΤΗΤΑ", "Laïkí Enótita", 4512L,
+  2019L, "GR", "Λαϊκή Ενότητα (ΛΑΕ)", "Laïkí Enótita", 4512L,
+  2019L, "GR", "Λαϊκός Σύνδεσμος – Χρυσή Αυγή", "Laïkós Sýndesmos / Chrysí Avgí", 1660L,
+  2019L, "GR", "ΝΔ", "Néa Đimokratía", 794L,
+  2019L, "GR", "Νέα Δημοκρατία (ΝΔ)", "Néa Đimokratía", 794L,
+  2019L, "GR", "Οικολόγοι Πράσινοι", "Oikologoi Prasinoi", 378L,
+  2019L, "GR", "ΣΥΡΙΖΑ", "Synaspismós Rizospastikís Aristerás", 301L,
+  2019L, "GR", "Συνασπισμός Ριζοσπαστικής Αριστεράς ( ΣΥΡΙ", "Synaspismós Rizospastikís Aristerás", 301L,
+  2019L, "GR", "Συνασπισμός Ριζοσπαστικής Αριστεράς (ΣΥΡΙΖ", "Synaspismós Rizospastikís Aristerás", 301L,
+  2019L, "GR", "ΤΟ ΠΟΤΑΜΙ", "To Potami", 3118L,
+  2019L, "GR", "Το Ποτάμι", "To Potami", 3118L,
+  2019L, "GR", "ΧΡΥΣΗ ΑΥΓΗ", "Laïkós Sýndesmos / Chrysí Avgí", 1660L,
+  2019L, "GR", "Χρυσή Αυγή (ΧΑ)", "Laïkós Sýndesmos / Chrysí Avgí", 1660L,
+  2019L, "HR", "BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV", "BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og]", NA,
+  2019L, "HR", "Bandić Milan 365 (BM)", "Bandić Milan 365 — Stranka rada i solidarnosti", 5452L, # hint Labour wrong; Bandić's own party
+  2019L, "HR", "Bandić Milan 365 i koalicijski partneri", "Bandić Milan 365 i koalicijski partneri [og]", NA, # coalition label (and partners)
+  2019L, "HR", "HRAST - POKRET ZA USPJEŠNU HRVATSKU + HRVATSKA KONZERVATIVNA STRANKA - HKS + H", "Hrvatski suverenisti", 9086L, # 2019 EP list = Hrvatski suverenisti coalition
+  2019L, "HR", "Hrvatska stranka prava (HSP) i koalicijski partneri", "Hrvatska stranka prava (HSP) i koalicijski partneri [og]", NA, # coalition label (and partners)
+  2019L, "HR", "NEZAVISNA LISTA MARIJANA PETIR", "NEZAVISNA LISTA MARIJANA PETIR [og]", NA,
+  2019L, "HR", "NEZAVISNA LISTA MISLAV KOLAKUŠIĆ", "NEZAVISNA LISTA MISLAV KOLAKUŠIĆ [og]", NA,
+  2019L, "HR", "Ne osjećam bliskost prema nijednoj političkoj stranci", "none", NA,
+  2019L, "HR", "PAMETNO + UNIJA KVARNERA", "PAMETNO + UNIJA KVARNERA [og]", NA, # joint list
+  2019L, "HR", "START", "START [og]", NA,
+  2019L, "HR", "START - STRANKA ANTIKORUPCIJE, RAZVOJA I TRANSPARENTNOSTI – START (START)", "START - STRANKA ANTIKORUPCIJE, RAZVOJA I TRANSPARENTNOSTI – START (START) [og]", NA,
+  2019L, "HR", "Samostalna demokratska srpska stranka (SDSS)", "Samostalna demokratska srpska stranka", 2348L,
+  2019L, "HU", "Fidesz - Magyar Polgári Szövetség - Kereszténydemokrata Néppárt (FIDESZ-KD", "Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége", 6366L, # PF alliance entry; hint Jobbik wrong
+  2019L, "HU", "Fidesz -Magyar Polgári Szövetség - Kereszténydemokrata Néppárt (FIDESZ-KDN", "Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége", 6366L, # PF alliance entry
+  2019L, "HU", "Magyar Szocialista Párt - Párbeszéd (MSZP-P)", "Magyar Szocialista Párt - Párbeszéd (MSZP-P) [og]", NA, # joint list, no PF alliance; hint Mi Hazánk wrong
+  2019L, "HU", "Nem, nem érzem magam közelinek egy politikai párthoz sem", "none", NA,
+  2019L, "IE", "Independent", "independent", NA,
+  2019L, "IE", "No, you do not feel close to any party", "none", NA,
+  2019L, "IE", "Sinn Féin", "Sinn Féin (Provisional)", 4L, # Irish SF entry (IRL), not GBR 963
+  2019L, "IT", "Casa Pound", "CasaPound Italia", 8244L,
+  2019L, "IT", "Forza Nuova", "Forza Nuova [og]", NA,
+  2019L, "IT", "Forza Nuova (Fn)", "Forza Nuova (Fn) [og]", NA,
+  2019L, "IT", "No, non mi sento vicino a nessun partito politico in particolare", "none", NA,
+  2019L, "IT", "POPOLARI PER L'ITALIA", "POPOLARI PER L'ITALIA [og]", NA,
+  2019L, "IT", "Partito Comunista", "Partito Comunista [og]", NA,
+  2019L, "IT", "Partito Comunista (PC)", "Partito Comunista (PC) [og]", NA,
+  2019L, "IT", "Sinistra (Rifondazione)", "Sinistra (Rifondazione) [og]", NA, # La Sinistra 2019 joint list (PRC+SI)
+  2019L, "IT", "Südtiroler Volkspartei Partito Autonomista Trentino Tirolese (SVP-Ptt)", "Südtiroler Volkspartei Partito Autonomista Trentino Tirolese (SVP-Ptt) [og]", NA, # 2018 SVP-PATT joint list
+  2019L, "LT", "Antikorupcinė N. Puteikio ir K. Krivicko koalicija (Lietuvos centro partija, Li", "Antikorupcinė N. Puteikio ir K. Krivicko koalicija (Lietuvos centro partija, Li [og]", NA,
+  2019L, "LT", "Lietuvos laisvės sąjunga (liberalai)", "Lietuvos Laisvės Sąjunga (Liberalai)", 5456L,
+  2019L, "LT", "Lietuvos valstiečių ir žaliųjų sąjunga (LVŽS)", "Lietuvos valstiečių ir žaliųjų sąjunga / Lietuvos valstiečių liaudininkų sąjunga", 1490L,
+  2019L, "LT", "Ne, nesijaučia artimas (-a) jokiai politinei partijai", "none", NA,
+  2019L, "LT", "S. Buškevičiaus ir Tautininkų koalicija „Prieš korupciją ir skurdą\" (Par", "S. Buškevičiaus ir Tautininkų koalicija „Prieš korupciją ir skurdą\" (Par [og]", NA,
+  2019L, "LT", "Visuomeninis rinkimų komitetas „Aušros Maldeikienės traukinys\"", "Visuomeninis rinkimų komitetas „Aušros Maldeikienės traukinys\" [og]", NA,
+  2019L, "LT", "Visuomeninis rinkimų komitetas „Lemiamas šuolis\"", "Visuomeninis rinkimų komitetas „Lemiamas šuolis\" [og]", NA,
+  2019L, "LT", "Visuomeninis rinkimų komitetas „Prezidento Rolando Pakso judėjimas\"", "Visuomeninis rinkimų komitetas „Prezidento Rolando Pakso judėjimas\" [og]", NA,
+  2019L, "LT", "Visuomeninis rinkimų komitetas „Stipri Lietuva vieningoje Europoje\"", "Visuomeninis rinkimų komitetas „Stipri Lietuva vieningoje Europoje\" [og]", NA,
+  2019L, "LT", "Visuomeninis rinkimų komitetas „Vytautas Radžvilas: susigrąžinkime valstyb", "Visuomeninis rinkimų komitetas „Vytautas Radžvilas: susigrąžinkime valstyb [og]", NA,
+  2019L, "LT", "„Valdemaro Tomaševskio blokas\" – Krikščioniškų šeimų sąjungos ir Rus", "„Valdemaro Tomaševskio blokas\" – Krikščioniškų šeimų sąjungos ir Rus [og]", NA, # LLRA-KŠS + Russian Alliance bloc; not mapped to 556
+  2019L, "LV", "LSDSP/KDS/GKL", "LSDSP/KDS/GKL [og]", NA,
+  2019L, "LV", "Latviešu nacionālisti", "Latviešu nacionālisti [og]", NA,
+  2019L, "LV", "Latvijas centriskā partija", "Latvijas centriskā partija [og]", NA,
+  2019L, "LV", "Nacionālā apvienība \"Visu Latvijai!\"-\"Tēvzemei un Brīvībai/LNNK\"", "Nacionālā apvienība", 7619L,
+  2019L, "LV", "Nē, Jūs nejūtaties tuvs/-a nevienai politiskajai partijai", "none", NA,
+  2019L, "LV", "Par Alternatīvu", "Par Alternatīvu [og]", NA,
+  2019L, "LV", "Rīcības partija", "Rīcības partija [og]", NA,
+  2019L, "NL", "Jezus Leeft", "Jezus Leeft [og]", NA,
+  2019L, "NL", "Nee, ik voel mij met geen enkele partij verbonden", "none", NA,
+  2019L, "PL", "Koalicja Europejska PO PSL SLD .N Zieloni (KE )", "Koalicja Europejska PO PSL SLD .N Zieloni (KE ) [og]", NA, # PO-PSL-SLD-N-Greens joint list; hint KNP wrong
+  2019L, "PL", "Konfederacja Korwin Braun Liroy Narodowcy(KKBLN)", "Konfederacja Wolność i Niepodległość", 9026L, # 2019 EP list of the Konfederacja alliance
+  2019L, "PL", "Lewica Razem(LR)", "[Lewica] Razem", 4871L, # 2019 EP Lewica Razem list (Razem-led)
+  2019L, "PL", "Nie, żadna partia polityczna nie jest Panu(i) bliska", "none", NA,
+  2019L, "PL", "Nowoczesna Ryszarda Petru", "Nowoczesna", 4630L, # 2015 name of Nowoczesna
+  2019L, "PL", "Polexit-Koalicja(P-K)", "Polexit-Koalicja(P-K) [og]", NA,
+  2019L, "PL", "Polska Fair Play bezpartyjni Gwiazdowski(PFP)", "Polska Fair Play bezpartyjni Gwiazdowski(PFP) [og]", NA,
+  2019L, "PL", "Polskie Stronnictwo Ludowe (PSL)", "Polskie Stronnictwo Ludowe", 602L,
+  2019L, "PL", "Wiosna Roberta Biedronia", "Wiosna", 7356L,
+  2019L, "PL", "Wiosna RobertaBiedronia(WRB)", "Wiosna", 7356L,
+  2019L, "PT", "Não, não se sente próximo de nenhum partido político", "none", NA,
+  2019L, "PT", "Partido Comunista dos Trabalhadores Portugueses/Movimento Reorganizativo do Part", "Comunista dos Trabalhadores Portugueses / Movimento Reorganizativo do Partido do Proletariado", 857L,
+  2019L, "RO", "+PLUS", "+PLUS [og]", NA,
+  2019L, "RO", "Alianța 2020 USR PLUS (2020 USR PLUS)", "Alianța 2020 USR PLUS (2020 USR PLUS) [og]", NA, # USR-PLUS alliance; no PF entry
+  2019L, "RO", "Nu, nu vă consideraţi apropiat(ă) de niciun partid politic", "none", NA,
+  2019L, "RO", "Partidul Democrației și Solidarității – Demos (Demos)", "Partidul Democrației și Solidarității – Demos (Demos) [og]", NA,
+  2019L, "RO", "Partidul Libertate, Unitate și Solidaritate (PLUS)", "Partidul Libertate, Unitate și Solidaritate (PLUS) [og]", NA,
+  2019L, "RO", "Partidul Uniunea Națională pentru Progresul României (UNPR)", "Uniunea Naţională pentru Progresul României", 1541L,
+  2019L, "RO", "Uniunea Salva?i România  (USR)", "Uniunea Salvați România", 5969L,
+  2019L, "SE", "Nej, jag anser mig inte stå nära något politiskt parti", "none", NA,
+  2019L, "SI", "Dobri državi (DD)", "Dobra Drzava", 6133L,
+  2019L, "SI", "Dom - domovinska liga (DOM)", "Domovinska liga", 7362L,
+  2019L, "SI", "Dom - domovinski ligi (DOM)", "Domovinska liga", 7362L,
+  2019L, "SI", "Levici", "Levica", 6131L,
+  2019L, "SI", "Ne počutitm se blizu nobeni politični stranki", "none", NA,
+  2019L, "SI", "Piratski stranki Slovenije", "Piratska stranka Slovenije", 3099L,
+  2019L, "SI", "Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS)", "Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS) [og]", NA, # joint SDS+SLS list
+  2019L, "SI", "Slovenska ljudska stranka (SLS)", "Slovenska ljudska stranka", 764L,
+  2019L, "SI", "Slovenski ljudski stranki (SLS)", "Slovenska ljudska stranka", 764L,
+  2019L, "SI", "Stranki modernega centra (SMC)", "Stranka Mira Cerarja / Stranka modernega centra", 3098L,
+  2019L, "SI", "ZPovežimo se", "Povežimo se", 7363L,
+  2019L, "SI", "Zelenim Slovenije", "Zeleni Slovenije", 1494L,
+  2019L, "SK", "Nie, necítite sa byť blízko ku žiadnej politickej strane", "none", NA,
+  2019L, "SK", "Progresivne Slovensko-SPOLU", "Progresivne Slovensko-SPOLU [og]", NA, # PS-Spolu alliance; no PF entry
+  2019L, "SK", "Progresívne Slovensko/ SPOLU", "Progresívne Slovensko/ SPOLU [og]", NA, # PS-Spolu alliance; no PF entry
+  2024L, "AT", "Die Bierpartei", "Die Bierpartei [og]", NA,
+  2024L, "AT", "Wandel", "Wandel [og]", NA,
+  2024L, "BE", "Anticapitalistes", "Anticapitalistes [og]", NA,
+  2024L, "BE", "Chez Nous", "Chez Nous [og]", NA,
+  2024L, "BE", "Collectif Citoyen", "Collectif Citoyen [og]", NA,
+  2024L, "BE", "Parti BLANCO", "Parti BLANCO [og]", NA,
+  2024L, "BE", "Volt Europa", "Volt Europa [og]", NA,
+  2024L, "BG", "Bulgarska sotsialisticheska partiya", "Bălgarska Socialističeska Partija", 757L,
+  2024L, "BG", "Demokratichna Bŭlgariya", "Demokratichna Bulgaria", 9083L,
+  2024L, "BG", "Grazhdani za Evropeisko Razvitie Balgariya - Sayuz na demokratichnite sili (GERB- SDS)", "Grazhdani za Evropeisko Razvitie Balgariya - Sayuz na demokratichnite sili (GERB- SDS) [og]", NA, # GERB-SDS alliance; no PF alliance entry
+  2024L, "BG", "Ima Takŭv Narod", "Ima takav narod", 8992L,
+  2024L, "BG", "Kuzman Iliev", "independent", NA, # Kuzman Iliev: independent candidate (EES English name)
+  2024L, "BG", "Levitsata!", "Levitsata! [og]", NA,
+  2024L, "BG", "Nie idvame", "Nie idvame [og]", NA,
+  2024L, "BG", "Prodalzhavame promyanata - Demokratichna Balgariya", "Prodalzhavame promyanata - Demokratichna Balgariya [og]", NA, # PP-DB alliance; no PF alliance entry
+  2024L, "BG", "Pryaka demokratsiya", "Pryaka demokratsiya [og]", NA,
+  2024L, "BG", "Sinya Bŭlgariya", "Sinya Bŭlgariya [og]", NA,
+  2024L, "BG", "Solidarna Bŭlgariya", "Solidarna Bŭlgariya [og]", NA,
+  2024L, "BG", "Tsentŭr", "Tsentŭr [og]", NA,
+  2024L, "BG", "Zeleno dvizhenie", "Zeleno dvizhenie [og]", NA,
+  2024L, "CZ", "Aliance národních sil", "Aliance národních sil [og]", NA,
+  2024L, "CZ", "Aliance za nezávislost ČR", "Aliance za nezávislost ČR [og]", NA,
+  2024L, "CZ", "Demokratická strana zelených – Za práva zvířat", "Demokratická strana zelených – Za práva zvířat [og]", NA,
+  2024L, "CZ", "Koalice PirSTAN (Piráti, STAN)", "Koalice PirSTAN (Piráti, STAN) [og]", NA,
+  2024L, "CZ", "Koalice SPD + Trikolora", "Koalice SPD + Trikolora [og]", NA,
+  2024L, "CZ", "Koalice Stačilo (KSČM+ČSNS, SD-SN)", "Koalice Stačilo (KSČM+ČSNS, SD-SN) [og]", NA,
+  2024L, "CZ", "Koruna Česká (monarchistická strana Čech, Moravy a Slezska", "Koruna Česká (monarchistická strana Čech, Moravy a Slezska [og]", NA,
+  2024L, "CZ", "Liberální aliance nezávislých občanů", "Liberální aliance nezávislých občanů [og]", NA,
+  2024L, "CZ", "Moravané", "Moravané [og]", NA,
+  2024L, "CZ", "Motoristé sobě", "Motoristé sobě [og]", NA,
+  2024L, "CZ", "Mourek - politická strana", "Mourek - politická strana [og]", NA,
+  2024L, "CZ", "Nevolte Urza.cz", "Nevolte Urza.cz [og]", NA,
+  2024L, "CZ", "SPOLU (ODS+TOP 09+KDU-ČSL)", "SPOLU (ODS+TOP 09+KDU-ČSL) [og]", NA,
+  2024L, "CZ", "Sen21 & Volt Česká republika", "Sen21 & Volt Česká republika [og]", NA,
+  2024L, "CZ", "Starostové a osobnosti pro Evropu", "Starostové a nezávislí", 1707L, # STAN's EP 2024 list name (EES comment)
+  2024L, "CZ", "Strana přímé demokracie Tomio Okamura", "Svoboda a přímá demokracie", 6125L, # SPD (Svoboda a přímá demokracie)
+  2024L, "CZ", "Tricolor-Svobodni-Soukromníci", "Tricolor-Svobodni-Soukromníci [og]", NA,
+  2024L, "CZ", "ČSSD – Česká suverenita sociální demokracie", "Suverenita — blok Jany Bobošíkové", 293L, # renamed successor of Suverenita - blok Jany Bobošíkové (EES comment)
+  2024L, "CZ", "Česká republika na 199 místě!", "Česká republika na 199 místě! [og]", NA,
+  2024L, "DE", "Bündnis C - Christen für Deutschland", "Bündnis C - Christen für Deutschland [og]", NA,
+  2024L, "DE", "Bündnis Deutschland", "Bündnis Deutschland [og]", NA,
+  2024L, "DE", "Demokratische Allianz für Vielfalt und Aufbruch", "Demokratische Allianz für Vielfalt und Aufbruch [og]", NA,
+  2024L, "DE", "Die Gerechtigkeitspartei – Team Todenhöfer", "Die Gerechtigkeitspartei – Team Todenhöfer [og]", NA,
+  2024L, "DE", "Die Heimat", "Nationaldemokratische Partei Deutschlands", 1723L, # NPD renamed Die Heimat 2023
+  2024L, "DE", "Familien-Partei", "Familien-Partei [og]", NA,
+  2024L, "DE", "MERA25", "MERA25 [og]", NA,
+  2024L, "DE", "Menschliche Welt", "Menschliche Welt [og]", NA,
+  2024L, "DE", "Parlament aufmischen – Stimme der Letzten Generation", "Parlament aufmischen – Stimme der Letzten Generation [og]", NA,
+  2024L, "DE", "Partei der Humanisten", "Partei der Humanisten [og]", NA,
+  2024L, "DE", "Partei des Fortschritts", "Partei des Fortschritts [og]", NA,
+  2024L, "DE", "Volt Deutschland", "Volt Deutschland [og]", NA,
+  2024L, "DK", "Frihedslisten", "Frihedslisten [og]", NA,
+  2024L, "DK", "Stabilt Demokrati", "Stabilt Demokrati [og]", NA,
+  2024L, "EE", "Isamaa Erakond", "Erakond Isamaa ja Res Publica Liit", 685L, # IRL renamed Isamaa 2018
+  2024L, "EE", "KOOS organisatsioon osutab suveräänsusele", "KOOS organisatsioon osutab suveräänsusele [og]", NA,
+  2024L, "ES", "Adelante Andalucía", "Adelante Andalucía [og]", NA,
+  2024L, "ES", "Ahora Repúblicas (Esquerra Republicana de Catalunya (ERC) & EH Bildu & Bloque Nationalista Galego (BNG))", "Ahora Repúblicas (Esquerra Republicana de Catalunya (ERC) & EH Bildu & Bloque Nationalista Galego (BNG)) [og]", NA,
+  2024L, "ES", "Alianca Catalana", "Alianca Catalana [og]", NA,
+  2024L, "ES", "Bloque Nationalista Galego", "Bloque Nacionalista Galego", 1011L,
+  2024L, "ES", "Ciudadanos En Blanco", "Ciudadanos En Blanco [og]", NA,
+  2024L, "ES", "Coalición por una Europa Solidaria", "Coalición por una Europa Solidaria [og]", NA,
+  2024L, "ES", "Feministas al Congreso", "Feministas al Congreso [og]", NA,
+  2024L, "ES", "Frente Obrero", "Frente Obrero [og]", NA,
+  2024L, "ES", "Nueva Canarias-Bloque Canarista", "Nueva Canarias-Bloque Canarista [og]", NA,
+  2024L, "ES", "PIRATAS | REBELDES", "PIRATAS | REBELDES [og]", NA,
+  2024L, "ES", "Partido Animalista Con el Medio Ambiente", "Partido Animalista Contra el Maltrato Animal", 3219L, # PACMA's current name
+  2024L, "ES", "Partido Popular", "Alianza-Partido Popular / Partido Popular", 441L,
+  2024L, "ES", "Sumar", "Sumar [og]", NA,
+  2024L, "ES", "Unión del Pueblu Llionés", "Unión del Pueblu Llionés [og]", NA,
+  2024L, "FI", "Avoin Puolue", "Avoin Puolue [og]", NA,
+  2024L, "FI", "Eläinoikeuspuolue", "Eläinoikeuspuolue [og]", NA,
+  2024L, "FI", "Liberaalipuolue – Vapaus valita", "Liberaalipuolue – Vapaus valita [og]", NA,
+  2024L, "FI", "Sinimusta Liike", "Sinimusta Liike [og]", NA,
+  2024L, "FI", "Valta kuuluu kansalle", "Valta kuuluu kansalle [og]", NA,
+  2024L, "FI", "Vapauden Liitto", "Vapauden Liitto [og]", NA,
+  2024L, "FR", "Alliance Rurale", "Alliance Rurale [og]", NA,
+  2024L, "FR", "Ensemble - Renaissance, Mouvement Démocrate (MoDem)", "Ensemble - Renaissance, Mouvement Démocrate (MoDem) [og]", NA,
+  2024L, "FR", "NUPES - La France Insoumise (LFI), Parti Socialiste (PS), Europe Écologie Les Verts (EELV)", "NUPES - La France Insoumise (LFI), Parti Socialiste (PS), Europe Écologie Les Verts (EELV) [og]", NA,
+  2024L, "FR", "Place Publique", "Place Publique [og]", NA,
+  2024L, "FR", "Union de la Droite et du Centre - Les Républicains et alliés", "Union de la Droite et du Centre - Les Républicains et alliés [og]", NA,
+  2024L, "FR", "Écologie au centre", "Écologie au centre [og]", NA,
+  2024L, "GR", "Dimokrates", "Dimokrates [og]", NA,
+  2024L, "GR", "Ethnikó Kómma – Éllines", "Ethnikó Kómma – Éllines [og]", NA,
+  2024L, "GR", "Kinima 21", "Kinima 21 [og]", NA,
+  2024L, "GR", "Kómma Ellínon Kynigón - Alieón", "Kómma Ellênòn Kynègôn", 2508L,
+  2024L, "GR", "Kósmos", "Kósmos [og]", NA,
+  2024L, "GR", "Orgánosi gia tin Anasigkrótisi tou Kommounistikoú Kómmatos Elládas", "Orgánosi gia tin Anasigkrótisi tou Kommounistikoú Kómmatos Elládas [og]", NA,
+  2024L, "GR", "Patriótes", "Patriótes [og]", NA,
+  2024L, "GR", "Prasino+Mov", "Prasino+Mov [og]", NA,
+  2024L, "GR", "Volt", "Volt [og]", NA,
+  2024L, "HR", "Agrarna stranka - Pokret za hrvatsku poljoprivredu", "Agrarna stranka - Pokret za hrvatsku poljoprivredu [og]", NA,
+  2024L, "HR", "Centar", "Centar [og]", NA,
+  2024L, "HR", "Hrvatska stranka građanskog otpora", "Hrvatska stranka građanskog otpora [og]", NA,
+  2024L, "HR", "Javno Dobro", "Javno Dobro [og]", NA,
+  2024L, "HR", "Naša Hrvatska", "Naša Hrvatska [og]", NA,
+  2024L, "HR", "Nezavisna Platforma Sjever", "Nezavisna Platforma Sjever [og]", NA,
+  2024L, "HR", "Nezavisna lista mladih", "Nezavisna lista mladih [og]", NA,
+  2024L, "HR", "Odlučnost i pravednost", "Odlučnost i pravednost [og]", NA,
+  2024L, "HR", "Pokret za životinje", "Pokret za životinje [og]", NA,
+  2024L, "HR", "Pravo i Pravda", "Pravo i Pravda [og]", NA,
+  2024L, "HR", "Radnička fronta", "Radnička fronta [og]", NA,
+  2024L, "HR", "Republika", "Republika [og]", NA,
+  2024L, "HR", "Ričard Nezavisni", "Ričard Nezavisni [og]", NA,
+  2024L, "HR", "Samostalna demokratska srpska stranka", "Samostalna demokratska srpska stranka", 2348L,
+  2024L, "HR", "Socijaldemokrati", "Socijaldemokrati [og]", NA,
+  2024L, "HR", "Stranka Ivana Pernara", "Stranka Ivana Pernara [og]", NA,
+  2024L, "HR", "Umirovljenici zajedno", "Umirovljenici zajedno [og]", NA,
+  2024L, "HU", "Egységben Magyarországért", "Egységben Magyarországért [og]", NA,
+  2024L, "HU", "Le Az Adók 75%-ával Párt", "Le Az Adók 75%-ával Párt [og]", NA,
+  2024L, "HU", "Mindenki Magyarországa Néppárt", "Mindenki Magyarországa Néppárt [og]", NA,
+  2024L, "HU", "Második Reformkor Párt", "Második Reformkor Párt [og]", NA,
+  2024L, "HU", "Normális Élet Pártja", "Normális Élet Pártja [og]", NA,
+  2024L, "HU", "Nép Pártján", "Nép Pártján [og]", NA,
+  2024L, "HU", "Tisztelet és Szabadság Párt", "Tisztelet és Szabadság Párt [og]", NA,
+  2024L, "IE", "An Páirtí Náisiúnta", "An Páirtí Náisiúnta [og]", NA, # hint 2053 is the 1995 National Party, not the 2016 one
+  2024L, "IE", "Dlúthpháirtíocht–Pobal Seachas Brabús", "Solidarity — People Before Profit", 8241L, # Solidarity-PBP alliance entry, not PBPA member party (hint 242)
+  2024L, "IE", "Independent Ireland", "Independent Ireland [og]", NA,
+  2024L, "IE", "Ireland First", "Ireland First [og]", NA,
+  2024L, "IE", "Irish Freedom Party", "Irish Freedom Party [og]", NA,
+  2024L, "IE", "Páirtí Neamhspleách na hEite Clé", "Páirtí Neamhspleách na hEite Clé [og]", NA,
+  2024L, "IE", "The Irish People", "The Irish People [og]", NA,
+  2024L, "IT", "Alleanza Verdi e Sinistra", "Alleanza Verdi e Sinistra [og]", NA,
+  2024L, "IT", "Azione - Italia Viva", "Azione - Italia Viva [og]", NA, # A-IV 2022 joint list; no PF alliance entry
+  2024L, "IT", "Democrazia Sovrana Popolare", "Democrazia Sovrana Popolare [og]", NA,
+  2024L, "IT", "Europa Verde - Verdi", "Europa Verde", 9110L,
+  2024L, "IT", "Forza Nuova", "Forza Nuova [og]", NA,
+  2024L, "IT", "Forza del Popolo", "Forza del Popolo [og]", NA,
+  2024L, "IT", "Lega Salvini Premier", "Lega Nord", 1221L, # PF links Lega Salvini Premier to 1221
+  2024L, "IT", "Libertà", "Libertà [og]", NA,
+  2024L, "IT", "Pace Terra Dignità", "Pace Terra Dignità [og]", NA,
+  2024L, "IT", "Partito Animalista Italiano", "Partito Animalista Italiano [og]", NA,
+  2024L, "IT", "Stati Uniti d'Europa", "Stati Uniti d'Europa [og]", NA,
+  2024L, "IT", "Unione Popolare", "Unione Popolare [og]", NA,
+  2024L, "IT", "Vita", "Vita [og]", NA,
+  2024L, "LT", "Kartų solidarumo sąjunga – Santalka Lietuvai", "Kartų solidarumo sąjunga – Santalka Lietuvai [og]", NA,
+  2024L, "LT", "Krikščionių sąjunga", "Krikščionių sąjunga [og]", NA,
+  2024L, "LT", "Lietuvos krikščioniškosios demokratijos partija", "Lietuvos krikščioniškosios demokratijos partija [og]", NA,
+  2024L, "LT", "Nacionalinis susivienijimas", "https://en.wikipedia.org/wiki/National_Alliance_(Lithuania)", 9096L, # PF core name field holds a Wikipedia URL (verbatim)
+  2024L, "LT", "Nemuno aušra", "Nemuno aušra [og]", NA,
+  2024L, "LT", "Partija Lietuva – visų", "Partija Lietuva – visų [og]", NA,
+  2024L, "LT", "Partijai: Laisvė ir teisingumas", "Partijai: Laisvė ir teisingumas [og]", NA,
+  2024L, "LT", "Taikos koalicija (Lietuvos krikščioniškosios demokratijos partija, Žemaičių partija)", "Taikos koalicija (Lietuvos krikščioniškosios demokratijos partija, Žemaičių partija) [og]", NA,
+  2024L, "LV", "Apvienība Latvijai", "Apvienība Latvijai [og]", NA,
+  2024L, "LV", "Austošā Saule", "Austošā Saule [og]", NA,
+  2024L, "LV", "Centra partija", "Centra partija [og]", NA,
+  2024L, "LV", "Coalition Apvienotais Saraksts (Latvijas Zaļā Partija, Latvijas Reģionu apvienība, Liepājas Partija)", "Coalition Apvienotais Saraksts (Latvijas Zaļā Partija, Latvijas Reģionu apvienība, Liepājas Partija) [og]", NA,
+  2024L, "LV", "Tauta. Zeme. Valstikums", "Tauta. Zeme. Valstikums [og]", NA,
+  2024L, "NL", "BIJ1", "BIJ1 [og]", NA,
+  2024L, "NL", "Coalition GL - PvdA (GroenLinks,PvdA)", "Coalition GL - PvdA (GroenLinks,PvdA) [og]", NA,
+  2024L, "NL", "Juiste Antwoord 2021", "Juiste Antwoord21", 9011L,
+  2024L, "NL", "Libertaire Partij", "Libertaire Partij [og]", NA,
+  2024L, "NL", "Meer Directe Democratie", "Meer Directe Democratie [og]", NA,
+  2024L, "NL", "Nederland met een Plan", "Nederland met een Plan [og]", NA,
+  2024L, "NL", "Piratenpartij - De Groenen", "Piratenpartij - De Groenen [og]", NA,
+  2024L, "NL", "vandeRegio", "vandeRegio [og]", NA,
+  2024L, "PL", "Bezjni Samorządowcy", "Bezjni Samorządowcy [og]", NA,
+  2024L, "PL", "Głos Silnej Polski", "Głos Silnej Polski [og]", NA,
+  2024L, "PL", "Lewica", "Lewica [og]", NA, # Lewica coalition (NL+Razem+PPS+UP); no PF alliance entry
+  2024L, "PL", "Normalny Kraj", "Normalny Kraj [og]", NA,
+  2024L, "PL", "Nowa Lewica", "Nowa Lewica", 9349L,
+  2024L, "PL", "PolEXIT", "PolEXIT [og]", NA,
+  2024L, "PL", "Polska Jest Jedna", "Polska Jest Jedna [og]", NA,
+  2024L, "PL", "Polska Liberalna Strajk Przedsiębiorców", "Polska Liberalna Strajk Przedsiębiorców [og]", NA,
+  2024L, "PL", "Ruch Dobrobytu i Pokoju", "Ruch Dobrobytu i Pokoju [og]", NA,
+  2024L, "PL", "Ruch Naprawy Polski", "Ruch Naprawy Polski [og]", NA,
+  2024L, "PL", "Trzecia Droga", "Trzecia Droga [og]", NA,
+  2024L, "PT", "Alternativa 21", "Alternativa 21 [og]", NA,
+  2024L, "PT", "Ergue-te", "Ergue-te [og]", NA,
+  2024L, "PT", "Juntos pelo Povo", "Juntos pelo Povo [og]", NA,
+  2024L, "PT", "Movimento Alternativa Socialista", "Movimento Alternativa Socialista [og]", NA,
+  2024L, "PT", "Nova Direita", "Nova Direita [og]", NA,
+  2024L, "PT", "Partido Trabalhista Português", "Partido Trabalhista Português [og]", NA, # hint 3226 (MPT) is a different party
+  2024L, "PT", "Reagir Incluir Reciclar", "Reagir Incluir Reciclar [og]", NA,
+  2024L, "PT", "Volt Portugal", "Volt Portugal [og]", NA,
+  2024L, "RO", "Alianța Dreapta Unită", "Alianța Dreapta Unită [og]", NA,
+  2024L, "RO", "Alianța Electorală PSD-PNL", "Alianța Electorală PSD-PNL [og]", NA,
+  2024L, "RO", "Alianța Renașterea Națională", "Alianța Renașterea Națională [og]", NA,
+  2024L, "RO", "Alianța USR-PLUS", "Alianța USR-PLUS [og]", NA, # USR-PLUS 2020 alliance; no PF alliance entry
+  2024L, "RO", "Partidul Alternativa Dreaptă", "Partidul Alternativa Dreaptă [og]", NA,
+  2024L, "RO", "Partidul Diaspora Unită", "Partidul Diaspora Unită [og]", NA,
+  2024L, "RO", "Partidul Patrioților", "Partidul Patrioților [og]", NA,
+  2024L, "RO", "Partidul Reînnoim Proiectul European al României", "Reînnoim Proiectul European al României", 9580L,
+  2024L, "RO", "Partidul S.O.S România", "Partidul S.O.S România [og]", NA,
+  2024L, "RO", "Partidul Umanist Social Liberal", "Partidul Umanist Social Liberal", 9546L, # PF has duplicate ids 9546/9547; used 9546
+  2024L, "RO", "România Socialistă", "România Socialistă [og]", NA,
+  2024L, "SE", "Alternativ för Sverige", "Alternativ för Sverige [og]", NA,
+  2024L, "SE", "Basinkomstpartiet", "Basinkomstpartiet [og]", NA,
+  2024L, "SE", "Folklistan", "Folklistan [og]", NA,
+  2024L, "SE", "Mänskliga rättigheter och Demokrati", "Mänskliga rättigheter och Demokrati [og]", NA,
+  2024L, "SE", "Socialisterna - Välfärdspartiet", "Socialisterna - Välfärdspartiet [og]", NA,
+  2024L, "SE", "Värdigt Liv", "Värdigt Liv [og]", NA,
+  2024L, "SI", "DeSUS - DD", "DeSUS - DD [og]", NA,
+  2024L, "SI", "Glas upokojencev", "Glas upokojencev [og]", NA,
+  2024L, "SI", "Nič od tega", "Nič od tega [og]", NA,
+  2024L, "SI", "VES – zelena stranka", "VESNA – zelena stranka", 9130L, # Vesna (EES English name/PF code)
+  2024L, "SI", "Za ljudstvo Slovenije", "Za ljudstvo Slovenije [og]", NA,
+  2024L, "SK", "Demokrati", "Demokrati [og]", NA,
+  2024L, "SK", "Magyar Szövetség – Maďarská aliancia", "Magyar Szövetség – Maďarská aliancia [og]", NA, # successor of SMK (349) but PF closes 349 in 2021
+  2024L, "SK", "OĽaNO a priatelia", "Obyčajní Ľudia a Nezávislé Osobnosti", 2130L, # OĽaNO-led 2023 list; coded as OĽaNO like S-ZL
+  2024L, "SK", "Pirátska strana – Slovensko", "Pirátska strana – Slovensko [og]", NA,
+  2024L, "SK", "Slovensko - Za ľudí", "Obyčajní Ľudia a Nezávislé Osobnosti", 2130L, # PF (populistree) links S-ZL list to 2130 OĽaNO/Slovensko
+  2024L, "SK", "Slovenský PATRIOT", "Slovenský PATRIOT [og]", NA,
+  2024L, "SK", "VZDOR - strana práce", "VZDOR - strana práce [og]", NA,
+  2024L, "SK", "Volt Slovensko", "Volt Slovensko [og]", NA,
+  2024L, "SK", "ZDRAVÝ ROZUM", "ZDRAVÝ ROZUM [og]", NA
+) |>
+  mutate(key = norm_key(label), source = "hand")
+
+pf_check(map_hand, keys = c("wave", "cntry", "key"), core = core)
+count(map_hand, kind = case_when(
+  pf_name %in% pf_sentinels ~ pf_name,
+  str_ends(pf_name, " \\[og\\]") ~ "[og]",
+  .default = "Party Facts"
+))
+```
+
+# Crosswalk
+
+Hand codes take precedence over links and name matches; the non-party codes of the answer items come from the table above.
+
+```{r}
+#| label: crosswalk
+
+map_label <- bind_rows(
+  mutate(select(map_hand, wave, cntry, key, pf_name, pf_id, source), prio = 1L),
+  mutate(map_link, prio = 2L),
+  mutate(map_name, prio = 3L)
+) |>
+  slice_min(prio, n = 1, by = c(wave, cntry, key)) |>
+  select(-prio)
+
+crosswalk <- cells |>
+  left_join(
+    rename(special, special_name = pf_name) |> mutate(is_special = TRUE),
+    by = c("wave", "variable", "code")
+  ) |>
+  mutate(is_special = coalesce(is_special, FALSE) & kind == "answer") |>
+  left_join(map_label, by = c("wave", "cntry", "key")) |>
+  mutate(
+    pf_name = if_else(is_special, special_name, pf_name),
+    pf_id = if_else(is_special, NA_integer_, pf_id),
+    source = case_when(
+      is_special ~ "special",
+      # a party code that neither the labels nor the code files document
+      is.na(label) ~ "undocumented",
+      .default = source
+    )
+  ) |>
+  select(wave, cntry, region, variable, code, label, pf_name, pf_id, source, n, kind) |>
+  arrange(wave, cntry, region, variable, code)
+
+# The undocumented codes stay NA
+crosswalk |>
+  filter(source == "undocumented") |>
+  summarise(
+    codes = paste(sort(unique(code)), collapse = " "),
+    answers = sum(n),
+    .by = c(wave, cntry, variable)
+  ) |>
+  print(n = Inf)
+
+# Nothing else unmapped: only missing and undocumented codes stay empty
+unmapped <- crosswalk |>
+  filter(is.na(pf_name), !source %in% c("special", "undocumented"))
+unmapped
+stopifnot(nrow(unmapped) == 0)
+
+pf_check(
+  crosswalk,
+  keys = c("wave", "cntry", "region", "variable", "code"),
+  core = core
+)
+
+crosswalk |>
+  mutate(
+    type = case_when(
+      is.na(pf_name) ~ "NA (missing)",
+      pf_name %in% pf_sentinels ~ "sentinel",
+      str_ends(pf_name, " \\[og\\]") ~ "[og]",
+      .default = "Party Facts"
+    )
+  ) |>
+  count(kind, type, source, wt = coalesce(n, 1L), name = "answers / positions")
+
+write_csv(
+  select(crosswalk, -n),
+  here("data", "02_processed", "ees_party_pf.csv"),
+  na = ""
+)
+```
+
+# Respondent File
+
+```{r}
+#| label: respondents
+
+ids <- bind_rows(
+  respondents_04 |> select(-country04),
+  ees_2009 |>
+    transmute(wave = 2009L, row = row_number(), respondent = as.character(t100)),
+  ees_2014 |>
+    transmute(wave = 2014L, row = row_number(), respondent = as.character(respid)),
+  ees_2019 |>
+    transmute(wave = 2019L, row = row_number(), respondent = as.character(serial)),
+  ees_2024 |>
+    transmute(wave = 2024L, row = row_number(), respondent = as.character(resp_id))
+) |>
+  select(wave, row, respondent)
+
+# Country and region as in the answer frames
+geo <- bind_rows(ans_04, ans_09, ans_14, ans_19, ans_24) |>
+  distinct(wave, row, cntry, region)
+
+# Respondents without any answer item keep their country from the file
+respondents <- ids |>
+  left_join(geo, by = c("wave", "row")) |>
+  left_join(
+    bind_rows(
+      respondents_04 |> select(wave, row, cntry_04 = cntry),
+      ees_2009 |> transmute(wave = 2009L, row = row_number(), cntry_04 = to_iso2(as.character(as_factor(t102)))),
+      ees_2014 |> transmute(wave = 2014L, row = row_number(), cntry_04 = to_iso2(as.character(as_factor(countrycode)))),
+      ees_2019 |> transmute(wave = 2019L, row = row_number(), cntry_04 = to_iso2(as.character(as_factor(countrycode)))),
+      ees_2024 |> transmute(wave = 2024L, row = row_number(), cntry_04 = to_iso2(country_alpha2))
+    ),
+    by = c("wave", "row")
+  ) |>
+  mutate(cntry = coalesce(cntry, cntry_04)) |>
+  select(-cntry_04) |>
+  filter(cntry %in% countries_25)
+
+stopifnot(nrow(respondents) == nrow(distinct(respondents, wave, row)))
+
+# Answer items
+coded_answers <- answers |>
+  left_join(
+    crosswalk |>
+      filter(kind == "answer") |>
+      select(wave, cntry, region, variable, code, pf_name, pf_id),
+    by = c("wave", "cntry", "region", "variable", "code")
+  ) |>
+  select(wave, row, stub, pf_name, pf_id) |>
+  pivot_wider(
+    names_from = stub,
+    values_from = c(pf_name, pf_id),
+    names_glue = "ext_{stub}_{.value}"
+  )
+
+# Battery positions: the party behind position k of the respondent's list
+coded_batteries <- crosswalk |>
+  filter(kind == "battery") |>
+  left_join(
+    distinct(batteries, wave, cntry, region, variable, battery, position),
+    by = c("wave", "cntry", "region", "variable")
+  ) |>
+  mutate(stub = paste0(battery, "_", position)) |>
+  select(wave, cntry, region, stub, pf_name, pf_id) |>
+  pivot_wider(
+    names_from = stub,
+    values_from = c(pf_name, pf_id),
+    names_glue = "ext_{stub}_{.value}"
+  )
+
+respondents <- respondents |>
+  left_join(coded_answers, by = c("wave", "row")) |>
+  left_join(coded_batteries, by = c("wave", "cntry", "region"))
+
+stopifnot(nrow(respondents) == nrow(distinct(respondents, wave, row)))
+
+# Order: ids, answer items, then batteries by position
+ext_cols <- str_subset(names(respondents), "^ext_")
+stub_of <- str_remove(ext_cols, "_pf_(name|id)$")
+item_order <- c("pid", "pid_lean", "vote_ep", "vote_ep_hyp", "vote_local", "vote_nat", "vote_intent")
+ord <- order(
+  match(str_remove(stub_of, "_[0-9]+$"), c(item_order, "ptv", "lr", "like")),
+  as.integer(str_extract(stub_of, "[0-9]+$")),
+  str_ends(ext_cols, "_pf_id")
+)
+respondents <- respondents |>
+  select(wave, row, respondent, cntry, region, all_of(ext_cols[ord])) |>
+  arrange(wave, row)
+
+write_parquet(
+  respondents,
+  here("data", "02_processed", "ees_party_pf.parquet"),
+  compression = "zstd"
+)
+
+glimpse(respondents[, 1:12])
+```
+
+# Checks
+
+Spot checks: CDU/CSU and AfD in Germany, the Five Star Movement in Italy, and the most frequent `[og]` answers.
+
+```{r}
+#| label: spot-checks
+
+crosswalk |>
+  filter(
+    (cntry == "DE" & str_detect(label, "(?i)CDU|AfD|Alternative f")) |
+      (cntry == "IT" & str_detect(label, "(?i)5 stelle|cinque stelle|five star|M5S"))
+  ) |>
+  distinct(wave, cntry, label, pf_name, pf_id) |>
+  print(n = Inf)
+
+crosswalk |>
+  filter(str_ends(pf_name, " \\[og\\]")) |>
+  count(wave, cntry, pf_name, wt = n, sort = TRUE) |>
+  head(10)
+```
+
+Among respondents who report both an attachment party and an EP-vote party, the share whose two answers carry the same Party Facts id.
+As in notebooks 1.2 and 1.3, this is a check on the coding; the EP vote is further from attachment than a national vote, and electoral alliances pull the share down.
+
+```{r}
+#| label: same-party
+
+respondents |>
+  filter(!is.na(ext_pid_pf_id), !is.na(ext_vote_ep_pf_id)) |>
+  summarise(
+    pairs = n(),
+    same = mean(ext_pid_pf_id == ext_vote_ep_pf_id),
+    .by = c(wave)
+  )
+
+respondents |>
+  filter(!is.na(ext_pid_pf_id), !is.na(ext_vote_ep_pf_id)) |>
+  summarise(
+    pairs = n(),
+    same = mean(ext_pid_pf_id == ext_vote_ep_pf_id),
+    .by = c(cntry)
+  ) |>
+  arrange(same) |>
+  print(n = Inf)
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+rendering_time <- end_time - start_time
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds."
+))
+```

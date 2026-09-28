@@ -1,0 +1,375 @@
+country,scope,code,label
+Austria,all,1,SPÖ
+Austria,all,2,ÖVP
+Austria,all,3,FPÖ
+Austria,all,4,GRÜNE
+Austria,all,5,KPÖ
+Austria,all,6,Die LINKE
+Austria,all,7,Liste H.-P. Martin
+Belgium,all,1,VLD - Vlaamse Liberalen en Democraten
+Belgium,all,2,SP.A-SPIRIT - Socialistische Partij. Anders
+Belgium,all,3,CD&V - Christen-Democratisch & Vlaams
+Belgium,all,4,VB - Vlaams Blok
+Belgium,all,5,N-VA
+Belgium,all,6,Agalev/Groen!
+Belgium,all,8,RESIST
+Belgium,all,9,Vivant
+Belgium,all,10,PS
+Belgium,all,11,MR
+Belgium,all,12,CDH
+Belgium,all,13,Ecolo
+Belgium,all,14,Front National
+Belgium,all,15,PTB-UA
+Britain,all,1,Labour
+Britain,all,2,Conservatives
+Britain,all,3,Liberal Democrats
+Britain,all,4,UK Independence Party
+Britain,all,5,Scottish National Party
+Britain,all,6,Plaid Cymru
+Britain,all,7,Green Party
+Britain,all,8,British National Party
+Britain,all,9,Scottish Socialist Party
+Britain,all,10,Respect
+Britain,all,11,George Galloway
+Britain,all,12,Christian Alliance
+Britain,all,13,National Front
+Cyprus,all,1,ΑΚΕΛ („AKEL“)
+Cyprus,all,2,ΔΗΣΥ („DISI“)
+Cyprus,all,3,ΔΗΚΟ („DIKO“)
+Cyprus,all,4,ΕΔΕΚ („EDEK“)
+Cyprus,all,5,For Europe
+Cyprus,all,6,“EDI”
+Cyprus,all,7,New Horizons
+Cyprus,all,8,Ecologists
+Czech Republic,all,1,ČSSD - Česká strana sociálně demokratická
+Czech Republic,all,2,KDU-CSL - Krestanska-demokraticka strana-Ceskoslovenska strana lidova
+Czech Republic,all,3,KSČM - Komunistická strana Čech a Moravy
+Czech Republic,all,4,ODS - Občanská demokratická strana
+Czech Republic,all,5,US-DEU - Unie svobody
+Czech Republic,all,6,SNK - Sdružení nezávislých a Evropští demokraté
+Czech Republic,all,7,SZ - Strana zelených (Greens)
+Czech Republic,all,8,NEZ - Hnutí Nezávislí
+Czech Republic,all,9,PB - Pravý blok
+Czech Republic,all,10,SŽJ - Strana za životní jistoty
+Czech Republic,all,11,BPS - Balbínova poetická strana
+Czech Republic,all,12,SPR-RSČ - Sdruzeni pro republiky – Republikanska strana Ceskoslovenska
+Czech Republic,all,13,SDS - Strana demokratického socialismu
+Czech Republic,all,14,HA - Humanistická aliance
+Czech Republic,all,15,SZR - Strana zdravého rozumu
+Czech Republic,all,16,SV-SOS - Strana venkova – spojené občanské síly
+Czech Republic,all,17,RMS - Republikáni Miroslava Sládka
+Czech Republic,all,18,CZ - Cesta změny
+Czech Republic,all,19,ODA - Občanská demokratická aliance
+Czech Republic,all,20,VPB - Volba pro budoucnost
+Czech Republic,all,21,Akce za zrušení Senátu a proti vytunelování důchodových fondů
+Czech Republic,all,22,Naděje
+Czech Republic,all,23,NH - Nové hnutí
+Czech Republic,all,24,ČSNS - Česká strana národně sociální
+Czech Republic,all,25,ROI ČR - Romská občanská iniciativa ČR
+Czech Republic,all,26,ČSS - Československá strana socialistická
+Czech Republic,all,27,ČSDH - České sociálně demokratické hnutí
+Czech Republic,all,28,ČP - Česká pravice
+Czech Republic,all,29,Republikáni
+Czech Republic,all,30,NDS - Národně demokratická stran
+Czech Republic,all,31,DL - Demokratická liga
+Czech Republic,all,32,Národní koalice
+Czech Republic,all,33,Strana pro otevřenou společnost
+Czech Republic,all,34,Konzervativní strana
+Czech Republic,all,35,Sdružení nestraníků
+Czech Republic,all,36,Strana občanů republiky České
+Czech Republic,all,37,Masarykova demokratická strana
+Czech Republic,all,38,Všeobecná občanská strana
+Czech Republic,all,39,Dělnická strana
+Czech Republic,all,40,Strana práce
+Czech Republic,all,41,Za zájmy Moravy ve sjednocené Evropě
+Czech Republic,all,42,Nezávislá iniciativa (NEI)
+Czech Republic,all,43,Svobodní
+Czech Republic,all,44,Viktor Kožený - Občanská federální demokracie
+Czech Republic,all,45,Koruna Česká
+Czech Republic,all,46,Helax-Ostrava se baví
+Czech Republic,all,47,"ULD - Unie liberálních demokratů CZ (18), US-DEU (5), ODA (19) [only in v029 and v211 ]"
+Czech Republic,all,48,"Koalice US-DEU (5), KDU-ČSL (2) [only in v113 ]"
+Czech Republic,all,94,“Did not have the right to vote” [only in v113 ]
+Denmark,all,1,Social Democratic Party
+Denmark,all,2,Radical Liberals
+Denmark,all,3,Conservative Peoples Party
+Denmark,all,4,Socialist Peoples Party
+Denmark,all,5,Danish Peoples Party
+Denmark,all,6,Liberal Party
+Denmark,all,7,The Movement of June
+Denmark,all,8,The pople’s movement against EU
+Denmark,all,9,Christian Peoples Party / The Christian Democrats
+Denmark,all,10,Leftwing Alliance
+Denmark,all,11,Centre Democratic Party
+Denmark,all,12,Progressive Party
+Denmark,all,13,The Minority Party
+Denmark,all,14,Democratic Renewal
+Estonia,all,1,Eesti Keskerakond
+Estonia,all,2,Ühendus Vabariigi Eest – Res Publica
+Estonia,all,3,Eesti Reformierakond
+Estonia,all,4,Eestimaa Rahvaliit
+Estonia,all,5,Erakond Isamaaliit
+Estonia,all,6,Sotsiaaldemokraatlik Erakond
+Estonia,all,7,Eestimaa Ühendatud Rahvapartei
+Estonia,all,8,Eesti Kristlik Rahvapartei
+Estonia,all,9,Eesti Sotsiaaldemokraatlik Tööpartei
+Estonia,all,10,Mõni muu erakond
+Estonia,all,11,Vene Erakond Eestis
+Estonia,all,12,Eesti Demokraatlik Partei
+Estonia,all,13,Eesti Pensionäride Erakond
+Finland,all,1,SDP: Suomen Sosialidemokraattinen Puolue (Finnish Social Democratic Party)
+Finland,all,2,KESK: Suomen Keskusta (Center Party of Finland)
+Finland,all,3,KOK: Kansallinen Kokoomus (National Coalition Party)
+Finland,all,4,VAS: Vasemmistoliitto (Left Alliance)
+Finland,all,5,VIHR: Vihreä liitto (Green League)
+Finland,all,6,RKP: Ruotsalainen kansanpuolue (Swedish People’s Party)
+Finland,all,7,KD: Suomen Kristillisdemokraatit (Christian Democrats in Finland)
+Finland,all,8,PS: Perussuomalaiset (True Finns)
+Finland,all,9,SKP: Suomen Kommunistinen Puolue (Communist Party of Finland)
+Finland,all,10,Liberaalit (Liberals)
+France,"(v029, v112, v113, v114, v115-v128, v211)",1,Extrême gauche – EXTG (LO/ LCR) (Lutte Ouvrière / Ligue Communiste Révolutionnaire)
+France,"(v029, v112, v113, v114, v115-v128, v211)",2,PCF (Parti Communiste français)
+France,"(v029, v112, v113, v114, v115-v128, v211)",3,PS
+France,"(v029, v112, v113, v114, v115-v128, v211)",4,Les Verts
+France,"(v029, v112, v113, v114, v115-v128, v211)",5,UDF
+France,"(v029, v112, v113, v114, v115-v128, v211)",6,UMP + DVD
+France,"(v029, v112, v113, v114, v115-v128, v211)",7,"FN, MNR (Front national, Mouvement National Républicain)"
+France,"(v029, v112, v113, v114, v115-v128, v211)",8,"MPF, RPF (Mouvement Pour la France / Rassemblement Pour la France"
+France,"(v029, v112, v113, v114, v115-v128, v211)",9,"CPNT (Chasse, Pêche, Nature et Traditions)"
+France,"(v029, v112, v113, v114, v115-v128, v211)",10,Pôle républicain de Jean-Pierre Chevènement
+France,(v135-v148); (v157-v170),1,LO (Lutte Ouvrière)
+France,(v135-v148); (v157-v170),2,LCR (Ligue Communiste Révolutionnaire)
+France,(v135-v148); (v157-v170),3,PC (Parti Communiste français)
+France,(v135-v148); (v157-v170),4,PS
+France,(v135-v148); (v157-v170),5,Les Verts
+France,(v135-v148); (v157-v170),6,UDF
+France,(v135-v148); (v157-v170),7,UMP
+France,(v135-v148); (v157-v170),8,MPF (Mouvement Pour la France)
+France,(v135-v148); (v157-v170),9,FN (Front national)
+France,(v135-v148); (v157-v170),10,MNR (Mouvement National Républicain)
+France,(v135-v148); (v157-v170),11,"CPNT (Chasse, Pêche, Nature et Traditions)"
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",1,CDU/CSU
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",2,SPD
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",3,Bündnis 90/Die Grünen
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",4,PDS
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",5,FDP
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",6,Republikaner
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",7,Die Tierschutzpartei
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",8,NPD
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",9,Die Grauen
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",10,ÖDP
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",11,Die Frauen
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",12,Partei bibeltreuer Christen
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",13,DKP
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",14,Bayernpartei BP
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",15,Familienpartei
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",16,Schill
+Germany,"(v029, v112, v113, v114, v115-v128, v211)",17,Freie Wähler
+Germany,(v135-v148); (v157-v170),1,CDU
+Germany,(v135-v148); (v157-v170),2,CSU
+Germany,(v135-v148); (v157-v170),3,SPD
+Germany,(v135-v148); (v157-v170),4,Bündnis 90/Die Grünen
+Germany,(v135-v148); (v157-v170),5,PDS
+Germany,(v135-v148); (v157-v170),6,FDP
+Germany,(v135-v148); (v157-v170),7,Republikaner
+Greece,all,1,New Democracy (ΝΔ: Nea Dimokratia)
+Greece,all,2,PASOK (ΠΑΣΟΚ: Panellino Socialistiko Kinima)
+Greece,all,3,ΚΚΕ (Kommunistiko Komma Ellados)
+Greece,all,4,ΣΥΝ (ΣΥΝΑΣΠΙΣΜΟΣ: Sinaspismos tis Aristeras ke ti Proodu)
+Greece,all,5,ΛΑ.Ο.Σ (LAOS)
+Greece,all,6,DIKKI
+Greece,all,7,ENOSSI KENTROON
+Greece,all,8,Ìera
+Greece,all,9,CHRYSSI AVGI
+Greece,all,10,Patriot coalition
+Greece,all,11,MERA
+Greece,all,12,Women for other Europe
+Greece,all,13,Democratic Periphery Union
+Greece,all,14,Ecologists-Greens
+Greece,all,15,Green party
+Hungary,all,1,"Fidesz-MPP, Fidesz-Hungarian Civic Alliance"
+Hungary,all,2,"MDF, Hungarian Democratic Forum"
+Hungary,all,3,"MIÉP, Party of Hungarian Justice and Life"
+Hungary,all,4,"MSZP, Hungarian Socialist Party"
+Hungary,all,5,"MP, Workers Party"
+Hungary,all,6,"SZDSZ, Alliance of Free Democrats"
+Hungary,all,7,"SZDP, Social Democratic Party"
+Hungary,all,8,"MNSZ, Hungarian National Alliance"
+Hungary,all,9,"FKgP, Independent Small Holders Party"
+Hungary,all,10,"ÖMCP, Center Party"
+Hungary,all,11,Joint list of Fidesz-MPP (1) and MDF (2) [only in v113]
+Ireland,all,1,FF: Fianna Fail
+Ireland,all,2,FG: Fine Gael
+Ireland,all,3,GP: Green Party
+Ireland,all,4,Lab: Labour Party
+Ireland,all,5,PDS
+Ireland,all,6,SF: Sinn Fein
+Ireland,all,7,Independent Candidate
+Italy,all,1,DS-Democratici di sinistra (Fassino)
+Italy,all,2,La Margherita (Rutelli)
+Italy,all,3,Comunisti Italiani (Diliberto)
+Italy,all,4,Verdi (Pecoraro Scanio)
+Italy,all,5,SDI (Boselli)
+Italy,all,6,Alleanza Popolare - UDEUR (Mastella)
+Italy,all,7,Italia dei valori (Di Pietro)
+Italy,all,8,Forza Italia (Berlusconi)
+Italy,all,9,AN-Alleanza nazionale (Fini)
+Italy,all,10,Udc (Follini e Buttiglione)
+Italy,all,11,Lega Nord (Bossi)
+Italy,all,12,Nuovo PSI (De Michelis)
+Italy,all,13,Radicali /Lista Bonino (Capezzone)
+Italy,all,14,Alternativa Sociale con Alessandra Mussolini
+Italy,all,15,Fiamma Tricolore (Rauti)
+Italy,all,16,"Lista Uniti nell’ULIVO [ DS(2), MARGHERITA(3), SDI(6) only in v112]"
+Italy,all,17,"Girasole [Verdi (5), SDI(6) only in v113]"
+Italy,all,18,Rifondazione comunista (Bertinotti)
+Latvia,all,1,PCTVL (For Human Rights in a United Latvia)
+Latvia,all,2,Tautas Partija (People’s Party)
+Latvia,all,3,Zalo un Zemnieku Savieniba (Union of the Green and Farmers)
+Latvia,all,4,Latvijas Pirma Partija (Latvia’s First Party)
+Latvia,all,5,Tevzemei un Brovobai/ LNNK (For Fatherland and Freedom)
+Latvia,all,6,Latvijas Cels (Latvia’s Way)
+Latvia,all,7,KDS (Christian Democratic Union)
+Latvia,all,8,Russian National Bolshevik Party
+Latvia,all,9,LSDSP (Latvian Social Democratic Workers' Party)
+Latvia,all,10,Conservative Party
+Latvia,all,11,Future Party
+Latvia,all,12,Tautas Saskanas Partija (People's Harmony Party)
+Latvia,all,13,United Social Democratic Welfare Party
+Latvia,all,14,"""Latgales Gaisma"" (Latgales' Light)"
+Latvia,all,15,Latvian Socialist Party
+Latvia,all,16,Latviesu Partija (Latvian Party)
+Latvia,all,17,SDS (Social Democratic Union)
+Latvia,all,18,Communists
+Latvia,all,19,"Political organization ""Eurosceptics"""
+Latvia,all,20,All together [only in v029]
+Latvia,all,21,Jaunais Laiks (New Era)
+Lithuania,all,1,VNDS
+Lithuania,all,2,LSDP
+Lithuania,all,3,LCS
+Lithuania,all,4,LKD
+Lithuania,all,5,NS/SL
+Lithuania,all,6,Coalition of LLRA and LRS
+Lithuania,all,7,TPP
+Lithuania,all,8,NCP
+Lithuania,all,9,TS
+Lithuania,all,10,KKSS
+Lithuania,all,11,DP
+Lithuania,all,12,LDP
+Luxembourg,all,1,KPL
+Luxembourg,all,2,Déi Lenk
+Luxembourg,all,3,Déi Gréng
+Luxembourg,all,4,LSAP
+Luxembourg,all,5,DP
+Luxembourg,all,6,CSV
+Luxembourg,all,7,ADR
+Luxembourg,all,8,Fräi Partei Lëtzebuerg
+Luxembourg,all,9,GAL (Jupp Weber)
+The Netherlands,all,1,PvdA
+The Netherlands,all,2,CDA
+The Netherlands,all,3,VVD
+The Netherlands,all,4,D'66
+The Netherlands,all,5,Groen Links
+The Netherlands,all,6,LPF
+The Netherlands,all,7,ChristenUnie
+The Netherlands,all,8,SGP
+The Netherlands,all,9,SP
+The Netherlands,all,10,Leefbaar Nederland / Leefbar Europa
+The Netherlands,all,11,Partij voor het Noorden
+The Netherlands,all,12,Nieuw Rechts
+The Netherlands,all,13,Europa Transparent
+The Netherlands,all,14,Partij voor de Dieren
+The Netherlands,all,15,Respect Nu
+The Netherlands,all,16,Democratisch Europa
+The Netherlands,all,17,CD10
+The Netherlands,all,18,Joint List of ChristenUnie (7) and SGP (8) [only in v112 ]
+Northern Ireland,all,1,Alliance Party
+Northern Ireland,all,2,Democratic Unionist Party – DUP
+Northern Ireland,all,3,Sinn Fein
+Northern Ireland,all,4,Social Democratic Labour Party – SDLP
+Northern Ireland,all,5,Ulster Unionist Party – UUP
+Northern Ireland,all,6,Independent Candidate
+Poland,all,1,LPR - League of Polish Families
+Poland,all,2,PSL - Polish People’s Party
+Poland,all,3,PiS - Law and Justice
+Poland,all,4,PO - Civic Platform
+Poland,all,5,SRP - Self-Defense of the Republic of Poland (Sambroona)
+Poland,all,6,SDPL - Social-Democracy of Poland
+Poland,all,7,SLD - Democratic Left Alliance
+Poland,all,8,UP - Labor Union
+Poland,all,9,UW - Freedom Union
+Poland,all,10,UPR - Union of Real Politics
+Poland,all,11,National Electoral Committee of Voters
+Poland,all,12,Initiative for Poland
+Poland,all,13,"All-Polish Citizens Caucus ""OKO"""
+Poland,all,14,KPEiR-PLD Coalition - National Party of Retirees and Pensioners
+Poland,all,15,"Anticlerical Progress Party ""Racja"""
+Poland,all,16,PPN - Polish National Party
+Poland,all,17,Confederation Defense Movement of the Unemployed
+Poland,all,18,Zieloni 2004 - Greens 2004
+Poland,all,19,NOP - National Revival of Poland
+Poland,all,20,"""Together for the Future"""
+Poland,all,21,Party of Democratic Left
+Poland,all,22,AWS-P – Solidarity: Electoral Action of the Right
+Poland,all,23,PPP - Polish Labor Party
+Poland,all,24,Democratic Left Alliance (7) and Labor Union (8) [only in v112 and v113]
+Portugal,all,1,Bloco de Esquerda
+Portugal,all,2,CDS-PP
+Portugal,all,3,CDU (PCP-PEV)
+Portugal,all,4,Partido da Nova Democracia
+Portugal,all,5,PS
+Portugal,all,6,PSD
+Portugal,all,7,PCTP / MRPP
+Portugal,all,8,"Coligação: PSD (6), CDS - PP (2), Força Portugal [only in v112]"
+Portugal,all,9,Numa coligação PSD/CDS [only in v114]
+Slovakia,all,1,ĽS-HZDS (Ľudová strana–HZDS)
+Slovakia,all,2,SMER
+Slovakia,all,3,KSS (Komunistická strana Slovenska)
+Slovakia,all,4,SDKÚ (Slovenská demokratická a kresťanská únia)
+Slovakia,all,5,SMK (Strana maďarskej koalície) / MKP ( Magyar Koalíció Pártja)
+Slovakia,all,6,KDH (Kresťansko-demokratické hnutie)
+Slovakia,all,7,ANO (Aliancia nového občana)
+Slovakia,all,8,SNS (Slovenská národná strana) / Pravá SNS
+Slovakia,all,9,DS (Demokratická strana)
+Slovakia,all,10,HZD (Hnutie za demokraciu) / ĽÚ (Ľudová únia)
+Slovakia,all,11,SDA (Sociálnodemokratická alternatíva)
+Slovakia,all,12,SDĽ (Strana demokratick ej ľavice)
+Slovakia,all,13,Slobodné fórum
+Slovakia,all,14,SZS (Green Party in Slovakia)
+Slovakia,all,15,OKS (Obèianska konzervatívna strana)
+Slovakia,all,16,Maïarská federalistická strana
+Slovakia,all,17,Živnostenská strana Slovenskej republiky
+Slovakia,all,18,Demokratická únia Slovenska
+Slovakia,all,19,Slovenská udová strana
+Slovakia,all,20,Aktívne ženy - OS Slovenska
+Slovenia,all,1,DESUS - demokratska stranka upokojencev Slovenije
+Slovenia,all,2,LDS - liberalna demokracija Slovenije
+Slovenia,all,3,NSI - krscanska ljudska stranka
+Slovenia,all,4,SLS - slovenska ljudska stranka
+Slovenia,all,5,SMS - stranka mladih Slovenije
+Slovenia,all,6,SNS - slovenska nacionalna stranka
+Slovenia,all,7,SDS - slovenska demokratska stranka
+Slovenia,all,8,ZLSD - združeno listo socialnih demokratov
+Slovenia,all,9,SJN - Slovenija je naša
+Slovenia,all,10,LDS (2) + DESUS (1) [only in v112]
+Spain,"(v029, v112, v113, v114, v211)",1,PP (Partido Popular) / UPN (Unión del Pueblo Navarro)
+Spain,"(v029, v112, v113, v114, v211)",2,PSOE (Partido Socialista Obrero Español)
+Spain,"(v029, v112, v113, v114, v211)",3,IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds)
+Spain,"(v029, v112, v113, v114, v211)",4,Regional Party of Center
+Spain,"(v029, v112, v113, v114, v211)",5,Regional Party of Left
+Spain,"(v029, v112, v113, v114, v211)",6,Ecologist Party
+Spain,(v115-v128); (v135-v148); (v157-v170),1,PP (Partido Popular)
+Spain,(v115-v128); (v135-v148); (v157-v170),2,PSOE (Partido Socialista Obrero Español)
+Spain,(v115-v128); (v135-v148); (v157-v170),3,IU (Izquierda Unida)
+Spain,(v115-v128); (v135-v148); (v157-v170),4,Galeusca – Pueblos de Europa (Leer partidos)
+Spain,(v115-v128); (v135-v148); (v157-v170),5,EdP (Europa de los Pueblos) (Leer partidos)
+Spain,(v115-v128); (v135-v148); (v157-v170),6,CC (Coalición Europea) (Leer partidos)
+Sweden,all,1,Left party
+Sweden,all,2,Social Democrats
+Sweden,all,3,Centre Party
+Sweden,all,4,"Peoples Party, liberals"
+Sweden,all,5,Moderate Party (conservatives)
+Sweden,all,6,Christian Democrats
+Sweden,all,7,Green Party
+Sweden,all,8,June-list
+Sweden,all,9,more than one party mentioned [only in v029]
