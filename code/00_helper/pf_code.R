@@ -45,6 +45,20 @@ norm_key <- function(x) {
     str_to_lower()
 }
 
+# Looser key for comparing party names: accents and punctuation removed
+normalise_party <- function(x) {
+  x |>
+    stringi::stri_trans_general("Latin-ASCII") |>
+    str_to_lower() |>
+    str_replace_all("[^a-z0-9]+", " ") |>
+    str_squish()
+}
+
+# Does `a` contain `b` as whole words? (both normalised)
+contains_words <- function(a, b) {
+  str_detect(paste0(" ", a, " "), fixed(paste0(" ", b, " ")))
+}
+
 # Party Facts core parties. Technical pseudo-parties ("other", "independent",
 # "unknown", ...) are kept but flagged, since they become sentinels.
 pf_core <- function() {
@@ -125,22 +139,4 @@ pf_check <- function(map, keys, core = pf_core()) {
   }
 
   invisible(map)
-}
-
-# Join a map onto one variable and name the result ext_<stub>_pf_*.
-# `map` holds the shared columns in `by`, a `code` column matched against
-# `var`, and pf_name / pf_id.
-pf_apply <- function(df, map, var, stub, by) {
-  n <- nrow(df)
-  out <- df |>
-    left_join(
-      select(map, all_of(by), code, pf_name, pf_id),
-      by = c(set_names(by), set_names("code", var))
-    ) |>
-    rename(
-      !!paste0("ext_", stub, "_pf_name") := pf_name,
-      !!paste0("ext_", stub, "_pf_id") := pf_id
-    )
-  stopifnot(nrow(out) == n)
-  out
 }

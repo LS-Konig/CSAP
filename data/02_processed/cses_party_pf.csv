@@ -1,0 +1,903 @@
+release,cntry,code,label,pf_name,pf_id,source
+imd,AT,400001,0400001. AUT - Social Democratic Party of Austria,Sozialdemokratische Partei Österreichs,1384,link
+imd,AT,400002,0400002. AUT - Austrian People's Party,Österreichische Volkspartei,1329,link
+imd,AT,400003,0400003. AUT - Freedom Party of Austria,Freiheitliche Partei Österreichs,463,link
+imd,AT,400004,0400004. AUT - Alliance for the Future of Austria,Bündnis Zukunft Österreich,599,link
+imd,AT,400005,0400005. AUT - The Greens - The Green Alternative,Die Grünen — Die grüne Alternative,1659,link
+imd,AT,400006,0400006. AUT - Communist Party of Austria,Kommunistische Partei Österreichs,996,name
+imd,AT,400007,0400007. AUT - Liberal Forum,Liberales Forum,605,link
+imd,AT,400008,0400008. AUT - Peter Pilz List,Liste Peter Pilz,6137,name
+imd,AT,400010,0400010. AUT - The New Austria,NEOS — Das Neue Österreich,1970,link
+imd,AT,400011,0400011. AUT - Pirate Party,Pirate Party [og],,hand
+imd,AT,400012,0400012. AUT - Team Stronach,Team Stronach,1971,link
+imd,AT,400013,0400013. AUT - Dinkhauser List,Bürgerforum Österreich — Liste Fritz Dinkhauser,439,hand
+imd,AT,400015,0400015. AUT - Citizen's Forum Austria,Bürgerforum Österreich — Liste Fritz Dinkhauser,439,hand
+imd,AT,400016,0400016. AUT - Roland Dueringer List - My Vote Counts,Liste Roland Düringer — Meine Stimme GILT,6138,hand
+imd,AT,400017,0400017. AUT - Communist Party of Austria and Platform PLUS - Open List,Communist Party of Austria and Platform PLUS - Open List [og],,hand
+imd,AT,400018,0400018. AUT - Free Austria List and FPS Dr. Karl Schnell List,Free Austria List and FPS Dr. Karl Schnell List [og],,hand
+imd,BE,560001,0560001. BEL - New Flemish Alliance,Nieuw-Vlaamse Alliantie,36,link
+imd,BE,560002,0560002. BEL - Socialist Party (Francophone),Parti Socialiste,500,link
+imd,BE,560003,0560003. BEL - Christian Democratic & Flemish,Christen-Democratisch en Vlaams,604,link
+imd,BE,560004,0560004. BEL - Flemish Liberals and Democrats,Partij voor Vrijheid en Vooruitgang — Open Vlaamse Liberalen en Democraten,49,link
+imd,BE,560005,0560005. BEL - Socialist Party Differently,Socialistische Partij Anders — Vooruit,1680,link
+imd,BE,560009,0560009  BEL - People's Party,Parti populaire,639,hand
+imd,BE,560010,0560010. BEL - Humanist Democratic Centre,Parti Social Chrétien — Centre démocrate humaniste,633,link
+imd,BE,560011,0560011. BEL - Worker's Party of Belgium,Partij van de Arbeid van België — Parti du Travail de Belgique,1753,name
+imd,BE,560012,0560012. BEL - Flemish Block/Importance,Vlaams Blok / Belang,553,link
+imd,BE,560013,0560013. BEL - Confederated Ecologists,Écologistes Confédérés pour l'organisation de luttes originales,1563,link
+imd,BE,560014,0560014. BEL - Democratic Francophones Front/Democratic Federalist Independent,Front Démocratique des Francophones / DéFI,698,hand
+imd,BE,560015,0560015. BEL - People's Union,Volksunie [Vlaamse Concentratie],1424,link
+imd,BE,560016,0560016. BEL - Liberal Reformist Party - Francophone Democratic Front,Parti Réformateur Libéral - Front Démocratique des Francophones,8259,link
+imd,BE,560017,0560017. BEL - RESIST,RESIST [og],,hand
+imd,BE,560018,0560018. BEL - Live Differently - Flemish Ecologists/Green,Agalev — Groen,528,link
+imd,BE,560019,0560019. BEL - National Front,Front National,191,name
+imd,BE,560021,0560021. BEL - Christian Social Party,Christlische Soziale Partei: Europäische Volkspartei,6688,link
+imd,BE,560023,0560023. BEL - Alive,Vivant,76,name
+imd,BE,560026,0560026. BEL - Reformist Movement,Mouvement Réformateur,789,link
+imd,BG,1000001,1000001. BGR - Citizens for European Development of Bulgaria,Grazhdani za evropeysko razvitie na Balgariya,760,link
+imd,BG,1000002,1000002. BGR - Bulgarian Socialist Party,Bălgarska Socialističeska Partija,757,link
+imd,BG,1000003,1000003. BGR - Movement for Rights and Freedoms,Dvizhenie za prava i svobodi,982,link
+imd,BG,1000004,1000004. BGR - Reformist Bloc,Reformatorski Blok,3189,link
+imd,BG,1000005,1000005. BGR - Patriotic Front,Patriotichen front,5649,link
+imd,BG,1000006,1000006. BGR - Bulgaria without Censorship,Balgarija bes Zensura,3188,link
+imd,BG,1000007,1000007. BGR - Attack,Natsionalen Sǎyuz Ataka,1793,link
+imd,BG,1000008,1000008. BGR - Alternative for Bulgarian Revival,Alternativa za balgarsko vazrazhdane,3187,link
+imd,BG,1000009,1000009. BGR - Movement 21,Movement 21,3200,name
+imd,BG,1000013,1000013. BGR - Green Party,Zelena Partija,659,name
+imd,BG,1000014,1000014. BGR - Republic BG,Republic BG [og],,hand
+imd,BG,1000015,1000015. BGR - PP New Time,Hoboto Bpeme,2022,hand
+imd,BG,1000016,1000016. BGR - New Force,New Force [og],,hand
+imd,BG,1000017,1000017. BGR - United Bulgaria,United Bulgaria [og],,hand
+imd,BG,1000018,1000018. BGR - Bulgarian Social Democratic Party,Partiya balgarski sotsialdemokrati,661,name
+imd,BG,1000019,1000019. BGR - National Movement for Stability and Progress,Nacionalno dviženie (Simeon Vtori) za stabilnost i văzhod,374,link
+imd,BG,1000020,1000020. BGR - BSP Left Bulgaria - Coalition for Bulgaria,Koalicija za Balgarija — BSP za Bŭlgariya,1665,link
+imd,BG,1000021,1000021. BGR - Bulgarian Communist Party,Bulgarian Communist Party [og],,hand
+imd,BG,1000022,1000022. BGR - New Alternative (Nikolay Tzove's party),New Alternative (Nikolay Tzove's party) [og],,hand
+imd,BG,1000023,1000023. BGR - Left and Green Parties,Left and Green Parties [og],,hand
+imd,BG,1000024,1000024. BGR - Social Democratic Party,Social Democratic Party [og],,hand
+imd,BG,1000025,1000025. BGR - Inner Macedonian Revolutionary Organization,Vnatrena Makedonska Revol. Org. / Dem. Partija,6397,link
+imd,BG,1000026,"1000026. BGR - National Union, Fatherland Left","National Union, Fatherland Left [og]",,hand
+imd,BG,1000028,1000028. BGR - Christian Social Union,Christian Social Union [og],,hand
+imd,BG,1000030,"1000030. BGR - Coalition: Georgievden, Inner Macedonian Revolutionary Organization",Vnatrena Makedonska Revol. Org. / Dem. Partija,6397,link
+imd,BG,1000031,1000031. BGR - Fatherland Party of Labour,Fatherland Party of Labour [og],,hand
+imd,BG,1000032,1000032. BGR - National Union,National Union [og],,hand
+imd,BG,1000033,1000033. BGR - The Bloc of G. Ganchev,The Bloc of G. Ganchev [og],,hand
+imd,BG,1000034,1000034. BGR - United Democratic Forces,Obedineni Demokratichni Sili,1183,link
+imd,BG,1000036,1000036. BGR - Movement 'Georgievden',Dvizhenie Gergyovden,1820,link
+imd,BG,1000039,1000039. BGR - Eurorama,Evroroma,2055,hand
+imd,BG,1000040,1000040. BGR - Euroleft,Bulgarska Evrolevista,149,name
+imd,BG,1000042,1000042. BGR - Bulgarian Agricultural National Forces - United,Bulgarian Agricultural National Forces - United [og],,hand
+imd,BG,1000043,1000043. BGR - Bulgarian Agricultural National Forces - 'N. Petkov',Bulgarian Agricultural National Forces - 'N. Petkov' [og],,hand
+imd,BG,1000044,1000044. BGR - Bulgarian Agricultural National Forces - 'Al. Stamboliski',"Agrarian Union ""Aleksandar Stamboliyski""",7809,hand
+imd,BG,1000045,"1000045. BGR - Bulgarian Agricultural National Forces, A. Mauser, National Union","Bulgarian Agricultural National Forces, A. Mauser, National Union [og]",,hand
+imd,BG,1000046,1000046. BGR - Coalition United Agricultural Forces,Coalition United Agricultural Forces [og],,hand
+imd,BG,1000200,1000200. BGR - Coalition For Bulgaria,Koalicija za Balgarija — BSP za Bŭlgariya,1665,link
+imd,HR,1910001,1910001. HRV - Croatian Democratic Union,Hrvatska demokratska zajednica,1431,link
+imd,HR,1910002,1910002. HRV - Social Democratic Party of Croatia,Socijaldemokratska partija Hrvatske,1475,link
+imd,HR,1910003,1910003. HRV - Croatian People's Party - Liberal Democrats,Hrvatska narodna stranka — Liberalni Demokrati,799,link
+imd,HR,1910006,1910006. HRV - Croatian Party of Pensioners,Hrvatska stranka umirovljenika,2062,link
+imd,HR,1910007,1910007. HRV - Croatian Peasant Party,Hrvatska seljačka stranka,72,link
+imd,HR,1910008,1910008. HRV - Croatian Social Liberal Party,Hrvatska socijalno liberalna stranka,214,link
+imd,HR,1910009,1910009. HRV - Croatian Democratic Alliance of Slavonia and Baranja,Hrvatski demokratski savez Slavonije i Baranje,2347,link
+imd,HR,1910010,1910010. HRV - Croatian Party of Rights,Hrvatska stranka prava,253,link
+imd,HR,1910011,1910011. HRV - Istrian Democratic Assembly,Istarski demokratski sabor,513,link
+imd,HR,1910017,1910017. HRV - Independent Democratic Serbian Party,Samostalna demokratska srpska stranka,2348,name
+imd,HR,1910019,1910019. HRV - Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party,Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party [og],,hand
+imd,HR,1910020,1910020. HRV - Minority Party,Minority Party [og],,hand
+imd,CZ,2030001,2030001. CZE - Czech Social Democratic Party,Česká strana sociálně demokratická,177,link
+imd,CZ,2030002,2030002. CZE - Civic Democratic Party,Občanská demokratická strana,466,link
+imd,CZ,2030003,2030003. CZE - Christian Democratic Union - Czech People's Party,Křesťanská a demokratická unie / Československá strana lidová,676,link
+imd,CZ,2030004,2030004. CZE - Communist Party of Bohemia and Moravia,Komunistická strana Cech a Moravy,1728,link
+imd,CZ,2030005,2030005. CZE - Green Party,Strana zelených,1554,link
+imd,CZ,2030006,2030006. CZE - Action of Dissatisfied Citizens,Akce nespokojených občanů,2141,link
+imd,CZ,2030007,2030007. CZE - Freedom and Direct Democracy,Svoboda a přímá demokracie,6125,name
+imd,CZ,2030010,2030010. CZE - TOP 09,Tradice Odpovědnost Prosperita 09,223,link
+imd,CZ,2030011,2030011. CZE - Civic Democratic Alliance,Občanská demokratická aliance,1008,link
+imd,CZ,2030012,2030012. CZE - Czech Pirate Party,Ceska piratska strana,2047,link
+imd,CZ,2030013,2030013. CZE - Dawn of Direct Democracy of Tomio Okamura,Úsvit přímé demokracie,2049,link
+imd,CZ,2030014,2030014. CZE - Public Affairs,Věci veřejné,1202,link
+imd,CZ,2030015,2030015. CZE - Mayors and Independents,Starostové a nezávislí,1707,name
+imd,CZ,2030016,2030016. CZE - Oath,Přísaha,9002,name
+imd,CZ,2030017,2030017. CZE - Freedom Union - Democratic Union,Unie svobody / Demokratická unie,104,hand
+imd,CZ,2030018,2030018. CZE - Association for the Republic - Czech Republican Party,Sdružení pro Republiku — Republikánská strana Československa,1657,link
+imd,CZ,2030019,2030019. CZE - Balbin's Poetic Party,Balbin's Poetic Party [og],,hand
+imd,CZ,2030021,2030021. CZE - Czech National Social Party,[ Liberální / Česká ] strana národně sociální,1813,hand
+imd,CZ,2030023,2030023. CZE - Humanistic Party,Humanistic Party [og],,hand
+imd,CZ,2030024,2030024. CZE - Moravian Democratic Party,Moravian Democratic Party [og],,hand
+imd,CZ,2030025,2030025. CZE - Republicans,Republicans [og],,hand
+imd,CZ,2030026,2030026. CZE - Right Block,Pravý Blok,904,hand
+imd,CZ,2030027,2030027. CZE - Miroslav Sladek's Republicans,Republikanska Miroslava Sladka,972,link
+imd,CZ,2030029,2030029. CZE - Association of Independents,Sdruzeni nezavislych,884,link
+imd,CZ,2030030,2030030. CZE - The Block of Jana Bobosikova and Party of Common Sense (SZR),Suverenita — blok Jany Bobošíkové,293,link
+imd,CZ,2030031,2030031. CZE - Party of Citizen Rights-Zemanites,Strana Práv Občanů — Zemanovci / Strana Práv Občanů,1272,link
+imd,CZ,2030040,2030040. CZE - Czech Movement for National Unity,Czech Movement for National Unity [og],,hand
+imd,CZ,2030042,2030042. CZE - Czech Right,Czech Right [og],,hand
+imd,CZ,2030045,2030045. CZE - Worker's Party of the Social Justice,Dělnická strana sociální spravedlnosti,805,hand
+imd,CZ,2030048,2030048. CZE - Folklore and Society,Folklore and Society [og],,hand
+imd,CZ,2030050,2030050. CZE - Humanistic Alliance,Humanistic Alliance [og],,hand
+imd,CZ,2030052,2030052. CZE - Cheer Up - Voting Bloc,Cheer Up - Voting Bloc [og],,hand
+imd,CZ,2030053,2030053. CZE - The Jesus is the Lord,The Jesus is the Lord [og],,hand
+imd,CZ,2030054,2030054. CZE - Club of Committed Non-Party Members,Klub angazovaných nestraníku,2142,name
+imd,CZ,2030055,2030055. CZE - Czech Crown - royal party,Czech Crown - royal party [og],,hand
+imd,CZ,2030056,2030056. CZE - Key Moment,Key Moment [og],,hand
+imd,CZ,2030057,2030057. CZE - Coalition for the Czech Republic,Coalition for the Czech Republic [og],,hand
+imd,CZ,2030058,2030058. CZE - Conservative Party,Conservative Party [og],,hand
+imd,CZ,2030059,2030059. CZE - Left Bloc,Levý Blok,2138,hand
+imd,CZ,2030060,2030060. CZE - Liberals.cz,Liberals.cz [og],,hand
+imd,CZ,2030061,2030061. CZE - Hope,Hope [og],,hand
+imd,CZ,2030063,2030063. CZE - Independent Democrats,Nezávislí,1425,hand
+imd,CZ,2030065,2030065. CZE - National Prosperity,National Prosperity [og],,hand
+imd,CZ,2030066,2030066. CZE - National Party,National Party [og],,hand
+imd,CZ,2030068,2030068. CZE - Law and Justice,Law and Justice [og],,hand
+imd,CZ,2030072,2030072. CZE - Free Democrats - Liberal Social National Party,[ Liberální / Česká ] strana národně sociální,1813,link
+imd,CZ,2030074,2030074. CZE - SNK European Democrats,SNK Evropští demokraté,751,link
+imd,CZ,2030075,2030075. CZE - Freeholders Party of the Czech Repbulic,Freeholders Party of the Czech Repbulic [og],,hand
+imd,CZ,2030076,2030076. CZE - Czech Sovereignty,Suverenita — blok Jany Bobošíkové,293,name
+imd,CZ,2030077,2030077. CZE - Party of Free Citizens,Strana svobodných občanů,254,name
+imd,CZ,2030078,2030078. CZE - Rural Party - Citizens Joint Strenght,Rural Party - Citizens Joint Strenght [og],,hand
+imd,CZ,2030079,2030079. CZE - Party for Life Security,Důchodci za životní jistoty,670,name
+imd,CZ,2030081,2030081. CZE - Choice for Tomorrow,Choice for Tomorrow [og],,hand
+imd,CZ,2030082,2030082. CZE - Political Change Movement,Political Change Movement [og],,hand
+imd,CZ,2030084,2030084. CZE - Moravians,Moravians [og],,hand
+imd,CZ,2030086,2030086. CZE - Party of Equal Chances,Party of Equal Chances [og],,hand
+imd,CZ,2030087,2030087. CZE - Coalition KDU-CSL and US-DEU,Křesťanská a demokratická unie / Československá strana lidová,676,link
+imd,CZ,2030089,2030089. CZE - Realists,Realists [og],,hand
+imd,CZ,2030090,2030090. CZE - Bloc against Islamization - Defense of the Homeland,Bloc against Islamization - Defense of the Homeland [og],,hand
+imd,CZ,2030091,2030091. CZE - Good Choice 2016,Good Choice 2016 [og],,hand
+imd,CZ,2030092,2030092. CZE - Swiss Democracy,Swiss Democracy [og],,hand
+imd,CZ,2030093,2030093. CZE - Sources Movement,Sources Movement [og],,hand
+imd,CZ,2030094,2030094. CZE - Don't Vote Urza.cz,Don't Vote Urza.cz [og],,hand
+imd,CZ,2030095,2030095. CZE - Alliance of National Forces,Alliance of National Forces [og],,hand
+imd,CZ,2030096,2030096. CZE - Pensioners 21,Pensioners 21 [og],,hand
+imd,CZ,2030097,2030097. CZE - The Left,The Left [og],,hand
+imd,CZ,2030200,2030200. CZE - Together,Together [og],,hand
+imd,CZ,2030201,2030201. CZE - Pirates and Mayors,Pirates and Mayors [og],,hand
+imd,CZ,2030202,2030202. CZE - Tricolor Citizen's Movement,Tricolor Citizen's Movement [og],,hand
+imd,DK,2080001,2080001. DNK - Social Democrats,Socialdemokraterne,379,link
+imd,DK,2080002,"2080002. DNK - Venstre, Denmark's Liberal Party",Venstre,1204,link
+imd,DK,2080003,2080003. DNK - Progress Party,Fremskridtspartiet,1601,link
+imd,DK,2080004,2080004. DNK - Socialist People's Party,Socialistisk Folkeparti,329,link
+imd,DK,2080005,2080005. DNK - Unity List - Red-Green Alliance,Enhedslisten / De Rød-Grønne,1527,link
+imd,DK,2080006,2080006. DNK - Danish Social Liberal Party,Det Radikale Venstre,1507,link
+imd,DK,2080007,2080007. DNK - Conservative People's Party,Konservative Folkeparti,536,link
+imd,DK,2080008,2080008. DNK - Christian Democrats,Kristeligt Folkeparti / Kristendemokraterne,53,link
+imd,DK,2080009,2080009. DNK - New Alliance/Liberal Alliance,[Ny] Liberal Alliance,212,link
+imd,DK,2080010,2080010. DNK - Danish People's Party,Dansk Folkeparti,1022,link
+imd,DK,2080011,2080011. DNK - Centre Democrats,Centrumdemokraterne,800,link
+imd,DK,2080012,2080012. DNK - The Alternative,Alternativet,4070,name
+imd,DK,2080013,2080013. DNK - The New Right,Nye Borgerlige,7339,name
+imd,DK,2080014,2080014. DNK - Democratic Renewal,Democratic Renewal [og],,hand
+imd,DK,2080016,2080016. DNK - Hard Line,Stram Kurs,7338,name
+imd,DK,2080017,2080017. DNK - Klaus Riskaer Pedersen List,Klaus Riskaer Pedersen List [og],,hand
+imd,EE,2330001,2330001. EST - Estonian Reform Party,Eesti Reformierakond,821,link
+imd,EE,2330002,2330002. EST - Estonian Centre Party,Eesti Keskerakond,533,link
+imd,EE,2330003,2330003. EST - Social Democratic Party,Sotsiaaldemokraatlik Erakond — Mõõdukad,1150,link
+imd,EE,2330004,2330004. EST - Pro Patria and Res Publica Union,Erakond Isamaa ja Res Publica Liit,685,link
+imd,EE,2330005,2330005. EST - Estonian Greens,Erakonna Eestimaa Rohelised,1040,link
+imd,EE,2330007,2330007. EST - Estonian Independence Party,Eesti Iseseisvuspartei,8922,hand
+imd,EE,2330013,2330013. EST - Russian Party in Estonia,Vene Erakond Eestis,1975,name
+imd,EE,2330014,2330014. EST - Estonian Christian Democrats,Eesti Kristlikud Demokraadid,790,name
+imd,EE,2330016,2330016. EST - Estonian People's Union,Eestimaa Rahvalliit,110,link
+imd,FI,2460001,2460001. FIN - Center Party of Finland,Maalaisliitto / Keskusta,901,link
+imd,FI,2460002,2460002. FIN - Social Democratic Party of Finland,Suomen Sosialidemokraattinen Puolue,1303,link
+imd,FI,2460003,2460003. FIN - National Coalition Party,Kansallinen Kokoomus,495,link
+imd,FI,2460004,2460004. FIN - True Finns/The Finns Party,Suomen Puolue / Perussuomalaiset,1689,link
+imd,FI,2460005,2460005. FIN - Green League,Vihreä Liitto,479,link
+imd,FI,2460006,2460006. FIN - Left Alliance,Vasemmistoliitto,1044,link
+imd,FI,2460007,2460007. FIN - Christian Democrats,Kristillisdemokraatit,703,link
+imd,FI,2460008,2460008. FIN - Swedish People's Party in Finland,Ruotsalainen Kansanpuolue / Svenska Folkepartiet i Finland,1229,link
+imd,FI,2460009,2460009. FIN - The Independence Party,The Independence Party [og],,hand
+imd,FI,2460010,2460010. FIN - Blue Reform,Uusi vaihtoehto / Sininen tulevaisuus,5859,name
+imd,FI,2460012,2460012. FIN - For the Poor,For the Poor [og],,hand
+imd,FI,2460013,2460013. FIN - For Peace and Socialism - Communist Worker's Party,For Peace and Socialism - Communist Worker's Party [og],,hand
+imd,FI,2460014,2460014. FIN - Liberal People's Party,Liberaalinen kansanpuolue,249,name
+imd,FI,2460015,2460015. FIN - Change 2011,Change 2011 [og],,hand
+imd,FI,2460016,2460016. FIN - Pirate Party of Finland,Piraattipuolue / Piratpartiet,9148,link
+imd,FI,2460017,2460017. FIN - Finnish Senior Citizen Party,Finnish Senior Citizen Party [og],,hand
+imd,FI,2460018,2460018. FIN - Communist Party of Finland,Suomen Kommunistinen Puolue,7030,name
+imd,FI,2460020,2460020. FIN - Finnish Workers Party,Finnish Workers Party [og],,hand
+imd,FI,2460021,2460021. FIN - Freedom Party,Freedom Party [og],,hand
+imd,FR,2500001,2500001. FRA - Union for a Popular Movement,Union pour un mouvement populaire,1595,link
+imd,FR,2500002,2500002. FRA - Socialist Party,Parti socialiste,1478,link
+imd,FR,2500003,2500003. FRA - Democratic Movement,Mouvement démocrate,496,link
+imd,FR,2500004,2500004. FRA - French Communist Party,Parti communiste française,1251,link
+imd,FR,2500005,2500005. FRA - Europe Ecology - The Greens,Europe Écologie — Les Verts,5650,link
+imd,FR,2500006,2500006. FRA - Left Front,Front de Gauche,4363,link
+imd,FR,2500007,2500007. FRA - National Front,Front National / Rassemblement national,433,link
+imd,FR,2500008,2500008. FRA - Rally For The Republic,Rassemblement pour la République,509,link
+imd,FR,2500009,2500009. FRA - Workers' Struggle,Lutte ouvrière,617,link
+imd,FR,2500010,2500010. FRA - Movement for France,Mouvement pour la France,364,name
+imd,FR,2500011,"2500011. FRA - Hunting, Fishing, Nature and Tradtion","Chasse, pêche, nature, traditions",1313,hand
+imd,FR,2500012,2500012. FRA - Republican And Civic Movement,Mouvement des citoyens / Pôle républicain,3156,link
+imd,FR,2500013,2500013. FRA - Liberal Democracy,Démocratie Libérale,4364,link
+imd,FR,2500014,2500014. FRA - Revolutionary Communist League,Ligue communiste révolutionnaire,1506,link
+imd,FR,2500017,2500017. FRA - The Republic Onwards!,La République En Marche! / Renaissance,5857,name
+imd,FR,2500018,2500018. FRA - Radical Party of the Left,Parti radical de gauche,1783,name
+imd,FR,2500019,2500019. FRA - Miscellaneous left,divers gauche,126,hand
+imd,FR,2500020,2500020. FRA - New Centre,Nouveau centre,1255,name
+imd,FR,2500021,2500021. FRA - Miscellaneous right,divers droite,1776,hand
+imd,FR,2500022,2500022. FRA - The Republicans,Les Républicains,8168,hand
+imd,FR,2500023,2500023. FRA - Regionalists,Regionalists [og],,hand
+imd,FR,2500024,"2500024. FRA - Citizenship, Action, Participation for the 21st Century","Citizenship, Action, Participation for the 21st Century [og]",,hand
+imd,FR,2500025,2500025. FRA - Arise the Republic/France Arise,Debout la France,3207,hand
+imd,FR,2500026,2500026. FRA - Forum Of Social Republicans,Forum Of Social Republicans [og],,hand
+imd,FR,2500027,2500027. FRA - National Republican Movement,Mouvement national républicain,1634,name
+imd,FR,2500028,2500028. FRA - New Anticapitalist Party,Nouveau Parti Anticapitaliste,6684,name
+imd,FR,2500029,2500029. FRA - Workers' Party,Workers' Party [og],,hand
+imd,FR,2500031,2500031. FRA - Indomitable France,La France Insoumise,5858,name
+imd,FR,2500032,2500032. FRA - Jose Bove - ran as an activist from 'After Globalization',Jose Bove - ran as an activist from 'After Globalization' [og],,hand
+imd,FR,2500033,2500033. FRA - Movement LaRouche,Movement LaRouche [og],,hand
+imd,FR,2500034,2500034. FRA - Resist!,Résistons !,9876,name
+imd,FR,2500035,2500035. FRA - Popular Republican Union,Union Populaire Républicaine,7344,name
+imd,DE,2760001,2760001. DEU - Christian Democratic Union/Christian Social Union,Christlich Demokratische Union / Christlich Soziale Union,211,link
+imd,DE,2760002,2760002. DEU - Christian Democratic Party,Christlich Demokratische Union,1375,link
+imd,DE,2760003,2760003. DEU - Christian Social Union in Bavaria,Christlich Soziale Union,1731,link
+imd,DE,2760004,2760004. DEU - Social Democratic Party,Sozialdemokratische Partei Deutschlands,383,link
+imd,DE,2760005,2760005. DEU - Alliance 90/Greens,Bündnis 90 / Die Grünen,1816,link
+imd,DE,2760006,2760006. DEU - Free Democratic Party,Freie Demokratische Partei,573,link
+imd,DE,2760007,2760007. DEU - Left Party,Die Linke,1545,link
+imd,DE,2760008,2760008. DEU - The Republicans,Die Republikaner,720,name
+imd,DE,2760009,2760009. DEU - National Democratic Party Of Germany,Nationaldemokratische Partei Deutschlands,1723,link
+imd,DE,2760010,2760010. DEU - Alternative for Germany,Alternative für Deutschland,1976,link
+imd,DE,2760014,2760014. DEU - Pirates Party,Piratenpartei Deutschland,1287,link
+imd,DE,2760016,2760016. DEU - Bavarian Party,Bayernpartei,61,name
+imd,DE,2760017,2760017. DEU - German People's Union,Deutsche Volksunion,695,link
+imd,DE,2760018,2760018. DEU - South Schleswig Voter's Association,Südschleswigscher Wählerverband,50,hand
+imd,DE,2760019,2760019. DEU - The Greys,Die Grauen — Graue Panther,1652,hand
+imd,DE,2760020,2760020. DEU - Ecological Democratic Party,Ökologisch-Demokratische Partei,7345,name
+imd,DE,2760021,2760021. DEU - Party of Literal Exegesis,Party of Literal Exegesis [og],,hand
+imd,DE,2760022,2760022. DEU - Pensioners/Greys,Pensioners/Greys [og],,hand
+imd,DE,2760023,2760023. DEU - Generation Party / The Grey,Generation Party / The Grey [og],,hand
+imd,DE,2760024,2760024. DEU - Party Of The Rule Of Law Offensive,Party Of The Rule Of Law Offensive [og],,hand
+imd,DE,2760025,2760025. DEU - Free Voters,Freie Wähler,1090,name
+imd,DE,2760026,2760026. DEU - Animal Protection Party,Tierschutzpartei,749,name
+imd,DE,2760027,2760027. DEU - Marxist-Leninist Party of Germany,Marxist-Leninist Party of Germany [og],,hand
+imd,DE,2760028,2760028. DEU - Family Party,Family Party [og],,hand
+imd,DE,2760029,2760029. DEU - The Violet for spiritual Politics,The Violet for spiritual Politics [og],,hand
+imd,DE,2760030,2760030. DEU - The Party,Die PARTEI,6126,name
+imd,DE,2760031,2760031. DEU - Women's Party,Women's Party [og],,hand
+imd,DE,2760032,"2760032. DEU - Alliance of health, peace and social equality","Alliance of health, peace and social equality [og]",,hand
+imd,DE,2760034,2760034. DEU - Civil Movement for Solidarity,Civil Movement for Solidarity [og],,hand
+imd,DE,2760035,2760035. DEU - Basic Income Alliance,Basic Income Alliance [og],,hand
+imd,DE,2760036,"2760036. DEU - V-Partei3 - Party for Change, Vegetarians and Vegans","V-Partei3 - Party for Change, Vegetarians and Vegans [og]",,hand
+imd,DE,2760037,2760037. DEU - Democracy in Motion,Democracy in Motion [og],,hand
+imd,DE,2760038,2760038. DEU - Alliance of German Democrats,Alliance of German Democrats [og],,hand
+imd,DE,2760041,2760041. DEU - Democratic Citizens Germany,Democratic Citizens Germany [og],,hand
+imd,DE,2760042,2760042. DEU - Grassroots Democratic Party of Germany,Basisdemokratische Partei Deutschland,8993,name
+imd,DE,2760043,2760043. DEU - Team Todenhoefer - The Justice Party,Team Todenhoefer - The Justice Party [og],,hand
+imd,DE,2760044,2760044. DEU - Volt Germany,Volt Germany [og],,hand
+imd,DE,2760045,2760045. DEU - Party of Humanists,Party of Humanists [og],,hand
+imd,DE,2760046,2760046. DEU - Alliance C - Christians for Germany,Alliance C - Christians for Germany [og],,hand
+imd,DE,2760047,2760047. DEU - The Greys - For all Generations,The Greys - For all Generations [og],,hand
+imd,DE,2760049,2760049. DEU - Party of Progress,Party of Progress [og],,hand
+imd,DE,2760050,2760050. DEU - Climate List Baden-Wuerttemberg,Climate List Baden-Wuerttemberg [og],,hand
+imd,DE,2760051,2760051. DEU - Courage,Courage [og],,hand
+imd,GR,3000001,3000001. GRC - Pan-Hellenic Socialist Movement,Panellinio Sosialistikó Kínima,1468,link
+imd,GR,3000002,3000002. GRC - New Democracy,Néa Đimokratía,794,link
+imd,GR,3000003,3000003. GRC - Coalition of the Radical Left,Synaspismós Rizospastikís Aristerás,301,link
+imd,GR,3000004,3000004. GRC - Communist Party of Greece,Kommounistikó Kómma Elládas,48,link
+imd,GR,3000005,3000005. GRC - Ecologists - Greens,Oikologoi Prasinoi,378,link
+imd,GR,3000006,3000006. GRC - Golden Dawn,Laïkós Sýndesmos / Chrysí Avgí,1660,link
+imd,GR,3000007,3000007. GRC - The Independent Greeks,Anexartitoi Ellines,1651,link
+imd,GR,3000008,3000008. GRC - Movement for Change,Kinima Allagis,7909,name
+imd,GR,3000009,3000009. GRC - Greek Solution,Elliniki Lisi,7347,name
+imd,GR,3000010,3000010. GRC - Pirate Party of Greece,Pirate Party of Greece [og],,hand
+imd,GR,3000011,3000011. GRC - Recreate Greece,Dimiourgia Xana,471,name
+imd,GR,3000012,3000012. GRC - Democratic Left,Dimokratiki Aristera,1160,link
+imd,GR,3000013,3000013. GRC - The River,To Potami,3118,link
+imd,GR,3000014,3000014. GRC - European Realistic Disobedience Front,Métopo Evropaikís Realistikís Anypakoís,7348,name
+imd,GR,3000016,3000016. GRC - Anticapitalist Left Cooperation for the Overthrow,Antikapitalistiki Aristeri Synergasia gia tin Anatropi,95,hand
+imd,GR,3000017,3000017. GRC - Action,Drasi — Fileleytheri Symmachia,1130,hand
+imd,GR,3000018,3000018. GRC - Democratic Revival,Democratic Revival [og],,hand
+imd,GR,3000019,3000019. GRC - Popular Orthodox Rally,Laïkós Orthódoxos Synagermós,965,link
+imd,GR,3000021,3000021. GRC - Union of Centrists,Enosi Kentroon,2510,name
+imd,GR,3000022,3000022. GRC - Movement of Democratic Socialists,Kinima Dimokraton Sosialiston,3212,name
+imd,GR,3000023,3000023. GRC - Course of Freedom,Plefsi Eleftherias,9088,hand
+imd,GR,3000024,3000024. GRC - Popular Unity,Laïkí Enótita,4512,name
+imd,GR,3000025,3000025. GRC - United Popular Front,United Popular Front [og],,hand
+imd,GR,3000026,3000026. GRC - Society - Political Party of the Successors of Kapodistrias,Society - Political Party of the Successors of Kapodistrias [og],,hand
+imd,GR,3000028,3000028. GRC - New Right,New Right [og],,hand
+imd,GR,3000029,3000029. GRC - Free Homeland,Free Homeland [og],,hand
+imd,GR,3000100,3000100. GRC - Democratic Coalition,Democratic Coalition [og],,hand
+imd,GR,3000101,3000101. GRC - Front of the Greek Anticapitalist Left - Workers Revolutionary Party,Front of the Greek Anticapitalist Left - Workers Revolutionary Party [og],,hand
+imd,GR,3000102,3000102. GRC - Democrats-Society of Values-Pirate Party of Greece,Democrats-Society of Values-Pirate Party of Greece [og],,hand
+imd,HU,3480001,3480001. HUN - Hungarian Socialist Party,Magyar Szocialista Párt,1408,link
+imd,HU,3480002,3480002. HUN - Fidesz-Hungarian Civic Party Alliance Party,Fidesz — Magyar Polgári Szövetség,1691,link
+imd,HU,3480003,3480003. HUN - Jobbik The Movement for a Better Hungary,Jobbik Magyarországért Mozgalom,42,name
+imd,HU,3480004,3480004. HUN - Hungarian Justice and Life Party,Magyar Igazság és Élet Pártja,1597,link
+imd,HU,3480006,3480006. HUN - Hungarian Worker's Party,Magyar Kommunista Munkáspárt,859,link
+imd,HU,3480007,3480007. HUN - Hungarian Democratic Forum,Magyar Demokrata Fórum,1697,name
+imd,HU,3480008,3480008. HUN - Alliance of Free Democrats,Szabad Demokraták Szövetsége,910,link
+imd,HU,3480009,3480009. HUN - Hungarian Democratic People's Party,Hungarian Democratic People's Party [og],,hand
+imd,HU,3480010,3480010. HUN - Fidesz – KDNP,Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége,6366,hand
+imd,HU,3480011,3480011. HUN - Politics Can Be Different,Lehet Más a Politika — LMP – Magyarország Zöld Pártja,1650,name
+imd,HU,3480012,3480012. HUN - MDF - FIDESZ - MPP Joint Candidate,Fidesz — Magyar Demokrata Fórum,8266,link
+imd,HU,3480013,3480013. HUN - Independent Small Holders Party,Független Kisgazdapárt,1294,link
+imd,HU,3480014,3480014. HUN - UJ Szovetseg,UJ Szovetseg [og],,hand
+imd,HU,3480015,3480015. HUN - Democratic Coalition,Demokratikus Koalíció,469,name
+imd,HU,3480016,3480016. HUN - Momentum Movement,Momentum Mozgalom,8249,hand
+imd,HU,3480017,3480017. HUN - Hungarian Two-tailed Dog Party,Magyar Kétfarkú Kutya Párt,6129,name
+imd,HU,3480018,3480018. HUN - Together - Party for a New Era,Együtt — A Korszakváltók Pártja,2458,name
+imd,HU,3480032,3480032. HUN - Christian Democratic People's Party,Kereszténydemokrata Néppárt,1412,link
+imd,HU,3480033,3480033. HUN - Alliance for Hungary - Center Party,Alliance for Hungary - Center Party [og],,hand
+imd,HU,3480100,3480100. HUN - Hungarian Socialist Party-Dialogue for Hungary,Hungarian Socialist Party-Dialogue for Hungary [og],,hand
+imd,IE,3720001,3720001. IRL - Fianna Fail,Fianna Fáil,1055,link
+imd,IE,3720002,3720002. IRL - Fine Gael,Fine Gael,1288,link
+imd,IE,3720003,3720003. IRL - Labour,Páirti Lucht Oibre,562,link
+imd,IE,3720004,3720004. IRL - Sinn Fein,Sinn Féin (Provisional),4,link
+imd,IE,3720005,3720005. IRL - Greens,Green Party-Comhaontas Glas,1775,link
+imd,IE,3720006,3720006. IRL - Progressive Democrats,An Pairti Daonlathach,924,link
+imd,IE,3720007,3720007. IRL - Socialist Party,Páirtí Sóisialach,1448,name
+imd,IE,3720008,3720008. IRL - Workers' Party,Páirtí na nOibrithe,208,name
+imd,IE,3720009,3720009. IRL - United Left Alliance,United Left Alliance,1978,link
+imd,IE,3720010,3720010. IRL - People Before Profit Alliance,People Before Profit Alliance,242,name
+imd,IE,3720011,3720011. IRL - Anti-Austerity Alliance-People Before Profit,Solidarity — People Before Profit,8241,hand
+imd,IE,3720013,3720013. IRL - Social Democrats,Daonlathaigh Shóisialta,4870,name
+imd,IE,3720014,3720014. IRL - Renew Ireland,Renua Ireland,4869,hand
+imd,IE,3720015,3720015. IRL - Anti-Austerity Alliance,Anti-Austerity Alliance / Solidarity,8242,name
+imd,IE,3720019,3720019. IRL - Direct Democracy Ireland,Direct Democracy Ireland,3209,name
+imd,IE,3720021,3720021. IRL - Fathers Rights-Responsibility,Fathers Rights-Responsibility [og],,hand
+imd,IT,3800001,3800001. ITA - Democratic Party,Partito Democratico,802,name
+imd,IT,3800002,3800002. ITA - Forward Italy (Forza Italia),Forza Italia,1626,link
+imd,IT,3800003,3800003. ITA - Northern League/League,Lega Nord,1221,link
+imd,IT,3800004,3800004. ITA - Five Star Movement,Movimento 5 Stelle,2046,name
+imd,IT,3800005,3800005. ITA - Federation of the Greens,Federazione dei Verdi,851,link
+imd,IT,3800006,3800006. ITA - More Europe,Più Europa,6155,name
+imd,IT,3800009,3800009. ITA - Party of Italian Communists,Partito dei Comunisti Italiani,1635,link
+imd,IT,3800010,3800010. ITA - Free and Equal,Liberi e Uguali,8246,name
+imd,IT,3800011,3800011. ITA - Democrats of the Left,Democratici di Sinistra,878,link
+imd,IT,3800012,3800012. ITA - Union of Christian and Centre Democrats,Unione dei Democratici Cristiani e Democratici di Centro,1758,link
+imd,IT,3800013,3800013. ITA - Communist Refoundation Party,Partito della Rifondazione Comunista,1404,link
+imd,IT,3800014,3800014. ITA - Rose in the Fist,Rosa nel Pugno,1711,link
+imd,IT,3800015,3800015. ITA - Italy of Values,Lista di Pietro — Italia del Valori,768,link
+imd,IT,3800021,3800021. ITA - Daisy - Democracy is Freedom,Democrazia è Libertà — La Margherita,279,link
+imd,IT,3800022,3800022. ITA - National Alliance,Alleanza Nazionale,813,link
+imd,IT,3800024,3800024. ITA - Popular - UDEUR,Unione Democratici per l'Europa,115,name
+imd,IT,3800025,3800025. ITA - Popular Civic List,Civica Popolare,7670,name
+imd,IT,3800026,3800026. ITA - Christian Democracy - New PSI,Nuovo Partito Socialisti Italiani,888,link
+imd,IT,3800027,3800027. ITA - Social Alternative,Alternativa Sociale Mussolini,327,name
+imd,IT,3800028,3800028. ITA - Tricolour Flame,Fiamma Tricolore,1101,name
+imd,IT,3800029,3800029. ITA - The Socialists,The Socialists [og],,hand
+imd,IT,3800032,3800032. ITA - Brothers of Italy,Fratelli d'Italia,2280,name
+imd,IT,3800034,3800034. ITA - Terzo Polo,Terzo Polo [og],,hand
+imd,IT,3800035,3800035. ITA - Solidarieta,Solidarieta [og],,hand
+imd,IT,3800036,3800036. ITA - Pensioners' Party,Partito Pensionati,772,link
+imd,IT,3800038,3800038. ITA - The Olive,L'Ulivo,1737,link
+imd,IT,3800039,3800039. ITA - The Union,L'Unione,1372,name
+imd,IT,3800040,3800040. ITA - House of Liberties,Casa delle Libertà,6241,hand
+imd,IT,3800041,3800041. ITA - Communist Party,Partito Comunista Italiano,34,name
+imd,IT,3800042,3800042. ITA - CasaPound Italy,CasaPound Italia,8244,name
+imd,IT,3800043,3800043. ITA - The People of Family,The People of Family [og],,hand
+imd,IT,3800044,3800044. ITA - Great North,Great North [og],,hand
+imd,IT,3800100,3800100. ITA - Us with Italy - Christian Democratic Union,Noi con l'Italia,9141,hand
+imd,IT,3800101,3800101. ITA - Power to the People,Potere al Popolo,8247,name
+imd,IT,3800102,3800102. ITA - Together List,Insieme,7671,hand
+imd,IT,3800103,3800103. ITA - For a Revolutionary Left,For a Revolutionary Left [og],,hand
+imd,LV,4280001,4280001. LVA - Harmony Centre/Social Democratic Party 'Harmony',Saskaņas Centrs,1056,link
+imd,LV,4280002,4280002. LVA - Unity,Vienotība,852,link
+imd,LV,4280003,4280003. LVA - National Union All for Latvia For Fatherland and Freedom,Latvijas Nacionālās Neatkarības Kustība,1789,link
+imd,LV,4280004,4280004. LVA - For a Good Latvia,Par Labu Latviju!,393,link
+imd,LV,4280005,4280005. LVA - Union of Greens and Farmers,Zaļo un Zemnieku savienība,701,link
+imd,LV,4280006,4280006. LVA - For Human Rights in United Latvia,Par cilvēka tiesībām vienotā Latvijā,176,name
+imd,LV,4280007,4280007. LVA - Zatler's Reform Party,Zatlera Reformu partija,1476,link
+imd,LV,4280011,4280011. LVA - The Progressives,Progresīvie,6357,name
+imd,LV,4280012,4280012. LVA - Who Owns the State?,Kam pieder valsts? — Par cilvēcīgu Latviju,6356,name
+imd,LV,4280013,4280013. LVA - For Latvia from the Heart/Awakening,No sirds Latvijai,3193,link
+imd,LV,4280014,4280014. LVA - Latvian Association of the Regions,Latvijas Reģionu apvienība,3194,link
+imd,LV,4280015,4280015. LVA - Made in Latvia,Made in Latvia [og],,hand
+imd,LV,4280016,4280016. LVA - Union of Social Democractic Parties Responsibility,Union of Social Democractic Parties Responsibility [og],,hand
+imd,LV,4280017,4280017. LVA - For a presidential republic,For a presidential republic [og],,hand
+imd,LV,4280018,4280018. LVA - Last Party,Last Party [og],,hand
+imd,LV,4280019,4280019. LVA - People's Control,People's Control [og],,hand
+imd,LV,4280020,4280020. LVA - Party Daugava for Latvia,Party Daugava for Latvia [og],,hand
+imd,LV,4280021,4280021. LVA - Christian Democratic Union,Kristīgi demokrātiskā savienība,304,name
+imd,LV,4280022,4280022. LVA - People's Party,Tautas Partija,1755,name
+imd,LV,4280023,4280023. LVA - New Era,Jaunais Laiks,1531,name
+imd,LV,4280024,4280024. LVA - First Party of Latvia,Latvijas Pirmā partija,1778,name
+imd,LV,4280025,4280025. LVA - Society for Different Politics,Sabiedrība citai politikai,627,hand
+imd,LV,4280026,4280026. LVA - All for Latvia,Visu Latvijai!,506,name
+imd,LV,4280027,4280027. LVA - Party of Social Justice,Party of Social Justice [og],,hand
+imd,LV,4280028,4280028. LVA - Eurosceptics/Action Party,Eurosceptics/Action Party [og],,hand
+imd,LV,4280032,4280032. LVA - Social Democratic Workers Party of Latvia,Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand
+imd,LV,4280036,4280036. LVA - Latvia's First Party/Latvian Way,Latvijas Pirmā partija / Latvijas Ceļš,461,name
+imd,LV,4280037,"4280037. LVA - Freedom. Free from fear, hate and anger.","Freedom. Free from fear, hate and anger. [og]",,hand
+imd,LV,4280038,4280038. LVA - Union For Fatherland and Freedom/LNNK,Tēvzemei un Brīvībai / LNNK,1704,hand
+imd,LV,4280039,4280039. LVA - Latvian Russian Union,Latvijas Krievu savienība / Русский союз Латвии,5657,hand
+imd,LV,4280040,4280040. LVA - United for Latvia,Vienoti Latvijai,3195,name
+imd,LV,4280041,4280041. LVA - Latvian Development,Latvijas attīstībai,3213,name
+imd,LV,4280042,4280042. LVA - New Conservative Party,Jaunā konservatīvā partija,6355,name
+imd,LV,4280043,4280043. LVA - Growth,Izaugsme,7864,name
+imd,LV,4280044,4280044. LVA - Sovereignty,Sovereignty [og],,hand
+imd,LV,4280045,4280045. LVA - National Power Unity,National Power Unity [og],,hand
+imd,LV,4280046,4280046. LVA - Latvian Nationalists,Latvian Nationalists [og],,hand
+imd,LV,4280047,4280047. LVA - For an Alternative,For an Alternative [og],,hand
+imd,LV,4280100,4280100. LVA - Development/For!,Attīstībai/Par!,8393,name
+imd,LV,4280101,4280101. LVA - The New Unity,Jaunā Vienotība,9089,hand
+imd,LV,4280102,4280102. LVA - SKG Alliance,SKG Alliance [og],,hand
+imd,LT,4400001,4400001. LTU - Homeland Union-Conservatives/Lithuanian Christian Democrats,Tėvynės sąjunga — Lietuvos krikščionys demokratai,193,link
+imd,LT,4400002,4400002. LTU - Christian Democratic Party,Lietuvos krikščionių demokratų partija,6804,link
+imd,LT,4400003,4400003. LTU - Social Democratic Party,Lietuvos socialdemokratų partija,64,link
+imd,LT,4400004,4400004. LTU - Liberal Union,Lietuvos liberalų sąjunga,1357,name
+imd,LT,4400005,4400005. LTU - Democratic Labor Party,Lietuvos demokratinė darbo partija,546,link
+imd,LT,4400006,4400006. LTU - Center Union,Lietuvos centro sąjunga,1185,link
+imd,LT,4400007,4400007. LTU - Nationalist Party - 'Young Lithuania',Jaunoji Lietuva,1026,link
+imd,LT,4400008,4400008. LTU - Lithuanian Farmers and Greens Union,Lietuvos valstiečių ir žaliųjų sąjunga / Lietuvos valstiečių liaudininkų sąjunga,1490,name
+imd,LT,4400009,4400009. LTU - Liberal Movement of the Republic of Lithuania,Lietuvos Respublikos Liberalų sąjūdis,1744,name
+imd,LT,4400010,4400010. LTU - Labor Party,Darbo Partija,102,name
+imd,LT,4400011,4400011. LTU - Peasants Party,Lietuvos valstiečių partija,21,hand
+imd,LT,4400012,4400012. LTU - Socialist Party,Socialist Party [og],,hand
+imd,LT,4400013,4400013. LTU - (Lithuanian) Poles Election Action - Christian Families Alliance,Lietuvos lenkų rinkimų akcija,556,hand
+imd,LT,4400015,4400015. LTU - New Democracy - Women's Party,Lietuvos moterų partija — Naujosios demokratijos partija,1747,hand
+imd,LT,4400016,4400016. LTU - Alliance of Ethnic Minorities,Lietuvos tautinių mažumų aljansas,1197,hand
+imd,LT,4400018,4400018. LTU - Democratic Party,Lietuvos demokratų partijos jungtinis sąrašas,341,name
+imd,LT,4400019,4400019. LTU - Political Refugees and Prisoners Union,Lietuvos politinių kalinių ir terminių sąjunga,753,hand
+imd,LT,4400022,4400022. LTU - Freedom Party,Laisvės partija,8982,name
+imd,LT,4400023,4400023. LTU - Lithuanian Social Democratic Labor Party,Lietuvos socialdemokratų darbo partija — Lietuvos regionų partija,7352,hand
+imd,LT,4400024,4400024. LTU - Center Party – Nationalists,Lietuvos Centro Partija,5455,hand
+imd,LT,4400025,4400025. LTU - Party Order and Justice,Tvarka ir teisingumas — Liberalų Demokratų Partija,237,name
+imd,LT,4400026,4400026. LTU - Lithuanian Green Party,Lietuvos žalioji partija,1407,name
+imd,LT,4400027,4400027. LTU - National Alliance,https://en.wikipedia.org/wiki/National_Alliance_(Lithuania),9096,name
+imd,LT,4400028,4400028. LTU - Political Party 'List of Lithuania',"Politinė partija ""Lietuvos sąrašas""",6738,hand
+imd,LT,4400029,4400029. LTU - Lithuanian People's Party,Lietuvos liaudies partija,8256,name
+imd,LT,4400030,4400030. LTU - Political Party 'The Way of Courage',Drąsos Kelias,74,hand
+imd,LT,4400031,4400031. LTU - Freedom and Justice,Lietuvos Laisvės Sąjunga (Liberalai),5456,name
+imd,LT,4400032,4400032. LTU - Lithuanian Freedom Union (Liberals),Lietuvos Laisvės Sąjunga (Liberalai),5456,hand
+imd,LT,4400035,4400035. LTU - Party 'Lithuania - For Everyone',Party 'Lithuania - For Everyone' [og],,hand
+imd,LT,4400036,4400036. LTU - Christian Union,Christian Union [og],,hand
+imd,LT,4400037,4400037. LTU - The Union of Generations' Solidarity - Unity for Lithuania,The Union of Generations' Solidarity - Unity for Lithuania [og],,hand
+imd,LT,4400101,4400101. LTU - A. Paulauskas (Independent),independent,,hand
+imd,LT,4400102,4400102. LTU - V. Adamkus (Independent),independent,,hand
+imd,LT,4400103,4400103. LTU - Leader F - R. Pavilionis,Leader F - R. Pavilionis [og],,hand
+imd,LT,4400200,4400200. LTU - Anti-Corruption Coalition,Anti-Corruption Coalition [og],,hand
+imd,LT,4400201,4400201. LTU - Coalition of Anti-Corruption and Poverty,Coalition of Anti-Corruption and Poverty [og],,hand
+imd,NL,5280001,5280001. NLD - Christian Democratic Appeal,Christen Democratisch Appèl,1157,link
+imd,NL,5280002,5280002. NLD - Labor Party,Partij van de Arbeid,1234,link
+imd,NL,5280003,5280003. NLD - People's Party for Freedom and Democracy,Volkspartij voor Vrijheid en Democratie,828,link
+imd,NL,5280004,5280004. NLD - Democrats 66,Democraten 66,45,link
+imd,NL,5280005,5280005. NLD - Green Left,GroenLinks,1537,link
+imd,NL,5280006,5280006. NLD - Socialist Party,Socialistiese Partij,1363,link
+imd,NL,5280007,5280007. NLD - Reformed Political Party,Staatkundig Gereformeerde Partij,1178,link
+imd,NL,5280008,5280008. NLD - Christian Union,ChristenUnie,1459,link
+imd,NL,5280009,5280009. NLD - Party for Freedom,Partij voor de Vrijheid,298,link
+imd,NL,5280011,5280011. NLD - Proud of the Netherlands,Trots op Nederland,1656,name
+imd,NL,5280012,5280012. NLD - One NL,One NL [og],,hand
+imd,NL,5280013,5280013. NLD - Party for the Animals,Partij voor de Dieren,1467,link
+imd,NL,5280014,5280014. NLD - List Pim Fortuyn,Lijst Pim Fortuyn,1528,link
+imd,NL,5280015,5280015. NLD - Local List,Local List [og],,hand
+imd,NL,5280016,5280016. NLD - Livable Netherlands,Leefbaar Nederland,1420,name
+imd,NL,5280017,5280017. NLD - United Seniors Party,Algemeen Ouderen Verbond / Verenigde Senioren Partij,994,hand
+imd,NL,5280021,5280021. NLD - Centre Democrats,Centrum Democraten,1472,name
+imd,NL,5280023,5280023. NLD - Communist Party of the Netherlands,Communist Party of the Netherlands [og],,hand
+imd,NL,5280026,5280026. NLD - Reformed Political Alliance,Gereformeerd Politiek Verbond,1602,link
+imd,NL,5280027,5280027. NLD - The Greens,De Groenen,1533,name
+imd,NL,5280030,5280030. NLD - Natural Law Party,Natural Law Party [og],,hand
+imd,NL,5280033,5280033. NLD - Pacifist Socialist Party,Pacifistisch Socialistische Partij,1050,name
+imd,NL,5280034,5280034. NLD - Party for the Future,Party for the Future [og],,hand
+imd,NL,5280035,5280035. NLD - Reformatory Political Federation,Reformatorisch Politieke Federatie,172,link
+imd,NL,5280038,5280038. NLD - Free Indian Party,Free Indian Party [og],,hand
+imd,NL,5280040,5280040. NLD - Union 55+,Unie 55+,873,name
+imd,NL,5280041,5280041. NLD - Seniors 2000,Seniors 2000 [og],,hand
+imd,NL,5280042,5280042. NLD - Mobile Netherlands,Mobile Netherlands [og],,hand
+imd,NL,5280048,5280048. NLD - 50Plus,50PLUS,714,name
+imd,NL,5280049,5280049. NLD - Political Movement Think,Beweging DENK,5856,hand
+imd,NL,5280050,5280050. NLD - Forum for Democracy,Forum voor Democratie,5855,name
+imd,NL,5280051,5280051. NLD - For Netherlands,For Netherlands [og],,hand
+imd,NL,5280052,5280052. NLD - Pirate Party,Pirate Party [og],,hand
+imd,NL,5280053,5280053. NLD - Together,Together [og],,hand
+imd,NL,5280054,5280054. NLD - New Ways,New Ways [og],,hand
+imd,NL,5280055,5280055. NLD - Entrepreneurs Party,Entrepreneurs Party [og],,hand
+imd,NL,5280056,5280056. NLD - Volt Netherlands,Volt Nederland,7355,name
+imd,NL,5280057,5280057. NLD - Correct Answer 2021,Juiste Antwoord21,9011,hand
+imd,NL,5280058,5280058. NLD - Farmer-Citizen Movement,BoerBurgerBeweging,9010,name
+imd,NL,5280059,5280059. NLD - Code Orange,Code Orange [og],,hand
+imd,NL,5280060,5280060. NLD - NIDA,NIDA [og],,hand
+imd,NL,5280061,5280061. NLD - Splinter,Splinter [og],,hand
+imd,NL,5280062,5280062. NLD - Young,Young [og],,hand
+imd,NL,5280063,5280063. NLD - Henk Krol List,Henk Krol List [og],,hand
+imd,NL,5280064,5280064. NLD - Netherlands Better,Netherlands Better [og],,hand
+imd,NL,5280066,5280066. NLD - Libertarian Party,Libertarian Party [og],,hand
+imd,NL,5280067,5280067. NLD - OpRecht,OpRecht [og],,hand
+imd,NL,5280068,5280068. NLD - Free and Social Netherlands,Free and Social Netherlands [og],,hand
+imd,PL,6160001,6160001. POL - Civic Platform,Platforma Obywatelska,1117,link
+imd,PL,6160002,6160002. POL - Law and Justice,Prawo i Sprawiedliwość,1565,link
+imd,PL,6160003,6160003. POL - Polish Peasants' (or People's) Party,Polskie Stronnictwo Ludowe,602,link
+imd,PL,6160004,6160004. POL - Solidarity Electoral Action,Akcja Wyborcza Solidarność Prawicy,863,link
+imd,PL,6160006,6160006. POL - Polish Labour Party,Polska Partia Pracy,3699,name
+imd,PL,6160007,6160007. POL - Labour Union,Unia Pracy,1104,link
+imd,PL,6160008,6160008. POL - Freedom Union,Unia Wolności,8268,link
+imd,PL,6160009,6160009. POL - Democratic Left Alliance,Sojusz Lewicy Demokratycznej,57,link
+imd,PL,6160010,6160010. POL - Movement for Reconstruction of Poland,Ruch Odbudowy Polski,1712,link
+imd,PL,6160014,6160014. POL - League of Polish Families,Liga Polskich Rodzin,1768,link
+imd,PL,6160015,6160015. POL - German Minority,Mniejszość niemiecka w Polsce,1439,name
+imd,PL,6160016,6160016. POL - Poland Comes First,Polska jest Najważniejsza,41,link
+imd,PL,6160017,6160017. POL - Palikots Movement,Ruch Palikota / Twój Ruch,731,link
+imd,PL,6160018,6160018. POL - Congress of the New Right,Kongres Nowej Prawicy,4713,name
+imd,PL,6160019,6160019. POL - Patriotic Self-Defense,Patriotic Self-Defense [og],,hand
+imd,PL,6160020,6160020. POL - Left and Democrats,Lewica i Demokraci,1588,link
+imd,PL,6160021,6160021. POL - Left Together,[Lewica] Razem,4871,hand
+imd,PL,6160022,6160022. POL - Modern,Nowoczesna,4630,name
+imd,PL,6160024,6160024. POL - Self-Defense of the Republic Poland,Samoobrona Rzeczypospolitej Polskiej,727,link
+imd,PL,6160025,6160025. POL - Kukiz'15,Kukiz'15,4631,name
+imd,PL,6160026,6160026. POL - Our Home Poland,Our Home Poland [og],,hand
+imd,PL,6160027,6160027. POL - Real Politics Union,Unia Polityki Realnej,283,name
+imd,PL,6160028,6160028. POL - Confederation of Independent Poland,Konfederacja Polski Niepodległej,1615,name
+imd,PL,6160029,6160029. POL - National Party of Pensioners and Retired,Krajowa Partia Emerytów i Rencistów,391,link
+imd,PL,6160030,6160030. POL - National Agreement of Pensioners and Retired of the Republic Poland,Krajowe Porozumienie Emerytów i Rencistów Rzeczypospolitej Polskiej,1534,link
+imd,PL,6160032,6160032. POL - Nonpartisan Local Government Activists,Nonpartisan Local Government Activists [og],,hand
+imd,PL,6160033,6160033. POL - Spring,Wiosna,7356,name
+imd,PL,6160034,6160034. POL - Alternative Social Movement,Alternative Social Movement [og],,hand
+imd,PL,6160035,6160035. POL - Center Party,Center Party [og],,hand
+imd,PL,6160037,6160037. POL - Christian Democracy,Chrześcijańska Demokracja,468,name
+imd,PL,6160038,6160038. POL - Ancestral Home,Ancestral Home [og],,hand
+imd,PL,6160040,6160040. POL - Citizen's Forum  - Christian Democracy,Citizen's Forum  - Christian Democracy [og],,hand
+imd,PL,6160041,6160041. POL - Feminist Initiative,Feminist Initiative [og],,hand
+imd,PL,6160042,6160042. POL - Partia Inicjatywa,Partia Inicjatywa [og],,hand
+imd,PL,6160044,6160044. POL - National Christian Democratic - Bloc for Poland,Narodowo Chrześcijańsko Demokratyczny - Blok dla Polski,145,link
+imd,PL,6160045,6160045. POL - New Left,New Left [og],,hand
+imd,PL,6160047,6160047. POL - Peasant Party 'Ojcowizna' RP,Peasant Party 'Ojcowizna' RP [og],,hand
+imd,PL,6160049,"6160049. POL - Citiezens' Committee for the Defence of Opolszczyzna, Poland","Citiezens' Committee for the Defence of Opolszczyzna, Poland [og]",,hand
+imd,PL,6160051,6160051. POL - Democratic Party,Stronnictwo Demokratyczne,919,link
+imd,PL,6160052,6160052. POL - Polish National Party,Polish National Party [og],,hand
+imd,PL,6160053,6160053. POL - Polish Socialist Party,Polska Partia Socjalistyczna,4354,name
+imd,PL,6160057,6160057. POL - Polish National Party,Polish National Party [og],,hand
+imd,PL,6160063,6160063. POL - Ruch Ludzi Pracy,Ruch Ludzi Pracy [og],,hand
+imd,PL,6160064,6160064. POL - Family-Homeland,Family-Homeland [og],,hand
+imd,PL,6160065,6160065. POL - Patriotic Movement of the Republic of Poland,Patriotic Movement of the Republic of Poland [og],,hand
+imd,PL,6160066,6160066. POL - Social Movement-Solidarity Electoral Action,Akcja Wyborcza Solidarność Prawicy,863,hand
+imd,PL,6160068,6160068. POL - Social Democracy of Poland,Socjaldemokracja Polska,1328,link
+imd,PL,6160069,6160069. POL - Social Democracy of the Republic of Poland,Socjaldemokracja Rzeczypospolitej Polskiej,8224,name
+imd,PL,6160070,6160070. POL - Coalition Of The Alliance Of The Democratic Left - The Union of Labor,Sojusz Lewicy Demokratycznej — Unia Pracy,6183,link
+imd,PL,6160071,6160071. POL - Union of the Republic's Rightists,Unia Polityki Realnej,283,link
+imd,PL,6160072,6160072. POL - Christian National Union,Zjednoczenie Chrześcijańsko-Narodowe,70,name
+imd,PL,6160074,6160074. POL - 'Jednomandatowe Okregi Wyborcze','Jednomandatowe Okregi Wyborcze' [og],,hand
+imd,PL,6160075,6160075. POL - 'Klub Sluzby Niepodleglsoci- Okregu Wyborczego Nr 10','Klub Sluzby Niepodleglsoci- Okregu Wyborczego Nr 10' [og],,hand
+imd,PL,6160076,6160076. POL - 'Slask W Europie','Slask W Europie' [og],,hand
+imd,PL,6160077,6160077. POL - 'Niezale na i bezpartyjna','Niezale na i bezpartyjna' [og],,hand
+imd,PL,6160078,6160078. POL - Alliance of the Polish Right,Alliance of the Polish Right [og],,hand
+imd,PL,6160079,6160079. POL - Bogdana Jorusewicza,Bogdana Jorusewicza [og],,hand
+imd,PL,6160082,6160082. POL - Committee of voters,Committee of voters [og],,hand
+imd,PL,6160083,6160083. POL - Conservative Peasent Party,Stronnictwo Konserwatywno-Ludowe,8766,hand
+imd,PL,6160084,6160084. POL - German Minority - Prawoslawni Slavic Ethnic Association - 'Orthodox Believers',German Minority - Prawoslawni Slavic Ethnic Association - 'Orthodox Believers' [og],,hand
+imd,PL,6160085,6160085. POL - German Minority Association In Olsztyn,Mniejszość niemiecka w Polsce,1439,hand
+imd,PL,6160087,6160087. POL - German Minority Of Upper Silesia,Mniejszość niemiecka w Polsce,1439,hand
+imd,PL,6160088,6160088. POL - Henryk Tadeusz Stoklosa,Henryk Tadeusz Stoklosa [og],,hand
+imd,PL,6160090,6160090. POL - Kazimierza Juliana Kutza,Kazimierza Juliana Kutza [og],,hand
+imd,PL,6160091,6160091. POL - Labor Solidarity,Labor Solidarity [og],,hand
+imd,PL,6160092,6160092. POL - Lech Kaczynski sympathizer,Lech Kaczynski sympathizer [og],,hand
+imd,PL,6160093,6160093. POL - Leszka Ireneusza Paradowskiego,Leszka Ireneusza Paradowskiego [og],,hand
+imd,PL,6160094,6160094. POL - Ludowy Kww Jozefa Sztorca,Ludowy Kww Jozefa Sztorca [og],,hand
+imd,PL,6160095,6160095. POL - Macieja Plazynskiego,Macieja Plazynskiego [og],,hand
+imd,PL,6160097,6160097. POL - Niezalezny Pozapartyjny Komitet Wyborczy Wyborcow,Niezalezny Pozapartyjny Komitet Wyborczy Wyborcow [og],,hand
+imd,PL,6160098,6160098. POL - O Lepsza Polske,O Lepsza Polske [og],,hand
+imd,PL,6160099,6160099. POL - Odnowa Rzeczypospolitej Polskiej,Odnowa Rzeczypospolitej Polskiej [og],,hand
+imd,PL,6160100,6160100. POL - Orlowska,Orlowska [og],,hand
+imd,PL,6160101,6160101. POL - Platforma Janusza Korwin-Mikke,Platforma Janusza Korwin-Mikke,913,link
+imd,PL,6160103,6160103. POL - Polish Confederation - Dignity Work,Polish Confederation - Dignity Work [og],,hand
+imd,PL,6160104,6160104. POL - Polish Economic Union,Polish Economic Union [og],,hand
+imd,PL,6160109,6160109. POL - Ryszard Matusiak,Ryszard Matusiak [og],,hand
+imd,PL,6160110,6160110. POL - Senate 2001 coalition,Senate 2001 coalition [og],,hand
+imd,PL,6160111,6160111. POL - Sij. Ludzi Pracy-Polska Praca Sprawiedl,Sij. Ludzi Pracy-Polska Praca Sprawiedl [og],,hand
+imd,PL,6160112,6160112. POL - Social and Cultural Association of Opole Silesia German,Mniejszość niemiecka w Polsce,1439,hand
+imd,PL,6160114,6160114. POL - Solidarity 80 Trade Union,Solidarity 80 Trade Union [og],,hand
+imd,PL,6160116,6160116. POL - Taduesz Dabrowski,Taduesz Dabrowski [og],,hand
+imd,PL,6160117,6160117. POL - Teresy Liszcz,Teresy Liszcz [og],,hand
+imd,PL,6160118,6160118. POL - Worker's Movement,Worker's Movement [og],,hand
+imd,PL,6160123,6160123. POL - United Right,United Right [og],,hand
+imd,PL,6160124,6160124. POL - Civic Coalition,Koalicja Obywatelska,9122,name
+imd,PL,6160125,6160125. POL - Polish Coalition,Polskie Stronnictwo Ludowe,602,name
+imd,PL,6160126,6160126. POL - The Left,The Left [og],,hand
+imd,PL,6160127,6160127. POL - Confederation Liberty and Independence,Konfederacja Wolność i Niepodległość,9026,name
+imd,PT,6200001,6200001. PRT - Social Democratic Party,Partido Popular Democrático / Partido Social Democrata,1359,link
+imd,PT,6200002,6200002. PRT - Socialist Party,Partido Socialista,655,link
+imd,PT,6200003,6200003. PRT - Democratic and Social Centre - People's Party,Centro Democrático e Social / Partido Popular,1308,link
+imd,PT,6200004,6200004. PRT - Unitarian Democratic Coalition,Coligação Democrática Unitária,284,link
+imd,PT,6200005,6200005. PRT - Ecologist Party 'The Greens',Partido Ecologista — Os Verdes,886,link
+imd,PT,6200006,6200006. PRT - Left Block,Bloco de Esquerda,1310,link
+imd,PT,6200007,6200007. PRT - Portugese Communist Worker's Party,Comunista dos Trabalhadores Portugueses / Movimento Reorganizativo do Partido do Proletariado,857,link
+imd,PT,6200008,6200008. PRT - Portugese Communist Party,Partido Comunista Português,310,link
+imd,PT,6200009,6200009. PRT - Merit and Society Movement,Merit and Society Movement [og],,hand
+imd,PT,6200010,6200010. PRT - Enough,Chega,8182,name
+imd,PT,6200011,6200011. PRT - Portugal Ahead,Portugal à Frente,5939,link
+imd,PT,6200012,6200012. PRT - Liberal Initiative,Iniciativa Liberal,8640,name
+imd,PT,6200013,6200013. PRT - Free,"Livre — Liberdade, Esquerda, Europa e Ecologia",3225,name
+imd,PT,6200015,6200015. PRT - People's Monarchist Party,Partido Popular Monárquico,1480,name
+imd,PT,6200017,6200017. PRT - Earth Party,Movimento Partido da Terra / Partido da Terra,3226,name
+imd,PT,6200018,6200018. PRT - Hope for Portugal,Movimento Esperança Portugal,1727,hand
+imd,PT,6200020,6200020. PRT - Democratic Republican Party,Partido Democrático Republicano,4513,link
+imd,PT,6200021,6200021. PRT - Revolutionary Socialist Party,Partido Socialista Revolucionário,375,name
+imd,PT,6200023,6200023. PRT - Popular Democratic Union,União Democrática Popular,896,name
+imd,PT,6200026,6200026. PRT - Humanist Party,Partido Humanista,8269,name
+imd,PT,6200028,"6200028. PRT - Party for People, Animals and Nature",Partido pelos Animais e pela Natureza,97,link
+imd,PT,6200029,6200029. PRT - Alliance,Aliança,7357,name
+imd,RO,6420001,6420001. ROU - Romanian Party of Social Democracy,Partidul Social Democrat,120,link
+imd,RO,6420002,6420002. ROU - People's Party - Dan Diaconescu,Partidul Poporului — Dan Diaconescu,2474,link
+imd,RO,6420003,6420003. ROU - Democratic Union of Hungarians in Romania,Uniunea Democrată Maghiară din România / Romániai Magyar Demokrata Szövetség,1105,link
+imd,RO,6420004,6420004. ROU - Greater Romania Party,Partidul România Mare,1305,link
+imd,RO,6420005,6420005. ROU - National Liberal Party,Partidul Naţional Liberal,481,hand
+imd,RO,6420006,6420006. ROU - Romanian Ecologist Party,Partidul Ecologist Român,1373,name
+imd,RO,6420007,6420007. ROU - National Peasant and Christian Democratic Party,Partidul Naţional Ţărănesc Creştin Democrat,1750,link
+imd,RO,6420008,6420008. ROU - New Republic Party,New Republic Party [og],,hand
+imd,RO,6420009,6420009. ROU - New Generation Party - Christian Democratic,Partidul Noua Generaţie — Creştin Democrat,296,link
+imd,RO,6420010,6420010. ROU - Conservative Party,Partidul Conservator / Partidul Umanist Român,1443,hand
+imd,RO,6420011,6420011. ROU - Social Liberal Union,Uniunea Social Liberală,5941,link
+imd,RO,6420013,6420013. ROU - Save Romania Union,Uniunea Salvați România,5969,name
+imd,RO,6420016,6420016. ROU - Hungarian People's Party of Transylvania,Hungarian People's Party of Transylvania [og],,hand
+imd,RO,6420017,6420017. ROU - Socialist Alternative Party/Romanian Socialist Party,Socialist Alternative Party/Romanian Socialist Party [og],,hand
+imd,RO,6420018,6420018. ROU - PRODEMO Party,PRODEMO Party [og],,hand
+imd,RO,6420019,6420019. ROU - Democratic Party,Partidul Democrat,1715,link
+imd,RO,6420020,6420020. ROU - Democratic Liberal Party,Partidul Democrat-Liberal,660,link
+imd,RO,6420021,6420021. ROU - Civic Force,Forța Civică,2473,name
+imd,RO,6420022,6420022. ROU - Romanian Democratic Convention,Convenţia Democrată Română,192,link
+imd,RO,6420023,6420023. ROU - New Generation Party,Partidul Noua Generaţie — Creştin Democrat,296,link
+imd,RO,6420024,6420024. ROU - Romanian Humanist Party,Partidul Conservator / Partidul Umanist Român,1443,link
+imd,RO,6420026,6420026. ROU - Justice and Truth Alliance,Alianţa Dreptate şi Adevăr,215,link
+imd,RO,6420027,6420027. ROU - Social Democratic Union,Partidul Social Democrat,120,link
+imd,RO,6420028,6420028. ROU - Romanian Party for National Unity,Partidul Unitatii Naţionale a Romanilor,1451,link
+imd,RO,6420029,6420029. ROU - Civic Alliance Party,Partidul Alianţa Civică,645,hand
+imd,RO,6420030,6420030. ROU - Republican Party,Partidul Republican,1457,name
+imd,RO,6420031,6420031. ROU - Party of the Roma,Partida Romilor,173,name
+imd,RO,6420032,6420032. ROU - Socialist Party,Partidul Socialist,1073,name
+imd,RO,6420035,6420035. ROU - Liberal Party 1993,Partidul Liberal '93,9108,name
+imd,RO,6420036,6420036. ROU - Romanian Socialist Party,Partidul Alternativa Socialista,7035,name
+imd,RO,6420038,6420038. ROU - National Liberal Alliance,National Liberal Alliance [og],,hand
+imd,RO,6420040,6420040. ROU - Romanian Agrarian Democratic Party,Partidul Democrat Agrar din România,1085,link
+imd,RO,6420041,6420041. ROU - National Alliance PSD+PUR,Uniunea Naţională PSD+PUR,1347,link
+imd,RO,6420042,6420042. ROU - Labour Socialist Party,Partidul Socialist al Muncii,1217,hand
+imd,RO,6420044,6420044. ROU - National Drivers Party,National Drivers Party [og],,hand
+imd,RO,6420046,6420046. ROU - National Union of the Center,National Union of the Center [og],,hand
+imd,RO,6420049,6420049. ROU - National Liberal Party - Campeanu,Partidul National Liberal Campeanu,967,name
+imd,RO,6420050,6420050. ROU - National Liberal Party - Democratic Convention,National Liberal Party - Democratic Convention [og],,hand
+imd,RO,6420051,6420051. ROU - Pensionist Party,Partidul Pensionarilor din Romania,400,hand
+imd,RO,6420052,6420052. ROU - Romanian Social Democratic Party,Partidul Social Democrat Român,1034,link
+imd,RO,6420053,6420053. ROU - Alliance of Liberals and Democrats,Alianța Liberalilor și Democraților,5662,name
+imd,RO,6420054,6420054. ROU - United Romania Party,Partidul România Unită,5854,name
+imd,RO,6420055,6420055. ROU - Our Romania Alliance,Our Romania Alliance [og],,hand
+imd,RO,6420101,6420101. ROU - PSD-UNPR-PC Electoral Alliance,PSD-UNPR-PC Electoral Alliance [og],,hand
+imd,RO,6420102,6420102. ROU - Christian-Liberal Alliance,Christian-Liberal Alliance [og],,hand
+imd,RO,6420103,6420103. ROU - Popular Movement Party,Partidul Mișcarea Populară,3210,link
+imd,RO,6420111,6420111. ROU - Social Democratic Party - Conservative Party,Alianța PSD+PC,6153,link
+imd,RO,6420200,6420200. ROU - Alliance for a Just Romania,Alianţa România Dreaptă,5940,link
+imd,RO,6420300,6420300. ROU - Independent (Calin-Constantin-Anton Popescu-Tariceanu),independent,,hand
+imd,RO,6420301,6420301. ROU - Independent (Monica-Luisa Macovei),independent,,hand
+imd,RO,6420302,6420302. ROU - Sorin Oprescu (Independent),independent,,hand
+imd,SK,7030001,7030001. SVK - Direction - Social Democracy,Smer — sociálna demokracia,311,link
+imd,SK,7030002,7030002. SVK - Freedom and Solidarity,Sloboda a Solidarita,1386,link
+imd,SK,7030003,7030003. SVK - Slovak Democratic and Christian Union - Democratic Party,Slovenská demokratická a kresťanská únia — Demokratická strana,1617,link
+imd,SK,7030004,7030004. SVK - Christian Democratic Movement,Kresťanskodemokratické hnutie,63,link
+imd,SK,7030005,7030005. SVK - Green Party,Strana zelených [na Slovensku],1569,hand
+imd,SK,7030006,7030006. SVK - Slovak National Party,Slovenská národná strana,730,link
+imd,SK,7030008,7030008. SVK - Bridge,MOST-HID,258,link
+imd,SK,7030009,7030009. SVK - Ordinary People - Independent Personalities,Obyčajní Ľudia a Nezávislé Osobnosti,2130,link
+imd,SK,7030010,7030010. SVK - People's Party - Movement For a Democratic Slovakia,Ľudová strana — Hnutie za demokratické Slovensko,560,link
+imd,SK,7030012,7030012. SVK - People's Party - Our Slovakia,Ľudová strana Naše Slovensko,656,link
+imd,SK,7030013,7030013. SVK - Network/Slovak Conservative Party,Sieť — Slovenská konzervatívna strana,4872,link
+imd,SK,7030014,7030014. SVK - We are family,Sme Rodina — Boris Kollár,4873,link
+imd,SK,7030015,7030015. SVK - Party Of The Hungarian Coalition,Strana maďarskej koalície / Strana maďarskej komunity,349,link
+imd,SK,7030016,7030016. SVK - Party Of The Democratic Left,Strana demokratickej ľavice,1242,link
+imd,SK,7030017,7030017. SVK - For the People,Za ľudí,8394,name
+imd,SK,7030018,7030018. SVK - Progressive Slovakia,Progresívne Slovensko,7361,name
+imd,SK,7030019,7030019. SVK - TOGHETHER - Civic Democracy,Spolu — občianska demokracia,8177,hand
+imd,SK,7030020,7030020. SVK - Voice - Social Democracy,HLAS – sociálna demokracia,9071,name
+imd,SK,7030022,7030022. SVK - Alliance for a Europe of Nations,Alliance for a Europe of Nations [og],,hand
+imd,SK,7030024,7030024. SVK - Chance,Chance [og],,hand
+imd,SK,7030025,7030025. SVK - Civic Conservative Party,Obcianska konzervatívna strana,665,name
+imd,SK,7030026,7030026. SVK - Coalition Together for Slovakia,Coalition Together for Slovakia [og],,hand
+imd,SK,7030027,7030027. SVK - Communist Party of Slovakia,Komunistická strana Slovenska,340,hand
+imd,SK,7030029,7030029. SVK - Democratic Party,Democratic Party [og],,hand
+imd,SK,7030030,7030030. SVK - Democrats of Slovakia,Democrats of Slovakia [og],,hand
+imd,SK,7030034,7030034. SVK - Hungarian Coalition,Strana maďarskej koalície / Strana maďarskej komunity,349,link
+imd,SK,7030038,7030038. SVK - Party of Modern Slovakia,Party of Modern Slovakia [og],,hand
+imd,SK,7030039,7030039. SVK - Party TIP,Strana TIP — Tvoríme inú politiku,3222,hand
+imd,SK,7030041,7030041. SVK - Roman Coalition Party,Roman Coalition Party [og],,hand
+imd,SK,7030042,7030042. SVK - Slovak Citizens Coalition,Slovak Citizens Coalition [og],,hand
+imd,SK,7030043,7030043. SVK - Union of the Workers of Slovakia,Združenie robotníkov Slovenska,230,name
+imd,SK,7030044,7030044. SVK - Union Party for Slovakia,Union Party for Slovakia [og],,hand
+imd,SK,7030045,7030045. SVK - Vesela Politicka Stranka,Vesela Politicka Stranka [og],,hand
+imd,SK,7030046,7030046. SVK - Courage - Great National and Prussian Coalition,Courage - Great National and Prussian Coalition [og],,hand
+imd,SK,7030059,7030059. SVK - Good Choice,Dobrá voľba,8644,name
+imd,SK,7030060,7030060. SVK - Homeland,Vlasť,8643,name
+imd,SK,7030061,7030061. SVK - Socialist.sk,Socialist.sk [og],,hand
+imd,SK,7030062,7030062. SVK - Hlinka's Slovak People's Party,Hlinkova slovenská ľudová strana,6983,name
+imd,SK,7030063,7030063. SVK - Mayors and Independents,Mayors and Independents [og],,hand
+imd,SK,7030064,7030064. SVK - Labor of the Slovak Nation,Labor of the Slovak Nation [og],,hand
+imd,SK,7030065,7030065. SVK - Christian Union,Kresťanská únia,7360,name
+imd,SK,7030100,7030100. SVK - Progressive Slovakia - TOGETHER-Civic Democracy,Progressive Slovakia - TOGETHER-Civic Democracy [og],,hand
+imd,SK,7030101,7030101. SVK - Hungarian Community Togetherness,Hungarian Community Togetherness [og],,hand
+imd,SI,7050001,7050001. SVN - Slovenian Democratic Party,Slovenska demokratska stranka,472,link
+imd,SI,7050002,7050002. SVN - Social Democrats,Socialni demokrati / Združena lista socialnih demokratov,1403,link
+imd,SI,7050003,7050003. SVN - Democratic Party of Pensioners,Demokratična stranka upokojencev Slovenije,467,link
+imd,SI,7050004,7050004. SVN - Liberal Democracy of Slovenia,Liberalna demokracija Slovenije,975,link
+imd,SI,7050005,7050005. SVN - Green Party of Slovenia,Zeleni Slovenije,1494,hand
+imd,SI,7050006,7050006. SVN - Slovenian People's Party,Slovenska ljudska stranka,764,link
+imd,SI,7050007,7050007. SVN - New Slovenia-Christian People's Party,Nova Slovenija — Krščanska ljudska stranka,1618,link
+imd,SI,7050008,7050008. SVN - Slovenian National Party,Slovenska nacionalna stranka,96,link
+imd,SI,7050009,7050009. SVN - Gregor Virant's Civic List,Državljanska lista,98,link
+imd,SI,7050013,7050013. SVN - Democratic Party,Slovenska demokratska stranka,472,link
+imd,SI,7050014,7050014. SVN - Active Slovenia,Aktivna Slovenija,1302,name
+imd,SI,7050016,7050016. SVN - Zoran Jankovic List - Positive Slovenia,Lista Zorana Jankovića — Pozitivna Slovenija,1773,link
+imd,SI,7050017,7050017. SVN - Christian Democrats,Slovenski krščanski demokrati,644,link
+imd,SI,7050019,7050019. SVN - Slovenian People's Party - Youth Party of Slovenia,Slovenska ljudska stranka,764,link
+imd,SI,7050020,7050020. SVN - For Real-New Politics,Zares,474,link
+imd,SI,7050022,7050022. SVN - Youth Party of Slovenia,Stranka mladih Slovenije,1401,name
+imd,ES,7240001,7240001. ESP - Spanish Socialist Workers' Party,Partido Socialista Obrero Español,1338,link
+imd,ES,7240002,7240002. ESP - People's Party,Partido Progresista,5750,link
+imd,ES,7240003,7240003. ESP - Convergence and Union,Convergència i Unió,139,link
+imd,ES,7240004,7240004. ESP - United Left,Izquierda Unida,247,link
+imd,ES,7240005,7240005. ESP - Basque Nationalist Party,Partido Nacionalista Vasco — Euzko Alderdi Jeltzalea,1637,link
+imd,ES,7240008,7240008. ESP - Galician Nationalist Bloc,Bloque Nacionalista Galego,1011,link
+imd,ES,7240009,7240009. ESP - Republican Left of Catalonia,Esquerra Republicana de Catalunya,848,link
+imd,ES,7240010,7240010. ESP - Basque Solidarity,Eusko Alkartasuna,1324,name
+imd,ES,7240012,"7240012. ESP - Union, Progress and Democracy",Unión Progreso y Democracia,55,name
+imd,ES,7240013,7240013. ESP - Canary Coalition,Coalición Canaria,81,link
+imd,ES,7240014,7240014. ESP - Canarian Coalition - Canarian Nationalist Party,Acuerdo de Unidad Nacionalista,8262,link
+imd,ES,7240015,7240015. ESP - Canarian Independent Center,Canarian Independent Center [og],,hand
+imd,ES,7240017,7240017. ESP - The Ecologists,Los Verdes Ecologistas,2455,link
+imd,ES,7240026,7240026. ESP - Aragoneses Party,Partido Aragonés Regionalista,946,hand
+imd,ES,7240027,7240027. ESP - Nafarroa Bai,Nafarroa Bai,611,name
+imd,ES,7240028,7240028. ESP - United People,Herri Batasuna,473,name
+imd,ES,7240032,7240032. ESP - Valencian Union,Union Valenciana,1094,name
+imd,ES,7240034,7240034. ESP - Partido Socialista Mallorquan,Partido Socialista Mallorquan [og],,hand
+imd,ES,7240042,7240042. ESP - Navarrese People's Union,Union del Pueblo Navarro,722,name
+imd,ES,7240045,7240045. ESP - Aragonese Council,Chunta Aragonesista,1564,hand
+imd,ES,7240050,7240050. ESP - Andalusian Party,Partidu Andalucista,1497,link
+imd,SE,7520001,7520001. SWE - Sweden's Social Democratic Worker's Party,Socialdemokraterna / Sveriges socialdemokratiska arbetareparti,487,link
+imd,SE,7520002,7520002. SWE - Moderate Party,Allmänna valmansförbundet / Högern / Högerpartiet / Moderata samlingspartiet,690,link
+imd,SE,7520003,7520003. SWE - Liberal People's Party/Liberals,Folkpartiet liberalerna / Liberalerna,1274,link
+imd,SE,7520004,7520004. SWE - Christian Democrats,Kristdemokraterna,651,link
+imd,SE,7520005,7520005. SWE - Green Party,Miljöpartiet de gröna,456,link
+imd,SE,7520006,7520006. SWE - Centre Party,Bondeförbundet / Centerpartiet,199,link
+imd,SE,7520007,7520007. SWE - Left Party,Vänsterpartiet / Sveriges Komunistiska Parti,830,link
+imd,SE,7520008,7520008. SWE - Sweden Democrats,Sverigedemokraterna,409,link
+imd,SE,7520009,7520009. SWE - Feminist Party,Feministiskt initiativ,1240,link
+imd,GB,8260001,8260001. GBR - Conservatives,Conservatives,1567,link
+imd,GB,8260002,8260002. GBR - Labor,Labour Party,1516,link
+imd,GB,8260003,8260003. GBR - Liberal Democrats,Liberal Democrats,1388,link
+imd,GB,8260004,8260004. GBR - Scottish National Party,Scottish National Party,986,link
+imd,GB,8260005,8260005. GBR - Green Party,Green Party of England and Wales,1794,link
+imd,GB,8260006,8260006. GBR - Plaid Cymru,Plaid Cymru,1002,link
+imd,GB,8260007,8260007. GBR - United Kingdom Independence Party,United Kingdom Independence Party,601,link
+imd,GB,8260008,8260008. GBR - Brexit Party,Brexit Party,7364,name
+imd,,9999988,9999988. NONE OF THE CANDIDATES/PARTIES,none,,special
+imd,,9999989,9999989. INDEPENDENT CANDIDATE,independent,,special
+imd,,9999990,9999990. OTHER LEFT WING CANDIDATE/PARTY,other,,special
+imd,,9999991,9999991. OTHER RIGHT WING CANDIDATE/PARTY,other,,special
+imd,,9999992,9999992. OTHER CANDIDATE/PARTY (NOT FURTHER SPECIFIED),other,,special
+imd,,9999993,9999993. INVALID/BLANK BALLOT,blank-invalid,,special
+imd,,9999995,9999995. NOT APPLICABLE: NO DISTRICT CANDIDATE VOTE,,,special
+imd,,9999996,9999996. NOT APPLICABLE: NO PRESIDENTIAL ELECTION,,,special
+imd,,9999997,9999997. VOLUNTEERED: REFUSED,refused,,special
+imd,,9999998,9999998. VOLUNTEERED: DON'T KNOW,dont-know,,special
+imd,,9999999,9999999. MISSING/ABSTAINED (DID NOT VOTE),,,special
+mod6,AT,40001,040001. aut - freedom party of austria,Freiheitliche Partei Österreichs,463,name
+mod6,AT,40002,040002. aut - austrian people's party,Österreichische Volkspartei,1329,name
+mod6,AT,40003,040003. aut - social democratic party of austria,Sozialdemokratische Partei Österreichs,1384,name
+mod6,AT,40004,040004. aut - neos - the new austria and liberal forum,NEOS — Das Neue Österreich,1970,name
+mod6,AT,40005,040005. aut - the greens - the green alternative,Die Grünen — Die grüne Alternative,1659,name
+mod6,AT,40006,040006. aut - communist party of austria - kpo plus,Kommunistische Partei Österreichs,996,hand
+mod6,AT,40007,040007. aut - the beer party,the beer party [og],,hand
+mod6,AT,40008,040008. aut - madeleine petrovic list,madeleine petrovic list [og],,hand
+mod6,AT,40009,040009. aut - change,change [og],,hand
+mod6,AT,40010,040010. aut - mfg austria - people freedom fundamental rights,Menschen Freiheit Grundrechte,9022,name
+mod6,AT,40011,040011. aut - gaza list: voices against the genocide,gaza list: voices against the genocide [og],,hand
+mod6,AT,40013,040013. aut - jetzt - pilz list,Liste Peter Pilz,6137,name
+mod6,DK,208001,208001. dnk - social democrats,Socialdemokraterne,379,name
+mod6,DK,208002,"208002. dnk - venstre, denmark's liberal party",Venstre,1204,bridge
+mod6,DK,208003,208003. dnk - moderates,Moderaterne,9063,name
+mod6,DK,208004,208004. dnk - socialist people's party,Socialistisk Folkeparti,329,name
+mod6,DK,208005,208005. dnk - denmark democrats - inger stojberg,Danmarksdemokraterne,9062,hand
+mod6,DK,208006,208006. dnk - liberal alliance,[Ny] Liberal Alliance,212,name
+mod6,DK,208007,208007. dnk - conservative people's party,Konservative Folkeparti,536,name
+mod6,DK,208008,208008. dnk - unity list - red-green alliance,Enhedslisten / De Rød-Grønne,1527,name
+mod6,DK,208009,208009. dnk - danish social liberal party,Det Radikale Venstre,1507,name
+mod6,DK,208010,208010. dnk - the new right,Nye Borgerlige,7339,name
+mod6,DK,208011,208011. dnk - the alternative,Alternativet,4070,name
+mod6,DK,208012,208012. dnk - danish people's party,Dansk Folkeparti,1022,name
+mod6,DK,208013,208013. dnk - independent greens,Frie Grønne – Danmarks nye venstrefløjsparti,9481,hand
+mod6,DK,208014,208014. dnk - christian democrats,Kristeligt Folkeparti / Kristendemokraterne,53,name
+mod6,DK,208015,208015. dnk - hard line,Stram Kurs,7338,name
+mod6,DK,208016,208016. dnk - klaus riskaer pedersen list,klaus riskaer pedersen list [og],,hand
+mod6,FR,250001,250001. fra - the republic onwards!,La République En Marche! / Renaissance,5857,name
+mod6,FR,250002,250002. fra - national rally,Front National / Rassemblement national,433,name
+mod6,FR,250003,250003. fra - indomitable france,La France Insoumise,5858,name
+mod6,FR,250004,250004. fra - reconquest,Reconquête,9064,name
+mod6,FR,250005,250005. fra - the republicans,Les Républicains,8168,hand
+mod6,FR,250006,250006. fra - europe ecology - the greens,Europe Écologie — Les Verts,5650,bridge
+mod6,FR,250007,250007. fra - resist!,Résistons !,9876,name
+mod6,FR,250008,250008. fra - french communist party,Parti communiste française,1251,name
+mod6,FR,250009,250009. fra - france arise,Debout la France,3207,name
+mod6,FR,250010,250010. fra - socialist party,Parti socialiste,1478,name
+mod6,FR,250011,250011. fra - new anticapitalist party,Nouveau Parti Anticapitaliste,6684,name
+mod6,FR,250012,250012. fra - workers' struggle,Lutte ouvrière,617,name
+mod6,FR,250013,250013. fra - popular republican union,Union Populaire Républicaine,7344,name
+mod6,FR,250014,250014. fra - solidarity and progress,solidarity and progress [og],,hand
+mod6,FR,250015,250015. fra - democratic movement,Mouvement démocrate,496,bridge
+mod6,PL,616001,616001. pol - united right,Prawo i Sprawiedliwość,1565,name
+mod6,PL,616002,616002. pol - civic coalition,Koalicja Obywatelska,9122,hand
+mod6,PL,616003,616003. pol - third way,Polska 2050,9027,name
+mod6,PL,616004,616004. pol - the left,Nowa Lewica,9349,hand
+mod6,PL,616005,616005. pol - polish people's party,Polskie Stronnictwo Ludowe,602,hand
+mod6,PL,616006,616006. pol - confederation liberty and independence,Konfederacja Wolność i Niepodległość,9026,name
+mod6,PL,616007,616007. pol - sovereign poland,Suwerenna Polska,9109,hand
+mod6,PL,616008,616008. pol - left together,[Lewica] Razem,4871,hand
+mod6,PL,616009,616009. pol - nonpartisan local government activists,nonpartisan local government activists [og],,hand
+mod6,PL,616010,616010. pol - there is one poland,there is one poland [og],,hand
+mod6,PL,616011,616011. pol - modern,Nowoczesna,4630,name
+mod6,PL,616012,616012. pol - new hope,new hope [og],,hand
+mod6,PL,616013,616013. pol - confederation of the polish crown,confederation of the polish crown [og],,hand
+mod6,PL,616014,616014. pol - agreement,Porozumienie,9025,name
+mod6,PL,616015,616015. pol - polish coalition,Polskie Stronnictwo Ludowe,602,name
+mod6,PL,616099,616099. pol - senate pact 2023 (not further specified),senate pact 2023 (not further specified) [og],,hand
+mod6,PT,620001,620001. prt - socialist party,Partido Socialista,655,name
+mod6,PT,620002,620002. prt - social democratic party,Partido Popular Democrático / Partido Social Democrata,1359,name
+mod6,PT,620003,620003. prt - enough,Chega,8182,name
+mod6,PT,620004,620004. prt - liberal initiative,Iniciativa Liberal,8640,name
+mod6,PT,620005,620005. prt - left bloc,Bloco de Esquerda,1310,name
+mod6,PT,620006,620006. prt - unitarian democratic coalition,Coligação Democrática Unitária,284,name
+mod6,PT,620007,620007. prt - democratic and social center - people's party,Centro Democrático e Social / Partido Popular,1308,name
+mod6,PT,620008,"620008. prt - party for people, animals and nature",Partido pelos Animais e pela Natureza,97,name
+mod6,PT,620009,620009. prt - free,"Livre — Liberdade, Esquerda, Europa e Ecologia",3225,name
+mod6,PT,620101,620101. prt - democratic alliance,Partido Popular Democrático / Partido Social Democrata,1359,bridge
+mod6,PT,620102,620102. prt - socialist party,Partido Socialista,655,name
+mod6,PT,620103,620103. prt - enough,Chega,8182,name
+mod6,PT,620104,620104. prt - liberal initiative,Iniciativa Liberal,8640,name
+mod6,PT,620105,620105. prt - left bloc,Bloco de Esquerda,1310,name
+mod6,PT,620106,620106. prt - unitarian democratic coalition,Coligação Democrática Unitária,284,name
+mod6,PT,620107,620107. prt - free,"Livre — Liberdade, Esquerda, Europa e Ecologia",3225,name
+mod6,PT,620108,"620108. prt - party for people, animals and nature",Partido pelos Animais e pela Natureza,97,name
+mod6,PT,620109,620109. prt - democratic and social center - people's party,Centro Democrático e Social / Partido Popular,1308,name
+mod6,SK,703001,703001. svk - direction - social democracy,Smer — sociálna demokracia,311,name
+mod6,SK,703002,703002. svk - progressive slovakia,Progresívne Slovensko,7361,name
+mod6,SK,703003,703003. svk - voice - social democracy,HLAS – sociálna demokracia,9071,name
+mod6,SK,703004,703004. svk - olano and friends,Obyčajní Ľudia a Nezávislé Osobnosti,2130,hand
+mod6,SK,703005,703005. svk - christian democratic movement,Kresťanskodemokratické hnutie,63,name
+mod6,SK,703006,703006. svk - freedom and solidarity,Sloboda a Solidarita,1386,name
+mod6,SK,703007,703007. svk - slovak national party,Slovenská národná strana,730,name
+mod6,SK,703008,703008. svk - movement republika,Republika,9072,hand
+mod6,SK,703009,703009. svk - hungarian alliance,Strana maďarskej koalície / Strana maďarskej komunity,349,hand
+mod6,SK,703010,703010. svk - democrats,democrats [og],,hand
+mod6,SK,703011,703011. svk - we are family,Sme Rodina — Boris Kollár,4873,name
+mod6,SK,703012,703012. svk - kotlebists - people's party our slovakia,Ľudová strana Naše Slovensko,656,hand
+mod6,SK,703013,703012. svk - communist party of slovakia,Komunistická strana Slovenska,340,hand
+mod6,SK,703014,"703014. svk - the blue(s), bridge",MOST-HID,258,hand
+mod6,SK,703015,703015. svk - hungarian forum,hungarian forum [og],,hand
+mod6,SK,703016,703016. svk - myslovensko,myslovensko [og],,hand
+mod6,SK,703017,703017. svk - justice,justice [og],,hand
+mod6,SK,703018,703018. svk - slovak democratic and christian union - democratic party,Slovenská demokratická a kresťanská únia — Demokratická strana,1617,name
+mod6,SK,703019,703019. svk - for the people,Za ľudí,8394,name
+mod6,SK,703020,703020. svk - hungarian community togetherness,hungarian community togetherness [og],,hand
+mod6,SK,703021,703021. svk - good choice,Dobrá voľba,8644,name
+mod6,SK,703022,703022. svk - homeland,Vlasť,8643,name
+mod6,SI,705001,705001. svn - freedom movement,Gibanje Svoboda,9067,name
+mod6,SI,705002,705002. svn - slovenian democratic party,Slovenska demokratska stranka,472,name
+mod6,SI,705003,705003. svn - new slovenia - christian democrats,Nova Slovenija — Krščanska ljudska stranka,1618,name
+mod6,SI,705004,705004. svn - social democrats,Socialni demokrati / Združena lista socialnih demokratov,1403,bridge
+mod6,SI,705005,705005. svn - the left,Levica,6131,hand
+mod6,SI,705006,705006. svn - list of marjan sarec,Lista Marjana Šarca,6132,name
+mod6,SI,705007,705007. svn - let's connect slovenia,Povežimo se,7363,name
+mod6,SI,705008,705008. svn - resni.ca,Resni.ca,9069,name
+mod6,SI,705009,705009. svn - party of alenka bratusek,Zavezništvo Alenke Bratušek / Stranka Alenke Bratušek,3114,name
+mod6,SI,705010,705010. svn - healthy society movement,Gibanje Zdrava Družba,9131,name
+mod6,SI,705011,705011. svn - our future and good state,our future and good state [og],,hand
+mod6,SI,705012,705012. svn - pirate party,Piratska stranka Slovenije,3099,name
+mod6,SI,705013,705013. svn - our country,Naša dežela,9070,name
+mod6,SI,705014,705014. svn - slovenian national party,Slovenska nacionalna stranka,96,name
+mod6,SI,705015,705015. svn - vesna - green party,VESNA – zelena stranka,9130,hand
+mod6,SI,705016,705016. svn - democratic party of pensioners of slovenia,Demokratična stranka upokojencev Slovenije,467,name
+mod6,SI,705017,705017. svn - list of boris popovic - let's digitize slovenia,list of boris popovic - let's digitize slovenia [og],,hand
+mod6,SI,705018,705018. svn - modern centre party,Stranka Mira Cerarja / Stranka modernega centra,3098,name
+mod6,SE,752001,752001. swe - sweden's social democratic worker's party,Socialdemokraterna / Sveriges socialdemokratiska arbetareparti,487,name
+mod6,SE,752002,752002. swe - sweden democrats,Sverigedemokraterna,409,name
+mod6,SE,752003,752003. swe - moderate party,Allmänna valmansförbundet / Högern / Högerpartiet / Moderata samlingspartiet,690,name
+mod6,SE,752004,752004. swe - left party,Vänsterpartiet / Sveriges Komunistiska Parti,830,name
+mod6,SE,752005,752005. swe - center party,Bondeförbundet / Centerpartiet,199,name
+mod6,SE,752006,752006. swe - christian democrats,Kristdemokraterna,651,name
+mod6,SE,752007,752007. swe - green party,Miljöpartiet de gröna,456,name
+mod6,SE,752008,752008. swe - liberals,Folkpartiet liberalerna / Liberalerna,1274,hand
+mod6,,999989,999989. independent candidate,independent,,special
+mod6,,999992,999992. other candidate/party (not further specified),other,,special
+mod6,,999993,999993. invalid/blank ballot,blank-invalid,,special
+mod6,,999995,999995. not applicable: no district candidate vote,,,special
+mod6,,999996,999996. not applicable: no presidential election,,,special
+mod6,,999997,999997. volunteered: refused,refused,,special
+mod6,,999998,999998. volunteered: don't know,dont-know,,special
+mod6,,999999,999999. missing/abstained (did not vote),,,special

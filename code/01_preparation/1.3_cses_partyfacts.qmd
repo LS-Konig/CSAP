@@ -1,0 +1,880 @@
+---
+title: |
+  CSAP Code Notebook 1.3
+subtitle: |
+  CSES party items coded to Party Facts
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+This notebook gives every CSES party item in the 25 democracies a pair of Party Facts variables, as notebook 1.2 does for the ESS and the eu25games release does for its own items:
+
+- `ext_<item>_pf_name`: the Party Facts core name, `"<CSES name> [og]"` for a party that is not in Party Facts, or a sentinel for a non-party answer;
+- `ext_<item>_pf_id`: the Party Facts id, `NA` for `[og]` and sentinels.
+
+Two releases are covered: the Integrated Module Dataset (IMD, modules 1–5) and the Module 6 advance release.
+Module 6 names its variables differently (`f3023_3` for `IMD3005_3`, ...); the output uses the IMD names for the items both releases share.
+The items:
+
+| Stub | IMD | Module 6 | Item |
+|------|-----|----------|------|
+| `imd3005_3` | `IMD3005_3` | `f3023_3` | party closest to |
+| `imd3002_pr_1`, `_pr_2` | `IMD3002_PR_*` | `f3011_pr_*` | current presidential vote, rounds 1 and 2 |
+| `imd3002_lh_pl`, `_lh_dc` | `IMD3002_LH_*` | `f3011_lh_*` | current lower-house vote, list and district |
+| `imd3002_uh_pl`, `_uh_dc_1`–`_4` | `IMD3002_UH_*` | `f3011_uh_*` | current upper-house vote, list and districts |
+| `f3016_*` | — | `f3016_*` | previous-election votes (Module 6 only) |
+| `imd5000_a`–`_i` | `IMD5000_*` | `f5000_*` | the party behind letter A–I, which identifies the party rated in the like-dislike (`IMD3008_*`) and left-right (`IMD3007_*`) batteries |
+
+The derived vote variables (`IMD3002_OUTGOV`, `_VS_1`, `_LR_*`, `_IF_*`) name no party and are not coded.
+
+Two outputs, both in `data/02_processed/`:
+
+- `cses_party_pf.csv`: the crosswalk, one row per release × code that occurs in the data, with the CSES label and the `source` of the coding (`link`, `name`, `bridge`, `hand`, `special`);
+- `cses_party_pf.parquet`: one row per respondent (`release`, `study`, `respondent`, `cntry`, `year`) with the `ext_*` variables.
+
+# Setup
+
+```{r}
+#| label: setup
+
+start_time <- Sys.time()
+options(width = 80)
+
+p_required <- c(
+  "tidyverse",
+  "here",
+  "arrow",
+  "stringi",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+source(here("code", "00_helper", "pid_tree.R")) # countries_25
+source(here("code", "00_helper", "pf_code.R"))
+```
+
+# Load CSES Data
+
+As in notebooks 1.6 and 2.3, `load()` creates `cses_imd` and `cses6`.
+The value labels sit in data-frame attributes (`val.labels` names each variable's label table, `label.table` holds the tables), so they are taken before the frames are cut down.
+
+```{r}
+#| label: load
+
+load(here("data", "01_raw", "cses", "imd", "cses_imd.rdata"))
+load(here("data", "01_raw", "cses", "mod6", "cses6.rdata"))
+
+# Code-label pairs for one variable
+label_table <- function(df, var) {
+  tables <- attr(df, "label.table")
+  table_name <- attr(df, "val.labels")[match(var, names(df))]
+  x <- tables[[table_name]]
+  tibble(variable = var, code = as.integer(unname(x)), label = names(x))
+}
+
+items <- tribble(
+  ~stub, ~imd, ~mod6,
+  "imd3005_3", "IMD3005_3", "f3023_3",
+  "imd3002_pr_1", "IMD3002_PR_1", "f3011_pr_1",
+  "imd3002_pr_2", "IMD3002_PR_2", "f3011_pr_2",
+  "imd3002_lh_pl", "IMD3002_LH_PL", "f3011_lh_pl",
+  "imd3002_lh_dc", "IMD3002_LH_DC", "f3011_lh_dc",
+  "imd3002_uh_pl", "IMD3002_UH_PL", "f3011_uh_pl",
+  "imd3002_uh_dc_1", "IMD3002_UH_DC_1", "f3011_uh_dc_1",
+  "imd3002_uh_dc_2", "IMD3002_UH_DC_2", "f3011_uh_dc_2",
+  "imd3002_uh_dc_3", "IMD3002_UH_DC_3", NA,
+  "imd3002_uh_dc_4", "IMD3002_UH_DC_4", NA,
+  "f3016_pr_1", NA, "f3016_pr_1",
+  "f3016_pr_2", NA, "f3016_pr_2",
+  "f3016_lh_pl", NA, "f3016_lh_pl",
+  "f3016_lh_dc", NA, "f3016_lh_dc",
+  "f3016_uh_pl", NA, "f3016_uh_pl",
+  "f3016_uh_dc_1", NA, "f3016_uh_dc_1",
+  "f3016_uh_dc_2", NA, "f3016_uh_dc_2"
+) |>
+  bind_rows(
+    tibble(
+      stub = paste0("imd5000_", letters[1:9]),
+      imd = paste0("IMD5000_", LETTERS[1:9]),
+      mod6 = paste0("f5000_", letters[1:9])
+    )
+  )
+
+# Two IMD labels are UTF-8 read as CP1252 ("Fidesz â€“ KDNP"); decode them again
+fix_mojibake <- function(x) {
+  bad <- !is.na(x) & str_detect(x, "Ã|â€|Å|Ä")
+  z <- iconv(x[bad], "UTF-8", "CP1252")
+  Encoding(z) <- "UTF-8"
+  x[bad] <- if_else(is.na(z) | !validUTF8(z), x[bad], z)
+  x
+}
+
+labels <- bind_rows(
+  map(na.omit(items$imd), \(v) label_table(cses_imd, v)) |>
+    list_rbind() |>
+    mutate(release = "imd"),
+  map(na.omit(items$mod6), \(v) label_table(cses6, v)) |>
+    list_rbind() |>
+    mutate(release = "mod6")
+) |>
+  mutate(label = fix_mojibake(label)) |>
+  distinct()
+
+# One frame for both releases, 25 countries, IMD item names
+imd_vars <- set_names(na.omit(items$imd), items$stub[!is.na(items$imd)])
+mod6_vars <- set_names(na.omit(items$mod6), items$stub[!is.na(items$mod6)])
+
+cses <- bind_rows(
+  cses_imd |>
+    as.list() |>
+    as_tibble() |>
+    filter(IMD1006_UNALPHA2 %in% countries_25) |>
+    transmute(
+      release = "imd",
+      study = IMD1004,
+      respondent = as.character(IMD1005),
+      cntry = IMD1006_UNALPHA2,
+      year = as.integer(IMD1008_YEAR),
+      across(all_of(unname(imd_vars)), as.integer)
+    ) |>
+    rename(all_of(imd_vars)),
+  cses6 |>
+    as.list() |>
+    as_tibble() |>
+    # Module 6 codes Slovenia SL
+    mutate(f1006_unalpha2 = if_else(f1006_unalpha2 == "SL", "SI", f1006_unalpha2)) |>
+    filter(f1006_unalpha2 %in% countries_25) |>
+    transmute(
+      release = "mod6",
+      study = f1004,
+      respondent = as.character(f1003_1),
+      cntry = f1006_unalpha2,
+      year = as.integer(f1010_y),
+      across(all_of(unname(mod6_vars)), as.integer)
+    ) |>
+    rename(all_of(mod6_vars))
+)
+rm(cses_imd, cses6)
+
+stopifnot(
+  nrow(cses) == nrow(distinct(cses, release, study, respondent))
+)
+
+cses |>
+  count(release, name = "respondents")
+```
+
+# Codes in the Data
+
+The party codes are the same across items within a release: a country's three-digit UN number followed by four digits (IMD) or three (Module 6).
+They are harmonised within a country across the IMD's modules, so one code means one party.
+Codes from `9999988` (`999988` in Module 6) upward are non-party answers.
+
+```{r}
+#| label: cells
+
+special_from <- c(imd = 9999988L, mod6 = 999988L)
+
+cells <- cses |>
+  pivot_longer(
+    -c(release, study, respondent, cntry, year),
+    names_to = "stub",
+    values_to = "code",
+    values_drop_na = TRUE
+  ) |>
+  left_join(
+    items |>
+      pivot_longer(c(imd, mod6), names_to = "release", values_to = "variable"),
+    by = c("stub", "release")
+  ) |>
+  count(release, cntry, variable, code, name = "n") |>
+  left_join(labels, by = c("release", "variable", "code"))
+
+# Every code in the data has a label
+stopifnot(!anyNA(cells$label))
+
+parties <- cells |>
+  filter(code < special_from[release]) |>
+  distinct(release, cntry, code, label) |>
+  mutate(
+    name = str_remove(label, "^[0-9]+\\. [A-Za-z]{3} - "),
+    # the name with and without its parenthesised abbreviation
+    nl = normalise_party(name),
+    nl2 = normalise_party(str_remove_all(name, "\\([^)]*\\)"))
+  )
+
+# A few Module 6 codes carry a different label on different items
+# (616002: "civic coalition", "senate pact KO candidate", ...); all labels
+# of a code take part in the matching below, and a code gets one party
+parties |>
+  filter(n() > 1, .by = c(release, code)) |>
+  select(release, code, label)
+
+count(distinct(parties, release, code), release, name = "party codes")
+```
+
+# Party Facts Links
+
+Party Facts links the IMD party codes as dataset `cses`, with the CSES code as `dataset_party_id`.
+Module 6 codes are not linked.
+Each link is checked against the names Party Facts holds for the linked party in any dataset: after lower-casing and stripping accents and punctuation, one name must contain the other as whole words.
+
+```{r}
+#| label: links
+
+core <- pf_core()
+
+links <- pf_links("cses", core) |>
+  mutate(code = as.integer(dataset_party_id))
+
+# Every name Party Facts holds for the parties of the 25 countries
+pf_names <- read_csv(
+  file.path(pf_dir, "partyfacts-external-parties.csv"),
+  col_types = cols(.default = col_character())
+) |>
+  transmute(country, pf_id = as.integer(partyfacts_id), name_short, name, name_english) |>
+  bind_rows(
+    core |>
+      transmute(country, pf_id, name_short = pf_short, name = pf_name, name_english = pf_english)
+  ) |>
+  filter(!is.na(pf_id), country %in% pf_iso3) |>
+  pivot_longer(
+    c(name_short, name, name_english),
+    values_to = "nk",
+    values_drop_na = TRUE
+  ) |>
+  mutate(
+    nk = normalise_party(nk),
+    cntry = names(pf_iso3)[match(country, pf_iso3)]
+  ) |>
+  filter(nchar(nk) >= 3) |>
+  # real parties only, with their core name
+  inner_join(
+    core |>
+      filter(is.na(technical)) |>
+      select(pf_id, pf_name),
+    by = "pf_id"
+  ) |>
+  distinct(cntry, nk, pf_id, pf_name)
+
+linked <- parties |>
+  filter(release == "imd") |>
+  inner_join(select(links, code, pf_id, pf_name, technical), by = "code")
+
+link_check <- linked |>
+  filter(is.na(technical)) |>
+  left_join(
+    distinct(pf_names, pf_id, nk),
+    by = "pf_id",
+    relationship = "many-to-many"
+  ) |>
+  summarise(
+    ok = any(
+      contains_words(nl, nk) | contains_words(nk, nl) |
+        contains_words(nl2, nk) | contains_words(nk, nl2),
+      na.rm = TRUE
+    ),
+    .by = c(release, code, pf_id, pf_name)
+  )
+
+tibble(
+  codes_linked = nrow(linked),
+  technical = sum(!is.na(linked[["technical"]])),
+  passed = sum(link_check$ok),
+  failed = sum(!link_check$ok)
+)
+stopifnot(all(link_check$ok))
+
+map_link <- link_check |>
+  transmute(release, code, pf_name, pf_id, source = "link")
+```
+
+Codes without a link are matched by exact normalised name, with and without the parenthesised abbreviation, against every name Party Facts holds for a party of the same country; the match must be unique.
+Module 6 codes that still have no match are bridged to an IMD code of the same country and name.
+
+```{r}
+#| label: name-match
+
+map_name <- parties |>
+  anti_join(map_link, by = c("release", "code")) |>
+  # technically linked codes go to the hand map
+  anti_join(filter(linked, !is.na(technical)), by = c("release", "code")) |>
+  pivot_longer(c(nl, nl2), names_to = "form", values_to = "nk") |>
+  inner_join(pf_names, by = c("cntry", "nk"), relationship = "many-to-many") |>
+  distinct(release, code, pf_name, pf_id) |>
+  filter(n() == 1, .by = c(release, code)) |>
+  mutate(source = "name")
+
+map_bridge <- parties |>
+  filter(release == "mod6") |>
+  anti_join(map_name, by = c("release", "code")) |>
+  inner_join(
+    bind_rows(map_link, map_name) |>
+      filter(release == "imd") |>
+      inner_join(select(parties, release, code, cntry, nl), by = c("release", "code")) |>
+      distinct(cntry, nl, pf_name, pf_id),
+    by = c("cntry", "nl")
+  ) |>
+  filter(n() == 1, .by = code) |>
+  transmute(release, code, pf_name, pf_id, source = "bridge")
+
+tibble(name = nrow(map_name), bridge = nrow(map_bridge))
+```
+
+# Hand Map
+
+Everything else is coded by hand, keyed by release and code.
+The CSES name is kept in the row for reading.
+
+```{r}
+#| label: hand-map
+
+map_hand <- tribble(
+  ~release, ~code, ~cntry, ~name, ~pf_name, ~pf_id,
+  "imd", 400011L, "AT", "Pirate Party", "Pirate Party [og]", NA, # PF has Pirate Party only as technical id (1-perc)
+  "imd", 400013L, "AT", "Dinkhauser List", "Bürgerforum Österreich — Liste Fritz Dinkhauser", 439L,
+  "imd", 400015L, "AT", "Citizen's Forum Austria", "Bürgerforum Österreich — Liste Fritz Dinkhauser", 439L, # Same party as Liste Fritz Dinkhauser (Bürgerforum Österreich)
+  "imd", 400016L, "AT", "Roland Dueringer List - My Vote Counts", "Liste Roland Düringer — Meine Stimme GILT", 6138L,
+  "imd", 400017L, "AT", "Communist Party of Austria and Platform PLUS - Open List", "Communist Party of Austria and Platform PLUS - Open List [og]", NA, # 2017 joint list KPÖ + Plattform Plus; no PF alliance entry
+  "imd", 400018L, "AT", "Free Austria List and FPS Dr. Karl Schnell List", "Free Austria List and FPS Dr. Karl Schnell List [og]", NA,
+  "imd", 560009L, "BE", "0560009  BEL - People's Party", "Parti populaire", 639L,
+  "imd", 560014L, "BE", "Democratic Francophones Front/Democratic Federalist Independent", "Front Démocratique des Francophones / DéFI", 698L,
+  "imd", 560017L, "BE", "RESIST", "RESIST [og]", NA,
+  "imd", 1000014L, "BG", "Republic BG", "Republic BG [og]", NA,
+  "imd", 1000015L, "BG", "PP New Time", "Hoboto Bpeme", 2022L, # New Time = Novoto Vreme (PF 'Hoboto Bpeme')
+  "imd", 1000016L, "BG", "New Force", "New Force [og]", NA,
+  "imd", 1000017L, "BG", "United Bulgaria", "United Bulgaria [og]", NA,
+  "imd", 1000021L, "BG", "Bulgarian Communist Party", "Bulgarian Communist Party [og]", NA, # Post-1990 BKP (Spasov) is distinct from KPB (603) and pre-1990 BKP (6754)
+  "imd", 1000022L, "BG", "New Alternative (Nikolay Tzove's party)", "New Alternative (Nikolay Tzove's party) [og]", NA,
+  "imd", 1000023L, "BG", "Left and Green Parties", "Left and Green Parties [og]", NA,
+  "imd", 1000024L, "BG", "Social Democratic Party", "Social Democratic Party [og]", NA, # Not clearly PBSD (661)
+  "imd", 1000026L, "BG", "National Union, Fatherland Left", "National Union, Fatherland Left [og]", NA,
+  "imd", 1000028L, "BG", "Christian Social Union", "Christian Social Union [og]", NA,
+  "imd", 1000031L, "BG", "Fatherland Party of Labour", "Fatherland Party of Labour [og]", NA,
+  "imd", 1000032L, "BG", "National Union", "National Union [og]", NA, # National Union 2001, not Ataka (founded 2005)
+  "imd", 1000033L, "BG", "The Bloc of G. Ganchev", "The Bloc of G. Ganchev [og]", NA, # Ganchev's 2001 bloc; BBB (1027) ended 1997
+  "imd", 1000039L, "BG", "Eurorama", "Evroroma", 2055L, # Eurorama read as Euroroma
+  "imd", 1000042L, "BG", "Bulgarian Agricultural National Forces - United", "Bulgarian Agricultural National Forces - United [og]", NA, # BZNS faction; generic BZNS (2060) not assumed
+  "imd", 1000043L, "BG", "Bulgarian Agricultural National Forces - 'N. Petkov'", "Bulgarian Agricultural National Forces - 'N. Petkov' [og]", NA, # BZNS-Nikola Petkov, distinct from BZNS
+  "imd", 1000044L, "BG", "Bulgarian Agricultural National Forces - 'Al. Stamboliski'", "Agrarian Union \"Aleksandar Stamboliyski\"", 7809L, # BZNS 'Al. Stamboliyski' = Agrarian Union A. Stamboliyski
+  "imd", 1000045L, "BG", "Bulgarian Agricultural National Forces, A. Mauser, National Union", "Bulgarian Agricultural National Forces, A. Mauser, National Union [og]", NA, # Coalition
+  "imd", 1000046L, "BG", "Coalition United Agricultural Forces", "Coalition United Agricultural Forces [og]", NA, # Coalition
+  "imd", 1910019L, "HR", "Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party", "Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party [og]", NA, # PF cses link points to technical ally id 3918
+  "imd", 1910020L, "HR", "Minority Party", "Minority Party [og]", NA,
+  "imd", 2030017L, "CZ", "Freedom Union - Democratic Union", "Unie svobody / Demokratická unie", 104L, # US-DEU merged party (2001-); used over US (905)
+  "imd", 2030019L, "CZ", "Balbin's Poetic Party", "Balbin's Poetic Party [og]", NA,
+  "imd", 2030021L, "CZ", "Czech National Social Party", "[ Liberální / Česká ] strana národně sociální", 1813L,
+  "imd", 2030023L, "CZ", "Humanistic Party", "Humanistic Party [og]", NA,
+  "imd", 2030024L, "CZ", "Moravian Democratic Party", "Moravian Democratic Party [og]", NA,
+  "imd", 2030025L, "CZ", "Republicans", "Republicans [og]", NA, # CSES codes Sladek's RMS separately (2030027 -> 972)
+  "imd", 2030026L, "CZ", "Right Block", "Pravý Blok", 904L,
+  "imd", 2030040L, "CZ", "Czech Movement for National Unity", "Czech Movement for National Unity [og]", NA,
+  "imd", 2030042L, "CZ", "Czech Right", "Czech Right [og]", NA,
+  "imd", 2030045L, "CZ", "Worker's Party of the Social Justice", "Dělnická strana sociální spravedlnosti", 805L,
+  "imd", 2030048L, "CZ", "Folklore and Society", "Folklore and Society [og]", NA,
+  "imd", 2030050L, "CZ", "Humanistic Alliance", "Humanistic Alliance [og]", NA,
+  "imd", 2030052L, "CZ", "Cheer Up - Voting Bloc", "Cheer Up - Voting Bloc [og]", NA,
+  "imd", 2030053L, "CZ", "The Jesus is the Lord", "The Jesus is the Lord [og]", NA,
+  "imd", 2030055L, "CZ", "Czech Crown - royal party", "Czech Crown - royal party [og]", NA,
+  "imd", 2030056L, "CZ", "Key Moment", "Key Moment [og]", NA,
+  "imd", 2030057L, "CZ", "Coalition for the Czech Republic", "Coalition for the Czech Republic [og]", NA,
+  "imd", 2030058L, "CZ", "Conservative Party", "Conservative Party [og]", NA,
+  "imd", 2030059L, "CZ", "Left Bloc", "Levý Blok", 2138L,
+  "imd", 2030060L, "CZ", "Liberals.cz", "Liberals.cz [og]", NA,
+  "imd", 2030061L, "CZ", "Hope", "Hope [og]", NA,
+  "imd", 2030063L, "CZ", "Independent Democrats", "Nezávislí", 1425L, # PF 1425 short name NEZDEM = Železný's Independent Democrats
+  "imd", 2030065L, "CZ", "National Prosperity", "National Prosperity [og]", NA,
+  "imd", 2030066L, "CZ", "National Party", "National Party [og]", NA,
+  "imd", 2030068L, "CZ", "Law and Justice", "Law and Justice [og]", NA,
+  "imd", 2030075L, "CZ", "Freeholders Party of the Czech Repbulic", "Freeholders Party of the Czech Repbulic [og]", NA,
+  "imd", 2030078L, "CZ", "Rural Party - Citizens Joint Strenght", "Rural Party - Citizens Joint Strenght [og]", NA,
+  "imd", 2030081L, "CZ", "Choice for Tomorrow", "Choice for Tomorrow [og]", NA,
+  "imd", 2030082L, "CZ", "Political Change Movement", "Political Change Movement [og]", NA,
+  "imd", 2030084L, "CZ", "Moravians", "Moravians [og]", NA,
+  "imd", 2030086L, "CZ", "Party of Equal Chances", "Party of Equal Chances [og]", NA,
+  "imd", 2030089L, "CZ", "Realists", "Realists [og]", NA,
+  "imd", 2030090L, "CZ", "Bloc against Islamization - Defense of the Homeland", "Bloc against Islamization - Defense of the Homeland [og]", NA,
+  "imd", 2030091L, "CZ", "Good Choice 2016", "Good Choice 2016 [og]", NA,
+  "imd", 2030092L, "CZ", "Swiss Democracy", "Swiss Democracy [og]", NA,
+  "imd", 2030093L, "CZ", "Sources Movement", "Sources Movement [og]", NA,
+  "imd", 2030094L, "CZ", "Don't Vote Urza.cz", "Don't Vote Urza.cz [og]", NA,
+  "imd", 2030095L, "CZ", "Alliance of National Forces", "Alliance of National Forces [og]", NA,
+  "imd", 2030096L, "CZ", "Pensioners 21", "Pensioners 21 [og]", NA,
+  "imd", 2030097L, "CZ", "The Left", "The Left [og]", NA,
+  "imd", 2030200L, "CZ", "Together", "Together [og]", NA, # SPOLU alliance (ODS/KDU/TOP09); no PF alliance entry
+  "imd", 2030201L, "CZ", "Pirates and Mayors", "Pirates and Mayors [og]", NA, # Pirates+STAN alliance; no PF alliance entry
+  "imd", 2030202L, "CZ", "Tricolor Citizen's Movement", "Tricolor Citizen's Movement [og]", NA, # 2021 joint list Trikolóra-Svobodní-Soukromníci; no alliance entry (Trikolóra = 9003)
+  "imd", 2080014L, "DK", "Democratic Renewal", "Democratic Renewal [og]", NA,
+  "imd", 2080017L, "DK", "Klaus Riskaer Pedersen List", "Klaus Riskaer Pedersen List [og]", NA,
+  "imd", 2330007L, "EE", "Estonian Independence Party", "Eesti Iseseisvuspartei", 8922L,
+  "imd", 2460009L, "FI", "The Independence Party", "The Independence Party [og]", NA,
+  "imd", 2460012L, "FI", "For the Poor", "For the Poor [og]", NA,
+  "imd", 2460013L, "FI", "For Peace and Socialism - Communist Worker's Party", "For Peace and Socialism - Communist Worker's Party [og]", NA,
+  "imd", 2460015L, "FI", "Change 2011", "Change 2011 [og]", NA,
+  "imd", 2460017L, "FI", "Finnish Senior Citizen Party", "Finnish Senior Citizen Party [og]", NA,
+  "imd", 2460020L, "FI", "Finnish Workers Party", "Finnish Workers Party [og]", NA,
+  "imd", 2460021L, "FI", "Freedom Party", "Freedom Party [og]", NA,
+  "imd", 2500011L, "FR", "Hunting, Fishing, Nature and Tradtion", "Chasse, pêche, nature, traditions", 1313L, # PF year_last 2004 but same party in 2007
+  "imd", 2500019L, "FR", "Miscellaneous left", "divers gauche", 126L,
+  "imd", 2500021L, "FR", "Miscellaneous right", "divers droite", 1776L,
+  "imd", 2500022L, "FR", "The Republicans", "Les Républicains", 8168L,
+  "imd", 2500023L, "FR", "Regionalists", "Regionalists [og]", NA,
+  "imd", 2500024L, "FR", "Citizenship, Action, Participation for the 21st Century", "Citizenship, Action, Participation for the 21st Century [og]", NA,
+  "imd", 2500025L, "FR", "Arise the Republic/France Arise", "Debout la France", 3207L, # DLR renamed DLF 2014; PF entry covers both
+  "imd", 2500026L, "FR", "Forum Of Social Republicans", "Forum Of Social Republicans [og]", NA,
+  "imd", 2500029L, "FR", "Workers' Party", "Workers' Party [og]", NA, # Parti des travailleurs (Gluckstein), not LO
+  "imd", 2500032L, "FR", "Jose Bove - ran as an activist from 'After Globalization'", "Jose Bove - ran as an activist from 'After Globalization' [og]", NA,
+  "imd", 2500033L, "FR", "Movement LaRouche", "Movement LaRouche [og]", NA,
+  "imd", 2760018L, "DE", "South Schleswig Voter's Association", "Südschleswigscher Wählerverband", 50L,
+  "imd", 2760019L, "DE", "The Greys", "Die Grauen — Graue Panther", 1652L, # Graue Panther (1989-2008); 2017 occurrence postdates dissolution
+  "imd", 2760021L, "DE", "Party of Literal Exegesis", "Party of Literal Exegesis [og]", NA,
+  "imd", 2760022L, "DE", "Pensioners/Greys", "Pensioners/Greys [og]", NA,
+  "imd", 2760023L, "DE", "Generation Party / The Grey", "Generation Party / The Grey [og]", NA,
+  "imd", 2760024L, "DE", "Party Of The Rule Of Law Offensive", "Party Of The Rule Of Law Offensive [og]", NA,
+  "imd", 2760027L, "DE", "Marxist-Leninist Party of Germany", "Marxist-Leninist Party of Germany [og]", NA,
+  "imd", 2760028L, "DE", "Family Party", "Family Party [og]", NA,
+  "imd", 2760029L, "DE", "The Violet for spiritual Politics", "The Violet for spiritual Politics [og]", NA,
+  "imd", 2760031L, "DE", "Women's Party", "Women's Party [og]", NA,
+  "imd", 2760032L, "DE", "Alliance of health, peace and social equality", "Alliance of health, peace and social equality [og]", NA,
+  "imd", 2760034L, "DE", "Civil Movement for Solidarity", "Civil Movement for Solidarity [og]", NA,
+  "imd", 2760035L, "DE", "Basic Income Alliance", "Basic Income Alliance [og]", NA,
+  "imd", 2760036L, "DE", "V-Partei3 - Party for Change, Vegetarians and Vegans", "V-Partei3 - Party for Change, Vegetarians and Vegans [og]", NA,
+  "imd", 2760037L, "DE", "Democracy in Motion", "Democracy in Motion [og]", NA,
+  "imd", 2760038L, "DE", "Alliance of German Democrats", "Alliance of German Democrats [og]", NA,
+  "imd", 2760041L, "DE", "Democratic Citizens Germany", "Democratic Citizens Germany [og]", NA,
+  "imd", 2760043L, "DE", "Team Todenhoefer - The Justice Party", "Team Todenhoefer - The Justice Party [og]", NA,
+  "imd", 2760044L, "DE", "Volt Germany", "Volt Germany [og]", NA,
+  "imd", 2760045L, "DE", "Party of Humanists", "Party of Humanists [og]", NA,
+  "imd", 2760046L, "DE", "Alliance C - Christians for Germany", "Alliance C - Christians for Germany [og]", NA,
+  "imd", 2760047L, "DE", "The Greys - For all Generations", "The Greys - For all Generations [og]", NA, # New 'Die Grauen' (2017-), not Graue Panther 1652
+  "imd", 2760049L, "DE", "Party of Progress", "Party of Progress [og]", NA, # PF 2108 is the 19th-century party
+  "imd", 2760050L, "DE", "Climate List Baden-Wuerttemberg", "Climate List Baden-Wuerttemberg [og]", NA,
+  "imd", 2760051L, "DE", "Courage", "Courage [og]", NA,
+  "imd", 3000010L, "GR", "Pirate Party of Greece", "Pirate Party of Greece [og]", NA,
+  "imd", 3000016L, "GR", "Anticapitalist Left Cooperation for the Overthrow", "Antikapitalistiki Aristeri Synergasia gia tin Anatropi", 95L,
+  "imd", 3000017L, "GR", "Action", "Drasi — Fileleytheri Symmachia", 1130L,
+  "imd", 3000018L, "GR", "Democratic Revival", "Democratic Revival [og]", NA,
+  "imd", 3000023L, "GR", "Course of Freedom", "Plefsi Eleftherias", 9088L,
+  "imd", 3000025L, "GR", "United Popular Front", "United Popular Front [og]", NA,
+  "imd", 3000026L, "GR", "Society - Political Party of the Successors of Kapodistrias", "Society - Political Party of the Successors of Kapodistrias [og]", NA,
+  "imd", 3000028L, "GR", "New Right", "New Right [og]", NA,
+  "imd", 3000029L, "GR", "Free Homeland", "Free Homeland [og]", NA,
+  "imd", 3000100L, "GR", "Democratic Coalition", "Democratic Coalition [og]", NA, # PASOK-DIMAR alliance (Dimokratiki Symparataxi); PF only as technical ally
+  "imd", 3000101L, "GR", "Front of the Greek Anticapitalist Left - Workers Revolutionary Party", "Front of the Greek Anticapitalist Left - Workers Revolutionary Party [og]", NA, # ANTARSYA-EEK joint list; no PF alliance entry
+  "imd", 3000102L, "GR", "Democrats-Society of Values-Pirate Party of Greece", "Democrats-Society of Values-Pirate Party of Greece [og]", NA, # joint list; no PF alliance entry
+  "imd", 3480009L, "HU", "Hungarian Democratic People's Party", "Hungarian Democratic People's Party [og]", NA,
+  "imd", 3480010L, "HU", "Fidesz – KDNP", "Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége", 6366L,
+  "imd", 3480014L, "HU", "UJ Szovetseg", "UJ Szovetseg [og]", NA,
+  "imd", 3480016L, "HU", "Momentum Movement", "Momentum Mozgalom", 8249L,
+  "imd", 3480033L, "HU", "Alliance for Hungary - Center Party", "Alliance for Hungary - Center Party [og]", NA, # PF cses link points to technical ally id 3948
+  "imd", 3480100L, "HU", "Hungarian Socialist Party-Dialogue for Hungary", "Hungarian Socialist Party-Dialogue for Hungary [og]", NA, # MSZP-PM joint list; no PF alliance entry
+  "imd", 3720011L, "IE", "Anti-Austerity Alliance-People Before Profit", "Solidarity — People Before Profit", 8241L,
+  "imd", 3720014L, "IE", "Renew Ireland", "Renua Ireland", 4869L, # Renew Ireland = Renua Ireland
+  "imd", 3720021L, "IE", "Fathers Rights-Responsibility", "Fathers Rights-Responsibility [og]", NA,
+  "imd", 3800029L, "IT", "The Socialists", "The Socialists [og]", NA,
+  "imd", 3800034L, "IT", "Terzo Polo", "Terzo Polo [og]", NA,
+  "imd", 3800035L, "IT", "Solidarieta", "Solidarieta [og]", NA,
+  "imd", 3800040L, "IT", "House of Liberties", "Casa delle Libertà", 6241L,
+  "imd", 3800043L, "IT", "The People of Family", "The People of Family [og]", NA,
+  "imd", 3800044L, "IT", "Great North", "Great North [og]", NA,
+  "imd", 3800100L, "IT", "Us with Italy - Christian Democratic Union", "Noi con l'Italia", 9141L, # NcI-UDC joint list; PF 9141 share 1.3 (2018) is the list result
+  "imd", 3800102L, "IT", "Together List", "Insieme", 7671L,
+  "imd", 3800103L, "IT", "For a Revolutionary Left", "For a Revolutionary Left [og]", NA,
+  "imd", 4280015L, "LV", "Made in Latvia", "Made in Latvia [og]", NA,
+  "imd", 4280016L, "LV", "Union of Social Democractic Parties Responsibility", "Union of Social Democractic Parties Responsibility [og]", NA,
+  "imd", 4280017L, "LV", "For a presidential republic", "For a presidential republic [og]", NA,
+  "imd", 4280018L, "LV", "Last Party", "Last Party [og]", NA,
+  "imd", 4280019L, "LV", "People's Control", "People's Control [og]", NA,
+  "imd", 4280020L, "LV", "Party Daugava for Latvia", "Party Daugava for Latvia [og]", NA,
+  "imd", 4280025L, "LV", "Society for Different Politics", "Sabiedrība citai politikai", 627L,
+  "imd", 4280027L, "LV", "Party of Social Justice", "Party of Social Justice [og]", NA,
+  "imd", 4280028L, "LV", "Eurosceptics/Action Party", "Eurosceptics/Action Party [og]", NA,
+  "imd", 4280032L, "LV", "Social Democratic Workers Party of Latvia", "Latvijas Sociāldemokrātiskā Strādnieku Partija", 741L, # PF year_last 1934 but share_year 1998: entry covers re-founded LSDSP
+  "imd", 4280037L, "LV", "Freedom. Free from fear, hate and anger.", "Freedom. Free from fear, hate and anger. [og]", NA,
+  "imd", 4280038L, "LV", "Union For Fatherland and Freedom/LNNK", "Tēvzemei un Brīvībai / LNNK", 1704L, # TB/LNNK merged into National Alliance mid-2011; PF 1704 ends 2011
+  "imd", 4280039L, "LV", "Latvian Russian Union", "Latvijas Krievu savienība / Русский союз Латвии", 5657L,
+  "imd", 4280044L, "LV", "Sovereignty", "Sovereignty [og]", NA,
+  "imd", 4280045L, "LV", "National Power Unity", "National Power Unity [og]", NA,
+  "imd", 4280046L, "LV", "Latvian Nationalists", "Latvian Nationalists [og]", NA,
+  "imd", 4280047L, "LV", "For an Alternative", "For an Alternative [og]", NA,
+  "imd", 4280101L, "LV", "The New Unity", "Jaunā Vienotība", 9089L,
+  "imd", 4280102L, "LV", "SKG Alliance", "SKG Alliance [og]", NA, # 2018 electoral alliance; candidate 7619 wrong
+  "imd", 4400011L, "LT", "Peasants Party", "Lietuvos valstiečių partija", 21L,
+  "imd", 4400012L, "LT", "Socialist Party", "Socialist Party [og]", NA, # Lithuanian Socialist Party not in PF; 6808 is 1917-22 party
+  "imd", 4400013L, "LT", "(Lithuanian) Poles Election Action - Christian Families Alliance", "Lietuvos lenkų rinkimų akcija", 556L, # LLRA's name since 2014 (LLRA-KŠS); same party
+  "imd", 4400015L, "LT", "New Democracy - Women's Party", "Lietuvos moterų partija — Naujosios demokratijos partija", 1747L,
+  "imd", 4400016L, "LT", "Alliance of Ethnic Minorities", "Lietuvos tautinių mažumų aljansas", 1197L,
+  "imd", 4400019L, "LT", "Political Refugees and Prisoners Union", "Lietuvos politinių kalinių ir terminių sąjunga", 753L,
+  "imd", 4400023L, "LT", "Lithuanian Social Democratic Labor Party", "Lietuvos socialdemokratų darbo partija — Lietuvos regionų partija", 7352L, # LSDDP (2018-); PF entry covers its later merger with Regions Party
+  "imd", 4400024L, "LT", "Center Party – Nationalists", "Lietuvos Centro Partija", 5455L, # Centre Party renamed Centre Party-Nationalists 2020
+  "imd", 4400028L, "LT", "Political Party 'List of Lithuania'", "Politinė partija \"Lietuvos sąrašas\"", 6738L,
+  "imd", 4400030L, "LT", "Political Party 'The Way of Courage'", "Drąsos Kelias", 74L,
+  "imd", 4400032L, "LT", "Lithuanian Freedom Union (Liberals)", "Lietuvos Laisvės Sąjunga (Liberalai)", 5456L,
+  "imd", 4400035L, "LT", "Party 'Lithuania - For Everyone'", "Party 'Lithuania - For Everyone' [og]", NA,
+  "imd", 4400036L, "LT", "Christian Union", "Christian Union [og]", NA, # 2020 Christian Union; PF 776 KDS ended 2001
+  "imd", 4400037L, "LT", "The Union of Generations' Solidarity - Unity for Lithuania", "The Union of Generations' Solidarity - Unity for Lithuania [og]", NA, # Kartu solidarumo sajunga-Santalka Lietuvai; candidate 9073 is a different party
+  "imd", 4400101L, "LT", "A. Paulauskas (Independent)", "independent", NA, # presidential candidate listed as independent
+  "imd", 4400102L, "LT", "V. Adamkus (Independent)", "independent", NA, # presidential candidate listed as independent
+  "imd", 4400103L, "LT", "Leader F - R. Pavilionis", "Leader F - R. Pavilionis [og]", NA,
+  "imd", 4400200L, "LT", "Anti-Corruption Coalition", "Anti-Corruption Coalition [og]", NA, # Krivickas-Puteikis electoral coalition; no PF alliance entry
+  "imd", 4400201L, "LT", "Coalition of Anti-Corruption and Poverty", "Coalition of Anti-Corruption and Poverty [og]", NA, # electoral coalition; no PF alliance entry
+  "imd", 5280012L, "NL", "One NL", "One NL [og]", NA,
+  "imd", 5280015L, "NL", "Local List", "Local List [og]", NA,
+  "imd", 5280017L, "NL", "United Seniors Party", "Algemeen Ouderen Verbond / Verenigde Senioren Partij", 994L,
+  "imd", 5280023L, "NL", "Communist Party of the Netherlands", "Communist Party of the Netherlands [og]", NA, # PF 459 CPN dissolved 1991; 1998 answer likely NCPN, not in PF
+  "imd", 5280030L, "NL", "Natural Law Party", "Natural Law Party [og]", NA,
+  "imd", 5280034L, "NL", "Party for the Future", "Party for the Future [og]", NA,
+  "imd", 5280038L, "NL", "Free Indian Party", "Free Indian Party [og]", NA,
+  "imd", 5280041L, "NL", "Seniors 2000", "Seniors 2000 [og]", NA,
+  "imd", 5280042L, "NL", "Mobile Netherlands", "Mobile Netherlands [og]", NA,
+  "imd", 5280049L, "NL", "Political Movement Think", "Beweging DENK", 5856L,
+  "imd", 5280051L, "NL", "For Netherlands", "For Netherlands [og]", NA,
+  "imd", 5280052L, "NL", "Pirate Party", "Pirate Party [og]", NA,
+  "imd", 5280053L, "NL", "Together", "Together [og]", NA,
+  "imd", 5280054L, "NL", "New Ways", "New Ways [og]", NA,
+  "imd", 5280055L, "NL", "Entrepreneurs Party", "Entrepreneurs Party [og]", NA,
+  "imd", 5280057L, "NL", "Correct Answer 2021", "Juiste Antwoord21", 9011L,
+  "imd", 5280059L, "NL", "Code Orange", "Code Orange [og]", NA,
+  "imd", 5280060L, "NL", "NIDA", "NIDA [og]", NA,
+  "imd", 5280061L, "NL", "Splinter", "Splinter [og]", NA,
+  "imd", 5280062L, "NL", "Young", "Young [og]", NA,
+  "imd", 5280063L, "NL", "Henk Krol List", "Henk Krol List [og]", NA,
+  "imd", 5280064L, "NL", "Netherlands Better", "Netherlands Better [og]", NA,
+  "imd", 5280066L, "NL", "Libertarian Party", "Libertarian Party [og]", NA,
+  "imd", 5280067L, "NL", "OpRecht", "OpRecht [og]", NA,
+  "imd", 5280068L, "NL", "Free and Social Netherlands", "Free and Social Netherlands [og]", NA,
+  "imd", 6160019L, "PL", "Patriotic Self-Defense", "Patriotic Self-Defense [og]", NA, # 2007 splinter Samoobrona Patriotyczna, not Samoobrona RP
+  "imd", 6160021L, "PL", "Left Together", "[Lewica] Razem", 4871L,
+  "imd", 6160026L, "PL", "Our Home Poland", "Our Home Poland [og]", NA,
+  "imd", 6160032L, "PL", "Nonpartisan Local Government Activists", "Nonpartisan Local Government Activists [og]", NA,
+  "imd", 6160034L, "PL", "Alternative Social Movement", "Alternative Social Movement [og]", NA,
+  "imd", 6160035L, "PL", "Center Party", "Center Party [og]", NA,
+  "imd", 6160038L, "PL", "Ancestral Home", "Ancestral Home [og]", NA,
+  "imd", 6160040L, "PL", "Citizen's Forum  - Christian Democracy", "Citizen's Forum  - Christian Democracy [og]", NA,
+  "imd", 6160041L, "PL", "Feminist Initiative", "Feminist Initiative [og]", NA,
+  "imd", 6160042L, "PL", "Partia Inicjatywa", "Partia Inicjatywa [og]", NA,
+  "imd", 6160045L, "PL", "New Left", "New Left [og]", NA, # 2007 Ikonowicz party, not 2021 Nowa Lewica (9349)
+  "imd", 6160047L, "PL", "Peasant Party 'Ojcowizna' RP", "Peasant Party 'Ojcowizna' RP [og]", NA,
+  "imd", 6160049L, "PL", "Citiezens' Committee for the Defence of Opolszczyzna, Poland", "Citiezens' Committee for the Defence of Opolszczyzna, Poland [og]", NA,
+  "imd", 6160052L, "PL", "Polish National Party", "Polish National Party [og]", NA, # modern party; PF 4353 is the 1928-1947 Stronnictwo Narodowe
+  "imd", 6160057L, "PL", "Polish National Party", "Polish National Party [og]", NA, # modern party; PF 4353 is the 1928-1947 Stronnictwo Narodowe
+  "imd", 6160063L, "PL", "Ruch Ludzi Pracy", "Ruch Ludzi Pracy [og]", NA,
+  "imd", 6160064L, "PL", "Family-Homeland", "Family-Homeland [og]", NA,
+  "imd", 6160065L, "PL", "Patriotic Movement of the Republic of Poland", "Patriotic Movement of the Republic of Poland [og]", NA,
+  "imd", 6160066L, "PL", "Social Movement-Solidarity Electoral Action", "Akcja Wyborcza Solidarność Prawicy", 863L, # AWSP 2001 list/Ruch Spoleczny AWS = AWS entity
+  "imd", 6160074L, "PL", "'Jednomandatowe Okregi Wyborcze'", "'Jednomandatowe Okregi Wyborcze' [og]", NA,
+  "imd", 6160075L, "PL", "'Klub Sluzby Niepodleglsoci- Okregu Wyborczego Nr 10'", "'Klub Sluzby Niepodleglsoci- Okregu Wyborczego Nr 10' [og]", NA,
+  "imd", 6160076L, "PL", "'Slask W Europie'", "'Slask W Europie' [og]", NA,
+  "imd", 6160077L, "PL", "'Niezale na i bezpartyjna'", "'Niezale na i bezpartyjna' [og]", NA,
+  "imd", 6160078L, "PL", "Alliance of the Polish Right", "Alliance of the Polish Right [og]", NA,
+  "imd", 6160079L, "PL", "Bogdana Jorusewicza", "Bogdana Jorusewicza [og]", NA,
+  "imd", 6160082L, "PL", "Committee of voters", "Committee of voters [og]", NA,
+  "imd", 6160083L, "PL", "Conservative Peasent Party", "Stronnictwo Konserwatywno-Ludowe", 8766L,
+  "imd", 6160084L, "PL", "German Minority - Prawoslawni Slavic Ethnic Association - 'Orthodox Believers'", "German Minority - Prawoslawni Slavic Ethnic Association - 'Orthodox Believers' [og]", NA, # combined minority answer
+  "imd", 6160085L, "PL", "German Minority Association In Olsztyn", "Mniejszość niemiecka w Polsce", 1439L, # German minority organisation
+  "imd", 6160087L, "PL", "German Minority Of Upper Silesia", "Mniejszość niemiecka w Polsce", 1439L, # German minority electoral committee
+  "imd", 6160088L, "PL", "Henryk Tadeusz Stoklosa", "Henryk Tadeusz Stoklosa [og]", NA,
+  "imd", 6160090L, "PL", "Kazimierza Juliana Kutza", "Kazimierza Juliana Kutza [og]", NA,
+  "imd", 6160091L, "PL", "Labor Solidarity", "Labor Solidarity [og]", NA,
+  "imd", 6160092L, "PL", "Lech Kaczynski sympathizer", "Lech Kaczynski sympathizer [og]", NA,
+  "imd", 6160093L, "PL", "Leszka Ireneusza Paradowskiego", "Leszka Ireneusza Paradowskiego [og]", NA,
+  "imd", 6160094L, "PL", "Ludowy Kww Jozefa Sztorca", "Ludowy Kww Jozefa Sztorca [og]", NA,
+  "imd", 6160095L, "PL", "Macieja Plazynskiego", "Macieja Plazynskiego [og]", NA,
+  "imd", 6160097L, "PL", "Niezalezny Pozapartyjny Komitet Wyborczy Wyborcow", "Niezalezny Pozapartyjny Komitet Wyborczy Wyborcow [og]", NA,
+  "imd", 6160098L, "PL", "O Lepsza Polske", "O Lepsza Polske [og]", NA,
+  "imd", 6160099L, "PL", "Odnowa Rzeczypospolitej Polskiej", "Odnowa Rzeczypospolitej Polskiej [og]", NA,
+  "imd", 6160100L, "PL", "Orlowska", "Orlowska [og]", NA,
+  "imd", 6160103L, "PL", "Polish Confederation - Dignity Work", "Polish Confederation - Dignity Work [og]", NA,
+  "imd", 6160104L, "PL", "Polish Economic Union", "Polish Economic Union [og]", NA,
+  "imd", 6160109L, "PL", "Ryszard Matusiak", "Ryszard Matusiak [og]", NA,
+  "imd", 6160110L, "PL", "Senate 2001 coalition", "Senate 2001 coalition [og]", NA, # Blok Senat 2001 alliance, no PF entry
+  "imd", 6160111L, "PL", "Sij. Ludzi Pracy-Polska Praca Sprawiedl", "Sij. Ludzi Pracy-Polska Praca Sprawiedl [og]", NA,
+  "imd", 6160112L, "PL", "Social and Cultural Association of Opole Silesia German", "Mniejszość niemiecka w Polsce", 1439L, # TSKN = organisation behind German minority committee
+  "imd", 6160114L, "PL", "Solidarity 80 Trade Union", "Solidarity 80 Trade Union [og]", NA, # trade union Solidarnosc 80, not Solidarnosc (767)
+  "imd", 6160116L, "PL", "Taduesz Dabrowski", "Taduesz Dabrowski [og]", NA,
+  "imd", 6160117L, "PL", "Teresy Liszcz", "Teresy Liszcz [og]", NA,
+  "imd", 6160118L, "PL", "Worker's Movement", "Worker's Movement [og]", NA,
+  "imd", 6160123L, "PL", "United Right", "United Right [og]", NA, # Zjednoczona Prawica alliance, no PF entry; not mapped to PiS
+  "imd", 6160126L, "PL", "The Left", "The Left [og]", NA, # 2019 Lewica joint list on SLD committee, no PF entry
+  "imd", 6200009L, "PT", "Merit and Society Movement", "Merit and Society Movement [og]", NA,
+  "imd", 6200018L, "PT", "Hope for Portugal", "Movimento Esperança Portugal", 1727L,
+  "imd", 6420005L, "RO", "National Liberal Party", "Partidul Naţional Liberal", 481L,
+  "imd", 6420008L, "RO", "New Republic Party", "New Republic Party [og]", NA,
+  "imd", 6420010L, "RO", "Conservative Party", "Partidul Conservator / Partidul Umanist Român", 1443L, # PC 1991-2015, not historical PC 6769
+  "imd", 6420016L, "RO", "Hungarian People's Party of Transylvania", "Hungarian People's Party of Transylvania [og]", NA,
+  "imd", 6420017L, "RO", "Socialist Alternative Party/Romanian Socialist Party", "Socialist Alternative Party/Romanian Socialist Party [og]", NA, # PAS+PSR combination; PF 7035 ends 2013
+  "imd", 6420018L, "RO", "PRODEMO Party", "PRODEMO Party [og]", NA,
+  "imd", 6420029L, "RO", "Civic Alliance Party", "Partidul Alianţa Civică", 645L,
+  "imd", 6420038L, "RO", "National Liberal Alliance", "National Liberal Alliance [og]", NA, # PL'93+PAC alliance
+  "imd", 6420042L, "RO", "Labour Socialist Party", "Partidul Socialist al Muncii", 1217L,
+  "imd", 6420044L, "RO", "National Drivers Party", "National Drivers Party [og]", NA,
+  "imd", 6420046L, "RO", "National Union of the Center", "National Union of the Center [og]", NA,
+  "imd", 6420050L, "RO", "National Liberal Party - Democratic Convention", "National Liberal Party - Democratic Convention [og]", NA, # PNL-CD splinter 1996
+  "imd", 6420051L, "RO", "Pensionist Party", "Partidul Pensionarilor din Romania", 400L,
+  "imd", 6420055L, "RO", "Our Romania Alliance", "Our Romania Alliance [og]", NA,
+  "imd", 6420101L, "RO", "PSD-UNPR-PC Electoral Alliance", "PSD-UNPR-PC Electoral Alliance [og]", NA, # Ponta 2014 alliance; PF 6153 is 2008-10 PSD+PC
+  "imd", 6420102L, "RO", "Christian-Liberal Alliance", "Christian-Liberal Alliance [og]", NA, # PNL+PDL 2014 alliance
+  "imd", 6420300L, "RO", "Independent (Calin-Constantin-Anton Popescu-Tariceanu)", "independent", NA,
+  "imd", 6420301L, "RO", "Independent (Monica-Luisa Macovei)", "independent", NA,
+  "imd", 6420302L, "RO", "Sorin Oprescu (Independent)", "independent", NA,
+  "imd", 7030005L, "SK", "Green Party", "Strana zelených [na Slovensku]", 1569L,
+  "imd", 7030019L, "SK", "TOGHETHER - Civic Democracy", "Spolu — občianska demokracia", 8177L,
+  "imd", 7030022L, "SK", "Alliance for a Europe of Nations", "Alliance for a Europe of Nations [og]", NA,
+  "imd", 7030024L, "SK", "Chance", "Chance [og]", NA,
+  "imd", 7030026L, "SK", "Coalition Together for Slovakia", "Coalition Together for Slovakia [og]", NA,
+  "imd", 7030027L, "SK", "Communist Party of Slovakia", "Komunistická strana Slovenska", 340L,
+  "imd", 7030029L, "SK", "Democratic Party", "Democratic Party [og]", NA, # refounded 2006 DS; PF 983 is 1990-1998
+  "imd", 7030030L, "SK", "Democrats of Slovakia", "Democrats of Slovakia [og]", NA,
+  "imd", 7030038L, "SK", "Party of Modern Slovakia", "Party of Modern Slovakia [og]", NA,
+  "imd", 7030039L, "SK", "Party TIP", "Strana TIP — Tvoríme inú politiku", 3222L,
+  "imd", 7030041L, "SK", "Roman Coalition Party", "Roman Coalition Party [og]", NA,
+  "imd", 7030042L, "SK", "Slovak Citizens Coalition", "Slovak Citizens Coalition [og]", NA, # PF links only to technical id
+  "imd", 7030044L, "SK", "Union Party for Slovakia", "Union Party for Slovakia [og]", NA,
+  "imd", 7030045L, "SK", "Vesela Politicka Stranka", "Vesela Politicka Stranka [og]", NA,
+  "imd", 7030046L, "SK", "Courage - Great National and Prussian Coalition", "Courage - Great National and Prussian Coalition [og]", NA,
+  "imd", 7030061L, "SK", "Socialist.sk", "Socialist.sk [og]", NA,
+  "imd", 7030063L, "SK", "Mayors and Independents", "Mayors and Independents [og]", NA,
+  "imd", 7030064L, "SK", "Labor of the Slovak Nation", "Labor of the Slovak Nation [og]", NA,
+  "imd", 7030100L, "SK", "Progressive Slovakia - TOGETHER-Civic Democracy", "Progressive Slovakia - TOGETHER-Civic Democracy [og]", NA, # PS+SPOLU coalition, no PF alliance
+  "imd", 7030101L, "SK", "Hungarian Community Togetherness", "Hungarian Community Togetherness [og]", NA, # MKS 2020 coalition list
+  "imd", 7050005L, "SI", "Green Party of Slovenia", "Zeleni Slovenije", 1494L,
+  "imd", 7240015L, "ES", "Canarian Independent Center", "Canarian Independent Center [og]", NA,
+  "imd", 7240026L, "ES", "Aragoneses Party", "Partido Aragonés Regionalista", 946L, # Partido Aragonés = PAR
+  "imd", 7240034L, "ES", "Partido Socialista Mallorquan", "Partido Socialista Mallorquan [og]", NA,
+  "imd", 7240045L, "ES", "Aragonese Council", "Chunta Aragonesista", 1564L,
+  "mod6", 40006L, "AT", "communist party of austria - kpo plus", "Kommunistische Partei Österreichs", 996L, # 2024 KPÖ ran alone under KPÖ Plus branding
+  "mod6", 40007L, "AT", "the beer party", "the beer party [og]", NA,
+  "mod6", 40008L, "AT", "madeleine petrovic list", "madeleine petrovic list [og]", NA,
+  "mod6", 40009L, "AT", "change", "change [og]", NA,
+  "mod6", 40011L, "AT", "gaza list: voices against the genocide", "gaza list: voices against the genocide [og]", NA,
+  "mod6", 208005L, "DK", "denmark democrats - inger stojberg", "Danmarksdemokraterne", 9062L,
+  "mod6", 208013L, "DK", "independent greens", "Frie Grønne – Danmarks nye venstrefløjsparti", 9481L,
+  "mod6", 208016L, "DK", "klaus riskaer pedersen list", "klaus riskaer pedersen list [og]", NA,
+  "mod6", 250005L, "FR", "the republicans", "Les Républicains", 8168L,
+  "mod6", 250014L, "FR", "solidarity and progress", "solidarity and progress [og]", NA,
+  "mod6", 616002L, "PL", "civic coalition", "Koalicja Obywatelska", 9122L,
+  "mod6", 616004L, "PL", "the left", "Nowa Lewica", 9349L, # 2023 list registered as Nowa Lewica
+  "mod6", 616005L, "PL", "polish people's party", "Polskie Stronnictwo Ludowe", 602L,
+  "mod6", 616007L, "PL", "sovereign poland", "Suwerenna Polska", 9109L,
+  "mod6", 616008L, "PL", "left together", "[Lewica] Razem", 4871L,
+  "mod6", 616009L, "PL", "nonpartisan local government activists", "nonpartisan local government activists [og]", NA,
+  "mod6", 616010L, "PL", "there is one poland", "there is one poland [og]", NA,
+  "mod6", 616012L, "PL", "new hope", "new hope [og]", NA, # Mentzen party within Konfederacja
+  "mod6", 616013L, "PL", "confederation of the polish crown", "confederation of the polish crown [og]", NA,
+  "mod6", 616099L, "PL", "senate pact 2023 (not further specified)", "senate pact 2023 (not further specified) [og]", NA, # senate pact alliance, no PF entry
+  "mod6", 703004L, "SK", "olano and friends", "Obyčajní Ľudia a Nezávislé Osobnosti", 2130L, # single OLaNO party list with guests
+  "mod6", 703008L, "SK", "movement republika", "Republika", 9072L,
+  "mod6", 703009L, "SK", "hungarian alliance", "Strana maďarskej koalície / Strana maďarskej komunity", 349L, # SMK renamed Aliancia 2021 (same legal party)
+  "mod6", 703010L, "SK", "democrats", "democrats [og]", NA,
+  "mod6", 703012L, "SK", "kotlebists - people's party our slovakia", "Ľudová strana Naše Slovensko", 656L,
+  "mod6", 703013L, "SK", "communist party of slovakia", "Komunistická strana Slovenska", 340L,
+  "mod6", 703014L, "SK", "the blue(s), bridge", "MOST-HID", 258L, # Most-Hid renamed Modri, Most-Hid 2023
+  "mod6", 703015L, "SK", "hungarian forum", "hungarian forum [og]", NA,
+  "mod6", 703016L, "SK", "myslovensko", "myslovensko [og]", NA,
+  "mod6", 703017L, "SK", "justice", "justice [og]", NA, # not Pravo a spravodlivost (3208)
+  "mod6", 703020L, "SK", "hungarian community togetherness", "hungarian community togetherness [og]", NA,
+  "mod6", 705005L, "SI", "the left", "Levica", 6131L,
+  "mod6", 705011L, "SI", "our future and good state", "our future and good state [og]", NA, # NP+Dobra drzava joint list
+  "mod6", 705015L, "SI", "vesna - green party", "VESNA – zelena stranka", 9130L,
+  "mod6", 705017L, "SI", "list of boris popovic - let's digitize slovenia", "list of boris popovic - let's digitize slovenia [og]", NA, # not Povezimo se
+  "mod6", 752008L, "SE", "liberals", "Folkpartiet liberalerna / Liberalerna", 1274L
+) |>
+  mutate(source = "hand")
+
+pf_check(map_hand, keys = c("release", "code"), core = core)
+count(map_hand, kind = case_when(
+  pf_name %in% pf_sentinels ~ pf_name,
+  str_ends(pf_name, " \\[og\\]") ~ "[og]",
+  .default = "Party Facts"
+))
+```
+
+# Crosswalk
+
+The non-party codes get sentinels; `95` and `96` (not applicable) and `99` (missing, which on the vote items also holds abstention) stay `NA`.
+
+```{r}
+#| label: crosswalk
+
+special <- tribble(
+  ~offset, ~pf_name,
+  88L, "none", # none of the candidates / parties
+  89L, "independent",
+  90L, "other", # other left wing
+  91L, "other", # other right wing
+  92L, "other", # other, not further specified
+  93L, "blank-invalid",
+  95L, NA, # not applicable
+  96L, NA, # not applicable
+  97L, "refused",
+  98L, "dont-know",
+  99L, NA # missing / abstained
+)
+
+map_code <- bind_rows(
+  mutate(select(map_hand, release, code, pf_name, pf_id, source), prio = 1L),
+  mutate(map_link, prio = 2L),
+  mutate(map_name, prio = 3L),
+  mutate(map_bridge, prio = 4L)
+) |>
+  slice_min(prio, n = 1, by = c(release, code)) |>
+  select(-prio)
+
+crosswalk <- cells |>
+  summarise(
+    cntry = first(cntry),
+    label = first(label),
+    n = sum(n),
+    .by = c(release, code)
+  ) |>
+  left_join(map_code, by = c("release", "code")) |>
+  mutate(offset = code - special_from[release] + 88L) |>
+  left_join(rename(special, special_name = pf_name), by = "offset") |>
+  mutate(
+    is_special = code >= special_from[release],
+    cntry = if_else(is_special, NA, cntry),
+    pf_name = if_else(is_special, special_name, pf_name),
+    pf_id = if_else(is_special, NA_integer_, pf_id),
+    source = if_else(is_special, "special", source)
+  ) |>
+  select(release, cntry, code, label, pf_name, pf_id, source, n) |>
+  arrange(release, code)
+
+# Nothing unmapped: only the not-applicable and missing codes stay empty
+unmapped <- crosswalk |>
+  filter(is.na(pf_name), source != "special" | is.na(source))
+unmapped
+stopifnot(nrow(unmapped) == 0)
+
+pf_check(crosswalk, keys = c("release", "code"), core = core)
+
+crosswalk |>
+  mutate(
+    kind = case_when(
+      is.na(pf_name) ~ "NA (95 / 96 / 99)",
+      pf_name %in% pf_sentinels ~ "sentinel",
+      str_ends(pf_name, " \\[og\\]") ~ "[og]",
+      .default = "Party Facts"
+    )
+  ) |>
+  count(kind, source, wt = n, name = "responses")
+
+write_csv(
+  select(crosswalk, -n),
+  here("data", "02_processed", "cses_party_pf.csv"),
+  na = ""
+)
+```
+
+# Respondent File
+
+```{r}
+#| label: respondents
+
+id_cols <- c("release", "study", "respondent", "cntry", "year")
+
+respondents <- cses |>
+  select(all_of(id_cols))
+
+for (s in items$stub) {
+  respondents <- respondents |>
+    mutate(code = cses[[s]]) |>
+    left_join(
+      select(crosswalk, release, code, pf_name, pf_id),
+      by = c("release", "code")
+    ) |>
+    rename(
+      !!paste0("ext_", s, "_pf_name") := pf_name,
+      !!paste0("ext_", s, "_pf_id") := pf_id
+    ) |>
+    select(-code)
+}
+
+stopifnot(nrow(respondents) == nrow(cses))
+
+write_parquet(
+  respondents,
+  here("data", "02_processed", "cses_party_pf.parquet"),
+  compression = "zstd"
+)
+
+glimpse(respondents)
+```
+
+# Checks
+
+Spot checks: CDU and AfD in Germany, the Five Star Movement in Italy, and the most frequent `[og]` answers.
+
+```{r}
+#| label: spot-checks
+
+crosswalk |>
+  filter(
+    (cntry == "DE" & str_detect(label, "Christian Democratic Union|Alternative for Germany")) |
+      (cntry == "IT" & str_detect(label, "Five Star"))
+  ) |>
+  select(release, code, label, pf_name, pf_id)
+
+crosswalk |>
+  filter(str_ends(pf_name, " \\[og\\]")) |>
+  arrange(desc(n)) |>
+  select(release, cntry, pf_name, n) |>
+  head(10)
+```
+
+Among respondents who report both an attachment party and a lower-house list vote (district vote where there is no list), the share whose two answers carry the same Party Facts id.
+As in notebook 1.2, this is a check on the coding: electoral alliances, which Party Facts keeps as entities of their own, pull the share down.
+Germany is the clearest case here: CSES codes attachment to the CDU and the CSU separately (Party Facts 1375 and 1731) but the list vote for the CDU/CSU union (211); Romania's alliances (USL, PSD+PUR, DA) do the same.
+
+```{r}
+#| label: same-party
+
+respondents |>
+  mutate(vote_pf_id = coalesce(ext_imd3002_lh_pl_pf_id, ext_imd3002_lh_dc_pf_id)) |>
+  filter(!is.na(ext_imd3005_3_pf_id), !is.na(vote_pf_id)) |>
+  summarise(
+    pairs = n(),
+    same = mean(ext_imd3005_3_pf_id == vote_pf_id),
+    .by = cntry
+  ) |>
+  arrange(same) |>
+  print(n = Inf)
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+rendering_time <- end_time - start_time
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds."
+))
+```

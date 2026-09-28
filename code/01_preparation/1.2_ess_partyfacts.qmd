@@ -225,17 +225,6 @@ Labels in Greek script cannot pass that test against transliterated names and ar
 #| label: link-check
 
 # All names Party Facts has for each id
-normalise_party <- function(x) {
-  x |>
-    stri_trans_general("Latin-ASCII") |>
-    str_to_lower() |>
-    str_replace_all("[^a-z0-9]+", " ") |>
-    str_squish()
-}
-contains_words <- function(a, b) {
-  str_detect(paste0(" ", a, " "), fixed(paste0(" ", b, " ")))
-}
-
 pf_names <- read_csv(
   file.path(pf_dir, "partyfacts-external-parties.csv"),
   col_types = cols(.default = col_character())
