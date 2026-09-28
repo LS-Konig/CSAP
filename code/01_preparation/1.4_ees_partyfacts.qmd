@@ -32,13 +32,15 @@ The items (question numbers in `data/01_raw/key-items.qmd`):
 | `vote_ep_hyp` | | `q26` | | | | EP vote had R voted |
 | `vote_local` | | `q26b` | | | | local vote (BE, IE) |
 | `vote_nat` | `v113` | `q27` | `qpp5_ees` | `Q9` | `q8_recoded` | last national vote |
-| `vote_intent` | `v114` | `q28` | `qpp6_ees` | | `q1a_recoded` | national vote intention |
+| `vote_intent` | `v114` | `q28` | `qpp6_ees` | | | national vote intention |
+| `mip_party` | `v029` | `q4` | | `Q2` | `q1a_recoded` | party best at dealing with the most important problem |
 | `ptv_1`… | `v115`… | `q39_p1`… | `qpp8_1`… | `q10_1`… | `q9_1`… | propensity to vote, party 1… |
 | `lr_1`… | `v135`… | `q47_p1`… | `qpp14_1`… | `q13_1`… | `q11_1`… | left-right placement, party 1… |
+| `eu_1`… | `v157`… | `q81_p1`… | `qpp19_1`… | `q24_1`… | `q18_1`… | EU-integration placement, party 1… |
 | `like_1`… | | | | | `q20_1`… | like-dislike of the party's supporters |
 
 For the batteries, `ext_ptv_<k>_pf_*` names the party behind position *k* of the respondent's country list, so that `ptv_3` can be read next to the rating it identifies.
-The party-competence items (2004 `v029`, 2019 `Q2`) and the EU-placement batteries are not coded.
+2014 has no party-competence item, and 2024 no vote intention: `q1a` in 2024 is the competence question ("which party would be best at dealing with this problem?"), although it sits next to the vote items in the party-code file.
 
 Each wave has its own party codes, and the choice of variable follows what the release offers:
 
@@ -183,7 +185,8 @@ ans_04 <- ees_2004 |>
     pid = as.numeric(v211),
     vote_ep = as.numeric(v112),
     vote_nat = as.numeric(v113),
-    vote_intent = as.numeric(v114)
+    vote_intent = as.numeric(v114),
+    mip_party = as.numeric(v029)
   ) |>
   stack_items()
 
@@ -193,7 +196,7 @@ ans_09 <- ees_2009 |>
     row = row_number(),
     respondent = as.character(t100),
     cntry = to_iso2(as.character(as_factor(t102))),
-    region = case_match(
+    region = recode_values(
       as.character(as_factor(t103)),
       "BE_Flanders" ~ "Flanders",
       "BE_Wallon" ~ "Wallonia"
@@ -204,7 +207,8 @@ ans_09 <- ees_2009 |>
     vote_ep_hyp = as.numeric(q26),
     vote_local = as.numeric(q26b),
     vote_nat = as.numeric(q27),
-    vote_intent = as.numeric(q28)
+    vote_intent = as.numeric(q28),
+    mip_party = as.numeric(q4)
   ) |>
   stack_items()
 
@@ -216,7 +220,7 @@ ans_14 <- ees_2014 |>
     cntry = to_iso2(as.character(as_factor(countrycode))),
     region = if_else(
       cntry == "BE",
-      case_match(
+      recode_values(
         as.character(as_factor(p13_intlang)),
         "Dutch" ~ "Flanders",
         "French" ~ "Wallonia"
@@ -236,14 +240,15 @@ ans_19 <- ees_2019 |>
     row = row_number(),
     respondent = as.character(serial),
     cntry = to_iso2(as.character(as_factor(countrycode))),
-    region = case_match(
+    region = recode_values(
       as.character(as_factor(meta_lang_be)),
       "Flamish" ~ "Flanders",
       "French" ~ "Wallonia"
     ),
     pid = as.numeric(Q25),
     vote_ep = as.numeric(Q7),
-    vote_nat = as.numeric(Q9)
+    vote_nat = as.numeric(Q9),
+    mip_party = as.numeric(Q2)
   ) |>
   stack_items()
 
@@ -255,13 +260,13 @@ ans_24 <- ees_2024 |>
     cntry = to_iso2(country_alpha2),
     region = if_else(
       cntry == "BE",
-      case_match(meta_lang, "nl" ~ "Flanders", "fr" ~ "Wallonia"),
+      recode_values(meta_lang, "nl" ~ "Flanders", "fr" ~ "Wallonia"),
       NA
     ),
     pid = as.numeric(q19_recoded),
     vote_ep = as.numeric(q6_recoded),
     vote_nat = as.numeric(q8_recoded),
-    vote_intent = as.numeric(q1a_recoded)
+    mip_party = as.numeric(q1a_recoded)
   ) |>
   stack_items()
 
@@ -275,6 +280,7 @@ item_vars <- tribble(
   2004L, "vote_ep", "v112",
   2004L, "vote_nat", "v113",
   2004L, "vote_intent", "v114",
+  2004L, "mip_party", "v029",
   2009L, "pid", "q87",
   2009L, "pid_lean", "q90",
   2009L, "vote_ep", "q25",
@@ -282,6 +288,7 @@ item_vars <- tribble(
   2009L, "vote_local", "q26b",
   2009L, "vote_nat", "q27",
   2009L, "vote_intent", "q28",
+  2009L, "mip_party", "q4",
   2014L, "pid", "qpp21_ees",
   2014L, "vote_ep", "qp2_ees",
   2014L, "vote_nat", "qpp5_ees",
@@ -289,10 +296,11 @@ item_vars <- tribble(
   2019L, "pid", "Q25",
   2019L, "vote_ep", "Q7",
   2019L, "vote_nat", "Q9",
+  2019L, "mip_party", "Q2",
   2024L, "pid", "q19_recoded",
   2024L, "vote_ep", "q6_recoded",
   2024L, "vote_nat", "q8_recoded",
-  2024L, "vote_intent", "q1a_recoded"
+  2024L, "mip_party", "q1a_recoded"
 )
 
 answers <- answers |>
@@ -394,7 +402,7 @@ scopes_04 <- scopes_04 |>
 labels_04 <- respondents_04 |>
   distinct(country04, cntry, region) |>
   filter(cntry %in% countries_25) |>
-  cross_join(tibble(variable = c("v112", "v113", "v114", "v211", sprintf("v%03d", c(115:128, 135:148))))) |>
+  cross_join(tibble(variable = c("v029", "v112", "v113", "v114", "v211", sprintf("v%03d", c(115:128, 135:148, 157:170))))) |>
   left_join(scopes_04, by = c("country04" = "country", "variable"), relationship = "many-to-many") |>
   # a country with a single list covers every variable
   mutate(scope = coalesce(scope, "all")) |>
@@ -416,13 +424,13 @@ count(labels_04, cntry, region, name = "labels") |>
 #| label: labels-waves
 
 labels_vl <- bind_rows(
-  map(c("q87", "q90", "q25", "q26", "q26b", "q27", "q28"), \(v) {
+  map(c("q4", "q87", "q90", "q25", "q26", "q26b", "q27", "q28"), \(v) {
     value_labels(ees_2009[[v]]) |> mutate(wave = 2009L, variable = v)
   }),
   map(c("qpp21_ees", "qp2_ees", "qpp5_ees", "qpp6_ees"), \(v) {
     value_labels(ees_2014[[v]]) |> mutate(wave = 2014L, variable = v)
   }),
-  map(c("Q25", "Q7", "Q9"), \(v) {
+  map(c("Q2", "Q25", "Q7", "Q9"), \(v) {
     value_labels(ees_2019[[v]]) |> mutate(wave = 2019L, variable = v)
   })
 )
@@ -437,7 +445,7 @@ pc_24 <- read_delim(
 names(pc_24) <- str_trim(names(pc_24))
 pc_24 <- pc_24 |>
   transmute(
-    region = case_match(Country, "Belgium-Flanders" ~ "Flanders", "Belgium-Wallonia" ~ "Wallonia"),
+    region = recode_values(Country, "Belgium-Flanders" ~ "Flanders", "Belgium-Wallonia" ~ "Wallonia"),
     un = as.integer(`Country Code`),
     code = as.numeric(`Harmonized Numerical 2024 Code...11`),
     label = str_squish(`Party Name`),
@@ -446,6 +454,7 @@ pc_24 <- pc_24 |>
     position = as.integer(`PARTY in Q9, Q11, Q18, Q20 (Party Placement Scales)`),
     q9 = Q9,
     q11 = Q11,
+    q18 = Q18,
     q20 = Q20,
     ees_code = as.numeric(`EES 2019/2014/2009 Code`),
     pf_hint = as.integer(`Party Facts Code`)
@@ -474,10 +483,10 @@ Each position is resolved to a party code of the wave's answer items, whose labe
 
 # 2004: position k is list code k, on the list covering that battery
 battery_04 <- labels_04 |>
-  filter(variable %in% sprintf("v%03d", c(115:128, 135:148))) |>
+  filter(variable %in% sprintf("v%03d", c(115:128, 135:148, 157:170))) |>
   mutate(
-    battery = if_else(variable <= "v128", "ptv", "lr"),
-    position = as.integer(str_sub(variable, 2)) - if_else(battery == "ptv", 114L, 134L)
+    battery = case_when(variable <= "v128" ~ "ptv", variable <= "v148" ~ "lr", .default = "eu"),
+    position = as.integer(str_sub(variable, 2)) - c(ptv = 114L, lr = 134L, eu = 156L)[battery]
   ) |>
   filter(code == position) |>
   transmute(wave = 2004L, cntry, region, battery, position, variable, code, label)
@@ -489,10 +498,10 @@ xls_09 <- read_excel(
   col_types = "text",
   .name_repair = "unique_quiet"
 ) |>
-  select(iso = 1, ptv = 3, lr = 4, english = 7, code = 8) |>
+  select(iso = 1, ptv = 3, lr = 4, eu = 5, english = 7, code = 8) |>
   # Denmark's party 1 sits on the row that carries the country name
   mutate(iso = if_else(str_detect(iso, "^[A-Z]{2}$"), iso, to_iso2(iso))) |>
-  filter(!is.na(iso), !is.na(ptv) | !is.na(lr)) |>
+  filter(!is.na(iso), !is.na(ptv) | !is.na(lr) | !is.na(eu)) |>
   mutate(
     cntry = if_else(iso == "UK", "GB", iso),
     region = if_else(
@@ -504,7 +513,7 @@ xls_09 <- read_excel(
   )
 
 battery_09 <- xls_09 |>
-  pivot_longer(c(ptv, lr), names_to = "battery", values_to = "variable", values_drop_na = TRUE) |>
+  pivot_longer(c(ptv, lr, eu), names_to = "battery", values_to = "variable", values_drop_na = TRUE) |>
   transmute(
     wave = 2009L,
     cntry,
@@ -522,12 +531,15 @@ xls_14 <- read_excel(
   col_types = "text",
   .name_repair = "unique_quiet"
 ) |>
-  select(iso = 1, ptv = 3, lr = 4, english = 7, code = 10) |>
+  select(iso = 1, ptv = 3, lr = 4, eu = 5, english = 7, code = 10) |>
   mutate(
+    # the EU column (qpp19_X) is filled for Belgium only; its header puts it
+    # on the PTV rows, so the other countries take it from the PTV position
+    eu = coalesce(eu, str_replace(ptv, "^qpp8_", "qpp19_")),
     block = if_else(str_detect(iso, "^Belgium - "), str_remove(iso, "^Belgium - "), NA)
   ) |>
   fill(block) |>
-  filter(str_detect(iso, "^[A-Z]{2}$"), !is.na(ptv) | !is.na(lr)) |>
+  filter(str_detect(iso, "^[A-Z]{2}$"), !is.na(ptv) | !is.na(lr) | !is.na(eu)) |>
   mutate(
     cntry = if_else(iso == "UK", "GB", iso),
     region = if_else(cntry == "BE", block, NA),
@@ -535,7 +547,7 @@ xls_14 <- read_excel(
   )
 
 battery_14 <- xls_14 |>
-  pivot_longer(c(ptv, lr), names_to = "battery", values_to = "variable", values_drop_na = TRUE) |>
+  pivot_longer(c(ptv, lr, eu), names_to = "battery", values_to = "variable", values_drop_na = TRUE) |>
   transmute(
     wave = 2014L,
     cntry,
@@ -560,11 +572,12 @@ battery_19 <- cp_19 |>
     region = if_else(cntry == "BE", Region, NA),
     ptv = Q10_PTV,
     lr = Q13_left_right,
+    eu = Q24_EU,
     code = as.numeric(Q7),
     english = `English name`,
     questionnaire = Party_name_questionnaire
   ) |>
-  pivot_longer(c(ptv, lr), names_to = "battery", values_to = "variable", values_drop_na = TRUE) |>
+  pivot_longer(c(ptv, lr, eu), names_to = "battery", values_to = "variable", values_drop_na = TRUE) |>
   transmute(
     wave = 2019L,
     cntry,
@@ -580,12 +593,12 @@ battery_19 <- cp_19 |>
 # 2024: the party-code file names the variables per position
 battery_24 <- pc_24 |>
   filter(!is.na(position)) |>
-  pivot_longer(c(q9, q11, q20), names_to = "item", values_to = "variable", values_drop_na = TRUE) |>
+  pivot_longer(c(q9, q11, q18, q20), names_to = "item", values_to = "variable", values_drop_na = TRUE) |>
   transmute(
     wave = 2024L,
     cntry,
     region,
-    battery = recode_values(item, "q9" ~ "ptv", "q11" ~ "lr", "q20" ~ "like"),
+    battery = recode_values(item, "q9" ~ "ptv", "q11" ~ "lr", "q18" ~ "eu", "q20" ~ "like"),
     position,
     variable = str_to_lower(variable),
     code
@@ -679,7 +692,7 @@ special <- bind_rows(
     98, "dont-know", # do not remember
     99, NA # d/k, n/a
   ) |>
-    cross_join(tibble(variable = c("v211", "v112", "v113", "v114"))) |>
+    cross_join(tibble(variable = c("v029", "v211", "v112", "v113", "v114"))) |>
     bind_rows(
       tribble(
         ~variable, ~code, ~pf_name,
@@ -706,9 +719,9 @@ special <- bind_rows(
     98, "other",
     99, NA
   ) |>
-    cross_join(tibble(variable = c("q87", "q90", "q25", "q26", "q26b", "q27", "q28"))) |>
-    # on q90, 98 is "unavailable"
-    mutate(pf_name = if_else(variable == "q90" & code == 98, NA, pf_name), wave = 2009L),
+    cross_join(tibble(variable = c("q4", "q87", "q90", "q25", "q26", "q26b", "q27", "q28"))) |>
+    # on q4 and q90, 98 is "unavailable"
+    mutate(pf_name = if_else(variable %in% c("q4", "q90") & code == 98, NA, pf_name), wave = 2009L),
   # 2014 (_ees codes)
   tribble(
     ~code, ~pf_name,
@@ -738,7 +751,12 @@ special <- bind_rows(
     "Q9", 96, "blank-invalid",
     "Q9", 97, "did-not-vote",
     "Q9", 98, "dont-know",
-    "Q9", 99, NA
+    "Q9", 99, NA,
+    "Q2", 10, "other",
+    "Q2", 11, "none", # none of the parties
+    "Q2", 98, "dont-know",
+    "Q2", 99, NA,
+    "Q2", 9999, NA # not asked (Q1 = don't know)
   ) |>
     mutate(wave = 2019L),
   # 2024 (*_recoded)
@@ -753,9 +771,10 @@ special <- bind_rows(
     98, "dont-know"
   ) |>
     cross_join(tibble(variable = c("q19_recoded", "q6_recoded", "q8_recoded", "q1a_recoded"))) |>
-    # on the vote intention, 96 is "would not vote"
+    # on the competence item q1a, 96 has no questionnaire code (3,307 answers,
+    # probably no problem named): missing
     mutate(
-      pf_name = if_else(variable == "q1a_recoded" & code == 96, "will-not-vote", pf_name),
+      pf_name = if_else(variable == "q1a_recoded" & code == 96, NA, pf_name),
       wave = 2024L
     )
 ) |>
@@ -822,7 +841,8 @@ ees_pf <- bind_rows(
 ees_19 <- bind_rows(
   cp_19 |> transmute(variable = "Q7", code = as.numeric(Q7), ees_code = as.numeric(Q7_EES)),
   cp_19 |> transmute(variable = "Q9", code = as.numeric(Q9), ees_code = as.numeric(Q9_Q25_EES)),
-  cp_19 |> transmute(variable = "Q25", code = as.numeric(q25), ees_code = as.numeric(Q9_Q25_EES))
+  cp_19 |> transmute(variable = "Q25", code = as.numeric(q25), ees_code = as.numeric(Q9_Q25_EES)),
+  cp_19 |> transmute(variable = "Q2", code = as.numeric(Q2), ees_code = as.numeric(Q2_EES))
 ) |>
   filter(!is.na(code), !is.na(ees_code)) |>
   distinct()
@@ -1610,7 +1630,20 @@ map_hand <- tribble(
   2024L, "SK", "Slovenský PATRIOT", "Slovenský PATRIOT [og]", NA,
   2024L, "SK", "VZDOR - strana práce", "VZDOR - strana práce [og]", NA,
   2024L, "SK", "Volt Slovensko", "Volt Slovensko [og]", NA,
-  2024L, "SK", "ZDRAVÝ ROZUM", "ZDRAVÝ ROZUM [og]", NA
+  2024L, "SK", "ZDRAVÝ ROZUM", "ZDRAVÝ ROZUM [og]", NA,
+  # labels that only the competence items (v029, q4, Q2) carry
+  2004L, "LV", "Political organization \"Eurosceptics\"", "Political organization \"Eurosceptics\" [og]", NA,
+  2009L, "IT", "Forza Nuova FN", "Forza Nuova FN [og]", NA,
+  2009L, "PT", "Partido Comunista Português (PCP)", "Partido Comunista Português", 310L,
+  2009L, "RO", "Partidul Comunist Român, PCR", "Partidul Comunist Român, PCR [og]", NA, # 5773 is the party of 1921-1989
+  2009L, "SI", "Slovenská pirátská strana", "Slovenská pirátská strana [og]", NA,
+  2019L, "ES", "Compromís per Europa/Compromiso por Europa", "Compromís per Europa/Compromiso por Europa [og]", NA, # joint list
+  2019L, "HR", "Amsterdamska koalicija", "Amsterdamska koalicija [og]", NA, # joint list
+  2019L, "HR", "Bandić Milan 365", "Bandić Milan 365 — Stranka rada i solidarnosti", 5452L,
+  2019L, "HU", "Fidesz -Magyar Polgári Szövetség (FIDESZ)", "Fidesz — Magyar Polgári Szövetség", 1691L,
+  2019L, "IE", "Sinn Féin (SF)", "Sinn Féin (Provisional)", 4L,
+  2019L, "SI", "Slovenska demokratska stranka in Slovenska ljudska stranka (SDS in SLS)", "Slovenska demokratska stranka in Slovenska ljudska stranka (SDS in SLS) [og]", NA, # joint list
+  2019L, "SK", "Progressive Slovakia – Together (Progresivne Slovensko-SPOLU)", "Progressive Slovakia – Together (Progresivne Slovensko-SPOLU) [og]", NA # joint list
 ) |>
   mutate(key = norm_key(label), source = "hand")
 
@@ -1777,9 +1810,9 @@ stopifnot(nrow(respondents) == nrow(distinct(respondents, wave, row)))
 # Order: ids, answer items, then batteries by position
 ext_cols <- str_subset(names(respondents), "^ext_")
 stub_of <- str_remove(ext_cols, "_pf_(name|id)$")
-item_order <- c("pid", "pid_lean", "vote_ep", "vote_ep_hyp", "vote_local", "vote_nat", "vote_intent")
+item_order <- c("pid", "pid_lean", "vote_ep", "vote_ep_hyp", "vote_local", "vote_nat", "vote_intent", "mip_party")
 ord <- order(
-  match(str_remove(stub_of, "_[0-9]+$"), c(item_order, "ptv", "lr", "like")),
+  match(str_remove(stub_of, "_[0-9]+$"), c(item_order, "ptv", "lr", "eu", "like")),
   as.integer(str_extract(stub_of, "[0-9]+$")),
   str_ends(ext_cols, "_pf_id")
 )
