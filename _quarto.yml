@@ -5,9 +5,9 @@ project:
   render:
     - index.qmd
     - code/01_preparation/1.1_ess_to_parquet.qmd
-    - code/01_preparation/1.2_ees_pid_over_time.qmd
-    - code/01_preparation/1.3_cses_pid_over_time.qmd
-    - code/01_preparation/1.4_ess_pid_over_time.qmd
+    - code/01_preparation/1.5_ees_pid_over_time.qmd
+    - code/01_preparation/1.6_cses_pid_over_time.qmd
+    - code/01_preparation/1.7_ess_pid_over_time.qmd
     # Rendered as plain pages, deliberately not listed under manuscript:
     # notebooks. The manuscript pipeline routes notebooks through .ipynb,
     # which turns `output: asis` into a code block, so their generated
@@ -25,10 +25,10 @@ manuscript:
   article: index.qmd
   notebooks:
     - code/01_preparation/1.1_ess_to_parquet.qmd
-    - code/01_preparation/1.2_ees_pid_over_time.qmd
-    - code/01_preparation/1.3_cses_pid_over_time.qmd
-    - code/01_preparation/1.4_ess_pid_over_time.qmd
-    - code/01_preparation/1.5_eu25_pid.qmd
+    - code/01_preparation/1.5_ees_pid_over_time.qmd
+    - code/01_preparation/1.6_cses_pid_over_time.qmd
+    - code/01_preparation/1.7_ess_pid_over_time.qmd
+    - code/01_preparation/1.8_eu25_pid.qmd
 
 execute:
   freeze: auto
