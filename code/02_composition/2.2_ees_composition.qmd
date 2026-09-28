@@ -37,6 +37,7 @@ p_required <- c(
   "tidyverse",
   "here",
   "haven",
+  "arrow",
   "sessioninfo"
 )
 packages <- rownames(installed.packages())
@@ -53,7 +54,7 @@ source(here("code", "00_helper", "pid_tree.R"))
 
 # Load EES Data
 
-The same five files as in notebook 1.2.
+The same five files as in notebook 1.5.
 
 ```{r}
 #| label: load-ees-data
@@ -93,29 +94,25 @@ Every wave also carries a recall of the last **national** general election, whic
 | 2019 | `Q25n` | `Q7n` | `Q9n` | none |
 | 2024 | `q19` (party: `q19n`) | `q6` (party: `q6n`) | `q8` | none |
 
-The difficult part is the party comparison, because the party codes of the two items do not line up in every file.
-Which code to compare was decided by checking, wave by wave and country by country, how often attached voters named the same code on both items.
+The items above only *classify* attachment and vote (party, no party, don't know; party vote, no vote).
+The party comparison uses the Party Facts coding of notebook 1.4 instead of the release's own codes, which do not line up across the two items in every wave (2014 and 2024 raw codes are shifted against each other, 2019 raw codes follow separate lists):
+the attachment party and the EP vote are compared by Party Facts party, with the alliance rule of notebook 1.9, so that a party and an electoral alliance or joint list containing it count as the *same party*.
+The match comes from `data/02_processed/ees_party_match.parquet`, joined on wave and the respondent's position in the wave's file.
 
-- **2004** codes both items on one country-specific list (`1`, `2`, ...), so the raw codes compare directly.
-- **2009** codes both items with the same seven-digit EES party codes.
-- **2014** raw codes are shifted against each other (`qpp21` counts parties from `2`, because `1` is "no"; `qp2` counts from `1`), so the harmonised `_ees` versions are used, which share the seven-digit codes.
-- **2019** raw codes do not line up at all; the unified `n` versions (`Q25n`, `Q7n`) do, and match better than the `_EES` codes in Estonia, Lithuania, Slovenia and Sweden.
-- **2024** raw codes are shifted in the same way as 2014.
-  The unified `q19n` and `q6n` line up, but they code some named parties as "other" (`90`) where the raw item has a party.
-  So attachment and vote are *classified* from the raw `q19` and `q6`, as in notebook 1.2, and the unified codes are used only for the *comparison*.
-  A party that the unified coding lacks becomes *not matchable*.
-
-The attachment categories follow notebook 1.2, with one difference: don't know, refusal and missing are pooled into the tree's grey *DK* box.
+The attachment categories follow notebook 1.5, with one difference: don't know, refusal and missing are pooled into the tree's grey *DK* box.
 
 ```{r}
 #| label: select-2004
 
 # 2004: v211 attachment, v112 EP vote
 ees_2004 <- ees_2004 |>
+  # Position in the file, the key of notebook 1.4
+  mutate(row = row_number()) |>
   # Item unfielded in BE, LT
   filter(!is.na(v211)) |>
   transmute(
     year = 2004,
+    row,
     country_raw = as.character(as_factor(country)),
     a = as.numeric(v211),
     v = as.numeric(v112),
@@ -139,6 +136,7 @@ ees_2004 <- ees_2004 |>
 ees_2009 <- ees_2009 |>
   transmute(
     year = 2009,
+    row = row_number(),
     country_raw = as.character(as_factor(t102)),
     a = as.numeric(q87),
     v = as.numeric(q25),
@@ -162,6 +160,7 @@ ees_2009 <- ees_2009 |>
 ees_2014 <- ees_2014 |>
   transmute(
     year = 2014,
+    row = row_number(),
     country_raw = as.character(as_factor(countrycode)),
     a = as.numeric(qpp21_ees),
     v = as.numeric(qp2_ees),
@@ -185,6 +184,7 @@ ees_2014 <- ees_2014 |>
 ees_2019 <- ees_2019 |>
   transmute(
     year = 2019,
+    row = row_number(),
     country_raw = as.character(as_factor(countrycode)),
     a = as.numeric(Q25n),
     v = as.numeric(Q7n),
@@ -208,6 +208,7 @@ ees_2019 <- ees_2019 |>
 ees_2024 <- ees_2024 |>
   transmute(
     year = 2024,
+    row = row_number(),
     country_raw = country_alpha2,
     a = q19,
     v = q6,
@@ -226,8 +227,7 @@ ees_2024 <- ees_2024 |>
 
 # Harmonise to the Tree
 
-Country names are mapped onto ISO2 exactly as in notebook 1.2, with Britain and Northern Ireland pooled into `GB` in 2004.
-Party codes are only ever compared within one respondent, so it does not matter that the unified codes of 2019 and 2024 are country-specific indices rather than unique party codes.
+Country names are mapped onto ISO2 exactly as in notebook 1.5, with Britain and Northern Ireland pooled into `GB` in 2004.
 
 ```{r}
 #| label: bind
@@ -270,16 +270,27 @@ ees_tree <- bind_rows(ees_2004, ees_2009, ees_2014, ees_2019, ees_2024) |>
   # Keep the project's 25 democracies
   filter(country %in% countries_25) |>
   mutate(
-    # Level 3: compare within country
+    year = factor(year)
+  )
+
+# Level 3: Party Facts match with the EP vote, alliances included (notebook 1.9)
+ees_match <- read_parquet(here("data", "02_processed", "ees_party_match.parquet")) |>
+  transmute(year = factor(wave, levels = levels(ees_tree$year)), row, pf_match = ext_match_vote_ep)
+ees_pf <- read_parquet(here("data", "02_processed", "ees_party_pf.parquet")) |>
+  transmute(year = factor(wave, levels = levels(ees_tree$year)), row, att_pf = ext_pid_pf_name, vote_pf = ext_vote_ep_pf_name)
+
+n_before <- nrow(ees_tree)
+ees_tree <- ees_tree |>
+  left_join(ees_match, by = c("year", "row")) |>
+  left_join(ees_pf, by = c("year", "row")) |>
+  mutate(
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
-      is.na(att_party) | is.na(vote_party) ~ "unmatchable",
-      att_party == vote_party ~ "same",
-      .default = "different"
-    ),
-    year = factor(year)
+      .default = coalesce(pf_match, "unmatchable")
+    )
   ) |>
-  select(year, country, att, vote, match, a, v)
+  select(year, country, att, vote, match, a, v, att_pf, vote_pf)
+stopifnot(nrow(ees_tree) == n_before)
 
 # Respondents and countries per wave
 ees_tree |>
@@ -317,7 +328,7 @@ ees_tree |>
 # Pooled Tree
 
 All 25 countries and all five waves.
-The panel of countries is unbalanced (see notebook 1.2), so this tree mixes different country sets.
+The panel of countries is unbalanced (see notebook 1.5), so this tree mixes different country sets.
 
 ```{r}
 #| label: tree-pooled
@@ -403,11 +414,11 @@ In the trees, the 2009 *No attachment* box therefore still contains the responde
 
 - **The vote is an EP vote.** European elections are second-order: turnout is low and sincere voting for small parties is common, so *no vote reported* and *different party* are both larger than they would be with a national recall.
   The national recall is listed in the table above for a later comparison.
-- **Mode changes between 2014 and 2019**, from interviewer-administered to online panels with no refusal option (see notebook 1.2).
-- **Electoral alliances count as different parties.** Where a party runs inside a joint list, an attachment to the party and a vote for the list do not share a code.
-  This is visible in the alignment table: Croatia 2014 (HDZ against the HDZ-led coalition list), Romania 2014 and 2019, Poland 2019 (the European Coalition list), Portugal 2014, and Italy and Portugal 2004 sit far below the other cells.
-  These are codings, not voters, and a crosswalk from members to lists would move them into *same party*.
-- **The 2004 DK category** also contains no-answers, as noted in notebook 1.2.
+- **Mode changes between 2014 and 2019**, from interviewer-administered to online panels with no refusal option (see notebook 1.5).
+- **Electoral alliances count as the same party as their members** (notebook 1.9): an attachment to HDZ and a vote for the HDZ-led coalition list, or to PO and a vote for the European Coalition, are *same party*.
+  Two members of one alliance stay *different party*, and so do renamed parties with a new Party Facts id.
+  Italy 2004 stays low for a different reason: attachment to the Margherita or the PdCI pairs with a vote for Il Girasole hundreds of times, which points to a mislabelled vote code in the release.
+- **The 2004 DK category** also contains no-answers, as noted in notebook 1.5.
 
 # Session Info
 

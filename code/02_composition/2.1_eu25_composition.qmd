@@ -48,6 +48,10 @@ rm(p_required, p_to_install, packages)
 
 # Shared tree helpers
 source(here("code", "00_helper", "pid_tree.R"))
+
+# Party Facts helpers and the alliance table of notebook 1.9
+source(here("code", "00_helper", "pf_code.R"))
+alliances <- pf_alliances()
 ```
 
 # The Tree
@@ -61,7 +65,7 @@ Every composition notebook (2.1 to 2.4) sorts respondents into the same sequenti
 2. **Vote.** Does the respondent report a party vote?
    *No vote reported* collects non-voters, blank or invalid ballots, don't know, refusals and missing answers, and "other" votes whose open text names no party.
    Where a survey wave never asked the vote item, the branch reads *vote item not fielded* instead, so that "not asked" is not confused with "did not answer".
-3. **Match.** Only for respondents who report both, the two parties are compared: *same party* or *different party*.
+3. **Match.** Only for respondents who report both, the two parties are compared by their Party Facts coding: *same party* (the same party, or a party and an electoral alliance or joint list that contains it, in either direction; notebook 1.9) or *different party* (including two members of one alliance).
    Because both sides are always a named party, no respondent in this notebook is *not matchable*.
 
 Two leaves are named after the typology: *no attachment, vote reported* is the **vote-anchored** group (the data files call it *implicit*), and *no attachment, no vote* is the non-partisan group.
@@ -73,7 +77,7 @@ Every box gives the number of respondents, and every arrow gives the share of th
 # Load Data
 
 The source is the published harmonised release, not the old analysis frame in `data/03_final/`.
-As in notebook 1.5, only respondents who passed the attention check (`der_att_check_3`) are kept.
+As in notebook 1.8, only respondents who passed the attention check (`der_att_check_3`) are kept.
 
 ```{r}
 #| label: load-eu25-data
@@ -85,7 +89,7 @@ eu25games <- read_rds(
     "eu25games2019.rds"
   )
 ) |>
-  # Attention-check passers, as in 1.5
+  # Attention-check passers, as in 1.8
   filter(der_att_check_3)
 ```
 
@@ -775,11 +779,10 @@ eu25_tree <- eu25_tree |>
       is.na(vote_party) | vote_party %in% c(pf_no_party, pf_other) ~ "no",
       .default = "yes"
     ),
-    # Level 3: same Party Facts name?
+    # Level 3: same Party Facts party, alliances included (notebook 1.9)
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
-      pid == vote_party ~ "same",
-      .default = "different"
+      .default = pf_match(country, pid, vote_party, alliances)
     ),
     wave = factor(paste("Wave", wave))
   ) |>
@@ -912,9 +915,8 @@ So no tree in this notebook has a dashed note.
   A party that appears only in hand-coded texts carries a `[hand]` name, so an attachment to it can only match a vote that was hand-coded as well.
   Votes for independent candidates count as *no vote reported*, and attachment to them as *DK / missing*.
 - **Respondent-waves, not persons.** See the panel table above.
-- **Matching on Party Facts names** treats an electoral alliance and its member party as different parties when Party Facts codes them separately.
-  The mismatch table above is dominated by such pairs: Fidesz against the Fidesz–KDNP list in Hungary, Civic Platform against the European Coalition in Poland, Podemos against Unidas Podemos in Spain, PLUS against the USR-PLUS alliance in Romania.
-  A member-to-list crosswalk would move these into *same party*; genuine switches (e.g. Conservative attachment, Brexit Party vote in Britain) would stay.
+- **Matching is by Party Facts party, with alliances** (notebook 1.9): a party and an electoral alliance containing it count as the *same party* (Fidesz and the Fidesz–KDNP list, Civic Platform and the European Coalition, Podemos and Unidas Podemos, PLUS and USR-PLUS), in all four composition notebooks alike.
+  Two members of one alliance, renamed parties with a new Party Facts id, and `[hand]` parties outside the table stay *different party*; genuine switches (e.g. Conservative attachment, Brexit Party vote in Britain) stay as they are.
 - **Panel duplicates.** A handful of panelists appear many times over (one 29 times), which the attention-check filter does not remove.
 
 # Session Info

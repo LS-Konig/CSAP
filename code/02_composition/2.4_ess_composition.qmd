@@ -55,7 +55,7 @@ source(here("code", "00_helper", "pid_tree.R"))
 
 # Load ESS Data
 
-The partitioned Parquet dataset from notebook 1.1, as in notebook 1.4.
+The partitioned Parquet dataset from notebook 1.1, as in notebook 1.7.
 
 ```{r}
 #| label: load-ess-data
@@ -77,7 +77,8 @@ The ESS asks both items as a filter followed by a party:
 The party variables are **country-specific**, and re-lettered whenever a country's party list changes (`prtclde`, `prtclade`, `prtclbde`, ...).
 More importantly, the attachment list and the vote list are **numbered independently**: the same party can be `3` on one and `5` on the other.
 The Parquet file carries only the numbers.
-So the numbers have to be turned back into party names, and the names compared.
+So the numbers have to be turned back into parties before the two answers can be compared.
+Notebook 1.2 does that, coding every code of both lists to Party Facts; this notebook uses the codebook labels only to classify the vote (party, other, non-vote) and compares the parties through the Party Facts coding, with the alliance rule of notebook 1.9.
 
 The names come from the value labels in the ESS codebook (`data/01_raw/ess/Datafile-subset codebook.html`).
 Each `prtcl*` and `prtv*` variable is one block there, with a table of codes and labels.
@@ -275,275 +276,56 @@ ess_tree <- ess_raw |>
   )
 ```
 
-# Matching Party Names
+# Matching Parties
 
-Comparing the names exactly is far too strict.
-The two lists of one country and round often spell the same party differently -- "PP" against "Partido Popular (PP)", "SMER-Social Democracy" against "Smer – SD", "Fidesz (Fidesz Magyar Polgári Párt)" against "Fidesz - KDNP" -- and an exact comparison scores all of these as *different party*.
-So a pair of names counts as the same party if one of four rules holds, tried in this order:
+Attachment and vote are compared by their Party Facts coding (notebook 1.2), not by the codebook names: the two lists of one country and round spell the same party differently ("PP" against "Partido Popular (PP)", "Smer – SD" against "SMER-Social Democracy"), and the coding has already resolved every spelling to one Party Facts party.
+The match level comes from `data/02_processed/ess_party_match.parquet` (notebook 1.9), which applies one rule to all four sources:
 
-1. **Exact:** the normalised names are identical.
-2. **Acronym:** an acronym written in capitals in one label ("PP", "SMER", "HDZ") occurs as a word in the other.
-3. **First word:** both names start with the same distinctive word of at least four letters ("fidesz", "sojusz"), after dropping generic words such as *party*, *social*, *democratic* or a country adjective.
-4. **Contained:** a name that is a single word occurs as a word in the other ("podemos" in "unidos podemos").
-
-Rules 2 to 4 credit a vote for an **electoral alliance** that carries the party's name or acronym ("Fidesz - KDNP", "HDZ, HSLS") as a vote for the party.
-The EES, CSES and eu25games notebooks compare codes and do not do this, so the ESS *same party* share is not directly comparable with theirs; see the caveats.
-
-Every pair matched by rules 2 to 4 is printed below, so that false matches can be spotted.
-The `name_overrides` table then forces individual pairs either way.
+- **same party**: the same Party Facts party, or a party and an electoral alliance or joint list that contains it, in either direction (Fidesz and the Fidesz–KDNP list, PO and Koalicja Obywatelska);
+- **different party**: two different parties, including two members of one alliance;
+- **not matchable**: the attachment party or the vote is an *other* answer, or has no party.
 
 ```{r}
-#| label: match-rules
+#| label: match
 
-# Words that identify no party
-generic_words <- c(
-  "the",
-  "of",
-  "and",
-  "for",
-  "a",
-  "i",
-  "na",
-  "za",
-  "de",
-  "la",
-  "le",
-  "les",
-  "del",
-  "di",
-  "per",
-  "des",
-  "du",
-  "van",
-  "voor",
-  "fur",
-  "und",
-  "party",
-  "parti",
-  "partido",
-  "partij",
-  "partei",
-  "partia",
-  "partiya",
-  "partidul",
-  "part",
-  "strana",
-  "stranka",
-  "puolue",
-  "partiet",
-  "parties",
-  "social",
-  "socialist",
-  "democratic",
-  "democrats",
-  "democracy",
-  "christian",
-  "liberal",
-  "liberals",
-  "national",
-  "people",
-  "peoples",
-  "popular",
-  "union",
-  "alliance",
-  "coalition",
-  "movement",
-  "list",
-  "new",
-  "green",
-  "greens",
-  "left",
-  "right",
-  "centre",
-  "center",
-  "citizens",
-  "civic",
-  "united",
-  "hrvatska",
-  "hrvatski",
-  "slovenska",
-  "ceska",
-  "polska",
-  "polskie",
-  "magyar",
-  "magyarorszag",
-  "balgarska",
-  "bulgarian",
-  "lietuvos",
-  "latvijas",
-  "eesti",
-  "suomen",
-  "svenska",
-  "dansk",
-  "danish",
-  "irish",
-  "movimento",
-  "bloco",
-  "coligacao",
-  "koalicja",
-  "koalitsia",
-  "koalice",
-  "alianta",
-  "narodna",
-  "demokratska",
-  "socijaldemokratska",
-  "erakond",
-  "eestimaa",
-  "jauna",
-  "lithuania",
-  "folkeparti",
-  "labour",
-  "lithuanian",
-  "slovak",
-  "slovenian",
-  "czech",
-  "hungarian",
-  "croatian",
-  "polish",
-  "estonian",
-  "latvian",
-  "finnish",
-  "swedish",
-  "dutch",
-  "german",
-  "french",
-  "spanish",
-  "portuguese",
-  "italian",
-  "greek",
-  "british",
-  "belgian",
-  "austrian",
-  "romanian"
-)
+ess_pf <- read_parquet(here("data", "02_processed", "ess_party_pf.parquet")) |>
+  select(cntry, essround, name, idno, att_pf = ext_prtcl_pf_name, vote_pf = ext_prtv_pf_name)
+ess_match <- read_parquet(here("data", "02_processed", "ess_party_match.parquet")) |>
+  select(cntry, essround, name, idno, pf_match = ext_match_prtv)
 
-# Capitalised acronyms in a label
-label_acronyms <- function(label) {
-  label |>
-    str_extract_all("\\b\\p{Lu}[\\p{Lu}\\d]+\\b") |>
-    map(normalise_party)
-}
-
-# Distinctive words of a name
-name_words <- function(norm) {
-  str_split(norm, " ") |>
-    map(\(w) w[!w %in% generic_words])
-}
-
-# One row per distinct name pair
-name_pairs <- ess_tree |>
-  filter(att == "yes", vote == "yes", !is.na(att_norm)) |>
-  filter(!att_other, !vote_other) |>
-  distinct(cntry, att_label, att_norm, vote_label, vote_norm) |>
-  mutate(
-    att_acr = label_acronyms(att_label),
-    vote_acr = label_acronyms(vote_label),
-    att_all = str_split(att_norm, " "),
-    vote_all = str_split(vote_norm, " "),
-    att_words = name_words(att_norm),
-    vote_words = name_words(vote_norm),
-    rule = case_when(
-      att_norm == vote_norm ~ "exact",
-      map2_lgl(att_acr, vote_all, \(a, b) any(a %in% b)) |
-        map2_lgl(vote_acr, att_all, \(a, b) any(a %in% b)) ~ "acronym",
-      map2_lgl(
-        att_words,
-        vote_words,
-        \(a, b) {
-          length(a) > 0 && length(b) > 0 && a[1] == b[1] && nchar(a[1]) >= 4
-        }
-      ) ~ "first word",
-      !str_detect(att_norm, " ") &
-        nchar(att_norm) >= 4 &
-        map2_lgl(att_norm, vote_all, \(a, b) a %in% b) ~ "contained",
-      .default = "none"
-    )
-  ) |>
-  select(cntry, att_label, att_norm, vote_label, vote_norm, rule)
-
-# How pairs were matched
-name_pairs |>
-  count(rule)
-```
-
-The table lists every pair matched by a rule other than *exact*, with the number of respondents behind it.
-This is the audit trail for the matching: a pair that names two different parties belongs in `name_overrides` with `same = FALSE`.
-
-```{r}
-#| label: fuzzy-audit
-
-# Non-exact matches, by weight
-ess_tree |>
-  inner_join(
-    name_pairs |> filter(!rule %in% c("exact", "none")),
-    by = c("cntry", "att_label", "att_norm", "vote_label", "vote_norm")
-  ) |>
-  count(cntry, rule, att_label, vote_label, sort = TRUE) |>
-  print(n = Inf, width = Inf)
-```
-
-```{r}
-#| label: overrides
-
-# Force individual pairs either way
-name_overrides <- tribble(
-  ~cntry , ~att_norm                                 , ~vote_norm                              , ~same ,
-  # "PP" is only the party prefix
-  "BG"   , "pp red zakonnost i spravedlivost rzs"    , "pp ataka"                              , FALSE ,
-  # Venstre and Radikale Venstre differ
-  "DK"   , "venstre"                                 , "det radikale venstre"                  , FALSE ,
-  # Two different freedom parties
-  "LT"   , "party freedom and justice lt"            , "freedom party lp"                      , FALSE ,
-  # Same party, other transliteration
-  "BG"   , "dvizhenie za prava i svobodi dps"        , "dvijenie za prava i svobodi"           , TRUE  ,
-  # Party inside its own alliance
-  "BG"   , "balgarska sotsialisticheska partiya bsp" , "koalitziia za balgariia"               , TRUE  ,
-  "BG"   , "pp ataka"                                , "koalitziia ataka"                      , TRUE  ,
-  "BG"   , "sds"                                     , "koalitziia ods"                        , TRUE  ,
-  "PL"   , "platforma obywatelska"                   , "koalicja obywatelska"                  , TRUE  ,
-  "CZ"   , "kdu csl christian democratic p"          , "koalice christian dem freedom union"   , TRUE  ,
-  "FR"   , "lr les republicains"                     , "les republicains et l udi"             , TRUE  ,
-  "FR"   , "renaissance ex la republique en marche"  , "ensemble lrem modem et horizons"       , TRUE  ,
-  "IT"   , "forza italia"                            , "popolo delle liberta pdl"              , TRUE  ,
-  # Renamed party, earlier name
-  "FR"   , "lr les republicains"                     , "ump union pour un mouvement populaire" , TRUE  ,
-  "BE"   , "cd v"                                    , "cvp"                                   , TRUE  ,
-  "BE"   , "mouvement reformateur mr"                , "prl fdf"                               , TRUE
-)
-
-name_pairs <- name_pairs |>
-  left_join(name_overrides, by = c("cntry", "att_norm", "vote_norm")) |>
-  mutate(same = coalesce(same, rule != "none"))
-
-# Level 3: rule-based name match
+n_before <- nrow(ess_tree)
 ess_tree <- ess_tree |>
-  left_join(
-    name_pairs |> select(cntry, att_label, vote_label, same),
-    by = c("cntry", "att_label", "vote_label")
-  ) |>
+  left_join(ess_pf, by = c("cntry", "essround", "name", "idno")) |>
+  left_join(ess_match, by = c("cntry", "essround", "name", "idno")) |>
   mutate(
+    # Level 3: Party Facts match, alliances included
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
-      is.na(att_norm) | att_other | vote_other ~ "unmatchable",
-      same ~ "same",
-      .default = "different"
+      .default = coalesce(pf_match, "unmatchable")
     )
   )
+stopifnot(nrow(ess_tree) == n_before)
 ```
 
-The names that remain unmatched are the other half of the audit.
-For every attachment name, the table gives the vote name its holders most often report when no rule links the two.
-Most rows are genuine switches or parties that did not stand; a row where both names plainly describe one party (a renamed party, a spelling no rule catches) belongs in `name_overrides` with `same = TRUE`.
+Pairs that count as the same party only through an alliance, by weight: the audit trail of the alliance table.
+
+```{r}
+#| label: alliance-audit
+
+ess_tree |>
+  filter(match == "same", att_pf != vote_pf) |>
+  count(cntry, att_pf, vote_pf, sort = TRUE) |>
+  print(n = 30, width = Inf)
+```
+
+The largest pairs that remain *different party*: most are genuine switches or parties that did not stand, but a renamed party with a new Party Facts id also lands here (see the caveats).
 
 ```{r}
 #| label: unmatched-names
 
-# Most common unmatched pair per name
 ess_tree |>
   filter(match == "different") |>
-  count(cntry, essround, att_label, vote_label, sort = TRUE) |>
-  slice_max(n, n = 1, by = c(cntry, essround, att_label), with_ties = FALSE) |>
-  arrange(desc(n)) |>
+  count(cntry, att_pf, vote_pf, sort = TRUE) |>
   print(n = 40, width = Inf)
 ```
 
@@ -551,12 +333,14 @@ ess_tree |>
 #| label: crosswalk
 
 # Pair-level crosswalk, stable order
-name_pairs |>
-  arrange(cntry, att_norm, vote_norm, att_label, vote_label) |>
+ess_tree |>
+  filter(match %in% c("same", "different", "unmatchable")) |>
+  count(cntry, att_label, att_pf, vote_label, vote_pf, match, name = "n") |>
+  arrange(cntry, att_pf, vote_pf, att_label, vote_label) |>
   write_csv(here("data", "02_processed", "ess_party_crosswalk.csv"))
 ```
 
-The pair-level crosswalk is written to `data/02_processed/ess_party_crosswalk.csv`: every attachment/vote name pair that occurs among attached voters, with the rule that matched it (or `none`) and the final decision.
+The pair-level table is written to `data/02_processed/ess_party_crosswalk.csv`: every attachment/vote label pair among attached voters, with the two Party Facts names, the match and the number of respondents.
 
 ```{r}
 #| label: round-labels
@@ -697,11 +481,10 @@ So the ESS *Close to a party* box is closer to "attachment or leaning" than the 
 # Caveats
 
 - **The vote is the last national election**, which can lie up to four or five years before the interview.
-- **Round 10 pools two modes** (face-to-face and self-completion) on disjoint country sets, see notebook 1.4.
-- **Matching is by name, not by code.** The rules catch spelling variants but are heuristics; the two audit tables above are the record of what they decided, and `name_overrides` corrects individual pairs.
-  Renamed parties are not linked by any rule; the largest cases (UMP and LR, CVP and CD&V, PRL-FDF and MR) are linked by hand in `name_overrides`, smaller ones remain *different party*.
-- **Alliances count as the same party here**, when the list carries the party's name or acronym (Fidesz and Fidesz-KDNP, the SDP inside Croatia's Restart coalition, the French parties inside NUPES).
-  The EES, CSES and eu25games notebooks compare party codes and count such votes as *different party*, so the ESS *same party* share runs higher for this reason alone.
+- **Round 10 pools two modes** (face-to-face and self-completion) on disjoint country sets, see notebook 1.7.
+- **Matching is by Party Facts party, with alliances.** A party and an electoral alliance or joint list containing it count as the same party (notebook 1.9); the same rule is used in all four composition notebooks, so their *same party* shares are comparable.
+  Two members of one alliance (CDU and CSU) stay *different party*.
+- **Renamed parties with a new Party Facts id count as *different party*** (UMP and Les Républicains, CVP and CD&V, PRL-FDF and MR): the alliance table lists alliances, not successors. The earlier name-rule version of this notebook linked these three by hand.
 
 # Session Info
 
