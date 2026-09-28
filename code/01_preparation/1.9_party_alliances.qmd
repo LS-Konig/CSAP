@@ -1,0 +1,710 @@
+---
+title: |
+  CSAP Code Notebook 1.9
+subtitle: |
+  Electoral alliances and the attachment-vote match
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+Party Facts keeps an electoral alliance, a joint list or a party union apart from its member parties: the CDU/CSU union (211) is not the CDU (1375) or the CSU (1731), the Fidesz–KDNP list (6366) is not Fidesz (1691), Koalicja Obywatelska (9122) is not Platforma Obywatelska (1117).
+Comparing Party Facts names therefore scores a respondent who feels close to the CDU and votes for the CDU/CSU list as a *different* party.
+
+This notebook lists the member parties of every alliance that occurs in the four sources (eu25games, ESS, CSES, EES) and uses the list to compare attachment and vote:
+
+- **same**: the same party, or a party and an alliance that contains it, in either direction (close to the CSU, voted CDU/CSU; close to KO, voted PO);
+- **different**: two different parties, including two members of the same alliance (CDU and CSU);
+- **unmatchable**: either answer missing or a non-party answer (`none`, `other`, `independent`, ...).
+
+The rule is implemented once, in `pf_match()` in `code/00_helper/pf_code.R`, and used here and in the composition notebooks 2.1–2.4.
+
+Outputs, in `data/02_processed/`:
+
+- `pf_alliances.csv`: one row per alliance and member (`cntry`, `alliance_name`, `member_name`, `member_id`), with names as they appear in the `ext_*_pf_name` variables (a Party Facts core name, or `"<label> [og]"`);
+- `ess_party_match.parquet`, `cses_party_match.parquet`, `ees_party_match.parquet`: the respondent keys of notebooks 1.2–1.4 with one `ext_match_<vote item>` column per vote item, comparing it with the attachment item.
+  The eu25games match is computed in notebook 2.1, which first resolves the release's open "other" answers.
+
+The table is built from the crosswalks of notebooks 1.2–1.4, so this notebook runs after them; they do not depend on it.
+
+# Setup
+
+```{r}
+#| label: setup
+
+start_time <- Sys.time()
+options(width = 80)
+
+p_required <- c(
+  "tidyverse",
+  "here",
+  "arrow",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+source(here("code", "00_helper", "pid_tree.R")) # countries_25
+source(here("code", "00_helper", "pf_code.R"))
+
+core <- pf_core()
+```
+
+# Party Answers in the Four Sources
+
+```{r}
+#| label: load
+
+processed <- \(f) read_parquet(here("data", "02_processed", f))
+ess <- processed("ess_party_pf.parquet")
+cses <- processed("cses_party_pf.parquet")
+ees <- processed("ees_party_pf.parquet")
+
+eu25_iso2 <- c(
+  Austria = "AT", Belgium = "BE", Bulgaria = "BG", Croatia = "HR",
+  Czechia = "CZ", Denmark = "DK", Estonia = "EE", Finland = "FI",
+  France = "FR", Germany = "DE", Greece = "GR", Hungary = "HU",
+  Ireland = "IE", Italy = "IT", Latvia = "LV", Lithuania = "LT",
+  Netherlands = "NL", Poland = "PL", Portugal = "PT", Romania = "RO",
+  Slovakia = "SK", Slovenia = "SI", Spain = "ES", Sweden = "SE",
+  `United Kingdom` = "GB"
+)
+eu25 <- read_rds(here("data", "01_raw", "eu25games2019.rds")) |>
+  filter(der_att_check_3) |>
+  transmute(
+    cntry = eu25_iso2[meta_country],
+    att = coalesce(ext_q_party_id_pf_name, ext_q_party_id_fra_pf_name),
+    vote = coalesce(
+      ext_q_vote_choice_intended_pf_name,
+      ext_q_vote_choice_hypo_pf_name,
+      ext_q_vote_choice_past_pf_name,
+      ext_q_vote_choice_hypo_fra_pf_name,
+      ext_q_vote_choice_past_fra_pf_name
+    )
+  )
+
+# Attachment and vote pairs, one frame
+pairs <- bind_rows(
+  ess |>
+    transmute(source = "ESS", cntry, att = ext_prtcl_pf_name, vote = coalesce(ext_prtv_pf_name, ext_prtv_de1_pf_name)),
+  cses |>
+    transmute(
+      source = "CSES",
+      cntry,
+      att = ext_imd3005_3_pf_name,
+      vote = coalesce(ext_imd3002_lh_pl_pf_name, ext_imd3002_lh_dc_pf_name)
+    ),
+  ees |>
+    transmute(source = "EES", cntry, att = ext_pid_pf_name, vote = ext_vote_ep_pf_name),
+  ees |>
+    transmute(source = "EES", cntry, att = ext_pid_pf_name, vote = ext_vote_nat_pf_name),
+  eu25 |>
+    mutate(source = "eu25games")
+) |>
+  filter(!is.na(att), !is.na(vote), !att %in% pf_sentinels, !vote %in% pf_sentinels)
+```
+
+# Candidates
+
+An alliance is a candidate for the table if its name reads as a joint list (a slash, a dash or a plus between names, or words such as *coalition*, *koalicja*, *alianța*, *blok*, *lista*, *spolu*), or if it is one side of an attachment/vote pair that disagrees at least five times in any source.
+The candidates were classified by hand below; the list is printed so that a new alliance shows up when the sources change.
+
+```{r}
+#| label: candidates
+
+disagree <- pairs |>
+  filter(att != vote) |>
+  count(cntry, att, vote, name = "n") |>
+  filter(n >= 5)
+
+joint_list <- regex(
+  "/| — | – | - |\\+|&|coali|koali|alian|allian|bloc\\b|blok|lista |list\\b|spolu|together|zusammen|ensemble|nupes|union of|unión|unidas|uniti|ulivo|olive|united|frente|front de|sojusz|egység|összefog|, ",
+  ignore_case = TRUE
+)
+
+entities <- pairs |>
+  pivot_longer(c(att, vote), names_to = "item", values_to = "name") |>
+  count(cntry, name, name = "n")
+
+candidates <- entities |>
+  mutate(
+    by_name = str_detect(name, joint_list),
+    in_pair = paste(cntry, name) %in% c(paste(disagree$cntry, disagree$att), paste(disagree$cntry, disagree$vote))
+  ) |>
+  filter(by_name | in_pair)
+
+count(candidates, by_name, in_pair)
+```
+
+# Alliance Table
+
+One row per alliance and member.
+Members are named as in the data, so a member that appears under two names (a Party Facts name and an `[og]` spelling) has two rows; `member_id` is its Party Facts id where it has one.
+Renamed parties are not alliances and are not listed.
+
+```{r}
+#| label: alliances
+
+alliances <- tribble(
+  ~cntry, ~alliance_name, ~member_name, ~member_id,
+  "AT", "Communist Party of Austria and Platform PLUS - Open List [og]", "Kommunistische Partei Österreichs", 996L,
+  "AT", "EUROPA Jetzt – Initiative Johannes Voggenhuber[og]", "Liste Peter Pilz", 6137L, # 2019 EP list backed by JETZT (Liste Pilz)
+  "AT", "KPÖ Plus [og]", "Kommunistische Partei Österreichs", 996L,
+  "AT", "KPÖ Plus – European Left, offene Liste[og]", "Kommunistische Partei Österreichs", 996L,
+  "BE", "Christen-Democratisch & Vlaams / Nieuw-Vlaams Alliantie", "Christen-Democratisch en Vlaams", 604L, # CD&V/N-VA cartel 2004-08
+  "BE", "Christen-Democratisch & Vlaams / Nieuw-Vlaams Alliantie", "Nieuw-Vlaamse Alliantie", 36L, # CD&V/N-VA cartel 2004-08
+  "BE", "Open VLD + Vivant [og]", "Partij voor Vrijheid en Vooruitgang — Open Vlaamse Liberalen en Democraten", 49L,
+  "BE", "Open VLD + Vivant [og]", "Vivant", 76L,
+  "BE", "Socialistische Partij Anders / Sociaal-Liberale Partij / Spirit", "Sociaal-Liberale Partij", 7015L, # sp.a-Spirit cartel; Spirit later SLP
+  "BE", "Socialistische Partij Anders / Sociaal-Liberale Partij / Spirit", "Socialistische Partij Anders — Vooruit", 1680L, # sp.a-Spirit cartel; Spirit later SLP
+  "BG", "Balgarski Naroden Sajuz", "VMRO — Bulgarsko Natsionalno Dvizhenie", 2056L, # 2005 BZNS-NS+SSD+VMRO
+  "BG", "Balgarski Naroden Sajuz", "Zemedelski Naroden Sǔyuz", 747L, # 2005 BZNS-NS+SSD+VMRO
+  "BG", "Demokratichna Bulgaria", "Da Bulgaria", 5861L,
+  "BG", "Demokratichna Bulgaria", "Demokrati za Silna Balgarija", 1195L,
+  "BG", "Grazhdani za Evropeisko Razvitie Balgariya - Sayuz na demokratichnite sili (GERB- SDS) [og]", "Grazhdani za evropeysko razvitie na Balgariya", 760L,
+  "BG", "Grazhdani za Evropeisko Razvitie Balgariya - Sayuz na demokratichnite sili (GERB- SDS) [og]", "Sayuz na Demokratichni Sili", 482L,
+  "BG", "Grazhdani za evropeysko razvitie na Balgariya – Sayuz na demokratichnite sili (GERB - SDS) [og]", "Grazhdani za evropeysko razvitie na Balgariya", 760L,
+  "BG", "Grazhdani za evropeysko razvitie na Balgariya – Sayuz na demokratichnite sili (GERB - SDS) [og]", "Sayuz na Demokratichni Sili", 482L,
+  "BG", "Koalicija za Balgarija — BSP za Bŭlgariya", "Bălgarska Socialističeska Partija", 757L,
+  "BG", "Koalitsiya ABV – Dvizhenie 21 [og]", "Alternativa za balgarsko vazrazhdane", 3187L,
+  "BG", "Nova republika - DSB - Suyuz za Plovdiv - BDO [og]", "Demokrati za Silna Balgarija", 1195L,
+  "BG", "Obedineni Demokratichni Sili", "Sayuz na Demokratichni Sili", 482L,
+  "BG", "Obedineni Patrioti", "Natsionalen Sǎyuz Ataka", 1793L,
+  "BG", "Obedineni Patrioti", "Natzionalen Front za Spasenie na Bulgaria", 2057L,
+  "BG", "Obedineni Patrioti", "VMRO — Bulgarsko Natsionalno Dvizhenie", 2056L,
+  "BG", "Prodalzhavame Promyanata – Demokratichna Balgariya (PP-DB) [og]", "Da Bulgaria", 5861L, # DB components included
+  "BG", "Prodalzhavame Promyanata – Demokratichna Balgariya (PP-DB) [og]", "Demokrati za Silna Balgarija", 1195L, # DB components included
+  "BG", "Prodalzhavame Promyanata – Demokratichna Balgariya (PP-DB) [og]", "Demokratichna Bulgaria", 9083L, # DB components included
+  "BG", "Prodalzhavame Promyanata – Demokratichna Balgariya (PP-DB) [og]", "Prodalzhavame promyanata", 8994L, # DB components included
+  "BG", "Prodalzhavame promyanata - Demokratichna Balgariya [og]", "Da Bulgaria", 5861L, # DB components included
+  "BG", "Prodalzhavame promyanata - Demokratichna Balgariya [og]", "Demokrati za Silna Balgarija", 1195L, # DB components included
+  "BG", "Prodalzhavame promyanata - Demokratichna Balgariya [og]", "Demokratichna Bulgaria", 9083L, # DB components included
+  "BG", "Prodalzhavame promyanata - Demokratichna Balgariya [og]", "Prodalzhavame promyanata", 8994L, # DB components included
+  "BG", "Reformatorski Blok", "Demokrati za Silna Balgarija", 1195L,
+  "BG", "Reformatorski Blok", "Sayuz na Demokratichni Sili", 482L,
+  "BG", "Sinyata koalitsia", "Demokrati za Silna Balgarija", 1195L,
+  "BG", "Sinyata koalitsia", "Sayuz na Demokratichni Sili", 482L,
+  "BG", "Демократична България (Да България! + Зелените + Демократи за силна България (ДСБ)) [og]", "Da Bulgaria", 5861L,
+  "BG", "Демократична България (Да България! + Зелените + Демократи за силна България (ДСБ)) [og]", "Demokrati za Silna Balgarija", 1195L,
+  "CZ", "Koalice PirSTAN (Piráti, STAN) [og]", "Ceska piratska strana", 2047L,
+  "CZ", "Koalice PirSTAN (Piráti, STAN) [og]", "Starostové a nezávislí", 1707L,
+  "CZ", "Koalice SPD + Trikolora [og]", "Svoboda a přímá demokracie", 6125L,
+  "CZ", "Koalice Stačilo (KSČM+ČSNS, SD-SN) [og]", "Komunistická strana Cech a Moravy", 1728L, # ČSNS
+  "CZ", "Koalice Stačilo (KSČM+ČSNS, SD-SN) [og]", "[ Liberální / Česká ] strana národně sociální", 1813L, # ČSNS
+  "CZ", "Pirates and Mayors [og]", "Ceska piratska strana", 2047L, # = PirSTAN
+  "CZ", "Pirates and Mayors [og]", "Starostové a nezávislí", 1707L, # = PirSTAN
+  "CZ", "SPOLU (ODS+TOP 09+KDU-ČSL) [og]", "Křesťanská a demokratická unie / Československá strana lidová", 676L,
+  "CZ", "SPOLU (ODS+TOP 09+KDU-ČSL) [og]", "Občanská demokratická strana", 466L,
+  "CZ", "SPOLU (ODS+TOP 09+KDU-ČSL) [og]", "Tradice Odpovědnost Prosperita 09", 223L,
+  "CZ", "Svobodní, Liberland a Radostné Česko - ODEJDEME BEZ PLACENÍ [og]", "Strana svobodných občanů", 254L,
+  "CZ", "Together [og]", "Křesťanská a demokratická unie / Československá strana lidová", 676L, # = SPOLU
+  "CZ", "Together [og]", "Občanská demokratická strana", 466L, # = SPOLU
+  "CZ", "Together [og]", "Tradice Odpovědnost Prosperita 09", 223L, # = SPOLU
+  "CZ", "ULD - Unie liberálních demokratů CZ (18), US-DEU (5), ODA (19) [only in v029 and v211 ] [og]", "Občanská demokratická aliance", 1008L, # per label: US-DEU + ODA
+  "CZ", "ULD - Unie liberálních demokratů CZ (18), US-DEU (5), ODA (19) [only in v029 and v211 ] [og]", "Unie svobody", 905L, # per label: US-DEU + ODA
+  "CZ", "ULD - Unie liberálních demokratů CZ (18), US-DEU (5), ODA (19) [only in v029 and v211 ] [og]", "Unie svobody / Demokratická unie", 104L, # per label: US-DEU + ODA
+  "CZ", "Čtyřkoalice", "Křesťanská a demokratická unie / Československá strana lidová", 676L, # US and US-DEU both listed (separate PF ids)
+  "CZ", "Čtyřkoalice", "Občanská demokratická aliance", 1008L, # US and US-DEU both listed (separate PF ids)
+  "CZ", "Čtyřkoalice", "Unie svobody", 905L, # US and US-DEU both listed (separate PF ids)
+  "CZ", "Čtyřkoalice", "Unie svobody / Demokratická unie", 104L, # US and US-DEU both listed (separate PF ids)
+  "DE", "Christlich Demokratische Union / Christlich Soziale Union", "Christlich Demokratische Union", 1446L,
+  "DE", "Christlich Demokratische Union / Christlich Soziale Union", "Christlich Soziale Union", 1731L,
+  "ES", "A la valenciana", "Coalició Compromís", 5623L, # IU via EUPV
+  "ES", "A la valenciana", "Izquierda Unida", 8128L, # IU via EUPV
+  "ES", "A la valenciana", "Podemos", 3203L, # IU via EUPV
+  "ES", "Ahora Repúblicas (Esquerra Republicana de Catalunya (ERC) & EH Bildu & Bloque Nationalista Galego (BNG)) [og]", "Bloque Nacionalista Galego", 1011L,
+  "ES", "Ahora Repúblicas (Esquerra Republicana de Catalunya (ERC) & EH Bildu & Bloque Nationalista Galego (BNG)) [og]", "Esquerra Republicana de Catalunya", 848L,
+  "ES", "Ahora Repúblicas (Esquerra Republicana de Catalunya (ERC) & EH Bildu & Bloque Nationalista Galego (BNG)) [og]", "Euskal Herria Bildu / Reunir Euskal Herria", 5668L,
+  "ES", "Ahora Repúblicas [og]", "Bloque Nacionalista Galego", 1011L,
+  "ES", "Ahora Repúblicas [og]", "Esquerra Republicana de Catalunya", 848L,
+  "ES", "Ahora Repúblicas [og]", "Euskal Herria Bildu / Reunir Euskal Herria", 5668L,
+  "ES", "CEU Coalicion por Europa [og]", "Coalición Canaria", 81L,
+  "ES", "CEU Coalicion por Europa [og]", "Coalición Canaria [og]", NA,
+  "ES", "CEU Coalicion por Europa [og]", "Convergència i Unió", 139L,
+  "ES", "CEU Coalicion por Europa [og]", "Partido Nacionalista Vasco — Euzko Alderdi Jeltzalea", 1637L,
+  "ES", "Coalición por una Europa Solidaria (CEUS (EAJ-PNV+CCa-PNC+CxG+El PI+DV+GBAI) [og]", "Coalición Canaria", 81L,
+  "ES", "Coalición por una Europa Solidaria (CEUS (EAJ-PNV+CCa-PNC+CxG+El PI+DV+GBAI) [og]", "Coalición Canaria [og]", NA,
+  "ES", "Coalición por una Europa Solidaria (CEUS (EAJ-PNV+CCa-PNC+CxG+El PI+DV+GBAI) [og]", "Partido Nacionalista Vasco — Euzko Alderdi Jeltzalea", 1637L,
+  "ES", "Coalición por una Europa Solidaria [og]", "Coalición Canaria", 81L,
+  "ES", "Coalición por una Europa Solidaria [og]", "Coalición Canaria [og]", NA,
+  "ES", "Coalición por una Europa Solidaria [og]", "Partido Nacionalista Vasco — Euzko Alderdi Jeltzalea", 1637L,
+  "ES", "Coalition for Europe (CiU (1724007) + EAJ-PNV (1724902) + CC (1724907) + others) [og]", "Coalición Canaria", 81L,
+  "ES", "Coalition for Europe (CiU (1724007) + EAJ-PNV (1724902) + CC (1724907) + others) [og]", "Coalición Canaria [og]", NA,
+  "ES", "Coalition for Europe (CiU (1724007) + EAJ-PNV (1724902) + CC (1724907) + others) [og]", "Convergència i Unió", 139L,
+  "ES", "Coalition for Europe (CiU (1724007) + EAJ-PNV (1724902) + CC (1724907) + others) [og]", "Partido Nacionalista Vasco — Euzko Alderdi Jeltzalea", 1637L,
+  "ES", "Compromís per Europa/Compromiso por Europa (CPE) [og]", "Coalició Compromís", 5623L,
+  "ES", "IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds) [og]", "Iniciativa per Catalunya Verds", 1260L,
+  "ES", "IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds) [og]", "Izquierda Unida", 8128L,
+  "ES", "IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds) [og]", "Iniciativa per Catalunya Verds", 1260L,
+  "ES", "IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds) [og]", "Izquierda Unida", 8128L,
+  "ES", "Junts per Catalunya — Partit Demòcrata Europeu Català", "Partit Demòcrata Europeu Català", 6027L,
+  "ES", "Left for The Right to Decide (Coalition ERC (1724905) + others) [og]", "Esquerra Republicana de Catalunya", 848L,
+  "ES", "PP (Partido Popular) / UPN (Unión del Pueblo Navarro) [og]", "Alianza-Partido Popular / Partido Popular", 441L,
+  "ES", "SUMAR [og]", "Coalició Compromís", 5623L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "SUMAR [og]", "Izquierda Unida", 8128L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "SUMAR [og]", "Más País", 8395L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "SUMAR [og]", "Podemos", 3203L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "Sumar [og]", "Coalició Compromís", 5623L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "Sumar [og]", "Izquierda Unida", 8128L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "Sumar [og]", "Más País", 8395L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "Sumar [og]", "Podemos", 3203L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "Unidas Podemos", "Izquierda Unida", 8128L,
+  "ES", "Unidas Podemos", "Podemos", 3203L,
+  "FR", "Alliance Rurale [og]", "Résistons !", 9876L, # 2024 EP list of Résistons! and LMR (ex-CPNT)
+  "FR", "Ensemble ! (LREM, MODEM et Horizons) [og]", "Agir, la droite constructive", 9132L, # Agir in Ensemble 2022, not in label
+  "FR", "Ensemble ! (LREM, MODEM et Horizons) [og]", "Horizons", 9134L,
+  "FR", "Ensemble ! (LREM, MODEM et Horizons) [og]", "La République En Marche! / Renaissance", 5857L,
+  "FR", "Ensemble ! (LREM, MODEM et Horizons) [og]", "Mouvement démocrate", 496L,
+  "FR", "Ensemble - Renaissance, Mouvement Démocrate (MoDem) [og]", "Horizons", 9134L, # Horizons in Ensemble 2022/2024, not in label
+  "FR", "Ensemble - Renaissance, Mouvement Démocrate (MoDem) [og]", "La République En Marche! / Renaissance", 5857L,
+  "FR", "Ensemble - Renaissance, Mouvement Démocrate (MoDem) [og]", "Mouvement démocrate", 496L,
+  "FR", "FN, MNR (Front national, Mouvement National Républicain) [og]", "Front National / Rassemblement national", 433L, # combined response code, not a joint list
+  "FR", "FN, MNR (Front national, Mouvement National Républicain) [og]", "Mouvement national républicain", 1634L, # combined response code, not a joint list
+  "FR", "Front de Gauche", "Parti communiste française", 1251L,
+  "FR", "Front de Gauche", "Parti de Gauche", 8359L,
+  "FR", "La liste Génération.s et Dème-Diem 25, menée par Benoît Hamon [og]", "Génération.s, le mouvement", 7342L,
+  "FR", "Les Républicains et l’UDI [og]", "Les Républicains", 8168L,
+  "FR", "Les Républicains et l’UDI [og]", "Union des démocrates et indépendants", 3229L,
+  "FR", "MPF, RPF (Mouvement Pour la France / Rassemblement Pour la France [og]", "Mouvement pour la France", 364L, # combined response code
+  "FR", "MPF, RPF (Mouvement Pour la France / Rassemblement Pour la France [og]", "RPF (Rassemblement du Peuple Français) [og]", NA, # label mis-expands Pasqua's Rassemblement pour la France
+  "FR", "NUPES (Nouvelle Union Populaire Ecologique et Sociale: FI, EELV, PCF, PS) [og]", "Europe Écologie — Les Verts", 5650L,
+  "FR", "NUPES (Nouvelle Union Populaire Ecologique et Sociale: FI, EELV, PCF, PS) [og]", "Génération.s, le mouvement", 7342L, # NUPES member, not in label
+  "FR", "NUPES (Nouvelle Union Populaire Ecologique et Sociale: FI, EELV, PCF, PS) [og]", "La France Insoumise", 5858L,
+  "FR", "NUPES (Nouvelle Union Populaire Ecologique et Sociale: FI, EELV, PCF, PS) [og]", "Les Verts", 1108L, # pre-2010 name of EELV
+  "FR", "NUPES (Nouvelle Union Populaire Ecologique et Sociale: FI, EELV, PCF, PS) [og]", "Parti communiste française", 1251L,
+  "FR", "NUPES (Nouvelle Union Populaire Ecologique et Sociale: FI, EELV, PCF, PS) [og]", "Parti socialiste", 1478L,
+  "FR", "NUPES - La France Insoumise (LFI), Parti Socialiste (PS), Europe Écologie Les Verts (EELV) [og]", "Europe Écologie — Les Verts", 5650L,
+  "FR", "NUPES - La France Insoumise (LFI), Parti Socialiste (PS), Europe Écologie Les Verts (EELV) [og]", "Génération.s, le mouvement", 7342L, # NUPES member, not in label
+  "FR", "NUPES - La France Insoumise (LFI), Parti Socialiste (PS), Europe Écologie Les Verts (EELV) [og]", "La France Insoumise", 5858L,
+  "FR", "NUPES - La France Insoumise (LFI), Parti Socialiste (PS), Europe Écologie Les Verts (EELV) [og]", "Les Verts", 1108L, # pre-2010 name of EELV
+  "FR", "NUPES - La France Insoumise (LFI), Parti Socialiste (PS), Europe Écologie Les Verts (EELV) [og]", "Parti communiste française", 1251L, # NUPES member, not in label
+  "FR", "NUPES - La France Insoumise (LFI), Parti Socialiste (PS), Europe Écologie Les Verts (EELV) [og]", "Parti socialiste", 1478L,
+  "FR", "UMP + DVD [og]", "Union pour un mouvement populaire", 1595L,
+  "FR", "UMP + DVD [og]", "divers droite", 1776L, # generic DVD category is literally part of the code
+  "FR", "Union de la Droite et du Centre - Les Républicains et alliés [og]", "Les Républicains", 8168L,
+  "FR", "Union de la Droite et du Centre - Les Républicains et alliés [og]", "Union des démocrates et indépendants", 3229L, # LR-UDI 2017 legislative alliance
+  "FR", "l’Union pour la France (Debout la France, Les Patriotes et Génération Frexit) [og]", "Debout la France", 3207L,
+  "GR", "Democratic Coalition [og]", "Dimokratiki Aristera", 1160L, # Dimokratiki Symparataxi PASOK-DIMAR
+  "GR", "Democratic Coalition [og]", "Panellinio Sosialistikó Kínima", 1468L, # Dimokratiki Symparataxi PASOK-DIMAR
+  "GR", "Front of the Greek Anticapitalist Left - Workers Revolutionary Party [og]", "Antikapitalistiki Aristeri Synergasia gia tin Anatropi", 95L, # ANTARSYA-EEK joint list
+  "GR", "Kinima Allagis", "Kinima Dimokraton Sosialiston", 3212L, # KIDISO in KINAL from 2017
+  "GR", "Kinima Allagis", "Panellinio Sosialistikó Kínima", 1468L, # KINAL electoral alliance 2017-2022
+  "GR", "Olive Tree-Democratic Alignment (Coalition PASOK (1300313) + others) [og]", "Dimokratiki Aristera", 1160L, # Democratic Alignment 2015 = PASOK+DIMAR
+  "GR", "Olive Tree-Democratic Alignment (Coalition PASOK (1300313) + others) [og]", "Panellinio Sosialistikó Kínima", 1468L,
+  "GR", "Synaspismós Rizospastikís Aristerás", "Synaspismós tīs Aristerás", 516L, # SYN main component of SYRIZA coalition until 2013
+  "GR", "Δημοκρατική Συμπαράταξη (ΔΗΣΥ) [og]", "Dimokratiki Aristera", 1160L,
+  "GR", "Δημοκρατική Συμπαράταξη (ΔΗΣΥ) [og]", "Panellinio Sosialistikó Kínima", 1468L,
+  "HR", "Amsterdam Coalition [og]", "Građansko-liberalni savez", 8178L,
+  "HR", "Amsterdam Coalition [og]", "Istarski demokratski sabor", 513L,
+  "HR", "BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og]", "Croatian Party of Rights [og]", NA, # label pools HSP and HSP-AS
+  "HR", "BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og]", "Hrvatska stranka prava", 1128L,
+  "HR", "BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og]", "Neovisni za Hrvatsku", 7422L,
+  "HR", "Bandić Milan 365 i koalicijski partneri [og]", "Bandić Milan 365 — Stranka rada i solidarnosti", 5452L,
+  "HR", "Coalition HDZ (1191511) + HSP AS (1191613)+HSS (1191810)+others [og]", "Croatian Party of Rights [og]", NA, # label pools HSP and HSP-AS
+  "HR", "Coalition HDZ (1191511) + HSP AS (1191613)+HSS (1191810)+others [og]", "Hrvatska demokratska zajednica", 1431L, # Domoljubna koalicija 2015
+  "HR", "Coalition HDZ (1191511) + HSP AS (1191613)+HSS (1191810)+others [og]", "Hrvatska seljačka stranka", 72L,
+  "HR", "Coalition HDZ (1191511) + HSP AS (1191613)+HSS (1191810)+others [og]", "Hrvatska socijalno liberalna stranka", 214L, # HSLS in Domoljubna koalicija 2015
+  "HR", "Coalition NF + HSLS (1191410)  + PGS + RI [og]", "Hrvatska socijalno liberalna stranka", 214L,
+  "HR", "Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party [og]", "Hrvatska seljačka stranka", 72L,
+  "HR", "Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party [og]", "Hrvatska socijalno liberalna stranka", 214L,
+  "HR", "DP Miroslava Škore, Hrvatski suverenisti, Blok za Hrvatsku, HKS, Hrast, SU, Zelena Lista [og]", "Domovinski pokret", 8981L,
+  "HR", "DP, HS, Blok za Hrvatsku, HKS, Hrast [og]", "Domovinski pokret", 8981L,
+  "HR", "HDZ, HSLS [og]", "Hrvatska demokratska zajednica", 1431L,
+  "HR", "HDZ, HSLS [og]", "Hrvatska socijalno liberalna stranka", 214L,
+  "HR", "Hrvatska stranka prava (HSP) i koalicijski partneri [og]", "Croatian Party of Rights [og]", NA, # label pools HSP and HSP-AS
+  "HR", "Hrvatska stranka prava (HSP) i koalicijski partneri [og]", "Hrvatska stranka prava", 1128L,
+  "HR", "Koalicija IDS, PGS, LRI [og]", "Istarski demokratski sabor", 513L,
+  "HR", "Koalicija Pametno i Za grad [og]", "Pametno", 7336L,
+  "HR", "Koalicija Živi zid, Promijenimo Hrvatsku, Abeceda, HDSS [og]", "Živi zid", 4867L,
+  "HR", "Kukuriku koalicija", "Hrvatska narodna stranka — Liberalni Demokrati", 799L,
+  "HR", "Kukuriku koalicija", "Hrvatska stranka umirovljenika", 2062L,
+  "HR", "Kukuriku koalicija", "Istarski demokratski sabor", 513L,
+  "HR", "Kukuriku koalicija", "Socijaldemokratska partija Hrvatske", 1475L,
+  "HR", "Možemo! - politička platforma, Zageb je naš, NL, RF, ORAH, Za Grad [og]", "Možemo! – politička platforma", 8980L,
+  "HR", "Možemo, Zagreb je naš, NLJ, RF, Orah [og]", "Možemo! – politička platforma", 8980L,
+  "HR", "Narodna stranka - Reformisti - Hrvatska seljačka stranka braće Radić, Stranka hrvatskih umirovljenika [og]", "Narodna stranka — Reformisti", 4866L,
+  "HR", "PAMETNO + UNIJA KVARNERA [og]", "Pametno", 7336L,
+  "HR", "Restart koalicija – SDP, HSS, HSU, SNAGA, GLAS, IDS, PGS [og]", "Građansko-liberalni savez", 8178L,
+  "HR", "Restart koalicija – SDP, HSS, HSU, SNAGA, GLAS, IDS, PGS [og]", "Hrvatska seljačka stranka", 72L,
+  "HR", "Restart koalicija – SDP, HSS, HSU, SNAGA, GLAS, IDS, PGS [og]", "Hrvatska stranka umirovljenika", 2062L,
+  "HR", "Restart koalicija – SDP, HSS, HSU, SNAGA, GLAS, IDS, PGS [og]", "Istarski demokratski sabor", 513L,
+  "HR", "Restart koalicija – SDP, HSS, HSU, SNAGA, GLAS, IDS, PGS [og]", "Socijaldemokratska partija Hrvatske", 1475L,
+  "HR", "SDP, HSS, HSU [og]", "Hrvatska seljačka stranka", 72L,
+  "HR", "SDP, HSS, HSU [og]", "Hrvatska stranka umirovljenika", 2062L,
+  "HR", "SDP, HSS, HSU [og]", "Socijaldemokratska partija Hrvatske", 1475L,
+  "HR", "SiP, Pametno, Fokus [og]", "Pametno", 7336L,
+  "HU", "Alliance for Hungary - Center Party [og]", "Centrumpárt", 1779L, # 2002 Centrum list
+  "HU", "Egységben Magyarországért [og]", "Demokratikus Koalíció", 469L,
+  "HU", "Egységben Magyarországért [og]", "Jobbik Magyarországért Mozgalom", 42L,
+  "HU", "Egységben Magyarországért [og]", "Lehet Más a Politika — LMP – Magyarország Zöld Pártja", 1650L,
+  "HU", "Egységben Magyarországért [og]", "Magyar Szocialista Párt", 1408L,
+  "HU", "Egységben Magyarországért [og]", "Momentum Mozgalom", 8249L,
+  "HU", "Egységben Magyarországért [og]", "Párbeszéd Magyarországért", 3115L,
+  "HU", "Ellenzéki Összefogás (DK-JOBBIK-LMP-MOMENTUM-MSZP-LMP-PÁRBESZÉD) [og]", "Demokratikus Koalíció", 469L,
+  "HU", "Ellenzéki Összefogás (DK-JOBBIK-LMP-MOMENTUM-MSZP-LMP-PÁRBESZÉD) [og]", "Jobbik Magyarországért Mozgalom", 42L,
+  "HU", "Ellenzéki Összefogás (DK-JOBBIK-LMP-MOMENTUM-MSZP-LMP-PÁRBESZÉD) [og]", "Lehet Más a Politika — LMP – Magyarország Zöld Pártja", 1650L,
+  "HU", "Ellenzéki Összefogás (DK-JOBBIK-LMP-MOMENTUM-MSZP-LMP-PÁRBESZÉD) [og]", "Magyar Szocialista Párt", 1408L,
+  "HU", "Ellenzéki Összefogás (DK-JOBBIK-LMP-MOMENTUM-MSZP-LMP-PÁRBESZÉD) [og]", "Momentum Mozgalom", 8249L,
+  "HU", "Ellenzéki Összefogás (DK-JOBBIK-LMP-MOMENTUM-MSZP-LMP-PÁRBESZÉD) [og]", "Párbeszéd Magyarországért", 3115L,
+  "HU", "Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége", "Fidesz — Magyar Polgári Szövetség", 1691L,
+  "HU", "Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége", "Kereszténydemokrata Néppárt", 1412L,
+  "HU", "Fidesz — Magyar Demokrata Fórum", "Fidesz — Magyar Polgári Szövetség", 1691L,
+  "HU", "Fidesz — Magyar Demokrata Fórum", "Magyar Demokrata Fórum", 1697L,
+  "HU", "Hungarian Socialist Party-Dialogue for Hungary [og]", "Magyar Szocialista Párt", 1408L,
+  "HU", "Hungarian Socialist Party-Dialogue for Hungary [og]", "Párbeszéd Magyarországért", 3115L,
+  "HU", "MIÉP — Jobbik a Harmadik Út pártszövetség", "Jobbik Magyarországért Mozgalom", 42L,
+  "HU", "MIÉP — Jobbik a Harmadik Út pártszövetség", "Magyar Igazság és Élet Pártja", 1597L,
+  "HU", "Magyar Szocialista Párt - Párbeszéd (MSZP-P) [og]", "Magyar Szocialista Párt", 1408L,
+  "HU", "Magyar Szocialista Párt - Párbeszéd (MSZP-P) [og]", "Párbeszéd Magyarországért", 3115L,
+  "HU", "Together 2014 - Dialogue for Hungary [og]", "Együtt — A Korszakváltók Pártja", 2458L,
+  "HU", "Together 2014 - Dialogue for Hungary [og]", "Párbeszéd Magyarországért", 3115L,
+  "HU", "Összefogás", "Demokratikus Koalíció", 469L,
+  "HU", "Összefogás", "Együtt — A Korszakváltók Pártja", 2458L,
+  "HU", "Összefogás", "Magyar Szocialista Párt", 1408L, # Kormányváltás 2014
+  "HU", "Összefogás", "Párbeszéd Magyarországért", 3115L,
+  "IE", "Solidarity — People Before Profit", "Anti-Austerity Alliance / Solidarity", 8242L,
+  "IE", "Solidarity — People Before Profit", "People Before Profit Alliance", 242L,
+  "IE", "United Left Alliance", "People Before Profit Alliance", 242L,
+  "IE", "United Left Alliance", "Páirtí Sóisialach", 1448L,
+  "IT", "Alleanza Verdi e Sinistra [og]", "Europa Verde", 9110L,
+  "IT", "Alleanza Verdi e Sinistra [og]", "Federazione dei Verdi", 851L, # pre-2021 name of Europa Verde
+  "IT", "Alleanza Verdi e Sinistra [og]", "Sinistra Italiana", 1212L,
+  "IT", "Azione - Italia Viva [og]", "Azione", 9082L,
+  "IT", "Azione - Italia Viva [og]", "Italia Viva", 8641L,
+  "IT", "Casa delle Libertà", "Alleanza Nazionale", 813L,
+  "IT", "Casa delle Libertà", "Centro Cristiano Democratico", 1767L,
+  "IT", "Casa delle Libertà", "Centro Cristiano Democratico  / Cristiani Democratici Uniti (Biancofiore)", 962L, # nested joint list
+  "IT", "Casa delle Libertà", "Forza Italia", 1626L,
+  "IT", "Casa delle Libertà", "Lega Nord", 1221L,
+  "IT", "Casa delle Libertà", "Nuovo Partito Socialisti Italiani", 888L,
+  "IT", "Casa delle Libertà", "Unione dei Democratici Cristiani e Democratici di Centro", 1758L,
+  "IT", "Centro Cristiano Democratico  / Cristiani Democratici Uniti (Biancofiore)", "Centro Cristiano Democratico", 1767L,
+  "IT", "Coalition NCD (1380633) + UDC (1380633) + PPI [og]", "Unione dei Democratici Cristiani e Democratici di Centro", 1758L,
+  "IT", "Il Girasole", "Federazione dei Verdi", 851L,
+  "IT", "Il Girasole", "Socialisti Democratici Italiani", 750L,
+  "IT", "Il Popolo della Libertà", "Alleanza Nazionale", 813L, # 2008 joint list FI+AN; party 2009-13
+  "IT", "Il Popolo della Libertà", "Forza Italia", 1626L, # 2008 joint list FI+AN; party 2009-13
+  "IT", "L'Ulivo", "Democratici di Sinistra", 878L,
+  "IT", "L'Ulivo", "Democrazia è Libertà — La Margherita", 279L,
+  "IT", "L'Unione", "Democratici di Sinistra", 878L,
+  "IT", "L'Unione", "Democrazia è Libertà — La Margherita", 279L,
+  "IT", "L'Unione", "Federazione dei Verdi", 851L,
+  "IT", "L'Unione", "L'Ulivo", 1737L, # nested: Ulivo list inside Unione coalition
+  "IT", "L'Unione", "Lista di Pietro — Italia del Valori", 768L,
+  "IT", "L'Unione", "Partito dei Comunisti Italiani", 1635L,
+  "IT", "L'Unione", "Partito della Rifondazione Comunista", 1404L,
+  "IT", "L'Unione", "Radicali Italiani", 8248L, # via Rosa nel Pugno
+  "IT", "L'Unione", "Socialisti Democratici Italiani", 750L, # via Rosa nel Pugno
+  "IT", "L'Unione", "Unione Democratici per l'Europa", 115L, # UDEUR
+  "IT", "Liberi e Uguali", "Articolo Uno", 8361L,
+  "IT", "Liberi e Uguali", "Sinistra Italiana", 1212L,
+  "IT", "Noi con l'Italia - UDC [og]", "Unione dei Democratici Cristiani e Democratici di Centro", 1758L,
+  "IT", "Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU [og]", "Partito dei Comunisti Italiani", 1635L, # 2009 EP Lista Anticapitalista
+  "IT", "Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU [og]", "Partito della Rifondazione Comunista", 1404L, # 2009 EP Lista Anticapitalista
+  "IT", "Sinistra (Rifondazione) [og]", "Partito della Rifondazione Comunista", 1404L, # 2019 EP La Sinistra
+  "IT", "Sinistra (Rifondazione) [og]", "Sinistra Italiana", 1212L, # 2019 EP La Sinistra
+  "IT", "Sinistra Arcobaleno [og]", "Federazione dei Verdi", 851L,
+  "IT", "Sinistra Arcobaleno [og]", "Partito dei Comunisti Italiani", 1635L,
+  "IT", "Sinistra Arcobaleno [og]", "Partito della Rifondazione Comunista", 1404L,
+  "IT", "Stati Uniti d'Europa [og]", "Italia Viva", 8641L,
+  "IT", "Stati Uniti d'Europa [og]", "Partito Socialista [og]", NA, # assumed to be PSI
+  "IT", "Stati Uniti d'Europa [og]", "Più Europa", 6155L,
+  "IT", "Stati Uniti d'Europa [og]", "Radicali Italiani", 8248L,
+  "LT", "Anti-Corruption Coalition [og]", "Lietuvos Centro Partija", 5455L, # assumed = 2016 Puteikis-Krivickas coalition
+  "LT", "Anti-corruption coalition of K. Krivickas and N. Puteikis (Lithuanian Centre Party, Lithuanian Pensioners' Party) (APKK) [og]", "Lietuvos Centro Partija", 5455L,
+  "LT", "Antikorupcinė N. Puteikio ir K. Krivicko koalicija (Lietuvos centro partija, Li [og]", "Lietuvos Centro Partija", 5455L,
+  "LT", "Coalition of LLRA and LRS [og]", "Lietuvos lenkų rinkimų akcija", 556L,
+  "LT", "Koalicija Darbo partija + Jaunimas", "Darbo Partija", 102L,
+  "LT", "Taikos koalicija (Lietuvos krikščioniškosios demokratijos partija, Žemaičių partija) [og]", "Žemaičių partija", 1291L,
+  "LT", "„Valdemaro Tomaševskio blokas\" – Krikščioniškų šeimų sąjungos ir Rus [og]", "Lietuvos lenkų rinkimų akcija", 556L,
+  "LV", "Attīstībai/Par!", "Kustība Par!", 7863L,
+  "LV", "Attīstībai/Par!", "Latvijas attīstībai", 3213L,
+  "LV", "Jaunā Vienotība", "Vienotība", 852L,
+  "LV", "LSDSP/KDS/GKL [og]", "Kristīgi demokrātiskā savienība", 304L,
+  "LV", "Latvijas Pirmā partija / Latvijas Ceļš", "Latvijas Ceļš", 1043L, # 2006 joint list, merged 2007
+  "LV", "Latvijas Pirmā partija / Latvijas Ceļš", "Latvijas Pirmā partija", 1778L, # 2006 joint list, merged 2007
+  "LV", "Nacionālā apvienība", "Tēvzemei un Brīvībai / LNNK", 1704L, # 2010 alliance, merged 2011
+  "LV", "Nacionālā apvienība", "Visu Latvijai!", 506L, # 2010 alliance, merged 2011
+  "LV", "Par Labu Latviju!", "Latvijas Ceļš", 1043L, # via LPP/LC
+  "LV", "Par Labu Latviju!", "Latvijas Pirmā partija", 1778L, # via LPP/LC
+  "LV", "Par Labu Latviju!", "Latvijas Pirmā partija / Latvijas Ceļš", 461L,
+  "LV", "Par Labu Latviju!", "Tautas Partija", 1755L,
+  "LV", "Saskaņas Centrs", "Sociāldemokrātiskā Partija \"Saskaņa\"", 5976L,
+  "LV", "Vienotība", "Jaunais Laiks", 1531L, # 2010 alliance, merged 2011
+  "LV", "Vienotība", "Pilsoniskā savienība", 415L, # 2010 alliance, merged 2011
+  "NL", "ChristenUnie — Staatkundig Gereformeerde Partij", "ChristenUnie", 1459L, # EP joint list
+  "NL", "ChristenUnie — Staatkundig Gereformeerde Partij", "Staatkundig Gereformeerde Partij", 1178L, # EP joint list
+  "NL", "Coalition GL - PvdA (GroenLinks,PvdA) [og]", "GroenLinks", 1537L,
+  "NL", "Coalition GL - PvdA (GroenLinks,PvdA) [og]", "Partij van de Arbeid", 1234L,
+  "NL", "Coalition GL - PvdA (GroenLinks,PvdA) [og]", "Partij van de Arbeid (PvdA)/Europese Sociaaldemocraten [og]", NA,
+  "PL", "Akcja Wyborcza Solidarność Prawicy", "Zjednoczenie Chrześcijańsko-Narodowe", 70L, # AWS founding member
+  "PL", "Europa Plus Social Movement [og]", "Ruch Palikota / Twój Ruch", 731L, # 2014 EP list
+  "PL", "Europa Plus Social Movement [og]", "Socjaldemokracja Polska", 1328L, # 2014 EP list
+  "PL", "Koalicja Europejska PO PSL SLD .N Zieloni (KE ) [og]", "Nowoczesna", 4630L,
+  "PL", "Koalicja Europejska PO PSL SLD .N Zieloni (KE ) [og]", "Platforma Obywatelska", 1117L,
+  "PL", "Koalicja Europejska PO PSL SLD .N Zieloni (KE ) [og]", "Polskie Stronnictwo Ludowe", 6757L,
+  "PL", "Koalicja Europejska PO PSL SLD .N Zieloni (KE ) [og]", "Sojusz Lewicy Demokratycznej", 57L,
+  "PL", "Koalicja Obywatelska", "Nowoczesna", 4630L,
+  "PL", "Koalicja Obywatelska", "Platforma Obywatelska", 1117L,
+  "PL", "Koalicyjny Komitet Wyborczy Porozumienie dla Przyszłości - CentroLewica (PD+SDPL+Zieloni 2004) [og]", "Socjaldemokracja Polska", 1328L,
+  "PL", "Konfederacja Wolność i Niepodległość", "Koalicja Odnowy Rzeczypospolitej Wolność i Nadzieja KORWiN", 4629L,
+  "PL", "Konfederacja Wolność i Niepodległość", "Ruch Narodowy", 3224L,
+  "PL", "Lewica [og]", "Nowa Lewica", 9349L, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "Lewica [og]", "Polska Partia Socjalistyczna, PPS [og]", NA, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "Lewica [og]", "Sojusz Lewicy Demokratycznej", 57L, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "Lewica [og]", "Spring", NA, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "Lewica [og]", "Wiosna", 7356L, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "Lewica [og]", "[Lewica] Razem", 4871L, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "Lewica i Demokraci", "Socjaldemokracja Polska", 1328L,
+  "PL", "Lewica i Demokraci", "Sojusz Lewicy Demokratycznej", 57L,
+  "PL", "Lewica i Demokraci", "Unia Pracy", 1104L,
+  "PL", "Nowa Lewica", "Polska Partia Socjalistyczna, PPS [og]", NA, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
+  "PL", "Nowa Lewica", "Sojusz Lewicy Demokratycznej", 57L, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
+  "PL", "Nowa Lewica", "Spring", NA, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
+  "PL", "Nowa Lewica", "Wiosna", 7356L, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
+  "PL", "Nowa Lewica", "[Lewica] Razem", 4871L, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
+  "PL", "Ogólnopolska Koalicja Obywatelska [og]", "Nowoczesna", 4630L,
+  "PL", "Ogólnopolska Koalicja Obywatelska [og]", "Platforma Obywatelska", 1117L,
+  "PL", "Senate 2001 coalition [og]", "Akcja Wyborcza Solidarność Prawicy", 863L, # Blok Senat 2001
+  "PL", "Senate 2001 coalition [og]", "Platforma Obywatelska", 1117L, # Blok Senat 2001
+  "PL", "Senate 2001 coalition [og]", "Prawo i Sprawiedliwość", 1565L, # Blok Senat 2001
+  "PL", "Senate 2001 coalition [og]", "Unia Wolności", 8268L, # Blok Senat 2001
+  "PL", "Sojusz Lewicy Demokratycznej", "Socjaldemokracja Rzeczypospolitej Polskiej", 8224L, # SdRP core of SLD coalition, merged 1999
+  "PL", "Sojusz Lewicy Demokratycznej — Unia Pracy", "Sojusz Lewicy Demokratycznej", 57L,
+  "PL", "Sojusz Lewicy Demokratycznej — Unia Pracy", "Unia Pracy", 1104L,
+  "PL", "The Left [og]", "Nowa Lewica", 9349L, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "The Left [og]", "Polska Partia Socjalistyczna, PPS [og]", NA, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "The Left [og]", "Sojusz Lewicy Demokratycznej", 57L, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "The Left [og]", "Spring", NA, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "The Left [og]", "Wiosna", 7356L, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "The Left [og]", "[Lewica] Razem", 4871L, # 2019/2023 Lewica list; Spring = Wiosna
+  "PL", "Trzecia Droga [og]", "Polska 2050", 9027L,
+  "PL", "Trzecia Droga [og]", "Polskie Stronnictwo Ludowe", 6757L,
+  "PL", "United Right [og]", "Prawo i Sprawiedliwość", 1565L, # United Poland = Solidarna Polska
+  "PL", "United Right [og]", "Solidarna Polska", 328L, # United Poland = Solidarna Polska
+  "PL", "United Right [og]", "United Poland", NA, # United Poland = Solidarna Polska
+  "PL", "Zjednoczona Lewica", "Polska Partia Socjalistyczna, PPS [og]", NA,
+  "PL", "Zjednoczona Lewica", "Ruch Palikota / Twój Ruch", 731L,
+  "PL", "Zjednoczona Lewica", "Sojusz Lewicy Demokratycznej", 57L,
+  "PL", "Zjednoczona Lewica", "Unia Pracy", 1104L,
+  "PT", "Aliança Democrática", "Centro Democrático e Social / Partido Popular", 1308L,
+  "PT", "Aliança Democrática", "Partido Popular Democrático / Partido Social Democrata", 1359L,
+  "PT", "Coligação Democrática Unitária", "Partido Comunista Português", 310L,
+  "PT", "Coligação Democrática Unitária", "Partido Ecologista — Os Verdes", 886L,
+  "PT", "Coligação: PSD (6), CDS - PP (2), Força Portugal [only in v112] [og]", "Centro Democrático e Social / Partido Popular", 1308L,
+  "PT", "Coligação: PSD (6), CDS - PP (2), Força Portugal [only in v112] [og]", "Partido Popular Democrático / Partido Social Democrata", 1359L,
+  "PT", "Numa coligação PSD/CDS [only in v114] [og]", "Centro Democrático e Social / Partido Popular", 1308L,
+  "PT", "Numa coligação PSD/CDS [only in v114] [og]", "Partido Popular Democrático / Partido Social Democrata", 1359L,
+  "PT", "Portugal à Frente", "Centro Democrático e Social / Partido Popular", 1308L,
+  "PT", "Portugal à Frente", "Partido Popular Democrático / Partido Social Democrata", 1359L,
+  "RO", "Alianţa Dreptate şi Adevăr", "Partidul Democrat", 1715L,
+  "RO", "Alianţa Dreptate şi Adevăr", "Partidul Naţional Liberal", 481L,
+  "RO", "Alianţa România Dreaptă", "Partidul Democrat-Liberal", 660L,
+  "RO", "Alianţa România Dreaptă", "Partidul Naţional Ţărănesc Creştin Democrat", 1750L,
+  "RO", "Alianța 2020 USR PLUS (2020 USR PLUS) [og]", "Partidul Libertate, Unitate și Solidaritate (PLUS) [og]", NA,
+  "RO", "Alianța 2020 USR PLUS (2020 USR PLUS) [og]", "Partidul Libertății Unității și Solidarității (PLUS) [og]", NA,
+  "RO", "Alianța 2020 USR PLUS (2020 USR PLUS) [og]", "Uniunea Salvați România", 5969L,
+  "RO", "Alianța Dreapta Unită [og]", "Partidul Mișcarea Populară", 3210L,
+  "RO", "Alianța Dreapta Unită [og]", "Uniunea Salvați România", 5969L,
+  "RO", "Alianța Electorală PSD-PNL [og]", "Partidul Naţional Liberal", 481L,
+  "RO", "Alianța Electorală PSD-PNL [og]", "Partidul Social Democrat", 2555L,
+  "RO", "Alianța PSD+PC", "Partidul Conservator / Partidul Umanist Român", 1443L,
+  "RO", "Alianța PSD+PC", "Partidul Social Democrat", 2555L,
+  "RO", "Alianța USR-PLUS [og]", "Partidul Libertate, Unitate și Solidaritate (PLUS) [og]", NA,
+  "RO", "Alianța USR-PLUS [og]", "Partidul Libertății Unității și Solidarității (PLUS) [og]", NA,
+  "RO", "Alianța USR-PLUS [og]", "Uniunea Salvați România", 5969L,
+  "RO", "Christian-Liberal Alliance [og]", "Partidul Democrat-Liberal", 660L, # ACL 2014
+  "RO", "Christian-Liberal Alliance [og]", "Partidul Naţional Liberal", 481L, # ACL 2014
+  "RO", "Convenţia Democrată Română", "Partidul Alianţa Civică", 645L,
+  "RO", "Convenţia Democrată Română", "Partidul Naţional Liberal", 481L, # CDR member 1992-2000
+  "RO", "Convenţia Democrată Română", "Partidul Naţional Ţărănesc Creştin Democrat", 1750L,
+  "RO", "Electoral Alliance PSD (1642300) + UNPR + PC (1642600) [og]", "Partidul Conservator / Partidul Umanist Român", 1443L,
+  "RO", "Electoral Alliance PSD (1642300) + UNPR + PC (1642600) [og]", "Partidul Social Democrat", 2555L,
+  "RO", "PSD-UNPR-PC Electoral Alliance [og]", "Partidul Conservator / Partidul Umanist Român", 1443L,
+  "RO", "PSD-UNPR-PC Electoral Alliance [og]", "Partidul Social Democrat", 2555L,
+  "RO", "PSD-UNPR-PC Electoral Alliance [og]", "Partidul Social Democrat Român", 1034L, # label used for PSD in this source
+  "RO", "Uniunea Naţională PSD+PUR", "Partidul Conservator / Partidul Umanist Român", 1443L,
+  "RO", "Uniunea Naţională PSD+PUR", "Partidul Social Democrat", 2555L,
+  "RO", "Uniunea Social Liberală", "Partidul Conservator / Partidul Umanist Român", 1443L,
+  "RO", "Uniunea Social Liberală", "Partidul Naţional Liberal", 481L,
+  "RO", "Uniunea Social Liberală", "Partidul Social Democrat", 2555L,
+  "SI", "Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521)) [og]", "Nova Slovenija — Krščanska ljudska stranka", 1618L,
+  "SI", "Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521)) [og]", "Slovenska ljudska stranka", 6740L,
+  "SI", "LDS (2) + DESUS (1) [only in v112] [og]", "Demokratična stranka upokojencev Slovenije", 467L,
+  "SI", "LDS (2) + DESUS (1) [only in v112] [og]", "Liberalna demokracija Slovenije", 975L,
+  "SI", "Slovenska demokratska stranka + Slovenska ljudska stranka [og]", "Slovenska demokratska stranka", 472L,
+  "SI", "Slovenska demokratska stranka + Slovenska ljudska stranka [og]", "Slovenska ljudska stranka", 6740L,
+  "SI", "Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS) [og]", "Slovenska demokratska stranka", 472L,
+  "SI", "Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS) [og]", "Slovenska ljudska stranka", 6740L,
+  "SK", "Hungarian Community Togetherness [og]", "Strana maďarskej koalície / Strana maďarskej komunity", 349L, # 2020 MKÖ joint list
+  "SK", "Koalícia Komunistická Strana Slovenska, Vzdor - Strana Práce [og]", "Komunistická strana Slovenska", 6798L,
+  "SK", "Koalícia Komunistická Strana Slovenska, Vzdor - Strana Práce [og]", "VZDOR - strana práce [og]", NA,
+  "SK", "Obyčajní Ľudia a Nezávislé Osobnosti", "Nová väčšina", 6686L, # joint lists 2016/2020
+  "SK", "Obyčajní Ľudia a Nezávislé Osobnosti", "Za ľudí", 8394L, # 2023 joint list
+  "SK", "Pogresívne Slovensko - Spolu [og]", "Progresívne Slovensko", 7361L,
+  "SK", "Pogresívne Slovensko - Spolu [og]", "Spolu — občianska demokracia", 8177L,
+  "SK", "Progresivne Slovensko-SPOLU [og]", "Progresívne Slovensko", 7361L,
+  "SK", "Progresivne Slovensko-SPOLU [og]", "Spolu — občianska demokracia", 8177L,
+  "SK", "Progressive Slovakia - TOGETHER-Civic Democracy [og]", "Progresívne Slovensko", 7361L,
+  "SK", "Progressive Slovakia - TOGETHER-Civic Democracy [og]", "Spolu — občianska demokracia", 8177L,
+  "SK", "Progressive Slovakia and Together - Civic Democracy [og]", "Progresívne Slovensko", 7361L,
+  "SK", "Progressive Slovakia and Together - Civic Democracy [og]", "Spolu — občianska demokracia", 8177L,
+  "SK", "Progresívne Slovensko/ SPOLU [og]", "Progresívne Slovensko", 7361L,
+  "SK", "Progresívne Slovensko/ SPOLU [og]", "Spolu — občianska demokracia", 8177L,
+  "SK", "SNS (Slovenská národná strana) / Pravá SNS [og]", "Slovenská národná strana", 730L, # combined answer category
+  "SK", "hungarian community togetherness [og]", "Strana maďarskej koalície / Strana maďarskej komunity", 349L # 2020 MKÖ joint list
+)
+
+pf_check_alliances(alliances, core = core)
+
+alliances |>
+  summarise(members = n(), .by = c(cntry, alliance_name)) |>
+  count(cntry, name = "alliances") |>
+  print(n = Inf)
+
+write_csv(alliances, here("data", "02_processed", "pf_alliances.csv"), na = "")
+```
+
+# Before and After
+
+The share of *same party* among attached voters with two real party answers, compared by Party Facts name only and with the alliance rule.
+
+```{r}
+#| label: before-after
+
+pairs |>
+  mutate(
+    by_name = att == vote,
+    with_alliances = pf_match(cntry, att, vote, alliances) == "same"
+  ) |>
+  summarise(
+    pairs = n(),
+    by_name = mean(by_name),
+    with_alliances = mean(with_alliances),
+    .by = c(source, cntry)
+  ) |>
+  mutate(gain = with_alliances - by_name) |>
+  arrange(desc(gain)) |>
+  print(n = 40)
+```
+
+Spot checks: attachment to the CDU and a vote for the CDU/CSU union match, attachment to the CDU and a vote for the CSU do not; the same for Fidesz and Fidesz–KDNP, and for PO and KO.
+
+```{r}
+#| label: spot-checks
+
+tribble(
+  ~cntry, ~att, ~vote,
+  "DE", "Christlich Demokratische Union", "Christlich Demokratische Union / Christlich Soziale Union",
+  "DE", "Christlich Soziale Union", "Christlich Demokratische Union / Christlich Soziale Union",
+  "DE", "Christlich Demokratische Union", "Christlich Soziale Union",
+  "HU", "Fidesz — Magyar Polgári Szövetség", "Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége",
+  "PL", "Platforma Obywatelska", "Koalicja Obywatelska"
+) |>
+  mutate(match = pf_match(cntry, att, vote, alliances))
+```
+
+The largest pairs still scored *different*: these should be genuine switches, not alliances missing from the table.
+Two kinds of pair are *different* by construction, not by oversight:
+
+- **Renamed or refounded parties with a new Party Facts id** (UMP and Les Républicains, PD and PDL in Romania, SDĽ and Smer): the table lists alliances only, not successors or later mergers.
+- **Suspect answers in the sources**, e.g. EES 2004 Italy, where attachment to the Margherita or the PdCI pairs with a vote for Il Girasole (Verdi + SDI) hundreds of times, which points to a mislabelled vote code upstream rather than to an alliance.
+
+```{r}
+#| label: remaining
+
+pairs |>
+  filter(pf_match(cntry, att, vote, alliances) == "different") |>
+  count(cntry, att, vote, sort = TRUE) |>
+  mutate(across(c(att, vote), \(x) str_trunc(x, 32))) |>
+  head(30)
+```
+
+# Match Files
+
+For every vote item, the match with the attachment item of the same respondent.
+
+```{r}
+#| label: match-files
+
+add_matches <- function(df, att, votes) {
+  for (v in votes) {
+    df[[paste0("ext_match_", v)]] <- pf_match(
+      df$cntry,
+      df[[paste0("ext_", att, "_pf_name")]],
+      df[[paste0("ext_", v, "_pf_name")]],
+      alliances
+    )
+    # no vote item for this respondent
+    df[[paste0("ext_match_", v)]][is.na(df[[paste0("ext_", v, "_pf_name")]])] <- NA
+  }
+  df
+}
+
+vote_stubs <- function(df, pattern) {
+  str_subset(names(df), pattern) |>
+    str_remove("^ext_") |>
+    str_remove("_pf_name$")
+}
+
+ess_match <- ess |>
+  add_matches("prtcl", vote_stubs(ess, "^ext_prtv.*_pf_name$")) |>
+  select(cntry, essround, name, idno, starts_with("ext_match_"))
+
+cses_match <- cses |>
+  add_matches("imd3005_3", vote_stubs(cses, "^ext_(imd3002|f3016)_.*_pf_name$")) |>
+  select(release, study, respondent, cntry, year, starts_with("ext_match_"))
+
+ees_match <- ees |>
+  add_matches("pid", vote_stubs(ees, "^ext_vote_.*_pf_name$")) |>
+  select(wave, row, respondent, cntry, region, starts_with("ext_match_"))
+
+write_parquet(ess_match, here("data", "02_processed", "ess_party_match.parquet"), compression = "zstd")
+write_parquet(cses_match, here("data", "02_processed", "cses_party_match.parquet"), compression = "zstd")
+write_parquet(ees_match, here("data", "02_processed", "ees_party_match.parquet"), compression = "zstd")
+
+map(
+  list(ESS = ess_match, CSES = cses_match, EES = ees_match),
+  \(d) d |>
+    select(starts_with("ext_match_")) |>
+    pivot_longer(everything()) |>
+    count(name, value) |>
+    pivot_wider(names_from = value, values_from = n, values_fill = 0)
+)
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+rendering_time <- end_time - start_time
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds."
+))
+```
