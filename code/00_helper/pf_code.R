@@ -73,8 +73,18 @@ pf_core <- function() {
       pf_name = name,
       pf_short = name_short,
       pf_english = name_english,
-      technical
+      technical,
+      year_last = as.integer(year_last)
     )
+}
+
+# Parties that ended before 1950 cannot be answers in surveys from 1996 on.
+# Party Facts links some survey codes to them anyway (the CSES and several other
+# datasets point Spain's Partido Popular to the Partido Progresista of 1834-74,
+# 5750, whose short name is also "PP"), so automatic links and name matches skip
+# them; the hand maps can still use any id.
+pf_historic <- function(core = pf_core(), before = 1950L) {
+  core$pf_id[!is.na(core$year_last) & core$year_last < before]
 }
 
 # Links from one external dataset to Party Facts. Links to technical ids
@@ -139,4 +149,65 @@ pf_check <- function(map, keys, core = pf_core()) {
   }
 
   invisible(map)
+}
+
+# Alliances ------------------------------------------------------------------
+#
+# `alliances` (data/02_processed/pf_alliances.csv, built in notebook 1.9) lists
+# electoral alliances, joint lists and party unions with one row per member:
+# cntry, alliance_name, member_name, member_id. Names are Party Facts core names
+# or "<label> [og]", exactly as they appear in the ext_*_pf_name variables.
+
+pf_alliances <- function() {
+  read_csv(
+    here("data", "02_processed", "pf_alliances.csv"),
+    col_types = cols(member_id = col_integer(), .default = col_character())
+  )
+}
+
+# Is `b` a member of alliance `a` (or `a` a member of alliance `b`)?
+pf_in_alliance <- function(cntry, a, b, alliances) {
+  links <- paste(alliances$cntry, alliances$alliance_name, alliances$member_name, sep = "\r")
+  paste(cntry, a, b, sep = "\r") %in% links | paste(cntry, b, a, sep = "\r") %in% links
+}
+
+# Compare two party answers (e.g. attachment and vote) by Party Facts name:
+# "same" for the same party or a party and an alliance containing it,
+# "unmatchable" when either side is missing or a non-party answer,
+# "different" otherwise. Two members of one alliance stay "different".
+pf_match <- function(cntry, a, b, alliances) {
+  case_when(
+    is.na(a) | is.na(b) | a %in% pf_sentinels | b %in% pf_sentinels ~ "unmatchable",
+    a == b ~ "same",
+    pf_in_alliance(cntry, a, b, alliances) ~ "same",
+    .default = "different"
+  )
+}
+
+# Checks on the alliance table
+pf_check_alliances <- function(alliances, core = pf_core()) {
+  dup <- alliances |>
+    count(cntry, alliance_name, member_name) |>
+    filter(n > 1)
+  if (nrow(dup) > 0) {
+    print(dup)
+    stop("pf_check_alliances: duplicate alliance-member rows")
+  }
+  self <- filter(alliances, alliance_name == member_name)
+  if (nrow(self) > 0) {
+    print(self)
+    stop("pf_check_alliances: an alliance lists itself")
+  }
+  real <- core |>
+    filter(is.na(technical)) |>
+    select(member_id = pf_id, core_name = pf_name)
+  bad <- alliances |>
+    filter(!is.na(member_id)) |>
+    left_join(real, by = "member_id") |>
+    filter(is.na(core_name) | core_name != member_name)
+  if (nrow(bad) > 0) {
+    print(bad)
+    stop("pf_check_alliances: member_id not in core, or member_name differs from the core name")
+  }
+  invisible(alliances)
 }

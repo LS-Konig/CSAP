@@ -241,7 +241,10 @@ Each link is checked against the names Party Facts holds for the linked party in
 core <- pf_core()
 
 links <- pf_links("cses", core) |>
-  mutate(code = as.integer(dataset_party_id))
+  mutate(code = as.integer(dataset_party_id)) |>
+  # Party Facts links Spain's People's Party (7240002) to the Partido
+  # Progresista of 1834-74 (5750); no links to parties that ended before 1950
+  filter(!pf_id %in% pf_historic(core))
 
 # Every name Party Facts holds for the parties of the 25 countries
 pf_names <- read_csv(
@@ -271,7 +274,8 @@ pf_names <- read_csv(
       select(pf_id, pf_name),
     by = "pf_id"
   ) |>
-  distinct(cntry, nk, pf_id, pf_name)
+  distinct(cntry, nk, pf_id, pf_name) |>
+  filter(!pf_id %in% pf_historic(core))
 
 linked <- parties |>
   filter(release == "imd") |>
@@ -693,7 +697,11 @@ map_hand <- tribble(
   "mod6", 705011L, "SI", "our future and good state", "our future and good state [og]", NA, # NP+Dobra drzava joint list
   "mod6", 705015L, "SI", "vesna - green party", "VESNA – zelena stranka", 9130L,
   "mod6", 705017L, "SI", "list of boris popovic - let's digitize slovenia", "list of boris popovic - let's digitize slovenia [og]", NA, # not Povezimo se
-  "mod6", 752008L, "SE", "liberals", "Folkpartiet liberalerna / Liberalerna", 1274L
+  "mod6", 752008L, "SE", "liberals", "Folkpartiet liberalerna / Liberalerna", 1274L,
+  # codes whose link or name pointed to a party of before 1950 (see pf_historic())
+  "imd", 7240002L, "ES", "People's Party", "Alianza-Partido Popular / Partido Popular", 441L, # Party Facts links it to 5750, the Partido Progresista of 1834-74
+  "imd", 6160053L, "PL", "Polish Socialist Party", "Polish Socialist Party [og]", NA, # the post-1987 PPS; 4354 is the party of 1892-1948
+  "imd", 7030062L, "SK", "Hlinka's Slovak People's Party", "Hlinka's Slovak People's Party [og]", NA # a post-1990 revival; the historic HSĽS ended 1945
 ) |>
   mutate(source = "hand")
 
@@ -856,6 +864,17 @@ respondents |>
   arrange(same) |>
   print(n = Inf)
 ```
+
+# Known Quirks
+
+- **Party Facts links the IMD codes only.** Its `cses` dataset covers about 290 of the 760 IMD party codes of the 25 countries and none of Module 6; the rest are matched by name or by hand.
+- **Module 6 codes are a different scheme** (country + three digits, e.g. `040001`, against IMD's country + four digits, `0400001`), so the same number does not mean the same party across releases. Module 6 codes are bridged to an IMD code only through an identical name in the same country, and the crosswalk is keyed by release and code.
+- **Some Module 6 codes carry a different label on different items** (Poland's 616002 is "civic coalition", "senate pact KO candidate" and "civic platform"); all labels of a code take part in the matching, and the code gets one party.
+- **The Module 6 respondent id is `f1003_1`.** `f1005` is the numeric study id, despite its position among the id variables.
+- **Two IMD labels are mojibake** (UTF-8 read as CP1252: "Fidesz â€“ KDNP", "Center Party â€“ Nationalists") and are decoded again before matching.
+- **`9999999` holds both missing and abstention** on the vote items and cannot be split; it stays `NA`, as do the not-applicable codes `95` and `96`.
+- **Alliances and unions:** CSES codes attachment to the CDU and the CSU separately (1375, 1731) but the German list vote for the CDU/CSU union (211), and Romanian studies code alliances (USL, PSD+PUR, DA) on the vote. The codes here keep those entities apart; notebook 1.9 adds the membership under which a party and its alliance count as the same party.
+- **Only the 25 democracies**, from both releases, are coded.
 
 # Session Info
 

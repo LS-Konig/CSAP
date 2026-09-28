@@ -204,7 +204,9 @@ links <- bind_rows(pf_links("essprtc", core), pf_links("essprtv", core)) |>
     c("cntry", "start", "code", "type"),
     "^([A-Z]{2})-([0-9]+)-([0-9]+)-(.+)$",
     convert = TRUE
-  )
+  ) |>
+  # no links to parties that ended before 1950 (see pf_historic())
+  filter(!pf_id %in% pf_historic(core))
 
 # Links at their exact position
 placed <- cells |>
@@ -290,7 +292,9 @@ country_names <- bind_rows(
   ) |>
   mutate(nk = normalise_party(nk)) |>
   filter(nchar(nk) >= 2) |>
-  distinct(cntry, nk, pf_name, pf_id)
+  distinct(cntry, nk, pf_name, pf_id) |>
+  # "PP" is also the short name of Spain's Partido Progresista (1834-74)
+  filter(!pf_id %in% pf_historic(core))
 
 map_name <- cells |>
   distinct(cntry, key, label) |>
@@ -712,7 +716,12 @@ map_hand <- tribble(
   "SK", "SMER-Social Democracy", "Smer — sociálna demokracia", 311L,
   "SK", "Sloboda a Solidarita (SaS)", "Sloboda a Solidarita", 1386L,
   "SK", "Slovak Democratic Christian Union (SDKU)", "Slovenská demokratická a kresťanská únia — Demokratická strana", 1617L,
-  "SK", "Slovenská národná strana (SNS)", "Slovenská národná strana", 730L
+  "SK", "Slovenská národná strana (SNS)", "Slovenská národná strana", 730L,
+  # names that matched a party of before 1950 by short name (see pf_historic())
+  "ES", "PP", "Alianza-Partido Popular / Partido Popular", 441L, # not 5750, the Partido Progresista of 1834-74
+  "SE", "Centern", "Bondeförbundet / Centerpartiet", 199L, # not 7415, "Centern" of 1873-82
+  "RO", "PC", "Partidul Conservator / Partidul Umanist Român", 1443L,
+  "PL", "Polska Partia Socjalistyczna", "Polska Partia Socjalistyczna [og]", NA # the post-1987 PPS; 4354 is the party of 1892-1948
 ) |>
   mutate(key = norm_key(label), source = "hand")
 
@@ -886,7 +895,7 @@ crosswalk |>
 Among respondents who report both an attachment party and a main-vote party, the share whose two answers carry the same Party Facts id.
 This is a check on the coding, not a result: a country far below the others would point to a party coded differently on the two lists.
 The low shares (Hungary, Romania, Poland, France) come mostly from electoral alliances, which Party Facts keeps as entities of their own: attachment to Fidesz with a vote for the Fidesz–KDNP list, PO with KO, PSD with the PSD+PC alliance, SLD with SLD–UP.
-The coding keeps that distinction; any analysis that treats a party and its alliance as the same has to add the membership itself.
+The coding keeps that distinction here; notebook 1.9 adds the alliance membership, under which such a pair counts as the same party.
 
 ```{r}
 #| label: same-party
@@ -901,6 +910,23 @@ respondents |>
   arrange(same) |>
   print(n = Inf)
 ```
+
+# Known Quirks
+
+What a user of the two output files should know, collected in one place:
+
+- **Party Facts' ESS link ids are not a code map.**
+  An id `DE-7-6-c` says that party 6 of Germany's attachment list first appears in round 7.
+  When ESS renumbers a list later, Party Facts writes no new link, so taking "the link with the largest start round up to this round" would put the wrong party on about 800 labels (Austria's code 5 is LIF in rounds 1–2 and the Greens in round 3).
+  Links are therefore used only at their exact position and carried to other rounds through the label; links that disagree with each other, or with the label, go to the hand map.
+- **Small parties that Party Facts files under a technical id** ("1 percent", "other", "unknown", ...) are coded `"<label> [og]"`, not the `other` sentinel: they are named parties, only not in Party Facts.
+  The sentinel `other` is kept for generic "other party" answers.
+- **Forza Italia** is the one label coded by round: 1626 (1994–2009) up to round 6, 8058 (refounded 2013) from round 7.
+- **Solidarna Polska** keeps id 328 in every round, although Party Facts also has 9109 (Suwerenna Polska) for the same years and links ESS round 10 there; 9109 looks like a duplicate, and 328 matches the eu25games release.
+- **A few Party Facts links are wrong** and are overridden by hand: PSL's round-1 link points to the PSL of 1945–49 (6757, coded 602), and Lithuania's Nationalist Union to the interwar party (377, coded 9107).
+- **Only the 25 democracies** are coded; other ESS countries are not in the output.
+- **Codes 66 and 99** (not applicable, no answer) stay `NA`; 77 and 88 become `refused` and `dont-know`. Codes above 66 that are real answers ("Other", "Blank vote", Italy's "voted only in the majoritarian race") are coded by their label.
+- **Electoral alliances** (Fidesz–KDNP, KO, PSD+PC, SLD–UP, ...) keep their own Party Facts id here, so the attachment/vote check above understates agreement; the alliance-aware comparison is in notebook 1.9.
 
 # Session Info
 

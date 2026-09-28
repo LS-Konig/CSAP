@@ -1962,7 +1962,7 @@ ES,6,prtclces,15,Otro,other,,hand
 ES,6,prtclces,66,Not applicable*,,,missing
 ES,6,prtclces,77,Refusal*,refused,,missing
 ES,6,prtclces,88,Don't know*,dont-know,,missing
-ES,7,prtcldes,1,PP,Partido Progresista,5750,name
+ES,7,prtcldes,1,PP,Alianza-Partido Popular / Partido Popular,441,hand
 ES,7,prtcldes,2,Partido Socialista Obrero Español (PSOE),Partido Socialista Obrero Español,1338,link
 ES,7,prtcldes,3,Convergència i Unió (CiU),Convergència i Unió,139,link
 ES,7,prtcldes,4,Izquierda Unida (IU) - (ICV en Cataluña),Izquierda Unida,247,hand
@@ -2019,7 +2019,7 @@ ES,1,prtcles,66,Not applicable*,,,missing
 ES,1,prtcles,68,Other,other,,hand
 ES,1,prtcles,77,Refusal*,refused,,missing
 ES,1,prtcles,88,Don't know*,dont-know,,missing
-ES,9,prtclfes,1,PP,Partido Progresista,5750,name
+ES,9,prtclfes,1,PP,Alianza-Partido Popular / Partido Popular,441,hand
 ES,9,prtclfes,2,PSOE,Partido Socialista Obrero Español,1338,name
 ES,9,prtclfes,3,Unidas Podemos,Unidas Podemos,7656,link
 ES,9,prtclfes,4,Podemos,Podemos,3203,link
@@ -2043,7 +2043,7 @@ ES,9,prtclfes,66,Not applicable*,,,missing
 ES,9,prtclfes,77,Refusal*,refused,,missing
 ES,9,prtclfes,88,Don't know*,dont-know,,missing
 ES,10,prtclges,1,PSOE,Partido Socialista Obrero Español,1338,name
-ES,10,prtclges,2,PP,Partido Progresista,5750,name
+ES,10,prtclges,2,PP,Alianza-Partido Popular / Partido Popular,441,hand
 ES,10,prtclges,3,VOX,Vox,3218,link
 ES,10,prtclges,4,Unidas Podemos,Unidas Podemos,7656,link
 ES,10,prtclges,5,En Comú Podem,En Comú Podem,8031,link
@@ -2064,7 +2064,7 @@ ES,10,prtclges,19,Izquierda Unida,Izquierda Unida,247,name
 ES,10,prtclges,53,Other,other,,hand
 ES,10,prtclges,66,Not applicable*,,,missing
 ES,10,prtclges,99,No answer*,,,missing
-ES,11,prtclhes,1,PP,Partido Progresista,5750,name
+ES,11,prtclhes,1,PP,Alianza-Partido Popular / Partido Popular,441,hand
 ES,11,prtclhes,2,PSOE,Partido Socialista Obrero Español,1338,name
 ES,11,prtclhes,3,VOX,Vox,3218,link
 ES,11,prtclhes,4,SUMAR,SUMAR [og],,hand
@@ -2214,7 +2214,7 @@ ES,8,prtvtdes,66,Not applicable*,,,missing
 ES,8,prtvtdes,77,Refusal*,refused,,missing
 ES,8,prtvtdes,88,Don't know*,dont-know,,missing
 ES,8,prtvtdes,99,No answer*,,,missing
-ES,9,prtvtees,1,PP,Partido Progresista,5750,name
+ES,9,prtvtees,1,PP,Alianza-Partido Popular / Partido Popular,441,hand
 ES,9,prtvtees,2,PSOE,Partido Socialista Obrero Español,1338,name
 ES,9,prtvtees,3,Unidas Podemos,Unidas Podemos,7656,link
 ES,9,prtvtees,5,Ciudadanos,Ciudadanos — Partido de la Ciudadanía,3217,hand
@@ -2255,7 +2255,7 @@ ES,1,prtvtes,68,Other,other,,hand
 ES,1,prtvtes,77,Refusal*,refused,,missing
 ES,1,prtvtes,88,Don't know*,dont-know,,missing
 ES,10,prtvtfes,1,PSOE,Partido Socialista Obrero Español,1338,name
-ES,10,prtvtfes,2,PP,Partido Progresista,5750,name
+ES,10,prtvtfes,2,PP,Alianza-Partido Popular / Partido Popular,441,hand
 ES,10,prtvtfes,3,VOX,Vox,3218,link
 ES,10,prtvtfes,4,Unidas Podemos,Unidas Podemos,7656,link
 ES,10,prtvtfes,5,En Comú Podem,En Comú Podem,8031,link
@@ -2277,7 +2277,7 @@ ES,10,prtvtfes,54,Blank vote,blank-invalid,,hand
 ES,10,prtvtfes,55,Invalid vote,blank-invalid,,hand
 ES,10,prtvtfes,66,Not applicable*,,,missing
 ES,10,prtvtfes,99,No answer*,,,missing
-ES,11,prtvtges,1,PP,Partido Progresista,5750,name
+ES,11,prtvtges,1,PP,Alianza-Partido Popular / Partido Popular,441,hand
 ES,11,prtvtges,2,PSOE,Partido Socialista Obrero Español,1338,name
 ES,11,prtvtges,3,VOX,Vox,3218,link
 ES,11,prtvtges,4,SUMAR,SUMAR [og],,hand
@@ -5701,7 +5701,7 @@ PL,1,prtclpl,3,Krajowa Partia Emerytow i Rencistow,Krajowa Partia Emerytów i Re
 PL,1,prtclpl,4,Liga Polskich Rodzin,Liga Polskich Rodzin,1768,link
 PL,1,prtclpl,5,Partia Ludowo-Demokratyczna,Partia Ludowo-Demokratyczna [og],,hand
 PL,1,prtclpl,6,Platforma Obywatelska,Platforma Obywatelska,1117,link
-PL,1,prtclpl,7,Polska Partia Socjalistyczna,Polska Partia Socjalistyczna,4354,link
+PL,1,prtclpl,7,Polska Partia Socjalistyczna,Polska Partia Socjalistyczna [og],,hand
 PL,1,prtclpl,10,Polskie Stronnictwo Ludowe,Polskie Stronnictwo Ludowe,602,hand
 PL,1,prtclpl,11,Prawo i Sprawiedliwość,Prawo i Sprawiedliwość,1565,link
 PL,1,prtclpl,13,Samoobrona Rzeczypospolitej Polskiej,Samoobrona Rzeczypospolitej Polskiej,727,link
@@ -5833,7 +5833,7 @@ PL,1,prtvtpl,7,Platforma Obywatelska,Platforma Obywatelska,1117,link
 PL,1,prtvtpl,8,Alternatywa Ruch Społeczny,Alternatywa Ruch Społeczny [og],,hand
 PL,1,prtvtpl,10,Liga Polskich Rodzin,Liga Polskich Rodzin,1768,link
 PL,1,prtvtpl,11,Mniejszość Niemiecka,Mniejszość niemiecka w Polsce,1439,link
-PL,1,prtvtpl,13,Polska Partia Socjalistyczna,Polska Partia Socjalistyczna,4354,link
+PL,1,prtvtpl,13,Polska Partia Socjalistyczna,Polska Partia Socjalistyczna [og],,hand
 PL,1,prtvtpl,66,Not applicable*,,,missing
 PL,1,prtvtpl,77,Refusal*,refused,,missing
 PL,1,prtvtpl,88,Don't know*,dont-know,,missing
@@ -6161,7 +6161,7 @@ RO,4,prtclaro,2,PD-L,Partidul Democrat-Liberal,660,link
 RO,4,prtclaro,3,PSD,Partidul Social Democrat,120,name
 RO,4,prtclaro,4,PRM,Partidul România Mare,1305,link
 RO,4,prtclaro,5,UDMR,Uniunea Democrată Maghiară din România / Romániai Magyar Demokrata Szövetség,1105,link
-RO,4,prtclaro,6,PC,Partidul Conservator,6769,name
+RO,4,prtclaro,6,PC,Partidul Conservator / Partidul Umanist Român,1443,hand
 RO,4,prtclaro,7,PNG-CD,Partidul Noua Generaţie — Creştin Democrat,296,link
 RO,4,prtclaro,9,PPCD (PNTCD),Partidul Naţional Ţărănesc Creştin Democrat,1750,hand
 RO,4,prtclaro,11,Other: PR,Partida Romilor,173,link
@@ -6181,7 +6181,7 @@ RO,4,prtvtaro,12,Other: PIN,Partidul Iniţiativa Naţională,1579,link
 RO,4,prtvtaro,13,Other: FDGR,Forumul Democrat al Germanilor din România,2454,link
 RO,4,prtvtaro,66,Not applicable*,,,missing
 RO,4,prtvtaro,99,No answer*,,,missing
-SE,5,prtclase,1,Centern,Centern,7415,name
+SE,5,prtclase,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,5,prtclase,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,5,prtclase,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,5,prtclase,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6195,7 +6195,7 @@ SE,5,prtclase,66,Not applicable*,,,missing
 SE,5,prtclase,77,Refusal*,refused,,missing
 SE,5,prtclase,88,Don't know*,dont-know,,missing
 SE,5,prtclase,99,No answer*,,,missing
-SE,6,prtclbse,1,Centern,Centern,7415,name
+SE,6,prtclbse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,6,prtclbse,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,6,prtclbse,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,6,prtclbse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6209,7 +6209,7 @@ SE,6,prtclbse,11,Annat parti,other,,hand
 SE,6,prtclbse,66,Not applicable*,,,missing
 SE,6,prtclbse,77,Refusal*,refused,,missing
 SE,6,prtclbse,88,Don't know*,dont-know,,missing
-SE,7,prtclbse,1,Centern,Centern,7415,name
+SE,7,prtclbse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,7,prtclbse,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,7,prtclbse,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,7,prtclbse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6223,7 +6223,7 @@ SE,7,prtclbse,11,Annat parti,other,,hand
 SE,7,prtclbse,66,Not applicable*,,,missing
 SE,7,prtclbse,77,Refusal*,refused,,missing
 SE,7,prtclbse,88,Don't know*,dont-know,,missing
-SE,8,prtclbse,1,Centern,Centern,7415,name
+SE,8,prtclbse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,8,prtclbse,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,8,prtclbse,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,8,prtclbse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6237,7 +6237,7 @@ SE,8,prtclbse,11,Annat parti,other,,hand
 SE,8,prtclbse,66,Not applicable*,,,missing
 SE,8,prtclbse,77,Refusal*,refused,,missing
 SE,8,prtclbse,88,Don't know*,dont-know,,missing
-SE,9,prtclcse,1,Centern,Centern,7415,name
+SE,9,prtclcse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,9,prtclcse,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,9,prtclcse,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,9,prtclcse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6250,7 +6250,7 @@ SE,9,prtclcse,10,Annat parti,other,,hand
 SE,9,prtclcse,66,Not applicable*,,,missing
 SE,9,prtclcse,77,Refusal*,refused,,missing
 SE,9,prtclcse,88,Don't know*,dont-know,,missing
-SE,10,prtcldse,1,Centern,Centern,7415,name
+SE,10,prtcldse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,10,prtcldse,2,Kristdemokraterna,Kristdemokraterna,651,name
 SE,10,prtcldse,3,Liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,10,prtcldse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6261,7 +6261,7 @@ SE,10,prtcldse,8,Vänsterpartiet,Vänsterpartiet / Sveriges Komunistiska Parti,8
 SE,10,prtcldse,9,Annat parti,other,,hand
 SE,10,prtcldse,66,Not applicable*,,,missing
 SE,10,prtcldse,99,No answer*,,,missing
-SE,11,prtclese,1,Centern,Centern,7415,name
+SE,11,prtclese,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,11,prtclese,2,Liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,11,prtclese,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,11,prtclese,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6320,7 +6320,7 @@ SE,4,prtclse,66,Not applicable*,,,missing
 SE,4,prtclse,77,Refusal*,refused,,missing
 SE,4,prtclse,88,Don't know*,dont-know,,missing
 SE,4,prtclse,99,No answer*,,,missing
-SE,5,prtvtase,1,Centern,Centern,7415,name
+SE,5,prtvtase,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,5,prtvtase,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,5,prtvtase,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,5,prtvtase,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6335,7 +6335,7 @@ SE,5,prtvtase,66,Not applicable*,,,missing
 SE,5,prtvtase,77,Refusal*,refused,,missing
 SE,5,prtvtase,88,Don't know*,dont-know,,missing
 SE,5,prtvtase,99,No answer*,,,missing
-SE,6,prtvtbse,1,Centern,Centern,7415,name
+SE,6,prtvtbse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,6,prtvtbse,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,6,prtvtbse,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,6,prtvtbse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6349,7 +6349,7 @@ SE,6,prtvtbse,11,Annat parti,other,,hand
 SE,6,prtvtbse,66,Not applicable*,,,missing
 SE,6,prtvtbse,77,Refusal*,refused,,missing
 SE,6,prtvtbse,88,Don't know*,dont-know,,missing
-SE,7,prtvtbse,1,Centern,Centern,7415,name
+SE,7,prtvtbse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,7,prtvtbse,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,7,prtvtbse,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,7,prtvtbse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6363,7 +6363,7 @@ SE,7,prtvtbse,11,Annat parti,other,,hand
 SE,7,prtvtbse,66,Not applicable*,,,missing
 SE,7,prtvtbse,77,Refusal*,refused,,missing
 SE,7,prtvtbse,88,Don't know*,dont-know,,missing
-SE,8,prtvtbse,1,Centern,Centern,7415,name
+SE,8,prtvtbse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,8,prtvtbse,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,8,prtvtbse,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,8,prtvtbse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6377,7 +6377,7 @@ SE,8,prtvtbse,11,Annat parti,other,,hand
 SE,8,prtvtbse,66,Not applicable*,,,missing
 SE,8,prtvtbse,77,Refusal*,refused,,missing
 SE,8,prtvtbse,88,Don't know*,dont-know,,missing
-SE,9,prtvtcse,1,Centern,Centern,7415,name
+SE,9,prtvtcse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,9,prtvtcse,2,Folkpartiet liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,9,prtvtcse,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,9,prtvtcse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6390,7 +6390,7 @@ SE,9,prtvtcse,10,Annat parti,other,,hand
 SE,9,prtvtcse,66,Not applicable*,,,missing
 SE,9,prtvtcse,77,Refusal*,refused,,missing
 SE,9,prtvtcse,88,Don't know*,dont-know,,missing
-SE,10,prtvtdse,1,Centern,Centern,7415,name
+SE,10,prtvtdse,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,10,prtvtdse,2,Kristdemokraterna,Kristdemokraterna,651,name
 SE,10,prtvtdse,3,Liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,10,prtvtdse,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name
@@ -6401,7 +6401,7 @@ SE,10,prtvtdse,8,Vänsterpartiet,Vänsterpartiet / Sveriges Komunistiska Parti,8
 SE,10,prtvtdse,9,Annat parti,other,,hand
 SE,10,prtvtdse,66,Not applicable*,,,missing
 SE,10,prtvtdse,99,No answer*,,,missing
-SE,11,prtvtese,1,Centern,Centern,7415,name
+SE,11,prtvtese,1,Centern,Bondeförbundet / Centerpartiet,199,hand
 SE,11,prtvtese,2,Liberalerna,Folkpartiet liberalerna / Liberalerna,1274,hand
 SE,11,prtvtese,3,Kristdemokraterna,Kristdemokraterna,651,name
 SE,11,prtvtese,4,Miljöpartiet de gröna,Miljöpartiet de gröna,456,name

@@ -341,7 +341,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2004,DE,,v124,10,ÖDP,Ökologisch-Demokratische Partei,7345,name,battery
 2004,DE,,v125,11,Die Frauen,Die Frauen [og],,hand,battery
 2004,DE,,v126,12,Partei bibeltreuer Christen,Partei bibeltreuer Christen [og],,hand,battery
-2004,DE,,v127,13,DKP,Deutschkonservative Partei,2125,name,battery
+2004,DE,,v127,13,DKP,DKP [og],,hand,battery
 2004,DE,,v128,14,Bayernpartei BP,Bayernpartei,61,name,battery
 2004,DE,,v135,1,CDU,Christlich Demokratische Union,1375,name,battery
 2004,DE,,v136,2,CSU,Christlich Soziale Union,1731,name,battery
@@ -1509,7 +1509,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2004,LV,,v120,6,Latvijas Cels (Latvia’s Way),Latvijas Ceļš,1043,name,battery
 2004,LV,,v121,7,KDS (Christian Democratic Union),Kristīgi demokrātiskā savienība,304,name,battery
 2004,LV,,v122,8,Russian National Bolshevik Party,Russian National Bolshevik Party [og],,hand,battery
-2004,LV,,v123,9,LSDSP (Latvian Social Democratic Workers' Party),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,battery
+2004,LV,,v123,9,LSDSP (Latvian Social Democratic Workers' Party),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,battery
 2004,LV,,v124,10,Conservative Party,Konservatīvā partija,944,name,battery
 2004,LV,,v125,11,Future Party,Future Party [og],,hand,battery
 2004,LV,,v126,12,Tautas Saskanas Partija (People's Harmony Party),Tautas Saskaņas Partija,1719,name,battery
@@ -1523,7 +1523,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2004,LV,,v140,6,Latvijas Cels (Latvia’s Way),Latvijas Ceļš,1043,name,battery
 2004,LV,,v141,7,KDS (Christian Democratic Union),Kristīgi demokrātiskā savienība,304,name,battery
 2004,LV,,v142,8,Russian National Bolshevik Party,Russian National Bolshevik Party [og],,hand,battery
-2004,LV,,v143,9,LSDSP (Latvian Social Democratic Workers' Party),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,battery
+2004,LV,,v143,9,LSDSP (Latvian Social Democratic Workers' Party),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,battery
 2004,LV,,v144,10,Conservative Party,Konservatīvā partija,944,name,battery
 2004,LV,,v145,11,Future Party,Future Party [og],,hand,battery
 2004,LV,,v146,12,Tautas Saskanas Partija (People's Harmony Party),Tautas Saskaņas Partija,1719,name,battery
@@ -1537,7 +1537,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2004,LV,,v162,6,Latvijas Cels (Latvia’s Way),Latvijas Ceļš,1043,name,battery
 2004,LV,,v163,7,KDS (Christian Democratic Union),Kristīgi demokrātiskā savienība,304,name,battery
 2004,LV,,v164,8,Russian National Bolshevik Party,Russian National Bolshevik Party [og],,hand,battery
-2004,LV,,v165,9,LSDSP (Latvian Social Democratic Workers' Party),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,battery
+2004,LV,,v165,9,LSDSP (Latvian Social Democratic Workers' Party),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,battery
 2004,LV,,v166,10,Conservative Party,Konservatīvā partija,944,name,battery
 2004,LV,,v167,11,Future Party,Future Party [og],,hand,battery
 2004,LV,,v168,12,Tautas Saskanas Partija (People's Harmony Party),Tautas Saskaņas Partija,1719,name,battery
@@ -1550,7 +1550,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2004,LV,,v211,5,Tevzemei un Brovobai/ LNNK (For Fatherland and Freedom),Tēvzemei un Brīvībai / LNNK,1704,hand,answer
 2004,LV,,v211,6,Latvijas Cels (Latvia’s Way),Latvijas Ceļš,1043,name,answer
 2004,LV,,v211,7,KDS (Christian Democratic Union),Kristīgi demokrātiskā savienība,304,name,answer
-2004,LV,,v211,9,LSDSP (Latvian Social Democratic Workers' Party),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,answer
+2004,LV,,v211,9,LSDSP (Latvian Social Democratic Workers' Party),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,answer
 2004,LV,,v211,10,Conservative Party,Konservatīvā partija,944,name,answer
 2004,LV,,v211,11,Future Party,Future Party [og],,hand,answer
 2004,LV,,v211,13,United Social Democratic Welfare Party,Sociāldemokrātiskā Labklājības partija,680,hand,answer
@@ -4265,7 +4265,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,LV,,q25,1428009,Libertas,Libertas.lv,367,hand,answer
 2009,LV,,q25,1428012,Latvijas Atdzimsanas partija (LA),Latvijas Atdzimsanas partija (LA) [og],,hand,answer
 2009,LV,,q25,1428110,Zaļo un Zemnieku savienība (Сою́з зелёных и крестья́н),Zaļo un Zemnieku savienība,701,link,answer
-2009,LV,,q25,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,answer
+2009,LV,,q25,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,answer
 2009,LV,,q25,1428317,“Saskaņas Centrs” (“Центр согласия”),Saskaņas Centrs,1056,name,answer
 2009,LV,,q25,1428422,Politisko organizāciju apvienība “Par cilvēka tiesībām vienotā Latvijā” (Руководство ЗаПЧЕЛ),Par cilvēka tiesībām vienotā Latvijā,176,link,answer
 2009,LV,,q25,1428423,Jaunais laiks (Но́вое вре́мя),Jaunais Laiks,1531,name,answer
@@ -4284,7 +4284,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,LV,,q26,99,[NAP],,,special,answer
 2009,LV,,q26,1428009,Libertas,Libertas.lv,367,hand,answer
 2009,LV,,q26,1428110,Zaļo un Zemnieku savienība (Сою́з зелёных и крестья́н),Zaļo un Zemnieku savienība,701,link,answer
-2009,LV,,q26,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,answer
+2009,LV,,q26,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,answer
 2009,LV,,q26,1428317,“Saskaņas Centrs” (“Центр согласия”),Saskaņas Centrs,1056,name,answer
 2009,LV,,q26,1428422,Politisko organizāciju apvienība “Par cilvēka tiesībām vienotā Latvijā” (Руководство ЗаПЧЕЛ),Par cilvēka tiesībām vienotā Latvijā,176,link,answer
 2009,LV,,q26,1428423,Jaunais laiks (Но́вое вре́мя),Jaunais Laiks,1531,name,answer
@@ -4302,7 +4302,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,LV,,q27,95,[spoiled vote],blank-invalid,,special,answer
 2009,LV,,q27,96,[did not vote],did-not-vote,,special,answer
 2009,LV,,q27,1428110,Zaļo un Zemnieku savienība (Сою́з зелёных и крестья́н),Zaļo un Zemnieku savienība,701,link,answer
-2009,LV,,q27,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,answer
+2009,LV,,q27,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,answer
 2009,LV,,q27,1428317,“Saskaņas Centrs” (“Центр согласия”),Saskaņas Centrs,1056,name,answer
 2009,LV,,q27,1428422,Politisko organizāciju apvienība “Par cilvēka tiesībām vienotā Latvijā” (Руководство ЗаПЧЕЛ),Par cilvēka tiesībām vienotā Latvijā,176,link,answer
 2009,LV,,q27,1428423,Jaunais laiks (Но́вое вре́мя),Jaunais Laiks,1531,name,answer
@@ -4318,7 +4318,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,LV,,q28,96,[would not vote],did-not-vote,,special,answer
 2009,LV,,q28,1428008,Ricibas partija (Rp),Ricibas partija (Rp) [og],,hand,answer
 2009,LV,,q28,1428110,Zaļo un Zemnieku savienība (Сою́з зелёных и крестья́н),Zaļo un Zemnieku savienība,701,link,answer
-2009,LV,,q28,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,answer
+2009,LV,,q28,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,answer
 2009,LV,,q28,1428317,“Saskaņas Centrs” (“Центр согласия”),Saskaņas Centrs,1056,name,answer
 2009,LV,,q28,1428422,Politisko organizāciju apvienība “Par cilvēka tiesībām vienotā Latvijā” (Руководство ЗаПЧЕЛ),Par cilvēka tiesībām vienotā Latvijā,176,link,answer
 2009,LV,,q28,1428423,Jaunais laiks (Но́вое вре́мя),Jaunais Laiks,1531,name,answer
@@ -4343,7 +4343,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,LV,,q4,99,[NAP],,,special,answer
 2009,LV,,q4,1428008,Ricibas partija (Rp),Ricibas partija (Rp) [og],,hand,answer
 2009,LV,,q4,1428110,Zaļo un Zemnieku savienība (Сою́з зелёных и крестья́н),Zaļo un Zemnieku savienība,701,link,answer
-2009,LV,,q4,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,answer
+2009,LV,,q4,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,answer
 2009,LV,,q4,1428317,“Saskaņas Centrs” (“Центр согласия”),Saskaņas Centrs,1056,name,answer
 2009,LV,,q4,1428422,Politisko organizāciju apvienība “Par cilvēka tiesībām vienotā Latvijā” (Руководство ЗаПЧЕЛ),Par cilvēka tiesībām vienotā Latvijā,176,link,answer
 2009,LV,,q4,1428423,Jaunais laiks (Но́вое вре́мя),Jaunais Laiks,1531,name,answer
@@ -4377,7 +4377,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,LV,,q87,88,[DK],dont-know,,special,answer
 2009,LV,,q87,1428008,Ricibas partija (Rp),Ricibas partija (Rp) [og],,hand,answer
 2009,LV,,q87,1428110,Zaļo un Zemnieku savienība (Сою́з зелёных и крестья́н),Zaļo un Zemnieku savienība,701,link,answer
-2009,LV,,q87,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,name,answer
+2009,LV,,q87,1428315,Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP),Latvijas Sociāldemokrātiskā Strādnieku Partija,741,hand,answer
 2009,LV,,q87,1428317,“Saskaņas Centrs” (“Центр согласия”),Saskaņas Centrs,1056,name,answer
 2009,LV,,q87,1428422,Politisko organizāciju apvienība “Par cilvēka tiesībām vienotā Latvijā” (Руководство ЗаПЧЕЛ),Par cilvēka tiesībām vienotā Latvijā,176,link,answer
 2009,LV,,q87,1428423,Jaunais laiks (Но́вое вре́мя),Jaunais Laiks,1531,name,answer
@@ -9674,7 +9674,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,DE,,q19_recoded,27618,MERA25,MERA25 [og],,hand,answer
 2024,DE,,q19_recoded,27620,Basisdemokratische Partei Deutschland,Basisdemokratische Partei Deutschland,8993,link,answer
 2024,DE,,q19_recoded,27622,Bündnis C - Christen für Deutschland,Bündnis C - Christen für Deutschland [og],,hand,answer
-2024,DE,,q19_recoded,27625,Deutsche Kommunistische Partei,Deutschkonservative Partei,2125,name,answer
+2024,DE,,q19_recoded,27625,Deutsche Kommunistische Partei,Deutsche Kommunistische Partei [og],,hand,answer
 2024,DE,,q19_recoded,27627,Südschleswigscher Wählerverband,Südschleswigscher Wählerverband,50,name,answer
 2024,DE,,q1a_recoded,88,,none,,special,answer
 2024,DE,,q1a_recoded,90,,other,,special,answer
@@ -10209,7 +10209,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,FR,,q6_recoded,25010,Parti Animaliste,Parti animaliste,7343,link,answer
 2024,FR,,q6_recoded,25011,Écologie au centre,Écologie au centre [og],,hand,answer
 2024,FR,,q6_recoded,25012,Union Populaire Républicaine,Union Populaire Républicaine,7344,link,answer
-2024,FR,,q6_recoded,25013,Les Patriotes,Ligue des Patriotes,6712,name,answer
+2024,FR,,q6_recoded,25013,Les Patriotes,Les Patriotes [og],,hand,answer
 2024,FR,,q6_recoded,25014,Lutte Ouvrière,Lutte ouvrière,617,link,answer
 2024,FR,,q8_recoded,90,,other,,special,answer
 2024,FR,,q8_recoded,91,,blank-invalid,,special,answer

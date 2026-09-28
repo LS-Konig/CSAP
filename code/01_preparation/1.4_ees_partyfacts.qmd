@@ -821,7 +821,9 @@ pf_names <- read_csv(
       select(pf_id, pf_name),
     by = "pf_id"
   ) |>
-  distinct(cntry, nk, pf_id, pf_name)
+  distinct(cntry, nk, pf_id, pf_name) |>
+  # no parties that ended before 1950 (see pf_historic())
+  filter(!pf_id %in% pf_historic(core))
 
 # EES seven-digit code to Party Facts
 ees_pf <- bind_rows(
@@ -877,7 +879,7 @@ hints <- bind_rows(
 ) |>
   distinct(wave, cntry, key, label, pf_id) |>
   left_join(select(core, pf_id, pf_name, technical), by = "pf_id") |>
-  filter(is.na(technical), !is.na(pf_name))
+  filter(is.na(technical), !is.na(pf_name), !pf_id %in% pf_historic(core))
 
 hint_check <- hints |>
   mutate(nl = normalise_party(label), nl2 = normalise_party(str_remove_all(label, "\\([^)]*\\)"))) |>
@@ -1643,7 +1645,13 @@ map_hand <- tribble(
   2019L, "HU", "Fidesz -Magyar Polgári Szövetség (FIDESZ)", "Fidesz — Magyar Polgári Szövetség", 1691L,
   2019L, "IE", "Sinn Féin (SF)", "Sinn Féin (Provisional)", 4L,
   2019L, "SI", "Slovenska demokratska stranka in Slovenska ljudska stranka (SDS in SLS)", "Slovenska demokratska stranka in Slovenska ljudska stranka (SDS in SLS) [og]", NA, # joint list
-  2019L, "SK", "Progressive Slovakia – Together (Progresivne Slovensko-SPOLU)", "Progressive Slovakia – Together (Progresivne Slovensko-SPOLU) [og]", NA # joint list
+  2019L, "SK", "Progressive Slovakia – Together (Progresivne Slovensko-SPOLU)", "Progressive Slovakia – Together (Progresivne Slovensko-SPOLU) [og]", NA, # joint list
+  # names that matched a party of before 1950 (see pf_historic())
+  2004L, "DE", "DKP", "DKP [og]", NA, # the communist DKP; 2125 is the Deutschkonservative Partei of 1876-1918
+  2024L, "DE", "Deutsche Kommunistische Partei", "Deutsche Kommunistische Partei [og]", NA,
+  2004L, "LV", "LSDSP (Latvian Social Democratic Workers' Party)", "Latvijas Sociāldemokrātiskā Strādnieku Partija", 741L, # Party Facts' only LSDSP entry (1918-34), refounded 1989
+  2009L, "LV", "Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP)", "Latvijas Sociāldemokrātiskā Strādnieku Partija", 741L,
+  2024L, "FR", "Les Patriotes", "Les Patriotes [og]", NA
 ) |>
   mutate(key = norm_key(label), source = "hand")
 
@@ -1874,6 +1882,19 @@ respondents |>
   arrange(same) |>
   print(n = Inf)
 ```
+
+# Known Quirks
+
+- **2004 party names exist only in the codebook PDF.** The data label every list code "party 1", "party 2", ...; the names were parsed from `ZA4566_cod.pdf` into `data/02_processed/ees2004_party_lists.csv` (parser kept above, not run). Three layout problems were fixed in the parse: Italy's code 18 (Rifondazione) and Latvia's code 21 (Jaunais Laiks) print their name on the country header line, and Denmark lists code 7 twice (the second, "Christian Peoples Party", duplicates code 9 and is dropped). France, Germany and Spain have a second list for some batteries.
+- **2004 respondent ids repeat**, so the respondent file is keyed by `wave` and `row` (the position in the wave's file); `respondent` carries the original id.
+- **Northern Ireland** was fielded separately in 2004 with its own list; it is coded `cntry = "GB"` with `region = "Northern Ireland"`.
+- **Which variable per wave.** 2019 uses the raw items and 2024 the `*_recoded` items, because the `_EES` / `_ees` versions fold small parties into "other (recoded by EES team)". 2014 has no such alternative (its raw codes are "Party 1", "Party 2" and shifted between items), so its `_ees` code 20 is coded `other`: about 850 attachment and 440 EP-vote answers that name a small party in the raw data.
+- **2024 has no value labels.** Its non-party codes come from the questionnaire and from the open "other" answers behind two codes the questionnaire does not list: 89 are independent candidates, 97 refusals. On the competence item `q1a`, code 96 (3,307 answers) has no questionnaire meaning and stays `NA`.
+- **2024 `q1a` is the competence item** ("which party would be best at dealing with this problem?"), not a vote intention, although the party-code file lists it next to the vote items; 2024 has no vote intention.
+- **Battery lists.** Position *k* names the same party in every battery of a wave. Belgium has a Flemish and a Walloon list, assigned by interview language (2009 `t103`, 2014 `p13_intlang`, 2019 `meta_lang_be`, 2024 `meta_lang`). In the 2009 code file Denmark's party 1 sits on the row carrying the country name, and Poland skips positions 1, 3, 4 and 8, which stay `NA`. The 2014 file fills the EU-placement column for Belgium only; the other countries take it from the PTV row, where its header puts it.
+- **Undocumented codes.** A few party codes (2004 Belgium 7 and 17, one 2014 Croatian code, a dozen 2024 codes) appear in the data but in no label or code file; they stay `NA` with `source = "undocumented"` (listed in the crosswalk chunk).
+- **Wrong hints overridden by hand**, e.g. Portugal's CDS-PP (hint 1359 is the PSD), Greece's 2014 Olive Tree (hint 7909 starts in 2017), Hungary's 2019 Fidesz–KDNP (hint pointed to Jobbik).
+- **Electoral alliances** keep their own Party Facts id (Fidesz–KDNP, KO, NUPES, the 2004 Ulivo list, ...); notebook 1.9 adds the membership under which a party and its alliance count as the same party.
 
 # Session Info
 
