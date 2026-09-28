@@ -867,6 +867,7 @@ respondents |>
 
 # Known Quirks
 
+- **Automatic links and name matches skip parties that ended before 1950** (`pf_historic()` in `pf_code.R`). Party Facts links Spain's Partido Popular in the CSES and several other datasets to the Partido Progresista of 1834–74 (5750, short name "PP"), and short names had matched labels to Sweden's "Centern" of 1873–82 and Germany's Deutschkonservative Partei (1876–1918); the affected labels are hand-coded. The cutoff is 1950 rather than 1990 because Party Facts' `year_last` for small parties is often their last year in parliament (PPM, UDP and PSP show 1989 but existed later).
 - **Party Facts links the IMD codes only.** Its `cses` dataset covers about 290 of the 760 IMD party codes of the 25 countries and none of Module 6; the rest are matched by name or by hand.
 - **Module 6 codes are a different scheme** (country + three digits, e.g. `040001`, against IMD's country + four digits, `0400001`), so the same number does not mean the same party across releases. Module 6 codes are bridged to an IMD code only through an identical name in the same country, and the crosswalk is keyed by release and code.
 - **Some Module 6 codes carry a different label on different items** (Poland's 616002 is "civic coalition", "senate pact KO candidate" and "civic platform"); all labels of a code take part in the matching, and the code gets one party.

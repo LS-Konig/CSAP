@@ -915,6 +915,7 @@ respondents |>
 
 What a user of the two output files should know, collected in one place:
 
+- **Automatic links and name matches skip parties that ended before 1950** (`pf_historic()` in `pf_code.R`). Party Facts links Spain's Partido Popular in the CSES and several other datasets to the Partido Progresista of 1834–74 (5750, short name "PP"), and short names had matched labels to Sweden's "Centern" of 1873–82 and Germany's Deutschkonservative Partei (1876–1918); the affected labels are hand-coded. The cutoff is 1950 rather than 1990 because Party Facts' `year_last` for small parties is often their last year in parliament (PPM, UDP and PSP show 1989 but existed later).
 - **Party Facts' ESS link ids are not a code map.**
   An id `DE-7-6-c` says that party 6 of Germany's attachment list first appears in round 7.
   When ESS renumbers a list later, Party Facts writes no new link, so taking "the link with the largest start round up to this round" would put the wrong party on about 800 labels (Austria's code 5 is LIF in rounds 1–2 and the Greens in round 3).

@@ -1885,6 +1885,7 @@ respondents |>
 
 # Known Quirks
 
+- **Automatic links and name matches skip parties that ended before 1950** (`pf_historic()` in `pf_code.R`). Party Facts links Spain's Partido Popular in the CSES and several other datasets to the Partido Progresista of 1834–74 (5750, short name "PP"), and short names had matched labels to Sweden's "Centern" of 1873–82 and Germany's Deutschkonservative Partei (1876–1918); the affected labels are hand-coded. The cutoff is 1950 rather than 1990 because Party Facts' `year_last` for small parties is often their last year in parliament (PPM, UDP and PSP show 1989 but existed later).
 - **2004 party names exist only in the codebook PDF.** The data label every list code "party 1", "party 2", ...; the names were parsed from `ZA4566_cod.pdf` into `data/02_processed/ees2004_party_lists.csv` (parser kept above, not run). Three layout problems were fixed in the parse: Italy's code 18 (Rifondazione) and Latvia's code 21 (Jaunais Laiks) print their name on the country header line, and Denmark lists code 7 twice (the second, "Christian Peoples Party", duplicates code 9 and is dropped). France, Germany and Spain have a second list for some batteries.
 - **2004 respondent ids repeat**, so the respondent file is keyed by `wave` and `row` (the position in the wave's file); `respondent` carries the original id.
 - **Northern Ireland** was fielded separately in 2004 with its own list; it is coded `cntry = "GB"` with `region = "Northern Ireland"`.
