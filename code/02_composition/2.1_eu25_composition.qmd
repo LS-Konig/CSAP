@@ -55,12 +55,14 @@ source(here("code", "00_helper", "pid_tree.R"))
 Every composition notebook (2.1 to 2.4) sorts respondents into the same sequential tree, following the typology in the notes of `index.qmd`.
 
 1. **Attachment.** Does the respondent report feeling close to a party?
-   The answer is *yes* (a party is named, including "other"), *no*, or *don't know / refused / missing*.
+   The answer is *yes* (a party is named), *no*, or *don't know / refused / missing*.
    The last group gets its own grey box so that the shares at every level add up to 100%.
+   An "other" answer counts as *yes* only if its open text names a real party (see [Other Answers](#other-answers)).
 2. **Vote.** Does the respondent report a party vote?
-   *No vote reported* collects non-voters, blank or invalid ballots, don't know, refusals and missing answers.
+   *No vote reported* collects non-voters, blank or invalid ballots, don't know, refusals and missing answers, and "other" votes whose open text names no party.
    Where a survey wave never asked the vote item, the branch reads *vote item not fielded* instead, so that "not asked" is not confused with "did not answer".
-3. **Match.** Only for respondents who report both, the two parties are compared: *same party*, *different party*, or *not matchable*, when either side is "other" or an unlisted party.
+3. **Match.** Only for respondents who report both, the two parties are compared: *same party* or *different party*.
+   Because both sides are always a named party, no respondent in this notebook is *not matchable*.
 
 Two leaves are named after the typology: *no attachment, vote reported* is the **vote-anchored** group (the data files call it *implicit*), and *no attachment, no vote* is the non-partisan group.
 Leaner probes are deliberately **not** part of the tree.
@@ -129,6 +131,493 @@ eu25games |>
 The attachment item has no don't-know code.
 A respondent either names a party, says "none", or leaves it empty; the empty answers are what the grey *DK / missing* box counts.
 
+## Other Answers {#other-answers}
+
+Every party item offers an "other" option with an open text field (`q_*_other_raw`), and the release codes that text to Party Facts as well (`ext_q_*_other_pf_name`).
+An "other" answer is replaced by what its open text says, so that it counts as attachment or vote only if the text names a real party:
+
+- **A real party:** the party is used, for the tree level and for the match.
+  This includes parties Party Facts does not list, which the release marks `[og]`.
+- **A clear denial:** *no attachment*, and *no vote reported* on the vote item.
+- **Anything else** (don't know, refusal, several parties, a political camp, an independent candidate, junk): *DK / missing* on the attachment item, *no vote reported* on the vote item.
+
+The release codes most open texts, but not all: about half of the open attachment answers and most open vote answers carry no code at all, among them plain party names ("Aontu", "Mislav Kolakušić", "Δημιουργία Ξανά").
+These are coded by hand below, from a reading of every uncoded text.
+
+- `other_text_parties` maps a text to a party.
+  Where the release already uses a name for that party in that country, the same name is used, so that an attachment and a vote for the same party match.
+  A party that appears nowhere else gets a new name ending in `[hand]`.
+  A text counts only if it names one party: a party's name or abbreviation (also misspelt or transliterated), its leader, or a candidate on its list.
+  Ambiguous abbreviations are left out.
+- `other_denials` lists the attachment texts that say the respondent is close to no party.
+  Complaints about parties, "a bit of several" and undecided answers do not count.
+  The vote item needs no such list, because a denial and anything else both end in *no vote reported*.
+
+```{r}
+#| label: other-denials
+
+# Uncoded open attachment texts that deny any attachment
+other_denials <- c(
+  # AT
+  "Jetzt stehe ich keiner politischen Partei mehr nahe",
+  # BG
+  "ne",
+  "не",
+  "Никоя партия. Трябва да се премахнат",
+  "безпартиен",
+  "не съм близък с никоя партия",
+  "не чувствам никоя партия близка",
+  "нямам симпатии",
+  # CZ
+  "nyní mne žádná strana svými programy neoslovuje",
+  # DK
+  "nej",
+  "Ikke et bestemt parti. Flere partier kan komme på tale. Min stemmeafgivelse var på en bestemt kandidat fra Venstre.",
+  # EE
+  "mitte ükski",
+  "mitte päris",
+  "Olen apoliitilne",
+  # FI
+  "en mitaan suomalaista",
+  # FR
+  "plus en ce moment",
+  # GR
+  "κανενα δεν μου ταιριαζει",
+  # HR
+  "Nijednoj",
+  # HU
+  "Egyik politikai párthoz sem érzem magam közel",
+  "Egyikhez sem, de a Fidesz politikájával értek egyet",
+  "Egyikhez sem.",
+  "Nem érzem közel",
+  # IE
+  "no, i do not feel close to any party",
+  "none",
+  "I did feal close to fine Geal but now i am not happy with any party",
+  # LT
+  "Neesu artimas jokiai partijai",
+  # LV
+  "Neesmu tva nevienai partijai",
+  "Nejūtos tuva nevienai partijai",
+  "nejūtos tuva nevienai partijai",
+  "Partijai nē, bet tuvas sociāldemokrātiskās vērtības",
+  # NL
+  "geen verbondenheid",
+  "niet echt maar ik stem eigenlijk altijd op het CDA al zo lang ik stem stemrecht heb.",
+  # PT
+  "nenhum tudo a mesma merda",
+  "Sou de esquerda mas não me identifico",
+  # RO
+  "apolitic",
+  # SE
+  "Inget speciellt parti, men är överlag mer vänster än höger.",
+  "Känner inte direkt tillhörighet till något valet är en kompromiss",
+  # SI
+  "Ne maram nobenega",
+  "Ne verjamem več nobeni stranki, ker lažejo kot cigani.",
+  "nisem blizu",
+  "nobeni",
+  "nobeni od teh",
+  "za nobeno ker nisem volila",
+  # SK
+  "vôbec k žiadnej politiku moc nesledujem lebo mám z toho len nervy",
+  # ES
+  "No me considero proxima a ninguno pero si tubiera que decir uno diria ERC",
+  "No me identifico con ninguno, pero prefiero y voto a PSOE"
+)
+
+```
+
+```{r}
+#| label: other-parties
+
+# Uncoded open texts that name one party
+other_text_parties <- tribble(
+  ~country, ~party, ~text,
+  # AT
+  "Austria", "Österreichische Volkspartei",
+  c("Türkis", "heißt das, ob ich ein Parteibuch habe? Dann nein. Ansonsten ÖVP"),
+  "Austria", "Sozialdemokratische Partei Österreichs",
+  "Für keine Partei, aber für einen Kandidaten (SPÖ), obwohl ich diese Partei noch nie gewählt habe",
+  "Austria", "KPÖ Plus – European Left, offene Liste[og]", "KPÖ Plus ausProtest",
+  "Austria", "Die Weißen [hand]", "Die Weißen",
+  "Austria", "GILT [hand]", "GILT",
+  "Austria", "Männerpartei [hand]", "Männerpartei",
+  # BE
+  "Belgium", "Partij van de Arbeid van België — Parti du Travail de Belgique", "PvDa",
+  "Belgium", "Liste Destexhe [og]", "destexhe",
+  "Belgium", "DierAnimal [og]", "partij van de dieren",
+  "Belgium", "Christen-Democratisch en Vlaams",
+  "verschillend: CD&V voor Europa, NVA voor Vlaanderen",
+  "Belgium", "Lijst Dedecker [hand]", "LIjst Dedecker",
+  "Belgium", "Parti des pensionnés [hand]", "Parti des pensionnés",
+  "Belgium", "Pirate Party Belgium [hand]", "Pirate Party Belgium",
+  "Belgium", "Beveren2020 [hand]", "Beveren2020",
+  # BG
+  "Bulgaria", "Vazrazhdane", c("\"Възраждане\"", "vazrajdane"),
+  "Bulgaria", "Glas Naroden [og]", "glas naroden",
+  "Bulgaria", "Pat na mladite [og]",
+  c(
+    "Движение на младите",
+    "Партия на младите",
+    "Път за младите",
+    "за младите",
+    "младите"
+  ),
+  "Bulgaria", "Koalicija za Balgarija — BSP za Bŭlgariya",
+  c(
+    "Коалиция за България",
+    "гласувах не за партия а за личност - Елена Йончева"
+  ),
+  "Bulgaria", "Grazhdani za evropeysko razvitie na Balgariya",
+  "десислава атанасова",
+  "Bulgaria", "Sayuz na Demokratichnite Sili [og]", "преференция сдс",
+  "Bulgaria", "Zelena Partija", "партията на зелените",
+  "Bulgaria", "Българска пролет [hand]",
+  c("Българската пролет", "българската пролет"),
+  "Bulgaria", "БНРП [hand]", "БНРП",
+  "Bulgaria", "България на труда и разума [hand]", "България на труда и разума",
+  "Bulgaria", "Български демократичен форум [hand]", "Български демократичен форум",
+  "Bulgaria", "Екогласност [hand]", "Екогласност",
+  "Bulgaria", "НДСВ [hand]", "НДСВ",
+  "Bulgaria", "Съюз за Пловдив [hand]", "ПП Съюз за Пловдив",
+  # HR
+  "Croatia", "Lista Mislava Kolakušića [hand]",
+  c(
+    "Lista Kolakušić",
+    "Mislav Kolakušić",
+    "Mislav kolakušić",
+    "Nezavisna lista Kolakušić",
+    "15 Mislav Kolakušić",
+    "KANDIDACIJSKA LISTA GRUPE BIRAČA Nositelj kandidacijske liste: MISLAV KOLAKUŠIĆ",
+    "KOLAKUŠIĆ",
+    "Kalakušić",
+    "Kolakušić",
+    "Kolakušič",
+    "Mislav Kolakušić čak i anketa ide u korist partije",
+    "Mislav Kolakušič",
+    "Mislav Tiolušić",
+    "Mislava Kolakušića",
+    "kolakušić",
+    "korlakušić",
+    "mislav kolakušić",
+    "nezavisna stranka Mislava Kolakušića"
+  ),
+  "Croatia", "Možemo! [og]",
+  c(
+    "Možemo",
+    "MOŽEMO",
+    "Možemo! politička platforma",
+    "možemo",
+    "MOŽEMO! - POLITIČKA PLATFORMA NOVA LJEVICA ODRŽIVI RAZVOJ HRVATSKE - ORaH",
+    "Nova ljevica (lista Možemo!, Nova ljevica, ORAH)",
+    "Rada Borić"
+  ),
+  "Croatia", "Nezavisna lista Marijane Petir [og]",
+  c(
+    "Marijana Petir",
+    "Neovisna lista Marijana Petir",
+    "Nezavisna lista-Marijana Petir",
+    "marijana petir"
+  ),
+  "Croatia", "Hrvatska konzervativna stranka", c("Ruža Tomašić", "RUŽA TOMAŠIĆ"),
+  "Croatia", "Hrvatski suverenisti [og]", c("suverenisti", "Suverenisti"),
+  "Croatia", "Radnička fronta [og]", "Radnička dronta",
+  "Croatia", "Hrvatska demokršćanska stranka [og]", c("HDS", "hds"),
+  "Croatia", "Hrvatska stranka umirovljenika [og]", "HSU",
+  "Croatia", "Održivi razvoj Hrvatske", "orah",
+  "Croatia", "Reformisti [og]", "Radimir Čačić",
+  "Croatia", "Samostalna demokratska srpska stranka",
+  "SDSS- Samostalna demokratska srpska stranka",
+  "Croatia", "Hrvatski laburisti — Stranka rada", "Stranka Hrvatskih Laburista",
+  "Croatia", "Pametno", c("Stranka Pametno", "pametno - dalia orešković"),
+  "Croatia", "Snaga [og]", "Stranka snaga",
+  "Croatia", "HSP AS [hand]", "HSP AS",
+  "Croatia", "Generacija obnove [hand]", "Generacija obnove",
+  "Croatia", "Mreža nezavisnih lista [hand]", "MREŽA NEZAVISNIH LISTA",
+  "Croatia", "Primorsko-goranski savez [hand]", "PGS",
+  "Croatia", "Slavonsko-baranjska hrvatska stranka [hand]",
+  c("SBHS - prestala sa djelovanjem", "Slavonsko baranjska hrvatska stranka"),
+  "Croatia", "Snaga Slavonije i Baranje [hand]",
+  "Snaga Slavonije i Baranje - u osnivanju",
+  "Croatia", "Zagreb je naš [hand]", c("Zageb je naš", "Zagreb je naš"),
+  "Croatia", "Stranka Ivana Pernara [hand]", "stranka Ivana Pernara",
+  # CZ
+  "Czechia", "Dělnická strana [og]", "DSSS",
+  "Czechia", "Strana zelených", "zeleni",
+  "Czechia", "Alternativa pro Českou republiku [hand]",
+  c("Alternativa pro Českou republiku", "APČR", "Alternativa pro ČR"),
+  "Czechia", "Cesta odpovědné společnosti [hand]",
+  c("Cesta odpovědné společnosti", "CESTA"),
+  "Czechia", "Patrioti ČR [hand]", "Patrioti ČR",
+  "Czechia", "Trikolóra [hand]", c("TRIKOLORA", "Trikolora", "Trikolóra"),
+  "Czechia", "Agrární demokratická strana [hand]",
+  "agrární demokratická společnost",
+  "Czechia", "ANO, vytrollíme europarlament [hand]",
+  c(
+    "ano vytrollíme europarlament",
+    "ANO, vytrollíme europarlament",
+    "Ano, vytrolíme Evropský parlament",
+    "trolly"
+  ),
+  "Czechia", "Strana nezávislosti České republiky [hand]",
+  "Strana nezávislosti České republiky",
+  "Czechia", "Vědci pro Českou republiku [hand]", c("Vědci", "Vědci..."),
+  "Czechia", "Strana za práva zvířat [hand]", "Za práva zvířat",
+  # DK
+  "Denmark", "Folkebevægelsen mod EU",
+  c("Folkebhevægelsen mod EU", "mod EU", "mod eu"),
+  "Denmark", "Venstre",
+  c(
+    "Jeg er langt fra enig i alt med mit parti som erVenstre",
+    "stemmer kun personligt her en fra partiet venster"
+  ),
+  "Denmark", "Socialistisk Folkeparti", c("SF", "Personligt på Margrethe Auken"),
+  "Denmark", "Stram Kurs", "stram Kurs1",
+  "Denmark", "Klaus Riskær Pedersen [hand]", "Claus riskjær",
+  "Denmark", "Retsforbundet [hand]", "retsforbundet",
+  # EE
+  "Estonia", "Eesti Konservatiivne Rahvaerakond",
+  c("EKRE", "Toetan EKRE põhimõtteid", "OLeksin hääletanud EKRE poolt", "ekre"),
+  "Estonia", "Elurikkuse Erakond", "ERE",
+  "Estonia", "Savisaare valimisliit [hand]", "Savisaare valimsliit",
+  # FI
+  "Finland", "Liberaalipuolue - Vapaus valita [og]",
+  c("Liberaali", "Liberaalipuolue", "Liberaalit"),
+  "Finland", "Piraattipuolue / Piratpartiet",
+  c("Piraatti", "Piraatti Puolue", "Piraatti puolue", "Pirattipuolue"),
+  "Finland", "Seitsemän tähden liike [og]",
+  c("7 tähden puolue", "Seitsemän tähden liike", "Seitsämän tähden liike"),
+  "Finland", "Eläinoikeuspuolue [og]", "Eläioikeuspuolue",
+  "Finland", "Suomen Kommunistinen Puolue", "Suomen kommunistinen puolue",
+  "Finland", "Feministinen puolue [og]", "feministi puolue",
+  # FR
+  "France", "Parti animaliste [og]",
+  c(
+    "Animalis",
+    "Liste animaliste",
+    "PARTI POUR LES ANIMAUX",
+    "parti animlaliste",
+    "pour les animaux"
+  ),
+  "France", "Gilets jaunes [og]", c("liste gilets jaunes", "gillet jaune", "les jaunes"),
+  "France", "Alliance jaune [og]", "Allaince jaune",
+  "France", "À voix égales [hand]", "A voix égales",
+  # DE
+  "Germany", "Bündnis Grundeinkommen [og]",
+  c(
+    "Bündnnis für ein bedingungsloses Grundeinkommen",
+    "Bündnis für bedingungslose Grundeinkommen"
+  ),
+  "Germany", "Partei der Humanisten [og]", c("Die Humanisten", "die Humanisten"),
+  "Germany", "Bündnis C – Christen für Deutschland [og]",
+  "Bündnis C - Christen für Deutschland",
+  "Germany", "DiEM25 [og]", c("DIEM", "DIEM25", "diem"),
+  "Germany", "Familien-Partei Deutschlands [og]",
+  "Familien-Partei Deutschlands (FAMILIE)",
+  "Germany", "Tierschutzpartei",
+  c(
+    "Partei Mensch Umwelt Tierschutz",
+    "Tierschutz, Mensch,Umwelt",
+    "partei mensch umwelt tierschutz tierschutzpartei",
+    "deutsche tierschützer"
+  ),
+  "Germany", "Die Grauen [og]", "graue panter",
+  "Germany", "Liberal-Konservative Reformer [hand]", c("LKR", "Lucke Partei"),
+  "Germany", "Bayernpartei [hand]", "Bayern Partei",
+  "Germany", "Demokratie Direkt [hand]", "Demokratie Direkt",
+  # GR
+  "Greece", "Métopo Evropaikís Realistikís Anypakoís",
+  c(
+    "DIEM 25",
+    "Diem",
+    "Diem25",
+    "¨ΜΕΡΑ 25",
+    "ΜΕΡΑ",
+    "ΜέΡΑ25",
+    "Μέρα25",
+    "Μέρα 25",
+    "ΜΕΡΑ24"
+  ),
+  "Greece", "Dimiourgia Xana [og]",
+  c(
+    "ΔΗ ΞΑ",
+    "ΔΗ.Ξα",
+    "ΔΗΜΙΟΥΡΓΙΑ, ΞΑΝΑ",
+    "ΔΗΞΑ",
+    "Δημιουργία Ξανά",
+    "Δημιουργία ξανά",
+    "Δημιουργία, ξανά",
+    "δηξα",
+    "δημιουργία ξανά",
+    "δημιουργία ξανά11"
+  ),
+  "Greece", "Ellada o Allos Dromos [og]",
+  c(
+    "ΕΛΛΑΔΑ- Ο ΑΛΛΟΣ ΔΡΟΜΟΣ",
+    "Ελλάδα, ο Άλλος Δρόμος",
+    "ΕΛΛΑΔΑ Ο ΑΛΛΟΣ ΔΡΟΜΟΣ - ΝΟΤΗΣ ΜΑΡΙΑΣ",
+    "Ο Άλλος Δρόμος",
+    "άλλο δρόμο",
+    "μΑΡΙΩς"
+  ),
+  "Greece", "Antarsya [og]", c("ανταρσία", "Ανταρσια"),
+  "Greece", "Agrotiko Ktinotrofiko Komma Ellados [og]", "ΚΑΕΠ",
+  "Greece", "Oikologoi Prasinoi", c("Οικολόγοι Πράσινοι", "οικολόγοι πράσινοι"),
+  "Greece", "Laïkós Sýndesmos / Chrysí Avgí", "Χρυσή Αυγή",
+  "Greece", "Δράση [hand]", "ΔΡΑΣΗ",
+  "Greece", "Δραχμή [hand]", "ΔΡΑΧΜΗ",
+  "Greece", "ΕΠΑΜ [hand]", "Ε.ΠΑ.Μ.",
+  "Greece", "Ελεύθερη Πατρίδα [hand]", c("ΕΛΕΥΘΕΡΗ ΠΑΤΡΙΔΑ", "Ελεύθερη Πατρίδα"),
+  "Greece", "Κοινωνία [hand]", "Κοινωνία Συνεχιστές Ιωάννη Καποδίστρια",
+  "Greece", "Φιλελεύθερη Συμμαχία [hand]", "Φιλελεύθερη Συμμαχία",
+  "Greece", "Ελλήνων Συνέλευσις [hand]", c("Ελλήνων Συνέλευσις", "ελληνων συνελευσι"),
+  "Greece", "Όρθια Ελλάδα [hand]", c("ΟΡΘΙΑ ΕΛΛΑΔΑ", "ορθια ελλαδα"),
+  "Greece", "Πολίτες [hand]", c("ΠΟΛΙΤΕΣ", "Πολίτες", "Πολίτες (Ψινάκης)"),
+  "Greece", "Κόμμα Πειρατών [hand]", "πειρατες",
+  # HU
+  "Hungary", "A Haza Pártja (A Haza Nem Eladó Mozgalom Párt, HNEM)[og]", "A Haza Pártja",
+  "Hungary", "Fidesz — Magyar Polgári Szövetség",
+  "Ezek közül, az összes közül kizárólag a Fidesz-...-nak van normális hozzáállása!!! A többi egy sunyi kalap szar!!!",
+  "Hungary", "Jobbik Magyarországért Mozgalom",
+  "JOBBIK-ra szavaztam, de NAGYON megbántam. Legszívesebben egyikre se szavaznék.",
+  "Hungary", "Balpárt [hand]", "Balpárt",
+  "Hungary", "MIÉP [hand]", "Miép",
+  # IE
+  "Ireland", "Aontú [og]", "Aontu",
+  "Ireland", "Fianna Fáil", "Fianna Fail",
+  # IT
+  "Italy", "CasaPound [og]", c("CASAPOUND", "casapound"),
+  "Italy", "Partito della Rifondazione Comunista", "Rifondazione Comunista",
+  "Italy", "Fratelli d'Italia", "meloni",
+  "Italy", "Forza Nuova [hand]", "forza nuova",
+  "Italy", "Partito Animalista [hand]", "Partito animalista",
+  # LV
+  "Latvia", "Attīstībai/Par!", c("Attistibai Par!", "Attīstībai Par", "Atīstībai PAR"),
+  "Latvia", "Kam pieder valsts? — Par cilvēcīgu Latviju",
+  c("Gobzemam", "kplv", "KPLV", "KPV.LV", "lkpv.lv"),
+  "Latvia", "Kristīgi demokrātiskā savienība", c("KDS", "Kristīgo demokrātu savienība"),
+  "Latvia", "Progresīvie",
+  c(
+    "Partija Progresīvie",
+    "Progresivie",
+    "Progresīvie1",
+    "par progresīvajiem",
+    "progresivie"
+  ),
+  "Latvia", "Vienotība", "Visdrīzāk par \"Vienotība\"",
+  "Latvia", "Latvijas Krievu savienība / Русский союз Латвии", "par Ždanoku",
+  "Latvia", "Reformu partija [hand]", "Reformu partija",
+  # LT
+  "Lithuania", "Lietuvos Laisvės Sąjunga (Liberalai)", "LLS",
+  "Lithuania", "Lietuvos Respublikos Liberalų sąjūdis", "LRLS",
+  "Lithuania", "Visuomeninis rinkimų komitetas „Lemiamas šuolis“ [og]", "Lemiamas šuolis",
+  "Lithuania", "Visuomeninis rinkimų komitetas „Prezidento Rolando Pakso judėjimas“ [og]",
+  "Prezidento Rolando Pakso judėjimas",
+  "Lithuania", "Lietuvos sąrašas [hand]", "Lietuvos sąrašas",
+  "Lithuania", "Lietuvos liaudies partija [hand]", "lietuvos liaudies partija",
+  # NL
+  "Netherlands", "Piratenpartij [og]", "Piratenpartij/regio",
+  "Netherlands", "Volt [og]", "Volt Nederland",
+  "Netherlands", "De Groenen [hand]", "de groenen",
+  # PL
+  "Poland", "Konfederacja Wolność i Niepodległość", "Konfederacja Korwin",
+  "Poland", "Polska Fair Play [og]", "Gwiazdowski Fair Play",
+  "Poland", "Federacja dla Rzeczypospolitej [hand]",
+  "Federacja na rzecz Rzeczpospolitej Marka Jakubiaka",
+  # PT
+  "Portugal", "Basta! [og]", "CHEGA",
+  "Portugal", "Nós Cidadãos [og]",
+  c("Nós, Cidadãos", "Nos Cidadãos", "Nós, Cidadãos!", "nós, cidadãos", "Nós", "nos"),
+  "Portugal", "Partido Ecologista — Os Verdes", "Partido ecologista \"os verdes\"",
+  "Portugal", "Livre — Liberdade, Esquerda, Europa e Ecologia", "Partido Livre",
+  "Portugal", "Partido pelos Animais e pela Natureza", "pan",
+  "Portugal", "Juntos pelo Povo [hand]", "JPP",
+  # RO
+  "Romania", "Uniunea Salvați România",
+  c("Alianta 2020", "USR PLUS", "USR plus", "alianta usr plus"),
+  "Romania", "Partidul Social Democrat", "pesede",
+  "Romania", "Partidul Naţional Ţărănesc Creştin Democrat", "PNTCD",
+  "Romania", "Partidul România Unită [og]", "PRU Partidul Romania Unita",
+  "Romania", "Prodemo [og]", "Pro Demo",
+  "Romania", "UNPR [hand]", "UNPR",
+  "Romania", "Partida Romilor [hand]", "PARTIDA ROMILOR",
+  # SK
+  "Slovakia", "Komunistická strana Slovenska", "Komunistická strana Slovenska",
+  "Slovakia", "Strana zelených", "Strana zelenych",
+  "Slovakia", "Slovenská Ľudová Strana Andreja Hlinku [og]",
+  "slovenska ludova strana ANDREA HLINKU",
+  "Slovakia", "Spolu — občianska demokracia", c("SPOLU", "Spolu"),
+  "Slovakia", "Ľudová strana Naše Slovensko", "Volil som človeka na kandidátke ĽSNS",
+  "Slovakia", "Sloboda a Solidarita", "sas",
+  "Slovakia", "Za ľudí [og]", "za ľudi",
+  "Slovakia", "Korektúra [hand]", c("Korektura", "Korektúra"),
+  "Slovakia", "Starostovia a nezávislí [hand]", "Strana starostov a nezávislých",
+  # SI
+  "Slovenia", "Solidarnost", "Solidarnosti",
+  "Slovenia", "Za zdravo družbo [og]", "Za zdravo družbo.",
+  "Slovenia", "Dobra Drzava", "za dobro državo- Bojan Dobovšek",
+  "Slovenia", "Zavezništvo Alenke Bratušek / Stranka Alenke Bratušek",
+  "ne za stranko, ampak za dr. Angeliko Milinar, pa čeprav je bila za stranko SAB",
+  "Slovenia", "Lista novinarja Bojana Požarja [hand]",
+  c("Lista novinarja Bojana Požarja", "lista bojana požarja"),
+  "Slovenia", "Stranka mladih Slovenije [hand]", "sms stranka mladih slovenije",
+  # ES
+  "Spain", "Compromís [og]", c("COMPROMIS", "compromis"),
+  "Spain", "Izquierda Unida", "IU, pero lo fuí más en el pasado",
+  "Spain", "Unidas Podemos", "Unidos Podemos",
+  "Spain", "Volt [og]", "VOLT europa",
+  "Spain", "Esquerra Republicana de Catalunya", "esquerra repubicana",
+  "Spain", "Actúa [hand]",
+  c("ACTUA", "Actúa (para Varufakis)", "Actúa (por Iannis Varufakis)"),
+  "Spain", "Falange Española de las JONS [hand]", c("FE de las JONS", "Falange"),
+  "Spain", "Unión del Pueblo Navarro [hand]", "UPN",
+  "Spain", "En Marea [hand]", "en marea",
+  "Spain", "Iniciativa Feminista [hand]", "Iniciativa feminista",
+  "Spain", "Recortes Cero [hand]", "recortes cero",
+  # SE
+  "Sweden", "Socialdemokraterna / Sveriges socialdemokratiska arbetareparti",
+  c("socialdemokraterna", "SAP men sviktande efter Januariöverenskommelsen", "s"),
+  "Sweden", "Miljöpartiet de gröna",
+  "MP-Står nära dess grundsten men inte dess politiker och byreokrati.",
+  "Sweden", "Medborgerlig samling [og]", "Medborglig samling",
+  "Sweden", "Alternativ för Sverige [og]", "altenativ för sverige",
+  "Sweden", "Partiet de Fria [hand]",
+  c("Partiet de Fria", "Partiet de fria", "partiet de fria"),
+  "Sweden", "Klassiskt liberala partiet [hand]", "Klassiskt liberala partiet",
+  # GB
+  "United Kingdom", "Ulster Unionist Party", "Ulster Unionist Party",
+  "United Kingdom", "Libertarian Party [hand]", "Libertarian Party UK",
+  "United Kingdom", "Veterans and People's Party [hand]", "VPPP",
+  "United Kingdom", "Animal Welfare Party [hand]", "Animal Welfare Party",
+  "United Kingdom", "Scottish Green Party [hand]",
+  c("Scottish Green Party", "Scottish Greens"),
+  "United Kingdom", "Yorkshire Party [hand]", c("The Yorkshire Party", "Yorkshire party")
+) |>
+  unnest_longer(text)
+
+# One party per text
+stopifnot(!anyDuplicated(other_text_parties[c("country", "text")]))
+
+# Replace an "other" answer by what its open text says
+resolve_other <- function(answer, other_pf, text, country, denials = character()) {
+  text <- str_squish(text)
+  hand <- other_text_parties$party[match(
+    paste(country, text),
+    paste(other_text_parties$country, other_text_parties$text)
+  )]
+  case_when(
+    !answer %in% pf_other ~ answer,
+    # Coded upstream to a party or non-party answer
+    !is.na(other_pf) & !other_pf %in% pf_other ~ other_pf,
+    !is.na(hand) ~ hand,
+    text %in% denials ~ "none",
+    # Anything else stays "other"
+    .default = "other"
+  )
+}
+```
+
 ```{r}
 #| label: select-vars
 
@@ -137,16 +626,105 @@ eu25_tree <- eu25games |>
     wave = meta_wave,
     country_name = meta_country,
     # French wave-2 items folded in
-    pid = coalesce(ext_q_party_id_pf_name, ext_q_party_id_fra_pf_name),
-    # Intention, hypothetical, past
-    vote_party = coalesce(
+    pid_answer = coalesce(ext_q_party_id_pf_name, ext_q_party_id_fra_pf_name),
+    pid_other_pf = coalesce(
+      ext_q_party_id_other_pf_name,
+      ext_q_party_id_other_fra_pf_name
+    ),
+    pid_other_text = coalesce(q_party_id_other_raw, q_party_id_other_fra_raw),
+    pid = resolve_other(
+      pid_answer,
+      pid_other_pf,
+      pid_other_text,
+      meta_country,
+      denials = other_denials
+    ),
+    # The "other" answer behind the vote
+    vote_answer = coalesce(
       ext_q_vote_choice_intended_pf_name,
       ext_q_vote_choice_hypo_pf_name,
       ext_q_vote_choice_past_pf_name,
       ext_q_vote_choice_hypo_fra_pf_name,
       ext_q_vote_choice_past_fra_pf_name
+    ),
+    # Intention, hypothetical, past
+    vote_party = coalesce(
+      resolve_other(
+        ext_q_vote_choice_intended_pf_name,
+        ext_q_vote_choice_intended_other_pf_name,
+        q_vote_choice_intended_other_raw,
+        meta_country
+      ),
+      resolve_other(
+        ext_q_vote_choice_hypo_pf_name,
+        ext_q_vote_choice_hypo_other_pf_name,
+        q_vote_choice_hypo_other_raw,
+        meta_country
+      ),
+      resolve_other(
+        ext_q_vote_choice_past_pf_name,
+        ext_q_vote_choice_past_other_pf_name,
+        q_vote_choice_past_other_raw,
+        meta_country
+      ),
+      resolve_other(
+        ext_q_vote_choice_hypo_fra_pf_name,
+        ext_q_vote_choice_hypo_other_fra_pf_name,
+        q_vote_choice_hypo_other_fra_raw,
+        meta_country
+      ),
+      resolve_other(
+        ext_q_vote_choice_past_fra_pf_name,
+        ext_q_vote_choice_past_other_fra_pf_name,
+        q_vote_choice_past_other_fra_raw,
+        meta_country
+      )
     )
   )
+
+# Every hand-coded text found
+open_texts <- eu25games |>
+  select(
+    country_name = meta_country,
+    matches("^q_(party_id|vote_choice_(intended|hypo|past))_other(_fra)?_raw$")
+  ) |>
+  pivot_longer(-country_name, values_to = "text") |>
+  mutate(text = str_squish(text)) |>
+  filter(!is.na(text))
+stopifnot(
+  all(other_denials %in% open_texts$text),
+  all(
+    paste(other_text_parties$country, other_text_parties$text) %in%
+      paste(open_texts$country_name, open_texts$text)
+  )
+)
+
+# Names reused from the release exist in it
+pf_names <- eu25games |>
+  select(matches("^ext_q_(party_id|vote_choice).*_pf_name$")) |>
+  unlist(use.names = FALSE) |>
+  unique()
+reused <- other_text_parties |>
+  filter(!str_ends(party, fixed("[hand]")))
+stopifnot(all(reused$party %in% pf_names))
+
+# How "other" answers resolve
+resolution <- function(resolved, other_pf) {
+  case_when(
+    resolved %in% c(pf_no_party, pf_other) ~ resolved,
+    !is.na(other_pf) & !other_pf %in% pf_other ~ "party (coded)",
+    .default = "party (by hand)"
+  )
+}
+eu25_tree |>
+  filter(pid_answer %in% pf_other) |>
+  count(attachment = resolution(pid, pid_other_pf))
+eu25_tree |>
+  filter(vote_answer %in% pf_other) |>
+  count(vote = case_when(
+    vote_party %in% c(pf_no_party, pf_other) ~ vote_party,
+    .default = "party"
+  ))
 ```
 
 # Harmonise to the Tree
@@ -185,22 +763,21 @@ eu25_tree <- eu25_tree |>
       "Sweden" ~ "SE",
       "United Kingdom" ~ "GB"
     ),
-    # Level 1: attachment
+    # Level 1: attachment, uncoded other as DK
     att = case_when(
-      is.na(pid) | pid %in% c("dont-know", "refused") ~ "dk",
+      is.na(pid) | pid %in% c("dont-know", "refused", pf_other) ~ "dk",
       pid %in% pf_no_party ~ "no",
       .default = "yes"
     ),
     # Level 2: vote, unasked in wave 1
     vote = case_when(
       wave == 1 ~ "not_fielded",
-      is.na(vote_party) | vote_party %in% pf_no_party ~ "no",
+      is.na(vote_party) | vote_party %in% c(pf_no_party, pf_other) ~ "no",
       .default = "yes"
     ),
     # Level 3: same Party Facts name?
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
-      pid %in% pf_other | vote_party %in% pf_other ~ "unmatchable",
       pid == vote_party ~ "same",
       .default = "different"
     ),
@@ -331,6 +908,9 @@ So no tree in this notebook has a dashed note.
 - **The vote is a European Parliament vote**, and in wave 2 mostly an intended or hypothetical one.
   Comparing it with a national-election recall in the CSES and ESS notebooks means comparing different quantities.
 - **Wave 1 has no vote.** Its trees stop at the attachment level.
+- **Hand-coded "other" answers.** Open texts the release left uncoded are coded by hand (see [Other Answers](#other-answers)), which is a judgement call for short or misspelt texts.
+  A party that appears only in hand-coded texts carries a `[hand]` name, so an attachment to it can only match a vote that was hand-coded as well.
+  Votes for independent candidates count as *no vote reported*, and attachment to them as *DK / missing*.
 - **Respondent-waves, not persons.** See the panel table above.
 - **Matching on Party Facts names** treats an electoral alliance and its member party as different parties when Party Facts codes them separately.
   The mismatch table above is dominated by such pairs: Fidesz against the Fidesz–KDNP list in Hungary, Civic Platform against the European Coalition in Poland, Podemos against Unidas Podemos in Spain, PLUS against the USR-PLUS alliance in Romania.
