@@ -16,12 +16,16 @@ project:
     # notebooks. The manuscript pipeline routes notebooks through .ipynb,
     # which turns `output: asis` into a code block, so their generated
     # tabsets and Mermaid trees would not render. Output lands next to the
-    # source (git-ignored *.html).
+    # source (git-ignored *.html); the post-render script copies it into
+    # _manuscript/code/02_composition/.
     - code/02_composition/2.1_eu25_composition.qmd
     - code/02_composition/2.2_ees_composition.qmd
     - code/02_composition/2.3_cses_composition.qmd
     - code/02_composition/2.4_ess_composition.qmd
     - code/03_analyses/3.1_eu25_prep.qmd
+  # Copies frozen figures and the plain composition pages into _manuscript/
+  post-render:
+    - code/00_helper/post_render.R
 
 # Only the notebooks listed here are rendered by the project. Without this block
 # Quarto auto-discovers every .qmd and .md in the tree, including data provenance
