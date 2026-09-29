@@ -1,0 +1,721 @@
+---
+title: |
+  CSAP Code Notebook 3.1
+subtitle: |
+  eu25games 2019: long-format analysis data for games and thermometers
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+This notebook builds the two analysis datasets for the eu25games side of the study:
+
+- `eu25_games`: one row per **round played** in the dictator and trust games (token allocation, horizontal and behavioral);
+- `eu25_thermo`: one row per **party evaluation** on the thermometer (0--100, vertical and attitudinal).
+
+Both carry the respondent's partisan type and anchor party from notebook 2.1 and the co-/out-partisan relation of the target, so that $AP = E(Y \mid Co) - E(Y \mid Out)$ and its explicit vs. vote-anchored contrast can be estimated from them directly.
+No models are fitted here.
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Shared tree helpers
+source(here("code", "00_helper", "pid_tree.R"))
+
+# Party Facts helpers and the alias, alliance and lineage tables of notebook 1.9
+source(here("code", "00_helper", "pf_code.R"))
+rules <- pf_rules()
+```
+
+# Variables
+
+The columns carried into the two datasets are listed here, and nowhere else.
+Adding a variable means adding its name to one of these vectors.
+Every name is the harmonised column of the release, and it keeps its published name in the output.
+Columns this notebook derives carry a `der_` prefix.
+
+- `resp_vars`: respondent-level columns (for instance `q_age`), copied to every row of both datasets.
+- `round_vars`: per-round conjoint columns, given by their stem after `cj_<game><round>_`.
+  In the output they read `cj_<stem>`.
+  The partner party's Party Facts coding (`ext_cj_<game><round>_party_pf_{name,id}`) is always included, as `ext_cj_party_pf_{name,id}`.
+
+The thermometer items (`q_thermo_<slot>` with `ext_q_thermo_<slot>_pf_{name,id}`) are fixed and come out as `q_thermo` and `ext_q_thermo_pf_{name,id}`, plus `slot`.
+
+```{r}
+#| label: variables
+
+# Respondent level, both datasets
+resp_vars <- character()
+
+# Per round, stems after cj_<game><round>_
+round_vars <- c(
+  "pl1",
+  "pl2",
+  "treatment",
+  "nationality_shown",
+  "nationality_drawn",
+  "eupos",
+  "rel",
+  "age",
+  "sex",
+  "class"
+)
+```
+
+# Load Data
+
+The source is the published harmonised release.
+The partisan classification (attachment, vote, and whether they name the same party) is not rebuilt here: it comes from notebook 2.1, which resolves the "other" answers and hand-codes their open texts, and writes one row per respondent-wave to `data/02_processed/eu25_partisan.rds`.
+The two are joined by `meta_responseid`, the release's unique row key.
+
+```{r}
+#| label: load-data
+
+eu25games <- read_rds(here("data", "01_raw", "eu25games2019.rds"))
+
+eu25_partisan <- read_rds(here("data", "02_processed", "eu25_partisan.rds"))
+
+# Row key is unique
+stopifnot(
+  !anyDuplicated(eu25games$meta_responseid),
+  !anyDuplicated(eu25_partisan$meta_responseid)
+)
+```
+
+# Sample and Duplicates
+
+The games and the thermometers were fielded in waves 2 and 3 only.
+The survey is partly a panel and partly a refresh sample, so one panelist (`meta_pid`) can appear in both waves.
+That is by design, and both rows are kept: `wave` and `meta_pid` stay in the data, so that a model can add a respondent level or an analysis can keep one wave per person.
+
+What is *not* by design are several rows for one panelist **within** a wave.
+The handling follows the data preparation of the MBEU25 project (`MBEU25/code/02_data_prep.qmd`):
+
+1. Keep attention-check passers (`der_att_check_3`) in waves 2 and 3.
+2. Drop rows without a panelist ID.
+3. Where a panelist has several rows in one wave, keep the finished ones.
+   Most such pairs are a broken-off start followed by a complete run.
+4. Where a panelist still has several rows in one wave, drop the panelist from **all** waves.
+   These are either near-identical submissions seconds apart (an invitation link that worked twice) or, in one Estonian case, rows whose demographics point to different people behind one ID.
+   Which row is the real one cannot be told, and the ID itself is suspect.
+
+The result is the **composition sample**: attention passers, one row per panelist and wave.
+
+```{r}
+#| label: sample
+
+# Row counts per step
+sample_log <- list()
+log_step <- function(df, step) {
+  sample_log[[step]] <<- tibble(
+    step = step,
+    rows = nrow(df),
+    panelists = n_distinct(df$meta_pid)
+  )
+  df
+}
+
+sample <- eu25games |>
+  filter(der_att_check_3, meta_wave %in% c(2, 3)) |>
+  log_step("1 attention passers, waves 2-3") |>
+  filter(!is.na(meta_pid)) |>
+  log_step("2 panelist ID present") |>
+  add_count(meta_wave, meta_pid, name = "n_rows") |>
+  filter(n_rows == 1 | meta_finished) |>
+  log_step("3 within-wave duplicates: finished kept") |>
+  add_count(meta_wave, meta_pid, name = "n_left")
+
+# Panelists still duplicated within a wave
+dup_pids <- sample |>
+  filter(n_left > 1) |>
+  count(meta_wave, meta_pid, meta_country, name = "rows")
+dup_pids
+
+sample <- sample |>
+  filter(!meta_pid %in% dup_pids$meta_pid) |>
+  select(-n_rows, -n_left) |>
+  log_step("4 unresolved duplicates dropped")
+
+# One row per panelist and wave
+stopifnot(!anyDuplicated(sample[c("meta_wave", "meta_pid")]))
+
+bind_rows(sample_log)
+```
+
+# Partisan Type and Anchor
+
+The tree of notebook 2.1 gives every respondent-wave an attachment level (`att`), a vote level (`vote`) and, for those who report both, a match (`match`).
+They are combined into one partisan type:
+
+| `type` | Attachment | Vote | Anchor party |
+|---|---|---|---|
+| `explicit` | a party | the same party | that party |
+| `attached_other` | a party | another party | the attachment party |
+| `attached_novote` | a party | none reported | the attachment party |
+| `vote_anchored` | none | a party | the vote party |
+| `non_partisan` | none | none reported | -- |
+| `dk` | DK / missing | any | -- |
+
+The data files of the release call the vote-anchored group *implicit*; the notebooks use the neutral term.
+The anchor of `attached_other` is the attachment party.
+Both parties stay in the data (`pid`, `vote_party`), so that this group can be re-anchored on its vote.
+
+```{r}
+#| label: type
+
+n_sample <- nrow(sample)
+
+sample <- sample |>
+  inner_join(
+    eu25_partisan |> select(-wave),
+    by = "meta_responseid"
+  ) |>
+  mutate(
+    wave = meta_wave,
+    type = case_when(
+      att == "yes" & match == "same" ~ "explicit",
+      att == "yes" & match == "different" ~ "attached_other",
+      att == "yes" & vote == "no" ~ "attached_novote",
+      att == "no" & vote == "yes" ~ "vote_anchored",
+      att == "no" & vote == "no" ~ "non_partisan",
+      att == "dk" ~ "dk"
+    ),
+    type = factor(
+      type,
+      levels = c(
+        "explicit",
+        "attached_other",
+        "attached_novote",
+        "vote_anchored",
+        "non_partisan",
+        "dk"
+      )
+    ),
+    anchor = case_when(
+      att == "yes" ~ pid,
+      type == "vote_anchored" ~ vote_party
+    )
+  )
+
+# Every row classified, anchored where it should be
+stopifnot(
+  nrow(sample) == n_sample,
+  !anyNA(sample$type),
+  all(is.na(sample$anchor) == sample$type %in% c("non_partisan", "dk")),
+  all(sample$vote != "not_fielded")
+)
+
+sample |>
+  count(wave, type) |>
+  mutate(share = n / sum(n), .by = wave) |>
+  pivot_wider(names_from = wave, values_from = c(n, share), names_prefix = "w")
+```
+
+# Composition in Waves 2 and 3
+
+The figure shows the leaves of the tree of notebook 2.1 for the composition sample, waves 2 and 3 pooled.
+The unit is the respondent-wave, so a panelist who took part in both waves counts twice.
+Countries are sorted by the share of respondents who report an attachment (all blue leaves together), from the highest at the top.
+
+```{r}
+#| label: fig-composition-w23
+#| fig-width: 10
+#| fig-height: 9
+
+# Leaf shares per country
+leaf_shares <- sample |>
+  tree_leaves() |>
+  count(country, leaf) |>
+  mutate(
+    share = n / sum(n),
+    n_country = sum(n),
+    .by = country
+  ) |>
+  mutate(
+    attached = sum(share[str_starts(leaf, "Attached")]),
+    .by = country
+  ) |>
+  mutate(
+    label = paste0(country, " (", fmt_n(n_country), ")"),
+    label = fct_reorder(label, attached)
+  )
+
+# All 25 countries
+stopifnot(setequal(leaf_shares$country, countries_25))
+
+leaf_shares |>
+  ggplot(aes(x = share, y = label, fill = leaf)) +
+  geom_col(
+    width = 0.8,
+    colour = "white",
+    linewidth = 0.2,
+    position = position_stack(reverse = TRUE)
+  ) +
+  geom_text(
+    data = distinct(leaf_shares, label, attached),
+    aes(x = 0.01, y = label, label = scales::percent(attached, 1)),
+    inherit.aes = FALSE,
+    hjust = 0,
+    size = 3,
+    colour = "white"
+  ) +
+  scale_x_continuous(
+    labels = scales::percent,
+    breaks = seq(0, 1, 0.25),
+    expand = c(0, 0)
+  ) +
+  scale_fill_manual(values = leaf_colours, drop = TRUE) +
+  labs(
+    title = "Partisan composition in eu25games, waves 2 and 3",
+    subtitle = "Unweighted shares of attention-check passers, within-wave duplicates removed; N in brackets, share attached in the bar",
+    x = "Share of respondent-waves",
+    y = NULL,
+    fill = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(5.5, 15, 5.5, 5.5)
+  ) +
+  guides(fill = guide_legend(nrow = 2))
+```
+
+# Analysis Sample
+
+The analysis data keep only completed questionnaires (`meta_finished`), as the old analysis frame did and the MBEU25 preparation does.
+The respondent frame `resp` holds what both datasets share: the keys, the partisan type and anchor, and the columns in `resp_vars`.
+
+```{r}
+#| label: analysis-sample
+
+analysis <- sample |>
+  filter(meta_finished) |>
+  log_step("5 finished questionnaire")
+
+bind_rows(sample_log)
+
+# Shared respondent columns
+resp <- analysis |>
+  select(
+    meta_responseid,
+    meta_pid,
+    wave,
+    country,
+    type,
+    anchor,
+    pid,
+    vote_party,
+    route,
+    all_of(resp_vars)
+  )
+```
+
+# Games: One Row per Round
+
+Every player played three rounds of the dictator game and three of the trust game.
+Each round shows a partner profile, and the release stores each round in its own set of columns (`cj_dict1_*` to `cj_trust3_*`).
+The outcome is the number of tokens (0--10) given to the partner (`cj_pl2`).
+The columns listed in `round_vars` are pivoted to one row per round and keep their release names without the game and round (`cj_dict2_eupos` becomes `cj_eupos`).
+
+```{r}
+#| label: games-long
+
+# Stems the derived columns need
+stopifnot(all(c("pl2", "treatment", "eupos") %in% round_vars))
+
+# Requested stems, plus the partner party coding
+round_pattern <- paste0(
+  "^cj_(dict|trust)(\\d)_(",
+  paste(c(round_vars, "party_pf_name", "party_pf_id"), collapse = "|"),
+  ")$"
+)
+
+rounds <- analysis |>
+  rename_with(
+    \(x) str_remove(x, "^ext_"),
+    matches("^ext_cj_(dict|trust)\\d_party_pf_(name|id)$")
+  ) |>
+  select(meta_responseid, matches(round_pattern)) |>
+  pivot_longer(
+    -meta_responseid,
+    names_to = c("game", "round", ".value"),
+    names_pattern = round_pattern
+  ) |>
+  rename_with(\(x) paste0("cj_", x), -c(meta_responseid, game, round)) |>
+  rename(
+    ext_cj_party_pf_name = cj_party_pf_name,
+    ext_cj_party_pf_id = cj_party_pf_id
+  ) |>
+  mutate(
+    game = recode_values(game, "dict" ~ "dictator", "trust" ~ "trust"),
+    round = as.integer(round)
+  ) |>
+  filter(!is.na(cj_pl2))
+
+eu25_games <- resp |>
+  inner_join(rounds, by = "meta_responseid")
+
+# Six rounds per player, tokens in range, every requested column present
+stopifnot(
+  all(count(eu25_games, meta_responseid)$n == 6),
+  all(eu25_games$cj_pl2 %in% 0:10),
+  all(resp_vars %in% names(eu25_games)),
+  all(paste0("cj_", round_vars) %in% names(eu25_games))
+)
+
+# Players
+n_distinct(eu25_games$meta_responseid)
+```
+
+## Partner Attributes: Shown vs. Drawn
+
+Every partner profile was drawn in full, but the treatment condition of the round decides what was **displayed**.
+The condition varies from round to round within a respondent.
+Following the recode notes of the release (`eu25games2019/code/07_recode.qmd`, section *Conjoint Shown Nationality*):
+
+| Condition | Nationality shown | EU stance shown | Party shown |
+|---|---|---|---|
+| `1_conat_eustance_partisan` | own country (forced) | yes | yes |
+| `2_conat_partisan` | own country (forced) | no | yes |
+| `3_eunat_eustance` | EU (forced) | yes | no |
+| `4_somenat` | the draw | no | no |
+
+Age, sex, religion and class are shown in every condition.
+Nationality is the only attribute the condition overrides, and the release carries the displayed value as `cj_nationality_shown`.
+EU stance and party are never overridden: when shown, the value is the draw, and when not shown, the draw is still in the data but was never seen.
+For these two the notebook derives the displayed version:
+
+- `der_cj_eu_identity`: `cj_eupos` where EU stance was shown, `not_displayed` otherwise (the coding of the MBEU25 preparation);
+- `der_cj_party_shown`: the party was shown;
+- `der_cj_partisan_relationship`: the partner's party compared with the respondent's anchor by the match rule of notebook 1.9 (`pf_match()`): `co` (same party), `out` (another party), `none` (the partner was shown as having no party), `not_shown` (conditions 3 and 4), and missing for respondents without an anchor.
+
+The drawn values stay in the data for placebo checks only: `cj_nationality_drawn`, `cj_eupos` itself, and `der_cj_partisan_relationship_drawn` (the same comparison on the partner's party whether shown or not).
+As controls, only the displayed columns are meaningful: `cj_nationality_shown`, `der_cj_eu_identity`, `der_cj_partisan_relationship`, `cj_age`, `cj_sex`, `cj_rel`, `cj_class`.
+
+```{r}
+#| label: games-display
+
+eu25_games <- eu25_games |>
+  mutate(
+    der_cj_party_shown = cj_treatment %in%
+      c("1_conat_eustance_partisan", "2_conat_partisan"),
+    der_cj_eu_identity = if_else(
+      cj_treatment %in% c("1_conat_eustance_partisan", "3_eunat_eustance"),
+      cj_eupos,
+      "not_displayed"
+    ),
+    m = pf_match(country, anchor, ext_cj_party_pf_name, rules, 2019L),
+    der_cj_partisan_relationship_drawn = case_when(
+      is.na(anchor) ~ NA,
+      ext_cj_party_pf_name == "none" ~ "none",
+      m == "same" ~ "co",
+      m == "different" ~ "out"
+    ),
+    der_cj_partisan_relationship = case_when(
+      is.na(anchor) ~ NA,
+      !der_cj_party_shown ~ "not_shown",
+      .default = der_cj_partisan_relationship_drawn
+    )
+  ) |>
+  select(-m)
+
+# Display logic as documented upstream
+g <- eu25_games
+conat <- c("1_conat_eustance_partisan", "2_conat_partisan")
+stopifnot(
+  all(g$cj_nationality_shown[g$cj_treatment %in% conat] == "own_country"),
+  all(g$cj_nationality_shown[g$cj_treatment == "3_eunat_eustance"] == "eu"),
+  all(
+    g$cj_nationality_shown[g$cj_treatment == "4_somenat"] ==
+      g$cj_nationality_drawn[g$cj_treatment == "4_somenat"]
+  ),
+  all(
+    (g$der_cj_eu_identity == "not_displayed") ==
+      g$cj_treatment %in% c("2_conat_partisan", "4_somenat")
+  ),
+  !anyNA(select(g, any_of(c("cj_age", "cj_sex", "cj_rel", "cj_class"))))
+)
+rm(g, conat)
+
+# Displayed attributes by condition
+eu25_games |>
+  count(cj_treatment, cj_nationality_shown, der_cj_eu_identity, der_cj_party_shown) |>
+  print(n = Inf)
+
+# Shown relation by type
+eu25_games |>
+  count(type, der_cj_partisan_relationship) |>
+  pivot_wider(
+    names_from = der_cj_partisan_relationship,
+    values_from = n,
+    values_fill = 0
+  )
+```
+
+## How the Partner's Party Was Drawn
+
+The co-partisan share is not the same across types.
+The game drew the partner's party with reference to the respondent's **attachment answer**: for respondents who named a party, about half of the partners carry that party, and the rest carry another party.
+Respondents who named no party have no such reference, so their partner's party is drawn from the country's main parties (eight in most countries).
+A vote-anchored respondent therefore meets a co-partisan only when the draw happens to hit the party they voted for, in about one round in ten.
+
+So the co/out contrast is randomised within every type, but the co-partisan cells of vote-anchored respondents are several times smaller, and the out-partisan partners of explicit partisans are drawn from the other parties only.
+The table gives the share of drawn co-partisan partners (shown or not) per type and country.
+
+```{r}
+#| label: games-draw-design
+
+eu25_games |>
+  filter(type %in% c("explicit", "attached_other", "vote_anchored")) |>
+  summarise(
+    co = mean(der_cj_partisan_relationship_drawn == "co", na.rm = TRUE),
+    .by = c(country, type)
+  ) |>
+  pivot_wider(names_from = type, values_from = co) |>
+  arrange(country) |>
+  print(n = Inf)
+```
+
+The drawn partner party is missing for a few dozen rounds in Portugal and Romania (an empty raw value), and it is `none` in several hundred rounds in Latvia.
+There the draw for respondents without an attachment copied their own attachment answer: the partner's party reads "Nē" (no) or "es nejūtos pietuvināts nevienai partijai" (I do not feel close to any party).
+These rounds reach only vote-anchored respondents and non-partisans, and in all four conditions.
+They are coded `none` (or `not_shown`) and fall out of any co/out contrast.
+The raw party text is read here for this check only.
+
+```{r}
+#| label: games-partner-check
+
+analysis |>
+  select(
+    country,
+    matches("^cj_(dict|trust)\\d_(pl2|treatment|party_raw)$"),
+    matches("^ext_cj_(dict|trust)\\d_party_pf_name$")
+  ) |>
+  rename_with(\(x) str_remove(x, "^ext_"), starts_with("ext_")) |>
+  pivot_longer(
+    -country,
+    names_to = c("game", "round", ".value"),
+    names_pattern = "^cj_(dict|trust)(\\d)_(.+)$"
+  ) |>
+  filter(!is.na(pl2), is.na(party_pf_name) | party_pf_name == "none") |>
+  count(country, treatment, party_pf_name, party_raw)
+```
+
+# Thermometers: One Row per Evaluation
+
+Respondents rated six parties of their country on a 0--100 thermometer (`q_thermo_1` to `q_thermo_6`), each slot with the Party Facts coding of the party rated (`ext_q_thermo_<slot>_pf_{name,id}`).
+They are pivoted to `slot`, `q_thermo` and `ext_q_thermo_pf_{name,id}`.
+The rated party is compared with the anchor by the same rule (`der_thermo_relationship`: `co` or `out`, missing without an anchor).
+
+Before commit `2508d30` in `eu25games2019`, British respondents had a score in the first slot only, because the cleaning step matched their country under the wrong label ("UK" instead of "United Kingdom").
+The check below fails if any country loses slots again.
+
+```{r}
+#| label: thermo-long
+
+thermo <- analysis |>
+  select(
+    meta_responseid,
+    matches("^q_thermo_\\d$"),
+    matches("^ext_q_thermo_\\d_pf_(name|id)$")
+  ) |>
+  rename_with(
+    \(x) str_replace(x, "^q_thermo_(\\d)$", "slot\\1__q_thermo"),
+    matches("^q_thermo_\\d$")
+  ) |>
+  rename_with(
+    \(x) str_replace(x, "^ext_q_thermo_(\\d)_pf_", "slot\\1__ext_q_thermo_pf_"),
+    matches("^ext_q_thermo_\\d_pf_")
+  ) |>
+  pivot_longer(
+    -meta_responseid,
+    names_to = c("slot", ".value"),
+    names_pattern = "^slot(\\d)__(.+)$"
+  ) |>
+  filter(!is.na(q_thermo)) |>
+  mutate(slot = as.integer(slot))
+
+eu25_thermo <- resp |>
+  inner_join(thermo, by = "meta_responseid") |>
+  mutate(
+    m = pf_match(country, anchor, ext_q_thermo_pf_name, rules, 2019L),
+    der_thermo_relationship = case_when(
+      is.na(anchor) ~ NA,
+      m == "same" ~ "co",
+      m == "different" ~ "out"
+    )
+  ) |>
+  select(-m)
+
+# Share of respondents with all six ratings, by country
+full_rating <- eu25_thermo |>
+  count(country, meta_responseid) |>
+  summarise(six = mean(n == 6), .by = country)
+
+# Scores in range, parties coded, requested columns present, six slots everywhere
+stopifnot(
+  all(between(eu25_thermo$q_thermo, 0, 100)),
+  !anyNA(eu25_thermo$ext_q_thermo_pf_name),
+  all(resp_vars %in% names(eu25_thermo)),
+  all(full_rating$six > 0.9)
+)
+
+# Countries below full coverage
+full_rating |>
+  filter(six < 1) |>
+  arrange(six)
+
+# Parties rated twice by one respondent
+eu25_thermo |>
+  count(meta_responseid, ext_q_thermo_pf_name) |>
+  filter(n > 1) |>
+  nrow()
+
+# Relation by type
+eu25_thermo |>
+  count(type, der_thermo_relationship) |>
+  pivot_wider(
+    names_from = der_thermo_relationship,
+    values_from = n,
+    values_fill = 0
+  )
+```
+
+# Descriptives
+
+Raw co- and out-partisan means by partisan type, unweighted and pooled over countries and waves, with their standard errors.
+They describe the data; the within-party contrasts come from the hierarchical models.
+For the games, only rounds with the party shown enter.
+
+```{r}
+#| label: raw-means
+
+raw_means <- function(df, y, rel) {
+  df |>
+    filter({{ rel }} %in% c("co", "out")) |>
+    summarise(
+      mean = mean({{ y }}),
+      se = sd({{ y }}) / sqrt(n()),
+      n = n(),
+      .by = c(type, {{ rel }})
+    ) |>
+    arrange(type, {{ rel }})
+}
+
+eu25_games |>
+  group_by(game) |>
+  group_modify(\(d, k) raw_means(d, cj_pl2, der_cj_partisan_relationship)) |>
+  ungroup() |>
+  print(n = Inf)
+
+eu25_thermo |>
+  raw_means(q_thermo, der_thermo_relationship) |>
+  print(n = Inf)
+```
+
+Respondent-waves by type and country in the two datasets:
+
+```{r}
+#| label: n-type-country
+
+bind_rows(
+  games = distinct(eu25_games, meta_responseid, country, type),
+  thermo = distinct(eu25_thermo, meta_responseid, country, type),
+  .id = "data"
+) |>
+  count(data, country, type) |>
+  pivot_wider(names_from = type, values_from = n, values_fill = 0) |>
+  print(n = Inf)
+```
+
+# Save
+
+```{r}
+#| label: save
+
+glimpse(eu25_games)
+glimpse(eu25_thermo)
+
+write_rds(
+  eu25_games,
+  here("data", "03_final", "eu25_games.rds"),
+  compress = "xz"
+)
+write_rds(
+  eu25_thermo,
+  here("data", "03_final", "eu25_thermo.rds"),
+  compress = "xz"
+)
+```
+
+# Caveats
+
+- **Panel respondents appear twice.** About a quarter of the players took part in both waves.
+  `meta_pid` identifies them; a model needs a respondent level, or one wave per person.
+- **The vote is a European Parliament vote**, in wave 2 mostly an intended or hypothetical one, so the vote-anchored group is anchored on an EP preference.
+- **`attached_other` is anchored on the attachment.** Re-anchoring on the vote is a one-line change on `pid` / `vote_party`.
+- **Co-partisan partners depend on the attachment answer.** They were drawn from the attachment answer, so vote-anchored respondents see a co-partisan in about one round in ten, against one in two for the attached (see [How the Partner's Party Was Drawn](#how-the-partners-party-was-drawn)).
+  In Latvia, respondents without an attachment were mostly shown a partner "without a party".
+- **Drawn is not shown.** `cj_nationality_drawn`, `cj_eupos` and `der_cj_partisan_relationship_drawn` include values the respondent never saw; use the displayed columns as controls (see [Partner Attributes](#partner-attributes-shown-vs.-drawn)).
+- **Question order is unverified.** It is not yet established whether the thermometers came before or after the games in the questionnaire. The upstream crosswalk gives no original question code for them. If they came after, the games could have primed the ratings.
+- **Respondent covariates are not joined.** The controls are still open (see the DAG in the notes); add them to `resp_vars`.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

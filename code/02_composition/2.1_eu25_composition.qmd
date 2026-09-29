@@ -627,6 +627,7 @@ resolve_other <- function(answer, other_pf, text, country, denials = character()
 
 eu25_tree <- eu25games |>
   transmute(
+    meta_responseid,
     wave = meta_wave,
     country_name = meta_country,
     # French wave-2 items folded in
@@ -788,7 +789,7 @@ eu25_tree <- eu25_tree |>
     route = if_else(match == "same", pf_match_route(country, pid, vote_party, rules, 2019L), NA),
     wave = factor(paste("Wave", wave))
   ) |>
-  select(wave, country, att, vote, match, route, pid, vote_party)
+  select(meta_responseid, wave, country, att, vote, match, route, pid, vote_party)
 
 # Every country mapped
 stopifnot(all(eu25_tree$country %in% countries_25))
@@ -927,6 +928,25 @@ So no tree in this notebook has a dashed note.
 - **Matching is by Party Facts party, with aliases, alliances and lineage** (notebook 1.9), in all four composition notebooks alike. A party and an electoral alliance containing it count as the *same party* (Fidesz and the Fidesz–KDNP list, Civic Platform and the European Coalition, Podemos and Unidas Podemos); so do a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on; and the release's own labels for a listed party (the PvdA's EP list label, "Spring" for Wiosna) are aliases of it.
   Two members of one alliance (PLUS and USR in 2019, two years before they merged), two predecessors of one successor, a breakaway and its parent, and `[hand]` parties outside the tables stay *different party*; genuine switches (e.g. Conservative attachment, Brexit Party vote in Britain) stay as they are. The `route` column records which table made a pair the same party.
 - **Panel duplicates.** A handful of panelists appear many times over (one 29 times), which the attention-check filter does not remove.
+  Notebook 3.1 removes them for the analysis data.
+
+# Save
+
+The tree frame, one row per respondent-wave, is the partisan classification the analysis notebooks build on (notebook 3.1 joins it by `meta_responseid`).
+
+```{r}
+#| label: save-partisan
+
+# Row key is unique
+stopifnot(!anyDuplicated(eu25_tree$meta_responseid))
+
+eu25_tree |>
+  mutate(wave = as.integer(str_remove(wave, "Wave "))) |>
+  write_rds(
+    here("data", "02_processed", "eu25_partisan.rds"),
+    compress = "xz"
+  )
+```
 
 # Session Info
 

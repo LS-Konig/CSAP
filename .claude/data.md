@@ -47,9 +47,34 @@ Lineage counting as *same* is a deliberate choice (Tristan, 2026-09-29). `pf_mat
 and the `ext_route_*` columns of the match files record the route of every *same*, so an
 analysis can exclude lineage. Change the rule only in 1.9 and `pf_code.R`, never per notebook.
 
+## Current eu25games analysis files
+
+These are written by the current pipeline. Details are in the notebooks.
+
+- `data/02_processed/eu25_partisan.rds` (2.1): one row per attention-passing respondent-wave, keyed on
+  `meta_responseid`. It holds the tree columns `att`, `vote`, `match` and `route`, plus `pid` and `vote_party`.
+- `data/03_final/eu25_games.rds` (3.1): one row per round played, 29,300 respondent-waves × 6 rounds
+  in waves 2–3. Both waves are kept for panelists, identified by `meta_pid` and `wave`.
+- `data/03_final/eu25_thermo.rds` (3.1): one row per party rating (`slot`, `q_thermo`, `ext_q_thermo_pf_*`).
+- **Column convention.** Release columns keep their harmonised, published names. Per-round conjoint
+  columns drop the game and round (`cj_dict2_eupos` becomes `cj_eupos`). Anything derived carries `der_`. The carried
+  variables are set in one place, the `resp_vars` / `round_vars` vectors at the top of 3.1.
+- Both 3.1 files carry `type`, `anchor` and a co/out relation from `pf_match()`:
+  `der_cj_partisan_relationship` in the games and `der_thermo_relationship` in the thermometers.
+- **Shown vs. drawn (games).**
+  - The treatment condition varies by round.
+  - Nationality is forced by the condition. Use `cj_nationality_shown`.
+  - EU stance and party are displayed only in some conditions. Use `der_cj_eu_identity` and
+    `der_cj_partisan_relationship`.
+  - `cj_nationality_drawn`, `cj_eupos` and `der_cj_partisan_relationship_drawn` hold unseen draws, so use them for placebo checks only.
+  - Age, sex, religion and class are always shown.
+- **Design fact.** Game partners' parties were drawn from the *attachment* answer. Attached respondents meet a co-partisan in
+  about half the rounds, vote-anchored respondents only by chance (about 10%). In Latvia, the draw for respondents without an attachment
+  copied their "no party" answer.
+
 ## Derived files still on disk
 
-The deleted pipeline produced these. They are usable, but nothing in the repo regenerates them.
+The deleted pipeline produced these. They predate the Party Facts match rule. They are usable, but nothing in the repo regenerates them.
 
 - `data/02_processed/eu25games2019_long.rds`: one row per respondent × game × round.
 - `data/03_final/eu25games2019.rds`: the analysis frame, 22,858 respondents × 6 game rounds
