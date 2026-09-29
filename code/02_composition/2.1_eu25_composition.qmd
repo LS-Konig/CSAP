@@ -49,9 +49,9 @@ rm(p_required, p_to_install, packages)
 # Shared tree helpers
 source(here("code", "00_helper", "pid_tree.R"))
 
-# Party Facts helpers and the alliance table of notebook 1.9
+# Party Facts helpers and the alias, alliance and lineage tables of notebook 1.9
 source(here("code", "00_helper", "pf_code.R"))
-alliances <- pf_alliances()
+rules <- pf_rules()
 ```
 
 # The Tree
@@ -65,7 +65,7 @@ Every composition notebook (2.1 to 2.4) sorts respondents into the same sequenti
 2. **Vote.** Does the respondent report a party vote?
    *No vote reported* collects non-voters, blank or invalid ballots, don't know, refusals and missing answers, and "other" votes whose open text names no party.
    Where a survey wave never asked the vote item, the branch reads *vote item not fielded* instead, so that "not asked" is not confused with "did not answer".
-3. **Match.** Only for respondents who report both, the two parties are compared by their Party Facts coding: *same party* (the same party, or a party and an electoral alliance or joint list that contains it, in either direction; notebook 1.9) or *different party* (including two members of one alliance).
+3. **Match.** Only for respondents who report both, the two parties are compared by their Party Facts coding with the rule of notebook 1.9: *same party* when they are the same party, one is an alias of the other, one is an electoral alliance or joint list that contains the other, or one continued in the other through a rename, refoundation or merger (from the year of the succession on); *different party* otherwise, including two members of one alliance, two predecessors of one successor, and a breakaway and its parent.
    Because both sides are always a named party, no respondent in this notebook is *not matchable*.
 
 Two leaves are named after the typology: *no attachment, vote reported* is the **vote-anchored** group (the data files call it *implicit*), and *no attachment, no vote* is the non-partisan group.
@@ -779,14 +779,16 @@ eu25_tree <- eu25_tree |>
       is.na(vote_party) | vote_party %in% c(pf_no_party, pf_other) ~ "no",
       .default = "yes"
     ),
-    # Level 3: same Party Facts party, alliances included (notebook 1.9)
+    # Level 3: same Party Facts party, with aliases, alliances and lineage
+    # (notebook 1.9); all waves were fielded in 2019
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
-      .default = pf_match(country, pid, vote_party, alliances)
+      .default = pf_match(country, pid, vote_party, rules, 2019L)
     ),
+    route = if_else(match == "same", pf_match_route(country, pid, vote_party, rules, 2019L), NA),
     wave = factor(paste("Wave", wave))
   ) |>
-  select(wave, country, att, vote, match, pid, vote_party)
+  select(wave, country, att, vote, match, route, pid, vote_party)
 
 # Every country mapped
 stopifnot(all(eu25_tree$country %in% countries_25))
@@ -795,7 +797,7 @@ stopifnot(all(eu25_tree$country %in% countries_25))
 # Checks
 
 The raw answers behind each tree level, printed so that any unexpected code is visible.
-The first table crosses the three levels by wave, the second lists the most frequent attachment/vote pairs that end up as *different party*.
+The first table crosses the three levels by wave, the second lists the most frequent attachment/vote pairs that end up as *different party*, and the third the pairs that are the *same party* only through an alias, an alliance or lineage (the audit trail of the tables of notebook 1.9).
 
 ```{r}
 #| label: checks
@@ -810,6 +812,13 @@ eu25_tree |>
   filter(match == "different") |>
   count(country, pid, vote_party, sort = TRUE) |>
   slice_head(n = 15)
+
+# Same party through a table, by route
+eu25_tree |>
+  filter(route %in% c("alias", "alliance", "lineage")) |>
+  count(route, country, pid, vote_party, sort = TRUE) |>
+  mutate(across(c(pid, vote_party), \(x) str_trunc(x, 40))) |>
+  print(n = 40)
 ```
 
 The unit here is the **respondent-wave**, not the person.
@@ -915,8 +924,8 @@ So no tree in this notebook has a dashed note.
   A party that appears only in hand-coded texts carries a `[hand]` name, so an attachment to it can only match a vote that was hand-coded as well.
   Votes for independent candidates count as *no vote reported*, and attachment to them as *DK / missing*.
 - **Respondent-waves, not persons.** See the panel table above.
-- **Matching is by Party Facts party, with alliances** (notebook 1.9): a party and an electoral alliance containing it count as the *same party* (Fidesz and the Fidesz–KDNP list, Civic Platform and the European Coalition, Podemos and Unidas Podemos, PLUS and USR-PLUS), in all four composition notebooks alike.
-  Two members of one alliance, renamed parties with a new Party Facts id, and `[hand]` parties outside the table stay *different party*; genuine switches (e.g. Conservative attachment, Brexit Party vote in Britain) stay as they are.
+- **Matching is by Party Facts party, with aliases, alliances and lineage** (notebook 1.9), in all four composition notebooks alike. A party and an electoral alliance containing it count as the *same party* (Fidesz and the Fidesz–KDNP list, Civic Platform and the European Coalition, Podemos and Unidas Podemos); so do a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on; and the release's own labels for a listed party (the PvdA's EP list label, "Spring" for Wiosna) are aliases of it.
+  Two members of one alliance (PLUS and USR in 2019, two years before they merged), two predecessors of one successor, a breakaway and its parent, and `[hand]` parties outside the tables stay *different party*; genuine switches (e.g. Conservative attachment, Brexit Party vote in Britain) stay as they are. The `route` column records which table made a pair the same party.
 - **Panel duplicates.** A handful of panelists appear many times over (one 29 times), which the attention-check filter does not remove.
 
 # Session Info

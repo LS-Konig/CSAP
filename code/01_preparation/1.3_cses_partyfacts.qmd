@@ -701,7 +701,12 @@ map_hand <- tribble(
   # codes whose link or name pointed to a party of before 1950 (see pf_historic())
   "imd", 7240002L, "ES", "People's Party", "Alianza-Partido Popular / Partido Popular", 441L, # Party Facts links it to 5750, the Partido Progresista of 1834-74
   "imd", 6160053L, "PL", "Polish Socialist Party", "Polish Socialist Party [og]", NA, # the post-1987 PPS; 4354 is the party of 1892-1948
-  "imd", 7030062L, "SK", "Hlinka's Slovak People's Party", "Hlinka's Slovak People's Party [og]", NA # a post-1990 revival; the historic HSĽS ended 1945
+  "imd", 7030062L, "SK", "Hlinka's Slovak People's Party", "Hlinka's Slovak People's Party [og]", NA, # a post-1990 revival; the historic HSĽS ended 1945
+  # codes whose link or name pointed to a party of another period (see pf_check_period())
+  "imd", 3800041L, "IT", "Communist Party", "Communist Party [og]", NA, # the PCI founded 2016; 34 is the PCI of 1921-91
+  "imd", 4280003L, "LV", "National Union All for Latvia For Fatherland and Freedom", "Nacionālā apvienība", 7619L, # not 1789, the LNNK of 1993-95; the 2010 alliance kept the name at its 2011 merger
+  "imd", 6160051L, "PL", "Democratic Party", "Partia Demokratyczna", 1566L, # POL_2005 only: demokraci.pl, "Democratic Party (PD)" in the IMD codebook; Party Facts links 919, the Stronnictwo Demokratyczne (SD)
+  "imd", 6420036L, "RO", "Romanian Socialist Party", "Romanian Socialist Party [og]", NA # ROU_1996; name-matched to 7035, the Partidul Alternativa Socialista founded 2003, a lineage not verified
 ) |>
   mutate(source = "hand")
 
@@ -807,6 +812,9 @@ for (s in items$stub) {
       select(crosswalk, release, code, pf_name, pf_id),
       by = c("release", "code")
     ) |>
+    # an IMD code follows a party across renames; Party Facts may split it
+    # (Die Linke / PDS, Forza Italia 2013, ...: pf_eras in pf_code.R)
+    pf_apply_eras(year = "year", core = core) |>
     rename(
       !!paste0("ext_", s, "_pf_name") := pf_name,
       !!paste0("ext_", s, "_pf_id") := pf_id
@@ -815,6 +823,23 @@ for (s in items$stub) {
 }
 
 stopifnot(nrow(respondents) == nrow(cses))
+
+# No party outside its years, except those reviewed: Party Facts' only entry
+# for a party that still existed or was refounded (LSDSP 741, PPM 1480, UDP
+# 896, KDS 304, SPR-RSČ 1657), parties Party Facts starts with
+# their first seat or registration (Suverenita 293, Feministiskt initiativ
+# 1240, Izaugsme 7864, Partida Romilor 173)
+period <- map(
+  items$stub,
+  \(s) pf_check_period(
+    respondents, year = "year",
+    id = paste0("ext_", s, "_pf_id"), name = paste0("ext_", s, "_pf_name"),
+    accepted = c(741L, 1480L, 896L, 304L, 1657L, 293L, 1240L, 7864L, 173L)
+  )
+) |>
+  list_rbind() |>
+  summarise(n = sum(n), .by = c(year, pf_id, pf_name))
+period
 
 write_parquet(
   respondents,
@@ -868,6 +893,9 @@ respondents |>
 # Known Quirks
 
 - **Automatic links and name matches skip parties that ended before 1950** (`pf_historic()` in `pf_code.R`). Party Facts links Spain's Partido Popular in the CSES and several other datasets to the Partido Progresista of 1834–74 (5750, short name "PP"), and short names had matched labels to Sweden's "Centern" of 1873–82 and Germany's Deutschkonservative Partei (1876–1918); the affected labels are hand-coded. The cutoff is 1950 rather than 1990 because Party Facts' `year_last` for small parties is often their last year in parliament (PPM, UDP and PSP show 1989 but existed later).
+- **Parties of another period.** The 1950 guard misses links to parties that ended later or whose name was reused, so `pf_check_period()` (in `pf_code.R`) stops the notebook when a coded party was founded more than a year after the survey or left Party Facts more than 12 years before it; the reviewed exceptions are listed at the call. Among the cases it found and that are now hand-coded: the EES 2024 Sinn Féin (linked to the Sinn Féin of 1905–70), the 2022 Parempoolsed (ESS, EES; linked to a 1995 party), the Slovenian Združena levica (ESS; linked to the Zdruzena Lista of 1992), the CSES Latvian National Alliance (linked to the LNNK of 1993–95), the CSES 2005 Polish Democratic Party (demokraci.pl, linked to the Stronnictwo Demokratyczne), and the EES Italian UDC (linked to the CCD).
+- **Renamed and refounded parties** that Party Facts splits while a code or label stays the same (Die Linke/PDS, MoDem/UDF, EELV/Les Verts, CD&V/CVP, Vlaams Blok/Belang, Forza Italia 1994/2013, PSDR/PSD) get the id of the survey year from `pf_eras` in `pf_code.R`. In the CSES this happens per respondent, since an IMD code spans studies, so `cses_party_pf.csv` shows the code's id before this step.
+- **Uncertain links coded `[og]`.** Romania 1996 "Romanian Socialist Party" (code 6420036, 7 answers) was name-matched to the Partidul Alternativa Socialista (7035), founded in 2003; whether the 1990s party is its predecessor is not verified, so the answer keeps its own label.
 - **Party Facts links the IMD codes only.** Its `cses` dataset covers about 290 of the 760 IMD party codes of the 25 countries and none of Module 6; the rest are matched by name or by hand.
 - **Module 6 codes are a different scheme** (country + three digits, e.g. `040001`, against IMD's country + four digits, `0400001`), so the same number does not mean the same party across releases. Module 6 codes are bridged to an IMD code only through an identical name in the same country, and the crosswalk is keyed by release and code.
 - **Some Module 6 codes carry a different label on different items** (Poland's 616002 is "civic coalition", "senate pact KO candidate" and "civic platform"); all labels of a code take part in the matching, and the code gets one party.

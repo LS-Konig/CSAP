@@ -2,7 +2,7 @@
 title: |
   CSAP Code Notebook 1.9
 subtitle: |
-  Electoral alliances and the attachment-vote match
+  Electoral alliances, party lineage and the attachment-vote match
 date: last-modified
 date-format: MMMM D, YYYY
 format:
@@ -17,24 +17,44 @@ execute:
   message: true
 ---
 
-Party Facts keeps an electoral alliance, a joint list or a party union apart from its member parties: the CDU/CSU union (211) is not the CDU (1375) or the CSU (1731), the Fidesz–KDNP list (6366) is not Fidesz (1691), Koalicja Obywatelska (9122) is not Platforma Obywatelska (1117).
-Comparing Party Facts names therefore scores a respondent who feels close to the CDU and votes for the CDU/CSU list as a *different* party.
+Is a respondent's attachment party the party they voted for?
+Comparing the two answers' Party Facts names (the `ext_*_pf_name` variables of notebooks 1.2–1.4 and the eu25games release) answers this for most respondents, but not for three kinds of pair:
 
-This notebook lists the member parties of every alliance that occurs in the four sources (eu25games, ESS, CSES, EES) and uses the list to compare attachment and vote:
+- **Electoral alliances.** Party Facts keeps an electoral alliance, a joint list or a party union apart from its member parties: the CDU/CSU union (211) is not the CDU (1375) or the CSU (1731), the Fidesz–KDNP list (6366) is not Fidesz (1691), Koalicja Obywatelska (9122) is not Platforma Obywatelska (1117). By name, a respondent close to the CDU who votes for the CDU/CSU list has voted for a *different* party.
+- **Lineage.** Party Facts gives a party a new id when it is renamed or refounded, or when it merges into another party: the UMP (1595) and Les Républicains (8168), the Romanian PD (1715) and the PDL (660), Forza Italia and the Popolo della Libertà (365). Someone who still names the UMP as their party but votes for Les Républicains has not switched; their attachment has followed the organisation.
+- **Aliases.** The eu25games release codes a few answers under a label rather than the Party Facts name of the party they name (the PvdA's EP list label, "Spring" for Wiosna).
 
-- **same**: the same party, or a party and an alliance that contains it, in either direction (close to the CSU, voted CDU/CSU; close to KO, voted PO);
-- **different**: two different parties, including two members of the same alliance (CDU and CSU);
-- **unmatchable**: either answer missing or a non-party answer (`none`, `other`, `independent`, ...).
+This notebook builds a table for each and compares attachment and vote with them. Two answers are the **same party** by one of four routes, checked in this order:
 
-The rule is implemented once, in `pf_match()` in `code/00_helper/pf_code.R`, and used here and in the composition notebooks 2.1–2.4.
+1. **identical**: the same name;
+2. **alias**: one is an alias of the other;
+3. **alliance**: a party and an alliance, joint list or party union that contains it, in either direction (close to the CSU, voted CDU/CSU; close to KO, voted PO);
+4. **lineage**: a party and the party it continued in, through a rename, a refoundation or a merger into it, in either direction, in surveys from the year of the succession on (close to the UMP, voted Les Républicains in 2017).
+
+They are a **different party** otherwise, including
+
+- two members of one alliance (CDU and CSU);
+- two predecessors of one successor (Forza Italia and Alleanza Nazionale, which both merged into the Popolo della Libertà in 2009);
+- a breakaway and the party it left (Smer and Hlas, the PdL and Fratelli d'Italia), or the several successors of a party that broke up (the Volksunie into N-VA and Spirit, the AWS into PO, PiS and LPR);
+- a predecessor and its successor before the succession (a PDL supporter who voted PNL in 2012, two years before the PDL merged into the PNL).
+
+A pair is **unmatchable** when either answer is missing or a non-party answer (`none`, `other`, `independent`, ...).
+
+The tables are looked up pair by pair and never chained: Alleanza Nazionale → Popolo della Libertà and Popolo della Libertà → Forza Italia (2013) do not make AN and Forza Italia (2013) the same party.
+A pair that is both alliance and lineage (a joint list that later became a party, like the PdL in 2008) is listed once, under lineage, with the year of the joint list.
+
+The rule is implemented once, in `pf_match()` and `pf_match_route()` in `code/00_helper/pf_code.R`, and used here and in the composition notebooks 2.1–2.4; `pf_match()` returns *same*, *different* or *unmatchable*, and `pf_match_route()` which of the four routes made a pair the same party, so every *same* can be traced to its table.
 
 Outputs, in `data/02_processed/`:
 
-- `pf_alliances.csv`: one row per alliance and member (`cntry`, `alliance_name`, `member_name`, `member_id`), with names as they appear in the `ext_*_pf_name` variables (a Party Facts core name, or `"<label> [og]"`);
-- `ess_party_match.parquet`, `cses_party_match.parquet`, `ees_party_match.parquet`: the respondent keys of notebooks 1.2–1.4 with one `ext_match_<vote item>` column per vote item, comparing it with the attachment item.
+- `pf_alliances.csv`: one row per alliance and member (`cntry`, `alliance_name`, `member_name`, `member_id`);
+- `pf_lineage.csv`: one row per succession (`cntry`, `predecessor`, `predecessor_id`, `successor`, `successor_id`, `year`);
+- `pf_aliases.csv`: one row per alias (`cntry`, `alias`, `name`);
+- `ess_party_match.parquet`, `cses_party_match.parquet`, `ees_party_match.parquet`: the respondent keys of notebooks 1.2–1.4 with, for every vote item, `ext_match_<vote item>` (same / different / unmatchable, against the attachment item) and `ext_route_<vote item>` (identical / alias / alliance / lineage, for *same*).
   The eu25games match is computed in notebook 2.1, which first resolves the release's open "other" answers.
 
-The table is built from the crosswalks of notebooks 1.2–1.4, so this notebook runs after them; they do not depend on it.
+Names in the tables are exactly as in the `ext_*_pf_name` variables: a Party Facts core name, or `"<label> [og]"` for a party Party Facts does not list; ids are Party Facts ids, checked to belong to the row's country.
+The tables are built from the crosswalks of notebooks 1.2–1.4, so this notebook runs after them; they do not depend on it.
 
 # Setup
 
@@ -87,6 +107,7 @@ eu25 <- read_rds(here("data", "01_raw", "eu25games2019.rds")) |>
   filter(der_att_check_3) |>
   transmute(
     cntry = eu25_iso2[meta_country],
+    year = 2019L,
     att = coalesce(ext_q_party_id_pf_name, ext_q_party_id_fra_pf_name),
     vote = coalesce(
       ext_q_vote_choice_intended_pf_name,
@@ -97,21 +118,27 @@ eu25 <- read_rds(here("data", "01_raw", "eu25games2019.rds")) |>
     )
   )
 
+# Survey year: the year an ESS round began (ess_round_year in pf_code.R), the
+# CSES election year, the EES wave
+ess <- mutate(ess, year = ess_round_year[essround])
+ees <- mutate(ees, year = as.integer(wave))
+
 # Attachment and vote pairs, one frame
 pairs <- bind_rows(
   ess |>
-    transmute(source = "ESS", cntry, att = ext_prtcl_pf_name, vote = coalesce(ext_prtv_pf_name, ext_prtv_de1_pf_name)),
+    transmute(source = "ESS", cntry, year, att = ext_prtcl_pf_name, vote = coalesce(ext_prtv_pf_name, ext_prtv_de1_pf_name)),
   cses |>
     transmute(
       source = "CSES",
       cntry,
+      year = as.integer(year),
       att = ext_imd3005_3_pf_name,
       vote = coalesce(ext_imd3002_lh_pl_pf_name, ext_imd3002_lh_dc_pf_name)
     ),
   ees |>
-    transmute(source = "EES", cntry, att = ext_pid_pf_name, vote = ext_vote_ep_pf_name),
+    transmute(source = "EES", cntry, year, att = ext_pid_pf_name, vote = ext_vote_ep_pf_name),
   ees |>
-    transmute(source = "EES", cntry, att = ext_pid_pf_name, vote = ext_vote_nat_pf_name),
+    transmute(source = "EES", cntry, year, att = ext_pid_pf_name, vote = ext_vote_nat_pf_name),
   eu25 |>
     mutate(source = "eu25games")
 ) |>
@@ -154,7 +181,7 @@ count(candidates, by_name, in_pair)
 
 One row per alliance and member.
 Members are named as in the data, so a member that appears under two names (a Party Facts name and an `[og]` spelling) has two rows; `member_id` is its Party Facts id where it has one.
-Renamed parties are not alliances and are not listed.
+Renamed and refounded parties, mergers, and joint lists that later became a party are not listed here but under *Lineage* below.
 
 ```{r}
 #| label: alliances
@@ -221,10 +248,10 @@ alliances <- tribble(
   "CZ", "Čtyřkoalice", "Občanská demokratická aliance", 1008L, # US and US-DEU both listed (separate PF ids)
   "CZ", "Čtyřkoalice", "Unie svobody", 905L, # US and US-DEU both listed (separate PF ids)
   "CZ", "Čtyřkoalice", "Unie svobody / Demokratická unie", 104L, # US and US-DEU both listed (separate PF ids)
-  "DE", "Christlich Demokratische Union / Christlich Soziale Union", "Christlich Demokratische Union", 1446L,
+  "DE", "Christlich Demokratische Union / Christlich Soziale Union", "Christlich Demokratische Union", 1375L,
   "DE", "Christlich Demokratische Union / Christlich Soziale Union", "Christlich Soziale Union", 1731L,
   "ES", "A la valenciana", "Coalició Compromís", 5623L, # IU via EUPV
-  "ES", "A la valenciana", "Izquierda Unida", 8128L, # IU via EUPV
+  "ES", "A la valenciana", "Izquierda Unida", 247L, # IU via EUPV
   "ES", "A la valenciana", "Podemos", 3203L, # IU via EUPV
   "ES", "Ahora Repúblicas (Esquerra Republicana de Catalunya (ERC) & EH Bildu & Bloque Nationalista Galego (BNG)) [og]", "Bloque Nacionalista Galego", 1011L,
   "ES", "Ahora Repúblicas (Esquerra Republicana de Catalunya (ERC) & EH Bildu & Bloque Nationalista Galego (BNG)) [og]", "Esquerra Republicana de Catalunya", 848L,
@@ -248,21 +275,21 @@ alliances <- tribble(
   "ES", "Coalition for Europe (CiU (1724007) + EAJ-PNV (1724902) + CC (1724907) + others) [og]", "Partido Nacionalista Vasco — Euzko Alderdi Jeltzalea", 1637L,
   "ES", "Compromís per Europa/Compromiso por Europa (CPE) [og]", "Coalició Compromís", 5623L,
   "ES", "IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds) [og]", "Iniciativa per Catalunya Verds", 1260L,
-  "ES", "IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds) [og]", "Izquierda Unida", 8128L,
+  "ES", "IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds) [og]", "Izquierda Unida", 247L,
   "ES", "IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds) [og]", "Iniciativa per Catalunya Verds", 1260L,
-  "ES", "IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds) [og]", "Izquierda Unida", 8128L,
+  "ES", "IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds) [og]", "Izquierda Unida", 247L,
   "ES", "Junts per Catalunya — Partit Demòcrata Europeu Català", "Partit Demòcrata Europeu Català", 6027L,
   "ES", "Left for The Right to Decide (Coalition ERC (1724905) + others) [og]", "Esquerra Republicana de Catalunya", 848L,
   "ES", "PP (Partido Popular) / UPN (Unión del Pueblo Navarro) [og]", "Alianza-Partido Popular / Partido Popular", 441L,
   "ES", "SUMAR [og]", "Coalició Compromís", 5623L, # Podemos on list only in 2023 general, not 2024 EP
-  "ES", "SUMAR [og]", "Izquierda Unida", 8128L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "SUMAR [og]", "Izquierda Unida", 247L, # Podemos on list only in 2023 general, not 2024 EP
   "ES", "SUMAR [og]", "Más País", 8395L, # Podemos on list only in 2023 general, not 2024 EP
   "ES", "SUMAR [og]", "Podemos", 3203L, # Podemos on list only in 2023 general, not 2024 EP
   "ES", "Sumar [og]", "Coalició Compromís", 5623L, # Podemos on list only in 2023 general, not 2024 EP
-  "ES", "Sumar [og]", "Izquierda Unida", 8128L, # Podemos on list only in 2023 general, not 2024 EP
+  "ES", "Sumar [og]", "Izquierda Unida", 247L, # Podemos on list only in 2023 general, not 2024 EP
   "ES", "Sumar [og]", "Más País", 8395L, # Podemos on list only in 2023 general, not 2024 EP
   "ES", "Sumar [og]", "Podemos", 3203L, # Podemos on list only in 2023 general, not 2024 EP
-  "ES", "Unidas Podemos", "Izquierda Unida", 8128L,
+  "ES", "Unidas Podemos", "Izquierda Unida", 247L,
   "ES", "Unidas Podemos", "Podemos", 3203L,
   "FR", "Alliance Rurale [og]", "Résistons !", 9876L, # 2024 EP list of Résistons! and LMR (ex-CPNT)
   "FR", "Ensemble ! (LREM, MODEM et Horizons) [og]", "Agir, la droite constructive", 9132L, # Agir in Ensemble 2022, not in label
@@ -305,13 +332,13 @@ alliances <- tribble(
   "GR", "Kinima Allagis", "Panellinio Sosialistikó Kínima", 1468L, # KINAL electoral alliance 2017-2022
   "GR", "Olive Tree-Democratic Alignment (Coalition PASOK (1300313) + others) [og]", "Dimokratiki Aristera", 1160L, # Democratic Alignment 2015 = PASOK+DIMAR
   "GR", "Olive Tree-Democratic Alignment (Coalition PASOK (1300313) + others) [og]", "Panellinio Sosialistikó Kínima", 1468L,
-  "GR", "Synaspismós Rizospastikís Aristerás", "Synaspismós tīs Aristerás", 516L, # SYN main component of SYRIZA coalition until 2013
+  "GR", "Synaspismós Rizospastikís Aristerás", "Synaspismós tīs Aristerás", 516L, # SYN main component of SYRIZA coalition until 2013, when it dissolved into the SYRIZA party; kept here, not under lineage, because it was an alliance first
   "GR", "Δημοκρατική Συμπαράταξη (ΔΗΣΥ) [og]", "Dimokratiki Aristera", 1160L,
   "GR", "Δημοκρατική Συμπαράταξη (ΔΗΣΥ) [og]", "Panellinio Sosialistikó Kínima", 1468L,
   "HR", "Amsterdam Coalition [og]", "Građansko-liberalni savez", 8178L,
   "HR", "Amsterdam Coalition [og]", "Istarski demokratski sabor", 513L,
   "HR", "BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og]", "Croatian Party of Rights [og]", NA, # label pools HSP and HSP-AS
-  "HR", "BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og]", "Hrvatska stranka prava", 1128L,
+  "HR", "BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og]", "Hrvatska stranka prava", 253L,
   "HR", "BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og]", "Neovisni za Hrvatsku", 7422L,
   "HR", "Bandić Milan 365 i koalicijski partneri [og]", "Bandić Milan 365 — Stranka rada i solidarnosti", 5452L,
   "HR", "Coalition HDZ (1191511) + HSP AS (1191613)+HSS (1191810)+others [og]", "Croatian Party of Rights [og]", NA, # label pools HSP and HSP-AS
@@ -322,11 +349,17 @@ alliances <- tribble(
   "HR", "Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party [og]", "Hrvatska seljačka stranka", 72L,
   "HR", "Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party [og]", "Hrvatska socijalno liberalna stranka", 214L,
   "HR", "DP Miroslava Škore, Hrvatski suverenisti, Blok za Hrvatsku, HKS, Hrast, SU, Zelena Lista [og]", "Domovinski pokret", 8981L,
+  "HR", "DP Miroslava Škore, Hrvatski suverenisti, Blok za Hrvatsku, HKS, Hrast, SU, Zelena Lista [og]", "Hrvatska konzervativna stranka", 9085L,
+  "HR", "DP Miroslava Škore, Hrvatski suverenisti, Blok za Hrvatsku, HKS, Hrast, SU, Zelena Lista [og]", "Hrvatski rast", 3138L,
+  "HR", "DP Miroslava Škore, Hrvatski suverenisti, Blok za Hrvatsku, HKS, Hrast, SU, Zelena Lista [og]", "Hrvatski suverenisti", 9086L,
   "HR", "DP, HS, Blok za Hrvatsku, HKS, Hrast [og]", "Domovinski pokret", 8981L,
+  "HR", "DP, HS, Blok za Hrvatsku, HKS, Hrast [og]", "Hrvatska konzervativna stranka", 9085L,
+  "HR", "DP, HS, Blok za Hrvatsku, HKS, Hrast [og]", "Hrvatski rast", 3138L,
+  "HR", "DP, HS, Blok za Hrvatsku, HKS, Hrast [og]", "Hrvatski suverenisti", 9086L,
   "HR", "HDZ, HSLS [og]", "Hrvatska demokratska zajednica", 1431L,
   "HR", "HDZ, HSLS [og]", "Hrvatska socijalno liberalna stranka", 214L,
   "HR", "Hrvatska stranka prava (HSP) i koalicijski partneri [og]", "Croatian Party of Rights [og]", NA, # label pools HSP and HSP-AS
-  "HR", "Hrvatska stranka prava (HSP) i koalicijski partneri [og]", "Hrvatska stranka prava", 1128L,
+  "HR", "Hrvatska stranka prava (HSP) i koalicijski partneri [og]", "Hrvatska stranka prava", 253L,
   "HR", "Koalicija IDS, PGS, LRI [og]", "Istarski demokratski sabor", 513L,
   "HR", "Koalicija Pametno i Za grad [og]", "Pametno", 7336L,
   "HR", "Koalicija Živi zid, Promijenimo Hrvatsku, Abeceda, HDSS [og]", "Živi zid", 4867L,
@@ -346,6 +379,7 @@ alliances <- tribble(
   "HR", "SDP, HSS, HSU [og]", "Hrvatska seljačka stranka", 72L,
   "HR", "SDP, HSS, HSU [og]", "Hrvatska stranka umirovljenika", 2062L,
   "HR", "SDP, HSS, HSU [og]", "Socijaldemokratska partija Hrvatske", 1475L,
+  "HR", "SiP, Pametno, Fokus [og]", "Fokus", 9480L,
   "HR", "SiP, Pametno, Fokus [og]", "Pametno", 7336L,
   "HU", "Alliance for Hungary - Center Party [og]", "Centrumpárt", 1779L, # 2002 Centrum list
   "HU", "Egységben Magyarországért [og]", "Demokratikus Koalíció", 469L,
@@ -396,8 +430,6 @@ alliances <- tribble(
   "IT", "Coalition NCD (1380633) + UDC (1380633) + PPI [og]", "Unione dei Democratici Cristiani e Democratici di Centro", 1758L,
   "IT", "Il Girasole", "Federazione dei Verdi", 851L,
   "IT", "Il Girasole", "Socialisti Democratici Italiani", 750L,
-  "IT", "Il Popolo della Libertà", "Alleanza Nazionale", 813L, # 2008 joint list FI+AN; party 2009-13
-  "IT", "Il Popolo della Libertà", "Forza Italia", 1626L, # 2008 joint list FI+AN; party 2009-13
   "IT", "L'Ulivo", "Democratici di Sinistra", 878L,
   "IT", "L'Ulivo", "Democrazia è Libertà — La Margherita", 279L,
   "IT", "L'Unione", "Democratici di Sinistra", 878L,
@@ -429,28 +461,25 @@ alliances <- tribble(
   "LT", "Antikorupcinė N. Puteikio ir K. Krivicko koalicija (Lietuvos centro partija, Li [og]", "Lietuvos Centro Partija", 5455L,
   "LT", "Coalition of LLRA and LRS [og]", "Lietuvos lenkų rinkimų akcija", 556L,
   "LT", "Koalicija Darbo partija + Jaunimas", "Darbo Partija", 102L,
+  "LT", "Taikos koalicija (Lietuvos krikščioniškosios demokratijos partija, Žemaičių partija) [og]", "Lietuvos krikščioniškosios demokratijos partija [og]", NA,
   "LT", "Taikos koalicija (Lietuvos krikščioniškosios demokratijos partija, Žemaičių partija) [og]", "Žemaičių partija", 1291L,
   "LT", "„Valdemaro Tomaševskio blokas\" – Krikščioniškų šeimų sąjungos ir Rus [og]", "Lietuvos lenkų rinkimų akcija", 556L,
   "LV", "Attīstībai/Par!", "Kustība Par!", 7863L,
   "LV", "Attīstībai/Par!", "Latvijas attīstībai", 3213L,
-  "LV", "Jaunā Vienotība", "Vienotība", 852L,
+  "LV", "Coalition Apvienotais Saraksts (Latvijas Zaļā Partija, Latvijas Reģionu apvienība, Liepājas Partija) [og]", "Latvijas Reģionu apvienība", 3194L,
+  "LV", "Coalition Apvienotais Saraksts (Latvijas Zaļā Partija, Latvijas Reģionu apvienība, Liepājas Partija) [og]", "Latvijas Zaļā partija", 1296L,
+  "LV", "Coalition Apvienotais Saraksts (Latvijas Zaļā Partija, Latvijas Reģionu apvienība, Liepājas Partija) [og]", "Liepājas Partija", 8400L,
+  "LV", "Jaunā Vienotība", "Vienotība", 852L, # an alliance of Vienotība and regional parties at the 2018 and 2022 elections
   "LV", "LSDSP/KDS/GKL [og]", "Kristīgi demokrātiskā savienība", 304L,
-  "LV", "Latvijas Pirmā partija / Latvijas Ceļš", "Latvijas Ceļš", 1043L, # 2006 joint list, merged 2007
-  "LV", "Latvijas Pirmā partija / Latvijas Ceļš", "Latvijas Pirmā partija", 1778L, # 2006 joint list, merged 2007
-  "LV", "Nacionālā apvienība", "Tēvzemei un Brīvībai / LNNK", 1704L, # 2010 alliance, merged 2011
-  "LV", "Nacionālā apvienība", "Visu Latvijai!", 506L, # 2010 alliance, merged 2011
   "LV", "Par Labu Latviju!", "Latvijas Ceļš", 1043L, # via LPP/LC
   "LV", "Par Labu Latviju!", "Latvijas Pirmā partija", 1778L, # via LPP/LC
   "LV", "Par Labu Latviju!", "Latvijas Pirmā partija / Latvijas Ceļš", 461L,
   "LV", "Par Labu Latviju!", "Tautas Partija", 1755L,
   "LV", "Saskaņas Centrs", "Sociāldemokrātiskā Partija \"Saskaņa\"", 5976L,
-  "LV", "Vienotība", "Jaunais Laiks", 1531L, # 2010 alliance, merged 2011
-  "LV", "Vienotība", "Pilsoniskā savienība", 415L, # 2010 alliance, merged 2011
   "NL", "ChristenUnie — Staatkundig Gereformeerde Partij", "ChristenUnie", 1459L, # EP joint list
   "NL", "ChristenUnie — Staatkundig Gereformeerde Partij", "Staatkundig Gereformeerde Partij", 1178L, # EP joint list
   "NL", "Coalition GL - PvdA (GroenLinks,PvdA) [og]", "GroenLinks", 1537L,
   "NL", "Coalition GL - PvdA (GroenLinks,PvdA) [og]", "Partij van de Arbeid", 1234L,
-  "NL", "Coalition GL - PvdA (GroenLinks,PvdA) [og]", "Partij van de Arbeid (PvdA)/Europese Sociaaldemocraten [og]", NA,
   "PL", "Akcja Wyborcza Solidarność Prawicy", "Zjednoczenie Chrześcijańsko-Narodowe", 70L, # AWS founding member
   "PL", "Europa Plus Social Movement [og]", "Ruch Palikota / Twój Ruch", 731L, # 2014 EP list
   "PL", "Europa Plus Social Movement [og]", "Socjaldemokracja Polska", 1328L, # 2014 EP list
@@ -466,30 +495,24 @@ alliances <- tribble(
   "PL", "Lewica [og]", "Nowa Lewica", 9349L, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "Lewica [og]", "Polska Partia Socjalistyczna, PPS [og]", NA, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "Lewica [og]", "Sojusz Lewicy Demokratycznej", 57L, # 2019/2023 Lewica list; Spring = Wiosna
-  "PL", "Lewica [og]", "Spring", NA, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "Lewica [og]", "Wiosna", 7356L, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "Lewica [og]", "[Lewica] Razem", 4871L, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "Lewica i Demokraci", "Socjaldemokracja Polska", 1328L,
   "PL", "Lewica i Demokraci", "Sojusz Lewicy Demokratycznej", 57L,
   "PL", "Lewica i Demokraci", "Unia Pracy", 1104L,
-  "PL", "Nowa Lewica", "Polska Partia Socjalistyczna, PPS [og]", NA, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
-  "PL", "Nowa Lewica", "Sojusz Lewicy Demokratycznej", 57L, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
-  "PL", "Nowa Lewica", "Spring", NA, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
-  "PL", "Nowa Lewica", "Wiosna", 7356L, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
-  "PL", "Nowa Lewica", "[Lewica] Razem", 4871L, # 2021 merger SLD+Wiosna; 2023 list incl. Razem, PPS
+  "PL", "Nowa Lewica", "Polska Partia Socjalistyczna, PPS [og]", NA, # the 2023 Lewica list, registered by the Nowa Lewica committee; SLD and Wiosna are lineage
+  "PL", "Nowa Lewica", "[Lewica] Razem", 4871L, # the 2023 Lewica list, registered by the Nowa Lewica committee; SLD and Wiosna are lineage
   "PL", "Ogólnopolska Koalicja Obywatelska [og]", "Nowoczesna", 4630L,
   "PL", "Ogólnopolska Koalicja Obywatelska [og]", "Platforma Obywatelska", 1117L,
   "PL", "Senate 2001 coalition [og]", "Akcja Wyborcza Solidarność Prawicy", 863L, # Blok Senat 2001
   "PL", "Senate 2001 coalition [og]", "Platforma Obywatelska", 1117L, # Blok Senat 2001
   "PL", "Senate 2001 coalition [og]", "Prawo i Sprawiedliwość", 1565L, # Blok Senat 2001
   "PL", "Senate 2001 coalition [og]", "Unia Wolności", 8268L, # Blok Senat 2001
-  "PL", "Sojusz Lewicy Demokratycznej", "Socjaldemokracja Rzeczypospolitej Polskiej", 8224L, # SdRP core of SLD coalition, merged 1999
   "PL", "Sojusz Lewicy Demokratycznej — Unia Pracy", "Sojusz Lewicy Demokratycznej", 57L,
   "PL", "Sojusz Lewicy Demokratycznej — Unia Pracy", "Unia Pracy", 1104L,
   "PL", "The Left [og]", "Nowa Lewica", 9349L, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "The Left [og]", "Polska Partia Socjalistyczna, PPS [og]", NA, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "The Left [og]", "Sojusz Lewicy Demokratycznej", 57L, # 2019/2023 Lewica list; Spring = Wiosna
-  "PL", "The Left [og]", "Spring", NA, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "The Left [og]", "Wiosna", 7356L, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "The Left [og]", "[Lewica] Razem", 4871L, # 2019/2023 Lewica list; Spring = Wiosna
   "PL", "Trzecia Droga [og]", "Polska 2050", 9027L,
@@ -501,8 +524,9 @@ alliances <- tribble(
   "PL", "Zjednoczona Lewica", "Ruch Palikota / Twój Ruch", 731L,
   "PL", "Zjednoczona Lewica", "Sojusz Lewicy Demokratycznej", 57L,
   "PL", "Zjednoczona Lewica", "Unia Pracy", 1104L,
-  "PT", "Aliança Democrática", "Centro Democrático e Social / Partido Popular", 1308L,
-  "PT", "Aliança Democrática", "Partido Popular Democrático / Partido Social Democrata", 1359L,
+  "PT", "Aliança Democrática [og]", "Centro Democrático e Social / Partido Popular", 1308L, # the 2024 list, not the AD of 1979-80
+  "PT", "Aliança Democrática [og]", "Partido Popular Democrático / Partido Social Democrata", 1359L, # the 2024 list, not the AD of 1979-80
+  "PT", "Aliança Democrática [og]", "Partido Popular Monárquico", 1480L, # the 2024 list, not the AD of 1979-80
   "PT", "Coligação Democrática Unitária", "Partido Comunista Português", 310L,
   "PT", "Coligação Democrática Unitária", "Partido Ecologista — Os Verdes", 886L,
   "PT", "Coligação: PSD (6), CDS - PP (2), Força Portugal [only in v112] [og]", "Centro Democrático e Social / Partido Popular", 1308L,
@@ -521,9 +545,9 @@ alliances <- tribble(
   "RO", "Alianța Dreapta Unită [og]", "Partidul Mișcarea Populară", 3210L,
   "RO", "Alianța Dreapta Unită [og]", "Uniunea Salvați România", 5969L,
   "RO", "Alianța Electorală PSD-PNL [og]", "Partidul Naţional Liberal", 481L,
-  "RO", "Alianța Electorală PSD-PNL [og]", "Partidul Social Democrat", 2555L,
+  "RO", "Alianța Electorală PSD-PNL [og]", "Partidul Social Democrat", 120L,
   "RO", "Alianța PSD+PC", "Partidul Conservator / Partidul Umanist Român", 1443L,
-  "RO", "Alianța PSD+PC", "Partidul Social Democrat", 2555L,
+  "RO", "Alianța PSD+PC", "Partidul Social Democrat", 120L,
   "RO", "Alianța USR-PLUS [og]", "Partidul Libertate, Unitate și Solidaritate (PLUS) [og]", NA,
   "RO", "Alianța USR-PLUS [og]", "Partidul Libertății Unității și Solidarității (PLUS) [og]", NA,
   "RO", "Alianța USR-PLUS [og]", "Uniunea Salvați România", 5969L,
@@ -533,25 +557,24 @@ alliances <- tribble(
   "RO", "Convenţia Democrată Română", "Partidul Naţional Liberal", 481L, # CDR member 1992-2000
   "RO", "Convenţia Democrată Română", "Partidul Naţional Ţărănesc Creştin Democrat", 1750L,
   "RO", "Electoral Alliance PSD (1642300) + UNPR + PC (1642600) [og]", "Partidul Conservator / Partidul Umanist Român", 1443L,
-  "RO", "Electoral Alliance PSD (1642300) + UNPR + PC (1642600) [og]", "Partidul Social Democrat", 2555L,
+  "RO", "Electoral Alliance PSD (1642300) + UNPR + PC (1642600) [og]", "Partidul Social Democrat", 120L,
   "RO", "PSD-UNPR-PC Electoral Alliance [og]", "Partidul Conservator / Partidul Umanist Român", 1443L,
-  "RO", "PSD-UNPR-PC Electoral Alliance [og]", "Partidul Social Democrat", 2555L,
-  "RO", "PSD-UNPR-PC Electoral Alliance [og]", "Partidul Social Democrat Român", 1034L, # label used for PSD in this source
+  "RO", "PSD-UNPR-PC Electoral Alliance [og]", "Partidul Social Democrat", 120L,
   "RO", "Uniunea Naţională PSD+PUR", "Partidul Conservator / Partidul Umanist Român", 1443L,
-  "RO", "Uniunea Naţională PSD+PUR", "Partidul Social Democrat", 2555L,
+  "RO", "Uniunea Naţională PSD+PUR", "Partidul Social Democrat", 120L,
   "RO", "Uniunea Social Liberală", "Partidul Conservator / Partidul Umanist Român", 1443L,
   "RO", "Uniunea Social Liberală", "Partidul Naţional Liberal", 481L,
-  "RO", "Uniunea Social Liberală", "Partidul Social Democrat", 2555L,
+  "RO", "Uniunea Social Liberală", "Partidul Social Democrat", 120L,
   "SI", "Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521)) [og]", "Nova Slovenija — Krščanska ljudska stranka", 1618L,
-  "SI", "Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521)) [og]", "Slovenska ljudska stranka", 6740L,
+  "SI", "Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521)) [og]", "Slovenska ljudska stranka", 764L,
   "SI", "LDS (2) + DESUS (1) [only in v112] [og]", "Demokratična stranka upokojencev Slovenije", 467L,
   "SI", "LDS (2) + DESUS (1) [only in v112] [og]", "Liberalna demokracija Slovenije", 975L,
   "SI", "Slovenska demokratska stranka + Slovenska ljudska stranka [og]", "Slovenska demokratska stranka", 472L,
-  "SI", "Slovenska demokratska stranka + Slovenska ljudska stranka [og]", "Slovenska ljudska stranka", 6740L,
+  "SI", "Slovenska demokratska stranka + Slovenska ljudska stranka [og]", "Slovenska ljudska stranka", 764L,
   "SI", "Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS) [og]", "Slovenska demokratska stranka", 472L,
-  "SI", "Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS) [og]", "Slovenska ljudska stranka", 6740L,
+  "SI", "Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS) [og]", "Slovenska ljudska stranka", 764L,
   "SK", "Hungarian Community Togetherness [og]", "Strana maďarskej koalície / Strana maďarskej komunity", 349L, # 2020 MKÖ joint list
-  "SK", "Koalícia Komunistická Strana Slovenska, Vzdor - Strana Práce [og]", "Komunistická strana Slovenska", 6798L,
+  "SK", "Koalícia Komunistická Strana Slovenska, Vzdor - Strana Práce [og]", "Komunistická strana Slovenska", 340L,
   "SK", "Koalícia Komunistická Strana Slovenska, Vzdor - Strana Práce [og]", "VZDOR - strana práce [og]", NA,
   "SK", "Obyčajní Ľudia a Nezávislé Osobnosti", "Nová väčšina", 6686L, # joint lists 2016/2020
   "SK", "Obyčajní Ľudia a Nezávislé Osobnosti", "Za ľudí", 8394L, # 2023 joint list
@@ -563,8 +586,6 @@ alliances <- tribble(
   "SK", "Progressive Slovakia - TOGETHER-Civic Democracy [og]", "Spolu — občianska demokracia", 8177L,
   "SK", "Progressive Slovakia and Together - Civic Democracy [og]", "Progresívne Slovensko", 7361L,
   "SK", "Progressive Slovakia and Together - Civic Democracy [og]", "Spolu — občianska demokracia", 8177L,
-  "SK", "Progresívne Slovensko/ SPOLU [og]", "Progresívne Slovensko", 7361L,
-  "SK", "Progresívne Slovensko/ SPOLU [og]", "Spolu — občianska demokracia", 8177L,
   "SK", "SNS (Slovenská národná strana) / Pravá SNS [og]", "Slovenská národná strana", 730L, # combined answer category
   "SK", "hungarian community togetherness [og]", "Strana maďarskej koalície / Strana maďarskej komunity", 349L # 2020 MKÖ joint list
 )
@@ -579,56 +600,277 @@ alliances |>
 write_csv(alliances, here("data", "02_processed", "pf_alliances.csv"), na = "")
 ```
 
+# Aliases
+
+A few answers in the eu25games release carry a label rather than the Party Facts name of the party they name, so they differ from the same party's name in another item: the EP-list labels of the PvdA and the CDA, "Zeleni Slovenije [og]" for Zeleni Slovenije (1494), and three English or short names.
+The release is published upstream, so they are resolved here rather than recoded.
+(Label variants in the ESS, CSES and EES are fixed where they are coded, in notebooks 1.2–1.4.)
+
+```{r}
+#| label: aliases
+
+aliases <- tribble(
+  ~cntry, ~alias, ~name,
+  "GB", "Plaid Cymru — the Party of Wales", "Plaid Cymru",
+  "LT", "Tvarka ir teisingumas", "Tvarka ir teisingumas — Liberalų Demokratų Partija",
+  "NL", "Christen-Democratisch Appèl (CDA) - Europese Volkspartij [og]", "Christen Democratisch Appèl", # 2019 EP list label
+  "NL", "Partij van de Arbeid (PvdA)/Europese Sociaaldemocraten [og]", "Partij van de Arbeid", # 2019 EP list label
+  "PL", "Spring", "Wiosna",
+  "SI", "Zeleni Slovenije [og]", "Zeleni Slovenije"
+)
+
+pf_check_aliases(aliases, core = core)
+write_csv(aliases, here("data", "02_processed", "pf_aliases.csv"), na = "")
+```
+
+# Lineage
+
+A party and the party it continued in count as the same party from the year of the succession on.
+The table lists what counts as a succession and, as a record of the review, the candidates that were looked at and do not count.
+
+**Lineage** (`decision = "lineage"`) is a party that ended and continued as a whole in another:
+
+- a **rename** or **refoundation** that Party Facts gives a new id (UMP → Les Républicains 2015, CVP → CD&V 2001, Forza Italia → Forza Italia (2013));
+- a **merger into** another party, which the predecessor did not survive (PDS → Die Linke 2007, PD and PLD → PDL 2007, PDL → PNL 2014, Isamaaliit and Res Publica → IRL 2006).
+
+A joint list that later became a party (the Popolo della Libertà, a list of FI and AN in 2008 and a party from 2009; Vienotība and the Nacionālā apvienība, alliances in 2010 and parties from 2011; the SLD, a coalition led by the SdRP from 1991 and a party from 1999) is listed here with the year of the joint list, since the pair counts as the same party both as alliance and as lineage.
+
+**Not lineage** (`decision = "not: ..."`):
+
+- `breakaway`: a party that split from another which continued (Fratelli d'Italia from the PdL, the PMP from the PDL, Hlas from Smer);
+- `broke up`: a party that ended in several successors, none of which continues it as a whole (the Volksunie in N-VA and Spirit, the AWS in PO, PiS and LPR);
+- `sibling`: two predecessors of one successor (Jaunais Laiks and Pilsoniskā savienība, both merged into Vienotība);
+- `name reused`: a succession that cannot be told apart by name, because a later party carries the predecessor's name (the SDĽ merged into Smer in 2005, but a new SDĽ with the same name ran from 2005 on, so any SDĽ answer from 2005 is the new party);
+- `unrelated`: parties that follow each other in time but are not predecessor and successor, or a pair that reflects a coding problem in a source rather than a party's history.
+
+```{r}
+#| label: lineage
+
+lineage_review <- tribble(
+  ~cntry, ~predecessor, ~predecessor_id, ~successor, ~successor_id, ~year, ~decision,
+  # renames and refoundations
+  "BE", "Christelijke Volkspartij", 622L, "Christen-Democratisch en Vlaams", 604L, 2001L, "lineage",
+  "BE", "Vlaams Blok / Belang", 553L, "Vlaams Belang", 1968L, 2004L, "lineage", # refounded after the 2004 conviction
+  "ES", "Convergència Democràtica de Catalunya", 4795L, "Partit Demòcrata Europeu Català", 6027L, 2016L, "lineage",
+  "FR", "Les Verts", 1108L, "Europe Écologie — Les Verts", 5650L, 2010L, "lineage",
+  "FR", "Union pour la démocratie française", 213L, "Mouvement démocrate", 496L, 2007L, "lineage",
+  "FR", "Union pour un mouvement populaire", 1595L, "Les Républicains", 8168L, 2015L, "lineage",
+  "IT", "Federazione dei Verdi", 851L, "Europa Verde", 9110L, 2021L, "lineage",
+  "IT", "Forza Italia", 1626L, "Forza Italia (2013)", 8058L, 2013L, "lineage", # refounded from the PdL; listed explicitly, not chained
+  "IT", "Il Popolo della Libertà", 365L, "Forza Italia (2013)", 8058L, 2013L, "lineage", # the PdL renamed itself Forza Italia; NCD split off
+  "PL", "Sojusz Lewicy Demokratycznej", 57L, "Nowa Lewica", 9349L, 2021L, "lineage", # the SLD renamed itself after absorbing Wiosna
+  "PL", "Unia Wolności", 8268L, "Partia Demokratyczna", 1566L, 2005L, "lineage",
+  # mergers into another party
+  "AT", "Liberales Forum", 605L, "NEOS — Das Neue Österreich", 1970L, 2014L, "lineage",
+  "BE", "Parti Réformateur Libéral - Front Démocratique des Francophones", 8259L, "Mouvement Réformateur", 789L, 2002L, "lineage",
+  "BE", "Parti Réformateur Libéral", 554L, "Mouvement Réformateur", 789L, 2002L, "lineage",
+  "CZ", "Demokratická unie", 1171L, "Unie svobody / Demokratická unie", 104L, 2001L, "lineage",
+  "CZ", "Unie svobody", 905L, "Unie svobody / Demokratická unie", 104L, 2001L, "lineage",
+  "DE", "Partei des Demokratischen Sozialismus", 86L, "Die Linke", 1545L, 2007L, "lineage", # Linkspartei.PDS merged with the WASG
+  "EE", "Eestimaa Rahvalliit", 110L, "Eesti Konservatiivne Rahvaerakond", 4094L, 2012L, "lineage",
+  "EE", "Isamaaliit", 779L, "Erakond Isamaa ja Res Publica Liit", 685L, 2006L, "lineage",
+  "EE", "Ühendus vabariigi eest / Res Publica", 491L, "Erakond Isamaa ja Res Publica Liit", 685L, 2006L, "lineage",
+  "FR", "Démocratie Libérale", 4364L, "Union pour un mouvement populaire", 1595L, 2002L, "lineage",
+  "FR", "Rassemblement pour la République", 509L, "Union pour un mouvement populaire", 1595L, 2002L, "lineage",
+  "IT", "Centro Cristiano Democratico  / Cristiani Democratici Uniti (Biancofiore)", 962L, "Unione dei Democratici Cristiani e Democratici di Centro", 1758L, 2002L, "lineage",
+  "IT", "Centro Cristiano Democratico", 1767L, "Unione dei Democratici Cristiani e Democratici di Centro", 1758L, 2002L, "lineage",
+  "IT", "Democratici di Sinistra", 878L, "Partito Democratico", 802L, 2007L, "lineage",
+  "IT", "Democrazia è Libertà — La Margherita", 279L, "Partito Democratico", 802L, 2007L, "lineage",
+  "IT", "L'Ulivo", 1737L, "Partito Democratico", 802L, 2007L, "lineage", # the DS-Margherita joint list became the PD
+  "PL", "Kongres Liberalno-Demokratyczny", 153L, "Unia Wolności", 8268L, 1994L, "lineage",
+  "PL", "Unia Demokratyczna", 1046L, "Unia Wolności", 8268L, 1994L, "lineage",
+  "PL", "Wiosna", 7356L, "Nowa Lewica", 9349L, 2021L, "lineage",
+  "RO", "Partidul Democrat", 1715L, "Partidul Democrat-Liberal", 660L, 2007L, "lineage",
+  "RO", "Partidul Democrat-Liberal", 660L, "Partidul Naţional Liberal", 481L, 2014L, "lineage", # the PNL absorbed the PDL
+  "RO", "Partidul Liberal Democrat", 874L, "Partidul Democrat-Liberal", 660L, 2007L, "lineage",
+  "RO", "Partidul Libertate, Unitate și Solidaritate (PLUS) [og]", NA, "Uniunea Salvați România", 5969L, 2021L, "lineage", # USR and PLUS merged as the USR
+  "RO", "Partidul Libertății Unității și Solidarității (PLUS) [og]", NA, "Uniunea Salvați România", 5969L, 2021L, "lineage",
+  "RO", "Partidul Social Democrat Român", 1034L, "Partidul Social Democrat", 120L, 2001L, "lineage",
+  # joint lists that became parties
+  "IT", "Alleanza Nazionale", 813L, "Il Popolo della Libertà", 365L, 2008L, "lineage", # joint list 2008, party 2009
+  "IT", "Forza Italia", 1626L, "Il Popolo della Libertà", 365L, 2008L, "lineage", # joint list 2008, party 2009
+  "LV", "Jaunais Laiks", 1531L, "Vienotība", 852L, 2010L, "lineage", # alliance 2010, party 2011
+  "LV", "Latvijas Ceļš", 1043L, "Latvijas Pirmā partija / Latvijas Ceļš", 461L, 2006L, "lineage", # joint list 2006, party 2007
+  "LV", "Latvijas Pirmā partija", 1778L, "Latvijas Pirmā partija / Latvijas Ceļš", 461L, 2006L, "lineage", # joint list 2006, party 2007
+  "LV", "Pilsoniskā savienība", 415L, "Vienotība", 852L, 2010L, "lineage", # alliance 2010, party 2011
+  "LV", "Sabiedrība citai politikai", 627L, "Vienotība", 852L, 2010L, "lineage", # alliance 2010, party 2011
+  "LV", "Tēvzemei un Brīvībai / LNNK", 1704L, "Nacionālā apvienība", 7619L, 2010L, "lineage", # alliance 2010, party 2011
+  "LV", "Visu Latvijai!", 506L, "Nacionālā apvienība", 7619L, 2010L, "lineage", # alliance 2010, party 2011
+  "PL", "Socjaldemokracja Rzeczypospolitej Polskiej", 8224L, "Sojusz Lewicy Demokratycznej", 57L, 1991L, "lineage", # SdRP-led coalition from 1991, party 1999
+  # reviewed, not lineage
+  "BE", "Volksunie [Vlaamse Concentratie]", 1424L, "Nieuw-Vlaamse Alliantie", 36L, NA, "not: broke up", # 2001, into N-VA and Spirit
+  "BE", "Volksunie [Vlaamse Concentratie]", 1424L, "Sociaal-Liberale Partij", 7015L, NA, "not: broke up", # 2001, into N-VA and Spirit
+  "BG", "Obedineni Demokratichni Sili", NA, "Grazhdani za evropeysko razvitie na Balgariya", NA, NA, "not: unrelated",
+  "CZ", "Věci veřejné", NA, "Tradice Odpovědnost Prosperita 09", NA, NA, "not: unrelated",
+  "DK", "Venstre", NA, "Det Radikale Venstre", NA, NA, "not: unrelated", # the names overlap; separate parties since 1905
+  "FR", "Chasse, pêche, nature, traditions", NA, "Union pour un mouvement populaire", 1595L, NA, "not: unrelated",
+  "FR", "Les Verts", 1108L, "Mouvement démocrate", 496L, NA, "not: unrelated",
+  "FR", "Europe Écologie — Les Verts", 5650L, "Union pour un mouvement populaire", 1595L, NA, "not: unrelated",
+  "FR", "Union pour la démocratie française", 213L, "Union pour un mouvement populaire", 1595L, NA, "not: breakaway", # most UDF deputies joined the UMP in 2002; the UDF continued to 2007
+  "FR", "Union des démocrates et indépendants", NA, "Union pour un mouvement populaire", 1595L, NA, "not: unrelated",
+  "IT", "Il Popolo della Libertà", 365L, "Fratelli d'Italia", 2280L, NA, "not: breakaway", # 2012
+  "IT", "Democrazia è Libertà — La Margherita", 279L, "Il Girasole", NA, NA, "not: unrelated", # EES 2004 coding problem, see Known Quirks
+  "IT", "Partito dei Comunisti Italiani", NA, "Il Girasole", NA, NA, "not: unrelated", # EES 2004 coding problem, see Known Quirks
+  "IT", "Democratici di Sinistra", 878L, "Il Girasole", NA, NA, "not: unrelated", # EES 2004 coding problem, see Known Quirks
+  "LV", "Jaunais Laiks", 1531L, "Pilsoniskā savienība", 415L, NA, "not: sibling", # both merged into Vienotība
+  "LV", "Tēvzemei un Brīvībai / LNNK", 1704L, "Vienotība", 852L, NA, "not: unrelated",
+  "LV", "Tēvzemei un Brīvībai / LNNK", 1704L, "Pilsoniskā savienība", 415L, NA, "not: breakaway", # founded 2008 by TB/LNNK defectors
+  "LV", "Latvijas Ceļš", 1043L, "Par cilvēka tiesībām vienotā Latvijā", NA, NA, "not: unrelated",
+  "LV", "Saskaņas Centrs", NA, "Vienotība", 852L, NA, "not: unrelated",
+  "PL", "[Lewica] Razem", NA, "Koalicja Obywatelska", NA, NA, "not: unrelated",
+  "RO", "Alianţa Dreptate şi Adevăr", NA, "Uniunea Naţională PSD+PUR", NA, NA, "not: unrelated", # rival alliances of 2004
+  "PL", "Akcja Wyborcza Solidarność Prawicy", 863L, "Platforma Obywatelska", 1117L, NA, "not: broke up", # 2001, into PO, PiS and LPR
+  "PL", "Akcja Wyborcza Solidarność Prawicy", 863L, "Prawo i Sprawiedliwość", 1565L, NA, "not: broke up",
+  "PL", "Akcja Wyborcza Solidarność Prawicy", 863L, "Liga Polskich Rodzin", NA, NA, "not: broke up",
+  "PL", "Unia Wolności", 8268L, "Platforma Obywatelska", 1117L, NA, "not: breakaway", # 2001
+  "PL", "Sojusz Lewicy Demokratycznej — Unia Pracy", 6183L, "Socjaldemokracja Polska", 1328L, NA, "not: breakaway", # SDPL split from the SLD in 2004
+  "PL", "Koalicja Obywatelska", NA, "Polska 2050", NA, NA, "not: unrelated",
+  "PL", "Koalicja Obywatelska", NA, "Nowa Lewica", 9349L, NA, "not: unrelated",
+  "RO", "Partidul Democrat-Liberal", 660L, "Partidul Mișcarea Populară", 3210L, NA, "not: breakaway", # 2014
+  "RO", "Convenţia Democrată Română", NA, "Partidul Social Democrat", 120L, NA, "not: unrelated",
+  "SI", "Stranka Mira Cerarja / Stranka modernega centra", NA, "Združena levica", NA, NA, "not: unrelated",
+  "SK", "Smer — sociálna demokracia", 311L, "Hlas", NA, NA, "not: breakaway", # 2020
+  "SK", "Strana demokratickej ľavice", 1242L, "Smer — sociálna demokracia", 311L, NA, "not: name reused" # merged into Smer 2005; a new SDĽ (2131) ran from 2005
+)
+
+lineage <- lineage_review |>
+  filter(decision == "lineage") |>
+  select(-decision)
+
+pf_check_lineage(lineage, alliances, core = core)
+
+lineage_review |>
+  count(cntry, decision) |>
+  pivot_wider(names_from = decision, values_from = n, values_fill = 0) |>
+  print(n = Inf)
+
+write_csv(lineage, here("data", "02_processed", "pf_lineage.csv"), na = "")
+
+rules <- list(aliases = aliases, alliances = alliances, lineage = lineage)
+```
+
+## Candidates
+
+The review starts from the pairs a respondent gives, not from party histories: every attachment/vote pair still scored *different* with at least five answers in one source is a candidate when
+
+- the Party Facts years fit a succession: one party left Party Facts (`year_last`) within five years of the other's first year (`year_first`); or
+- one name contains the other.
+
+A candidate with ten or more answers that is not in the review table stops the notebook, so that a new source or a changed coding cannot add a succession silently.
+Candidates below ten answers are printed for information.
+
+```{r}
+#| label: lineage-candidates
+
+pf_years <- read_csv(
+  file.path(pf_dir, "partyfacts-core-parties.csv"),
+  col_types = cols(.default = col_character())
+) |>
+  transmute(country, name, year_first = as.integer(year_first), year_last = as.integer(year_last)) |>
+  distinct(country, name, .keep_all = TRUE)
+
+near <- \(last, first) !is.na(last) & !is.na(first) & abs(first - last) <= 5
+
+lineage_candidates <- pairs |>
+  filter(pf_match(cntry, att, vote, rules, year) == "different") |>
+  mutate(p1 = pmin(att, vote), p2 = pmax(att, vote)) |>
+  count(source, cntry, p1, p2) |>
+  filter(n >= 5) |>
+  summarise(n = sum(n), sources = paste(sort(unique(source)), collapse = ", "), .by = c(cntry, p1, p2)) |>
+  mutate(iso3 = pf_iso3[cntry]) |>
+  left_join(rename(pf_years, y1_first = year_first, y1_last = year_last), by = c(iso3 = "country", p1 = "name")) |>
+  left_join(rename(pf_years, y2_first = year_first, y2_last = year_last), by = c(iso3 = "country", p2 = "name")) |>
+  mutate(
+    n1 = normalise_party(str_remove(p1, fixed(" [og]"))),
+    n2 = normalise_party(str_remove(p2, fixed(" [og]"))),
+    by_years = near(y1_last, y2_first) | near(y2_last, y1_first),
+    by_name = contains_words(n1, n2) | contains_words(n2, n1),
+    reviewed = pf_pair_in(cntry, p1, p2, lineage_review$cntry, lineage_review$predecessor, lineage_review$successor)
+  ) |>
+  filter(by_years | by_name) |>
+  select(cntry, p1, p2, n, sources, by_years, by_name, reviewed) |>
+  arrange(desc(n))
+
+lineage_candidates |>
+  mutate(across(c(p1, p2), \(x) str_trunc(x, 40))) |>
+  print(n = Inf)
+
+unreviewed <- filter(lineage_candidates, !reviewed, n >= 10)
+if (nrow(unreviewed) > 0) {
+  print(unreviewed)
+  stop("lineage candidates with 10+ answers not in the review table")
+}
+```
+
 # Before and After
 
-The share of *same party* among attached voters with two real party answers, compared by Party Facts name only and with the alliance rule.
+The share of *same party* among attached voters with two real party answers: by Party Facts name only, then adding aliases, alliances and lineage in turn.
 
 ```{r}
 #| label: before-after
 
+rules_aliases <- list(aliases = aliases, alliances = alliances[0, ], lineage = lineage[0, ])
+rules_alliances <- list(aliases = aliases, alliances = alliances, lineage = lineage[0, ])
 pairs |>
   mutate(
     by_name = att == vote,
-    with_alliances = pf_match(cntry, att, vote, alliances) == "same"
+    with_aliases = pf_match(cntry, att, vote, rules_aliases, year) == "same",
+    with_alliances = pf_match(cntry, att, vote, rules_alliances, year) == "same",
+    with_lineage = pf_match(cntry, att, vote, rules, year) == "same"
   ) |>
   summarise(
     pairs = n(),
-    by_name = mean(by_name),
-    with_alliances = mean(with_alliances),
+    across(c(by_name, with_aliases, with_alliances, with_lineage), mean),
     .by = c(source, cntry)
   ) |>
-  mutate(gain = with_alliances - by_name) |>
+  mutate(gain = with_lineage - by_name) |>
   arrange(desc(gain)) |>
+  print(n = 40)
+
+# Pairs made the same party by each route, largest first
+pairs |>
+  mutate(route = pf_match_route(cntry, att, vote, rules, year)) |>
+  filter(route %in% c("alias", "lineage")) |>
+  count(route, cntry, att, vote, sort = TRUE) |>
+  mutate(across(c(att, vote), \(x) str_trunc(x, 40))) |>
   print(n = 40)
 ```
 
-Spot checks: attachment to the CDU and a vote for the CDU/CSU union match, attachment to the CDU and a vote for the CSU do not; the same for Fidesz and Fidesz–KDNP, and for PO and KO.
+Spot checks: attachment to the CDU and a vote for the CDU/CSU union are the same party, attachment to the CDU and a vote for the CSU are not; the same for Fidesz and Fidesz–KDNP, and for PO and KO.
+Lineage holds from the year of the succession on (UMP and Les Républicains in 2017, not in 2012; PDL and PNL in 2014, not in 2012) and is never chained (AN and Forza Italia (2013)); a breakaway (the PdL and Fratelli d'Italia) and two predecessors of one successor (Forza Italia and AN) stay different.
 
 ```{r}
 #| label: spot-checks
 
-tribble(
-  ~cntry, ~att, ~vote,
-  "DE", "Christlich Demokratische Union", "Christlich Demokratische Union / Christlich Soziale Union",
-  "DE", "Christlich Soziale Union", "Christlich Demokratische Union / Christlich Soziale Union",
-  "DE", "Christlich Demokratische Union", "Christlich Soziale Union",
-  "HU", "Fidesz — Magyar Polgári Szövetség", "Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége",
-  "PL", "Platforma Obywatelska", "Koalicja Obywatelska"
+spot <- tribble(
+  ~cntry, ~year, ~att, ~vote, ~expected,
+  "DE", 2017L, "Christlich Demokratische Union", "Christlich Demokratische Union / Christlich Soziale Union", "alliance",
+  "DE", 2017L, "Christlich Soziale Union", "Christlich Demokratische Union / Christlich Soziale Union", "alliance",
+  "DE", 2017L, "Christlich Demokratische Union", "Christlich Soziale Union", NA,
+  "HU", 2019L, "Fidesz — Magyar Polgári Szövetség", "Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége", "alliance",
+  "PL", 2019L, "Platforma Obywatelska", "Koalicja Obywatelska", "alliance",
+  "NL", 2019L, "Partij van de Arbeid", "Partij van de Arbeid (PvdA)/Europese Sociaaldemocraten [og]", "alias",
+  "FR", 2017L, "Union pour un mouvement populaire", "Les Républicains", "lineage",
+  "FR", 2012L, "Union pour un mouvement populaire", "Les Républicains", NA,
+  "RO", 2014L, "Partidul Democrat-Liberal", "Partidul Naţional Liberal", "lineage",
+  "RO", 2012L, "Partidul Democrat-Liberal", "Partidul Naţional Liberal", NA,
+  "IT", 2019L, "Alleanza Nazionale", "Forza Italia (2013)", NA,
+  "IT", 2009L, "Forza Italia", "Alleanza Nazionale", NA,
+  "IT", 2014L, "Il Popolo della Libertà", "Fratelli d'Italia", NA,
+  "LV", 2011L, "Tēvzemei un Brīvībai / LNNK", "Nacionālā apvienība", "lineage"
 ) |>
-  mutate(match = pf_match(cntry, att, vote, alliances))
+  mutate(route = pf_match_route(cntry, att, vote, rules, year))
+spot
+stopifnot(identical(spot$route, spot$expected))
 ```
 
-The largest pairs still scored *different*: these should be genuine switches, not alliances missing from the table.
-Two kinds of pair are *different* by construction, not by oversight:
-
-- **Renamed or refounded parties with a new Party Facts id** (UMP and Les Républicains, PD and PDL in Romania, SDĽ and Smer): the table lists alliances only, not successors or later mergers.
-- **Suspect answers in the sources**, e.g. EES 2004 Italy, where attachment to the Margherita or the PdCI pairs with a vote for Il Girasole (Verdi + SDI) hundreds of times, which points to a mislabelled vote code upstream rather than to an alliance.
+The largest pairs still scored *different*: genuine switches, breakaways and the other reviewed non-successions above, and suspect answers in the sources, e.g. EES 2004 Italy, where attachment to the Margherita or the PdCI pairs with a vote for Il Girasole (Verdi + SDI) hundreds of times, which points to a mislabelled vote code upstream rather than to an alliance.
 
 ```{r}
 #| label: remaining
 
 pairs |>
-  filter(pf_match(cntry, att, vote, alliances) == "different") |>
+  filter(pf_match(cntry, att, vote, rules, year) == "different") |>
   count(cntry, att, vote, sort = TRUE) |>
   mutate(across(c(att, vote), \(x) str_trunc(x, 32))) |>
   head(30)
@@ -636,21 +878,21 @@ pairs |>
 
 # Match Files
 
-For every vote item, the match with the attachment item of the same respondent.
+For every vote item, the match with the attachment item of the same respondent (`ext_match_*`) and, when it is the same party, the route (`ext_route_*`).
 
 ```{r}
 #| label: match-files
 
 add_matches <- function(df, att, votes) {
   for (v in votes) {
-    df[[paste0("ext_match_", v)]] <- pf_match(
-      df$cntry,
-      df[[paste0("ext_", att, "_pf_name")]],
-      df[[paste0("ext_", v, "_pf_name")]],
-      alliances
-    )
+    a <- df[[paste0("ext_", att, "_pf_name")]]
+    b <- df[[paste0("ext_", v, "_pf_name")]]
+    m <- pf_match(df$cntry, a, b, rules, df$year)
+    r <- pf_match_route(df$cntry, a, b, rules, df$year)
     # no vote item for this respondent
-    df[[paste0("ext_match_", v)]][is.na(df[[paste0("ext_", v, "_pf_name")]])] <- NA
+    m[is.na(b)] <- NA
+    df[[paste0("ext_match_", v)]] <- m
+    df[[paste0("ext_route_", v)]] <- r
   }
   df
 }
@@ -663,15 +905,15 @@ vote_stubs <- function(df, pattern) {
 
 ess_match <- ess |>
   add_matches("prtcl", vote_stubs(ess, "^ext_prtv.*_pf_name$")) |>
-  select(cntry, essround, name, idno, starts_with("ext_match_"))
+  select(cntry, essround, name, idno, starts_with(c("ext_match_", "ext_route_")))
 
 cses_match <- cses |>
   add_matches("imd3005_3", vote_stubs(cses, "^ext_(imd3002|f3016)_.*_pf_name$")) |>
-  select(release, study, respondent, cntry, year, starts_with("ext_match_"))
+  select(release, study, respondent, cntry, year, starts_with(c("ext_match_", "ext_route_")))
 
 ees_match <- ees |>
   add_matches("pid", vote_stubs(ees, "^ext_vote_.*_pf_name$")) |>
-  select(wave, row, respondent, cntry, region, starts_with("ext_match_"))
+  select(wave, row, respondent, cntry, region, starts_with(c("ext_match_", "ext_route_")))
 
 write_parquet(ess_match, here("data", "02_processed", "ess_party_match.parquet"), compression = "zstd")
 write_parquet(cses_match, here("data", "02_processed", "cses_party_match.parquet"), compression = "zstd")
@@ -685,7 +927,30 @@ map(
     count(name, value) |>
     pivot_wider(names_from = value, values_from = n, values_fill = 0)
 )
+
+# Routes of the same-party matches
+map(
+  list(ESS = ess_match, CSES = cses_match, EES = ees_match),
+  \(d) d |>
+    select(starts_with("ext_route_")) |>
+    pivot_longer(everything()) |>
+    filter(!is.na(value)) |>
+    count(name, value) |>
+    pivot_wider(names_from = value, values_from = n, values_fill = 0)
+)
 ```
+
+# Known Quirks and Judgement Calls
+
+- **Lineage counts as the same party.** A respondent attached to a party that has since been renamed, refounded or merged into another, and who votes for the successor, has not switched party; their attachment has followed the organisation. This is a choice, and `ext_route_*` shows which *same* matches rest on it, so an analysis can exclude them.
+- **Lineage is time-bounded but not chained.** A pair is lineage only in surveys from the year of the succession on, since before it the two were separate parties (a PDL supporter voting PNL in 2012 switched). Chains are listed explicitly where they hold (Forza Italia → Forza Italia (2013), besides Forza Italia → PdL → Forza Italia (2013)) and otherwise do not apply (Alleanza Nazionale → PdL does not make AN the same party as Forza Italia (2013), which most of AN did not join).
+- **Joint lists that became parties** (PdL, Vienotība, Nacionālā apvienība, LPP/LC, the SLD) are listed under lineage with the year of the joint list, not under alliances; the SYRIZA coalition, whose main component SYN dissolved into the SYRIZA party in 2013, stays under alliances. Either way the pair is the same party from the joint list on.
+- **Jaunā Vienotība** is listed as an alliance containing Vienotība (the 2018 and 2022 lists of Vienotība and regional parties).
+- **Nowa Lewica** is the SLD renamed after absorbing Wiosna in 2021 (lineage), and the 2023 *Lewica* list, which the Nowa Lewica committee registered, also carried Razem and the PPS (alliance). Razem never joined the party, so outside 2023 the alliance reading is generous.
+- **The SDĽ** merged into Smer in 2005, but a new party of the same name ran from 2005 on, and matching is by name, so the pair is not lineage (see `name reused`).
+- **The 2024 Portuguese Aliança Democrática** is the list of PSD, CDS-PP and PPM of 2024, coded `[og]` in notebook 1.4, not the AD of 1979–80 that Party Facts lists (1742).
+- **EES 2004 Italy**: attachment to the Margherita, the DS or the PdCI pairs with a vote for Il Girasole (Verdi + SDI) hundreds of times, which points to a mislabelled vote code upstream rather than to an alliance or a succession; the pairs stay *different*.
+- **Alliance calls with the least certain membership** are commented in the alliance table (e.g. OĽaNO including Za ľudí, Kinima Allagis as PASOK + KIDISO, Stati Uniti d'Europa including a PSI coded `[og]`).
 
 # Session Info
 

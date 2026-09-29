@@ -197,7 +197,7 @@ BE,3,prtclabe,3,N-VA,Nieuw-Vlaamse Alliantie,36,link
 BE,3,prtclabe,5,SP.A,Socialistische Partij Anders — Vooruit,1680,link
 BE,3,prtclabe,6,Spirit,Sociaal-Liberale Partij,7015,link
 BE,3,prtclabe,7,Vivant,Vivant,76,link
-BE,3,prtclabe,8,Vlaams Blok,Vlaams Blok / Belang,553,link
+BE,3,prtclabe,8,Vlaams Blok,Vlaams Belang,1968,link
 BE,3,prtclabe,9,VLD,Partij voor Vrijheid en Vooruitgang — Open Vlaamse Liberalen en Democraten,49,link
 BE,3,prtclabe,10,CDH,Parti Social Chrétien — Centre démocrate humaniste,633,hand
 BE,3,prtclabe,11,Ecolo,Écologistes Confédérés pour l'organisation de luttes originales,1563,link
@@ -392,7 +392,7 @@ BE,3,prtvtabe,2,CD&V,Christen-Democratisch en Vlaams,604,link
 BE,3,prtvtabe,3,N-VA,Nieuw-Vlaamse Alliantie,36,link
 BE,3,prtvtabe,5,SP.A-Spirit,Socialistische Partij Anders / Sociaal-Liberale Partij / Spirit,1586,link
 BE,3,prtvtabe,6,Vivant,Vivant,76,link
-BE,3,prtvtabe,7,Vlaams Blok,Vlaams Blok / Belang,553,link
+BE,3,prtvtabe,7,Vlaams Blok,Vlaams Belang,1968,link
 BE,3,prtvtabe,8,VLD,Partij voor Vrijheid en Vooruitgang — Open Vlaamse Liberalen en Democraten,49,link
 BE,3,prtvtabe,9,CDH,Parti Social Chrétien — Centre démocrate humaniste,633,hand
 BE,3,prtvtabe,10,Ecolo,Écologistes Confédérés pour l'organisation de luttes originales,1563,link
@@ -1747,7 +1747,7 @@ EE,11,prtcliee,5,Erakond Eestimaa Rohelised,Erakonna Eestimaa Rohelised,1040,lin
 EE,11,prtcliee,6,Eesti Konservatiivne Rahvaerakond,Eesti Konservatiivne Rahvaerakond,4094,link
 EE,11,prtcliee,10,Üksikkandidaadid,independent,,hand
 EE,11,prtcliee,14,Eesti 200,Erakond Eesti 200,7340,link
-EE,11,prtcliee,20,Parempoolsed,Parempoolsed,83,name
+EE,11,prtcliee,20,Parempoolsed,Parempoolsed [og],,hand
 EE,11,prtcliee,35,Other,other,,hand
 EE,11,prtcliee,66,Not applicable*,,,missing
 EE,11,prtcliee,77,Refusal*,refused,,missing
@@ -1880,7 +1880,7 @@ EE,11,prtvtiee,5,Erakond Eestimaa Rohelised,Erakonna Eestimaa Rohelised,1040,lin
 EE,11,prtvtiee,6,Eesti Konservatiivne Rahvaerakond,Eesti Konservatiivne Rahvaerakond,4094,link
 EE,11,prtvtiee,10,Üksikkandidaadid,independent,,hand
 EE,11,prtvtiee,14,Eesti 200,Erakond Eesti 200,7340,link
-EE,11,prtvtiee,20,Parempoolsed,Parempoolsed,83,name
+EE,11,prtvtiee,20,Parempoolsed,Parempoolsed [og],,hand
 EE,11,prtvtiee,35,Other,other,,hand
 EE,11,prtvtiee,66,Not applicable*,,,missing
 EE,11,prtvtiee,77,Refusal*,refused,,missing
@@ -6533,7 +6533,7 @@ SI,7,prtclesi,6,SDS - Slovenska demokratska stranka,Slovenska demokratska strank
 SI,7,prtclesi,7,SLS - Slovenska ljudska stranka,Slovenska ljudska stranka,764,link
 SI,7,prtclesi,8,SMC - Stranka Mira Cerarja,Stranka Mira Cerarja / Stranka modernega centra,3098,link
 SI,7,prtclesi,10,ZAAB - Zavezništvo Alenke Bratušek,Zavezništvo Alenke Bratušek / Stranka Alenke Bratušek,3114,link
-SI,7,prtclesi,11,"ZL - Združena levica (DSD, IDS in Stranka TRS)",Zdruzena Lista,2276,link
+SI,7,prtclesi,11,"ZL - Združena levica (DSD, IDS in Stranka TRS)",Združena levica,4714,hand
 SI,7,prtclesi,12,Other,other,,hand
 SI,7,prtclesi,66,Not applicable*,,,missing
 SI,7,prtclesi,77,Refusal*,refused,,missing
@@ -6548,7 +6548,7 @@ SI,8,prtclesi,6,SDS - Slovenska demokratska stranka,Slovenska demokratska strank
 SI,8,prtclesi,7,SLS - Slovenska ljudska stranka,Slovenska ljudska stranka,764,link
 SI,8,prtclesi,8,SMC - Stranka Mira Cerarja,Stranka Mira Cerarja / Stranka modernega centra,3098,link
 SI,8,prtclesi,10,ZAAB - Zavezništvo Alenke Bratušek,Zavezništvo Alenke Bratušek / Stranka Alenke Bratušek,3114,link
-SI,8,prtclesi,11,"ZL - Združena levica (DSD, IDS in Stranka TRS)",Zdruzena Lista,2276,link
+SI,8,prtclesi,11,"ZL - Združena levica (DSD, IDS in Stranka TRS)",Združena levica,4714,hand
 SI,8,prtclesi,12,Other,other,,hand
 SI,8,prtclesi,66,Not applicable*,,,missing
 SI,8,prtclesi,77,Refusal*,refused,,missing
@@ -6690,7 +6690,7 @@ SI,7,prtvtesi,7,SLS - Slovenska ljudska stranka,Slovenska ljudska stranka,764,li
 SI,7,prtvtesi,8,SMC - Stranka Mira Cerarja,Stranka Mira Cerarja / Stranka modernega centra,3098,link
 SI,7,prtvtesi,9,VERJAMEM - Stranka Igorja Šoltesa,Verjamem,3205,link
 SI,7,prtvtesi,10,ZAAB - Zavezništvo Alenke Bratušek,Zavezništvo Alenke Bratušek / Stranka Alenke Bratušek,3114,link
-SI,7,prtvtesi,11,"ZL - Združena levica (DSD, IDS in Stranka TRS)",Zdruzena Lista,2276,link
+SI,7,prtvtesi,11,"ZL - Združena levica (DSD, IDS in Stranka TRS)",Združena levica,4714,hand
 SI,7,prtvtesi,12,Other,other,,hand
 SI,7,prtvtesi,66,Not applicable*,,,missing
 SI,7,prtvtesi,77,Refusal*,refused,,missing
@@ -6704,7 +6704,7 @@ SI,8,prtvtesi,6,SDS - Slovenska demokratska stranka,Slovenska demokratska strank
 SI,8,prtvtesi,7,SLS - Slovenska ljudska stranka,Slovenska ljudska stranka,764,link
 SI,8,prtvtesi,8,SMC - Stranka Mira Cerarja,Stranka Mira Cerarja / Stranka modernega centra,3098,link
 SI,8,prtvtesi,10,ZAAB - Zavezništvo Alenke Bratušek,Zavezništvo Alenke Bratušek / Stranka Alenke Bratušek,3114,link
-SI,8,prtvtesi,11,"ZL - Združena levica (DSD, IDS in Stranka TRS)",Zdruzena Lista,2276,link
+SI,8,prtvtesi,11,"ZL - Združena levica (DSD, IDS in Stranka TRS)",Združena levica,4714,hand
 SI,8,prtvtesi,12,Other,other,,hand
 SI,8,prtvtesi,66,Not applicable*,,,missing
 SI,8,prtvtesi,77,Refusal*,refused,,missing

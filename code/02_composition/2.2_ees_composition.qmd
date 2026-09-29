@@ -96,7 +96,7 @@ Every wave also carries a recall of the last **national** general election, whic
 
 The items above only *classify* attachment and vote (party, no party, don't know; party vote, no vote).
 The party comparison uses the Party Facts coding of notebook 1.4 instead of the release's own codes, which do not line up across the two items in every wave (2014 and 2024 raw codes are shifted against each other, 2019 raw codes follow separate lists):
-the attachment party and the EP vote are compared by Party Facts party, with the alliance rule of notebook 1.9, so that a party and an electoral alliance or joint list containing it count as the *same party*.
+the attachment party and the EP vote are compared by Party Facts party, with the rule of notebook 1.9, so that a party and an electoral alliance or joint list containing it count as the *same party*, and so do a party and the party it continued in through a rename, refoundation or merger (from the year of the succession on).
 The match comes from `data/02_processed/ees_party_match.parquet`, joined on wave and the respondent's position in the wave's file.
 
 The attachment categories follow notebook 1.5, with one difference: don't know, refusal and missing are pooled into the tree's grey *DK* box.
@@ -273,9 +273,10 @@ ees_tree <- bind_rows(ees_2004, ees_2009, ees_2014, ees_2019, ees_2024) |>
     year = factor(year)
   )
 
-# Level 3: Party Facts match with the EP vote, alliances included (notebook 1.9)
+# Level 3: Party Facts match with the EP vote, with alliances and lineage
+# (notebook 1.9); `route` says which table made a pair the same party
 ees_match <- read_parquet(here("data", "02_processed", "ees_party_match.parquet")) |>
-  transmute(year = factor(wave, levels = levels(ees_tree$year)), row, pf_match = ext_match_vote_ep)
+  transmute(year = factor(wave, levels = levels(ees_tree$year)), row, match_cntry = cntry, pf_match = ext_match_vote_ep, route = ext_route_vote_ep)
 ees_pf <- read_parquet(here("data", "02_processed", "ees_party_pf.parquet")) |>
   transmute(year = factor(wave, levels = levels(ees_tree$year)), row, att_pf = ext_pid_pf_name, vote_pf = ext_vote_ep_pf_name)
 
@@ -283,13 +284,19 @@ n_before <- nrow(ees_tree)
 ees_tree <- ees_tree |>
   left_join(ees_match, by = c("year", "row")) |>
   left_join(ees_pf, by = c("year", "row")) |>
+  # the (wave, row) key lines up with notebook 1.4: same country on every row
+  (\(d) {
+    stopifnot(!anyNA(d$match_cntry), all(d$country == d$match_cntry))
+    d
+  })() |>
   mutate(
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
       .default = coalesce(pf_match, "unmatchable")
     )
   ) |>
-  select(year, country, att, vote, match, a, v, att_pf, vote_pf)
+  mutate(route = if_else(match == "same", route, NA)) |>
+  select(year, country, att, vote, match, route, a, v, att_pf, vote_pf)
 stopifnot(nrow(ees_tree) == n_before)
 
 # Respondents and countries per wave
@@ -306,6 +313,7 @@ ees_tree |>
 The first table crosses the tree levels by wave.
 The second is the alignment check described above: among respondents who report both an attachment and a comparable vote, the share naming the *same* party, by country and wave.
 A cell far below its neighbours points to a coding problem rather than to voters; the ones that remain low are discussed under the caveats.
+The third lists the pairs that are the *same party* only through an alliance or lineage (the audit trail of the tables of notebook 1.9).
 
 ```{r}
 #| label: checks
@@ -323,6 +331,13 @@ ees_tree |>
   pivot_wider(names_from = year, values_from = same) |>
   arrange(country) |>
   print(n = Inf)
+
+# Same party through a table, by route
+ees_tree |>
+  filter(route %in% c("alias", "alliance", "lineage")) |>
+  count(route, country, year, att_pf, vote_pf, sort = TRUE) |>
+  mutate(across(c(att_pf, vote_pf), \(x) str_trunc(x, 40))) |>
+  print(n = 40)
 ```
 
 # Pooled Tree
@@ -416,7 +431,8 @@ In the trees, the 2009 *No attachment* box therefore still contains the responde
   The national recall is listed in the table above for a later comparison.
 - **Mode changes between 2014 and 2019**, from interviewer-administered to online panels with no refusal option (see notebook 1.5).
 - **Electoral alliances count as the same party as their members** (notebook 1.9): an attachment to HDZ and a vote for the HDZ-led coalition list, or to PO and a vote for the European Coalition, are *same party*.
-  Two members of one alliance stay *different party*, and so do renamed parties with a new Party Facts id.
+  So do a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on (the UMP and Les Républicains, the PD and the PDL).
+  Two members of one alliance, two predecessors of one successor, and a breakaway and its parent stay *different party*.
   Italy 2004 stays low for a different reason: attachment to the Margherita or the PdCI pairs with a vote for Il Girasole hundreds of times, which points to a mislabelled vote code in the release.
 - **The 2004 DK category** also contains no-answers, as noted in notebook 1.5.
 

@@ -1354,7 +1354,7 @@ map_hand <- tribble(
   2019L, "HR", "NEZAVISNA LISTA MISLAV KOLAKUŠIĆ", "NEZAVISNA LISTA MISLAV KOLAKUŠIĆ [og]", NA,
   2019L, "HR", "Ne osjećam bliskost prema nijednoj političkoj stranci", "none", NA,
   2019L, "HR", "PAMETNO + UNIJA KVARNERA", "PAMETNO + UNIJA KVARNERA [og]", NA, # joint list
-  2019L, "HR", "START", "START [og]", NA,
+  2019L, "HR", "START", "START - STRANKA ANTIKORUPCIJE, RAZVOJA I TRANSPARENTNOSTI – START (START) [og]", NA, # one name for the party's two labels in this wave
   2019L, "HR", "START - STRANKA ANTIKORUPCIJE, RAZVOJA I TRANSPARENTNOSTI – START (START)", "START - STRANKA ANTIKORUPCIJE, RAZVOJA I TRANSPARENTNOSTI – START (START) [og]", NA,
   2019L, "HR", "Samostalna demokratska srpska stranka (SDSS)", "Samostalna demokratska srpska stranka", 2348L,
   2019L, "HU", "Fidesz - Magyar Polgári Szövetség - Kereszténydemokrata Néppárt (FIDESZ-KD", "Fidesz — KDNP pártszövetség / Magyar Szolidaritás Szövetsége", 6366L, # PF alliance entry; hint Jobbik wrong
@@ -1366,11 +1366,11 @@ map_hand <- tribble(
   2019L, "IE", "Sinn Féin", "Sinn Féin (Provisional)", 4L, # Irish SF entry (IRL), not GBR 963
   2019L, "IT", "Casa Pound", "CasaPound Italia", 8244L,
   2019L, "IT", "Forza Nuova", "Forza Nuova [og]", NA,
-  2019L, "IT", "Forza Nuova (Fn)", "Forza Nuova (Fn) [og]", NA,
+  2019L, "IT", "Forza Nuova (Fn)", "Forza Nuova [og]", NA, # one name for the party's two labels in this wave
   2019L, "IT", "No, non mi sento vicino a nessun partito politico in particolare", "none", NA,
   2019L, "IT", "POPOLARI PER L'ITALIA", "POPOLARI PER L'ITALIA [og]", NA,
   2019L, "IT", "Partito Comunista", "Partito Comunista [og]", NA,
-  2019L, "IT", "Partito Comunista (PC)", "Partito Comunista (PC) [og]", NA,
+  2019L, "IT", "Partito Comunista (PC)", "Partito Comunista [og]", NA, # one name for the party's two labels in this wave
   2019L, "IT", "Sinistra (Rifondazione)", "Sinistra (Rifondazione) [og]", NA, # La Sinistra 2019 joint list (PRC+SI)
   2019L, "IT", "Südtiroler Volkspartei Partito Autonomista Trentino Tirolese (SVP-Ptt)", "Südtiroler Volkspartei Partito Autonomista Trentino Tirolese (SVP-Ptt) [og]", NA, # 2018 SVP-PATT joint list
   2019L, "LT", "Antikorupcinė N. Puteikio ir K. Krivicko koalicija (Lietuvos centro partija, Li", "Antikorupcinė N. Puteikio ir K. Krivicko koalicija (Lietuvos centro partija, Li [og]", NA,
@@ -1427,7 +1427,7 @@ map_hand <- tribble(
   2019L, "SI", "Zelenim Slovenije", "Zeleni Slovenije", 1494L,
   2019L, "SK", "Nie, necítite sa byť blízko ku žiadnej politickej strane", "none", NA,
   2019L, "SK", "Progresivne Slovensko-SPOLU", "Progresivne Slovensko-SPOLU [og]", NA, # PS-Spolu alliance; no PF entry
-  2019L, "SK", "Progresívne Slovensko/ SPOLU", "Progresívne Slovensko/ SPOLU [og]", NA, # PS-Spolu alliance; no PF entry
+  2019L, "SK", "Progresívne Slovensko/ SPOLU", "Progresivne Slovensko-SPOLU [og]", NA, # PS-Spolu alliance; no PF entry; one name for its three labels in this wave
   2024L, "AT", "Die Bierpartei", "Die Bierpartei [og]", NA,
   2024L, "AT", "Wandel", "Wandel [og]", NA,
   2024L, "BE", "Anticapitalistes", "Anticapitalistes [og]", NA,
@@ -1621,7 +1621,7 @@ map_hand <- tribble(
   2024L, "SE", "Värdigt Liv", "Värdigt Liv [og]", NA,
   2024L, "SI", "DeSUS - DD", "DeSUS - DD [og]", NA,
   2024L, "SI", "Glas upokojencev", "Glas upokojencev [og]", NA,
-  2024L, "SI", "Nič od tega", "Nič od tega [og]", NA,
+  2024L, "SI", "Nič od tega", "Nič od tega [og]", NA, # a party list ("Nothing of That", founded 2024), not a "none of these" answer
   2024L, "SI", "VES – zelena stranka", "VESNA – zelena stranka", 9130L, # Vesna (EES English name/PF code)
   2024L, "SI", "Za ljudstvo Slovenije", "Za ljudstvo Slovenije [og]", NA,
   2024L, "SK", "Demokrati", "Demokrati [og]", NA,
@@ -1645,12 +1645,21 @@ map_hand <- tribble(
   2019L, "HU", "Fidesz -Magyar Polgári Szövetség (FIDESZ)", "Fidesz — Magyar Polgári Szövetség", 1691L,
   2019L, "IE", "Sinn Féin (SF)", "Sinn Féin (Provisional)", 4L,
   2019L, "SI", "Slovenska demokratska stranka in Slovenska ljudska stranka (SDS in SLS)", "Slovenska demokratska stranka in Slovenska ljudska stranka (SDS in SLS) [og]", NA, # joint list
-  2019L, "SK", "Progressive Slovakia – Together (Progresivne Slovensko-SPOLU)", "Progressive Slovakia – Together (Progresivne Slovensko-SPOLU) [og]", NA, # joint list
+  2019L, "SK", "Progressive Slovakia – Together (Progresivne Slovensko-SPOLU)", "Progresivne Slovensko-SPOLU [og]", NA, # joint list; one name for its three labels in this wave
   # names that matched a party of before 1950 (see pf_historic())
   2004L, "DE", "DKP", "DKP [og]", NA, # the communist DKP; 2125 is the Deutschkonservative Partei of 1876-1918
   2024L, "DE", "Deutsche Kommunistische Partei", "Deutsche Kommunistische Partei [og]", NA,
   2004L, "LV", "LSDSP (Latvian Social Democratic Workers' Party)", "Latvijas Sociāldemokrātiskā Strādnieku Partija", 741L, # Party Facts' only LSDSP entry (1918-34), refounded 1989
   2009L, "LV", "Latvijas Sociāldemokrātiskā Strādnieku Partija (LSDSP)", "Latvijas Sociāldemokrātiskā Strādnieku Partija", 741L,
+  # links and names that pointed to a party of another period (see pf_check_period())
+  2009L, "DE", "Deutsche Kommunistische Partei, DKP", "Deutsche Kommunistische Partei, DKP [og]", NA, # not 1135, the KPD of 1919-56
+  2009L, "IT", "Unione di Centro", "Unione dei Democratici Cristiani e Democratici di Centro", 1758L, # not 1767, the CCD of 1994-2001
+  2014L, "IT", "Union for Christian and Center Democrats", "Unione dei Democratici Cristiani e Democratici di Centro", 1758L, # not 1767, the CCD of 1994-2001
+  2019L, "LV", "Jaunā Saskaņa", "Jaunā Saskaņa [og]", NA, # not 897, Dzimtene
+  2024L, "EE", "Erakond Parempoolsed", "Erakond Parempoolsed [og]", NA, # founded 2022; 83 is the Parempoolsed of 1995
+  2024L, "IE", "Sinn Féin", "Sinn Féin (Provisional)", 4L, # not 2507, the Sinn Féin of 1905-70; as in 2004-2019
+  2024L, "SE", "Medborgerlig Samling", "Medborgerlig Samling [og]", NA, # founded 2014; 1633 is the party of 1964-68
+  2024L, "PT", "Aliança Democrática", "Aliança Democrática [og]", NA, # the 2024 list of PSD, CDS-PP and PPM; 1742 is the AD of 1979-80 (notebook 1.9 lists its members)
   2024L, "FR", "Les Patriotes", "Les Patriotes [og]", NA
 ) |>
   mutate(key = norm_key(label), source = "hand")
@@ -1696,7 +1705,18 @@ crosswalk <- cells |>
     )
   ) |>
   select(wave, cntry, region, variable, code, label, pf_name, pf_id, source, n, kind) |>
-  arrange(wave, cntry, region, variable, code)
+  arrange(wave, cntry, region, variable, code) |>
+  # Forza Italia refounded in 2013, Vlaams Belang, ... (pf_eras in pf_code.R)
+  pf_apply_eras(year = "wave", core = core)
+
+# No party outside its years, except those reviewed: Party Facts' only entry
+# for a party that still existed or was refounded (National Front 1140, LSDSP
+# 741, De Groenen 1533, Dalmatinska akcija 8606), and parties Party Facts starts
+# with their first seat (SNK ED 751, Oikologoi Prasinoi 378)
+pf_check_period(
+  crosswalk, year = "wave",
+  accepted = c(1140L, 741L, 1533L, 8606L, 751L, 378L)
+)
 
 # The undocumented codes stay NA
 crosswalk |>
@@ -1886,6 +1906,10 @@ respondents |>
 # Known Quirks
 
 - **Automatic links and name matches skip parties that ended before 1950** (`pf_historic()` in `pf_code.R`). Party Facts links Spain's Partido Popular in the CSES and several other datasets to the Partido Progresista of 1834–74 (5750, short name "PP"), and short names had matched labels to Sweden's "Centern" of 1873–82 and Germany's Deutschkonservative Partei (1876–1918); the affected labels are hand-coded. The cutoff is 1950 rather than 1990 because Party Facts' `year_last` for small parties is often their last year in parliament (PPM, UDP and PSP show 1989 but existed later).
+- **Parties of another period.** The 1950 guard misses links to parties that ended later or whose name was reused, so `pf_check_period()` (in `pf_code.R`) stops the notebook when a coded party was founded more than a year after the survey or left Party Facts more than 12 years before it; the reviewed exceptions are listed at the call. Among the cases it found and that are now hand-coded: the EES 2024 Sinn Féin (linked to the Sinn Féin of 1905–70), the 2022 Parempoolsed (ESS, EES; linked to a 1995 party), the Slovenian Združena levica (ESS; linked to the Zdruzena Lista of 1992), the CSES Latvian National Alliance (linked to the LNNK of 1993–95), the CSES 2005 Polish Democratic Party (demokraci.pl, linked to the Stronnictwo Demokratyczne), and the EES Italian UDC (linked to the CCD).
+- **Renamed and refounded parties** that Party Facts splits while a code or label stays the same (Die Linke/PDS, MoDem/UDF, EELV/Les Verts, CD&V/CVP, Vlaams Blok/Belang, Forza Italia 1994/2013, PSDR/PSD) get the id of the survey year from `pf_eras` in `pf_code.R`. In the CSES this happens per respondent, since an IMD code spans studies, so `cses_party_pf.csv` shows the code's id before this step.
+- **Uncertain links coded `[og]`.** The 2024 "Aliança Democrática" (Portugal, about 470 vote answers) is the list PSD, CDS-PP and PPM formed for the 2024 elections; Party Facts has only the AD of 1979–80 (1742), a different alliance with the same name, so the answer is `Aliança Democrática [og]` and notebook 1.9 lists its members.
+- **One `[og]` name per party.** An `[og]` name is normally the answer's own label, but where a wave labels one unlisted party differently on different items, all its labels get one name, so that an attachment and a vote for it compare as the same party: 2019 Slovakia's PS–SPOLU list (three labels), Croatia's START, Italy's Forza Nuova and Partito Comunista.
 - **2004 party names exist only in the codebook PDF.** The data label every list code "party 1", "party 2", ...; the names were parsed from `ZA4566_cod.pdf` into `data/02_processed/ees2004_party_lists.csv` (parser kept above, not run). Three layout problems were fixed in the parse: Italy's code 18 (Rifondazione) and Latvia's code 21 (Jaunais Laiks) print their name on the country header line, and Denmark lists code 7 twice (the second, "Christian Peoples Party", duplicates code 9 and is dropped). France, Germany and Spain have a second list for some batteries.
 - **2004 respondent ids repeat**, so the respondent file is keyed by `wave` and `row` (the position in the wave's file); `respondent` carries the original id.
 - **Northern Ireland** was fielded separately in 2004 with its own list; it is coded `cntry = "GB"` with `region = "Northern Ireland"`.

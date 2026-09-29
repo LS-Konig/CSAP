@@ -281,8 +281,8 @@ ess_tree <- ess_raw |>
 Attachment and vote are compared by their Party Facts coding (notebook 1.2), not by the codebook names: the two lists of one country and round spell the same party differently ("PP" against "Partido Popular (PP)", "Smer – SD" against "SMER-Social Democracy"), and the coding has already resolved every spelling to one Party Facts party.
 The match level comes from `data/02_processed/ess_party_match.parquet` (notebook 1.9), which applies one rule to all four sources:
 
-- **same party**: the same Party Facts party, or a party and an electoral alliance or joint list that contains it, in either direction (Fidesz and the Fidesz–KDNP list, PO and Koalicja Obywatelska);
-- **different party**: two different parties, including two members of one alliance;
+- **same party**: the same Party Facts party; a party and an electoral alliance or joint list that contains it, in either direction (Fidesz and the Fidesz–KDNP list, PO and Koalicja Obywatelska); or a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on (the UMP and Les Républicains, the CVP and CD&V, the PRL-FDF and the MR);
+- **different party**: two different parties, including two members of one alliance, two predecessors of one successor, and a breakaway and its parent;
 - **not matchable**: the attachment party or the vote is an *other* answer, or has no party.
 
 ```{r}
@@ -291,34 +291,35 @@ The match level comes from `data/02_processed/ess_party_match.parquet` (notebook
 ess_pf <- read_parquet(here("data", "02_processed", "ess_party_pf.parquet")) |>
   select(cntry, essround, name, idno, att_pf = ext_prtcl_pf_name, vote_pf = ext_prtv_pf_name)
 ess_match <- read_parquet(here("data", "02_processed", "ess_party_match.parquet")) |>
-  select(cntry, essround, name, idno, pf_match = ext_match_prtv)
+  select(cntry, essround, name, idno, pf_match = ext_match_prtv, route = ext_route_prtv)
 
 n_before <- nrow(ess_tree)
 ess_tree <- ess_tree |>
   left_join(ess_pf, by = c("cntry", "essround", "name", "idno")) |>
   left_join(ess_match, by = c("cntry", "essround", "name", "idno")) |>
   mutate(
-    # Level 3: Party Facts match, alliances included
+    # Level 3: Party Facts match, with alliances and lineage (notebook 1.9)
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
       .default = coalesce(pf_match, "unmatchable")
-    )
+    ),
+    route = if_else(match == "same", route, NA)
   )
 stopifnot(nrow(ess_tree) == n_before)
 ```
 
-Pairs that count as the same party only through an alliance, by weight: the audit trail of the alliance table.
+Pairs that count as the same party only through an alliance or lineage, by route and weight: the audit trail of the tables of notebook 1.9.
 
 ```{r}
-#| label: alliance-audit
+#| label: route-audit
 
 ess_tree |>
-  filter(match == "same", att_pf != vote_pf) |>
-  count(cntry, att_pf, vote_pf, sort = TRUE) |>
-  print(n = 30, width = Inf)
+  filter(route %in% c("alias", "alliance", "lineage")) |>
+  count(route, cntry, att_pf, vote_pf, sort = TRUE) |>
+  print(n = 40, width = Inf)
 ```
 
-The largest pairs that remain *different party*: most are genuine switches or parties that did not stand, but a renamed party with a new Party Facts id also lands here (see the caveats).
+The largest pairs that remain *different party*: most are genuine switches or parties that did not stand.
 
 ```{r}
 #| label: unmatched-names
@@ -335,12 +336,12 @@ ess_tree |>
 # Pair-level crosswalk, stable order
 ess_tree |>
   filter(match %in% c("same", "different", "unmatchable")) |>
-  count(cntry, att_label, att_pf, vote_label, vote_pf, match, name = "n") |>
+  count(cntry, att_label, att_pf, vote_label, vote_pf, match, route, name = "n") |>
   arrange(cntry, att_pf, vote_pf, att_label, vote_label) |>
   write_csv(here("data", "02_processed", "ess_party_crosswalk.csv"))
 ```
 
-The pair-level table is written to `data/02_processed/ess_party_crosswalk.csv`: every attachment/vote label pair among attached voters, with the two Party Facts names, the match and the number of respondents.
+The pair-level table is written to `data/02_processed/ess_party_crosswalk.csv`: every attachment/vote label pair among attached voters, with the two Party Facts names, the match, its route (identical, alliance or lineage) and the number of respondents.
 
 ```{r}
 #| label: round-labels
@@ -482,9 +483,10 @@ So the ESS *Close to a party* box is closer to "attachment or leaning" than the 
 
 - **The vote is the last national election**, which can lie up to four or five years before the interview.
 - **Round 10 pools two modes** (face-to-face and self-completion) on disjoint country sets, see notebook 1.7.
-- **Matching is by Party Facts party, with alliances.** A party and an electoral alliance or joint list containing it count as the same party (notebook 1.9); the same rule is used in all four composition notebooks, so their *same party* shares are comparable.
-  Two members of one alliance (CDU and CSU) stay *different party*.
-- **Renamed parties with a new Party Facts id count as *different party*** (UMP and Les Républicains, CVP and CD&V, PRL-FDF and MR): the alliance table lists alliances, not successors. The earlier name-rule version of this notebook linked these three by hand.
+- **Matching is by Party Facts party, with alliances and lineage** (notebook 1.9); the same rule is used in all four composition notebooks, so their *same party* shares are comparable.
+  A party and an electoral alliance or joint list containing it count as the same party, and so do a party and the party it continued in through a rename, refoundation or merger (UMP and Les Républicains, CVP and CD&V, PRL-FDF and MR), in surveys from the year of the succession on.
+  Because the vote is the last national election, this is where lineage matters most: a respondent interviewed in 2016 who feels close to Les Républicains and voted UMP in 2012 has not switched.
+  Two members of one alliance (CDU and CSU), two predecessors of one successor, and a breakaway and its parent stay *different party*.
 
 # Session Info
 

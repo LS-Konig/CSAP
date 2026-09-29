@@ -76,7 +76,7 @@ Where the study followed no lower-house election at all (code `9999996`, e.g. th
 Blank or invalid ballots, refusals, don't know and abstention count as *no vote reported*.
 Abstention and missing share the code `9999999`, so they cannot be told apart.
 
-**Match.** Attachment party and vote are compared by their Party Facts coding (notebook 1.3), with the alliance rule of notebook 1.9: the same party, or a party and an electoral alliance containing it, counts as *same party*.
+**Match.** Attachment party and vote are compared by their Party Facts coding (notebook 1.3), with the rule of notebook 1.9: the same party, a party and an electoral alliance containing it, or a party and the party it continued in through a rename, refoundation or merger (from the year of the succession on) count as *same party*.
 This matters most in Germany, where CSES codes attachment to the CDU and the CSU separately but the list vote for the CDU/CSU union, and in Romania's alliance years.
 Codes `9999988`--`9999992` (none of the parties, independent, other left/right/unspecified) name something that is not a codeable party and count as *not matchable*.
 
@@ -172,10 +172,15 @@ cses_tree <- bind_rows(cses_imd_tree, cses_mod6_tree) |>
     year = factor(year)
   )
 
-# Level 3: Party Facts match, alliances included (notebook 1.9), for the
-# vote the tree uses: the list vote, else the district vote
+# Level 3: Party Facts match, with alliances and lineage (notebook 1.9), for
+# the vote the tree uses: the list vote, else the district vote; `route` says
+# which table made a pair the same party
 cses_match <- read_parquet(here("data", "02_processed", "cses_party_match.parquet")) |>
-  select(release, study, respondent, match_pl = ext_match_imd3002_lh_pl, match_dc = ext_match_imd3002_lh_dc)
+  select(
+    release, study, respondent,
+    match_pl = ext_match_imd3002_lh_pl, match_dc = ext_match_imd3002_lh_dc,
+    route_pl = ext_route_imd3002_lh_pl, route_dc = ext_route_imd3002_lh_dc
+  )
 cses_pf <- read_parquet(here("data", "02_processed", "cses_party_pf.parquet")) |>
   transmute(
     release, study, respondent,
@@ -191,7 +196,8 @@ cses_tree <- cses_tree |>
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
       .default = coalesce(if_else(vote_pl == other_from + 7, match_dc, match_pl), "unmatchable")
-    )
+    ),
+    route = if_else(match == "same", if_else(vote_pl == other_from + 7, route_dc, route_pl), NA)
   ) |>
   select(
     module,
@@ -201,6 +207,7 @@ cses_tree <- cses_tree |>
     att,
     vote,
     match,
+    route,
     probe,
     party,
     vote_code,
@@ -225,6 +232,7 @@ cses_tree |>
 The first table crosses the tree levels by module.
 The second gives, per election study, the share naming the *same* party among attached voters whose two answers are both real parties, sorted from the lowest.
 The third lists the most frequent German pairs still scored *different*: with CDU and CSU attachment now matched to the CDU/CSU list vote, these are genuine switches.
+The fourth lists the pairs that are the *same party* only through an alliance or lineage (the audit trail of the tables of notebook 1.9).
 
 ```{r}
 #| label: checks
@@ -251,6 +259,13 @@ cses_tree |>
   filter(country == "DE", match == "different") |>
   count(att_pf, vote_pf, sort = TRUE) |>
   slice_head(n = 6)
+
+# Same party through a table, by route
+cses_tree |>
+  filter(route %in% c("alias", "alliance", "lineage")) |>
+  count(route, country, att_pf, vote_pf, sort = TRUE) |>
+  mutate(across(c(att_pf, vote_pf), \(x) str_trunc(x, 40))) |>
+  print(n = 40)
 ```
 
 # Pooled Tree
@@ -379,7 +394,8 @@ cses_tree |>
 - **Abstention and missing share code `9999999`**, so *no vote reported* mixes both.
 - **Close is not naming.** Respondents close to a party with no usable party code are in *not matchable*.
 - **CSES folds inconsistent answers into the binary** (notebook 1.6): a "yes" with no party is kept as yes, a "no" with a party as no.
-- **Alliances and unions count as the same party** as their member parties (notebook 1.9), so the CDU/CSU union code no longer pushes German studies towards *different party*; renamed parties with a new Party Facts id still count as different.
+- **Alliances and unions count as the same party** as their member parties (notebook 1.9), so the CDU/CSU union code no longer pushes German studies towards *different party*.
+- **Lineage counts as the same party** (notebook 1.9): a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on (PDS and Die Linke, PD and PDL in Romania, Isamaaliit and IRL in Estonia). Two predecessors of one successor and a breakaway and its parent stay *different party*; the `route` column records which table made a pair the same party.
 - **Module 6 is an advance release** covering eight of the 25 countries.
 
 # Session Info

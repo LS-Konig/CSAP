@@ -55,20 +55,26 @@ Quarto is configured with `freeze: auto`; delete the notebook's subdirectory und
 | `presentation.qmd` | RevealJS slides, University of Mannheim SCSS theme (`theme.scss`). Three figure embeds are commented out where the notebooks that produced them were deleted |
 | `code/code-template.qmd` | Boilerplate for a new analysis notebook (tidyverse + here + sessioninfo). Numbered notebooks go in `code/`, following the old `NN_topic/N.N_name.qmd` convention |
 | `code/01_preparation/1.1_ess_to_parquet.qmd` | Converts the raw ESS CSV to a partitioned Parquet dataset. Raw-layer format conversion only — no cleaning, no recoding. Idempotent: re-renders cheaply once the output is current |
+| `code/01_preparation/1.2`–`1.4` | Party Facts coding of the ESS, CSES and EES party items (attachment, vote, batteries): `ext_*_pf_name` / `ext_*_pf_id` as in the eu25games release, written to `data/02_processed/{ess,cses,ees}_party_pf.{csv,parquet}`. Each ends in a *Known Quirks* section listing every hand decision |
+| `code/01_preparation/1.9_party_alliances.qmd` | The attachment-vote match rule: alias, alliance and lineage tables (`data/02_processed/pf_{aliases,alliances,lineage}.csv`) and the match files `{ess,cses,ees}_party_match.parquet`. See *Party matching* below |
 | `code/02_composition/2.1`–`2.4` | Partisan composition trees (attachment → vote → same party) for eu25games, EES, CSES, ESS: Mermaid flowcharts pooled / by period / by country / country × period, plus leaf-share plots. Shared helpers in `code/00_helper/pid_tree.R`. Rendered as plain pages, not manuscript notebooks (see comment in `_quarto.yml`) |
-| `code/00_helper/` | `copyR.R` (refresh the raw file from a sibling clone), `glftrackeR.R` (auto-LFS tracking) |
+| `code/00_helper/` | `pf_code.R` (Party Facts coding helpers, checks and the match rule `pf_match()` / `pf_match_route()`), `pid_tree.R` (composition-tree helpers), `copyR.R` (refresh the raw file from a sibling clone), `glftrackeR.R` (auto-LFS tracking) |
 | `data/` | See below |
 | `references.bib` | APSR-format bibliography (~2,000 entries) |
 | `images/` | Figures used by the deck |
 | `literature/` | Git submodule → private repo `LS-Konig/CSAP-lit` (PDFs in `pdf/`, book chapters in `pdf/<book>/`, pdf2md output in `md/`). Plain git, no LFS; run `git submodule update --init` after cloning. Push new PDFs in batches of ≤100 MB |
 
-There is no *analysis* code in the repo — only the ESS conversion notebook above. The old pipeline was written in `code/01_preparation/` through `code/04_models/` and lives only in git history; the derived data files it produced are still on disk (see below), so a new pipeline can start from those or from the raw release.
+There is no *analysis* code in the repo — only the preparation and composition notebooks above. The old pipeline was written in `code/01_preparation/` through `code/04_models/` and lives only in git history; the derived data files it produced are still on disk (see below), so a new pipeline can start from those or from the raw release.
 
 ## Data
 
 **One raw input**: `data/01_raw/eu25games2019.rds`, the published harmonized release of the Hahm et al. survey (Zenodo DOI [10.5281/zenodo.21294634](https://doi.org/10.5281/zenodo.21294634), v1.0.0, repo `LS-Konig/eu25games2019`). 103,685 respondent-waves × 847 columns, wide, xz-compressed to 29 MB but >1 GB in memory. Party Facts IDs are already merged onto every party-bearing item as `ext_*_pf_name` / `ext_*_pf_id`.
 
 **The upstream codebook is the variable reference**, not anything in this repo: `C:/R/research/eu25games2019/code/08_codebook.html` (question wording in all 25 languages, empirical coded↔raw value maps) and `data/03_final/variable_crosswalk.csv` (variable → original Dynata code per wave) in that repo. Do not re-document variables here.
+
+### Party matching
+
+Whether a respondent's attachment party is the party they voted for is decided in one place, `pf_match()` in `code/00_helper/pf_code.R`, with the tables of notebook 1.9, in all four sources alike. Two answers are the **same party** by one of four routes: identical Party Facts name; an **alias** (an eu25games label for a listed party); an **alliance** containing the other party, in either direction; or **lineage**, a party and the party it continued in through a rename, refoundation or merger, only in surveys from the year of the succession on. Two members of one alliance, two predecessors of one successor, and a breakaway and its parent are **different**. The tables are pairwise and never chained. Lineage counting as *same* is a deliberate choice (Tristan, 2026-09-29): `pf_match_route()` and the `ext_route_*` columns of the match files record the route of every *same*, so an analysis can exclude lineage. Change the rule only in 1.9 and `pf_code.R`, never per notebook.
 
 ### Derived files still on disk
 

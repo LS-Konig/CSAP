@@ -721,7 +721,10 @@ map_hand <- tribble(
   "ES", "PP", "Alianza-Partido Popular / Partido Popular", 441L, # not 5750, the Partido Progresista of 1834-74
   "SE", "Centern", "Bondeförbundet / Centerpartiet", 199L, # not 7415, "Centern" of 1873-82
   "RO", "PC", "Partidul Conservator / Partidul Umanist Român", 1443L,
-  "PL", "Polska Partia Socjalistyczna", "Polska Partia Socjalistyczna [og]", NA # the post-1987 PPS; 4354 is the party of 1892-1948
+  "PL", "Polska Partia Socjalistyczna", "Polska Partia Socjalistyczna [og]", NA, # the post-1987 PPS; 4354 is the party of 1892-1948
+  # labels whose link or name pointed to a party of another period (see pf_check_period())
+  "EE", "Parempoolsed", "Parempoolsed [og]", NA, # founded 2022; 83 is the Parempoolsed of 1995
+  "SI", "ZL - Združena levica (DSD, IDS in Stranka TRS)", "Združena levica", 4714L # not 2276, the Zdruzena Lista of 1992
 ) |>
   mutate(key = norm_key(label), source = "hand")
 
@@ -798,7 +801,17 @@ crosswalk <- cells |>
     by = c("cntry", "essround", "variable", "code")
   ) |>
   arrange(cntry, variable, essround, code) |>
-  select(cntry, essround, variable, code, label, pf_name, pf_id, source, n)
+  select(cntry, essround, variable, code, label, pf_name, pf_id, source, n) |>
+  # Vlaams Belang, ... (pf_eras in pf_code.R), by the year a round began
+  mutate(year = ess_round_year[essround]) |>
+  pf_apply_eras(year = "year", core = core)
+
+# No party outside its years, except those reviewed: Party Facts' only entry
+# for a party that still existed (PPM 1480, Stronnictwo Demokratyczne 919),
+# parties Party Facts starts with their first seat (ABV 3187 and BNS-ND 8260
+# in 2010), and the Groep Wilders of 2004 coded as the PVV (298)
+pf_check_period(crosswalk, year = "year", accepted = c(1480L, 919L, 3187L, 8260L, 298L))
+crosswalk <- select(crosswalk, -year)
 
 # Nothing unmapped: only 66 / 99 stay empty
 unmapped <- crosswalk |>
@@ -916,6 +929,8 @@ respondents |>
 What a user of the two output files should know, collected in one place:
 
 - **Automatic links and name matches skip parties that ended before 1950** (`pf_historic()` in `pf_code.R`). Party Facts links Spain's Partido Popular in the CSES and several other datasets to the Partido Progresista of 1834–74 (5750, short name "PP"), and short names had matched labels to Sweden's "Centern" of 1873–82 and Germany's Deutschkonservative Partei (1876–1918); the affected labels are hand-coded. The cutoff is 1950 rather than 1990 because Party Facts' `year_last` for small parties is often their last year in parliament (PPM, UDP and PSP show 1989 but existed later).
+- **Parties of another period.** The 1950 guard misses links to parties that ended later or whose name was reused, so `pf_check_period()` (in `pf_code.R`) stops the notebook when a coded party was founded more than a year after the survey or left Party Facts more than 12 years before it; the reviewed exceptions are listed at the call. Among the cases it found and that are now hand-coded: the EES 2024 Sinn Féin (linked to the Sinn Féin of 1905–70), the 2022 Parempoolsed (ESS, EES; linked to a 1995 party), the Slovenian Združena levica (ESS; linked to the Zdruzena Lista of 1992), the CSES Latvian National Alliance (linked to the LNNK of 1993–95), the CSES 2005 Polish Democratic Party (demokraci.pl, linked to the Stronnictwo Demokratyczne), and the EES Italian UDC (linked to the CCD).
+- **Renamed and refounded parties** that Party Facts splits while a code or label stays the same (Die Linke/PDS, MoDem/UDF, EELV/Les Verts, CD&V/CVP, Vlaams Blok/Belang, Forza Italia 1994/2013, PSDR/PSD) get the id of the survey year from `pf_eras` in `pf_code.R`. In the CSES this happens per respondent, since an IMD code spans studies, so `cses_party_pf.csv` shows the code's id before this step.
 - **Party Facts' ESS link ids are not a code map.**
   An id `DE-7-6-c` says that party 6 of Germany's attachment list first appears in round 7.
   When ESS renumbers a list later, Party Facts writes no new link, so taking "the link with the largest start round up to this round" would put the wrong party on about 800 labels (Austria's code 5 is LIF in rounds 1–2 and the Greens in round 3).

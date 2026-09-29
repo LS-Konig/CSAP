@@ -59,10 +59,10 @@ CZ,Čtyřkoalice,Křesťanská a demokratická unie / Československá strana li
 CZ,Čtyřkoalice,Občanská demokratická aliance,1008
 CZ,Čtyřkoalice,Unie svobody,905
 CZ,Čtyřkoalice,Unie svobody / Demokratická unie,104
-DE,Christlich Demokratische Union / Christlich Soziale Union,Christlich Demokratische Union,1446
+DE,Christlich Demokratische Union / Christlich Soziale Union,Christlich Demokratische Union,1375
 DE,Christlich Demokratische Union / Christlich Soziale Union,Christlich Soziale Union,1731
 ES,A la valenciana,Coalició Compromís,5623
-ES,A la valenciana,Izquierda Unida,8128
+ES,A la valenciana,Izquierda Unida,247
 ES,A la valenciana,Podemos,3203
 ES,Ahora Repúblicas (Esquerra Republicana de Catalunya (ERC) & EH Bildu & Bloque Nationalista Galego (BNG)) [og],Bloque Nacionalista Galego,1011
 ES,Ahora Repúblicas (Esquerra Republicana de Catalunya (ERC) & EH Bildu & Bloque Nationalista Galego (BNG)) [og],Esquerra Republicana de Catalunya,848
@@ -86,21 +86,21 @@ ES,Coalition for Europe (CiU (1724007) + EAJ-PNV (1724902) + CC (1724907) + othe
 ES,Coalition for Europe (CiU (1724007) + EAJ-PNV (1724902) + CC (1724907) + others) [og],Partido Nacionalista Vasco — Euzko Alderdi Jeltzalea,1637
 ES,Compromís per Europa/Compromiso por Europa (CPE) [og],Coalició Compromís,5623
 ES,IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds) [og],Iniciativa per Catalunya Verds,1260
-ES,IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds) [og],Izquierda Unida,8128
+ES,IU (Izquierda Unida) - IC-V (Iniciativa per Catalunya - Verds) [og],Izquierda Unida,247
 ES,IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds) [og],Iniciativa per Catalunya Verds,1260
-ES,IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds) [og],Izquierda Unida,8128
+ES,IU (Izquierda Unida) / IC-V (Iniciativa per Catalunya – Verds) [og],Izquierda Unida,247
 ES,Junts per Catalunya — Partit Demòcrata Europeu Català,Partit Demòcrata Europeu Català,6027
 ES,Left for The Right to Decide (Coalition ERC (1724905) + others) [og],Esquerra Republicana de Catalunya,848
 ES,PP (Partido Popular) / UPN (Unión del Pueblo Navarro) [og],Alianza-Partido Popular / Partido Popular,441
 ES,SUMAR [og],Coalició Compromís,5623
-ES,SUMAR [og],Izquierda Unida,8128
+ES,SUMAR [og],Izquierda Unida,247
 ES,SUMAR [og],Más País,8395
 ES,SUMAR [og],Podemos,3203
 ES,Sumar [og],Coalició Compromís,5623
-ES,Sumar [og],Izquierda Unida,8128
+ES,Sumar [og],Izquierda Unida,247
 ES,Sumar [og],Más País,8395
 ES,Sumar [og],Podemos,3203
-ES,Unidas Podemos,Izquierda Unida,8128
+ES,Unidas Podemos,Izquierda Unida,247
 ES,Unidas Podemos,Podemos,3203
 FR,Alliance Rurale [og],Résistons !,9876
 FR,"Ensemble ! (LREM, MODEM et Horizons) [og]","Agir, la droite constructive",9132
@@ -149,7 +149,7 @@ GR,Δημοκρατική Συμπαράταξη (ΔΗΣΥ) [og],Panellinio Sosi
 HR,Amsterdam Coalition [og],Građansko-liberalni savez,8178
 HR,Amsterdam Coalition [og],Istarski demokratski sabor,513
 HR,BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og],Croatian Party of Rights [og],
-HR,BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og],Hrvatska stranka prava,1128
+HR,BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og],Hrvatska stranka prava,253
 HR,BRUNA ESIH - ZLATKO HASANBEGOVIĆ: NEOVISNI ZA HRVATSKU + HRVATSKA STRANKA PRAV [og],Neovisni za Hrvatsku,7422
 HR,Bandić Milan 365 i koalicijski partneri [og],Bandić Milan 365 — Stranka rada i solidarnosti,5452
 HR,Coalition HDZ (1191511) + HSP AS (1191613)+HSS (1191810)+others [og],Croatian Party of Rights [og],
@@ -160,11 +160,17 @@ HR,Coalition NF + HSLS (1191410)  + PGS + RI [og],Hrvatska socijalno liberalna s
 HR,Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party [og],Hrvatska seljačka stranka,72
 HR,Coalition of the Croatian Peasant Party and the Croatian Social Liberal Party [og],Hrvatska socijalno liberalna stranka,214
 HR,"DP Miroslava Škore, Hrvatski suverenisti, Blok za Hrvatsku, HKS, Hrast, SU, Zelena Lista [og]",Domovinski pokret,8981
+HR,"DP Miroslava Škore, Hrvatski suverenisti, Blok za Hrvatsku, HKS, Hrast, SU, Zelena Lista [og]",Hrvatska konzervativna stranka,9085
+HR,"DP Miroslava Škore, Hrvatski suverenisti, Blok za Hrvatsku, HKS, Hrast, SU, Zelena Lista [og]",Hrvatski rast,3138
+HR,"DP Miroslava Škore, Hrvatski suverenisti, Blok za Hrvatsku, HKS, Hrast, SU, Zelena Lista [og]",Hrvatski suverenisti,9086
 HR,"DP, HS, Blok za Hrvatsku, HKS, Hrast [og]",Domovinski pokret,8981
+HR,"DP, HS, Blok za Hrvatsku, HKS, Hrast [og]",Hrvatska konzervativna stranka,9085
+HR,"DP, HS, Blok za Hrvatsku, HKS, Hrast [og]",Hrvatski rast,3138
+HR,"DP, HS, Blok za Hrvatsku, HKS, Hrast [og]",Hrvatski suverenisti,9086
 HR,"HDZ, HSLS [og]",Hrvatska demokratska zajednica,1431
 HR,"HDZ, HSLS [og]",Hrvatska socijalno liberalna stranka,214
 HR,Hrvatska stranka prava (HSP) i koalicijski partneri [og],Croatian Party of Rights [og],
-HR,Hrvatska stranka prava (HSP) i koalicijski partneri [og],Hrvatska stranka prava,1128
+HR,Hrvatska stranka prava (HSP) i koalicijski partneri [og],Hrvatska stranka prava,253
 HR,"Koalicija IDS, PGS, LRI [og]",Istarski demokratski sabor,513
 HR,Koalicija Pametno i Za grad [og],Pametno,7336
 HR,"Koalicija Živi zid, Promijenimo Hrvatsku, Abeceda, HDSS [og]",Živi zid,4867
@@ -184,6 +190,7 @@ HR,"Restart koalicija – SDP, HSS, HSU, SNAGA, GLAS, IDS, PGS [og]",Socijaldemo
 HR,"SDP, HSS, HSU [og]",Hrvatska seljačka stranka,72
 HR,"SDP, HSS, HSU [og]",Hrvatska stranka umirovljenika,2062
 HR,"SDP, HSS, HSU [og]",Socijaldemokratska partija Hrvatske,1475
+HR,"SiP, Pametno, Fokus [og]",Fokus,9480
 HR,"SiP, Pametno, Fokus [og]",Pametno,7336
 HU,Alliance for Hungary - Center Party [og],Centrumpárt,1779
 HU,Egységben Magyarországért [og],Demokratikus Koalíció,469
@@ -234,8 +241,6 @@ IT,Centro Cristiano Democratico  / Cristiani Democratici Uniti (Biancofiore),Cen
 IT,Coalition NCD (1380633) + UDC (1380633) + PPI [og],Unione dei Democratici Cristiani e Democratici di Centro,1758
 IT,Il Girasole,Federazione dei Verdi,851
 IT,Il Girasole,Socialisti Democratici Italiani,750
-IT,Il Popolo della Libertà,Alleanza Nazionale,813
-IT,Il Popolo della Libertà,Forza Italia,1626
 IT,L'Ulivo,Democratici di Sinistra,878
 IT,L'Ulivo,Democrazia è Libertà — La Margherita,279
 IT,L'Unione,Democratici di Sinistra,878
@@ -267,28 +272,25 @@ LT,"Anti-corruption coalition of K. Krivickas and N. Puteikis (Lithuanian Centre
 LT,"Antikorupcinė N. Puteikio ir K. Krivicko koalicija (Lietuvos centro partija, Li [og]",Lietuvos Centro Partija,5455
 LT,Coalition of LLRA and LRS [og],Lietuvos lenkų rinkimų akcija,556
 LT,Koalicija Darbo partija + Jaunimas,Darbo Partija,102
+LT,"Taikos koalicija (Lietuvos krikščioniškosios demokratijos partija, Žemaičių partija) [og]",Lietuvos krikščioniškosios demokratijos partija [og],
 LT,"Taikos koalicija (Lietuvos krikščioniškosios demokratijos partija, Žemaičių partija) [og]",Žemaičių partija,1291
 LT,"„Valdemaro Tomaševskio blokas"" – Krikščioniškų šeimų sąjungos ir Rus [og]",Lietuvos lenkų rinkimų akcija,556
 LV,Attīstībai/Par!,Kustība Par!,7863
 LV,Attīstībai/Par!,Latvijas attīstībai,3213
+LV,"Coalition Apvienotais Saraksts (Latvijas Zaļā Partija, Latvijas Reģionu apvienība, Liepājas Partija) [og]",Latvijas Reģionu apvienība,3194
+LV,"Coalition Apvienotais Saraksts (Latvijas Zaļā Partija, Latvijas Reģionu apvienība, Liepājas Partija) [og]",Latvijas Zaļā partija,1296
+LV,"Coalition Apvienotais Saraksts (Latvijas Zaļā Partija, Latvijas Reģionu apvienība, Liepājas Partija) [og]",Liepājas Partija,8400
 LV,Jaunā Vienotība,Vienotība,852
 LV,LSDSP/KDS/GKL [og],Kristīgi demokrātiskā savienība,304
-LV,Latvijas Pirmā partija / Latvijas Ceļš,Latvijas Ceļš,1043
-LV,Latvijas Pirmā partija / Latvijas Ceļš,Latvijas Pirmā partija,1778
-LV,Nacionālā apvienība,Tēvzemei un Brīvībai / LNNK,1704
-LV,Nacionālā apvienība,Visu Latvijai!,506
 LV,Par Labu Latviju!,Latvijas Ceļš,1043
 LV,Par Labu Latviju!,Latvijas Pirmā partija,1778
 LV,Par Labu Latviju!,Latvijas Pirmā partija / Latvijas Ceļš,461
 LV,Par Labu Latviju!,Tautas Partija,1755
 LV,Saskaņas Centrs,"Sociāldemokrātiskā Partija ""Saskaņa""",5976
-LV,Vienotība,Jaunais Laiks,1531
-LV,Vienotība,Pilsoniskā savienība,415
 NL,ChristenUnie — Staatkundig Gereformeerde Partij,ChristenUnie,1459
 NL,ChristenUnie — Staatkundig Gereformeerde Partij,Staatkundig Gereformeerde Partij,1178
 NL,"Coalition GL - PvdA (GroenLinks,PvdA) [og]",GroenLinks,1537
 NL,"Coalition GL - PvdA (GroenLinks,PvdA) [og]",Partij van de Arbeid,1234
-NL,"Coalition GL - PvdA (GroenLinks,PvdA) [og]",Partij van de Arbeid (PvdA)/Europese Sociaaldemocraten [og],
 PL,Akcja Wyborcza Solidarność Prawicy,Zjednoczenie Chrześcijańsko-Narodowe,70
 PL,Europa Plus Social Movement [og],Ruch Palikota / Twój Ruch,731
 PL,Europa Plus Social Movement [og],Socjaldemokracja Polska,1328
@@ -304,16 +306,12 @@ PL,Konfederacja Wolność i Niepodległość,Ruch Narodowy,3224
 PL,Lewica [og],Nowa Lewica,9349
 PL,Lewica [og],"Polska Partia Socjalistyczna, PPS [og]",
 PL,Lewica [og],Sojusz Lewicy Demokratycznej,57
-PL,Lewica [og],Spring,
 PL,Lewica [og],Wiosna,7356
 PL,Lewica [og],[Lewica] Razem,4871
 PL,Lewica i Demokraci,Socjaldemokracja Polska,1328
 PL,Lewica i Demokraci,Sojusz Lewicy Demokratycznej,57
 PL,Lewica i Demokraci,Unia Pracy,1104
 PL,Nowa Lewica,"Polska Partia Socjalistyczna, PPS [og]",
-PL,Nowa Lewica,Sojusz Lewicy Demokratycznej,57
-PL,Nowa Lewica,Spring,
-PL,Nowa Lewica,Wiosna,7356
 PL,Nowa Lewica,[Lewica] Razem,4871
 PL,Ogólnopolska Koalicja Obywatelska [og],Nowoczesna,4630
 PL,Ogólnopolska Koalicja Obywatelska [og],Platforma Obywatelska,1117
@@ -321,13 +319,11 @@ PL,Senate 2001 coalition [og],Akcja Wyborcza Solidarność Prawicy,863
 PL,Senate 2001 coalition [og],Platforma Obywatelska,1117
 PL,Senate 2001 coalition [og],Prawo i Sprawiedliwość,1565
 PL,Senate 2001 coalition [og],Unia Wolności,8268
-PL,Sojusz Lewicy Demokratycznej,Socjaldemokracja Rzeczypospolitej Polskiej,8224
 PL,Sojusz Lewicy Demokratycznej — Unia Pracy,Sojusz Lewicy Demokratycznej,57
 PL,Sojusz Lewicy Demokratycznej — Unia Pracy,Unia Pracy,1104
 PL,The Left [og],Nowa Lewica,9349
 PL,The Left [og],"Polska Partia Socjalistyczna, PPS [og]",
 PL,The Left [og],Sojusz Lewicy Demokratycznej,57
-PL,The Left [og],Spring,
 PL,The Left [og],Wiosna,7356
 PL,The Left [og],[Lewica] Razem,4871
 PL,Trzecia Droga [og],Polska 2050,9027
@@ -339,8 +335,9 @@ PL,Zjednoczona Lewica,"Polska Partia Socjalistyczna, PPS [og]",
 PL,Zjednoczona Lewica,Ruch Palikota / Twój Ruch,731
 PL,Zjednoczona Lewica,Sojusz Lewicy Demokratycznej,57
 PL,Zjednoczona Lewica,Unia Pracy,1104
-PT,Aliança Democrática,Centro Democrático e Social / Partido Popular,1308
-PT,Aliança Democrática,Partido Popular Democrático / Partido Social Democrata,1359
+PT,Aliança Democrática [og],Centro Democrático e Social / Partido Popular,1308
+PT,Aliança Democrática [og],Partido Popular Democrático / Partido Social Democrata,1359
+PT,Aliança Democrática [og],Partido Popular Monárquico,1480
 PT,Coligação Democrática Unitária,Partido Comunista Português,310
 PT,Coligação Democrática Unitária,Partido Ecologista — Os Verdes,886
 PT,"Coligação: PSD (6), CDS - PP (2), Força Portugal [only in v112] [og]",Centro Democrático e Social / Partido Popular,1308
@@ -359,9 +356,9 @@ RO,Alianța 2020 USR PLUS (2020 USR PLUS) [og],Uniunea Salvați România,5969
 RO,Alianța Dreapta Unită [og],Partidul Mișcarea Populară,3210
 RO,Alianța Dreapta Unită [og],Uniunea Salvați România,5969
 RO,Alianța Electorală PSD-PNL [og],Partidul Naţional Liberal,481
-RO,Alianța Electorală PSD-PNL [og],Partidul Social Democrat,2555
+RO,Alianța Electorală PSD-PNL [og],Partidul Social Democrat,120
 RO,Alianța PSD+PC,Partidul Conservator / Partidul Umanist Român,1443
-RO,Alianța PSD+PC,Partidul Social Democrat,2555
+RO,Alianța PSD+PC,Partidul Social Democrat,120
 RO,Alianța USR-PLUS [og],"Partidul Libertate, Unitate și Solidaritate (PLUS) [og]",
 RO,Alianța USR-PLUS [og],Partidul Libertății Unității și Solidarității (PLUS) [og],
 RO,Alianța USR-PLUS [og],Uniunea Salvați România,5969
@@ -371,25 +368,24 @@ RO,Convenţia Democrată Română,Partidul Alianţa Civică,645
 RO,Convenţia Democrată Română,Partidul Naţional Liberal,481
 RO,Convenţia Democrată Română,Partidul Naţional Ţărănesc Creştin Democrat,1750
 RO,Electoral Alliance PSD (1642300) + UNPR + PC (1642600) [og],Partidul Conservator / Partidul Umanist Român,1443
-RO,Electoral Alliance PSD (1642300) + UNPR + PC (1642600) [og],Partidul Social Democrat,2555
+RO,Electoral Alliance PSD (1642300) + UNPR + PC (1642600) [og],Partidul Social Democrat,120
 RO,PSD-UNPR-PC Electoral Alliance [og],Partidul Conservator / Partidul Umanist Român,1443
-RO,PSD-UNPR-PC Electoral Alliance [og],Partidul Social Democrat,2555
-RO,PSD-UNPR-PC Electoral Alliance [og],Partidul Social Democrat Român,1034
+RO,PSD-UNPR-PC Electoral Alliance [og],Partidul Social Democrat,120
 RO,Uniunea Naţională PSD+PUR,Partidul Conservator / Partidul Umanist Român,1443
-RO,Uniunea Naţională PSD+PUR,Partidul Social Democrat,2555
+RO,Uniunea Naţională PSD+PUR,Partidul Social Democrat,120
 RO,Uniunea Social Liberală,Partidul Conservator / Partidul Umanist Român,1443
 RO,Uniunea Social Liberală,Partidul Naţional Liberal,481
-RO,Uniunea Social Liberală,Partidul Social Democrat,2555
+RO,Uniunea Social Liberală,Partidul Social Democrat,120
 SI,Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521)) [og],Nova Slovenija — Krščanska ljudska stranka,1618
-SI,Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521)) [og],Slovenska ljudska stranka,6740
+SI,Coalition New Slovenia + Slovenian People's Party (NSi (1705522) + SLS (1705521)) [og],Slovenska ljudska stranka,764
 SI,LDS (2) + DESUS (1) [only in v112] [og],Demokratična stranka upokojencev Slovenije,467
 SI,LDS (2) + DESUS (1) [only in v112] [og],Liberalna demokracija Slovenije,975
 SI,Slovenska demokratska stranka + Slovenska ljudska stranka [og],Slovenska demokratska stranka,472
-SI,Slovenska demokratska stranka + Slovenska ljudska stranka [og],Slovenska ljudska stranka,6740
+SI,Slovenska demokratska stranka + Slovenska ljudska stranka [og],Slovenska ljudska stranka,764
 SI,Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS) [og],Slovenska demokratska stranka,472
-SI,Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS) [og],Slovenska ljudska stranka,6740
+SI,Slovenska demokratska stranka in Slovenska ljudska stranka(SDS+SLS) [og],Slovenska ljudska stranka,764
 SK,Hungarian Community Togetherness [og],Strana maďarskej koalície / Strana maďarskej komunity,349
-SK,"Koalícia Komunistická Strana Slovenska, Vzdor - Strana Práce [og]",Komunistická strana Slovenska,6798
+SK,"Koalícia Komunistická Strana Slovenska, Vzdor - Strana Práce [og]",Komunistická strana Slovenska,340
 SK,"Koalícia Komunistická Strana Slovenska, Vzdor - Strana Práce [og]",VZDOR - strana práce [og],
 SK,Obyčajní Ľudia a Nezávislé Osobnosti,Nová väčšina,6686
 SK,Obyčajní Ľudia a Nezávislé Osobnosti,Za ľudí,8394
@@ -401,7 +397,5 @@ SK,Progressive Slovakia - TOGETHER-Civic Democracy [og],Progresívne Slovensko,7
 SK,Progressive Slovakia - TOGETHER-Civic Democracy [og],Spolu — občianska demokracia,8177
 SK,Progressive Slovakia and Together - Civic Democracy [og],Progresívne Slovensko,7361
 SK,Progressive Slovakia and Together - Civic Democracy [og],Spolu — občianska demokracia,8177
-SK,Progresívne Slovensko/ SPOLU [og],Progresívne Slovensko,7361
-SK,Progresívne Slovensko/ SPOLU [og],Spolu — občianska demokracia,8177
 SK,SNS (Slovenská národná strana) / Pravá SNS [og],Slovenská národná strana,730
 SK,hungarian community togetherness [og],Strana maďarskej koalície / Strana maďarskej komunity,349

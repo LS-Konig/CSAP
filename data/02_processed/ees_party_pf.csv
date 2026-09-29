@@ -2768,7 +2768,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,DE,,q25,1276091,Die Grauen,Die Grauen — Graue Panther,1652,hand,answer
 2009,DE,,q25,1276113,B90/Die Grünen,Bündnis 90 / Die Grünen,1816,link,answer
 2009,DE,,q25,1276190,"Ökologisch-Demokratische Partei, ÖDP",Ökologisch-Demokratische Partei,7345,hand,answer
-2009,DE,,q25,1276290,"Deutsche Kommunistische Partei, DKP",Kommunistische Partei Deutschlands,1135,name,answer
+2009,DE,,q25,1276290,"Deutsche Kommunistische Partei, DKP","Deutsche Kommunistische Partei, DKP [og]",,hand,answer
 2009,DE,,q25,1276320,SPD,Sozialdemokratische Partei Deutschlands,383,link,answer
 2009,DE,,q25,1276321,Linke,Die Linke,1545,link,answer
 2009,DE,,q25,1276420,FDP,Freie Demokratische Partei,573,link,answer
@@ -2837,7 +2837,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,DE,,q4,1276091,Die Grauen,Die Grauen — Graue Panther,1652,hand,answer
 2009,DE,,q4,1276113,B90/Die Grünen,Bündnis 90 / Die Grünen,1816,link,answer
 2009,DE,,q4,1276190,"Ökologisch-Demokratische Partei, ÖDP",Ökologisch-Demokratische Partei,7345,hand,answer
-2009,DE,,q4,1276290,"Deutsche Kommunistische Partei, DKP",Kommunistische Partei Deutschlands,1135,name,answer
+2009,DE,,q4,1276290,"Deutsche Kommunistische Partei, DKP","Deutsche Kommunistische Partei, DKP [og]",,hand,answer
 2009,DE,,q4,1276320,SPD,Sozialdemokratische Partei Deutschlands,383,link,answer
 2009,DE,,q4,1276321,Linke,Die Linke,1545,link,answer
 2009,DE,,q4,1276420,FDP,Freie Demokratische Partei,573,link,answer
@@ -2871,7 +2871,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,DE,,q90,99,[NAP],,,special,answer
 2009,DE,,q90,1276090,Piratenpartei Deutschland,Piratenpartei Deutschland,1287,name,answer
 2009,DE,,q90,1276113,B90/Die Grünen,Bündnis 90 / Die Grünen,1816,link,answer
-2009,DE,,q90,1276290,"Deutsche Kommunistische Partei, DKP",Kommunistische Partei Deutschlands,1135,name,answer
+2009,DE,,q90,1276290,"Deutsche Kommunistische Partei, DKP","Deutsche Kommunistische Partei, DKP [og]",,hand,answer
 2009,DE,,q90,1276320,SPD,Sozialdemokratische Partei Deutschlands,383,link,answer
 2009,DE,,q90,1276321,Linke,Die Linke,1545,link,answer
 2009,DE,,q90,1276420,FDP,Freie Demokratische Partei,573,link,answer
@@ -3399,7 +3399,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,FR,,q25,99,[NAP],,,special,answer
 2009,FR,,q25,1250090,Libertas,Libertas [og],,hand,answer
 2009,FR,,q25,1250110,Les Verts,Les Verts,1108,name,answer
-2009,FR,,q25,1250190,Europe Écologie,Europe Écologie — Les Verts,5650,name,answer
+2009,FR,,q25,1250190,Europe Écologie,Les Verts,1108,name,answer
 2009,FR,,q25,1250220,PCF,Parti communiste française,1251,name,answer
 2009,FR,,q25,1250226,"Extrême gauche (LO/NPA, le parti d’Olivier Besancenot)",extrême gauche,1594,name,answer
 2009,FR,,q25,1250320,PS,Parti socialiste,1478,link,answer
@@ -3415,7 +3415,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,FR,,q26,99,[NAP],,,special,answer
 2009,FR,,q26,1250026,Le front de gauche (Le parti de gauche + PCF),Front de Gauche,4363,hand,answer
 2009,FR,,q26,1250110,Les Verts,Les Verts,1108,name,answer
-2009,FR,,q26,1250190,Europe Écologie,Europe Écologie — Les Verts,5650,name,answer
+2009,FR,,q26,1250190,Europe Écologie,Les Verts,1108,name,answer
 2009,FR,,q26,1250220,PCF,Parti communiste française,1251,name,answer
 2009,FR,,q26,1250226,"Extrême gauche (LO/NPA, le parti d’Olivier Besancenot)",extrême gauche,1594,name,answer
 2009,FR,,q26,1250320,PS,Parti socialiste,1478,link,answer
@@ -3432,7 +3432,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,FR,,q27,96,[did not vote],did-not-vote,,special,answer
 2009,FR,,q27,1250026,Le front de gauche (Le parti de gauche + PCF),Front de Gauche,4363,hand,answer
 2009,FR,,q27,1250110,Les Verts,Les Verts,1108,name,answer
-2009,FR,,q27,1250190,Europe Écologie,Europe Écologie — Les Verts,5650,name,answer
+2009,FR,,q27,1250190,Europe Écologie,Les Verts,1108,name,answer
 2009,FR,,q27,1250220,PCF,Parti communiste française,1251,name,answer
 2009,FR,,q27,1250226,"Extrême gauche (LO/NPA, le parti d’Olivier Besancenot)",extrême gauche,1594,name,answer
 2009,FR,,q27,1250320,PS,Parti socialiste,1478,link,answer
@@ -3468,7 +3468,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,FR,,q4,99,[NAP],,,special,answer
 2009,FR,,q4,1250026,Le front de gauche (Le parti de gauche + PCF),Front de Gauche,4363,hand,answer
 2009,FR,,q4,1250110,Les Verts,Les Verts,1108,name,answer
-2009,FR,,q4,1250190,Europe Écologie,Europe Écologie — Les Verts,5650,name,answer
+2009,FR,,q4,1250190,Europe Écologie,Les Verts,1108,name,answer
 2009,FR,,q4,1250220,PCF,Parti communiste française,1251,name,answer
 2009,FR,,q4,1250226,"Extrême gauche (LO/NPA, le parti d’Olivier Besancenot)",extrême gauche,1594,name,answer
 2009,FR,,q4,1250320,PS,Parti socialiste,1478,link,answer
@@ -3499,7 +3499,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,FR,,q87,1250026,Le front de gauche (Le parti de gauche + PCF),Front de Gauche,4363,hand,answer
 2009,FR,,q87,1250090,Libertas,Libertas [og],,hand,answer
 2009,FR,,q87,1250110,Les Verts,Les Verts,1108,name,answer
-2009,FR,,q87,1250190,Europe Écologie,Europe Écologie — Les Verts,5650,name,answer
+2009,FR,,q87,1250190,Europe Écologie,Les Verts,1108,name,answer
 2009,FR,,q87,1250220,PCF,Parti communiste française,1251,name,answer
 2009,FR,,q87,1250226,"Extrême gauche (LO/NPA, le parti d’Olivier Besancenot)",extrême gauche,1594,name,answer
 2009,FR,,q87,1250320,PS,Parti socialiste,1478,link,answer
@@ -3511,7 +3511,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,FR,,q90,99,[NAP],,,special,answer
 2009,FR,,q90,1250090,Libertas,Libertas [og],,hand,answer
 2009,FR,,q90,1250110,Les Verts,Les Verts,1108,name,answer
-2009,FR,,q90,1250190,Europe Écologie,Europe Écologie — Les Verts,5650,name,answer
+2009,FR,,q90,1250190,Europe Écologie,Les Verts,1108,name,answer
 2009,FR,,q90,1250220,PCF,Parti communiste française,1251,name,answer
 2009,FR,,q90,1250226,"Extrême gauche (LO/NPA, le parti d’Olivier Besancenot)",extrême gauche,1594,name,answer
 2009,FR,,q90,1250320,PS,Parti socialiste,1478,link,answer
@@ -3992,7 +3992,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,IT,,q25,1380290,Partito Comunista dei Lavoratori PCL,Partito Comunista dei Lavoratori PCL [og],,hand,answer
 2009,IT,,q25,1380331,Partito Democratico,Partito Democratico,802,link,answer
 2009,IT,,q25,1380401,Partito Radicale /Bonino-Pannella,Radicali Italiani,8248,hand,answer
-2009,IT,,q25,1380523,Unione di Centro,Centro Cristiano Democratico,1767,link,answer
+2009,IT,,q25,1380523,Unione di Centro,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,answer
 2009,IT,,q25,1380630,Popolo della Liberta,Il Popolo della Libertà,365,link,answer
 2009,IT,,q25,1380720,Lega Nord,Lega Nord,1221,link,answer
 2009,IT,,q25,1380902,Italia dei Valori,Lista di Pietro — Italia del Valori,768,link,answer
@@ -4005,7 +4005,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,IT,,q26,99,[NAP],,,special,answer
 2009,IT,,q26,1380221,"Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU","Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU [og]",,hand,answer
 2009,IT,,q26,1380331,Partito Democratico,Partito Democratico,802,link,answer
-2009,IT,,q26,1380523,Unione di Centro,Centro Cristiano Democratico,1767,link,answer
+2009,IT,,q26,1380523,Unione di Centro,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,answer
 2009,IT,,q26,1380630,Popolo della Liberta,Il Popolo della Libertà,365,link,answer
 2009,IT,,q26,1380720,Lega Nord,Lega Nord,1221,link,answer
 2009,IT,,q26,1380902,Italia dei Valori,Lista di Pietro — Italia del Valori,768,link,answer
@@ -4021,7 +4021,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,IT,,q27,1380090,Partito Pensionati PP,Partito Pensionati,772,hand,answer
 2009,IT,,q27,1380221,"Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU","Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU [og]",,hand,answer
 2009,IT,,q27,1380331,Partito Democratico,Partito Democratico,802,link,answer
-2009,IT,,q27,1380523,Unione di Centro,Centro Cristiano Democratico,1767,link,answer
+2009,IT,,q27,1380523,Unione di Centro,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,answer
 2009,IT,,q27,1380630,Popolo della Liberta,Il Popolo della Libertà,365,link,answer
 2009,IT,,q27,1380631,La Destra,La Destra,8188,name,answer
 2009,IT,,q27,1380690,"Alleanza Nazionale, AN",Alleanza Nazionale,813,hand,answer
@@ -4037,7 +4037,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,IT,,q28,1380212,Sinistra Arcobaleno,Sinistra Arcobaleno [og],,hand,answer
 2009,IT,,q28,1380221,"Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU","Partito della Rifondazione Comunista, PdCI-PRC-S2000-CU [og]",,hand,answer
 2009,IT,,q28,1380331,Partito Democratico,Partito Democratico,802,link,answer
-2009,IT,,q28,1380523,Unione di Centro,Centro Cristiano Democratico,1767,link,answer
+2009,IT,,q28,1380523,Unione di Centro,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,answer
 2009,IT,,q28,1380630,Popolo della Liberta,Il Popolo della Libertà,365,link,answer
 2009,IT,,q28,1380631,La Destra,La Destra,8188,name,answer
 2009,IT,,q28,1380720,Lega Nord,Lega Nord,1221,link,answer
@@ -4046,7 +4046,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,IT,,q39_p2,1380720,Lega Nord,Lega Nord,1221,link,battery
 2009,IT,,q39_p3,1380331,Partito Democratico,Partito Democratico,802,link,battery
 2009,IT,,q39_p4,1380902,Italia dei Valori,Lista di Pietro — Italia del Valori,768,link,battery
-2009,IT,,q39_p5,1380523,Unione di Centro,Centro Cristiano Democratico,1767,link,battery
+2009,IT,,q39_p5,1380523,Unione di Centro,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,battery
 2009,IT,,q39_p6,1380212,Sinistra Arcobaleno,Sinistra Arcobaleno [og],,hand,battery
 2009,IT,,q39_p7,1380007,Sinistra e Libertà,Sinistra Italiana,1212,link,battery
 2009,IT,,q39_p8,1380631,La Destra,La Destra,8188,name,battery
@@ -4060,7 +4060,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,IT,,q4,1380290,Partito Comunista dei Lavoratori PCL,Partito Comunista dei Lavoratori PCL [og],,hand,answer
 2009,IT,,q4,1380331,Partito Democratico,Partito Democratico,802,link,answer
 2009,IT,,q4,1380401,Partito Radicale /Bonino-Pannella,Radicali Italiani,8248,hand,answer
-2009,IT,,q4,1380523,Unione di Centro,Centro Cristiano Democratico,1767,link,answer
+2009,IT,,q4,1380523,Unione di Centro,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,answer
 2009,IT,,q4,1380630,Popolo della Liberta,Il Popolo della Libertà,365,link,answer
 2009,IT,,q4,1380631,La Destra,La Destra,8188,name,answer
 2009,IT,,q4,1380690,"Alleanza Nazionale, AN",Alleanza Nazionale,813,hand,answer
@@ -4071,7 +4071,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,IT,,q47_p2,1380720,Lega Nord,Lega Nord,1221,link,battery
 2009,IT,,q47_p3,1380331,Partito Democratico,Partito Democratico,802,link,battery
 2009,IT,,q47_p4,1380902,Italia dei Valori,Lista di Pietro — Italia del Valori,768,link,battery
-2009,IT,,q47_p5,1380523,Unione di Centro,Centro Cristiano Democratico,1767,link,battery
+2009,IT,,q47_p5,1380523,Unione di Centro,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,battery
 2009,IT,,q47_p6,1380212,Sinistra Arcobaleno,Sinistra Arcobaleno [og],,hand,battery
 2009,IT,,q47_p7,1380007,Sinistra e Libertà,Sinistra Italiana,1212,link,battery
 2009,IT,,q47_p8,1380631,La Destra,La Destra,8188,name,battery
@@ -4079,7 +4079,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,IT,,q81_p2,1380720,Lega Nord,Lega Nord,1221,link,battery
 2009,IT,,q81_p3,1380331,Partito Democratico,Partito Democratico,802,link,battery
 2009,IT,,q81_p4,1380902,Italia dei Valori,Lista di Pietro — Italia del Valori,768,link,battery
-2009,IT,,q81_p5,1380523,Unione di Centro,Centro Cristiano Democratico,1767,link,battery
+2009,IT,,q81_p5,1380523,Unione di Centro,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,battery
 2009,IT,,q81_p6,1380212,Sinistra Arcobaleno,Sinistra Arcobaleno [og],,hand,battery
 2009,IT,,q81_p7,1380007,Sinistra e Libertà,Sinistra Italiana,1212,link,battery
 2009,IT,,q81_p8,1380631,La Destra,La Destra,8188,name,battery
@@ -4093,7 +4093,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2009,IT,,q87,1380290,Partito Comunista dei Lavoratori PCL,Partito Comunista dei Lavoratori PCL [og],,hand,answer
 2009,IT,,q87,1380331,Partito Democratico,Partito Democratico,802,link,answer
 2009,IT,,q87,1380401,Partito Radicale /Bonino-Pannella,Radicali Italiani,8248,hand,answer
-2009,IT,,q87,1380523,Unione di Centro,Centro Cristiano Democratico,1767,link,answer
+2009,IT,,q87,1380523,Unione di Centro,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,answer
 2009,IT,,q87,1380630,Popolo della Liberta,Il Popolo della Libertà,365,link,answer
 2009,IT,,q87,1380631,La Destra,La Destra,8188,name,answer
 2009,IT,,q87,1380720,Lega Nord,Lega Nord,1221,link,answer
@@ -6475,14 +6475,14 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2014,IT,,qp2_ees,1380001,Coalition NCD (1380633) + UDC (1380633) + PPI,Coalition NCD (1380633) + UDC (1380633) + PPI [og],,hand,answer
 2014,IT,,qp2_ees,1380007,Left Ecology Movement,Sinistra Italiana,1212,link,answer
 2014,IT,,qp2_ees,1380331,Democratic Party,Partito Democratico,802,link,answer
-2014,IT,,qp2_ees,1380610,Go Italy,Forza Italia,1626,link,answer
+2014,IT,,qp2_ees,1380610,Go Italy,Forza Italia (2013),8058,link,answer
 2014,IT,,qp2_ees,1380631,Brothers of Italy - National Centre-right,Fratelli d'Italia,2280,link,answer
 2014,IT,,qp2_ees,1380720,Northern League,Lega Nord,1221,link,answer
 2014,IT,,qp2_ees,1380902,List di Pietro Italy of Values,Lista di Pietro — Italia del Valori,768,link,answer
 2014,IT,,qp2_ees,1380956,Five Star Movement,Movimento 5 Stelle,2046,link,answer
 2014,IT,,qp2_ees,1380958,South Tyrol People's Party,Südtiroler Volkspartei,1369,name,answer
 2014,IT,,qpp14_1,1380331,Democratic Party,Partito Democratico,802,link,battery
-2014,IT,,qpp14_2,1380610,Go Italy,Forza Italia,1626,link,battery
+2014,IT,,qpp14_2,1380610,Go Italy,Forza Italia (2013),8058,link,battery
 2014,IT,,qpp14_3,1380720,Northern League,Lega Nord,1221,link,battery
 2014,IT,,qpp14_4,1380956,Five Star Movement,Movimento 5 Stelle,2046,link,battery
 2014,IT,,qpp14_5,1380001,Coalition NCD+UDC+PPI,Coalition NCD+UDC+PPI [og],,hand,battery
@@ -6490,7 +6490,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2014,IT,,qpp14_7,1380001,Coalition NCD+UDC+PPI,Coalition NCD+UDC+PPI [og],,hand,battery
 2014,IT,,qpp14_8,1380631,Brothers of Italy - National Centre-right,Fratelli d'Italia,2280,link,battery
 2014,IT,,qpp19_1,1380331,Democratic Party,Partito Democratico,802,link,battery
-2014,IT,,qpp19_2,1380610,Go Italy,Forza Italia,1626,link,battery
+2014,IT,,qpp19_2,1380610,Go Italy,Forza Italia (2013),8058,link,battery
 2014,IT,,qpp19_3,1380720,Northern League,Lega Nord,1221,link,battery
 2014,IT,,qpp19_4,1380956,Five Star Movement,Movimento 5 Stelle,2046,link,battery
 2014,IT,,qpp19_5,1380001,Coalition NCD+UDC+PPI,Coalition NCD+UDC+PPI [og],,hand,battery
@@ -6504,8 +6504,8 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2014,IT,,qpp21_ees,98,other (open answer recoded),other,,special,answer
 2014,IT,,qpp21_ees,1380007,Left Ecology Movement,Sinistra Italiana,1212,link,answer
 2014,IT,,qpp21_ees,1380331,Democratic Party,Partito Democratico,802,link,answer
-2014,IT,,qpp21_ees,1380523,Union for Christian and Center Democrats,Centro Cristiano Democratico,1767,link,answer
-2014,IT,,qpp21_ees,1380610,Go Italy,Forza Italia,1626,link,answer
+2014,IT,,qpp21_ees,1380523,Union for Christian and Center Democrats,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,answer
+2014,IT,,qpp21_ees,1380610,Go Italy,Forza Italia (2013),8058,link,answer
 2014,IT,,qpp21_ees,1380631,Brothers of Italy - National Centre-right,Fratelli d'Italia,2280,link,answer
 2014,IT,,qpp21_ees,1380633,New Centre-Right,Nuovo Centrodestra,2052,name,answer
 2014,IT,,qpp21_ees,1380720,Northern League,Lega Nord,1221,link,answer
@@ -6520,7 +6520,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2014,IT,,qpp5_ees,98,other (open answer recoded),other,,special,answer
 2014,IT,,qpp5_ees,1380007,Left Ecology Movement,Sinistra Italiana,1212,link,answer
 2014,IT,,qpp5_ees,1380331,Democratic Party,Partito Democratico,802,link,answer
-2014,IT,,qpp5_ees,1380523,Union for Christian and Center Democrats,Centro Cristiano Democratico,1767,link,answer
+2014,IT,,qpp5_ees,1380523,Union for Christian and Center Democrats,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,answer
 2014,IT,,qpp5_ees,1380630,People of Freedom,Il Popolo della Libertà,365,link,answer
 2014,IT,,qpp5_ees,1380631,Brothers of Italy - National Centre-right,Fratelli d'Italia,2280,link,answer
 2014,IT,,qpp5_ees,1380720,Northern League,Lega Nord,1221,link,answer
@@ -6533,8 +6533,8 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2014,IT,,qpp6_ees,98,other (open answer recoded),other,,special,answer
 2014,IT,,qpp6_ees,1380007,Left Ecology Movement,Sinistra Italiana,1212,link,answer
 2014,IT,,qpp6_ees,1380331,Democratic Party,Partito Democratico,802,link,answer
-2014,IT,,qpp6_ees,1380523,Union for Christian and Center Democrats,Centro Cristiano Democratico,1767,link,answer
-2014,IT,,qpp6_ees,1380610,Go Italy,Forza Italia,1626,link,answer
+2014,IT,,qpp6_ees,1380523,Union for Christian and Center Democrats,Unione dei Democratici Cristiani e Democratici di Centro,1758,hand,answer
+2014,IT,,qpp6_ees,1380610,Go Italy,Forza Italia (2013),8058,link,answer
 2014,IT,,qpp6_ees,1380631,Brothers of Italy - National Centre-right,Fratelli d'Italia,2280,link,answer
 2014,IT,,qpp6_ees,1380633,New Centre-Right,Nuovo Centrodestra,2052,name,answer
 2014,IT,,qpp6_ees,1380720,Northern League,Lega Nord,1221,link,answer
@@ -6542,7 +6542,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2014,IT,,qpp6_ees,1380956,Five Star Movement,Movimento 5 Stelle,2046,link,answer
 2014,IT,,qpp6_ees,1380958,South Tyrol People's Party,Südtiroler Volkspartei,1369,name,answer
 2014,IT,,qpp8_1,1380331,Democratic Party,Partito Democratico,802,link,battery
-2014,IT,,qpp8_2,1380610,Go Italy,Forza Italia,1626,link,battery
+2014,IT,,qpp8_2,1380610,Go Italy,Forza Italia (2013),8058,link,battery
 2014,IT,,qpp8_3,1380720,Northern League,Lega Nord,1221,link,battery
 2014,IT,,qpp8_4,1380956,Five Star Movement,Movimento 5 Stelle,2046,link,battery
 2014,IT,,qpp8_5,1380001,Coalition NCD+UDC+PPI,Coalition NCD+UDC+PPI [og],,hand,battery
@@ -8189,7 +8189,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,HR,,Q2,403,Živi zid,Živi zid,4867,name,answer
 2019,HR,,Q2,404,Amsterdamska koalicija,Amsterdamska koalicija [og],,hand,answer
 2019,HR,,Q2,405,MOST,Most nezavisnih lista,4865,link,answer
-2019,HR,,Q2,406,START,START [og],,hand,answer
+2019,HR,,Q2,406,START,"START - STRANKA ANTIKORUPCIJE, RAZVOJA I TRANSPARENTNOSTI – START (START) [og]",,hand,answer
 2019,HR,,Q2,407,Bandić Milan 365,Bandić Milan 365 — Stranka rada i solidarnosti,5452,hand,answer
 2019,HR,,Q2,9999,NA - has not been asked (Q1=DK),,,special,answer
 2019,HR,,Q25,90,Other,other,,special,answer
@@ -8205,7 +8205,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,HR,,Q25,409,Hrvatska socijalno liberalna stranka (HSLS),Hrvatska socijalno liberalna stranka,214,link,answer
 2019,HR,,Q25,410,MOST,Most nezavisnih lista,4865,link,answer
 2019,HR,,Q25,411,Živi zid,Živi zid,4867,name,answer
-2019,HR,,Q25,412,START,START [og],,hand,answer
+2019,HR,,Q25,412,START,"START - STRANKA ANTIKORUPCIJE, RAZVOJA I TRANSPARENTNOSTI – START (START) [og]",,hand,answer
 2019,HR,,Q25,413,Neovisni za Hrvatsku,Neovisni za Hrvatsku,7422,name,answer
 2019,HR,,Q25,414,Hrast,Hrvatski rast,3138,name,answer
 2019,HR,,Q25,415,Pametno,Pametno,7336,name,answer
@@ -8403,7 +8403,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,IT,,Q2,11,none of the parties,none,,special,answer
 2019,IT,,Q2,98,Don't know,dont-know,,special,answer
 2019,IT,,Q2,1501,Partito Democratico (PD),Partito Democratico,802,link,answer
-2019,IT,,Q2,1502,Forza Italia (Fi),Forza Italia,1626,link,answer
+2019,IT,,Q2,1502,Forza Italia (Fi),Forza Italia (2013),8058,link,answer
 2019,IT,,Q2,1503,Lega Salvini Premier,Lega Nord,1221,link,answer
 2019,IT,,Q2,1504,Movimento 5 Stelle (MCS),Movimento 5 Stelle,2046,link,answer
 2019,IT,,Q2,1505,"""+Europa""",Più Europa,6155,name,answer
@@ -8413,7 +8413,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,IT,,Q25,98,Don't know,dont-know,,special,answer
 2019,IT,,Q25,1501,"No, non mi sento vicino a nessun partito politico in particolare",none,,hand,answer
 2019,IT,,Q25,1502,Partito Democratico (PD),Partito Democratico,802,link,answer
-2019,IT,,Q25,1503,Forza Italia (Fi),Forza Italia,1626,link,answer
+2019,IT,,Q25,1503,Forza Italia (Fi),Forza Italia (2013),8058,link,answer
 2019,IT,,Q25,1504,Lega Salvini Premier (Lega),Lega Nord,1221,link,answer
 2019,IT,,Q25,1505,Movimento 5 Stelle (MCS),Movimento 5 Stelle,2046,link,answer
 2019,IT,,Q25,1506,Rifondazione Comunista (Rc),Partito della Rifondazione Comunista,1404,name,answer
@@ -8421,15 +8421,15 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,IT,,Q25,1508,Fratelli d'Italia (FDI),Fratelli d'Italia,2280,link,answer
 2019,IT,,Q25,1509,FEDERAZIONE DEI VERDI,Federazione dei Verdi,851,name,answer
 2019,IT,,Q25,1510,"Südtiroler Volkspartei (Partito popolare sudtirolese), SVP",Südtiroler Volkspartei,1369,name,answer
-2019,IT,,Q25,1512,Partito Comunista (PC),Partito Comunista (PC) [og],,hand,answer
-2019,IT,,Q25,1513,Forza Nuova (Fn),Forza Nuova (Fn) [og],,hand,answer
+2019,IT,,Q25,1512,Partito Comunista (PC),Partito Comunista [og],,hand,answer
+2019,IT,,Q25,1513,Forza Nuova (Fn),Forza Nuova [og],,hand,answer
 2019,IT,,Q25,1514,Casa Pound,CasaPound Italia,8244,hand,answer
 2019,IT,,Q7,0,did not vote,did-not-vote,,special,answer
 2019,IT,,Q7,90,other party,other,,special,answer
 2019,IT,,Q7,96,did vote blanc or nil,blank-invalid,,special,answer
 2019,IT,,Q7,98,do not remember,dont-know,,special,answer
 2019,IT,,Q7,1501,Partito Democratico (PD),Partito Democratico,802,link,answer
-2019,IT,,Q7,1502,Forza Italia (Fi),Forza Italia,1626,link,answer
+2019,IT,,Q7,1502,Forza Italia (Fi),Forza Italia (2013),8058,link,answer
 2019,IT,,Q7,1503,Lega Salvini Premier (Lega),Lega Nord,1221,link,answer
 2019,IT,,Q7,1504,Movimento 5 Stelle (MCS),Movimento 5 Stelle,2046,link,answer
 2019,IT,,Q7,1505,Sinistra (Rifondazione),Sinistra (Rifondazione) [og],,hand,answer
@@ -8450,27 +8450,27 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,IT,,Q9,1503,"""+Europa""",Più Europa,6155,name,answer
 2019,IT,,Q9,1504,Südtiroler Volkspartei Partito Autonomista Trentino Tirolese (SVP-Ptt),Südtiroler Volkspartei Partito Autonomista Trentino Tirolese (SVP-Ptt) [og],,hand,answer
 2019,IT,,Q9,1505,Italia Europa Insieme,Insieme,7671,name,answer
-2019,IT,,Q9,1506,Forza Italia (Fi),Forza Italia,1626,link,answer
+2019,IT,,Q9,1506,Forza Italia (Fi),Forza Italia (2013),8058,link,answer
 2019,IT,,Q9,1507,Lega Salvini Premier (Lega),Lega Nord,1221,link,answer
 2019,IT,,Q9,1508,Movimento 5 Stelle (MCS),Movimento 5 Stelle,2046,link,answer
 2019,IT,,Q9,1509,Noi con L'Italia (Udc)_,Noi con l'Italia,9141,name,answer
 2019,IT,,Q9,1510,Fratelli d'Italia (FDI),Fratelli d'Italia,2280,link,answer
 2019,IT,,q10_1,1501,Partito Democratico (PD),Partito Democratico,802,link,battery
-2019,IT,,q10_2,1502,Forza Italia (Fi),Forza Italia,1626,link,battery
+2019,IT,,q10_2,1502,Forza Italia (Fi),Forza Italia (2013),8058,link,battery
 2019,IT,,q10_3,1503,Lega Salvini Premier (Lega),Lega Nord,1221,link,battery
 2019,IT,,q10_4,1504,Movimento 5 Stelle (MCS),Movimento 5 Stelle,2046,link,battery
 2019,IT,,q10_5,1505,Sinistra (Rifondazione),Sinistra (Rifondazione) [og],,hand,battery
 2019,IT,,q10_6,1506,"""+Europa""",Più Europa,6155,name,battery
 2019,IT,,q10_7,1507,Fratelli d'Italia (FDI),Fratelli d'Italia,2280,link,battery
 2019,IT,,q13_1,1501,Partito Democratico (PD),Partito Democratico,802,link,battery
-2019,IT,,q13_2,1502,Forza Italia (Fi),Forza Italia,1626,link,battery
+2019,IT,,q13_2,1502,Forza Italia (Fi),Forza Italia (2013),8058,link,battery
 2019,IT,,q13_3,1503,Lega Salvini Premier (Lega),Lega Nord,1221,link,battery
 2019,IT,,q13_4,1504,Movimento 5 Stelle (MCS),Movimento 5 Stelle,2046,link,battery
 2019,IT,,q13_5,1505,Sinistra (Rifondazione),Sinistra (Rifondazione) [og],,hand,battery
 2019,IT,,q13_6,1506,"""+Europa""",Più Europa,6155,name,battery
 2019,IT,,q13_7,1507,Fratelli d'Italia (FDI),Fratelli d'Italia,2280,link,battery
 2019,IT,,q24_1,1501,Partito Democratico (PD),Partito Democratico,802,link,battery
-2019,IT,,q24_2,1502,Forza Italia (Fi),Forza Italia,1626,link,battery
+2019,IT,,q24_2,1502,Forza Italia (Fi),Forza Italia (2013),8058,link,battery
 2019,IT,,q24_3,1503,Lega Salvini Premier (Lega),Lega Nord,1221,link,battery
 2019,IT,,q24_4,1504,Movimento 5 Stelle (MCS),Movimento 5 Stelle,2046,link,battery
 2019,IT,,q24_5,1505,Sinistra (Rifondazione),Sinistra (Rifondazione) [og],,hand,battery
@@ -8575,7 +8575,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,LV,,Q25,1605,Zaļo un Zemnieku savienība,Zaļo un Zemnieku savienība,701,link,answer
 2019,LV,,Q25,1606,Politiskā partija KPV LV,Kam pieder valsts? — Par cilvēcīgu Latviju,6356,name,answer
 2019,LV,,Q25,1607,Progresīvie,Progresīvie,6357,link,answer
-2019,LV,,Q25,1608,Jaunā Saskaņa,Dzimtene,897,name,answer
+2019,LV,,Q25,1608,Jaunā Saskaņa,Jaunā Saskaņa [og],,hand,answer
 2019,LV,,Q25,1609,Jaunā konservatīvā partija,Jaunā konservatīvā partija,6355,name,answer
 2019,LV,,Q25,1610,Attīstībai/Par!,Attīstībai/Par!,8393,link,answer
 2019,LV,,Q25,1611,"""Saskaņa"" sociāldemokrātiskā partija","Sociāldemokrātiskā Partija ""Saskaņa""",5976,name,answer
@@ -8592,7 +8592,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,LV,,Q7,1604,Zaļo un Zemnieku savienība,Zaļo un Zemnieku savienība,701,link,answer
 2019,LV,,Q7,1605,Politiskā partija KPV LV,Kam pieder valsts? — Par cilvēcīgu Latviju,6356,name,answer
 2019,LV,,Q7,1606,Progresīvie,Progresīvie,6357,link,answer
-2019,LV,,Q7,1607,Jaunā Saskaņa,Dzimtene,897,name,answer
+2019,LV,,Q7,1607,Jaunā Saskaņa,Jaunā Saskaņa [og],,hand,answer
 2019,LV,,Q7,1608,Jaunā konservatīvā partija,Jaunā konservatīvā partija,6355,name,answer
 2019,LV,,Q7,1609,Attīstībai/Par!,Attīstībai/Par!,8393,link,answer
 2019,LV,,Q7,1610,"""Saskaņa"" sociāldemokrātiskā partija","Sociāldemokrātiskā Partija ""Saskaņa""",5976,name,answer
@@ -9123,7 +9123,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,SK,,Q2,2504,Smer–sociálna demokracia (Smer-SD),Smer — sociálna demokracia,311,link,answer
 2019,SK,,Q2,2505,Sloboda a Solidarita (SaS),Sloboda a Solidarita,1386,link,answer
 2019,SK,,Q2,2506,Obyčajní Ľudia a nezávislé osobnosti (OĽaNO),Obyčajní Ľudia a Nezávislé Osobnosti,2130,link,answer
-2019,SK,,Q2,2507,Progressive Slovakia – Together (Progresivne Slovensko-SPOLU),Progressive Slovakia – Together (Progresivne Slovensko-SPOLU) [og],,hand,answer
+2019,SK,,Q2,2507,Progressive Slovakia – Together (Progresivne Slovensko-SPOLU),Progresivne Slovensko-SPOLU [og],,hand,answer
 2019,SK,,Q2,2508,Slovenská národná strana (SNS),Slovenská národná strana,730,link,answer
 2019,SK,,Q2,2509,Most–Híd,MOST-HID,258,link,answer
 2019,SK,,Q2,9999,NA - has not been asked (Q1=DK),,,special,answer
@@ -9136,7 +9136,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2019,SK,,Q25,2505,Smer–sociálna demokracia (Smer-SD),Smer — sociálna demokracia,311,link,answer
 2019,SK,,Q25,2506,Sloboda a Solidarita (SaS),Sloboda a Solidarita,1386,link,answer
 2019,SK,,Q25,2507,Obyčajní ľudia a nezávislé osobnosti (OĽaNO),Obyčajní Ľudia a Nezávislé Osobnosti,2130,link,answer
-2019,SK,,Q25,2508,Progresívne Slovensko/ SPOLU,Progresívne Slovensko/ SPOLU [og],,hand,answer
+2019,SK,,Q25,2508,Progresívne Slovensko/ SPOLU,Progresivne Slovensko-SPOLU [og],,hand,answer
 2019,SK,,Q25,2509,Slovenská národná strana (SNS),Slovenská národná strana,730,link,answer
 2019,SK,,Q25,2510,Most-Híd,MOST-HID,258,link,answer
 2019,SK,,Q7,0,did not vote,did-not-vote,,special,answer
@@ -9860,14 +9860,14 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,EE,,q11_4,23302,Sotsiaaldemokraatlik Erakond,Sotsiaaldemokraatlik Erakond — Mõõdukad,1150,link,battery
 2024,EE,,q11_5,23305,Eesti Keskerakond,Eesti Keskerakond,533,link,battery
 2024,EE,,q11_6,23308,Erakond Eesti 200,Erakond Eesti 200,7340,link,battery
-2024,EE,,q11_7,23306,Erakond Parempoolsed,Parempoolsed,83,link,battery
+2024,EE,,q11_7,23306,Erakond Parempoolsed,Erakond Parempoolsed [og],,hand,battery
 2024,EE,,q18_1,23301,Isamaa Erakond,Erakond Isamaa ja Res Publica Liit,685,hand,battery
 2024,EE,,q18_2,23303,Eesti Reformierakond,Eesti Reformierakond,821,link,battery
 2024,EE,,q18_3,23304,Eesti Konservatiivne Rahvaerakond,Eesti Konservatiivne Rahvaerakond,4094,link,battery
 2024,EE,,q18_4,23302,Sotsiaaldemokraatlik Erakond,Sotsiaaldemokraatlik Erakond — Mõõdukad,1150,link,battery
 2024,EE,,q18_5,23305,Eesti Keskerakond,Eesti Keskerakond,533,link,battery
 2024,EE,,q18_6,23308,Erakond Eesti 200,Erakond Eesti 200,7340,link,battery
-2024,EE,,q18_7,23306,Erakond Parempoolsed,Parempoolsed,83,link,battery
+2024,EE,,q18_7,23306,Erakond Parempoolsed,Erakond Parempoolsed [og],,hand,battery
 2024,EE,,q19_recoded,88,,none,,special,answer
 2024,EE,,q19_recoded,90,,other,,special,answer
 2024,EE,,q19_recoded,98,,dont-know,,special,answer
@@ -9876,7 +9876,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,EE,,q19_recoded,23303,Eesti Reformierakond,Eesti Reformierakond,821,link,answer
 2024,EE,,q19_recoded,23304,Eesti Konservatiivne Rahvaerakond,Eesti Konservatiivne Rahvaerakond,4094,link,answer
 2024,EE,,q19_recoded,23305,Eesti Keskerakond,Eesti Keskerakond,533,link,answer
-2024,EE,,q19_recoded,23306,Erakond Parempoolsed,Parempoolsed,83,link,answer
+2024,EE,,q19_recoded,23306,Erakond Parempoolsed,Erakond Parempoolsed [og],,hand,answer
 2024,EE,,q19_recoded,23307,KOOS organisatsioon osutab suveräänsusele,KOOS organisatsioon osutab suveräänsusele [og],,hand,answer
 2024,EE,,q19_recoded,23308,Erakond Eesti 200,Erakond Eesti 200,7340,link,answer
 2024,EE,,q19_recoded,23309,Erakond Eestimaa Rohelised,Erakonna Eestimaa Rohelised,1040,link,answer
@@ -9888,7 +9888,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,EE,,q1a_recoded,23303,Eesti Reformierakond,Eesti Reformierakond,821,link,answer
 2024,EE,,q1a_recoded,23304,Eesti Konservatiivne Rahvaerakond,Eesti Konservatiivne Rahvaerakond,4094,link,answer
 2024,EE,,q1a_recoded,23305,Eesti Keskerakond,Eesti Keskerakond,533,link,answer
-2024,EE,,q1a_recoded,23306,Erakond Parempoolsed,Parempoolsed,83,link,answer
+2024,EE,,q1a_recoded,23306,Erakond Parempoolsed,Erakond Parempoolsed [og],,hand,answer
 2024,EE,,q1a_recoded,23307,KOOS organisatsioon osutab suveräänsusele,KOOS organisatsioon osutab suveräänsusele [og],,hand,answer
 2024,EE,,q1a_recoded,23308,Erakond Eesti 200,Erakond Eesti 200,7340,link,answer
 2024,EE,,q1a_recoded,23309,Erakond Eestimaa Rohelised,Erakonna Eestimaa Rohelised,1040,link,answer
@@ -9898,7 +9898,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,EE,,q20_4,23302,Sotsiaaldemokraatlik Erakond,Sotsiaaldemokraatlik Erakond — Mõõdukad,1150,link,battery
 2024,EE,,q20_5,23305,Eesti Keskerakond,Eesti Keskerakond,533,link,battery
 2024,EE,,q20_6,23308,Erakond Eesti 200,Erakond Eesti 200,7340,link,battery
-2024,EE,,q20_7,23306,Erakond Parempoolsed,Parempoolsed,83,link,battery
+2024,EE,,q20_7,23306,Erakond Parempoolsed,Erakond Parempoolsed [og],,hand,battery
 2024,EE,,q6_recoded,89,,independent,,special,answer
 2024,EE,,q6_recoded,90,,other,,special,answer
 2024,EE,,q6_recoded,91,,blank-invalid,,special,answer
@@ -9909,7 +9909,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,EE,,q6_recoded,23303,Eesti Reformierakond,Eesti Reformierakond,821,link,answer
 2024,EE,,q6_recoded,23304,Eesti Konservatiivne Rahvaerakond,Eesti Konservatiivne Rahvaerakond,4094,link,answer
 2024,EE,,q6_recoded,23305,Eesti Keskerakond,Eesti Keskerakond,533,link,answer
-2024,EE,,q6_recoded,23306,Erakond Parempoolsed,Parempoolsed,83,link,answer
+2024,EE,,q6_recoded,23306,Erakond Parempoolsed,Erakond Parempoolsed [og],,hand,answer
 2024,EE,,q6_recoded,23307,KOOS organisatsioon osutab suveräänsusele,KOOS organisatsioon osutab suveräänsusele [og],,hand,answer
 2024,EE,,q6_recoded,23308,Erakond Eesti 200,Erakond Eesti 200,7340,link,answer
 2024,EE,,q6_recoded,23309,Erakond Eestimaa Rohelised,Erakonna Eestimaa Rohelised,1040,link,answer
@@ -9923,7 +9923,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,EE,,q8_recoded,23303,Eesti Reformierakond,Eesti Reformierakond,821,link,answer
 2024,EE,,q8_recoded,23304,Eesti Konservatiivne Rahvaerakond,Eesti Konservatiivne Rahvaerakond,4094,link,answer
 2024,EE,,q8_recoded,23305,Eesti Keskerakond,Eesti Keskerakond,533,link,answer
-2024,EE,,q8_recoded,23306,Erakond Parempoolsed,Parempoolsed,83,link,answer
+2024,EE,,q8_recoded,23306,Erakond Parempoolsed,Erakond Parempoolsed [og],,hand,answer
 2024,EE,,q8_recoded,23307,KOOS organisatsioon osutab suveräänsusele,KOOS organisatsioon osutab suveräänsusele [og],,hand,answer
 2024,EE,,q8_recoded,23308,Erakond Eesti 200,Erakond Eesti 200,7340,link,answer
 2024,EE,,q8_recoded,23309,Erakond Eestimaa Rohelised,Erakonna Eestimaa Rohelised,1040,link,answer
@@ -9934,7 +9934,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,EE,,q9_4,23302,Sotsiaaldemokraatlik Erakond,Sotsiaaldemokraatlik Erakond — Mõõdukad,1150,link,battery
 2024,EE,,q9_5,23305,Eesti Keskerakond,Eesti Keskerakond,533,link,battery
 2024,EE,,q9_6,23308,Erakond Eesti 200,Erakond Eesti 200,7340,link,battery
-2024,EE,,q9_7,23306,Erakond Parempoolsed,Parempoolsed,83,link,battery
+2024,EE,,q9_7,23306,Erakond Parempoolsed,Erakond Parempoolsed [og],,hand,battery
 2024,ES,,q11_1,72402,Partido Socialista Obrero Español,Partido Socialista Obrero Español,1338,link,battery
 2024,ES,,q11_2,72401,Partido Popular,Alianza-Partido Popular / Partido Popular,441,hand,battery
 2024,ES,,q11_3,72403,VOX,Vox,3218,link,battery
@@ -10556,7 +10556,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,HU,,q9_6,34807,Jobbik – Konzervatívok,Jobbik Magyarországért Mozgalom,42,link,battery
 2024,HU,,q9_7,34806,Magyar Kétfarkú Kutya Párt,Magyar Kétfarkú Kutya Párt,6129,link,battery
 2024,HU,,q9_8,34808,LMP – Magyarország Zöld Pártja,Lehet Más a Politika — LMP – Magyarország Zöld Pártja,1650,link,battery
-2024,IE,,q11_1,37203,Sinn Féin,Sinn Fein,2507,link,battery
+2024,IE,,q11_1,37203,Sinn Féin,Sinn Féin (Provisional),4,hand,battery
 2024,IE,,q11_2,37201,Fine Gael,Fine Gael,1288,link,battery
 2024,IE,,q11_3,37202,Fianna Fáil,Fianna Fáil,1055,link,battery
 2024,IE,,q11_4,37209,Daonlathaithe Sóisialta,Daonlathaigh Shóisialta,4870,link,battery
@@ -10564,7 +10564,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IE,,q11_6,37208,Aontú,Aontú,8642,link,battery
 2024,IE,,q11_7,37205,Páirti Lucht Oibre,Páirti Lucht Oibre,562,link,battery
 2024,IE,,q11_8,37211,Dlúthpháirtíocht–Pobal Seachas Brabús,Solidarity — People Before Profit,8241,hand,battery
-2024,IE,,q18_1,37203,Sinn Féin,Sinn Fein,2507,link,battery
+2024,IE,,q18_1,37203,Sinn Féin,Sinn Féin (Provisional),4,hand,battery
 2024,IE,,q18_2,37201,Fine Gael,Fine Gael,1288,link,battery
 2024,IE,,q18_3,37202,Fianna Fáil,Fianna Fáil,1055,link,battery
 2024,IE,,q18_4,37209,Daonlathaithe Sóisialta,Daonlathaigh Shóisialta,4870,link,battery
@@ -10578,7 +10578,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IE,,q19_recoded,98,,dont-know,,special,answer
 2024,IE,,q19_recoded,37201,Fine Gael,Fine Gael,1288,link,answer
 2024,IE,,q19_recoded,37202,Fianna Fáil,Fianna Fáil,1055,link,answer
-2024,IE,,q19_recoded,37203,Sinn Féin,Sinn Fein,2507,link,answer
+2024,IE,,q19_recoded,37203,Sinn Féin,Sinn Féin (Provisional),4,hand,answer
 2024,IE,,q19_recoded,37205,Páirti Lucht Oibre,Páirti Lucht Oibre,562,link,answer
 2024,IE,,q19_recoded,37206,Green -Comhaontas Glas,Green Party-Comhaontas Glas,1775,link,answer
 2024,IE,,q19_recoded,37208,Aontú,Aontú,8642,link,answer
@@ -10594,7 +10594,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IE,,q1a_recoded,98,,dont-know,,special,answer
 2024,IE,,q1a_recoded,37201,Fine Gael,Fine Gael,1288,link,answer
 2024,IE,,q1a_recoded,37202,Fianna Fáil,Fianna Fáil,1055,link,answer
-2024,IE,,q1a_recoded,37203,Sinn Féin,Sinn Fein,2507,link,answer
+2024,IE,,q1a_recoded,37203,Sinn Féin,Sinn Féin (Provisional),4,hand,answer
 2024,IE,,q1a_recoded,37205,Páirti Lucht Oibre,Páirti Lucht Oibre,562,link,answer
 2024,IE,,q1a_recoded,37206,Green -Comhaontas Glas,Green Party-Comhaontas Glas,1775,link,answer
 2024,IE,,q1a_recoded,37207,Neamhspleáigh ar son an Athraithe,Neamhspleáigh ar son an Athraithe,8181,link,answer
@@ -10604,7 +10604,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IE,,q1a_recoded,37211,Dlúthpháirtíocht–Pobal Seachas Brabús,Solidarity — People Before Profit,8241,hand,answer
 2024,IE,,q1a_recoded,37212,Irish Freedom Party,Irish Freedom Party [og],,hand,answer
 2024,IE,,q1a_recoded,37213,An Páirtí Náisiúnta,An Páirtí Náisiúnta [og],,hand,answer
-2024,IE,,q20_1,37203,Sinn Féin,Sinn Fein,2507,link,battery
+2024,IE,,q20_1,37203,Sinn Féin,Sinn Féin (Provisional),4,hand,battery
 2024,IE,,q20_2,37201,Fine Gael,Fine Gael,1288,link,battery
 2024,IE,,q20_3,37202,Fianna Fáil,Fianna Fáil,1055,link,battery
 2024,IE,,q20_4,37209,Daonlathaithe Sóisialta,Daonlathaigh Shóisialta,4870,link,battery
@@ -10619,7 +10619,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IE,,q6_recoded,98,,dont-know,,special,answer
 2024,IE,,q6_recoded,37201,Fine Gael,Fine Gael,1288,link,answer
 2024,IE,,q6_recoded,37202,Fianna Fáil,Fianna Fáil,1055,link,answer
-2024,IE,,q6_recoded,37203,Sinn Féin,Sinn Fein,2507,link,answer
+2024,IE,,q6_recoded,37203,Sinn Féin,Sinn Féin (Provisional),4,hand,answer
 2024,IE,,q6_recoded,37204,Independent Ireland,Independent Ireland [og],,hand,answer
 2024,IE,,q6_recoded,37205,Páirti Lucht Oibre,Páirti Lucht Oibre,562,link,answer
 2024,IE,,q6_recoded,37206,Green -Comhaontas Glas,Green Party-Comhaontas Glas,1775,link,answer
@@ -10636,7 +10636,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IE,,q8_recoded,98,,dont-know,,special,answer
 2024,IE,,q8_recoded,37201,Fine Gael,Fine Gael,1288,link,answer
 2024,IE,,q8_recoded,37202,Fianna Fáil,Fianna Fáil,1055,link,answer
-2024,IE,,q8_recoded,37203,Sinn Féin,Sinn Fein,2507,link,answer
+2024,IE,,q8_recoded,37203,Sinn Féin,Sinn Féin (Provisional),4,hand,answer
 2024,IE,,q8_recoded,37205,Páirti Lucht Oibre,Páirti Lucht Oibre,562,link,answer
 2024,IE,,q8_recoded,37206,Green -Comhaontas Glas,Green Party-Comhaontas Glas,1775,link,answer
 2024,IE,,q8_recoded,37208,Aontú,Aontú,8642,link,answer
@@ -10645,7 +10645,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IE,,q8_recoded,37213,An Páirtí Náisiúnta,An Páirtí Náisiúnta [og],,hand,answer
 2024,IE,,q8_recoded,37215,Páirtí Neamhspleách na hEite Clé,Páirtí Neamhspleách na hEite Clé [og],,hand,answer
 2024,IE,,q8_recoded,72407,,,,undocumented,answer
-2024,IE,,q9_1,37203,Sinn Féin,Sinn Fein,2507,link,battery
+2024,IE,,q9_1,37203,Sinn Féin,Sinn Féin (Provisional),4,hand,battery
 2024,IE,,q9_2,37201,Fine Gael,Fine Gael,1288,link,battery
 2024,IE,,q9_3,37202,Fianna Fáil,Fianna Fáil,1055,link,battery
 2024,IE,,q9_4,37209,Daonlathaithe Sóisialta,Daonlathaigh Shóisialta,4870,link,battery
@@ -10656,7 +10656,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IT,,q11_1,38001,Fratelli d'Italia,Fratelli d'Italia,2280,link,battery
 2024,IT,,q11_2,38002,Partito Democratico,Partito Democratico,802,link,battery
 2024,IT,,q11_3,38003,Movimento Cinque Stelle,Movimento 5 Stelle,2046,link,battery
-2024,IT,,q11_4,38004,Forza Italia,Forza Italia,1626,link,battery
+2024,IT,,q11_4,38004,Forza Italia,Forza Italia (2013),8058,link,battery
 2024,IT,,q11_5,38005,Lega Salvini Premier,Lega Nord,1221,hand,battery
 2024,IT,,q11_6,38006,Alleanza Verdi e Sinistra,Alleanza Verdi e Sinistra [og],,hand,battery
 2024,IT,,q11_7,38008,Azione,Azione,9082,link,battery
@@ -10664,7 +10664,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IT,,q18_1,38001,Fratelli d'Italia,Fratelli d'Italia,2280,link,battery
 2024,IT,,q18_2,38002,Partito Democratico,Partito Democratico,802,link,battery
 2024,IT,,q18_3,38003,Movimento Cinque Stelle,Movimento 5 Stelle,2046,link,battery
-2024,IT,,q18_4,38004,Forza Italia,Forza Italia,1626,link,battery
+2024,IT,,q18_4,38004,Forza Italia,Forza Italia (2013),8058,link,battery
 2024,IT,,q18_5,38005,Lega Salvini Premier,Lega Nord,1221,hand,battery
 2024,IT,,q18_6,38006,Alleanza Verdi e Sinistra,Alleanza Verdi e Sinistra [og],,hand,battery
 2024,IT,,q18_7,38008,Azione,Azione,9082,link,battery
@@ -10676,7 +10676,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IT,,q19_recoded,38001,Fratelli d'Italia,Fratelli d'Italia,2280,link,answer
 2024,IT,,q19_recoded,38002,Partito Democratico,Partito Democratico,802,link,answer
 2024,IT,,q19_recoded,38003,Movimento Cinque Stelle,Movimento 5 Stelle,2046,link,answer
-2024,IT,,q19_recoded,38004,Forza Italia,Forza Italia,1626,link,answer
+2024,IT,,q19_recoded,38004,Forza Italia,Forza Italia (2013),8058,link,answer
 2024,IT,,q19_recoded,38005,Lega Salvini Premier,Lega Nord,1221,hand,answer
 2024,IT,,q19_recoded,38006,Alleanza Verdi e Sinistra,Alleanza Verdi e Sinistra [og],,hand,answer
 2024,IT,,q19_recoded,38008,Azione,Azione,9082,link,answer
@@ -10699,7 +10699,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IT,,q1a_recoded,38001,Fratelli d'Italia,Fratelli d'Italia,2280,link,answer
 2024,IT,,q1a_recoded,38002,Partito Democratico,Partito Democratico,802,link,answer
 2024,IT,,q1a_recoded,38003,Movimento Cinque Stelle,Movimento 5 Stelle,2046,link,answer
-2024,IT,,q1a_recoded,38004,Forza Italia,Forza Italia,1626,link,answer
+2024,IT,,q1a_recoded,38004,Forza Italia,Forza Italia (2013),8058,link,answer
 2024,IT,,q1a_recoded,38005,Lega Salvini Premier,Lega Nord,1221,hand,answer
 2024,IT,,q1a_recoded,38006,Alleanza Verdi e Sinistra,Alleanza Verdi e Sinistra [og],,hand,answer
 2024,IT,,q1a_recoded,38008,Azione,Azione,9082,link,answer
@@ -10711,7 +10711,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IT,,q20_1,38001,Fratelli d'Italia,Fratelli d'Italia,2280,link,battery
 2024,IT,,q20_2,38002,Partito Democratico,Partito Democratico,802,link,battery
 2024,IT,,q20_3,38003,Movimento Cinque Stelle,Movimento 5 Stelle,2046,link,battery
-2024,IT,,q20_4,38004,Forza Italia,Forza Italia,1626,link,battery
+2024,IT,,q20_4,38004,Forza Italia,Forza Italia (2013),8058,link,battery
 2024,IT,,q20_5,38005,Lega Salvini Premier,Lega Nord,1221,hand,battery
 2024,IT,,q20_6,38006,Alleanza Verdi e Sinistra,Alleanza Verdi e Sinistra [og],,hand,battery
 2024,IT,,q20_7,38008,Azione,Azione,9082,link,battery
@@ -10724,7 +10724,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IT,,q6_recoded,38001,Fratelli d'Italia,Fratelli d'Italia,2280,link,answer
 2024,IT,,q6_recoded,38002,Partito Democratico,Partito Democratico,802,link,answer
 2024,IT,,q6_recoded,38003,Movimento Cinque Stelle,Movimento 5 Stelle,2046,link,answer
-2024,IT,,q6_recoded,38004,Forza Italia,Forza Italia,1626,link,answer
+2024,IT,,q6_recoded,38004,Forza Italia,Forza Italia (2013),8058,link,answer
 2024,IT,,q6_recoded,38005,Lega Salvini Premier,Lega Nord,1221,hand,answer
 2024,IT,,q6_recoded,38006,Alleanza Verdi e Sinistra,Alleanza Verdi e Sinistra [og],,hand,answer
 2024,IT,,q6_recoded,38007,Stati Uniti d'Europa,Stati Uniti d'Europa [og],,hand,answer
@@ -10741,7 +10741,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IT,,q8_recoded,38001,Fratelli d'Italia,Fratelli d'Italia,2280,link,answer
 2024,IT,,q8_recoded,38002,Partito Democratico,Partito Democratico,802,link,answer
 2024,IT,,q8_recoded,38003,Movimento Cinque Stelle,Movimento 5 Stelle,2046,link,answer
-2024,IT,,q8_recoded,38004,Forza Italia,Forza Italia,1626,link,answer
+2024,IT,,q8_recoded,38004,Forza Italia,Forza Italia (2013),8058,link,answer
 2024,IT,,q8_recoded,38005,Lega Salvini Premier,Lega Nord,1221,hand,answer
 2024,IT,,q8_recoded,38006,Alleanza Verdi e Sinistra,Alleanza Verdi e Sinistra [og],,hand,answer
 2024,IT,,q8_recoded,38011,Südtiroler Volkspartei,Südtiroler Volkspartei,1369,name,answer
@@ -10754,7 +10754,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,IT,,q9_1,38001,Fratelli d'Italia,Fratelli d'Italia,2280,link,battery
 2024,IT,,q9_2,38002,Partito Democratico,Partito Democratico,802,link,battery
 2024,IT,,q9_3,38003,Movimento Cinque Stelle,Movimento 5 Stelle,2046,link,battery
-2024,IT,,q9_4,38004,Forza Italia,Forza Italia,1626,link,battery
+2024,IT,,q9_4,38004,Forza Italia,Forza Italia (2013),8058,link,battery
 2024,IT,,q9_5,38005,Lega Salvini Premier,Lega Nord,1221,hand,battery
 2024,IT,,q9_6,38006,Alleanza Verdi e Sinistra,Alleanza Verdi e Sinistra [og],,hand,battery
 2024,IT,,q9_7,38008,Azione,Azione,9082,link,battery
@@ -11236,7 +11236,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,PT,,q6_recoded,96,,did-not-vote,,special,answer
 2024,PT,,q6_recoded,98,,dont-know,,special,answer
 2024,PT,,q6_recoded,62001,Partido Socialista,Partido Socialista,655,name,answer
-2024,PT,,q6_recoded,62002,Aliança Democrática,Aliança Democrática,1742,name,answer
+2024,PT,,q6_recoded,62002,Aliança Democrática,Aliança Democrática [og],,hand,answer
 2024,PT,,q6_recoded,62003,Chega,Chega,8182,link,answer
 2024,PT,,q6_recoded,62004,Iniciativa Liberal,Iniciativa Liberal,8640,link,answer
 2024,PT,,q6_recoded,62005,Bloco de Esquerda,Bloco de Esquerda,1310,link,answer
@@ -11256,7 +11256,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,PT,,q8_recoded,96,,did-not-vote,,special,answer
 2024,PT,,q8_recoded,98,,dont-know,,special,answer
 2024,PT,,q8_recoded,62001,Partido Socialista,Partido Socialista,655,name,answer
-2024,PT,,q8_recoded,62002,Aliança Democrática,Aliança Democrática,1742,name,answer
+2024,PT,,q8_recoded,62002,Aliança Democrática,Aliança Democrática [og],,hand,answer
 2024,PT,,q8_recoded,62003,Chega,Chega,8182,link,answer
 2024,PT,,q8_recoded,62004,Iniciativa Liberal,Iniciativa Liberal,8640,link,answer
 2024,PT,,q8_recoded,62005,Bloco de Esquerda,Bloco de Esquerda,1310,link,answer
@@ -11395,7 +11395,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,SE,,q19_recoded,75209,Folklistan,Folklistan [og],,hand,answer
 2024,SE,,q19_recoded,75210,Alternativ för Sverige,Alternativ för Sverige [og],,hand,answer
 2024,SE,,q19_recoded,75211,Piratpartiet,Piratpartiet,1485,link,answer
-2024,SE,,q19_recoded,75212,Medborgerlig Samling,Medborgerlig samling,1633,link,answer
+2024,SE,,q19_recoded,75212,Medborgerlig Samling,Medborgerlig Samling [og],,hand,answer
 2024,SE,,q19_recoded,75213,Mänskliga rättigheter och Demokrati,Mänskliga rättigheter och Demokrati [og],,hand,answer
 2024,SE,,q19_recoded,75214,Värdigt Liv,Värdigt Liv [og],,hand,answer
 2024,SE,,q19_recoded,75215,Sveriges kommunistiska parti,Vänsterpartiet / Sveriges Komunistiska Parti,830,name,answer
@@ -11436,7 +11436,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,SE,,q6_recoded,75209,Folklistan,Folklistan [og],,hand,answer
 2024,SE,,q6_recoded,75210,Alternativ för Sverige,Alternativ för Sverige [og],,hand,answer
 2024,SE,,q6_recoded,75211,Piratpartiet,Piratpartiet,1485,link,answer
-2024,SE,,q6_recoded,75212,Medborgerlig Samling,Medborgerlig samling,1633,link,answer
+2024,SE,,q6_recoded,75212,Medborgerlig Samling,Medborgerlig Samling [og],,hand,answer
 2024,SE,,q6_recoded,75214,Värdigt Liv,Värdigt Liv [og],,hand,answer
 2024,SE,,q8_recoded,91,,blank-invalid,,special,answer
 2024,SE,,q8_recoded,96,,did-not-vote,,special,answer
@@ -11450,7 +11450,7 @@ wave,cntry,region,variable,code,label,pf_name,pf_id,source,kind
 2024,SE,,q8_recoded,75207,Kristdemokraterna,Kristdemokraterna,651,link,answer
 2024,SE,,q8_recoded,75208,Liberalerna,Folkpartiet liberalerna / Liberalerna,1274,link,answer
 2024,SE,,q8_recoded,75211,Piratpartiet,Piratpartiet,1485,link,answer
-2024,SE,,q8_recoded,75212,Medborgerlig Samling,Medborgerlig samling,1633,link,answer
+2024,SE,,q8_recoded,75212,Medborgerlig Samling,Medborgerlig Samling [og],,hand,answer
 2024,SE,,q8_recoded,75213,Mänskliga rättigheter och Demokrati,Mänskliga rättigheter och Demokrati [og],,hand,answer
 2024,SE,,q8_recoded,75216,Basinkomstpartiet,Basinkomstpartiet [og],,hand,answer
 2024,SE,,q8_recoded,75217,Socialisterna - Välfärdspartiet,Socialisterna - Välfärdspartiet [og],,hand,answer
