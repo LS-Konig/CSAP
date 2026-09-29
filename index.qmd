@@ -273,7 +273,11 @@ Within the 2019 data, where both types are measurable, $\Delta$ for dislike of
 parties
 
 
-timeline: estimate for hahmetal data, have results and presentation until oktober 7th, ideally: partisan attachement gap for allocation games less than for thermometer, revision due to stricter attention check, etc.
+possible interesting deeper look: conflicting instances (attachement and vote differ) -> which shows more ingroup favoritism?
+
+# HMS presentation
+
+timeline: estimate for eu25games data, have results and presentation until oktober 7th, ideally: partisan attachement gap for allocation games less than for thermometer, revision due to stricter attention check, etc.
 
 Standardization of effects to compare attitudinal and behavioral, posterior differences in contrast between the two as probability statement
 
