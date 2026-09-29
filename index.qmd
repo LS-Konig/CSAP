@@ -80,9 +80,9 @@ In a second study, I investigate the relationship between partisanship and ideol
 
 In a third study, I take a closer look at how partisanship impacts *perceived* ideological polarization of their respective party systems.
 
-In a fourth study, I then turn to affective polarization, specifically *horizontal* affective polarization, directed towards parties (as opposed to *partisans*).
+In a fourth study, I then turn to affective polarization, specifically *vertical* affective polarization, directed towards parties (as opposed to *partisans*).
 
-In a fifth study, I compare experimentally measured *vertical* affective polarization among partisans and deniers.
+In a fifth study, I compare experimentally measured *horizontal* affective polarization among partisans and deniers.
 
 This study makes multiple contributions: First, it is the most comprehensive study of political polarization in Europe, focusing on its various facets (actual and perceived ideological, vertical and horizontal affective), applying both a dynamic and static lense.
 
@@ -278,5 +278,32 @@ timeline: estimate for hahmetal data, have results and presentation until oktobe
 Standardization of effects to compare attitudinal and behavioral, posterior differences in contrast between the two as probability statement
 
 for HMS presentation: conceptual analytical section on polarization (see other talk or seminar), then focus on affective polarization, then the empirical contrast, conclusion: term "polarization" is vague, speaking of "the polarization" does not make sense, and normative notion (more polarization = bad) is not linear (see one curvilinear paper), rather U-shaped, 
+
+1. Polarization as a family, not a thing
+  - ancient origins (poles) -> physics (polarized light) -> social science 
+  - mutliple facets (+ example for each)
+  -> polarization is not a "thing"
+2. Affective polarization
+  - in pol science, debate on polarization "ended" with "affective turn"
+  - Iyengar and minimal original definition
+  - but even here its more complicated
+  - 2x2 matrix with vertical/horizontal and attitudinal/behavioral
+3. Empirical insights
+  - AP focuses on identity / attachement
+  - systematic comparison of people who report attachement vs people who explicitly deny it (show distribution plots and highlight that this matters for scope of population of inference)
+  - hierachical modelling for within party contrast
+  - vertical attitudinal (thermometer scales) vs behavioral horizontal (dictator/trust games) with illustration slide for each
+  - results tba (I guess contrast larger for vertical attitudinal than for horizontal behavioral -> AP if measured by attitudes might be overly exagerrated)
+4. implications for democracy
+  - measurement in social science always involves conceptual choices 
+  - most widespread measures (thermometer/like-dislike) may overexaggerate "extent" of AP
+  - additionally, early narrative of AP = bad for democracy recently scrutinized, some work now suggests inverted U shape relationship (think about how during Merkel people complained about too little emotions in politics)
+5. conclusion:
+  - there is no such a thing as "the polarization"
+  - there is a clear affective polarization gap
+  - but making meaninful inferences about magnitude and dynamic is subject to conceptual/measurement choices by researchers
+  - alarming narratives are neither helpful nor resting on evidence 
+
+
 
 @boxell2024cross as example for how to display differing survey wordings
