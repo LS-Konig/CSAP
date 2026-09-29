@@ -60,6 +60,7 @@ Quarto is configured with `freeze: auto`; delete the notebook's subdirectory und
 | `data/` | See below |
 | `references.bib` | APSR-format bibliography (~2,000 entries) |
 | `images/` | Figures used by the deck |
+| `literature/` | Git submodule → private repo `LS-Konig/CSAP-lit` (PDFs in `pdf/`, book chapters in `pdf/<book>/`, pdf2md output in `md/`). Plain git, no LFS; run `git submodule update --init` after cloning. Push new PDFs in batches of ≤100 MB |
 
 There is no *analysis* code in the repo — only the ESS conversion notebook above. The old pipeline was written in `code/01_preparation/` through `code/04_models/` and lives only in git history; the derived data files it produced are still on disk (see below), so a new pipeline can start from those or from the raw release.
 
