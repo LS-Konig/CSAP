@@ -80,6 +80,7 @@ The sampler runs on `cmdstanr` (CmdStan 2.39).
 The `rstan` backend is not used, because the R 4.6 library pairs rstan 2.32 with StanHeaders 2.39, and that pair compiles no model.
 `adapt_delta = 0.95` is set from the start, because hierarchical models with varying slopes at two levels tend to produce divergent transitions at the default of 0.8.
 The maximum tree depth stays at the default of 10, and the diagnostics count the iterations that hit it.
+When CmdStan compiles a model, the C++ compiler emits warnings about the generated Stan code (e.g. `-Woverloaded-virtual`). These say nothing about the model or the sampling, and `fit_model()` mutes exactly those messages. Every other brms message and every warning stays visible.
 Prior predictive fits always use the development subsample: they do not condition on the outcome, so a larger sample adds nothing.
 
 ```{r}
@@ -114,6 +115,19 @@ fit_model <- function(
   sample_prior = "no",
   settings = run
 ) {
+  # Mute C++ compiler notes only
+  compiler_note <- "\\.hpp|\\.cpp|\\[-W[a-z-]+=?\\]|\\^~"
+  withCallingHandlers(
+    fit_brm(formula, family, prior, data, name, sample_prior, settings),
+    message = \(m) {
+      if (grepl(compiler_note, conditionMessage(m))) {
+        invokeRestart("muffleMessage")
+      }
+    }
+  )
+}
+
+fit_brm <- function(formula, family, prior, data, name, sample_prior, settings) {
   brm(
     formula,
     data = data,
