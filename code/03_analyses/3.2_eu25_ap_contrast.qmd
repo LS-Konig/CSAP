@@ -1,0 +1,1681 @@
+---
+title: |
+  CSAP Code Notebook 3.2
+subtitle: |
+  eu25games 2019: within-party AP contrast of explicit and vote-anchored partisans (model set-up)
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+This notebook sets up the models for the first eu25games estimates.
+The quantity of interest is the gap in affective polarization (AP) between **explicit** partisans (attachment and vote name the same party) and **vote-anchored** partisans (no attachment, but a reported vote), estimated *within* party and country.
+In the composition figure of notebook 3.1, these are the dark-blue leaf ("Attached: same party") and the dark-orange leaf ("No attachment: vote").
+There are two outcomes, and each gets its own models:
+
+- **Games**: tokens (0--10) given to a partner in the dictator and trust games (horizontal, behavioral);
+- **Thermometer**: 0--100 ratings of parties (vertical, attitudinal).
+
+The notebook follows the Bayesian workflow in eight steps: scientific model, estimand, data summary, formal model, prior predictive check, fit, MCMC diagnostics and posterior predictive check, estimand computation, limitations.
+For every outcome, a Gaussian model (on the standardized outcome) is built first, then a beta-binomial model.
+The beta-binomial is the generative model of the integer outcome. The Gaussian model recovers conditional means and serves as robustness.
+
+**Nothing in this notebook is a result.**
+With `full_fit <- FALSE` (the default), every model is compiled and sampled on a 10% development subsample with short chains, only to show that the pipeline runs end to end: priors, prior predictive checks, sampling, diagnostics, posterior predictive checks and the estimand code.
+The estimates from these runs are not interpretable and are not interpreted.
+Setting `full_fit <- TRUE` switches every model to the full analysis sample and production settings, and caches the fits in `data/04_models/` (git-ignored).
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "brms",
+  "cmdstanr",
+  "posterior",
+  "bayesplot",
+  "ggdag",
+  "dagitty",
+  "patchwork",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+```
+
+## Run Settings
+
+Two switches govern the whole notebook.
+
+- `full_fit`: `FALSE` fits every model on the development subsample (`dev`), with 2 chains of 300 iterations (150 warm-up). `TRUE` fits on the full analysis sample with 4 chains of 2,000 iterations (1,000 warm-up) and writes the fit to `data/04_models/`. A cached fit is reused as long as model, data and priors are unchanged (`file_refit = "on_change"`).
+- `seed`: one seed for the development subsample, the samplers and the posterior draws used in the estimand code.
+
+The sampler runs on `cmdstanr` (CmdStan 2.39).
+`cmdstanr` is not on CRAN; it comes from the Stan r-universe (`install.packages("cmdstanr", repos = "https://stan-dev.r-universe.dev")`).
+The `rstan` backend is not used, because the R 4.6 library pairs rstan 2.32 with StanHeaders 2.39, and that pair compiles no model.
+`adapt_delta = 0.95` is set from the start, because hierarchical models with varying slopes at two levels tend to produce divergent transitions at the default of 0.8.
+The maximum tree depth stays at the default of 10, and the diagnostics count the iterations that hit it.
+Prior predictive fits always use the development subsample: they do not condition on the outcome, so a larger sample adds nothing.
+
+```{r}
+#| label: run-settings
+
+full_fit <- FALSE
+seed <- 2019
+
+run <- if (full_fit) {
+  list(chains = 4, iter = 2000, warmup = 1000)
+} else {
+  list(chains = 2, iter = 300, warmup = 150)
+}
+
+# Sampler control
+max_treedepth <- 10
+
+# Prior predictive runs
+run_prior <- list(chains = 2, iter = 300, warmup = 150)
+
+# Cache for full fits only
+model_dir <- here("data", "04_models")
+if (full_fit) dir.create(model_dir, showWarnings = FALSE)
+
+# One wrapper for every brm() call
+fit_model <- function(
+  formula,
+  family,
+  prior,
+  data,
+  name,
+  sample_prior = "no",
+  settings = run
+) {
+  brm(
+    formula,
+    data = data,
+    family = family,
+    prior = prior,
+    sample_prior = sample_prior,
+    chains = settings$chains,
+    iter = settings$iter,
+    warmup = settings$warmup,
+    cores = settings$chains,
+    control = list(adapt_delta = 0.95, max_treedepth = max_treedepth),
+    seed = seed,
+    backend = "cmdstanr",
+    refresh = 0,
+    silent = 2,
+    file = if (full_fit && sample_prior == "no") {
+      file.path(model_dir, name)
+    },
+    file_refit = "on_change"
+  )
+}
+```
+
+# Scientific Model
+
+Before any model is chosen, the data-generating process is written down as a DAG.
+The DAG states what each part of the model is there for, and it says which reading of the contrast the design supports.
+
+The nodes:
+
+- $C$: country; $P$: the respondent's anchor party (the attachment party for explicit partisans, the vote party for vote-anchored partisans);
+- $T$: partisan type (explicit or vote-anchored);
+- $R$: the relation of the target to the anchor (co-partisan or out-partisan);
+- $W$: survey wave (2 or 3). The vote item differs between waves (in wave 2 the European Parliament vote was mostly an intended or hypothetical one), so the wave can shift who ends up vote-anchored, and it can shift the outcome;
+- $U$: unobserved respondent traits that drive both whether people report an attachment and how they treat partisans (political interest, strength of preference, social desirability, and so on);
+- $Y$: the outcome (tokens or rating).
+
+For the **games** there are three more nodes, all fixed by the design: $Z$, the shown partner attributes (age, sex, religion, class, EU stance shown or not); $G$, the game (dictator or trust); and $K$, the round.
+$Z$ is randomized. $G$ and $K$ are design factors. All three only affect $Y$.
+
+The arrow $T \to R$ in the games is a design arrow.
+The partner's party was drawn with reference to the attachment answer, so explicit partisans meet a co-partisan in about half of the rounds and vote-anchored partisans in about one in ten (notebook 3.1, *How the Partner's Party Was Drawn*).
+Within a type, $R$ is random.
+This is why AP is always computed *within* type: conditioning on $T$ closes the only back door into $R$.
+
+```{r}
+#| label: dag-games
+
+dag_games <- dagify(
+  Y ~ T + R + P + C + W + U + Z + G + K,
+  T ~ P + W + U,
+  R ~ T,
+  P ~ C,
+  exposure = "T",
+  outcome = "Y",
+  latent = "U",
+  labels = c(
+    Y = "Tokens",
+    T = "Type",
+    R = "Co/out",
+    P = "Anchor party",
+    C = "Country",
+    W = "Wave",
+    U = "Unobserved",
+    Z = "Shown attributes",
+    G = "Game",
+    K = "Round"
+  )
+)
+
+ggdag(dag_games, text = TRUE, use_labels = "label", text_size = 3) +
+  labs(title = "DAG: token allocation in the games") +
+  theme_dag()
+```
+
+For the **thermometer**, $R$ is not randomized.
+Every respondent in a country rated the same six parties (checked in the [Thermometer](#thermometer) data section), so whether a rating is a co- or an out-rating is fixed by the anchor party: $P \to R$.
+Since explicit and vote-anchored respondents of one anchor rate the same six parties, which parties are rated is balanced across type within party and cancels out of the type contrast.
+For this reason the thermometer models carry no rated-party term.
+
+```{r}
+#| label: dag-thermo
+
+dag_thermo <- dagify(
+  Y ~ T + R + P + C + W + U,
+  T ~ P + W + U,
+  R ~ P,
+  P ~ C,
+  exposure = "T",
+  outcome = "Y",
+  latent = "U",
+  labels = c(
+    Y = "Rating",
+    T = "Type",
+    R = "Co/out",
+    P = "Anchor party",
+    C = "Country",
+    W = "Wave",
+    U = "Unobserved"
+  )
+)
+
+ggdag(dag_thermo, text = TRUE, use_labels = "label", text_size = 3) +
+  labs(title = "DAG: thermometer ratings") +
+  theme_dag()
+```
+
+What the DAGs imply for identification, as computed by `dagitty`:
+
+```{r}
+#| label: dag-adjustment
+
+# Type -> outcome, U latent
+adjustmentSets(dag_games, exposure = "T", outcome = "Y")
+
+# Type -> outcome, if there were no U
+adjustmentSets(
+  dagify(
+    Y ~ T + R + P + C + W + Z + G + K,
+    T ~ P + W,
+    R ~ T,
+    P ~ C
+  ),
+  exposure = "T",
+  outcome = "Y"
+)
+
+# Co/out -> tokens
+adjustmentSets(dag_games, exposure = "R", outcome = "Y")
+```
+
+The first call returns nothing: with $U$ in the graph, there is no adjustment set that identifies the effect of type. (An empty set `{}` would instead mean that no adjustment is needed.)
+Without $U$, the anchor party and the wave would suffice ($\{P, W\}$).
+For the co/out relation in the games, conditioning on type is enough ($\{T\}$).
+
+The models below follow from this.
+The anchor party enters as a varying-effects level (nested in country), and the wave enters as a dummy.
+The quantity of interest, the type difference in the co/out gap, is an interaction $T \times R$.
+A DAG does not encode interactions, but the gap itself is identified within type, and the comparison of gaps across types inherits the problem of $U$.
+**The type contrast is therefore a within-party descriptive contrast, not a causal effect.**
+Under which assumptions it can be read causally is an open section in the notes (`design.md`).
+Respondent covariates that could stand in for $U$ are not joined yet (notebook 3.1, *Caveats*).
+
+# Estimand
+
+For a type $t \in \{\text{explicit}, \text{vote-anchored}\}$:
+
+$$
+AP_t = E(Y \mid Co, t) - E(Y \mid Out, t)
+$$
+
+$$
+\Delta AP = AP_{\text{explicit}} - AP_{\text{vote-anchored}}
+$$
+
+The expectations are marginal means over parties, so they need a stated average.
+They are computed by g-computation from the fitted model:
+
+1. Take the observed rows of the anchor parties in the estimand population (below).
+2. Set type and relation counterfactually to each of the four cells (explicit/vote-anchored × co/out), keeping everything else as observed, and predict the expected outcome for every row with all varying effects (country, party, person) included.
+3. Average the predictions with **respondent weights**: every respondent-wave counts once, whatever their number of rows. Each anchor party then weighs by its number of respondents of both types together. The weight is the same in all four cells, so $\Delta AP$ is not driven by how types are distributed across parties.
+4. Take differences draw by draw.
+
+**Common support.** The type contrast within a party exists only where the party has respondents of both types.
+The models are fitted on **all** anchor parties: single-type parties still inform the country and grand means through partial pooling.
+The estimands are averaged only over anchor parties with at least one explicit **and** at least one vote-anchored respondent.
+The data sections tabulate per country what falls outside.
+
+The estimands are reported pooled (all parties in support), per country and per anchor party.
+They are reported in raw units (tokens, thermometer points) and in SD units: the raw contrast divided by the SD of the outcome in its analysis sample.
+The SD units make the attitudinal and behavioral contrast comparable.
+The cross-outcome quantity is
+
+$$
+\Delta AP^{SD}_{\text{thermo}} - \Delta AP^{SD}_{\text{games}},
+$$
+
+reported with the posterior probability that it is positive.
+The two models are fitted separately, so draws are paired by index, which is valid for independent posteriors.
+This quantity is coded here, but not interpreted.
+
+The estimand code is shared by all models:
+
+- `ap_draws()` returns posterior draws of the four cell means per group.
+- `ap_contrasts()` turns them into $AP_t$ and $\Delta AP$.
+- `summarise_ap()` gives the posterior median and the 95% interval.
+
+`posterior_epred()` is called in row chunks, so that the full samples fit into memory.
+
+```{r}
+#| label: estimand-code
+
+# Cell means per group, by draw
+ap_draws <- function(
+  fit,
+  data,
+  by = NULL,
+  ndraws = 1000,
+  back = identity,
+  chunk = 5000
+) {
+  set.seed(seed)
+  ids <- sample(seq_len(ndraws(fit)), min(ndraws, ndraws(fit)))
+  grp <- factor(if (is.null(by)) "pooled" else data[[by]])
+
+  # Respondent weights per group
+  m <- sapply(levels(grp), \(l) (grp == l) * data$der_w)
+  m <- matrix(m, nrow = nrow(data), dimnames = list(NULL, levels(grp)))
+  rows <- split(seq_len(nrow(data)), ceiling(seq_len(nrow(data)) / chunk))
+
+  cells <- expand_grid(der_explicit = 0:1, der_co = 0:1)
+  map2(cells$der_explicit, cells$der_co, \(e, k) {
+    nd <- mutate(data, der_explicit = e, der_co = k)
+    tot <- 0
+    for (i in rows) {
+      ep <- back(posterior_epred(fit, newdata = nd[i, ], draw_ids = ids))
+      tot <- tot + ep %*% m[i, , drop = FALSE]
+    }
+    tot <- sweep(tot, 2, colSums(m), "/")
+    as_tibble(tot) |>
+      mutate(.draw = ids) |>
+      pivot_longer(-.draw, names_to = "group", values_to = "mean") |>
+      mutate(der_explicit = e, der_co = k)
+  }) |>
+    bind_rows()
+}
+
+# AP by type and Delta AP, by draw
+ap_contrasts <- function(draws, sd_y) {
+  draws |>
+    pivot_wider(
+      names_from = c(der_explicit, der_co),
+      values_from = mean,
+      names_prefix = "m"
+    ) |>
+    transmute(
+      .draw,
+      group,
+      ap_vote_anchored = m0_1 - m0_0,
+      ap_explicit = m1_1 - m1_0,
+      delta_ap = ap_explicit - ap_vote_anchored,
+      delta_ap_sd = delta_ap / sd_y
+    )
+}
+
+# Median and 95% interval
+summarise_ap <- function(contrasts) {
+  contrasts |>
+    pivot_longer(-c(.draw, group), names_to = "quantity") |>
+    summarise(
+      median = median(value),
+      lower = quantile(value, 0.025),
+      upper = quantile(value, 0.975),
+      .by = c(group, quantity)
+    )
+}
+```
+
+The MCMC diagnostics are also shared.
+`mcmc_check()` reports the largest $\hat{R}$, the smallest bulk and tail ESS over all parameters, the number of divergent transitions, and the number of iterations that hit the maximum tree depth.
+One `posterior` warning is muted: "The ESS has been capped to avoid unstable estimates". It fires once per parameter whose ESS estimate exceeds what the number of draws can support. With thousands of person intercepts it would otherwise flood the output, and it never signals a sampling problem. All other warnings stay visible.
+
+```{r}
+#| label: diagnostics-code
+
+mcmc_check <- function(fit) {
+  # Mute only the ESS-cap note
+  s <- withCallingHandlers(
+    summarise_draws(as_draws_df(fit), "rhat", "ess_bulk", "ess_tail"),
+    warning = \(w) {
+      if (grepl("ESS has been capped", conditionMessage(w))) {
+        invokeRestart("muffleWarning")
+      }
+    }
+  )
+  np <- nuts_params(fit)
+  tibble(
+    max_rhat = max(s$rhat, na.rm = TRUE),
+    min_ess_bulk = min(s$ess_bulk, na.rm = TRUE),
+    min_ess_tail = min(s$ess_tail, na.rm = TRUE),
+    divergent = sum(np$Value[np$Parameter == "divergent__"]),
+    max_treedepth = sum(
+      np$Value[np$Parameter == "treedepth__"] >= max_treedepth
+    )
+  )
+}
+```
+
+Grouped predictive checks need a grouping variable, such as the type × relation cell, that is not in the model formula.
+`pp_check()` looks up grouping variables only among the model's own variables.
+`ppc_by()` therefore calls the `bayesplot` function directly, with the group taken from the data the model was fitted on, row by row.
+
+```{r}
+#| label: ppc-code
+
+# Grouped PPC with an outside grouping variable
+ppc_by <- function(fit, type, group, newdata, ndraws = 100, stat = NULL) {
+  stopifnot(nrow(newdata) == nrow(fit$data))
+  y <- as.vector(get_y(fit))
+  yrep <- posterior_predict(fit, ndraws = ndraws)
+  g <- newdata[[group]]
+  switch(
+    type,
+    stat_grouped = ppc_stat_grouped(y, yrep, group = g, stat = stat),
+    bars_grouped = ppc_bars_grouped(y, yrep, group = g)
+  )
+}
+```
+
+# Data
+
+The inputs are the two long datasets of notebook 3.1.
+Sample construction, duplicate handling, partisan type, anchor and the co/out relation are all done there and are not repeated here.
+
+```{r}
+#| label: load-data
+
+eu25_games <- read_rds(here("data", "03_final", "eu25_games.rds"))
+eu25_thermo <- read_rds(here("data", "03_final", "eu25_thermo.rds"))
+```
+
+## Games
+
+The games sample keeps:
+
+- explicit and vote-anchored respondents (`type`);
+- rounds in which the partner's party was **shown** and is a co- or out-partisan (`der_cj_partisan_relationship`). This drops conditions 3 and 4 (party not shown) and the Latvian partners shown "without a party".
+
+Both games and both waves are kept.
+
+The model variables:
+
+- `der_explicit` (1 explicit, 0 vote-anchored), `der_co` (1 co-partisan, 0 out-partisan), `der_trust` (1 trust game, 0 dictator game), `der_wave3` (1 wave 3, 0 wave 2): binary 0/1 dummies, not centred.
+- `round` (1--3 within game) and the shown partner attributes `cj_age`, `cj_sex`, `cj_rel`, `cj_class` and `der_cj_eu_identity`, all as factors, as is standard for conjoint attributes. Age is shown at five values and is treated as five levels, not as a number. There are no continuous predictors, so no predictor needs standardizing.
+- `cj_nationality_shown` is not used. When the party is shown (conditions 1 and 2), nationality is forced to the respondent's own country, so it is constant here. The check below asserts this.
+- `der_y_z`: the token allocation z-scored on the mean and SD of this sample, the outcome of the Gaussian model.
+- `der_w`: the respondent weight of the estimand, one over the respondent-wave's number of rows.
+- `der_anchor`: the anchor party with its country. Only used for tables; the model nests `anchor` in `country`.
+
+```{r}
+#| label: games-sample
+
+games <- eu25_games |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_cj_partisan_relationship %in% c("co", "out")
+  ) |>
+  mutate(
+    der_explicit = as.integer(type == "explicit"),
+    der_co = as.integer(der_cj_partisan_relationship == "co"),
+    der_trust = as.integer(game == "trust"),
+    der_wave3 = as.integer(wave == 3),
+    der_cell = paste(type, der_cj_partisan_relationship),
+    der_anchor = paste(country, anchor, sep = ": "),
+    round = factor(round),
+    across(c(cj_age, cj_sex, cj_rel, cj_class, der_cj_eu_identity), factor)
+  ) |>
+  mutate(der_w = 1 / n(), .by = meta_responseid)
+
+# Outcome scale, kept for back-transformation
+games_scale <- list(mean = mean(games$cj_pl2), sd = sd(games$cj_pl2))
+games <- games |>
+  mutate(der_y_z = (cj_pl2 - games_scale$mean) / games_scale$sd)
+
+# Party shown, nationality constant, no gaps
+stopifnot(
+  all(games$der_cj_party_shown),
+  all(games$cj_nationality_shown == "own_country"),
+  !anyNA(select(
+    games,
+    cj_pl2,
+    der_explicit,
+    der_co,
+    der_trust,
+    der_wave3,
+    round,
+    cj_age,
+    cj_sex,
+    cj_rel,
+    cj_class,
+    der_cj_eu_identity,
+    country,
+    anchor,
+    meta_pid
+  ))
+)
+
+games_scale
+```
+
+Rounds, respondent-waves, persons and anchor parties per cell:
+
+```{r}
+#| label: games-cells
+
+games |>
+  summarise(
+    rounds = n(),
+    respondent_waves = n_distinct(meta_responseid),
+    persons = n_distinct(meta_pid),
+    anchors = n_distinct(der_anchor),
+    .by = c(type, der_cj_partisan_relationship)
+  ) |>
+  arrange(type, der_cj_partisan_relationship) |>
+  knitr::kable()
+```
+
+The token allocation by cell is shown below.
+The distribution has a spike at 0 and one at 5, the even split.
+The beta-binomial model must reproduce both. A Gaussian model cannot, which is one reason it is robustness only.
+
+```{r}
+#| label: fig-games-outcome
+#| fig-width: 9
+#| fig-height: 5
+
+games |>
+  count(der_cell, game, cj_pl2) |>
+  mutate(share = n / sum(n), .by = c(der_cell, game)) |>
+  ggplot(aes(x = cj_pl2, y = share, fill = game)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.75) +
+  facet_wrap(~der_cell) +
+  scale_x_continuous(breaks = 0:10) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(dictator = "#08306b", trust = "#d94801")) +
+  labs(
+    title = "Tokens given, by partisan type and partner relation",
+    subtitle = "Explicit and vote-anchored respondents, rounds with the partner's party shown",
+    x = "Tokens given (of 10)",
+    y = "Share of rounds",
+    fill = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank())
+```
+
+### Common Support
+
+An anchor party is in the estimand population if it has at least one explicit and at least one vote-anchored respondent in this sample.
+The support is defined on the full analysis sample, so it is the same whether the models run on the development subsample or not.
+
+```{r}
+#| label: games-support
+
+games_support <- games |>
+  distinct(der_anchor, country, meta_responseid, type) |>
+  count(der_anchor, country, type) |>
+  pivot_wider(names_from = type, values_from = n, values_fill = 0) |>
+  mutate(in_support = explicit >= 1 & vote_anchored >= 1)
+
+games <- games |>
+  mutate(
+    der_support = der_anchor %in%
+      games_support$der_anchor[games_support$in_support]
+  )
+
+# Parties and respondents in and out of support, per country
+games_support |>
+  summarise(
+    parties = n(),
+    parties_in = sum(in_support),
+    explicit_in = sum(explicit[in_support]),
+    explicit_out = sum(explicit[!in_support]),
+    vote_anchored_in = sum(vote_anchored[in_support]),
+    vote_anchored_out = sum(vote_anchored[!in_support]),
+    .by = country
+  ) |>
+  arrange(country) |>
+  knitr::kable()
+
+# Overall
+games_support |>
+  summarise(
+    parties = n(),
+    parties_in = sum(in_support),
+    share_respondents_in = sum((explicit + vote_anchored)[in_support]) /
+      sum(explicit + vote_anchored)
+  )
+```
+
+Parties outside the support are mostly small parties with only explicit or only vote-anchored respondents in the sample.
+They are fitted but not averaged over.
+Within the support, some parties have the vote-anchored co-partisan cell empty, because those respondents met a co-partisan only by chance.
+Their party-level co/out gap for vote-anchored respondents then comes from partial pooling towards the country and grand means, and the posterior for that party shows it through a wider interval.
+
+## Thermometer
+
+The thermometer sample keeps explicit and vote-anchored respondents, with ratings of their own anchor party (co) and of the other rated parties (out).
+The model variables are built as in the games, without the game, round and partner attributes.
+
+The check below establishes that every respondent in a country rated the same six parties, in the same slot order.
+This is the premise for leaving out a rated-party term (see [Scientific Model](#scientific-model)), and the notebook stops if it fails.
+
+```{r}
+#| label: thermo-sample
+
+thermo <- eu25_thermo |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_thermo_relationship %in% c("co", "out")
+  ) |>
+  mutate(
+    der_explicit = as.integer(type == "explicit"),
+    der_co = as.integer(der_thermo_relationship == "co"),
+    der_wave3 = as.integer(wave == 3),
+    der_cell = paste(type, der_thermo_relationship),
+    der_anchor = paste(country, anchor, sep = ": ")
+  ) |>
+  mutate(der_w = 1 / n(), .by = meta_responseid)
+
+thermo_scale <- list(mean = mean(thermo$q_thermo), sd = sd(thermo$q_thermo))
+thermo <- thermo |>
+  mutate(der_y_z = (q_thermo - thermo_scale$mean) / thermo_scale$sd)
+
+# One list of rated parties per country
+rated_lists <- eu25_thermo |>
+  summarise(
+    list = paste(sort(unique(ext_q_thermo_pf_name)), collapse = " | "),
+    .by = c(country, meta_responseid)
+  ) |>
+  summarise(lists = n_distinct(list), .by = country)
+
+# One party per slot and country
+slot_parties <- eu25_thermo |>
+  summarise(parties = n_distinct(ext_q_thermo_pf_name), .by = c(country, slot))
+
+stopifnot(
+  all(rated_lists$lists == 1),
+  all(slot_parties$parties == 1),
+  all(thermo$q_thermo == round(thermo$q_thermo)),
+  !anyNA(select(
+    thermo,
+    q_thermo,
+    der_explicit,
+    der_co,
+    der_wave3,
+    country,
+    anchor,
+    meta_pid
+  ))
+)
+
+thermo_scale
+```
+
+Not every respondent has a co-rating: when the anchor party is not among the six rated parties, the respondent contributes out-ratings only.
+
+```{r}
+#| label: thermo-cells
+
+thermo |>
+  summarise(
+    ratings = n(),
+    respondent_waves = n_distinct(meta_responseid),
+    persons = n_distinct(meta_pid),
+    anchors = n_distinct(der_anchor),
+    .by = c(type, der_thermo_relationship)
+  ) |>
+  arrange(type, der_thermo_relationship) |>
+  knitr::kable()
+
+# Share of respondent-waves with a co-rating
+thermo |>
+  summarise(has_co = any(der_co == 1), .by = c(meta_responseid, type)) |>
+  summarise(share_with_co = mean(has_co), .by = type)
+```
+
+The ratings pile up at the scale ends: 0 for many out-parties, and 100 for some own parties.
+A plain binomial with 100 trials could not produce these spikes. The beta-binomial can, and the posterior predictive check will show whether it does.
+
+```{r}
+#| label: fig-thermo-outcome
+#| fig-width: 9
+#| fig-height: 5
+
+thermo |>
+  ggplot(aes(x = q_thermo)) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    binwidth = 5,
+    boundary = 0,
+    fill = "#08306b",
+    colour = "white",
+    linewidth = 0.2
+  ) +
+  facet_wrap(~der_cell) +
+  labs(
+    title = "Thermometer ratings, by partisan type and relation to the rated party",
+    subtitle = "Explicit and vote-anchored respondents, bins of 5 points",
+    x = "Rating (0-100)",
+    y = "Density"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(panel.grid.minor = element_blank())
+```
+
+```{r}
+#| label: thermo-bounds
+
+thermo |>
+  summarise(
+    share_0 = mean(q_thermo == 0),
+    share_100 = mean(q_thermo == 100),
+    .by = der_cell
+  ) |>
+  knitr::kable(digits = 3)
+```
+
+### Common Support
+
+Same rule as in the games: an anchor party is in the estimand population if it has at least one explicit and one vote-anchored respondent.
+
+```{r}
+#| label: thermo-support
+
+thermo_support <- thermo |>
+  distinct(der_anchor, country, meta_responseid, type) |>
+  count(der_anchor, country, type) |>
+  pivot_wider(names_from = type, values_from = n, values_fill = 0) |>
+  mutate(in_support = explicit >= 1 & vote_anchored >= 1)
+
+thermo <- thermo |>
+  mutate(
+    der_support = der_anchor %in%
+      thermo_support$der_anchor[thermo_support$in_support]
+  )
+
+thermo_support |>
+  summarise(
+    parties = n(),
+    parties_in = sum(in_support),
+    explicit_in = sum(explicit[in_support]),
+    explicit_out = sum(explicit[!in_support]),
+    vote_anchored_in = sum(vote_anchored[in_support]),
+    vote_anchored_out = sum(vote_anchored[!in_support]),
+    .by = country
+  ) |>
+  arrange(country) |>
+  knitr::kable()
+
+thermo_support |>
+  summarise(
+    parties = n(),
+    parties_in = sum(in_support),
+    share_respondents_in = sum((explicit + vote_anchored)[in_support]) /
+      sum(explicit + vote_anchored)
+  )
+```
+
+## Development Subsample
+
+The development subsample is a seeded 10% of **persons** (`meta_pid`), drawn once from both datasets together.
+Persons rather than rows or respondent-waves are drawn, so that a panelist's two waves and all of a respondent's rounds and ratings stay together, and so that the same people are in both development samples.
+All 25 countries stay in, so the full varying-effects structure is exercised, only thinly.
+
+```{r}
+#| label: dev-sample
+
+set.seed(seed)
+persons <- union(games$meta_pid, thermo$meta_pid)
+dev_pids <- sample(persons, round(0.1 * length(persons)))
+
+games_dev <- filter(games, meta_pid %in% dev_pids)
+thermo_dev <- filter(thermo, meta_pid %in% dev_pids)
+
+# All countries present
+stopifnot(
+  n_distinct(games_dev$country) == 25,
+  n_distinct(thermo_dev$country) == 25
+)
+
+tibble(
+  data = c("games", "thermo"),
+  rows_full = c(nrow(games), nrow(thermo)),
+  rows_dev = c(nrow(games_dev), nrow(thermo_dev)),
+  persons_dev = c(n_distinct(games_dev$meta_pid), n_distinct(thermo_dev$meta_pid)),
+  anchors_dev = c(n_distinct(games_dev$der_anchor), n_distinct(thermo_dev$der_anchor))
+)
+
+# Data the posterior fits use
+games_fit <- if (full_fit) games else games_dev
+thermo_fit <- if (full_fit) thermo else thermo_dev
+```
+
+# Formal Models
+
+All four models share one structure.
+For observation $i$ of person $j$, whose anchor party $p$ lies in country $c$:
+
+$$
+\eta_i = \alpha + \beta_R R_i + \beta_T T_i + \beta_{RT} R_i T_i + \boldsymbol{\gamma}^\top \mathbf{x}_i + \mathbf{z}_i^\top (\mathbf{u}_c + \mathbf{u}_{cp}) + v_j,
+$$
+
+where:
+
+- $R_i$ is `der_co` and $T_i$ is `der_explicit`;
+- $\mathbf{x}_i$ are the controls (games: game, round, wave and the shown partner attributes; thermometer: wave);
+- $\mathbf{z}_i = (1, R_i, T_i, R_i T_i)$;
+- $\mathbf{u}_c \sim \text{MVN}(\mathbf{0}, \Sigma_C)$ and $\mathbf{u}_{cp} \sim \text{MVN}(\mathbf{0}, \Sigma_P)$ are the country and party deviations in intercept, co/out gap, type gap and their interaction;
+- $v_j \sim N(0, \sigma_v)$ is a person intercept that spans both waves of a panelist.
+
+The party-level slopes let the type × relation contrast differ between parties, so it is estimated *within* party. Countries differ through $\mathbf{u}_c$ and through the parties they hold.
+The game and the round are controls only: they shift the level, and they do not vary by party or country.
+
+The two families:
+
+- **Beta-binomial** (the generative model): $Y_i \sim \text{BetaBinomial}(n, \mu_i, \phi)$ with $\text{logit}(\mu_i) = \eta_i$, $n = 10$ tokens or $n = 100$ thermometer points. $E(Y_i) = n\mu_i$, and $\phi$ governs how much the person-specific propensity spreads beyond the binomial. A small $\phi$ allows the spikes at the scale ends.
+- **Gaussian** (robustness): $Y^z_i \sim N(\eta_i, \sigma)$ on the z-scored outcome. It recovers conditional means, but it puts predictive mass outside the scale and cannot produce the spikes.
+
+```{r}
+#| label: formulas
+
+re_part <- "(1 + der_co * der_explicit | country) +
+  (1 + der_co * der_explicit | country:anchor) +
+  (1 | meta_pid)"
+
+games_rhs <- paste(
+  "der_co * der_explicit + der_trust + round + der_wave3 +
+  cj_age + cj_sex + cj_rel + cj_class + der_cj_eu_identity +",
+  re_part
+)
+thermo_rhs <- paste("der_co * der_explicit + der_wave3 +", re_part)
+
+f_games_gauss <- bf(as.formula(paste("der_y_z ~", games_rhs)))
+f_games_bb <- bf(as.formula(paste("cj_pl2 | trials(10) ~", games_rhs)))
+f_thermo_gauss <- bf(as.formula(paste("der_y_z ~", thermo_rhs)))
+f_thermo_bb <- bf(as.formula(paste("q_thermo | trials(100) ~", thermo_rhs)))
+```
+
+## Priors
+
+The priors aim for two things:
+
+- every coefficient is centred on zero, so that the prior expectation of every contrast is no difference;
+- the implied outcomes spread across the logical range of the scale rather than piling up anywhere.
+
+The prior predictive check below tests the second aim.
+If it fails, the priors are revisited with Tristan before anything changes.
+
+In brms, the `Intercept` class is the intercept at the sample means of the predictors, so its prior centres the *average* prediction.
+
+- **Beta-binomial (logit scale).**
+  - Intercept normal(0, 1.5): centred on $\mu = 0.5$ (5 tokens, 50 points), with 95% of the mass between about $0.05$ and $0.95$.
+  - b normal(0, 1): a single coefficient of $\pm 2$ moves a probability of 0.5 to about 0.12 or 0.88, which is a large but possible effect.
+  - sd exponential(1): mean 1 on the logit scale for every varying effect.
+  - cor lkj(2): mild shrinkage of correlations towards zero.
+  - phi exponential(0.1): mean 10, with mass both near 0 (U-shaped allocations) and well above 10 (close to binomial).
+- **Gaussian (z-scale).**
+  - Intercept normal(0, 1).
+  - b normal(0, 0.5): half an SD per coefficient covers the range of plausible group differences.
+  - sd exponential(2): mean 0.5 SD.
+  - sigma exponential(1).
+  - cor lkj(2).
+
+```{r}
+#| label: priors
+
+prior_bb <- c(
+  prior(normal(0, 1.5), class = Intercept),
+  prior(normal(0, 1), class = b),
+  prior(exponential(1), class = sd),
+  prior(lkj(2), class = cor),
+  prior(exponential(0.1), class = phi)
+)
+
+prior_gauss <- c(
+  prior(normal(0, 1), class = Intercept),
+  prior(normal(0, 0.5), class = b),
+  prior(exponential(2), class = sd),
+  prior(exponential(1), class = sigma),
+  prior(lkj(2), class = cor)
+)
+```
+
+# Games
+
+The models are built in order: Gaussian first, then beta-binomial.
+For each, the steps are the prior predictive check, the fit, MCMC diagnostics, the posterior predictive check and the estimand.
+
+## Gaussian Model
+
+### Prior Predictive Check
+
+The prior-only model samples from the priors without seeing the outcome.
+Its replicated datasets are compared with the observed outcome on the z-scale.
+On this scale the token range runs from `r round((0 - games_scale$mean) / games_scale$sd, 2)` (0 tokens) to `r round((10 - games_scale$mean) / games_scale$sd, 2)` (10 tokens).
+
+```{r}
+#| label: games-gauss-prior
+
+prior_games_gauss <- fit_model(
+  f_games_gauss,
+  gaussian(),
+  prior_gauss,
+  games_dev,
+  name = "games_gauss_prior",
+  sample_prior = "only",
+  settings = run_prior
+)
+```
+
+```{r}
+#| label: fig-games-gauss-prior
+
+pp_check(prior_games_gauss, type = "dens_overlay", ndraws = 50) +
+  labs(title = "Prior predictive: games, Gaussian (z-scale)")
+```
+
+The share of prior predictions outside the token range: the Gaussian model ignores the bounds, so some share is expected. A very large share would mean the priors are too wide.
+
+```{r}
+#| label: games-gauss-prior-bounds
+
+games_bounds_z <- (c(0, 10) - games_scale$mean) / games_scale$sd
+out_of_range <- function(y, bounds) mean(y < bounds[1] | y > bounds[2])
+
+yrep <- posterior_predict(prior_games_gauss, ndraws = 200)
+summary(apply(yrep, 1, out_of_range, bounds = games_bounds_z))
+```
+
+The prior of the estimand should be centred on zero:
+
+```{r}
+#| label: games-gauss-prior-ap
+
+prior_games_gauss_ap <- ap_draws(
+  prior_games_gauss,
+  filter(games_dev, der_support),
+  back = \(x) x * games_scale$sd + games_scale$mean
+) |>
+  ap_contrasts(games_scale$sd)
+
+summarise_ap(prior_games_gauss_ap) |>
+  knitr::kable(digits = 2)
+```
+
+### Fit
+
+```{r}
+#| label: games-gauss-fit
+
+fit_games_gauss <- fit_model(
+  f_games_gauss,
+  gaussian(),
+  prior_gauss,
+  games_fit,
+  name = "games_gauss"
+)
+```
+
+### MCMC Diagnostics
+
+With the development settings (2 chains, 150 post-warm-up draws each), the diagnostics only show that sampling ran. Low ESS and high $\hat{R}$ are expected there and mean nothing about the full fit.
+
+```{r}
+#| label: games-gauss-diagnostics
+
+mcmc_check(fit_games_gauss) |>
+  knitr::kable(digits = 3)
+```
+
+```{r}
+#| label: fig-games-gauss-trace
+#| fig-width: 10
+#| fig-height: 8
+
+mcmc_plot(
+  fit_games_gauss,
+  type = "trace",
+  variable = c("^b_der_", "^sd_country:anchor__"),
+  regex = TRUE
+) +
+  labs(title = "Trace plots: games, Gaussian")
+```
+
+### Posterior Predictive Check
+
+The overall density, and the mean and SD per type × relation cell:
+
+```{r}
+#| label: fig-games-gauss-ppc
+
+pp_check(fit_games_gauss, type = "dens_overlay", ndraws = 50) +
+  labs(title = "Posterior predictive: games, Gaussian (z-scale)")
+```
+
+```{r}
+#| label: fig-games-gauss-ppc-grouped
+#| fig-width: 9
+#| fig-height: 6
+
+pp_check(
+  fit_games_gauss,
+  type = "stat_2d",
+  stat = c("mean", "sd"),
+  ndraws = 200
+) +
+  labs(title = "Posterior predictive: games, Gaussian, mean and SD")
+```
+
+```{r}
+#| label: fig-games-gauss-ppc-cells
+#| fig-width: 9
+#| fig-height: 6
+
+ppc_by(
+  fit_games_gauss,
+  type = "stat_grouped",
+  stat = "mean",
+  group = "der_cell",
+  newdata = games_fit,
+  ndraws = 200
+) +
+  labs(title = "Posterior predictive: games, Gaussian, mean by cell")
+```
+
+Predictions outside the token range (an expected failure of the Gaussian model):
+
+```{r}
+#| label: games-gauss-ppc-bounds
+
+yrep <- posterior_predict(fit_games_gauss, ndraws = 200)
+summary(apply(yrep, 1, out_of_range, bounds = games_bounds_z))
+rm(yrep)
+```
+
+### Estimand
+
+The estimand code on the development fit. The table and figure check that the code runs, and **are not estimates**.
+
+```{r}
+#| label: games-gauss-ap
+
+games_gauss_ap <- ap_draws(
+  fit_games_gauss,
+  filter(games_fit, der_support),
+  back = \(x) x * games_scale$sd + games_scale$mean
+) |>
+  ap_contrasts(games_scale$sd)
+
+summarise_ap(games_gauss_ap) |>
+  knitr::kable(digits = 2)
+```
+
+## Beta-Binomial Model
+
+### Prior Predictive Check
+
+```{r}
+#| label: games-bb-prior
+
+prior_games_bb <- fit_model(
+  f_games_bb,
+  beta_binomial(),
+  prior_bb,
+  games_dev,
+  name = "games_bb_prior",
+  sample_prior = "only",
+  settings = run_prior
+)
+```
+
+The prior predictive distribution of the tokens should spread over 0--10 without piling up at either end:
+
+```{r}
+#| label: fig-games-bb-prior
+
+pp_check(prior_games_bb, type = "bars", ndraws = 50) +
+  labs(title = "Prior predictive: games, beta-binomial")
+```
+
+The share of zeros and of tens, prior predictive against observed:
+
+```{r}
+#| label: fig-games-bb-prior-ends
+#| fig-width: 9
+#| fig-height: 4
+
+share_0 <- function(y) mean(y == 0)
+share_10 <- function(y) mean(y == 10)
+
+pp_check(prior_games_bb, type = "stat", stat = "share_0", ndraws = 200) +
+  labs(title = "Prior predictive: share of 0 tokens") +
+  pp_check(prior_games_bb, type = "stat", stat = "share_10", ndraws = 200) +
+  labs(title = "Prior predictive: share of 10 tokens")
+```
+
+The same shares as numbers (quantiles over 200 prior draws), next to the observed values:
+
+```{r}
+#| label: games-bb-prior-ends-table
+
+yrep <- posterior_predict(prior_games_bb, ndraws = 200)
+tibble(
+  stat = c("share_0", "share_10"),
+  observed = c(share_0(games_dev$cj_pl2), share_10(games_dev$cj_pl2)),
+  prior_q10 = c(quantile(apply(yrep, 1, share_0), 0.1), quantile(apply(yrep, 1, share_10), 0.1)),
+  prior_median = c(median(apply(yrep, 1, share_0)), median(apply(yrep, 1, share_10))),
+  prior_q90 = c(quantile(apply(yrep, 1, share_0), 0.9), quantile(apply(yrep, 1, share_10), 0.9))
+) |>
+  knitr::kable(digits = 3)
+rm(yrep)
+```
+
+```{r}
+#| label: games-bb-prior-ap
+
+prior_games_bb_ap <- ap_draws(prior_games_bb, filter(games_dev, der_support)) |>
+  ap_contrasts(games_scale$sd)
+
+summarise_ap(prior_games_bb_ap) |>
+  knitr::kable(digits = 2)
+```
+
+### Fit
+
+```{r}
+#| label: games-bb-fit
+
+fit_games_bb <- fit_model(
+  f_games_bb,
+  beta_binomial(),
+  prior_bb,
+  games_fit,
+  name = "games_bb"
+)
+```
+
+### MCMC Diagnostics
+
+```{r}
+#| label: games-bb-diagnostics
+
+mcmc_check(fit_games_bb) |>
+  knitr::kable(digits = 3)
+```
+
+```{r}
+#| label: fig-games-bb-trace
+#| fig-width: 10
+#| fig-height: 8
+
+mcmc_plot(
+  fit_games_bb,
+  type = "trace",
+  variable = c("^b_der_", "^sd_country:anchor__", "^phi$"),
+  regex = TRUE
+) +
+  labs(title = "Trace plots: games, beta-binomial")
+```
+
+### Posterior Predictive Check
+
+Following the modelling notes in `design.md`, the checks look at the zero mass and at the distribution of 1--10, overall, by type × relation and by game.
+A hurdle model would come in only if the zeros were systematically underpredicted while the positive allocations fit.
+
+```{r}
+#| label: fig-games-bb-ppc
+
+pp_check(fit_games_bb, type = "bars", ndraws = 100) +
+  labs(title = "Posterior predictive: games, beta-binomial")
+```
+
+```{r}
+#| label: fig-games-bb-ppc-cells
+#| fig-width: 10
+#| fig-height: 7
+
+ppc_by(
+  fit_games_bb,
+  type = "bars_grouped",
+  group = "der_cell",
+  newdata = games_fit,
+  ndraws = 100
+) +
+  labs(title = "Posterior predictive: games, beta-binomial, by cell")
+```
+
+```{r}
+#| label: fig-games-bb-ppc-game
+#| fig-width: 10
+#| fig-height: 4
+
+ppc_by(
+  fit_games_bb,
+  type = "bars_grouped",
+  group = "game",
+  newdata = games_fit,
+  ndraws = 100
+) +
+  labs(title = "Posterior predictive: games, beta-binomial, by game")
+```
+
+```{r}
+#| label: fig-games-bb-ppc-zeros
+#| fig-width: 10
+#| fig-height: 6
+
+ppc_by(
+  fit_games_bb,
+  type = "stat_grouped",
+  stat = "share_0",
+  group = "der_cell",
+  newdata = games_fit,
+  ndraws = 200
+) +
+  labs(title = "Posterior predictive: games, beta-binomial, share of 0 tokens by cell")
+```
+
+### Estimand
+
+```{r}
+#| label: games-bb-ap
+
+games_bb_ap <- ap_draws(fit_games_bb, filter(games_fit, der_support)) |>
+  ap_contrasts(games_scale$sd)
+
+summarise_ap(games_bb_ap) |>
+  knitr::kable(digits = 2)
+```
+
+The country and party breakdowns use the same code with `by`:
+
+```{r}
+#| label: games-bb-ap-country
+
+games_bb_ap_country <- ap_draws(
+  fit_games_bb,
+  filter(games_fit, der_support),
+  by = "country"
+) |>
+  ap_contrasts(games_scale$sd)
+
+games_bb_ap_party <- ap_draws(
+  fit_games_bb,
+  filter(games_fit, der_support),
+  by = "der_anchor"
+) |>
+  ap_contrasts(games_scale$sd)
+
+summarise_ap(games_bb_ap_country) |>
+  filter(quantity == "delta_ap") |>
+  arrange(group) |>
+  knitr::kable(digits = 2)
+```
+
+```{r}
+#| label: fig-games-bb-ap-country
+#| fig-width: 8
+#| fig-height: 7
+
+summarise_ap(games_bb_ap_country) |>
+  filter(quantity == "delta_ap") |>
+  mutate(group = fct_reorder(group, median)) |>
+  ggplot(aes(x = median, y = group, xmin = lower, xmax = upper)) +
+  geom_vline(xintercept = 0, colour = "grey60") +
+  geom_pointrange(size = 0.3) +
+  labs(
+    title = "Delta AP by country: games, beta-binomial (development fit, not an estimate)",
+    subtitle = "Posterior median and 95% interval, tokens",
+    x = "Delta AP (tokens)",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 11)
+```
+
+# Thermometer
+
+Same steps, same order.
+
+## Gaussian Model
+
+### Prior Predictive Check
+
+On the z-scale, the thermometer range runs from `r round((0 - thermo_scale$mean) / thermo_scale$sd, 2)` (0 points) to `r round((100 - thermo_scale$mean) / thermo_scale$sd, 2)` (100 points).
+
+```{r}
+#| label: thermo-gauss-prior
+
+prior_thermo_gauss <- fit_model(
+  f_thermo_gauss,
+  gaussian(),
+  prior_gauss,
+  thermo_dev,
+  name = "thermo_gauss_prior",
+  sample_prior = "only",
+  settings = run_prior
+)
+```
+
+```{r}
+#| label: fig-thermo-gauss-prior
+
+pp_check(prior_thermo_gauss, type = "dens_overlay", ndraws = 50) +
+  labs(title = "Prior predictive: thermometer, Gaussian (z-scale)")
+```
+
+```{r}
+#| label: thermo-gauss-prior-bounds
+
+thermo_bounds_z <- (c(0, 100) - thermo_scale$mean) / thermo_scale$sd
+
+yrep <- posterior_predict(prior_thermo_gauss, ndraws = 200)
+summary(apply(yrep, 1, out_of_range, bounds = thermo_bounds_z))
+```
+
+```{r}
+#| label: thermo-gauss-prior-ap
+
+prior_thermo_gauss_ap <- ap_draws(
+  prior_thermo_gauss,
+  filter(thermo_dev, der_support),
+  back = \(x) x * thermo_scale$sd + thermo_scale$mean
+) |>
+  ap_contrasts(thermo_scale$sd)
+
+summarise_ap(prior_thermo_gauss_ap) |>
+  knitr::kable(digits = 2)
+```
+
+### Fit
+
+```{r}
+#| label: thermo-gauss-fit
+
+fit_thermo_gauss <- fit_model(
+  f_thermo_gauss,
+  gaussian(),
+  prior_gauss,
+  thermo_fit,
+  name = "thermo_gauss"
+)
+```
+
+### MCMC Diagnostics
+
+```{r}
+#| label: thermo-gauss-diagnostics
+
+mcmc_check(fit_thermo_gauss) |>
+  knitr::kable(digits = 3)
+```
+
+```{r}
+#| label: fig-thermo-gauss-trace
+#| fig-width: 10
+#| fig-height: 8
+
+mcmc_plot(
+  fit_thermo_gauss,
+  type = "trace",
+  variable = c("^b_der_", "^sd_country:anchor__"),
+  regex = TRUE
+) +
+  labs(title = "Trace plots: thermometer, Gaussian")
+```
+
+### Posterior Predictive Check
+
+```{r}
+#| label: fig-thermo-gauss-ppc
+
+pp_check(fit_thermo_gauss, type = "dens_overlay", ndraws = 50) +
+  labs(title = "Posterior predictive: thermometer, Gaussian (z-scale)")
+```
+
+```{r}
+#| label: fig-thermo-gauss-ppc-cells
+#| fig-width: 9
+#| fig-height: 6
+
+ppc_by(
+  fit_thermo_gauss,
+  type = "stat_grouped",
+  stat = "mean",
+  group = "der_cell",
+  newdata = thermo_fit,
+  ndraws = 200
+) +
+  labs(title = "Posterior predictive: thermometer, Gaussian, mean by cell")
+```
+
+```{r}
+#| label: thermo-gauss-ppc-bounds
+
+yrep <- posterior_predict(fit_thermo_gauss, ndraws = 200)
+summary(apply(yrep, 1, out_of_range, bounds = thermo_bounds_z))
+rm(yrep)
+```
+
+### Estimand
+
+```{r}
+#| label: thermo-gauss-ap
+
+thermo_gauss_ap <- ap_draws(
+  fit_thermo_gauss,
+  filter(thermo_fit, der_support),
+  back = \(x) x * thermo_scale$sd + thermo_scale$mean
+) |>
+  ap_contrasts(thermo_scale$sd)
+
+summarise_ap(thermo_gauss_ap) |>
+  knitr::kable(digits = 2)
+```
+
+## Beta-Binomial Model
+
+### Prior Predictive Check
+
+```{r}
+#| label: thermo-bb-prior
+
+prior_thermo_bb <- fit_model(
+  f_thermo_bb,
+  beta_binomial(),
+  prior_bb,
+  thermo_dev,
+  name = "thermo_bb_prior",
+  sample_prior = "only",
+  settings = run_prior
+)
+```
+
+With 101 possible values, a histogram shows the prior predictive better than bars:
+
+```{r}
+#| label: fig-thermo-bb-prior
+
+pp_check(prior_thermo_bb, type = "hist", ndraws = 8, binwidth = 5) +
+  labs(title = "Prior predictive: thermometer, beta-binomial")
+```
+
+```{r}
+#| label: fig-thermo-bb-prior-ends
+#| fig-width: 9
+#| fig-height: 4
+
+share_100 <- function(y) mean(y == 100)
+
+pp_check(prior_thermo_bb, type = "stat", stat = "share_0", ndraws = 200) +
+  labs(title = "Prior predictive: share of 0 points") +
+  pp_check(prior_thermo_bb, type = "stat", stat = "share_100", ndraws = 200) +
+  labs(title = "Prior predictive: share of 100 points")
+```
+
+```{r}
+#| label: thermo-bb-prior-ends-table
+
+yrep <- posterior_predict(prior_thermo_bb, ndraws = 200)
+tibble(
+  stat = c("share_0", "share_100"),
+  observed = c(share_0(thermo_dev$q_thermo), share_100(thermo_dev$q_thermo)),
+  prior_q10 = c(quantile(apply(yrep, 1, share_0), 0.1), quantile(apply(yrep, 1, share_100), 0.1)),
+  prior_median = c(median(apply(yrep, 1, share_0)), median(apply(yrep, 1, share_100))),
+  prior_q90 = c(quantile(apply(yrep, 1, share_0), 0.9), quantile(apply(yrep, 1, share_100), 0.9))
+) |>
+  knitr::kable(digits = 3)
+rm(yrep)
+```
+
+```{r}
+#| label: thermo-bb-prior-ap
+
+prior_thermo_bb_ap <- ap_draws(prior_thermo_bb, filter(thermo_dev, der_support)) |>
+  ap_contrasts(thermo_scale$sd)
+
+summarise_ap(prior_thermo_bb_ap) |>
+  knitr::kable(digits = 2)
+```
+
+### Fit
+
+```{r}
+#| label: thermo-bb-fit
+
+fit_thermo_bb <- fit_model(
+  f_thermo_bb,
+  beta_binomial(),
+  prior_bb,
+  thermo_fit,
+  name = "thermo_bb"
+)
+```
+
+### MCMC Diagnostics
+
+```{r}
+#| label: thermo-bb-diagnostics
+
+mcmc_check(fit_thermo_bb) |>
+  knitr::kable(digits = 3)
+```
+
+```{r}
+#| label: fig-thermo-bb-trace
+#| fig-width: 10
+#| fig-height: 8
+
+mcmc_plot(
+  fit_thermo_bb,
+  type = "trace",
+  variable = c("^b_der_", "^sd_country:anchor__", "^phi$"),
+  regex = TRUE
+) +
+  labs(title = "Trace plots: thermometer, beta-binomial")
+```
+
+### Posterior Predictive Check
+
+The checks look at the overall distribution, the spikes at 0 and 100, and the cell means.
+
+```{r}
+#| label: fig-thermo-bb-ppc
+
+pp_check(fit_thermo_bb, type = "hist", ndraws = 8, binwidth = 5) +
+  labs(title = "Posterior predictive: thermometer, beta-binomial")
+```
+
+```{r}
+#| label: fig-thermo-bb-ppc-ends
+#| fig-width: 10
+#| fig-height: 6
+
+ppc_by(
+  fit_thermo_bb,
+  type = "stat_grouped",
+  stat = "share_0",
+  group = "der_cell",
+  newdata = thermo_fit,
+  ndraws = 200
+) +
+  labs(title = "Posterior predictive: thermometer, share of 0 points by cell")
+```
+
+```{r}
+#| label: fig-thermo-bb-ppc-top
+#| fig-width: 10
+#| fig-height: 6
+
+ppc_by(
+  fit_thermo_bb,
+  type = "stat_grouped",
+  stat = "share_100",
+  group = "der_cell",
+  newdata = thermo_fit,
+  ndraws = 200
+) +
+  labs(title = "Posterior predictive: thermometer, share of 100 points by cell")
+```
+
+```{r}
+#| label: fig-thermo-bb-ppc-cells
+#| fig-width: 9
+#| fig-height: 6
+
+ppc_by(
+  fit_thermo_bb,
+  type = "stat_grouped",
+  stat = "mean",
+  group = "der_cell",
+  newdata = thermo_fit,
+  ndraws = 200
+) +
+  labs(title = "Posterior predictive: thermometer, beta-binomial, mean by cell")
+```
+
+### Estimand
+
+```{r}
+#| label: thermo-bb-ap
+
+thermo_bb_ap <- ap_draws(fit_thermo_bb, filter(thermo_fit, der_support)) |>
+  ap_contrasts(thermo_scale$sd)
+
+summarise_ap(thermo_bb_ap) |>
+  knitr::kable(digits = 2)
+```
+
+```{r}
+#| label: thermo-bb-ap-country
+
+thermo_bb_ap_country <- ap_draws(
+  fit_thermo_bb,
+  filter(thermo_fit, der_support),
+  by = "country"
+) |>
+  ap_contrasts(thermo_scale$sd)
+
+thermo_bb_ap_party <- ap_draws(
+  fit_thermo_bb,
+  filter(thermo_fit, der_support),
+  by = "der_anchor"
+) |>
+  ap_contrasts(thermo_scale$sd)
+
+summarise_ap(thermo_bb_ap_country) |>
+  filter(quantity == "delta_ap") |>
+  arrange(group) |>
+  knitr::kable(digits = 2)
+```
+
+# Attitudinal vs. Behavioral
+
+The cross-outcome quantity is the difference of the two $\Delta AP$ in SD units, from the beta-binomial models, with the posterior probability that it is positive.
+The draws of the two independent fits are paired by index.
+**The code runs here on development fits, and the output is not an estimate.**
+
+```{r}
+#| label: cross-outcome
+
+cross <- inner_join(
+  games_bb_ap |>
+    transmute(i = row_number(), games = delta_ap_sd),
+  thermo_bb_ap |>
+    transmute(i = row_number(), thermo = delta_ap_sd),
+  by = "i"
+) |>
+  mutate(diff = thermo - games)
+
+cross |>
+  summarise(
+    median = median(diff),
+    lower = quantile(diff, 0.025),
+    upper = quantile(diff, 0.975),
+    p_positive = mean(diff > 0)
+  ) |>
+  knitr::kable(digits = 3)
+```
+
+# Limitations and Open Points
+
+- **The contrast is descriptive.** Unobserved traits ($U$) can drive both reporting an attachment and treating partisans differently. No respondent covariates are joined yet, and the conditions for a causal reading are open (`design.md`).
+- **Thin vote-anchored co-partisan cells in the games.** Vote-anchored respondents met a co-partisan only by chance, about one round in ten, so many parties have few or no such rounds. Their party-level gap rests on partial pooling, and the intervals show it.
+- **Out-partners differ by type.** Explicit partisans' out-partners were drawn from the other parties only, while vote-anchored respondents' partners came from all main parties. Both are "out", but from slightly different sets.
+- **The Gaussian models are robustness.** They recover conditional means, but they put predictive mass outside the scales and cannot produce the spikes at the ends.
+- **The vote is a European Parliament vote**, in wave 2 mostly an intended or hypothetical one (notebook 3.1).
+- **Question order is unverified.** Whether the thermometers came before or after the games is not established (notebook 3.1).
+- **Priors are not final.** If the prior predictive checks of the beta-binomial models pile up at the scale ends (several varying effects add up on the logit scale), the priors on the standard deviations need revisiting before the full fit.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

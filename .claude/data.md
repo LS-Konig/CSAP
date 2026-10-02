@@ -1,5 +1,5 @@
 ---
-last_modified: 2026-09-29
+last_modified: 2026-10-02
 scope: raw input, variable references, party matching, derived files, external sources
 ---
 
@@ -71,6 +71,10 @@ These are written by the current pipeline. Details are in the notebooks.
 - **Design fact.** Game partners' parties were drawn from the *attachment* answer. Attached respondents meet a co-partisan in
   about half the rounds, vote-anchored respondents only by chance (about 10%). In Latvia, the draw for respondents without an attachment
   copied their "no party" answer.
+
+- `data/04_models/` (3.2, git-ignored): cached brms fits, written only when `full_fit = TRUE`.
+- **Thermometer list.** Every respondent in a country rated the same six parties in the same slot
+  order (checked in 3.2). This is why the thermometer models carry no rated-party term.
 
 ## Derived files still on disk
 

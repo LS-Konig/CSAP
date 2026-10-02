@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Last modified: 2026-09-29
+Last modified: 2026-10-02
 
 This is the entry point. It holds only what every task needs. The detail lives in the
 context files indexed below, and you should open those only when a task needs them.
@@ -21,7 +21,7 @@ sketch, not a specification (summarised in `design.md`). Do not treat them, or a
 reconstructed from git history, as settled.
 
 Built so far: the Party Facts coding of the ESS, CSES and EES party items, the attachment-vote
-match rule, and the partisan composition trees. There are no analysis models yet. The near-term aim in the
+match rule, and the partisan composition trees. The first model set-up (notebook 3.2) is built but not yet fully fitted. The near-term aim in the
 notes is first results and a presentation by 7 October 2026.
 
 ## No claim is settled
@@ -47,6 +47,7 @@ not verdicts.
   come from the user library (`C:/Users/Tris/AppData/Local/R/win-library/4.6`). There are two traps:
   - `C:\Program Files\R\R-4.5.2` is a broken partial install (DLLs only, no `Rscript.exe`).
   - The 421-package `win-library/4.5` **cannot be loaded by 4.6**: compiled packages fail at `rlang.dll`. Install into 4.6 instead.
+  - **rstan compiles no model in 4.6** (rstan 2.32.7 with StanHeaders 2.39.1). Fit brms with `backend = "cmdstanr"` (cmdstanr from the Stan r-universe, CmdStan 2.39.0 in `~/.cmdstan`).
 - There is deliberately **no renv** until the directory is frozen for replication, when `renv::init()` will bring it back. Until then, do not add `.Rprofile`, `renv/` or `renv.lock`.
 - **Quarto 1.9.36**, **brms** (Bayesian multilevel), **ggplot2 / ggpubr / ggrepel / ggdag**, **Git LFS** for files >100 MB.
 
@@ -67,8 +68,8 @@ quarto render presentation.qmd  # RevealJS deck
 | File | Read when… | Last modified |
 |------|-----------|---------------|
 | `.claude/design.md` | the task concerns the argument, the explicit vs. vote-anchored contrast, outcomes, estimands, models, or `index.qmd`'s notes | 2026-09-29 |
-| `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-09-29 |
-| `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule (repo layout, pipeline order, Quarto quirks, LFS) | 2026-09-29 |
+| `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-10-02 |
+| `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule (repo layout, pipeline order, Quarto quirks, LFS) | 2026-10-02 |
 
 ## Maintaining this system
 

@@ -1,5 +1,5 @@
 ---
-last_modified: 2026-09-29
+last_modified: 2026-10-02
 scope: repo layout, notebook pipeline, Quarto quirks, Git LFS, literature submodule
 ---
 
@@ -22,6 +22,7 @@ Read this before adding files or notebooks, rendering, or committing data.
 | `code/02_composition/2.1`–`2.4` | Partisan composition trees (attachment → vote → same party) for eu25games, EES, CSES and ESS. Each draws Mermaid flowcharts pooled, by period, by country and by country × period, plus leaf-share plots. They render as plain pages, not manuscript notebooks (see the comment in `_quarto.yml`) |
 | `code/02_composition/2.1_eu25_composition.qmd` (output) | Also writes `data/02_processed/eu25_partisan.rds`, the eu25games partisan classification that 3.1 builds on |
 | `code/03_analyses/3.1_eu25_prep.qmd` | eu25games analysis data. Carried variables are set in its *Variables* section. Sample and within-wave duplicate handling, partisan type and anchor, display-aware conjoint attributes, the pooled wave-2+3 composition figure, and two long datasets: `data/03_final/eu25_games.rds` (one row per round) and `eu25_thermo.rds` (one row per party rating). No models |
+| `code/03_analyses/3.2_eu25_ap_contrast.qmd` | Model set-up for the within-party explicit vs. vote-anchored AP contrast in the games and the thermometers: DAG, estimand code (g-computation on the common support), Gaussian and beta-binomial brms models, prior and posterior predictive checks. A `full_fit` switch: `FALSE` (the default) runs everything on a 10% development subsample, while `TRUE` fits the full samples and caches them in `data/04_models/` (git-ignored). Not yet listed in `_quarto.yml` |
 | `code/00_helper/` | `pf_code.R` (Party Facts coding helpers, checks, and the match rule `pf_match()` / `pf_match_route()`), `pid_tree.R` (composition-tree helpers), `copyR.R` (refreshes the raw file from a sibling clone), `glftrackeR.R` (auto-LFS tracking) |
 | `data/` | See `data.md` |
 | `references.bib` | APSR-format bibliography (~2,000 entries) |
@@ -32,7 +33,7 @@ Read this before adding files or notebooks, rendering, or committing data.
 before 1.9, which reads their outputs. 3.1 reads the partisan file that 2.1 writes. New numbered notebooks go in `code/`, following the
 `NN_topic/N.N_name.qmd` convention.
 
-There are no models in the repo yet; `03_analyses` so far only prepares data. The old pipeline (`code/01_preparation/` through
+3.1 prepares the data. 3.2 holds the first model set-up, not yet fully fitted. The old pipeline (`code/01_preparation/` through
 `code/04_models/`) lives only in git history. The derived files it produced are still on
 disk (see `data.md`), so a new pipeline can start from those or from the raw release. To
 recover an old notebook:
