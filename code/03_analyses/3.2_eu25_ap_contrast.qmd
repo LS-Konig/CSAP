@@ -850,40 +850,60 @@ The priors aim for two things:
 - every coefficient is centred on zero, so that the prior expectation of every contrast is no difference;
 - the implied outcomes spread across the logical range of the scale rather than piling up anywhere.
 
-The prior predictive check below tests the second aim.
-If it fails, the priors are revisited with Tristan before anything changes.
+The prior predictive checks below test the second aim.
+
+**Why these priors (history).**
+A first set had wider priors: Intercept normal(0, 1.5), every b normal(0, 1), every SD exponential(1), and phi exponential(0.1); for the Gaussian, b normal(0, 0.5), SD exponential(2) and sigma exponential(1).
+It produced U-shaped prior predictive distributions, rendered in commit `c48c1aa`.
+In the games, the prior median share was 30% at 0 tokens and 26% at 10. In the Gaussian models, about 41--46% of the draws fell outside the scale.
+The cause is additive. On the logit scale, the predictor of one row sums the intercept, up to 17 control dummies, four varying effects at both the country and the party level, and a person intercept. With wide priors on each, the sum spreads over many logits, and the inverse logit then pushes most of the mass to the bounds.
+A small phi (mass near 0 under exponential(0.1)) adds a second U-shape inside every row.
+
+The current set was chosen by simulating the prior predictive through the model's own design (same dummies, centred intercept, varying effects at country, party and person level) on the development subsample.
+It keeps every coefficient centred on zero. It narrows the parts that only add spread (controls, varying-effect SDs, phi near 0), but not the three **focal terms**: co, explicit, and co × explicit.
+These keep a wider normal(0, 1). The prior must not rule out a large co/out gap. On the thermometer, a gap of 2--3 logits means, for example, 85 against 35 points: a large difference, but one the scale is built to record. A tighter focal prior would put such a gap many prior SDs out and pull the contrast of interest towards zero.
 
 In brms, the `Intercept` class is the intercept at the sample means of the predictors, so its prior centres the *average* prediction.
 
 - **Beta-binomial (logit scale).**
-  - Intercept normal(0, 1.5): centred on $\mu = 0.5$ (5 tokens, 50 points), with 95% of the mass between about $0.05$ and $0.95$.
-  - b normal(0, 1): a single coefficient of $\pm 2$ moves a probability of 0.5 to about 0.12 or 0.88, which is a large but possible effect.
-  - sd exponential(1): mean 1 on the logit scale for every varying effect.
+  - Intercept normal(0, 0.75): centred on $\mu = 0.5$ (5 tokens, 50 points), 95% of the mass between about 0.19 and 0.81.
+  - Focal b normal(0, 1): a gap of $\pm 2$ logits (0.5 to 0.12 or 0.88) remains well within the prior.
+  - Control b normal(0, 0.25): game, round, wave and the shown partner attributes shift the level by at most about half a logit each.
+  - sd exponential(5): mean 0.2 logit for every varying effect, with 5% of the mass above 0.6.
   - cor lkj(2): mild shrinkage of correlations towards zero.
-  - phi exponential(0.1): mean 10, with mass both near 0 (U-shaped allocations) and well above 10 (close to binomial).
+  - phi gamma(4, 0.4): mean 10, SD 5. Less than 2% of the mass lies below 2, the region in which a beta distribution with mean 0.5 turns U-shaped. This rules out a U-shape *by prior*, but not by data: if the allocations call for a small phi, the posterior can still get there.
 - **Gaussian (z-scale).**
-  - Intercept normal(0, 1).
-  - b normal(0, 0.5): half an SD per coefficient covers the range of plausible group differences.
-  - sd exponential(2): mean 0.5 SD.
-  - sigma exponential(1).
+  - Intercept normal(0, 0.5).
+  - Focal b normal(0, 1): a gap of up to about 2 SD remains within the prior.
+  - Control b normal(0, 0.2).
+  - sd exponential(5): mean 0.2 SD.
+  - sigma exponential(2): mean 0.5 SD.
   - cor lkj(2).
+
+In the simulation, the beta-binomial prior predictive is nearly flat across the whole range: each token value takes 8.5--9.2%, with 10% at 0 and 9.5% at 10. The Gaussian prior predictive puts a median of 16% of draws outside the scale. Some of that is unavoidable for a model that ignores the bounds.
 
 ```{r}
 #| label: priors
 
 prior_bb <- c(
-  prior(normal(0, 1.5), class = Intercept),
-  prior(normal(0, 1), class = b),
-  prior(exponential(1), class = sd),
+  prior(normal(0, 0.75), class = Intercept),
+  prior(normal(0, 0.25), class = b),
+  prior(normal(0, 1), class = b, coef = der_co),
+  prior(normal(0, 1), class = b, coef = der_explicit),
+  prior(normal(0, 1), class = b, coef = der_co:der_explicit),
+  prior(exponential(5), class = sd),
   prior(lkj(2), class = cor),
-  prior(exponential(0.1), class = phi)
+  prior(gamma(4, 0.4), class = phi)
 )
 
 prior_gauss <- c(
-  prior(normal(0, 1), class = Intercept),
-  prior(normal(0, 0.5), class = b),
-  prior(exponential(2), class = sd),
-  prior(exponential(1), class = sigma),
+  prior(normal(0, 0.5), class = Intercept),
+  prior(normal(0, 0.2), class = b),
+  prior(normal(0, 1), class = b, coef = der_co),
+  prior(normal(0, 1), class = b, coef = der_explicit),
+  prior(normal(0, 1), class = b, coef = der_co:der_explicit),
+  prior(exponential(5), class = sd),
+  prior(exponential(2), class = sigma),
   prior(lkj(2), class = cor)
 )
 ```
@@ -1652,7 +1672,7 @@ cross |>
 - **The Gaussian models are robustness.** They recover conditional means, but they put predictive mass outside the scales and cannot produce the spikes at the ends.
 - **The vote is a European Parliament vote**, in wave 2 mostly an intended or hypothetical one (notebook 3.1).
 - **Question order is unverified.** Whether the thermometers came before or after the games is not established (notebook 3.1).
-- **Priors are not final.** If the prior predictive checks of the beta-binomial models pile up at the scale ends (several varying effects add up on the logit scale), the priors on the standard deviations need revisiting before the full fit.
+- **The priors on the varying-effect SDs are fairly tight** (exponential(5), mean 0.2 on the logit or z scale). They were tightened to remove the U-shape of the first prior set (see [Priors](#priors)). With 25 countries and about 400 parties the data should dominate, but whether the posterior SDs press against the prior is worth checking after the full fit.
 
 # Session Info
 
