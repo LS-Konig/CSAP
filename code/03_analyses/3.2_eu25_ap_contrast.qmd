@@ -77,7 +77,7 @@ Two switches govern the whole notebook.
 With `full_fit <- TRUE`:
 
 - **Every fit is cached**, the prior-only fits included, as `data/04_models/<name>.rds` (git-ignored). A later render loads a cached fit in seconds as long as model, data and priors are unchanged (`file_refit = "on_change"`), and refits only what changed. This cache is what makes re-renders cheap. The project's `freeze: auto` does not help here: the notebook is not in `_quarto.yml`, and Quarto always executes a single-file render.
-- **Each chain runs on 3 threads** (`threads_per_chain`; within-chain parallelism via `reduce_sum`, brms `threading()`), so the four chains use 12 of the machine's 14 cores. Threading splits the likelihood sum across threads, and it changes results only at floating-point precision.
+- **The chains run in parallel, one core each** (`cores = chains`), with no within-chain threading.
 - **The sampler reports progress to the terminal, not the document.** cmdstanr prints its iteration lines with `cat()`, which knitr would capture into the output (knitr's `message = NA` only reroutes `message()`). `fit_model()` therefore diverts the console output to stderr, which `quarto render` shows in the terminal, and mirrors it into `data/04_models/logs/<name>.log`. Every iteration is printed (`refresh = 1`), so the pace shows from the first iterations on. That is 8,000 lines per model across the four chains. Messages from brms and Stan go the same way. Warnings stay in the document. `data/04_models/logs/progress.log` gets one timestamped line when a fit starts and one when it ends, saying whether it was fitted or loaded from the cache.
 
 The progress-file problem of Positron issue #5920 is specific to the rstan backend, so it does not apply here.
@@ -104,9 +104,6 @@ run <- if (full_fit) {
 
 # Sampler control
 max_treedepth <- 10
-
-# Threads per chain, full fits only
-threads_per_chain <- 3
 
 # Prior predictive runs
 run_prior <- list(chains = 2, iter = 300, warmup = 150)
@@ -194,7 +191,6 @@ fit_brm <- function(formula, family, prior, data, name, sample_prior, settings) 
     control = list(adapt_delta = 0.95, max_treedepth = max_treedepth),
     seed = seed,
     backend = "cmdstanr",
-    threads = if (full_fit) threading(threads_per_chain),
     refresh = if (full_fit) 1 else 0,
     silent = if (full_fit) 1 else 2,
     file = if (full_fit) file.path(model_dir, name),
