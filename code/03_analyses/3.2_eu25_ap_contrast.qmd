@@ -161,7 +161,7 @@ The nodes:
 - $C$: country; $P$: the respondent's anchor party (the attachment party for explicit partisans, the vote party for vote-anchored partisans);
 - $T$: partisan type (explicit or vote-anchored);
 - $R$: the relation of the target to the anchor (co-partisan or out-partisan);
-- $W$: survey wave (2 or 3). The vote item differs between waves (in wave 2 the European Parliament vote was mostly an intended or hypothetical one), so the wave can shift who ends up vote-anchored, and it can shift the outcome;
+- $W$: survey wave (2 or 3). It can shift the outcome level ($W \to Y$). The vote item also differs between waves (in wave 2 the European Parliament vote was mostly an intended or hypothetical one), so the wave changes how respondents are *classified*: who passes the vote filter and so counts as vote-anchored, and whose vote matches their attachment. This is a measurement effect, not a causal path from the wave to being attached, so it is not drawn as an edge $W \to T$. It is listed under [Limitations](#limitations-and-open-points);
 - $U$: unobserved respondent traits that drive both whether people report an attachment and how they treat partisans (political interest, strength of preference, social desirability, and so on);
 - $Y$: the outcome (tokens or rating).
 
@@ -178,12 +178,16 @@ This is why AP is always computed *within* type: conditioning on $T$ closes the 
 
 dag_games <- dagify(
   Y ~ T + R + P + C + W + U + Z + G + K,
-  T ~ P + W + U,
+  T ~ P + U,
   R ~ T,
   P ~ C,
   exposure = "T",
   outcome = "Y",
   latent = "U",
+  coords = list(
+    x = c(C = 0, P = 1, T = 2, R = 2, U = 3, Y = 3, W = 3, Z = 4, G = 4, K = 4),
+    y = c(C = 2, P = 1, T = 2, R = 0, U = 3, Y = 1, W = -1, Z = 2, G = 1, K = 0)
+  ),
   labels = c(
     Y = "Tokens",
     T = "Type",
@@ -213,12 +217,16 @@ For this reason the thermometer models carry no rated-party term.
 
 dag_thermo <- dagify(
   Y ~ T + R + P + C + W + U,
-  T ~ P + W + U,
+  T ~ P + U,
   R ~ P,
   P ~ C,
   exposure = "T",
   outcome = "Y",
   latent = "U",
+  coords = list(
+    x = c(C = 0, P = 1, T = 2, R = 2, U = 3, Y = 3, W = 3),
+    y = c(C = 2, P = 1, T = 2, R = 0, U = 3, Y = 1, W = -1)
+  ),
   labels = c(
     Y = "Rating",
     T = "Type",
@@ -247,7 +255,7 @@ adjustmentSets(dag_games, exposure = "T", outcome = "Y")
 adjustmentSets(
   dagify(
     Y ~ T + R + P + C + W + Z + G + K,
-    T ~ P + W,
+    T ~ P,
     R ~ T,
     P ~ C
   ),
@@ -260,11 +268,12 @@ adjustmentSets(dag_games, exposure = "R", outcome = "Y")
 ```
 
 The first call returns nothing: with $U$ in the graph, there is no adjustment set that identifies the effect of type. (An empty set `{}` would instead mean that no adjustment is needed.)
-Without $U$, the anchor party and the wave would suffice ($\{P, W\}$).
+Without $U$, the anchor party would suffice ($\{P\}$).
 For the co/out relation in the games, conditioning on type is enough ($\{T\}$).
 
 The models below follow from this.
-The anchor party enters as a varying-effects level (nested in country), and the wave enters as a dummy.
+The anchor party enters as a varying-effects level (nested in country).
+The wave is not a confounder in the DAG, because it affects only the outcome. It still enters as a dummy, as a precision control for the level shift between waves.
 The quantity of interest, the type difference in the co/out gap, is an interaction $T \times R$.
 A DAG does not encode interactions, but the gap itself is identified within type, and the comparison of gaps across types inherits the problem of $U$.
 **The type contrast is therefore a within-party descriptive contrast, not a causal effect.**
@@ -583,8 +592,24 @@ games <- games |>
     der_support = der_anchor %in%
       games_support$der_anchor[games_support$in_support]
   )
+```
 
-# Parties and respondents in and out of support, per country
+@tbl-games-support-country shows, per country, how many anchor parties and how many respondents fall inside and outside the support.
+The respondent counts are respondent-waves (distinct `meta_responseid`), so a panelist who took part in both waves counts twice.
+The columns mean:
+
+- `parties`: the anchor parties of the country that have at least one explicit or vote-anchored respondent in the games sample;
+- `parties_in`: of these, the parties with respondents of both types. These are the parties the estimands average over;
+- `explicit_in`, `explicit_out`: the explicit respondents whose anchor party is inside or outside the support;
+- `vote_anchored_in`, `vote_anchored_out`: the same for vote-anchored respondents.
+
+The `_out` respondents are still in the models. They inform the country and grand means, but the estimands do not average over them.
+@tbl-games-support-overall gives the same counts pooled over all countries. `share_respondents_in` is the share of all explicit and vote-anchored respondents whose anchor party is inside the support.
+
+```{r}
+#| label: tbl-games-support-country
+#| tbl-cap: "Games: anchor parties and respondent-waves inside and outside the common support, per country."
+
 games_support |>
   summarise(
     parties = n(),
@@ -597,15 +622,20 @@ games_support |>
   ) |>
   arrange(country) |>
   knitr::kable()
+```
 
-# Overall
+```{r}
+#| label: tbl-games-support-overall
+#| tbl-cap: "Games: common support pooled over all countries."
+
 games_support |>
   summarise(
     parties = n(),
     parties_in = sum(in_support),
     share_respondents_in = sum((explicit + vote_anchored)[in_support]) /
       sum(explicit + vote_anchored)
-  )
+  ) |>
+  knitr::kable(digits = 3)
 ```
 
 Parties outside the support are mostly small parties with only explicit or only vote-anchored respondents in the sample.
@@ -754,6 +784,15 @@ thermo <- thermo |>
     der_support = der_anchor %in%
       thermo_support$der_anchor[thermo_support$in_support]
   )
+```
+
+@tbl-thermo-support-country and @tbl-thermo-support-overall have the same columns as the games tables (@tbl-games-support-country, @tbl-games-support-overall), computed on the thermometer sample.
+`parties` counts the anchor parties that have at least one explicit or vote-anchored respondent in the thermometer sample. That includes anchor parties that are not among the six rated parties: their respondents contribute out-ratings only.
+The respondent counts are again respondent-waves.
+
+```{r}
+#| label: tbl-thermo-support-country
+#| tbl-cap: "Thermometer: anchor parties and respondent-waves inside and outside the common support, per country."
 
 thermo_support |>
   summarise(
@@ -767,6 +806,11 @@ thermo_support |>
   ) |>
   arrange(country) |>
   knitr::kable()
+```
+
+```{r}
+#| label: tbl-thermo-support-overall
+#| tbl-cap: "Thermometer: common support pooled over all countries."
 
 thermo_support |>
   summarise(
@@ -774,7 +818,8 @@ thermo_support |>
     parties_in = sum(in_support),
     share_respondents_in = sum((explicit + vote_anchored)[in_support]) /
       sum(explicit + vote_anchored)
-  )
+  ) |>
+  knitr::kable(digits = 3)
 ```
 
 ## Development Subsample
@@ -815,27 +860,37 @@ thermo_fit <- if (full_fit) thermo else thermo_dev
 # Formal Models
 
 All four models share one structure.
-For observation $i$ of person $j$, whose anchor party $p$ lies in country $c$:
+An observation $i$ is one row of the data: one round in the games, one rating in the thermometer.
+Each row belongs to a person $j[i]$, whose anchor party $p[i]$ lies in country $c[i]$.
+The square brackets are an index lookup: $c[i]$ reads "the country of row $i$".
+The linear predictor of row $i$ is
 
 $$
-\eta_i = \alpha + \beta_R R_i + \beta_T T_i + \beta_{RT} R_i T_i + \boldsymbol{\gamma}^\top \mathbf{x}_i + \mathbf{z}_i^\top (\mathbf{u}_c + \mathbf{u}_{cp}) + v_j,
+\eta_i = \alpha + \beta_R R_i + \beta_T T_i + \beta_{RT} R_i T_i + \boldsymbol{\gamma}^\top \mathbf{x}_i + \mathbf{z}_i^\top \left(\mathbf{u}_{c[i]} + \mathbf{u}_{c[i]p[i]}\right) + v_{j[i]}.
 $$
 
-where:
+Notation: bold lower-case letters are column vectors and $\Sigma$ denotes a covariance matrix.
+The superscript $\top$ is the transpose. It turns a column vector into a row vector, so $\mathbf{a}^\top \mathbf{b} = \sum_k a_k b_k$ is the inner product of two vectors of equal length: multiply element by element and sum, which gives a single number.
+Every term in the equation is therefore a scalar.
 
-- $R_i$ is `der_co` and $T_i$ is `der_explicit`;
-- $\mathbf{x}_i$ are the controls (games: game, round, wave and the shown partner attributes; thermometer: wave);
-- $\mathbf{z}_i = (1, R_i, T_i, R_i T_i)$;
-- $\mathbf{u}_c \sim \text{MVN}(\mathbf{0}, \Sigma_C)$ and $\mathbf{u}_{cp} \sim \text{MVN}(\mathbf{0}, \Sigma_P)$ are the country and party deviations in intercept, co/out gap, type gap and their interaction;
-- $v_j \sim N(0, \sigma_v)$ is a person intercept that spans both waves of a panelist.
+The terms:
+
+- $R_i$ is `der_co` (1 if the target is a co-partisan, 0 if an out-partisan), and $T_i$ is `der_explicit` (1 explicit, 0 vote-anchored).
+- $\alpha$ is the intercept: the predictor for a vote-anchored respondent facing an out-partisan, with all controls at their reference level. brms does not put the prior on $\alpha$ directly. Its `Intercept` class is the intercept with all predictors centred at their sample means, and brms recovers $\alpha$ from it after sampling (see [Priors](#priors)).
+- $\beta_R$ is the co/out gap of vote-anchored respondents, $\beta_T$ the explicit–vote-anchored difference towards out-partisans, and $\beta_{RT}$ how much larger the co/out gap is for explicit than for vote-anchored respondents. These are the three focal coefficients. On the scale of $\eta$, $\beta_{RT}$ is the type difference in the co/out gap. The estimand $\Delta AP$ is computed on the outcome scale, not read off $\beta_{RT}$ (see [Estimand](#estimand)).
+- $\mathbf{x}_i$ is the vector of control dummies of row $i$: the dummy-coded game, round, wave and shown partner attributes in the games, and the wave in the thermometer. $\boldsymbol{\gamma}$ holds one coefficient per dummy, so $\boldsymbol{\gamma}^\top \mathbf{x}_i = \sum_k \gamma_k x_{ik}$ adds up the shift from each control.
+- $\mathbf{z}_i = (1, R_i, T_i, R_i T_i)^\top$ repeats the focal design: a constant, the relation, the type and their product.
+- $\mathbf{u}_c = (u_{c,0}, u_{c,R}, u_{c,T}, u_{c,RT})^\top$ holds country $c$'s deviations from $\alpha$, $\beta_R$, $\beta_T$ and $\beta_{RT}$. The inner product writes out as $\mathbf{z}_i^\top \mathbf{u}_c = u_{c,0} + u_{c,R} R_i + u_{c,T} T_i + u_{c,RT} R_i T_i$, so each country has its own intercept, gaps and interaction. $\mathbf{u}_{cp}$ is the same four-vector for anchor party $p$ within country $c$ (party nested in country), as a deviation from its country's values.
+- $\mathbf{u}_c \sim \text{MVN}(\mathbf{0}, \Sigma_C)$ and $\mathbf{u}_{cp} \sim \text{MVN}(\mathbf{0}, \Sigma_P)$: the deviations are multivariate normal around zero. $\Sigma_C$ and $\Sigma_P$ are $4 \times 4$ covariance matrices. brms writes each as $\Sigma = \text{diag}(\boldsymbol{\tau})\, \Omega\, \text{diag}(\boldsymbol{\tau})$, with $\boldsymbol{\tau}$ the four SDs (prior class `sd`) and $\Omega$ the correlation matrix (prior class `cor`).
+- $v_j \sim N(0, \sigma_v^2)$ is a person intercept with SD $\sigma_v$. It spans both waves of a panelist and all of a person's rounds or ratings.
 
 The party-level slopes let the type × relation contrast differ between parties, so it is estimated *within* party. Countries differ through $\mathbf{u}_c$ and through the parties they hold.
 The game and the round are controls only: they shift the level, and they do not vary by party or country.
 
 The two families:
 
-- **Beta-binomial** (the generative model): $Y_i \sim \text{BetaBinomial}(n, \mu_i, \phi)$ with $\text{logit}(\mu_i) = \eta_i$, $n = 10$ tokens or $n = 100$ thermometer points. $E(Y_i) = n\mu_i$, and $\phi$ governs how much the person-specific propensity spreads beyond the binomial. A small $\phi$ allows the spikes at the scale ends.
-- **Gaussian** (robustness): $Y^z_i \sim N(\eta_i, \sigma)$ on the z-scored outcome. It recovers conditional means, but it puts predictive mass outside the scale and cannot produce the spikes.
+- **Beta-binomial** (the generative model): $Y_i \sim \text{BetaBinomial}(n, \mu_i, \phi)$ with $\text{logit}(\mu_i) = \eta_i$. $n$ is the number of trials: $n = 10$ tokens or $n = 100$ thermometer points. $\mu_i \in (0, 1)$ is the expected share of the scale, so $E(Y_i) = n\mu_i$. $\phi > 0$ is the precision: each row's success probability is drawn from a beta distribution with mean $\mu_i$ and precision $\phi$, and $\text{Var}(Y_i) = n\mu_i(1 - \mu_i)\,\frac{\phi + n}{\phi + 1}$. A large $\phi$ approaches the binomial. A small $\phi$ spreads the probabilities towards 0 and 1 and allows the spikes at the scale ends.
+- **Gaussian** (robustness): $Y^z_i \sim N(\eta_i, \sigma^2)$, where $Y^z_i$ is the outcome z-scored on its sample mean and SD (`der_y_z`) and $\sigma$ is the residual SD. Here $\eta_i$ is the conditional mean itself, without a link function. The model recovers conditional means, but it puts predictive mass outside the scale and cannot produce the spikes.
 
 ```{r}
 #| label: formulas
@@ -1684,7 +1739,7 @@ cross |>
 - **Thin vote-anchored co-partisan cells in the games.** Vote-anchored respondents met a co-partisan only by chance, about one round in ten, so many parties have few or no such rounds. Their party-level gap rests on partial pooling, and the intervals show it.
 - **Out-partners differ by type.** Explicit partisans' out-partners were drawn from the other parties only, while vote-anchored respondents' partners came from all main parties. Both are "out", but from slightly different sets.
 - **The Gaussian models are robustness.** They recover conditional means, but they put predictive mass outside the scales and cannot produce the spikes at the ends.
-- **The vote is a European Parliament vote**, in wave 2 mostly an intended or hypothetical one (notebook 3.1).
+- **The vote is a European Parliament vote**, in wave 2 mostly an intended or hypothetical one (notebook 3.1). Because the vote item differs between waves, so does the classification into types: the wave mix of explicit and vote-anchored respondents is not the same. The DAGs leave this measurement effect out (see [Scientific Model](#scientific-model)). The wave dummy absorbs level differences between waves, but not differences in who is classified as which type.
 - **Question order is unverified.** Whether the thermometers came before or after the games is not established (notebook 3.1).
 - **The priors on the varying-effect SDs are fairly tight** (exponential(5), mean 0.2 on the logit or z scale). They were tightened to remove the U-shape of the first prior set (see [Priors](#priors)). With 25 countries and about 400 parties the data should dominate, but whether the posterior SDs press against the prior is worth checking after the full fit.
 
