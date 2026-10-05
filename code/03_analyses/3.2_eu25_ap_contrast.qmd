@@ -31,10 +31,9 @@ The notebook follows the Bayesian workflow in eight steps: scientific model, est
 For every outcome, a Gaussian model (on the standardized outcome) is built first, then a beta-binomial model.
 The beta-binomial is the generative model of the integer outcome. The Gaussian model recovers conditional means and serves as robustness.
 
-**Nothing in this notebook is a result.**
-With `full_fit <- FALSE` (the default), every model is compiled and sampled on a 10% development subsample with short chains, only to show that the pipeline runs end to end: priors, prior predictive checks, sampling, diagnostics, posterior predictive checks and the estimand code.
-The estimates from these runs are not interpretable and are not interpreted.
-Setting `full_fit <- TRUE` switches every model to the full analysis sample and production settings, and caches the fits in `data/04_models/` (git-ignored).
+**Nothing in this notebook is a claim.**
+With `full_fit <- TRUE` (the current setting), every model is fitted on the full analysis sample with production settings, and the fits are cached in `data/04_models/` (git-ignored). The estimates are reported with their uncertainty, and they are not interpreted here.
+With `full_fit <- FALSE`, every model is compiled and sampled on a 10% development subsample with short chains, only to show that the pipeline runs end to end: priors, prior predictive checks, sampling, diagnostics, posterior predictive checks and the estimand code. Those estimates are not interpretable.
 
 ```{r}
 #| label: setup
@@ -72,21 +71,29 @@ rm(p_required, p_to_install, packages)
 
 Two switches govern the whole notebook.
 
-- `full_fit`: `FALSE` fits every model on the development subsample (`dev`), with 2 chains of 300 iterations (150 warm-up). `TRUE` fits on the full analysis sample with 4 chains of 2,000 iterations (1,000 warm-up) and writes the fit to `data/04_models/`. A cached fit is reused as long as model, data and priors are unchanged (`file_refit = "on_change"`).
+- `full_fit`: `TRUE` fits on the full analysis sample with 4 chains of 2,000 iterations (1,000 warm-up). `FALSE` fits every model on the development subsample (`dev`), with 2 chains of 300 iterations (150 warm-up), and saves nothing.
 - `seed`: one seed for the development subsample, the samplers and the posterior draws used in the estimand code.
+
+With `full_fit <- TRUE`:
+
+- **Every fit is cached**, the prior-only fits included, as `data/04_models/<name>.rds` (git-ignored). A later render loads a cached fit in seconds as long as model, data and priors are unchanged (`file_refit = "on_change"`), and refits only what changed. This cache is what makes re-renders cheap. The project's `freeze: auto` does not help here: the notebook is not in `_quarto.yml`, and Quarto always executes a single-file render.
+- **Each chain runs on 3 threads** (`threads_per_chain`; within-chain parallelism via `reduce_sum`, brms `threading()`), so the four chains use 12 of the machine's 14 cores. Threading splits the likelihood sum across threads, and it changes results only at floating-point precision.
+- **The sampler reports progress to the terminal, not the document.** cmdstanr prints its iteration lines with `cat()`, which knitr would capture into the output (knitr's `message = NA` only reroutes `message()`). `fit_model()` therefore diverts the console output to stderr, which `quarto render` shows in the terminal, and mirrors it into `data/04_models/logs/<name>.log`. Messages from brms and Stan go the same way. Warnings stay in the document. `data/04_models/logs/progress.log` gets one timestamped line when a fit starts and one when it ends, saying whether it was fitted or loaded from the cache.
+
+The progress-file problem of Positron issue #5920 is specific to the rstan backend, so it does not apply here.
 
 The sampler runs on `cmdstanr` (CmdStan 2.39).
 `cmdstanr` is not on CRAN; it comes from the Stan r-universe (`install.packages("cmdstanr", repos = "https://stan-dev.r-universe.dev")`).
 The `rstan` backend is not used, because the R 4.6 library pairs rstan 2.32 with StanHeaders 2.39, and that pair compiles no model.
 `adapt_delta = 0.95` is set from the start, because hierarchical models with varying slopes at two levels tend to produce divergent transitions at the default of 0.8.
 The maximum tree depth stays at the default of 10, and the diagnostics count the iterations that hit it.
-When CmdStan compiles a model, the C++ compiler emits warnings about the generated Stan code (e.g. `-Woverloaded-virtual`). These say nothing about the model or the sampling, and `fit_model()` mutes exactly those messages. Every other brms message and every warning stays visible.
+When CmdStan compiles a model, the C++ compiler emits warnings about the generated Stan code (e.g. `-Woverloaded-virtual`). These say nothing about the model or the sampling, and `fit_model()` mutes exactly those messages. Every other brms message stays visible: in the document for development fits, and in the terminal and log for full fits. Every warning stays in the document.
 Prior predictive fits always use the development subsample: they do not condition on the outcome, so a larger sample adds nothing.
 
 ```{r}
 #| label: run-settings
 
-full_fit <- FALSE
+full_fit <- TRUE
 seed <- 2019
 
 run <- if (full_fit) {
@@ -98,12 +105,16 @@ run <- if (full_fit) {
 # Sampler control
 max_treedepth <- 10
 
+# Threads per chain, full fits only
+threads_per_chain <- 3
+
 # Prior predictive runs
 run_prior <- list(chains = 2, iter = 300, warmup = 150)
 
-# Cache for full fits only
+# Cache and logs for full fits only
 model_dir <- here("data", "04_models")
-if (full_fit) dir.create(model_dir, showWarnings = FALSE)
+log_dir <- file.path(model_dir, "logs")
+if (full_fit) dir.create(log_dir, showWarnings = FALSE, recursive = TRUE)
 
 # One wrapper for every brm() call
 fit_model <- function(
@@ -115,16 +126,58 @@ fit_model <- function(
   sample_prior = "no",
   settings = run
 ) {
-  # Mute C++ compiler notes only
+  # Mute C++ compiler notes; full fits send other messages to terminal and log
   compiler_note <- "\\.hpp|\\.cpp|\\[-W[a-z-]+=?\\]|\\^~"
-  withCallingHandlers(
-    fit_brm(formula, family, prior, data, name, sample_prior, settings),
-    message = \(m) {
-      if (grepl(compiler_note, conditionMessage(m))) {
-        invokeRestart("muffleMessage")
+  fit <- \() {
+    withCallingHandlers(
+      fit_brm(formula, family, prior, data, name, sample_prior, settings),
+      message = \(m) {
+        if (grepl(compiler_note, conditionMessage(m))) {
+          invokeRestart("muffleMessage")
+        }
+        if (full_fit) {
+          cat(conditionMessage(m))
+          invokeRestart("muffleMessage")
+        }
       }
-    }
+    )
+  }
+  if (!full_fit) {
+    return(fit())
+  }
+
+  # Sampler output to terminal (stderr) and model log, not the document
+  rds <- paste0(file.path(model_dir, name), ".rds")
+  mtime <- file.mtime(rds)
+  log_progress(name, "start", nrow(data))
+  con <- file(file.path(log_dir, paste0(name, ".log")), open = "at")
+  cat("\n=====", format(Sys.time()), name, "=====\n", file = con)
+  sink(stderr())
+  sink(con, split = TRUE)
+  on.exit({
+    sink()
+    sink()
+    close(con)
+  })
+  t0 <- Sys.time()
+  out <- fit()
+  status <- if (identical(file.mtime(rds), mtime)) "cached" else "fitted"
+  log_progress(name, status, nrow(data), t0)
+  out
+}
+
+# One line per fit start and end, in progress.log and the terminal
+log_progress <- function(name, status, rows, t0 = NULL) {
+  line <- paste0(
+    format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+    "  ", name, "  ", status, "  rows=", rows,
+    if (!is.null(t0)) {
+      paste0("  min=", round(as.numeric(Sys.time() - t0, units = "mins"), 1))
+    },
+    "\n"
   )
+  cat(line, file = file.path(log_dir, "progress.log"), append = TRUE)
+  cat(line, file = stderr())
 }
 
 fit_brm <- function(formula, family, prior, data, name, sample_prior, settings) {
@@ -141,11 +194,10 @@ fit_brm <- function(formula, family, prior, data, name, sample_prior, settings) 
     control = list(adapt_delta = 0.95, max_treedepth = max_treedepth),
     seed = seed,
     backend = "cmdstanr",
-    refresh = 0,
-    silent = 2,
-    file = if (full_fit && sample_prior == "no") {
-      file.path(model_dir, name)
-    },
+    threads = if (full_fit) threading(threads_per_chain),
+    refresh = if (full_fit) 100 else 0,
+    silent = if (full_fit) 1 else 2,
+    file = if (full_fit) file.path(model_dir, name),
     file_refit = "on_change"
   )
 }
@@ -1055,7 +1107,7 @@ fit_games_gauss <- fit_model(
 
 ### MCMC Diagnostics
 
-With the development settings (2 chains, 150 post-warm-up draws each), the diagnostics only show that sampling ran. Low ESS and high $\hat{R}$ are expected there and mean nothing about the full fit.
+For a full fit, these are the convergence checks. With the development settings (2 chains, 150 post-warm-up draws each), they only show that sampling ran. Low ESS and high $\hat{R}$ are expected there and mean nothing about the full fit.
 
 ```{r}
 #| label: games-gauss-diagnostics
@@ -1131,7 +1183,7 @@ rm(yrep)
 
 ### Estimand
 
-The estimand code on the development fit. The table and figure check that the code runs, and **are not estimates**.
+With `full_fit <- TRUE`, these are the posterior estimates, reported with their 95% intervals and not interpreted here. On a development fit, they only check that the code runs.
 
 ```{r}
 #| label: games-gauss-ap
@@ -1361,7 +1413,10 @@ summarise_ap(games_bb_ap_country) |>
   geom_vline(xintercept = 0, colour = "grey60") +
   geom_pointrange(size = 0.3) +
   labs(
-    title = "Delta AP by country: games, beta-binomial (development fit, not an estimate)",
+    title = paste(
+      "Delta AP by country: games, beta-binomial",
+      if (!full_fit) "(development fit, not an estimate)"
+    ),
     subtitle = "Posterior median and 95% interval, tokens",
     x = "Delta AP (tokens)",
     y = NULL
@@ -1709,7 +1764,7 @@ summarise_ap(thermo_bb_ap_country) |>
 
 The cross-outcome quantity is the difference of the two $\Delta AP$ in SD units, from the beta-binomial models, with the posterior probability that it is positive.
 The draws of the two independent fits are paired by index.
-**The code runs here on development fits, and the output is not an estimate.**
+With `full_fit <- TRUE`, the output is an estimate, reported but not interpreted. On development fits it only checks that the code runs.
 
 ```{r}
 #| label: cross-outcome
