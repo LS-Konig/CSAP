@@ -149,3 +149,27 @@ $presentation-heading-color: #003056;
 .reveal .slides section.smaller > h2 {
   font-size: 1.36em;
 }
+
+/* Result placeholder (HMS deck): dashed box until the fitted models are in */
+.reveal .placeholder {
+  border: 2px dashed #DE7E50;
+  border-radius: 6px;
+  color: #7F94A5;
+  font-size: 0.5em;
+  text-align: center;
+  padding: 14px 10px;
+  margin: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 150px;
+}
+.reveal .placeholder strong { color: #DE7E50; }
+.reveal .placeholder.tall { min-height: 380px; }
+
+/* Struck-out half of the announced title (HMS deck) */
+.reveal .struck { text-decoration: line-through; text-decoration-color: #DE7E50; color: #7F94A5; }
+.reveal .fix { color: #DE7E50; font-weight: 600; }
+
+/* HMS title slide: one headline with the struck-out and corrected halves inline */
+.reveal .slides section.title-slide-hms > h2 { font-size: 1.15em; line-height: 1.25; }

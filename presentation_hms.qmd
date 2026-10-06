@@ -1,0 +1,987 @@
+---
+author: Tristan Muno
+date: last-modified
+date-format: "D. MMMM YYYY"
+lang: de
+bibliography: references.bib
+biblio-style: apsr
+format:
+  revealjs:
+    embed-resources: true
+    theme: theme.scss
+    slideNumber: true
+    width: 1280
+    height: 720
+    footer: Tristan Muno – Hanns Martin Schleyer-Stiftung, Berlin – Oktober 2026
+    logo: ./images/uma_ss.png
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    dev: ragg_png
+    dpi: 300
+editor: source
+preview-links: true
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+library(here)
+
+navy <- "#003056"
+accent <- "#DE7E50"
+grey1 <- "#B9C2CA"
+grey2 <- "#7F94A5"
+
+# Partisan types, as in the composition trees (code/00_helper/pid_tree.R)
+col_expl <- "#08306b"
+col_impl <- "#a63603"
+
+theme_schematic <- function(base = 13) {
+  theme_void(base_size = base) +
+    theme(
+      plot.title = element_text(
+        colour = navy,
+        face = "bold",
+        hjust = 0.5,
+        size = rel(1.05),
+        margin = margin(b = 3)
+      ),
+      plot.subtitle = element_text(
+        colour = grey2,
+        hjust = 0.5,
+        size = rel(0.85),
+        margin = margin(b = 5)
+      ),
+      plot.background = element_rect(fill = "white", colour = NA),
+      legend.position = "none",
+      plot.margin = margin(4, 6, 4, 6)
+    )
+}
+```
+
+## Wer sich bekennt, urteilt härter – [handelt aber nicht anders]{.struck} [handelt aber nur ein bisschen anders]{.fix} {.title-slide-hms}
+
+[Die Rolle subjektiver Parteibindung bei einstellungs- und verhaltensbezogener affektiver Polarisierung in 25 europäischen Demokratien]{style="font-size: 0.55em;"}
+
+[*Titel v2 – nach strengerem Aufmerksamkeitstest* · Wortlaut der Korrektur vorläufig, bis die Modelle durchgerechnet sind]{style="font-size: 0.42em; color: #7F94A5;"}
+
+![](./images/uma_palace.png){height="210px"}
+
+[{{< meta author >}} – Universität Mannheim · gemeinsame Arbeit mit Thomas König]{style="font-size: 0.45em;"}
+
+::: {.notes}
+*(ca. 0:30)*
+
+Vielen Dank für die Einladung.
+
+Sie sehen: Der Titel im Programm hat schon eine kleine Korrektur hinter sich. Als ich ihn eingereicht habe, sahen die Daten so aus, als würden Menschen mit Parteibindung zwar härter urteilen, aber nicht anders handeln. Dann habe ich die Stichprobe strenger gefasst – nur noch Befragte, die einen Aufmerksamkeitstest bestanden haben – und dieser Befund ist so nicht mehr da.
+
+Das ist kein Betriebsunfall, sondern so funktioniert Wissenschaft: Versuch, Irrtum, Korrektur – und zwar öffentlich. Ich zeige Ihnen deshalb heute auch, *wie* man zu so einer Aussage kommt, nicht nur die Aussage selbst.
+
+[Die genaue Formulierung der zweiten Titelhälfte passe ich an, sobald die Ergebnisse vorliegen.]
+:::
+
+# Polarisierung: eine Familie, kein Ding
+
+## Ein Wort mit Geschichte
+
+- Griechisch *polos*, lateinisch *polus*: die Achse, um die sich etwas dreht
+- 19. Jh., Physik: *polarisiertes* Licht – Ausrichtung, nicht Konflikt
+- Erst nach 1945 ein Begriff der Sozialwissenschaften
+
+```{r}
+#| label: schematic-physics
+#| fig-width: 8
+#| fig-height: 3.3
+#| fig-align: center
+#| out-width: "74%"
+
+ang <- seq(0, 165, by = 15) * pi / 180
+pre <- do.call(
+  rbind,
+  lapply(c(0.55, 1.10), function(cx) {
+    data.frame(x = cx, dx = 0.17 * cos(ang), dy = 0.52 * sin(ang))
+  })
+)
+post <- data.frame(x = c(2.35, 2.80, 3.25))
+grating <- data.frame(gx = seq(1.79, 1.96, length.out = 5))
+
+p_light <- ggplot() +
+  geom_segment(
+    aes(x = 0.15, xend = 3.45, y = 0, yend = 0),
+    colour = grey1,
+    linewidth = 0.35,
+    linetype = "22"
+  ) +
+  geom_segment(
+    data = pre,
+    aes(x = x - dx, xend = x + dx, y = -dy, yend = dy),
+    colour = grey1,
+    linewidth = 0.7
+  ) +
+  geom_rect(
+    aes(xmin = 1.75, xmax = 2.00, ymin = -0.88, ymax = 0.88),
+    fill = "white",
+    colour = navy,
+    linewidth = 0.9
+  ) +
+  geom_segment(
+    data = grating,
+    aes(x = gx, xend = gx, y = -0.82, yend = 0.82),
+    colour = navy,
+    linewidth = 0.4
+  ) +
+  geom_segment(
+    data = post,
+    aes(x = x, xend = x, y = -0.52, yend = 0.52),
+    colour = navy,
+    linewidth = 1.2
+  ) +
+  annotate("text", x = 0.83, y = -1.12, label = "unpolarisiert", colour = grey2, size = 3.2) +
+  annotate("text", x = 1.88, y = 1.12, label = "Filter", colour = navy, size = 3.2) +
+  annotate("text", x = 2.80, y = -1.12, label = "polarisiert", colour = navy, size = 3.2) +
+  coord_fixed(xlim = c(0.1, 3.5), ylim = c(-1.35, 1.35)) +
+  labs(title = "Licht: in einer Ebene ausgerichtet", subtitle = " ") +
+  theme_schematic()
+
+fline <- data.frame(x = -0.78, y = 0.30, xend = 0.78, yend = 0.30)
+flineb <- data.frame(x = -0.78, y = -0.30, xend = 0.78, yend = -0.30)
+curv <- c(-0.45, -0.80, -1.15)
+
+p_mag <- ggplot() +
+  lapply(curv, function(cc) {
+    geom_curve(
+      data = fline,
+      aes(x = x, y = y, xend = xend, yend = yend),
+      curvature = cc,
+      colour = grey1,
+      linewidth = 0.5
+    )
+  }) +
+  lapply(curv, function(cc) {
+    geom_curve(
+      data = flineb,
+      aes(x = x, y = y, xend = xend, yend = yend),
+      curvature = -cc,
+      colour = grey1,
+      linewidth = 0.5
+    )
+  }) +
+  geom_rect(aes(xmin = -0.90, xmax = 0, ymin = -0.30, ymax = 0.30), fill = navy, colour = NA) +
+  geom_rect(aes(xmin = 0, xmax = 0.90, ymin = -0.30, ymax = 0.30), fill = accent, colour = NA) +
+  annotate("text", x = -0.45, y = 0, label = "N", colour = "white", fontface = "bold", size = 4.6) +
+  annotate("text", x = 0.45, y = 0, label = "S", colour = "white", fontface = "bold", size = 4.6) +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.35, 1.35)) +
+  labs(title = "Magnet: zwei Pole", subtitle = " ") +
+  theme_schematic()
+
+p_light | p_mag
+```
+
+::: {.notes}
+*(Block 1, ca. 2:30 insgesamt)*
+
+Zuerst zum Wort selbst. „Polos“ ist im Griechischen die Achse, um die sich etwas dreht – daher die Erdpole. Im 19. Jahrhundert nimmt die Physik das Wort auf: Licht, das durch einen Filter geht, schwingt danach nur noch in einer Ebene. Es ist *polarisiert*. Oder der Magnet mit seinen zwei Polen.
+
+Was in diesem Ursprung steckt, ist Ausrichtung und Trennung. Was nicht drinsteckt, ist Konflikt. Polarisiertes Licht streitet sich nicht. Die Vorstellung von Lagern, die sich feindlich gegenüberstehen, haben erst die Sozialwissenschaften nach 1945 hinzugefügt.
+:::
+
+------------------------------------------------------------------------
+
+## Viele Formen unter einem Namen {.smaller}
+
+- Mindestens vier mathematisch verschiedene Dinge – sie können sich **in denselben Daten gegenläufig** bewegen
+- Dazu: zwei Lager oder viele? Zustand oder Prozess? Wer ist polarisiert – und gegen wen?
+
+```{r}
+#| label: schematic-four-dists
+#| fig-width: 8
+#| fig-height: 3.3
+#| fig-align: center
+#| out-width: "68%"
+
+xs <- seq(-5.5, 5.5, length.out = 400)
+
+base_p <- function(d, title, sub) {
+  ggplot(d, aes(x, y, colour = g, group = grp)) +
+    geom_hline(yintercept = 0, colour = grey1, linewidth = 0.3) +
+    geom_line(linewidth = 0.9) +
+    scale_colour_manual(values = c(before = grey1, after = navy)) +
+    labs(title = title, subtitle = sub) +
+    theme_schematic()
+}
+
+d_disp <- rbind(
+  data.frame(x = xs, y = dnorm(xs, 0, 1.0), g = "before", grp = "1"),
+  data.frame(x = xs, y = dnorm(xs, 0, 2.3), g = "after", grp = "2")
+)
+
+d_bim <- rbind(
+  data.frame(x = xs, y = dnorm(xs, 0, 1.6), g = "before", grp = "1"),
+  data.frame(
+    x = xs,
+    y = 0.5 * dnorm(xs, -2.1, 0.8) + 0.5 * dnorm(xs, 2.1, 0.8),
+    g = "after",
+    grp = "2"
+  )
+)
+
+d_dist <- rbind(
+  data.frame(x = xs, y = dnorm(xs, -0.7, 0.9), g = "before", grp = "1"),
+  data.frame(x = xs, y = dnorm(xs, 0.7, 0.9), g = "before", grp = "2"),
+  data.frame(x = xs, y = dnorm(xs, -2.4, 0.9), g = "after", grp = "3"),
+  data.frame(x = xs, y = dnorm(xs, 2.4, 0.9), g = "after", grp = "4")
+)
+
+set.seed(7)
+n <- 110
+aa <- rnorm(n)
+d_sort <- rbind(
+  data.frame(x = aa, y = rnorm(n), g = "before"),
+  data.frame(x = aa, y = 0.9 * aa + sqrt(1 - 0.81) * rnorm(n), g = "after")
+)
+
+p_sort <- ggplot(d_sort, aes(x, y, colour = g)) +
+  geom_point(size = 0.75, alpha = 0.8) +
+  scale_colour_manual(values = c(before = grey1, after = navy)) +
+  labs(title = "Sortierung", subtitle = "Konfliktlinien fallen zusammen") +
+  theme_schematic()
+
+(base_p(d_disp, "Streuung", "wie weit Meinungen auseinanderliegen") |
+  base_p(d_bim, "Bimodalität", "leert sich die Mitte?")) /
+  (p_sort |
+    base_p(d_dist, "Distanz", "wie weit Gruppen auseinanderliegen"))
+```
+
+::: {.notes}
+Wenn heute von Polarisierung die Rede ist, sind mindestens vier verschiedene Dinge gemeint. Grau ist jeweils „vorher“, blau „nachher“.
+
+Streuung: Meinungen liegen weiter auseinander. Bimodalität: Die Mitte leert sich, aus einem Hügel werden zwei. Sortierung: Wer bei einem Thema links steht, steht es jetzt auch bei allen anderen – obwohl sich auf der waagrechten Achse niemand bewegt hat. Distanz: Die Mittelwerte von Gruppen rücken auseinander.
+
+Diese vier können sich in denselben Daten in entgegengesetzte Richtungen bewegen. Und dazu kommen weitere Fragen: Gibt es zwei Lager oder viele – in Deutschland eher viele? Reden wir über einen Zustand oder einen Trend? Und wer ist polarisiert: Politiker oder Bürger?
+:::
+
+------------------------------------------------------------------------
+
+## Quer dazu: Wahrnehmung und Wirklichkeit
+
+- Jede dieser Formen gibt es **zweimal**: wie sie ist – und wie wir sie wahrnehmen
+- Menschen überschätzen systematisch, wie extrem und wie anders „die anderen“ sind [@levendusky2016mis; @ahler2018parties]
+- Wahrgenommene Polarisierung kann wachsen, während die tatsächliche gleich bleibt
+
+```{r}
+#| label: schematic-perception
+#| fig-width: 8
+#| fig-height: 2.6
+#| fig-align: center
+#| out-width: "66%"
+
+xs <- seq(-5.5, 5.5, length.out = 400)
+d_real <- rbind(
+  data.frame(x = xs, y = dnorm(xs, -0.9, 1.1), grp = "a"),
+  data.frame(x = xs, y = dnorm(xs, 0.9, 1.1), grp = "b")
+)
+d_perc <- rbind(
+  data.frame(x = xs, y = dnorm(xs, -2.6, 0.8), grp = "a"),
+  data.frame(x = xs, y = dnorm(xs, 2.6, 0.8), grp = "b")
+)
+
+ggplot() +
+  geom_hline(yintercept = 0, colour = grey1, linewidth = 0.3) +
+  geom_line(data = d_real, aes(x, y, group = grp), colour = grey2, linewidth = 1) +
+  geom_line(
+    data = d_perc,
+    aes(x, y, group = grp),
+    colour = accent,
+    linewidth = 1,
+    linetype = "22"
+  ) +
+  annotate("text", x = 0, y = 0.42, label = "Wirklichkeit", colour = grey2, fontface = "bold", size = 3.6) +
+  annotate("text", x = -4.4, y = 0.50, label = "Wahrnehmung", colour = accent, fontface = "bold", size = 3.6) +
+  annotate("text", x = 4.4, y = 0.50, label = "Wahrnehmung", colour = accent, fontface = "bold", size = 3.6) +
+  coord_cartesian(ylim = c(0, 0.56)) +
+  theme_schematic()
+```
+
+::: {.notes}
+Und quer zu all diesen Formen liegt noch eine weitere Unterscheidung: Wirklichkeit und Wahrnehmung.
+
+Jede dieser Formen gibt es zweimal – einmal so, wie sie in den Daten ist, und einmal so, wie Menschen sie wahrnehmen. Und die Forschung zeigt recht deutlich: Wir überschätzen, wie extrem die andere Seite ist und wie sehr sie sich von uns unterscheidet. Grau ist, wie weit zwei Gruppen tatsächlich auseinanderliegen. Orange gestrichelt ist, wie weit sie sich gegenseitig auseinander *vermuten*.
+
+Damit ist der erste Punkt dieses Vortrags gemacht: Polarisierung ist kein „Ding“, das man einfach misst. Es ist eine Familie von Phänomenen. Wer sagt „die Polarisierung nimmt zu“, muss dazusagen, welche.
+:::
+
+# Affektive Polarisierung
+
+## Nicht *was* wir denken, sondern *wie wir fühlen*
+
+- Lange Debatte: Ist die US-Bevölkerung ideologisch polarisiert? [@fiorina2008polarization; @abramowitz2008ispolarization]
+- Die „affektive Wende“ [@iyengar2012affect]: Wie fühlen Anhänger *übereinander*?
+- Kerngedanke: Parteianhängerschaft als **soziale Identität** – ein „Wir“ und ein „Die“
+- Minimaldefinition: Sympathie für die **eigene** Seite, Ablehnung der **anderen**
+- Abneigung kann weit über sachliche Meinungsunterschiede hinausgehen
+
+::: {.notes}
+*(Block 2, ca. 2:00)*
+
+In der Politikwissenschaft gab es lange eine Debatte, ob die Amerikaner in ihren Positionen polarisiert sind. Die einen sagten: Nein, sie haben sich nur besser sortiert. Die anderen: Doch, zumindest die politisch Interessierten.
+
+Iyengar und Kollegen haben 2012 die Frage verschoben. Nicht: Wo stehen die Leute inhaltlich? Sondern: Wie fühlen sie *übereinander*? Die Idee dahinter: Parteianhängerschaft funktioniert wie eine soziale Identität, ähnlich wie bei Fußballfans. Man mag die eigenen Leute, man mag die anderen weniger. Und diese Abneigung kann viel größer sein, als es die inhaltlichen Unterschiede rechtfertigen würden. Das nennt man affektive Polarisierung.
+:::
+
+------------------------------------------------------------------------
+
+## Auch hier: zwei Achsen, vier Fragen {.smaller}
+
+Wem gilt die Abneigung – und wie wird sie gemessen? [@areal2024verticalvshorizontal]
+
+```{r}
+#| label: schematic-ap-typology
+#| fig-width: 8
+#| fig-height: 3.4
+#| fig-align: center
+#| out-width: "62%"
+
+cells <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  lab = c(
+    "Gefühlsthermometer\nSympathie für Parteien\n(die übliche Messung)",
+    "Wahlentscheidungen\nSpenden, Kandidatenwahl",
+    "Soziale Distanz\n„Hätten Sie etwas dagegen,\nwenn Ihr Kind … heiratet?“",
+    "Verteilungsspiele\nDiktator- & Vertrauensspiel\nmit Mitbürgern"
+  ),
+  fill = c(navy, "white", "white", accent),
+  txt = c("white", navy, navy, "white")
+)
+
+ggplot(cells, aes(x, y)) +
+  geom_tile(aes(fill = fill), colour = navy, linewidth = 0.9, width = 0.94, height = 0.90) +
+  geom_text(aes(label = lab, colour = txt), size = 3.0, lineheight = 0.95) +
+  scale_fill_identity() +
+  scale_colour_identity() +
+  annotate("text", x = 1, y = 2.66, label = "Einstellung\nwas Menschen sagen", colour = navy, fontface = "bold", size = 3.2, lineheight = 0.95) +
+  annotate("text", x = 2, y = 2.66, label = "Verhalten\nwas Menschen tun", colour = navy, fontface = "bold", size = 3.2, lineheight = 0.95) +
+  annotate("text", x = 0.40, y = 2, angle = 90, lineheight = 0.95, label = "Vertikal\nParteien & Politiker", colour = navy, fontface = "bold", size = 3.2) +
+  annotate("text", x = 0.40, y = 1, angle = 90, lineheight = 0.95, label = "Horizontal\nMitbürger", colour = navy, fontface = "bold", size = 3.2) +
+  annotate("text", x = 1.5, y = 0.36, size = 2.9, colour = grey2, label = "Diese Studie: die beiden farbigen Zellen – bei denselben Befragten") +
+  coord_cartesian(xlim = c(0.25, 2.62), ylim = c(0.25, 3.02)) +
+  theme_schematic()
+```
+
+::: {.notes}
+Aber auch hier ist es komplizierter. Zwei Fragen.
+
+Erstens: Wem gilt die Abneigung? Den Parteien und Politikern – das nennt man vertikal. Oder den ganz normalen Mitbürgern, die eine andere Partei wählen – horizontal.
+
+Zweitens: Wie messen wir sie? Indem wir fragen, was Menschen *sagen*, oder indem wir beobachten, was sie *tun*, wenn etwas auf dem Spiel steht.
+
+Fast die gesamte Forschung sitzt oben links: Man fragt, wie sympathisch jemand eine Partei findet. Wir haben in unseren Daten beides – oben links und unten rechts – und zwar bei denselben Menschen. Wichtig: In unseren Daten hängen Ziel und Messweise zusammen. Wir vergleichen also Einstellung mit Verhalten, nicht vertikal mit horizontal.
+:::
+
+# Empirie
+
+## Wer zählt als Parteianhänger? {.smaller}
+
+- Affektive Polarisierung braucht eine „eigene“ Partei – jemand muss entscheiden, wer dazugehört
+- Die übliche Frage: *„Do you consider yourself to be close to any particular political party?“*
+
+```{r}
+#| label: schematic-types
+#| fig-width: 8
+#| fig-height: 3
+#| fig-align: center
+#| out-width: "78%"
+
+nodes <- data.frame(
+  x = c(0.6, 2.4, 2.4, 4.6, 4.6, 4.6, 4.6),
+  y = c(1.5, 2.3, 0.7, 2.75, 1.95, 1.15, 0.30),
+  lab = c(
+    "Fühlen Sie sich\neiner Partei nahe?",
+    "Ja: Partei X",
+    "„Nein, keiner Partei“",
+    "Wahl: Partei X",
+    "Wahl: andere / keine",
+    "Wahl: Partei X",
+    "keine Wahl"
+  ),
+  col = c(navy, navy, navy, col_expl, grey1, col_impl, grey1)
+)
+edges <- data.frame(
+  x = c(1.35, 1.35, 3.05, 3.05, 3.05, 3.05),
+  y = c(1.5, 1.5, 2.3, 2.3, 0.7, 0.7),
+  xend = c(1.8, 1.8, 3.95, 3.95, 3.95, 3.95),
+  yend = c(2.3, 0.7, 2.75, 1.95, 1.15, 0.30)
+)
+
+ggplot() +
+  geom_segment(data = edges, aes(x, y, xend = xend, yend = yend), colour = grey1, linewidth = 0.6) +
+  geom_label(
+    data = nodes,
+    aes(x, y, label = lab, colour = col),
+    size = 3.0,
+    lineheight = 0.95,
+    label.size = 0.5,
+    label.padding = unit(0.25, "lines")
+  ) +
+  annotate("text", x = 5.45, y = 2.75, label = "bekennend", colour = col_expl, fontface = "bold", size = 3.6, hjust = 0) +
+  annotate("text", x = 5.45, y = 1.15, label = "implizit", colour = col_impl, fontface = "bold", size = 3.6, hjust = 0) +
+  scale_colour_identity() +
+  coord_cartesian(xlim = c(0, 6.4), ylim = c(0, 3.05)) +
+  theme_schematic()
+```
+
+- **Bekennende** Anhänger nennen eine Partei – und wählen sie
+- **Implizite** Anhänger *verneinen ausdrücklich* jede Parteibindung – nennen bei der Wahlfrage aber doch eine Partei
+
+::: {.notes}
+*(Block 3, ca. 4:00)*
+
+Um affektive Polarisierung zu messen, braucht man eine „eigene“ Partei. Also muss man entscheiden, wer überhaupt als Parteianhänger zählt. Üblich ist diese Frage: „Fühlen Sie sich einer bestimmten Partei nahe?“
+
+Wer „Ja“ sagt und dieselbe Partei auch wählt, nenne ich *bekennend*. Spannend sind die anderen: Menschen, die ausdrücklich ankreuzen „Nein, ich fühle mich keiner Partei nahe“ – und bei der Wahlfrage dann doch eine Partei nennen. Sie haben eine Präferenz, sie bekennen sich nur nicht dazu. Die nenne ich *implizit*. Diese Menschen fallen in den meisten Studien einfach heraus.
+:::
+
+------------------------------------------------------------------------
+
+## Wie viele sind es? {.smaller}
+
+```{r}
+#| label: composition-data
+#| cache: true
+#| include: false
+
+source(here("code", "00_helper", "pid_tree.R"))
+
+raw <- readr::read_rds(here("data", "01_raw", "eu25games2019.rds"))
+partisan <- readr::read_rds(here("data", "02_processed", "eu25_partisan.rds"))
+
+# Composition sample as in notebook 3.1 (Sample and Duplicates)
+comp <- raw |>
+  filter(der_att_check_3, meta_wave %in% c(2, 3), !is.na(meta_pid)) |>
+  add_count(meta_wave, meta_pid, name = "n_rows") |>
+  filter(n_rows == 1 | meta_finished) |>
+  add_count(meta_wave, meta_pid, name = "n_left")
+
+dups <- unique(comp$meta_pid[comp$n_left > 1])
+
+comp <- comp |>
+  filter(!meta_pid %in% dups) |>
+  select(meta_responseid) |>
+  inner_join(select(partisan, -wave), by = "meta_responseid")
+
+# Leaves of the tree, as in fig-composition-w23
+leaf_shares <- tree_leaves(comp) |>
+  count(country, leaf) |>
+  mutate(share = n / sum(n), .by = country)
+
+pooled <- leaf_shares |>
+  summarise(n = sum(n), .by = leaf) |>
+  mutate(share = n / sum(n))
+
+rm(raw)
+```
+
+```{r}
+#| label: schematic-composition
+#| fig-width: 9
+#| fig-height: 5
+#| fig-align: center
+#| out-width: "82%"
+
+laender <- c(
+  AT = "Österreich", BE = "Belgien", BG = "Bulgarien", CY = "Zypern",
+  CZ = "Tschechien", DE = "Deutschland", DK = "Dänemark", EE = "Estland",
+  ES = "Spanien", FI = "Finnland", FR = "Frankreich", GR = "Griechenland",
+  EL = "Griechenland", HR = "Kroatien", HU = "Ungarn", IE = "Irland",
+  IT = "Italien", LT = "Litauen", LU = "Luxemburg", LV = "Lettland",
+  MT = "Malta", NL = "Niederlande", PL = "Polen", PT = "Portugal",
+  RO = "Rumänien", SE = "Schweden", SI = "Slowenien", SK = "Slowakei",
+  UK = "Vereinigtes Königreich", GB = "Vereinigtes Königreich"
+)
+
+# German legend labels for the leaves of pid_tree.R
+leaf_de <- c(
+  "Attached: same party" = "Bindung: gleiche Partei gewählt (bekennend)",
+  "Attached: different party" = "Bindung: andere Partei gewählt",
+  "Attached: vote not matchable" = "Bindung: Wahl nicht zuordenbar",
+  "Attached: no vote" = "Bindung: keine Wahl angegeben",
+  "No attachment: vote" = "Keine Bindung, aber Wahl (implizit)",
+  "No attachment: no vote" = "Keine Bindung, keine Wahl",
+  "Attachment DK / missing" = "Bindung: weiß nicht / fehlt",
+  "Vote item not fielded" = "Wahlfrage nicht gestellt"
+)
+
+d_comp <- leaf_shares |>
+  mutate(
+    land = coalesce(unname(laender[country]), country),
+    expl = sum(share[leaf == "Attached: same party"]),
+    .by = country
+  ) |>
+  mutate(land = reorder(land, expl))
+
+# Labels only on the two focal leaves
+focal_pos <- d_comp |>
+  arrange(land, leaf) |>
+  mutate(end = cumsum(share), start = end - share, .by = land) |>
+  filter(leaf %in% c("Attached: same party", "No attachment: vote"))
+
+ggplot(d_comp, aes(x = share, y = land, fill = leaf)) +
+  geom_col(width = 0.8, colour = "white", linewidth = 0.2, position = position_stack(reverse = TRUE)) +
+  geom_text(
+    data = focal_pos,
+    aes(x = start + 0.01, label = scales::percent(share, 1)),
+    hjust = 0,
+    size = 2.6,
+    colour = "white"
+  ) +
+  scale_fill_manual(values = leaf_colours, labels = leaf_de, drop = TRUE) +
+  guides(fill = guide_legend(nrow = 2)) +
+  scale_x_continuous(labels = scales::percent, breaks = seq(0, 1, 0.25), expand = c(0, 0)) +
+  labs(x = NULL, y = NULL, fill = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.y = element_text(size = 7.5, colour = navy),
+    legend.text = element_text(colour = navy),
+    plot.margin = margin(2, 12, 2, 2)
+  )
+```
+
+[eu25games 2019, Wellen 2 und 3, nur Befragte mit bestandenem Aufmerksamkeitstest; ungewichtet. Insgesamt: `r scales::percent(pooled$share[pooled$leaf == "Attached: same party"], 1)` bekennend, `r scales::percent(pooled$share[pooled$leaf == "No attachment: vote"], 1)` implizit.]{style="font-size: 0.45em; color: #7F94A5;"}
+
+::: {.notes}
+Wie viele sind das? Hier für alle 25 Länder: Blautöne sind Menschen mit Parteibindung, Orangetöne Menschen ohne. Dunkelblau sind die Bekennenden, Dunkelrot die Impliziten – nur für diese beiden stehen die Anteile im Balken.
+
+Zwei Dinge. Erstens: Die Impliziten sind keine Randgruppe. Über alle Länder hinweg ist es etwa jeder Vierte bis Fünfte. Zweitens: Der Anteil schwankt stark zwischen Ländern.
+
+Das heißt: Wer nur die Bekennenden untersucht, ändert, über wen er eigentlich Aussagen macht – und zwar in jedem Land unterschiedlich stark. Das ist eine Messentscheidung, die meistens stillschweigend getroffen wird.
+:::
+
+------------------------------------------------------------------------
+
+## Der Vergleich: gleiche Partei, anderes Bekenntnis
+
+- Wir vergleichen bekennende und implizite Anhänger **derselben Partei im selben Land**
+- Ein hierarchisches (Mehrebenen-)Modell: 25 Länder, rund 400 Parteien – kleine Gruppen „leihen“ sich Information von großen, Unsicherheit wird ehrlich ausgewiesen
+- Ergebnis immer als Wahrscheinlichkeitsaussage – kein „signifikant ja/nein“
+
+::: {.notes}
+Der Kern des Designs: Wir vergleichen nicht einfach alle Bekennenden mit allen Impliziten. Denn dann würden wir auch Parteien miteinander vergleichen – und Anhänger mancher Parteien sind generell polarisierter.
+
+Stattdessen vergleichen wir *innerhalb* derselben Partei im selben Land: Wie stark ist die Polarisierung bei bekennenden SPD-Anhängern verglichen mit SPD-Wählern, die sagen, sie fühlen sich keiner Partei nahe? Und erst dann mitteln wir.
+
+Technisch ist das ein Mehrebenenmodell mit Ländern und Parteien. Der Vorteil: Wo es wenige Befragte gibt, wird die Unsicherheit größer – das Modell tut nicht so, als wüsste es mehr, als es weiß. Details im Anhang.
+:::
+
+------------------------------------------------------------------------
+
+## Messung 1 – Einstellung: das Gefühlsthermometer {.smaller}
+
+::: {.columns}
+::: {.column width="62%"}
+::: {.paper-fig}
+![](./images/eu25-thermo-ie.png)
+:::
+:::
+
+::: {.column width="38%"}
+- Originalfrage, irischer Fragebogen (Welle 3)
+- Skala 0–100 „Grad“: 50 neutral, darüber warm, darunter kalt
+- Ziel: **Parteien** (vertikal)
+- Polarisierung = Bewertung der **eigenen** minus Bewertung **fremder** Parteien
+:::
+:::
+
+::: {.notes}
+Jetzt zu den beiden Messungen. Die erste ist die Standardmessung der Forschung, das Gefühlsthermometer. Hier sehen Sie die Originalfrage aus dem irischen Fragebogen: Bewerten Sie jede Partei von 0 bis 100 Grad. Über 50 heißt warm, unter 50 kalt.
+
+Affektive Polarisierung ist dann einfach: Wie viel wärmer bewerte ich meine eigene Partei als die anderen? Das ist eine Einstellung, und sie richtet sich auf Parteien.
+:::
+
+------------------------------------------------------------------------
+
+## Messung 2 – Verhalten: Diktator- und Vertrauensspiel {.smaller}
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.paper-fig}
+![](./images/cj-example-profile.png)
+:::
+:::
+
+::: {.column width="50%"}
+- 10 Punkte: Wie viel gebe ich einer **anderen Person** ab? [@hahm2024divided]
+- Das Gegenüber ist ein ganz normaler Mitbürger (horizontal)
+- Parteizugehörigkeit ist **eines von sechs** zufällig gezogenen Merkmalen
+- Je 3 Runden Diktator- und Vertrauensspiel, 25 EU-Länder, 2019
+:::
+:::
+
+::: {.notes}
+Die zweite Messung ist Verhalten. Die Befragten spielen ökonomische Spiele: Sie bekommen zehn Punkte und entscheiden, wie viele sie einer anderen Person abgeben. Im Diktatorspiel ist das reine Großzügigkeit, im Vertrauensspiel steckt zusätzlich Vertrauen drin.
+
+Wichtig ist das Profil des Gegenübers: Alter, Geschlecht, Religion, Schicht, Nationalität und eben die Partei – alles zufällig kombiniert. Dadurch wissen wir, dass es wirklich die Partei ist, die den Unterschied macht, und nicht etwa die Religion. Und das Gegenüber ist kein Politiker, sondern ein Mitbürger.
+:::
+
+------------------------------------------------------------------------
+
+## Ergebnis: alle Länder zusammen {.smaller}
+
+::: {.columns}
+::: {.column width="38%"}
+::: {.placeholder .tall}
+**Platzhalter – (a) Polarisierung nach Typ und Messung**
+
+Posterior-Verteilungen, standardisiert (SD-Einheiten): Median, 95 %- und 99 %-Intervalle
+
+inkl. Pr(> 0) je Posterior
+
+Unter der x-Achse: 1 SD = … Punkte (Spiele) / … Grad (Thermometer)
+:::
+:::
+
+::: {.column width="31%"}
+::: {.placeholder .tall}
+**Platzhalter – (b) Unterschied bekennend − implizit**
+
+je Messung (ΔAP)
+
+inkl. Pr(> 0) je Posterior
+:::
+:::
+
+::: {.column width="31%"}
+::: {.placeholder .tall}
+**Platzhalter – (c) Unterschied der Unterschiede**
+
+ΔAP Thermometer − ΔAP Spiele
+
+inkl. Pr(> 0)
+:::
+:::
+:::
+
+::: {.notes}
+[PLATZHALTER – Ergebnisse folgen, sobald Notebook 3.2 durchgerechnet ist.]
+
+Links: Wie stark ist die affektive Polarisierung – getrennt nach Bekennenden und Impliziten, und getrennt nach Thermometer und Spielen. Damit beide vergleichbar sind, in Standardabweichungen.
+
+Mitte: Wie groß ist der Unterschied zwischen Bekennenden und Impliziten, jeweils innerhalb einer Messung?
+
+Rechts: Ist dieser Unterschied beim Thermometer größer als bei den Spielen? Bei jeder Verteilung steht die Wahrscheinlichkeit, dass der Wert größer als null ist.
+
+[vorläufig, Erwartung – kein Befund: Bekennende zeigen in beiden Messungen mehr Polarisierung; der Unterschied ist beim Verhalten aber deutlich kleiner als bei der Einstellung.]
+:::
+
+------------------------------------------------------------------------
+
+## Ergebnis nach Ländern (1/2) {.smaller}
+
+::: {.placeholder .tall}
+**Platzhalter – Länder 1–13**
+
+Je Land: AP nach Typ und Messung, ΔAP je Messung und Unterschied der Unterschiede
+
+inkl. Pr(> 0) je Posterior
+
+Leitfrage: Gilt das Muster in allen 25 Ländern?
+:::
+
+::: {.notes}
+[PLATZHALTER]
+
+Dieselben Größen wie eben, jetzt für jedes Land einzeln. Weniger Befragte pro Land bedeuten breitere Intervalle – das ist gewollt, das Modell zeigt ehrlich, wo wir wenig wissen, etwa in Ländern, in denen fast alle sich bekennen.
+
+[vorläufig: Gilt das Muster im Großen und Ganzen überall? – erst nach den Ergebnissen formulieren.]
+:::
+
+------------------------------------------------------------------------
+
+## Ergebnis nach Ländern (2/2) {.smaller}
+
+::: {.placeholder .tall}
+**Platzhalter – Länder 14–25**
+
+Je Land: AP nach Typ und Messung, ΔAP je Messung und Unterschied der Unterschiede
+
+inkl. Pr(> 0) je Posterior
+:::
+
+::: {.notes}
+[PLATZHALTER – siehe vorherige Folie.]
+:::
+
+# Was folgt daraus?
+
+## Was folgt daraus? {.smaller}
+
+- **Messen heißt entscheiden:** Wer zählt als Anhänger, was zählt als Polarisierung – beides sind begriffliche Entscheidungen
+- [Platzhalter: Die verbreitetsten Messungen (Thermometer, Sympathie-Skalen) könnten Ausmaß und Anstieg affektiver Polarisierung **überzeichnen**]{style="color: #DE7E50;"}
+- **Mehr ist nicht automatisch schlechter:** Der Zusammenhang zwischen affektiver Polarisierung und Unterstützung der Demokratie ist nicht linear [@janssen2024breaking]
+
+::: {.notes}
+*(Block 4 und 5, ca. 1:30)*
+
+Was folgt daraus?
+
+Erstens: Messen heißt entscheiden. Wen ich als Parteianhänger zähle und was ich als Polarisierung messe, sind keine technischen Details, sondern begriffliche Entscheidungen.
+
+Zweitens [vorläufig, abhängig von den Ergebnissen]: Die Messungen, auf denen fast die ganze Forschung beruht, könnten das Ausmaß affektiver Polarisierung überzeichnen – wenn Menschen in ihren Einstellungen härter urteilen, als sie dann handeln.
+
+Drittens: Die frühe Erzählung „affektive Polarisierung ist schlecht für die Demokratie“ wird inzwischen kritischer gesehen. Neuere Arbeiten finden eher einen umgekehrt U-förmigen Zusammenhang: Etwas Emotion gehört zur Demokratie dazu. Erinnern Sie sich an die Merkel-Jahre – da war die Klage eher, Politik sei zu wenig leidenschaftlich, zu alternativlos.
+:::
+
+------------------------------------------------------------------------
+
+## Fazit
+
+- Es gibt nicht **die eine** Polarisierung
+- Es gibt eine klare affektive Kluft zwischen eigener und fremder Partei
+- Wie groß sie ist und wie sie sich entwickelt, hängt an Mess- und Begriffsentscheidungen
+- Alarmistische Erzählungen helfen nicht – und stehen auf dünner empirischer Grundlage
+
+::: {.notes}
+Zum Schluss vier Sätze.
+
+Es gibt nicht *die* Polarisierung – es gibt eine Familie von Phänomenen.
+
+Es gibt eine klare affektive Kluft: Menschen behandeln Anhänger der eigenen Partei besser als die anderer Parteien.
+
+Aber wie groß diese Kluft ist und ob sie wächst, hängt davon ab, wie wir sie messen.
+
+Und deshalb: Alarmistische Erzählungen helfen nicht weiter – und sie stehen auf dünnerem Boden, als ihr Ton vermuten lässt. Vielen Dank.
+:::
+
+# Vielen Dank für Ihre Aufmerksamkeit!
+
+Ich freue mich über Fragen, Kritik und Anregungen ❤
+
+<a href="https://github.com/dertristan" target="_blank" style="text-decoration: none; margin-left: 10px;"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"> <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/> </svg> </a> <a href="mailto:tristan.muno@uni-mannheim.de" style="text-decoration: none; margin-left: 5px;"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16"> <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/> </svg> </a>
+
+------------------------------------------------------------------------
+
+## Literatur {.scrollable}
+
+::: {#refs}
+:::
+
+# Anhang
+
+## Frageformulierungen (eu25games, Irland) {.smaller}
+
+**Parteibindung** (Wellen 2 und 3, Q52)
+
+- *„Do you consider yourself to be close to any particular political party? If so, which party do you feel close to?“*
+- Antwortoptionen: die Parteien des Landes, „Other“ – und *„No, I do not feel close to any political party“*
+
+**Wahl** (Europawahl 2019)
+
+- Welle 2: *„Which party did you give your 1st preference vote to in this election?“* / *„Which party will you give …?“* / hypothetisch: *„Just assuming you were going to vote …“*
+- Welle 3: *„Which party did you give your 1st preference vote to in this election?“* / Nichtwähler: *„Just assuming you had voted in the election, which party would you have voted for?“*
+
+**Implizit** = „No, I do not feel close to any political party“ **und** eine Partei bei der Wahlfrage.
+
+::: {.notes}
+Wortlaut aus den irischen Fragebögen der Wellen 2 und 3 (eu25games-Repository). Die Wahlfrage bezieht sich auf die Europawahl im Mai 2019; in Welle 2 war sie überwiegend eine Absicht oder hypothetisch.
+:::
+
+------------------------------------------------------------------------
+
+## Stichprobe {.smaller}
+
+```{r}
+#| label: sample-sizes
+#| cache: true
+
+games <- readr::read_rds(here("data", "03_final", "eu25_games.rds"))
+thermo <- readr::read_rds(here("data", "03_final", "eu25_thermo.rds"))
+
+n_resp <- n_distinct(c(games$meta_responseid, thermo$meta_responseid))
+fmt <- function(x) format(x, big.mark = ".")
+
+data.frame(
+  Datensatz = c(
+    "Analysestichprobe",
+    "Spiele (Befragte × Runde)",
+    "Thermometer (Befragte × bewertete Partei)"
+  ),
+  Befragte = fmt(c(n_resp, n_distinct(games$meta_responseid), n_distinct(thermo$meta_responseid))),
+  Zeilen = c("–", fmt(nrow(games)), fmt(nrow(thermo)))
+) |>
+  knitr::kable(align = c("l", "r", "r"))
+```
+
+- **Analysestichprobe:** Befragte der Wellen 2 und 3, die den Aufmerksamkeitstest bestanden und den Fragebogen vollständig ausgefüllt haben
+- Eine Zeile je Person und Welle – wer an beiden Wellen teilnahm, zählt zweimal (im Modell: eigene Personenebene)
+
+::: {.notes}
+Die strengere Stichprobe: nur Befragte, die den Aufmerksamkeitstest bestanden und den Fragebogen abgeschlossen haben, aus den Wellen 2 und 3, in denen Spiele und Thermometer erhoben wurden. Jede Person spielt sechs Runden und bewertet sechs Parteien.
+:::
+
+------------------------------------------------------------------------
+
+## Kausal oder beschreibend? {.smaller}
+
+```{r}
+#| label: schematic-dags
+#| fig-width: 10
+#| fig-height: 3.6
+#| fig-align: center
+#| out-width: "92%"
+
+library(ggdag)
+
+dag_lab <- c(
+  Y = "Ergebnis", T = "Typ", R = "eigen/fremd", P = "Partei", C = "Land",
+  W = "Welle", U = "Unbeobachtet", Z = "Profilmerkmale", G = "Spiel", K = "Runde"
+)
+
+dag_games <- dagify(
+  Y ~ T + R + P + C + W + U + Z + G + K,
+  T ~ P + U,
+  R ~ T,
+  P ~ C,
+  exposure = "T",
+  outcome = "Y",
+  latent = "U",
+  coords = list(
+    x = c(C = 0, P = 1, T = 2, R = 2, U = 3, Y = 3, W = 3, Z = 4, G = 4, K = 4),
+    y = c(C = 2, P = 1, T = 2, R = 0, U = 3, Y = 1, W = -1, Z = 2, G = 1, K = 0)
+  ),
+  labels = dag_lab[c("Y", "T", "R", "P", "C", "W", "U", "Z", "G", "K")]
+)
+
+dag_thermo <- dagify(
+  Y ~ T + R + P + C + W + U,
+  T ~ P + U,
+  R ~ P,
+  P ~ C,
+  exposure = "T",
+  outcome = "Y",
+  latent = "U",
+  coords = list(
+    x = c(C = 0, P = 1, T = 2, R = 2, U = 3, Y = 3, W = 3),
+    y = c(C = 2, P = 1, T = 2, R = 0, U = 3, Y = 1, W = -1)
+  ),
+  labels = dag_lab[c("Y", "T", "R", "P", "C", "W", "U")]
+)
+
+draw_dag <- function(dag, title) {
+  td <- tidy_dagitty(dag)
+  ggplot(td, aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_dag_edges(
+      edge_colour = grey2,
+      start_cap = ggraph::circle(7, "mm"),
+      end_cap = ggraph::circle(7, "mm")
+    ) +
+    geom_label(
+      data = dplyr::distinct(as.data.frame(td$data), name, .keep_all = TRUE),
+      aes(label = label, colour = name %in% c("T", "Y")),
+      size = 3,
+      label.size = 0.4
+    ) +
+    scale_colour_manual(values = c(`TRUE` = accent, `FALSE` = navy)) +
+    scale_x_continuous(expand = expansion(add = 0.6)) +
+    labs(title = title) +
+    theme_dag() +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(colour = navy, face = "bold", hjust = 0.5, size = 11)
+    )
+}
+
+draw_dag(dag_games, "Spiele (Punkte)") | draw_dag(dag_thermo, "Thermometer (Grad)")
+```
+
+- Unbeobachtete Eigenschaften (U: Interesse, Stärke der Präferenz, soziale Erwünschtheit …) wirken auf Bekenntnis **und** Verhalten
+- Daher: ein **beschreibender** Vergleich innerhalb von Parteien, kein kausaler Effekt des Bekenntnisses
+
+::: {.notes}
+Die Kausaldiagramme: In den Spielen ist das Gegenüber zufällig gezogen, der Unterschied eigen/fremd ist also kausal identifiziert, sobald man den Typ festhält. Beim Unterschied zwischen den Typen gilt das nicht: Unbeobachtete Eigenschaften können beides beeinflussen – ob jemand sich bekennt, und wie er andere behandelt. Darum spreche ich von einem beschreibenden Vergleich innerhalb von Parteien.
+:::
+
+------------------------------------------------------------------------
+
+## Modell {.smaller}
+
+Für jede Beobachtung $i$ (eine Runde bzw. eine Bewertung) von Person $j$ mit Partei $p$ in Land $c$:
+
+$$
+\eta_i = \alpha + \beta_R R_i + \beta_T T_i + \beta_{RT} R_i T_i + \boldsymbol{\gamma}^\top \mathbf{x}_i + \mathbf{z}_i^\top \left(\mathbf{u}_{c} + \mathbf{u}_{cp}\right) + v_{j}
+$$
+
+- $R$: Gegenüber/bewertete Partei eigen (1) oder fremd (0); $T$: bekennend (1) oder implizit (0)
+- $\mathbf{x}$: Kontrollen – Spiel, Runde, Welle, gezeigte Profilmerkmale (Spiele); Welle (Thermometer)
+- $\mathbf{z} = (1, R, T, RT)$: alle vier Terme variieren nach **Land** und nach **Partei im Land** ($\mathbf{u}_c, \mathbf{u}_{cp}$ multivariat normal)
+- $v_j$: Personeneffekt über Runden und Wellen hinweg
+- **Hauptmodell:** Beta-Binomial, $Y_i \sim \text{BetaBinomial}(n, \text{logit}^{-1}(\eta_i), \phi)$ mit $n = 10$ Punkten bzw. $100$ Grad
+- **Robustheit:** Gauß-Modell auf dem z-standardisierten Ergebnis
+- brms / Stan (cmdstanr), 4 Ketten à 2.000 Iterationen
+
+::: {.notes}
+Ein Modell für beide Messungen, mit derselben Struktur. Die entscheidende Größe ist die Interaktion von eigen/fremd und Typ, und zwar mit Variation nach Land und nach Partei – so wird der Vergleich innerhalb jeder Partei geschätzt. Das Beta-Binomial passt zu begrenzten, ganzzahligen Ergebnissen mit Häufungen an den Rändern; das Gauß-Modell dient als Robustheitscheck.
+:::
+
+------------------------------------------------------------------------
+
+## Priors {.smaller}
+
+- Alle Koeffizienten um **null** zentriert: a priori kein Unterschied
+- Fokale Terme (eigen/fremd, Typ, Interaktion): Normal(0, 1) – große Unterschiede bleiben möglich
+- Kontrollen: Normal(0, 0,25); Streuungen der variierenden Effekte: Exponential(5); Korrelationen: LKJ(2)
+- Präzision $\phi$: Gamma(4, 0,4) – schließt eine U-förmige Verteilung a priori aus, nicht aber durch die Daten
+- Geprüft per **Prior Predictive Check**: Die implizierten Ergebnisse verteilen sich über die ganze Skala, statt sich an den Rändern zu stauen
+
+::: {.notes}
+Eine erste, weitere Prior-Spezifikation hat zu U-förmigen vorhergesagten Verteilungen geführt – zu viel Masse bei 0 und 10. Die jetzige ist mit einer Simulation durch das Design des Modells selbst gewählt. Die fokalen Terme bleiben bewusst weit, damit der Prior den interessierenden Unterschied nicht gegen null zieht.
+:::
+
+------------------------------------------------------------------------
+
+## Schätzgröße {.smaller}
+
+Für Typ $t \in \{\text{bekennend}, \text{implizit}\}$:
+
+$$
+AP_t = E(Y \mid \text{eigen}, t) - E(Y \mid \text{fremd}, t), \qquad \Delta AP = AP_{\text{bekennend}} - AP_{\text{implizit}}
+$$
+
+$$
+\Delta AP^{SD}_{\text{Thermometer}} - \Delta AP^{SD}_{\text{Spiele}}, \quad \text{berichtet mit } \Pr(> 0)
+$$
+
+- **Logik wie der API** [@reiljan2020fear]: eigene Partei minus die anderen – hier aber modellbasiert, als Kontrast von Randmittelwerten statt als Rechnung je Befragtem
+- **g-Computation:** Typ und eigen/fremd kontrafaktisch für alle Beobachtungen setzen, vorhersagen, mitteln – Ziehung für Ziehung
+- **Gemeinsamer Träger:** nur Parteien mit bekennenden **und** impliziten Anhängern
+- **Gewichte:** jede Person zählt einmal, gleiche Gewichte in allen vier Zellen
+- **Standardisierung:** geteilt durch die SD des Ergebnisses – macht Punkte und Grad vergleichbar
+
+::: {.notes}
+Die Schätzgrößen sind Differenzen von Mittelwerten, nicht einzelne Koeffizienten. Für den Vergleich der beiden Messungen wird jeweils durch die Standardabweichung geteilt. Die Ziehungen der beiden unabhängig geschätzten Modelle werden paarweise kombiniert.
+:::
+
+------------------------------------------------------------------------
+
+## Grenzen {.smaller}
+
+- **Beschreibend, nicht kausal:** Unbeobachtete Merkmale können Bekenntnis und Verhalten zugleich treiben; Personenmerkmale als Kontrollen fehlen noch
+- **Dünne Zellen:** Implizite trafen nur zufällig auf Gegenüber der eigenen Partei (etwa jede zehnte Runde) – ihre Schätzungen stützen sich stärker auf das Pooling
+- **Etwas andere „Fremde“:** Bekennende sahen fremde Parteien aus den übrigen Parteien, Implizite aus allen Hauptparteien
+- **Europawahl:** Die Wahlfrage betrifft die Europawahl 2019, in Welle 2 meist als Absicht oder hypothetisch – die Wellen klassifizieren leicht unterschiedlich
+- **Reihenfolge der Fragen:** noch nicht abschließend geprüft
+- **Momentaufnahme:** 2019, keine Zeitreihe
+
+::: {.notes}
+Die wichtigste Grenze zuerst: Das ist ein beschreibender Vergleich. Wer sich zu einer Partei bekennt, unterscheidet sich vermutlich auch in anderen Dingen. Die übrigen Punkte betreffen das Design der Spiele und die Wahlfrage.
+:::
