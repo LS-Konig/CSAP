@@ -77,9 +77,9 @@ sapply(p_required, require, character.only = TRUE)
 rm(p_required, p_to_install, packages)
 
 # Run settings
-run_mode <- "test"
+run_mode <- "full"
 use_subsample <- FALSE
-cross_family <- FALSE
+cross_family <- TRUE
 test_per_cell <- 250
 subsample_per_cell <- 2000
 chunk_size <- 2000
