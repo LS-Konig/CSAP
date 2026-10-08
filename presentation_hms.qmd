@@ -670,12 +670,45 @@ summ <- draws_all |>
     .by = c(model, measure, group, quantity)
   )
 
+# Main model: Gaussian (cell means, see "Warum das Gauß-Modell?"); BB = robustness
+main_model <- "gauss"
+
 # Inline numbers for the notes: "0,66 [0,63; 0,69]"
-est <- function(measure, quantity, model = "bb", group = "pooled", d = 2) {
+est <- function(measure, quantity, model = main_model, group = "pooled", d = 2) {
   r <- summ[summ$model == model & summ$measure == measure &
     summ$group == group & summ$quantity == quantity, ]
   paste0(fmt(r$median, d), " [", fmt(r$lower_95, d), "; ", fmt(r$upper_95, d), "]")
 }
+med <- function(measure, quantity, model = main_model, group = "pooled") {
+  summ$median[summ$model == model & summ$measure == measure &
+    summ$group == group & summ$quantity == quantity]
+}
+
+# Sanity check against the pooled medians printed by notebook 3.3. Display
+# values never come from here; this only stops the render if the file changed.
+ref_33 <- tribble(
+  ~model,  ~measure, ~quantity,          ~ref,
+  "gauss", "thermo", "delta_ap",         19.07,
+  "gauss", "thermo", "delta_ap_sd",      0.61,
+  "gauss", "thermo", "ap_explicit",      55.75,
+  "gauss", "thermo", "ap_vote_anchored", 36.66,
+  "gauss", "games",  "delta_ap",         0.37,
+  "gauss", "games",  "delta_ap_sd",      0.15,
+  "gauss", "diff",   "diff",             0.46,
+  "bb",    "thermo", "delta_ap",         20.74,
+  "bb",    "thermo", "delta_ap_sd",      0.66,
+  "bb",    "thermo", "ap_explicit",      55.26,
+  "bb",    "thermo", "ap_vote_anchored", 34.52,
+  "bb",    "games",  "delta_ap",         0.37,
+  "bb",    "games",  "delta_ap_sd",      0.15,
+  "bb",    "diff",   "diff",             0.51
+)
+chk <- inner_join(ref_33, filter(summ, group == "pooled"), by = c("model", "measure", "quantity"))
+stopifnot(
+  nrow(chk) == nrow(ref_33),
+  all(abs(chk$median - chk$ref) < 0.011 * pmax(1, abs(chk$ref))),
+  all(filter(summ, group == "pooled", quantity %in% c("delta_ap", "diff"))$p == 1)
+)
 
 mlab <- c(thermo = "Thermometer", games = "Spiele")
 col_meas <- c(Thermometer = navy, Spiele = accent)
@@ -816,7 +849,7 @@ country_figure <- function(s_all, lands) {
     )
 }
 
-cty <- country_data("bb")
+cty <- country_data(main_model)
 lands_ord <- rev(levels(cty$land))
 ```
 
@@ -827,13 +860,13 @@ lands_ord <- rev(levels(cty$land))
 #| fig-align: center
 #| out-width: "100%"
 
-pooled_figure("bb")
+pooled_figure(main_model)
 ```
 
 ::: {.notes}
 *(Ergebnisse, ca. 1:30)*
 
-Alle Länder zusammen, Beta-Binomial-Modell. Alles in Standardabweichungen, damit Punkte und Grad vergleichbar werden.
+Alle Länder zusammen, Gauß-Modell (Begründung im Anhang; das Beta-Binomial-Modell kommt zum selben Ergebnis). Alles in Standardabweichungen, damit Punkte und Grad vergleichbar werden.
 
 Links: Polarisierung, also eigene minus fremde Partei, getrennt nach Typ und Messung. Beim Thermometer: bekennend `r est("thermo", "ap_explicit_sd")`, implizit `r est("thermo", "ap_vote_anchored_sd")` Standardabweichungen. Bei den Spielen: bekennend `r est("games", "ap_explicit_sd")`, implizit `r est("games", "ap_vote_anchored_sd")`. In Rohwerten: beim Thermometer `r est("thermo", "ap_explicit", d = 1)` gegenüber `r est("thermo", "ap_vote_anchored", d = 1)` Grad, bei den Spielen `r est("games", "ap_explicit")` gegenüber `r est("games", "ap_vote_anchored")` Punkte von zehn.
 
@@ -1087,12 +1120,12 @@ $$
 - $\mathbf{x}$: Kontrollen – Spiel, Runde, Welle, gezeigte Profilmerkmale (Spiele); Welle (Thermometer)
 - $\mathbf{z} = (1, R, T, RT)$: alle vier Terme variieren nach **Land** und nach **Partei im Land** ($\mathbf{u}_c, \mathbf{u}_{cp}$ multivariat normal)
 - $v_j$: Personeneffekt über Runden und Wellen hinweg
-- **Hauptmodell:** Beta-Binomial, $Y_i \sim \text{BetaBinomial}(n, \text{logit}^{-1}(\eta_i), \phi)$ mit $n = 10$ Punkten bzw. $100$ Grad
-- **Robustheit:** Gauß-Modell auf dem z-standardisierten Ergebnis
+- **Hauptmodell:** Gauß, $Y^{z}_i \sim \text{Normal}(\eta_i, \sigma)$ auf dem z-standardisierten Ergebnis (Identitäts-Link)
+- **Robustheit:** Beta-Binomial, $Y_i \sim \text{BetaBinomial}(n, \text{logit}^{-1}(\eta_i), \phi)$ mit $n = 10$ Punkten bzw. $100$ Grad
 - brms / Stan (cmdstanr), 4 Ketten à 2.000 Iterationen
 
 ::: {.notes}
-Ein Modell für beide Messungen, mit derselben Struktur. Die entscheidende Größe ist die Interaktion von eigen/fremd und Typ, und zwar mit Variation nach Land und nach Partei – so wird der Vergleich innerhalb jeder Partei geschätzt. Das Beta-Binomial passt zu begrenzten, ganzzahligen Ergebnissen mit Häufungen an den Rändern; das Gauß-Modell dient als Robustheitscheck.
+Ein Modell für beide Messungen, mit derselben Struktur. Die entscheidende Größe ist die Interaktion von eigen/fremd und Typ, und zwar mit Variation nach Land und nach Partei – so wird der Vergleich innerhalb jeder Partei geschätzt. Hauptmodell ist das Gauß-Modell, weil die Schätzgröße aus Zellmittelwerten besteht (nächste Folien); das Beta-Binomial-Modell ist der Robustheitscheck.
 :::
 
 ------------------------------------------------------------------------
@@ -1101,8 +1134,9 @@ Ein Modell für beide Messungen, mit derselben Struktur. Die entscheidende Grö�
 
 - Alle Koeffizienten um **null** zentriert: a priori kein Unterschied
 - Fokale Terme (eigen/fremd, Typ, Interaktion): Normal(0, 1) – große Unterschiede bleiben möglich
-- Kontrollen: Normal(0, 0,25); Streuungen der variierenden Effekte: Exponential(5); Korrelationen: LKJ(2)
-- Präzision $\phi$: Gamma(4, 0,4) – schließt eine U-förmige Verteilung a priori aus, nicht aber durch die Daten
+- Kontrollen: Normal(0, 0,2) (Gauß) bzw. Normal(0, 0,25) (Beta-Binomial); Streuungen der variierenden Effekte: Exponential(5); Korrelationen: LKJ(2)
+- Gauß: Residual-SD $\sigma$: Exponential(2)
+- Beta-Binomial: Präzision $\phi$: Gamma(4, 0,4) – schließt eine U-förmige Verteilung a priori aus, nicht aber durch die Daten
 - Geprüft per **Prior Predictive Check**: Die implizierten Ergebnisse verteilen sich über die ganze Skala, statt sich an den Rändern zu stauen
 
 ::: {.notes}
@@ -1135,20 +1169,66 @@ Die Schätzgrößen sind Differenzen von Mittelwerten, nicht einzelne Koeffizien
 
 ------------------------------------------------------------------------
 
-## Robustheit: Gauß-Modell {.smaller}
+## Warum das Gauß-Modell? {.smaller}
 
 ```{r}
-#| label: results-gauss
-#| fig-width: 10
-#| fig-height: 4.9
-#| fig-align: center
-#| out-width: "100%"
+#| label: raw-cells
+#| include: false
 
-pooled_figure("gauss")
+# Raw weighted cell means of the thermometer, on the rows and weights of the
+# estimand (filter, respondent weights and common support as in notebook 3.3)
+raw_thermo <- readr::read_rds(here("data", "03_final", "eu25_thermo.rds")) |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_thermo_relationship %in% c("co", "out")
+  ) |>
+  mutate(
+    der_anchor = paste(country, anchor, sep = ": "),
+    der_w = 1 / n(),
+    .by = meta_responseid
+  )
+support <- raw_thermo |>
+  distinct(der_anchor, meta_responseid, type) |>
+  count(der_anchor, type) |>
+  tidyr::pivot_wider(names_from = type, values_from = n, values_fill = 0) |>
+  filter(explicit >= 1, vote_anchored >= 1)
+raw_cells <- raw_thermo |>
+  filter(der_anchor %in% support$der_anchor) |>
+  summarise(m = weighted.mean(q_thermo, der_w), .by = c(type, der_thermo_relationship)) |>
+  tidyr::pivot_wider(names_from = der_thermo_relationship, values_from = m) |>
+  mutate(ap = co - out)
+raw_ap <- setNames(raw_cells$ap, raw_cells$type)
+raw_dap <- raw_ap[["explicit"]] - raw_ap[["vote_anchored"]]
 ```
 
+- **Die Schätzgröße besteht aus Zellmittelwerten:** AP und ΔAP sind Differenzen der vier Mittelwerte Typ × eigen/fremd
+- Das Gauß-Modell **reproduziert diese vier Zellmittelwerte** (Posterior Predictive Check der Zellmittel, beide Messungen)
+- Thermometer: g-computiertes ΔAP `r fmt(med("thermo", "delta_ap"), 1)` Grad, nahe am rohen Kontrast der Zellmittel `r fmt(raw_ap[["explicit"]], 1)` − `r fmt(raw_ap[["vote_anchored"]], 1)` = `r fmt(raw_dap, 1)` Grad (gemeinsamer Träger)
+- Ein Gauß-Modell mit Identitäts-Link schätzt **bedingte Mittelwerte robust**, auch wenn die Verteilungsform falsch ist – das Beta-Binomial-Modell hat diese Eigenschaft nicht
+- Das heißt **nicht**, dass das Gauß-Modell die Daten besser beschreibt: An der Verteilungsform scheitert es (siehe Grenzen)
+
 ::: {.notes}
-Dieselbe Abbildung aus den Gauß-Modellen auf dem standardisierten Ergebnis. ΔAP Thermometer `r est("thermo", "delta_ap_sd", model = "gauss")`, Spiele `r est("games", "delta_ap_sd", model = "gauss")`, Unterschied `r est("diff", "diff", model = "gauss")` SD.
+Die Wahl folgt aus der Schätzgröße, nicht aus der Anpassung. Wir interessieren uns für Differenzen von Mittelwerten. Ein lineares Modell trifft Mittelwerte auch dann, wenn die Verteilung um sie herum falsch beschrieben ist. Beim Beta-Binomial-Modell hängt der vorhergesagte Mittelwert dagegen an der richtig spezifizierten Streuung: Ist sie falsch, verschieben sich die Mittelwerte – und damit AP und ΔAP. Die rohen Zellmittel sind hier auf denselben Zeilen und mit denselben Gewichten berechnet wie die Schätzgröße; das g-computierte ΔAP mittelt anders über die Parteien (das Modell setzt Typ und eigen/fremd für alle Zeilen kontrafaktisch) und liegt deshalb nicht exakt, aber nahe am rohen Kontrast.
+:::
+
+------------------------------------------------------------------------
+
+## Robustheit: Beta-Binomial-Modell {.smaller}
+
+```{r}
+#| label: results-bb
+#| fig-width: 10
+#| fig-height: 4.2
+#| fig-align: center
+#| out-width: "92%"
+
+pooled_figure("bb")
+```
+
+Beide Modellfamilien kommen zum selben Schluss: ΔAP Thermometer `r fmt(med("thermo", "delta_ap"), 1)` (Gauß) bzw. `r fmt(med("thermo", "delta_ap", "bb"), 1)` Grad (BB), Spiele `r fmt(med("games", "delta_ap"))` bzw. `r fmt(med("games", "delta_ap", "bb"))` Punkte, Unterschied der Unterschiede `r fmt(med("diff", "diff"))` bzw. `r fmt(med("diff", "diff", "bb"))` SD – jeweils mit Pr(>0) > 0,999.
+
+::: {.notes}
+Dieselbe Abbildung aus den Beta-Binomial-Modellen. ΔAP Thermometer `r est("thermo", "delta_ap_sd", model = "bb")`, Spiele `r est("games", "delta_ap_sd", model = "bb")`, Unterschied `r est("diff", "diff", model = "bb")` SD. Das Beta-Binomial liegt beim Thermometer etwas höher; das ist keine „vorsichtigere“ Schätzung, sondern eine Folge seiner Fehlspezifikation (nächste Folie), bei gleich engen Intervallen.
 :::
 
 ------------------------------------------------------------------------
@@ -1178,7 +1258,27 @@ post$diagnostics |>
 
 ------------------------------------------------------------------------
 
-## Grenzen {.smaller}
+## Grenzen der Modelle {.smaller}
+
+**Gauß (Hauptmodell)**
+
+- Legt Vorhersagemasse außerhalb der Skala; Parteimittel können 0–100 überschreiten
+- Kann die Häufungen nicht erzeugen: Thermometer ~20–23 % Nullen in den Fremd-Zellen, 27 % Hunderter bei Bekennenden/eigen; Spiele: Häufung bei 0 (fremd) und bei 5 (überall)
+- Eine Residual-SD für alle Zellen – Intervalle je Zelle womöglich schlecht kalibriert
+
+**Beta-Binomial (Robustheit)**
+
+- Thermometer: gemeinsames $\phi \approx 1{,}94$ → U-förmig; zu wenige Nullen in den Fremd-Zellen (0,15 statt 0,23; 0,14 statt 0,20), zu viele Hunderter in den Eigen-Zellen
+- Unterschätzt alle vier Zellmittel um 3–4,5 Grad, bei Impliziten/eigen stärker (~4,5) als fremd (~2,7) → implizite AP ~2 Grad zu niedrig, ΔAP überhöht
+- Spiele: $\phi \approx 7{,}7$ → ein Buckel, verfehlt die Häufungen bei 0 und 5; ΔAP trotzdem wie im Gauß-Modell
+
+::: {.notes}
+Werte aus den Posterior Predictive Checks in Notebook 3.2. Beide Modelle haben Schwächen an der Verteilungsform. Für die Schätzgröße ist das beim Gauß-Modell harmlos, weil es die Zellmittel trotzdem trifft; beim Beta-Binomial-Modell verschiebt die falsche Streuung die Mittelwerte selbst.
+:::
+
+------------------------------------------------------------------------
+
+## Grenzen des Designs {.smaller}
 
 - **Beschreibend, nicht kausal:** Unbeobachtete Merkmale können Bekenntnis und Verhalten zugleich treiben; Personenmerkmale als Kontrollen fehlen noch
 - **Dünne Zellen:** Implizite trafen nur zufällig auf Gegenüber der eigenen Partei (etwa jede zehnte Runde) – ihre Schätzungen stützen sich stärker auf das Pooling
@@ -1186,6 +1286,8 @@ post$diagnostics |>
 - **Europawahl:** Die Wahlfrage betrifft die Europawahl 2019, in Welle 2 meist als Absicht oder hypothetisch – die Wellen klassifizieren leicht unterschiedlich
 - **Reihenfolge der Fragen:** noch nicht abschließend geprüft
 - **Momentaufnahme:** 2019, keine Zeitreihe
+
+**Nächster Schritt:** eine prädiktive Diagnose je Zelle Typ × eigen/fremd (LOO, Kalibrierung) ist in Vorbereitung – nachrangig gegenüber den Prüfungen der Schätzgröße
 
 ::: {.notes}
 Die wichtigste Grenze zuerst: Das ist ein beschreibender Vergleich. Wer sich zu einer Partei bekennt, unterscheidet sich vermutlich auch in anderen Dingen. Die übrigen Punkte betreffen das Design der Spiele und die Wahlfrage.
