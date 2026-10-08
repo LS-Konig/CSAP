@@ -638,88 +638,250 @@ Wichtig ist das Profil des Gegenübers: Alter, Geschlecht, Religion, Schicht, Na
 
 ## Ergebnis: alle Länder zusammen {.smaller}
 
-::: {.columns}
-::: {.column width="38%"}
-::: {.placeholder .tall}
-**Platzhalter – (a) Polarisierung nach Typ und Messung**
+```{r}
+#| label: results-load
+#| include: false
 
-Posterior-Verteilungen, standardisiert (SD-Einheiten): Median, 95 %- und 99 %-Intervalle
+library(ggdist)
 
-inkl. Pr(> 0) je Posterior
+post <- readr::read_rds(here("data", "05_results", "eu25_ap_post.rds"))
 
-Unter der x-Achse: 1 SD = … Punkte (Spiele) / … Grad (Thermometer)
-:::
-:::
+# Decimal comma
+fmt <- function(x, d = 2) formatC(x, digits = d, format = "f", decimal.mark = ",")
+fmt_p <- function(p) {
+  ifelse(p >= 0.999, "Pr(>0) > 0,999", paste0("Pr(>0) = ", fmt(p, 3)))
+}
 
-::: {.column width="31%"}
-::: {.placeholder .tall}
-**Platzhalter – (b) Unterschied bekennend − implizit**
+# Long draws: AP and Delta AP per measure, plus the cross-measure difference
+draws_all <- bind_rows(
+  post$draws,
+  post$cross |>
+    transmute(model, measure = "diff", group, .draw = i, quantity = "diff", value = diff)
+)
 
-je Messung (ΔAP)
+summ <- draws_all |>
+  summarise(
+    median = median(value),
+    lower_95 = quantile(value, 0.025),
+    upper_95 = quantile(value, 0.975),
+    lower_99 = quantile(value, 0.005),
+    upper_99 = quantile(value, 0.995),
+    p = mean(value > 0),
+    .by = c(model, measure, group, quantity)
+  )
 
-inkl. Pr(> 0) je Posterior
-:::
-:::
+# Inline numbers for the notes: "0,66 [0,63; 0,69]"
+est <- function(measure, quantity, model = "bb", group = "pooled", d = 2) {
+  r <- summ[summ$model == model & summ$measure == measure &
+    summ$group == group & summ$quantity == quantity, ]
+  paste0(fmt(r$median, d), " [", fmt(r$lower_95, d), "; ", fmt(r$upper_95, d), "]")
+}
 
-::: {.column width="31%"}
-::: {.placeholder .tall}
-**Platzhalter – (c) Unterschied der Unterschiede**
+mlab <- c(thermo = "Thermometer", games = "Spiele")
+col_meas <- c(Thermometer = navy, Spiele = accent)
 
-ΔAP Thermometer − ΔAP Spiele
+# German country names: `laender`, defined in the composition chunk
 
-inkl. Pr(> 0)
-:::
-:::
-:::
+theme_res <- function() {
+  theme_minimal(base_size = 11) +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.grid.major.y = element_blank(),
+      axis.text = element_text(colour = navy),
+      axis.title.x = element_text(colour = navy, size = 9),
+      plot.title = element_text(colour = navy, face = "bold", size = 11),
+      plot.caption = element_text(colour = grey2, size = 8, hjust = 0),
+      legend.position = "none"
+    )
+}
+
+# One panel: half-eye posteriors with median, 95% and 99% intervals and Pr(>0)
+halfeye_panel <- function(d, s, title, xlab, caption = NULL) {
+  pad <- diff(range(c(0, d$value))) * 0.04
+  ggplot(d, aes(x = value, y = row)) +
+    geom_vline(xintercept = 0, colour = grey1) +
+    stat_halfeye(
+      aes(fill = fill),
+      .width = c(0.95, 0.99),
+      point_interval = "median_qi",
+      slab_alpha = 0.55,
+      interval_colour = navy,
+      point_colour = navy,
+      point_size = 1.6,
+      normalize = "groups",
+      height = 0.8
+    ) +
+    geom_text(
+      data = s,
+      aes(x = upper_99 + pad, y = row, label = fmt_p(p)),
+      hjust = 0,
+      vjust = -0.6,
+      size = 2.7,
+      colour = navy
+    ) +
+    scale_x_continuous(
+      labels = scales::label_number(decimal.mark = ","),
+      expand = expansion(mult = c(0.05, 0.45))
+    ) +
+    labs(title = title, x = xlab, y = NULL, caption = caption) +
+    theme_res()
+}
+
+pooled_figure <- function(model_sel) {
+  type_lab <- c(ap_explicit_sd = "bekennend", ap_vote_anchored_sd = "implizit")
+  rows_a <- rev(c(
+    "Thermometer · bekennend", "Thermometer · implizit",
+    "Spiele · bekennend", "Spiele · implizit"
+  ))
+  pick <- function(df, q) filter(df, model == model_sel, group == "pooled", quantity %in% q)
+
+  da <- pick(draws_all, names(type_lab)) |>
+    mutate(
+      fill = type_lab[quantity],
+      row = factor(paste(mlab[measure], fill, sep = " · "), levels = rows_a)
+    )
+  sa <- pick(summ, names(type_lab)) |>
+    mutate(row = factor(paste(mlab[measure], type_lab[quantity], sep = " · "), levels = rows_a))
+
+  db <- pick(draws_all, "delta_ap_sd") |>
+    mutate(fill = mlab[measure], row = factor(fill, levels = rev(mlab)))
+  sb <- pick(summ, "delta_ap_sd") |>
+    mutate(row = factor(mlab[measure], levels = rev(mlab)))
+
+  dc <- pick(draws_all, "diff") |>
+    mutate(fill = "diff", row = factor("Thermometer − Spiele"))
+  sc <- pick(summ, "diff") |>
+    mutate(row = factor("Thermometer − Spiele"))
+
+  sd_note <- paste0(
+    "1 SD = ", fmt(post$scales$games$sd, 1), " Punkte (Spiele) · ",
+    fmt(post$scales$thermo$sd, 1), " Grad (Thermometer)"
+  )
+
+  pa <- halfeye_panel(da, sa, "(a) Polarisierung nach Typ", "AP: eigene minus fremde Partei (SD)", sd_note) +
+    scale_fill_manual(values = c(bekennend = col_expl, implizit = col_impl))
+  pb <- halfeye_panel(db, sb, "(b) bekennend − implizit", "ΔAP (SD)") +
+    scale_fill_manual(values = col_meas)
+  pc <- halfeye_panel(dc, sc, "(c) Unterschied der Unterschiede", "ΔAP Thermometer − ΔAP Spiele (SD)") +
+    scale_fill_manual(values = c(diff = grey2))
+
+  (pa | (pb / pc)) + plot_layout(widths = c(1.25, 1))
+}
+
+# Country figure: Delta AP per measure and the difference, one row per country
+country_data <- function(model_sel) {
+  panels <- c(thermo = "ΔAP Thermometer", games = "ΔAP Spiele", diff = "Thermometer − Spiele")
+  s <- summ |>
+    filter(model == model_sel, group != "pooled", quantity %in% c("delta_ap_sd", "diff")) |>
+    mutate(
+      panel = factor(panels[measure], levels = panels),
+      land = coalesce(unname(laender[group]), group)
+    )
+  ord <- s |>
+    filter(measure == "thermo") |>
+    arrange(desc(median)) |>
+    pull(land)
+  mutate(s, land = factor(land, levels = rev(ord)))
+}
+
+country_figure <- function(s_all, lands) {
+  lim <- s_all |>
+    summarise(lo = min(0, lower_99), hi = max(upper_99), .by = panel) |>
+    mutate(hi_lab = hi + (hi - lo) * 0.04, hi_ext = hi + (hi - lo) * 0.6)
+  s <- s_all |>
+    filter(land %in% lands) |>
+    droplevels() |>
+    left_join(lim, by = "panel")
+
+  ggplot(s, aes(y = land)) +
+    geom_vline(xintercept = 0, colour = grey1) +
+    geom_blank(data = lim, aes(x = lo), inherit.aes = FALSE) +
+    geom_blank(data = lim, aes(x = hi_ext), inherit.aes = FALSE) +
+    geom_linerange(aes(xmin = lower_99, xmax = upper_99, colour = panel), linewidth = 0.5) +
+    geom_linerange(aes(xmin = lower_95, xmax = upper_95, colour = panel), linewidth = 1.3) +
+    geom_point(aes(x = median, colour = panel), size = 1.8) +
+    geom_text(aes(x = hi_lab, label = fmt_p(p)), hjust = 0, size = 2.5, colour = navy) +
+    facet_wrap(~panel, scales = "free_x", nrow = 1) +
+    scale_colour_manual(values = c(
+      "ΔAP Thermometer" = navy,
+      "ΔAP Spiele" = accent,
+      "Thermometer − Spiele" = grey2
+    )) +
+    scale_x_continuous(labels = scales::label_number(decimal.mark = ",")) +
+    labs(x = "SD-Einheiten · Punkt = Median, Balken = 95-%- und 99-%-Intervall", y = NULL) +
+    theme_res() +
+    theme(
+      strip.text = element_text(colour = navy, face = "bold"),
+      panel.spacing.x = unit(1.4, "lines")
+    )
+}
+
+cty <- country_data("bb")
+lands_ord <- rev(levels(cty$land))
+```
+
+```{r}
+#| label: results-pooled
+#| fig-width: 10
+#| fig-height: 4.9
+#| fig-align: center
+#| out-width: "100%"
+
+pooled_figure("bb")
+```
 
 ::: {.notes}
-[PLATZHALTER – Ergebnisse folgen, sobald Notebook 3.2 durchgerechnet ist.]
+*(Ergebnisse, ca. 1:30)*
 
-Links: Wie stark ist die affektive Polarisierung – getrennt nach Bekennenden und Impliziten, und getrennt nach Thermometer und Spielen. Damit beide vergleichbar sind, in Standardabweichungen.
+Alle Länder zusammen, Beta-Binomial-Modell. Alles in Standardabweichungen, damit Punkte und Grad vergleichbar werden.
 
-Mitte: Wie groß ist der Unterschied zwischen Bekennenden und Impliziten, jeweils innerhalb einer Messung?
+Links: Polarisierung, also eigene minus fremde Partei, getrennt nach Typ und Messung. Beim Thermometer: bekennend `r est("thermo", "ap_explicit_sd")`, implizit `r est("thermo", "ap_vote_anchored_sd")` Standardabweichungen. Bei den Spielen: bekennend `r est("games", "ap_explicit_sd")`, implizit `r est("games", "ap_vote_anchored_sd")`. In Rohwerten: beim Thermometer `r est("thermo", "ap_explicit", d = 1)` gegenüber `r est("thermo", "ap_vote_anchored", d = 1)` Grad, bei den Spielen `r est("games", "ap_explicit")` gegenüber `r est("games", "ap_vote_anchored")` Punkte von zehn.
 
-Rechts: Ist dieser Unterschied beim Thermometer größer als bei den Spielen? Bei jeder Verteilung steht die Wahrscheinlichkeit, dass der Wert größer als null ist.
+Mitte: der Unterschied zwischen Bekennenden und Impliziten innerhalb jeder Messung. Thermometer `r est("thermo", "delta_ap_sd")`, Spiele `r est("games", "delta_ap_sd")` SD.
 
-[vorläufig, Erwartung – kein Befund: Bekennende zeigen in beiden Messungen mehr Polarisierung; der Unterschied ist beim Verhalten aber deutlich kleiner als bei der Einstellung.]
+Rechts: der Unterschied dieser beiden Unterschiede, `r est("diff", "diff")` SD.
+
+Die Zahlen in Klammern sind 95-%-Intervalle. Bei jeder Verteilung steht die Wahrscheinlichkeit, dass der Wert größer als null ist.
+
+[Deutung mit Tristan abstimmen – Beschreibung hier bewusst ohne Urteil.]
 :::
 
 ------------------------------------------------------------------------
 
 ## Ergebnis nach Ländern (1/2) {.smaller}
 
-::: {.placeholder .tall}
-**Platzhalter – Länder 1–13**
+```{r}
+#| label: results-country-1
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+#| out-width: "100%"
 
-Je Land: AP nach Typ und Messung, ΔAP je Messung und Unterschied der Unterschiede
-
-inkl. Pr(> 0) je Posterior
-
-Leitfrage: Gilt das Muster in allen 25 Ländern?
-:::
+country_figure(cty, lands_ord[1:13])
+```
 
 ::: {.notes}
-[PLATZHALTER]
+Dieselben Größen für jedes Land einzeln, sortiert nach dem Unterschied beim Thermometer, von oben nach unten. Weniger Befragte pro Land bedeuten breitere Intervalle – das Modell zeigt offen, wo wir wenig wissen.
 
-Dieselben Größen wie eben, jetzt für jedes Land einzeln. Weniger Befragte pro Land bedeuten breitere Intervalle – das ist gewollt, das Modell zeigt ehrlich, wo wir wenig wissen, etwa in Ländern, in denen fast alle sich bekennen.
-
-[vorläufig: Gilt das Muster im Großen und Ganzen überall? – erst nach den Ergebnissen formulieren.]
+[Muster über die Länder mit Tristan abstimmen.]
 :::
 
 ------------------------------------------------------------------------
 
 ## Ergebnis nach Ländern (2/2) {.smaller}
 
-::: {.placeholder .tall}
-**Platzhalter – Länder 14–25**
+```{r}
+#| label: results-country-2
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+#| out-width: "100%"
 
-Je Land: AP nach Typ und Messung, ΔAP je Messung und Unterschied der Unterschiede
-
-inkl. Pr(> 0) je Posterior
-:::
+country_figure(cty, lands_ord[14:length(lands_ord)])
+```
 
 ::: {.notes}
-[PLATZHALTER – siehe vorherige Folie.]
+Die übrigen Länder, gleiche Achsen wie auf der vorherigen Folie.
 :::
 
 # Was folgt daraus?
@@ -808,7 +970,7 @@ games <- readr::read_rds(here("data", "03_final", "eu25_games.rds"))
 thermo <- readr::read_rds(here("data", "03_final", "eu25_thermo.rds"))
 
 n_resp <- n_distinct(c(games$meta_responseid, thermo$meta_responseid))
-fmt <- function(x) format(x, big.mark = ".")
+fmt_n <- function(x) format(x, big.mark = ".")
 
 data.frame(
   Datensatz = c(
@@ -816,8 +978,8 @@ data.frame(
     "Spiele (Befragte × Runde)",
     "Thermometer (Befragte × bewertete Partei)"
   ),
-  Befragte = fmt(c(n_resp, n_distinct(games$meta_responseid), n_distinct(thermo$meta_responseid))),
-  Zeilen = c("–", fmt(nrow(games)), fmt(nrow(thermo)))
+  Befragte = fmt_n(c(n_resp, n_distinct(games$meta_responseid), n_distinct(thermo$meta_responseid))),
+  Zeilen = c("–", fmt_n(nrow(games)), fmt_n(nrow(thermo)))
 ) |>
   knitr::kable(align = c("l", "r", "r"))
 ```
@@ -970,6 +1132,49 @@ $$
 ::: {.notes}
 Die Schätzgrößen sind Differenzen von Mittelwerten, nicht einzelne Koeffizienten. Für den Vergleich der beiden Messungen wird jeweils durch die Standardabweichung geteilt. Die Ziehungen der beiden unabhängig geschätzten Modelle werden paarweise kombiniert.
 :::
+
+------------------------------------------------------------------------
+
+## Robustheit: Gauß-Modell {.smaller}
+
+```{r}
+#| label: results-gauss
+#| fig-width: 10
+#| fig-height: 4.9
+#| fig-align: center
+#| out-width: "100%"
+
+pooled_figure("gauss")
+```
+
+::: {.notes}
+Dieselbe Abbildung aus den Gauß-Modellen auf dem standardisierten Ergebnis. ΔAP Thermometer `r est("thermo", "delta_ap_sd", model = "gauss")`, Spiele `r est("games", "delta_ap_sd", model = "gauss")`, Unterschied `r est("diff", "diff", model = "gauss")` SD.
+:::
+
+------------------------------------------------------------------------
+
+## Konvergenz {.smaller}
+
+```{r}
+#| label: results-diagnostics
+
+post$diagnostics |>
+  mutate(
+    name = c(
+      games_bb = "Spiele, BB", games_gauss = "Spiele, Gauß",
+      thermo_bb = "Thermometer, BB", thermo_gauss = "Thermometer, Gauß"
+    )[name],
+    max_rhat = fmt(max_rhat, 3),
+    across(c(min_ess_bulk, min_ess_tail), \(x) format(round(x), big.mark = "."))
+  ) |>
+  knitr::kable(
+    col.names = c("Modell", "max. R̂", "min. ESS (bulk)", "min. ESS (tail)", "Divergenzen", "max. Baumtiefe erreicht"),
+    align = c("l", "r", "r", "r", "r", "r")
+  )
+```
+
+- BB = Beta-Binomial; 4 Ketten à 2.000 Iterationen (1.000 Warm-up), `adapt_delta` = 0,95; Werte über alle Parameter, inkl. Personeneffekte
+- Schätzgrößen aus 1.000 Posterior-Ziehungen je Modell
 
 ------------------------------------------------------------------------
 
