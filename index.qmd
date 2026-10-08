@@ -275,6 +275,57 @@ parties
 
 possible interesting deeper look: conflicting instances (attachement and vote differ) -> which shows more ingroup favoritism?
 
+## Next models: getting both the expectation and the shape right
+
+Notes only, nothing fitted. Current state: Gaussian (z-scale) and beta-binomial fits of notebook 3.2; the Gaussian is the main estimate because the estimand is built from cell means (3.3, 3.5); the beta-binomial is robustness.
+
+**Diagnosis.** Both outcomes look like point masses at anchors plus a smooth interior hump: 0 = outright rejection, 100 = full endorsement (thermometer), 5 = even split (games). The mix depends on co/out × type (thermometer: ~20–23% zeros in the out-cells, 27% hundreds in explicit co; games: spike at 0 in the out-cells, at 5 everywhere). One shared dispersion parameter cannot represent that. With a non-Gaussian likelihood a wrong dispersion also biases the means: the beta-binomial's shared φ ≈ 1.94 (thermometer) turns the rows U-shaped, underpredicts all four cell means by 3–4.5 points, more in vote-anchored co than out, and so inflates ΔAP.
+
+**Candidates, in order of cost.**
+
+1. **Gaussian with σ by cell**: `sigma ~ der_co * der_explicit + (1 | country)`. Same mean structure, better calibrated intervals by cell. The immediate next robustness model.
+2. **Beta-binomial with φ by cell**: `phi ~ der_co * der_explicit + (1 | country)`.
+3. **Thermometer hurdle beta-binomial.** P(0) = pz, P(100) = (1 − pz) · ph, interior 1–99 a truncated beta-binomial, so φ is not dragged down to fake the spikes. `pz`, `ph`, `phi` all `~ der_co * der_explicit`. A person intercept on `pz` (habitual zero-givers); a rated-party term `(1 | country:ext_q_thermo_pf_name)` on `pz`/`mu` (zeros concentrate on fringe parties; it does not change what the g-computation averages over); focal priors on `pz` with SD 2–3 (it moves ~5–6 logits between cells). Needs a brms `custom_family` with `log_lik_*`, `posterior_predict_*` and `posterior_epred_*`. With `posterior_epred_*` defined, `ap_draws()` and notebook 3.3 work unchanged. Untested sketch below.
+4. **Games: zero-and-five inflated beta-binomial.** 5 is interior, so it needs an inflation point, not a hurdle; `phi ~ cell`.
+5. **Cumulative ordinal model** with `disc ~ der_co * der_explicit`, only if heaping cannot be absorbed otherwise. Proportional odds alone cannot change the shape, and 100 thresholds on 124k rows is costly.
+
+**New fits** use `save_pars(all = TRUE)` (already set in 3.2's `fit_brm()`), so LOO with moment matching is possible.
+
+**AP decomposition.** Swap one component at a time in the g-computation (e.g. the out-cell mean with the co-cell `pz`) to split AP and ΔAP into the extensive margin (more zeros) and the intensive margin (lower interior ratings).
+
+**Acceptance criteria for a new model.**
+
+i. It passes the weighted cell-mean and raw-ΔAP checks of notebook 3.5.
+ii. It passes the anchor-share checks by cell (3.5) and is calibrated by cell (LOO-PIT, notebook 3.4).
+iii. Only then: native LOO among the comparable fits (beta-binomial variants against each other; Gaussian variants against each other). Cross-family elpd only via the discretization module of 3.4.
+
+Sketch (untested):
+
+```r
+hbb <- custom_family(
+  "hbb", dpars = c("mu", "phi", "pz", "ph"),
+  links = c("logit", "log", "logit", "logit"),
+  lb = c(0, 0, 0, 0), ub = c(1, NA, 1, 1),
+  type = "int", vars = "vint1[n]"
+)
+stan_funs <- "
+real hbb_lpmf(int y, real mu, real phi, real pz, real ph, int T) {
+  real a = mu * phi; real b = (1 - mu) * phi;
+  if (y == 0) return log(pz);
+  if (y == T) return log1m(pz) + log(ph);
+  return log1m(pz) + log1m(ph) + beta_binomial_lpmf(y | T, a, b)
+    - log1m_exp(log_sum_exp(beta_binomial_lpmf(0 | T, a, b),
+                            beta_binomial_lpmf(T | T, a, b)));
+}"
+posterior_epred_hbb <- function(prep) {
+  mu <- brms::get_dpar(prep, "mu"); phi <- brms::get_dpar(prep, "phi")
+  pz <- brms::get_dpar(prep, "pz"); ph <- brms::get_dpar(prep, "ph")
+  T <- prep$data$vint1[1]; a <- mu * phi; b <- (1 - mu) * phi
+  f0 <- exp(lbeta(a, b + T) - lbeta(a, b)); fT <- exp(lbeta(a + T, b) - lbeta(a, b))
+  (1 - pz) * (ph * T + (1 - ph) * (T * mu - T * fT) / (1 - f0 - fT))
+}
+```
+
 # HMS presentation
 
 timeline: estimate for eu25games data, have results and presentation until oktober 7th, ideally: partisan attachement gap for allocation games less than for thermometer, revision due to stricter attention check, etc.
