@@ -30,6 +30,7 @@ There are two outcomes, and each gets its own models:
 The notebook follows the Bayesian workflow in eight steps: scientific model, estimand, data summary, formal model, prior predictive check, fit, MCMC diagnostics and posterior predictive check, estimand computation, limitations.
 For every outcome, a Gaussian model (on the standardized outcome) is built first, then a beta-binomial model.
 The beta-binomial is the generative model of the integer outcome. The Gaussian model recovers conditional means and serves as robustness.
+(Update: the HMS deck and notebook 3.5 treat the Gaussian models as the main estimates, because the estimand is built from cell means and the identity-link Gaussian reproduces them; the beta-binomial is the robustness check. The text below keeps the original set-up.)
 
 **Nothing in this notebook is a claim.**
 With `full_fit <- TRUE` (the current setting), every model is fitted on the full analysis sample with production settings, and the fits are cached in `data/04_models/` (git-ignored). The estimates are reported with their uncertainty, and they are not interpreted here.
@@ -76,7 +77,9 @@ Two switches govern the whole notebook.
 
 With `full_fit <- TRUE`:
 
-- **Every fit is cached**, the prior-only fits included, as `data/04_models/<name>.rds` (git-ignored). A later render loads a cached fit in seconds as long as model, data and priors are unchanged (`file_refit = "on_change"`), and refits only what changed. This cache is what makes re-renders cheap. The project's `freeze: auto` does not help here: the notebook is not in `_quarto.yml`, and Quarto always executes a single-file render.
+- **Every fit is cached**, the prior-only fits included, as `data/04_models/<name>.rds` (git-ignored). This cache is what makes re-renders cheap. The project's `freeze: auto` does not help here: the notebook is not in `_quarto.yml`, and Quarto always executes a single-file render.
+- **No refit by accident** (`refit_allowed`). A full fit takes 2--12 hours. brms's `file_refit = "on_change"` refits whenever the Stan code *or the data passed to `brm()`* change, so a harmless data-prep edit (row order, factor levels) would silently start a refit. With `refit_allowed <- FALSE` (the default), `fit_model()` loads an existing cached fit without calling `brm()`, runs the same check brms would run, and only warns if brms would have refit (logged as `cached-stale`). Set `refit_allowed <- TRUE` to let `file_refit = "on_change"` refit what changed. A missing fit is always fitted.
+- **New fits keep all parameters** (`save_pars(all = TRUE)`), so that LOO with moment matching is possible later. The four current fits predate this and are not refit for it.
 - **The chains run in parallel, one core each** (`cores = chains`), with no within-chain threading.
 - **The sampler reports progress to the terminal, not the document.** cmdstanr prints its iteration lines with `cat()`, which knitr would capture into the output (knitr's `message = NA` only reroutes `message()`). `fit_model()` therefore diverts the console output to stderr, which `quarto render` shows in the terminal, and mirrors it into `data/04_models/logs/<name>.log`. Every iteration is printed (`refresh = 1`), so the pace shows from the first iterations on. That is 8,000 lines per model across the four chains. Messages from brms and Stan go the same way. Warnings stay in the document. `data/04_models/logs/progress.log` gets one timestamped line when a fit starts and one when it ends, saying whether it was fitted or loaded from the cache.
 
@@ -94,6 +97,7 @@ Prior predictive fits always use the development subsample: they do not conditio
 #| label: run-settings
 
 full_fit <- TRUE
+refit_allowed <- FALSE
 seed <- 2019
 
 run <- if (full_fit) {
@@ -143,8 +147,25 @@ fit_model <- function(
     return(fit())
   }
 
-  # Sampler output to terminal (stderr) and model log, not the document
+  # Cached fit and no refits allowed: load it, and only warn if brms would refit
   rds <- paste0(file.path(model_dir, name), ".rds")
+  if (file.exists(rds) && !refit_allowed) {
+    out <- read_rds(rds)
+    stale <- would_refit(out, formula, family, prior, data, sample_prior)
+    if (!isFALSE(stale)) {
+      warning(
+        name, ": loaded from cache, but brms would refit it (",
+        if (isTRUE(stale)) "Stan code, Stan data or factor levels changed"
+        else stale,
+        "). Set refit_allowed <- TRUE to refit.",
+        call. = FALSE
+      )
+    }
+    log_progress(name, if (isFALSE(stale)) "cached" else "cached-stale", nrow(data))
+    return(out)
+  }
+
+  # Sampler output to terminal (stderr) and model log, not the document
   mtime <- file.mtime(rds)
   log_progress(name, "start", nrow(data))
   con <- file(file.path(log_dir, paste0(name, ".log")), open = "at")
@@ -177,6 +198,36 @@ log_progress <- function(name, status, rows, t0 = NULL) {
   cat(line, file = stderr())
 }
 
+# The check brm(file_refit = "on_change") runs, without refitting: TRUE, FALSE,
+# or the error message if the check itself fails
+would_refit <- function(fit, formula, family, prior, data, sample_prior) {
+  tryCatch(
+    {
+      args <- list(
+        formula,
+        data = data,
+        family = family,
+        prior = prior,
+        sample_prior = sample_prior
+      )
+      # brm() compares factor levels on its validated data, which adds
+      # grouping columns such as `country:anchor`
+      bterms <- brmsterms(
+        brms:::validate_formula(formula, data = data, family = family)
+      )
+      brms:::brmsfit_needs_refit(
+        fit,
+        scode = do.call(stancode, c(args, backend = "cmdstanr")),
+        sdata = do.call(standata, args),
+        data = brms:::validate_data(data, bterms = bterms),
+        algorithm = "sampling",
+        silent = TRUE
+      )
+    },
+    error = \(e) paste("refit check failed:", conditionMessage(e))
+  )
+}
+
 fit_brm <- function(formula, family, prior, data, name, sample_prior, settings) {
   brm(
     formula,
@@ -184,6 +235,7 @@ fit_brm <- function(formula, family, prior, data, name, sample_prior, settings) 
     family = family,
     prior = prior,
     sample_prior = sample_prior,
+    save_pars = save_pars(all = TRUE),
     chains = settings$chains,
     iter = settings$iter,
     warmup = settings$warmup,
