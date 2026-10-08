@@ -71,31 +71,38 @@ theme_schematic <- function(base = 13) {
 
 [Die Rolle subjektiver Parteibindung bei einstellungs- und verhaltensbezogener affektiver Polarisierung in 25 europäischen Demokratien]{style="font-size: 0.55em;"}
 
-[*Titel v2 – nach strengerem Aufmerksamkeitstest* · Wortlaut der Korrektur vorläufig, bis die Modelle durchgerechnet sind]{style="font-size: 0.42em; color: #7F94A5;"}
+![](./images/uma_palace.png){height="400px"}
 
-![](./images/uma_palace.png){height="210px"}
-
-[{{< meta author >}} – Universität Mannheim · gemeinsame Arbeit mit Thomas König]{style="font-size: 0.45em;"}
+[{{< meta author >}} <a href="https://github.com/dertristan" target="_blank" style="text-decoration: none; margin-left: 10px;"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"> <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/> </svg> </a> <a href="mailto:tristan.muno@uni-mannheim.de" style="text-decoration: none; margin-left: 5px;"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16"> <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/> </svg> </a>]{style="font-size: 0.45em;"}
 
 ::: {.notes}
-*(ca. 0:30)*
 
-Vielen Dank für die Einladung.
-
-Sie sehen: Der Titel im Programm hat schon eine kleine Korrektur hinter sich. Als ich ihn eingereicht habe, sahen die Daten so aus, als würden Menschen mit Parteibindung zwar härter urteilen, aber nicht anders handeln. Dann habe ich die Stichprobe strenger gefasst – nur noch Befragte, die einen Aufmerksamkeitstest bestanden haben – und dieser Befund ist so nicht mehr da.
-
-Das ist kein Betriebsunfall, sondern so funktioniert Wissenschaft: Versuch, Irrtum, Korrektur – und zwar öffentlich. Ich zeige Ihnen deshalb heute auch, *wie* man zu so einer Aussage kommt, nicht nur die Aussage selbst.
-
-[Die genaue Formulierung der zweiten Titelhälfte passe ich an, sobald die Ergebnisse vorliegen.]
 :::
 
-# Polarisierung: eine Familie, kein Ding
+## Agenda
 
-## Ein Wort mit Geschichte
+1. Polarisierung als Familie, nicht als Sache
+2. Affektive Polarisierung
+3. Empirische Einblicke
+4. Schlussfolgerungen aus der Anaylse
+5. Konsequenzen für die Polarisierungsdebatte
 
-- Griechisch *polos*, lateinisch *polus*: die Achse, um die sich etwas dreht
-- 19. Jh., Physik: *polarisiertes* Licht – Ausrichtung, nicht Konflikt
-- Erst nach 1945 ein Begriff der Sozialwissenschaften
+# Polarisierung als Familie, nicht als Sache
+
+## Ein gegenwärtiges Trendwort...
+
+Polarisierung/Polarisation/polarisieren ist momentan allgegenwärtig im -- nicht nur deutschen -- Sprachgebrauch angekommen (vgl. Merriam Webster Wort des Jahres 2024 https://www.merriam-webster.com/wordplay/word-of-the-year-2024 oder Verlaufskurve png)
+
+## ... mit langer Geschichte ...
+
+- **Antike:** Griechisch *polos*, lateinisch *polus*: die Achse, um die sich etwas dreht [@etymonline2026pole]
+  - Drehpunkt, Himmelsachse, geographische Pole
+  - Das Adjektiv *polar* kommt erst später über das Mittellateinische [@etymonline2026polar]
+- **19. Jh., Physik:** Polarisation als Orientierung/Ausrichtung [@etymonline2026polarize]
+  - Optik: Lichtwellen werden in einer Ebene ausgerichtet (Begriff und Verb @malus1811memoire)
+  - Elektromagnetismus: Ladungen bzw. Pole werden gegensätzlich angeordnet
+- **Ab 1945, Gesellschaft:** Übertragung auf soziale und politische Gruppen als „Verstärkung von Unterschieden" [@etymonline2026polarize]
+  - Hier kommen Spaltung und Konflikt als Wertung hinzu
 
 ```{r}
 #| label: schematic-physics
@@ -145,9 +152,30 @@ p_light <- ggplot() +
     colour = navy,
     linewidth = 1.2
   ) +
-  annotate("text", x = 0.83, y = -1.12, label = "unpolarisiert", colour = grey2, size = 3.2) +
-  annotate("text", x = 1.88, y = 1.12, label = "Filter", colour = navy, size = 3.2) +
-  annotate("text", x = 2.80, y = -1.12, label = "polarisiert", colour = navy, size = 3.2) +
+  annotate(
+    "text",
+    x = 0.83,
+    y = -1.12,
+    label = "unpolarisiert",
+    colour = grey2,
+    size = 3.2
+  ) +
+  annotate(
+    "text",
+    x = 1.88,
+    y = 1.12,
+    label = "Filter",
+    colour = navy,
+    size = 3.2
+  ) +
+  annotate(
+    "text",
+    x = 2.80,
+    y = -1.12,
+    label = "polarisiert",
+    colour = navy,
+    size = 3.2
+  ) +
   coord_fixed(xlim = c(0.1, 3.5), ylim = c(-1.35, 1.35)) +
   labs(title = "Licht: in einer Ebene ausgerichtet", subtitle = " ") +
   theme_schematic()
@@ -175,10 +203,34 @@ p_mag <- ggplot() +
       linewidth = 0.5
     )
   }) +
-  geom_rect(aes(xmin = -0.90, xmax = 0, ymin = -0.30, ymax = 0.30), fill = navy, colour = NA) +
-  geom_rect(aes(xmin = 0, xmax = 0.90, ymin = -0.30, ymax = 0.30), fill = accent, colour = NA) +
-  annotate("text", x = -0.45, y = 0, label = "N", colour = "white", fontface = "bold", size = 4.6) +
-  annotate("text", x = 0.45, y = 0, label = "S", colour = "white", fontface = "bold", size = 4.6) +
+  geom_rect(
+    aes(xmin = -0.90, xmax = 0, ymin = -0.30, ymax = 0.30),
+    fill = navy,
+    colour = NA
+  ) +
+  geom_rect(
+    aes(xmin = 0, xmax = 0.90, ymin = -0.30, ymax = 0.30),
+    fill = accent,
+    colour = NA
+  ) +
+  annotate(
+    "text",
+    x = -0.45,
+    y = 0,
+    label = "N",
+    colour = "white",
+    fontface = "bold",
+    size = 4.6
+  ) +
+  annotate(
+    "text",
+    x = 0.45,
+    y = 0,
+    label = "S",
+    colour = "white",
+    fontface = "bold",
+    size = 4.6
+  ) +
   coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.35, 1.35)) +
   labs(title = "Magnet: zwei Pole", subtitle = " ") +
   theme_schematic()
@@ -187,19 +239,14 @@ p_light | p_mag
 ```
 
 ::: {.notes}
-*(Block 1, ca. 2:30 insgesamt)*
 
-Zuerst zum Wort selbst. „Polos“ ist im Griechischen die Achse, um die sich etwas dreht – daher die Erdpole. Im 19. Jahrhundert nimmt die Physik das Wort auf: Licht, das durch einen Filter geht, schwingt danach nur noch in einer Ebene. Es ist *polarisiert*. Oder der Magnet mit seinen zwei Polen.
-
-Was in diesem Ursprung steckt, ist Ausrichtung und Trennung. Was nicht drinsteckt, ist Konflikt. Polarisiertes Licht streitet sich nicht. Die Vorstellung von Lagern, die sich feindlich gegenüberstehen, haben erst die Sozialwissenschaften nach 1945 hinzugefügt.
 :::
 
 ------------------------------------------------------------------------
 
-## Viele Formen unter einem Namen {.smaller}
+## ... und mindestens vier Gesichtern ... {.smaller}
 
-- Mindestens vier mathematisch verschiedene Dinge – sie können sich **in denselben Daten gegenläufig** bewegen
-- Dazu: zwei Lager oder viele? Zustand oder Prozess? Wer ist polarisiert – und gegen wen?
+- Mindestens vier mathematisch verschiedene Konzepte -- die sich **in denselben Daten gegenläufig** verhalten können
 
 ```{r}
 #| label: schematic-four-dists
@@ -262,18 +309,20 @@ p_sort <- ggplot(d_sort, aes(x, y, colour = g)) +
 ```
 
 ::: {.notes}
-Wenn heute von Polarisierung die Rede ist, sind mindestens vier verschiedene Dinge gemeint. Grau ist jeweils „vorher“, blau „nachher“.
 
-Streuung: Meinungen liegen weiter auseinander. Bimodalität: Die Mitte leert sich, aus einem Hügel werden zwei. Sortierung: Wer bei einem Thema links steht, steht es jetzt auch bei allen anderen – obwohl sich auf der waagrechten Achse niemand bewegt hat. Distanz: Die Mittelwerte von Gruppen rücken auseinander.
-
-Diese vier können sich in denselben Daten in entgegengesetzte Richtungen bewegen. Und dazu kommen weitere Fragen: Gibt es zwei Lager oder viele – in Deutschland eher viele? Reden wir über einen Zustand oder einen Trend? Und wer ist polarisiert: Politiker oder Bürger?
 :::
 
 ------------------------------------------------------------------------
 
+## ... und drei offenen Fragen
+
+- zwei Lager (bipolar) oder viele (multipolar)?
+- Zustand (*Polarisation*) oder Dynamik/Prozess(*Polarisierung*)?
+- Wer ist polarisiert (Population) -- und gegen wen/was (Ziel)?
+
 ## Quer dazu: Wahrnehmung und Wirklichkeit
 
-- Jede dieser Formen gibt es **zweimal**: wie sie ist – und wie wir sie wahrnehmen
+- Jede dieser Formen gibt es **zweimal**: wie sie ist -- und wie sie wahrgenommen
 - Menschen überschätzen systematisch, wie extrem und wie anders „die anderen“ sind [@levendusky2016mis; @ahler2018parties]
 - Wahrgenommene Polarisierung kann wachsen, während die tatsächliche gleich bleibt
 
@@ -296,7 +345,12 @@ d_perc <- rbind(
 
 ggplot() +
   geom_hline(yintercept = 0, colour = grey1, linewidth = 0.3) +
-  geom_line(data = d_real, aes(x, y, group = grp), colour = grey2, linewidth = 1) +
+  geom_line(
+    data = d_real,
+    aes(x, y, group = grp),
+    colour = grey2,
+    linewidth = 1
+  ) +
   geom_line(
     data = d_perc,
     aes(x, y, group = grp),
@@ -304,19 +358,39 @@ ggplot() +
     linewidth = 1,
     linetype = "22"
   ) +
-  annotate("text", x = 0, y = 0.42, label = "Wirklichkeit", colour = grey2, fontface = "bold", size = 3.6) +
-  annotate("text", x = -4.4, y = 0.50, label = "Wahrnehmung", colour = accent, fontface = "bold", size = 3.6) +
-  annotate("text", x = 4.4, y = 0.50, label = "Wahrnehmung", colour = accent, fontface = "bold", size = 3.6) +
+  annotate(
+    "text",
+    x = 0,
+    y = 0.42,
+    label = "Wirklichkeit",
+    colour = grey2,
+    fontface = "bold",
+    size = 3.6
+  ) +
+  annotate(
+    "text",
+    x = -4.4,
+    y = 0.50,
+    label = "Wahrnehmung",
+    colour = accent,
+    fontface = "bold",
+    size = 3.6
+  ) +
+  annotate(
+    "text",
+    x = 4.4,
+    y = 0.50,
+    label = "Wahrnehmung",
+    colour = accent,
+    fontface = "bold",
+    size = 3.6
+  ) +
   coord_cartesian(ylim = c(0, 0.56)) +
   theme_schematic()
 ```
 
 ::: {.notes}
-Und quer zu all diesen Formen liegt noch eine weitere Unterscheidung: Wirklichkeit und Wahrnehmung.
 
-Jede dieser Formen gibt es zweimal – einmal so, wie sie in den Daten ist, und einmal so, wie Menschen sie wahrnehmen. Und die Forschung zeigt recht deutlich: Wir überschätzen, wie extrem die andere Seite ist und wie sehr sie sich von uns unterscheidet. Grau ist, wie weit zwei Gruppen tatsächlich auseinanderliegen. Orange gestrichelt ist, wie weit sie sich gegenseitig auseinander *vermuten*.
-
-Damit ist der erste Punkt dieses Vortrags gemacht: Polarisierung ist kein „Ding“, das man einfach misst. Es ist eine Familie von Phänomenen. Wer sagt „die Polarisierung nimmt zu“, muss dazusagen, welche.
 :::
 
 # Affektive Polarisierung
@@ -364,15 +438,66 @@ cells <- data.frame(
 )
 
 ggplot(cells, aes(x, y)) +
-  geom_tile(aes(fill = fill), colour = navy, linewidth = 0.9, width = 0.94, height = 0.90) +
+  geom_tile(
+    aes(fill = fill),
+    colour = navy,
+    linewidth = 0.9,
+    width = 0.94,
+    height = 0.90
+  ) +
   geom_text(aes(label = lab, colour = txt), size = 3.0, lineheight = 0.95) +
   scale_fill_identity() +
   scale_colour_identity() +
-  annotate("text", x = 1, y = 2.66, label = "Einstellung\nwas Menschen sagen", colour = navy, fontface = "bold", size = 3.2, lineheight = 0.95) +
-  annotate("text", x = 2, y = 2.66, label = "Verhalten\nwas Menschen tun", colour = navy, fontface = "bold", size = 3.2, lineheight = 0.95) +
-  annotate("text", x = 0.40, y = 2, angle = 90, lineheight = 0.95, label = "Vertikal\nParteien & Politiker", colour = navy, fontface = "bold", size = 3.2) +
-  annotate("text", x = 0.40, y = 1, angle = 90, lineheight = 0.95, label = "Horizontal\nMitbürger", colour = navy, fontface = "bold", size = 3.2) +
-  annotate("text", x = 1.5, y = 0.36, size = 2.9, colour = grey2, label = "Diese Studie: die beiden farbigen Zellen – bei denselben Befragten") +
+  annotate(
+    "text",
+    x = 1,
+    y = 2.66,
+    label = "Einstellung\nwas Menschen sagen",
+    colour = navy,
+    fontface = "bold",
+    size = 3.2,
+    lineheight = 0.95
+  ) +
+  annotate(
+    "text",
+    x = 2,
+    y = 2.66,
+    label = "Verhalten\nwas Menschen tun",
+    colour = navy,
+    fontface = "bold",
+    size = 3.2,
+    lineheight = 0.95
+  ) +
+  annotate(
+    "text",
+    x = 0.40,
+    y = 2,
+    angle = 90,
+    lineheight = 0.95,
+    label = "Vertikal\nParteien & Politiker",
+    colour = navy,
+    fontface = "bold",
+    size = 3.2
+  ) +
+  annotate(
+    "text",
+    x = 0.40,
+    y = 1,
+    angle = 90,
+    lineheight = 0.95,
+    label = "Horizontal\nMitbürger",
+    colour = navy,
+    fontface = "bold",
+    size = 3.2
+  ) +
+  annotate(
+    "text",
+    x = 1.5,
+    y = 0.36,
+    size = 2.9,
+    colour = grey2,
+    label = "Diese Studie: die beiden farbigen Zellen – bei denselben Befragten"
+  ) +
   coord_cartesian(xlim = c(0.25, 2.62), ylim = c(0.25, 3.02)) +
   theme_schematic()
 ```
@@ -423,7 +548,12 @@ edges <- data.frame(
 )
 
 ggplot() +
-  geom_segment(data = edges, aes(x, y, xend = xend, yend = yend), colour = grey1, linewidth = 0.6) +
+  geom_segment(
+    data = edges,
+    aes(x, y, xend = xend, yend = yend),
+    colour = grey1,
+    linewidth = 0.6
+  ) +
   geom_label(
     data = nodes,
     aes(x, y, label = lab, colour = col),
@@ -432,8 +562,26 @@ ggplot() +
     label.size = 0.5,
     label.padding = unit(0.25, "lines")
   ) +
-  annotate("text", x = 5.45, y = 2.75, label = "bekennend", colour = col_expl, fontface = "bold", size = 3.6, hjust = 0) +
-  annotate("text", x = 5.45, y = 1.15, label = "implizit", colour = col_impl, fontface = "bold", size = 3.6, hjust = 0) +
+  annotate(
+    "text",
+    x = 5.45,
+    y = 2.75,
+    label = "bekennend",
+    colour = col_expl,
+    fontface = "bold",
+    size = 3.6,
+    hjust = 0
+  ) +
+  annotate(
+    "text",
+    x = 5.45,
+    y = 1.15,
+    label = "implizit",
+    colour = col_impl,
+    fontface = "bold",
+    size = 3.6,
+    hjust = 0
+  ) +
   scale_colour_identity() +
   coord_cartesian(xlim = c(0, 6.4), ylim = c(0, 3.05)) +
   theme_schematic()
@@ -498,14 +646,36 @@ rm(raw)
 #| out-width: "82%"
 
 laender <- c(
-  AT = "Österreich", BE = "Belgien", BG = "Bulgarien", CY = "Zypern",
-  CZ = "Tschechien", DE = "Deutschland", DK = "Dänemark", EE = "Estland",
-  ES = "Spanien", FI = "Finnland", FR = "Frankreich", GR = "Griechenland",
-  EL = "Griechenland", HR = "Kroatien", HU = "Ungarn", IE = "Irland",
-  IT = "Italien", LT = "Litauen", LU = "Luxemburg", LV = "Lettland",
-  MT = "Malta", NL = "Niederlande", PL = "Polen", PT = "Portugal",
-  RO = "Rumänien", SE = "Schweden", SI = "Slowenien", SK = "Slowakei",
-  UK = "Vereinigtes Königreich", GB = "Vereinigtes Königreich"
+  AT = "Österreich",
+  BE = "Belgien",
+  BG = "Bulgarien",
+  CY = "Zypern",
+  CZ = "Tschechien",
+  DE = "Deutschland",
+  DK = "Dänemark",
+  EE = "Estland",
+  ES = "Spanien",
+  FI = "Finnland",
+  FR = "Frankreich",
+  GR = "Griechenland",
+  EL = "Griechenland",
+  HR = "Kroatien",
+  HU = "Ungarn",
+  IE = "Irland",
+  IT = "Italien",
+  LT = "Litauen",
+  LU = "Luxemburg",
+  LV = "Lettland",
+  MT = "Malta",
+  NL = "Niederlande",
+  PL = "Polen",
+  PT = "Portugal",
+  RO = "Rumänien",
+  SE = "Schweden",
+  SI = "Slowenien",
+  SK = "Slowakei",
+  UK = "Vereinigtes Königreich",
+  GB = "Vereinigtes Königreich"
 )
 
 # German legend labels for the leaves of pid_tree.R
@@ -535,7 +705,12 @@ focal_pos <- d_comp |>
   filter(leaf %in% c("Attached: same party", "No attachment: vote"))
 
 ggplot(d_comp, aes(x = share, y = land, fill = leaf)) +
-  geom_col(width = 0.8, colour = "white", linewidth = 0.2, position = position_stack(reverse = TRUE)) +
+  geom_col(
+    width = 0.8,
+    colour = "white",
+    linewidth = 0.2,
+    position = position_stack(reverse = TRUE)
+  ) +
   geom_text(
     data = focal_pos,
     aes(x = start + 0.01, label = scales::percent(share, 1)),
@@ -545,7 +720,11 @@ ggplot(d_comp, aes(x = share, y = land, fill = leaf)) +
   ) +
   scale_fill_manual(values = leaf_colours, labels = leaf_de, drop = TRUE) +
   guides(fill = guide_legend(nrow = 2)) +
-  scale_x_continuous(labels = scales::percent, breaks = seq(0, 1, 0.25), expand = c(0, 0)) +
+  scale_x_continuous(
+    labels = scales::percent,
+    breaks = seq(0, 1, 0.25),
+    expand = c(0, 0)
+  ) +
   labs(x = NULL, y = NULL, fill = NULL) +
   theme_minimal(base_size = 10) +
   theme(
@@ -647,7 +826,9 @@ library(ggdist)
 post <- readr::read_rds(here("data", "05_results", "eu25_ap_post.rds"))
 
 # Decimal comma
-fmt <- function(x, d = 2) formatC(x, digits = d, format = "f", decimal.mark = ",")
+fmt <- function(x, d = 2) {
+  formatC(x, digits = d, format = "f", decimal.mark = ",")
+}
 fmt_p <- function(p) {
   ifelse(p >= 0.999, "Pr(>0) > 0,999", paste0("Pr(>0) = ", fmt(p, 3)))
 }
@@ -656,7 +837,14 @@ fmt_p <- function(p) {
 draws_all <- bind_rows(
   post$draws,
   post$cross |>
-    transmute(model, measure = "diff", group, .draw = i, quantity = "diff", value = diff)
+    transmute(
+      model,
+      measure = "diff",
+      group,
+      .draw = i,
+      quantity = "diff",
+      value = diff
+    )
 )
 
 summ <- draws_all |>
@@ -674,40 +862,67 @@ summ <- draws_all |>
 main_model <- "gauss"
 
 # Inline numbers for the notes: "0,66 [0,63; 0,69]"
-est <- function(measure, quantity, model = main_model, group = "pooled", d = 2) {
-  r <- summ[summ$model == model & summ$measure == measure &
-    summ$group == group & summ$quantity == quantity, ]
-  paste0(fmt(r$median, d), " [", fmt(r$lower_95, d), "; ", fmt(r$upper_95, d), "]")
+est <- function(
+  measure,
+  quantity,
+  model = main_model,
+  group = "pooled",
+  d = 2
+) {
+  r <- summ[
+    summ$model == model &
+      summ$measure == measure &
+      summ$group == group &
+      summ$quantity == quantity,
+  ]
+  paste0(
+    fmt(r$median, d),
+    " [",
+    fmt(r$lower_95, d),
+    "; ",
+    fmt(r$upper_95, d),
+    "]"
+  )
 }
 med <- function(measure, quantity, model = main_model, group = "pooled") {
-  summ$median[summ$model == model & summ$measure == measure &
-    summ$group == group & summ$quantity == quantity]
+  summ$median[
+    summ$model == model &
+      summ$measure == measure &
+      summ$group == group &
+      summ$quantity == quantity
+  ]
 }
 
 # Sanity check against the pooled medians printed by notebook 3.3. Display
 # values never come from here; this only stops the render if the file changed.
 ref_33 <- tribble(
-  ~model,  ~measure, ~quantity,          ~ref,
-  "gauss", "thermo", "delta_ap",         19.07,
-  "gauss", "thermo", "delta_ap_sd",      0.61,
-  "gauss", "thermo", "ap_explicit",      55.75,
-  "gauss", "thermo", "ap_vote_anchored", 36.66,
-  "gauss", "games",  "delta_ap",         0.37,
-  "gauss", "games",  "delta_ap_sd",      0.15,
-  "gauss", "diff",   "diff",             0.46,
-  "bb",    "thermo", "delta_ap",         20.74,
-  "bb",    "thermo", "delta_ap_sd",      0.66,
-  "bb",    "thermo", "ap_explicit",      55.26,
-  "bb",    "thermo", "ap_vote_anchored", 34.52,
-  "bb",    "games",  "delta_ap",         0.37,
-  "bb",    "games",  "delta_ap_sd",      0.15,
-  "bb",    "diff",   "diff",             0.51
+  ~model  , ~measure , ~quantity          , ~ref  ,
+  "gauss" , "thermo" , "delta_ap"         , 19.07 ,
+  "gauss" , "thermo" , "delta_ap_sd"      ,  0.61 ,
+  "gauss" , "thermo" , "ap_explicit"      , 55.75 ,
+  "gauss" , "thermo" , "ap_vote_anchored" , 36.66 ,
+  "gauss" , "games"  , "delta_ap"         ,  0.37 ,
+  "gauss" , "games"  , "delta_ap_sd"      ,  0.15 ,
+  "gauss" , "diff"   , "diff"             ,  0.46 ,
+  "bb"    , "thermo" , "delta_ap"         , 20.74 ,
+  "bb"    , "thermo" , "delta_ap_sd"      ,  0.66 ,
+  "bb"    , "thermo" , "ap_explicit"      , 55.26 ,
+  "bb"    , "thermo" , "ap_vote_anchored" , 34.52 ,
+  "bb"    , "games"  , "delta_ap"         ,  0.37 ,
+  "bb"    , "games"  , "delta_ap_sd"      ,  0.15 ,
+  "bb"    , "diff"   , "diff"             ,  0.51
 )
-chk <- inner_join(ref_33, filter(summ, group == "pooled"), by = c("model", "measure", "quantity"))
+chk <- inner_join(
+  ref_33,
+  filter(summ, group == "pooled"),
+  by = c("model", "measure", "quantity")
+)
 stopifnot(
   nrow(chk) == nrow(ref_33),
   all(abs(chk$median - chk$ref) < 0.011 * pmax(1, abs(chk$ref))),
-  all(filter(summ, group == "pooled", quantity %in% c("delta_ap", "diff"))$p == 1)
+  all(
+    filter(summ, group == "pooled", quantity %in% c("delta_ap", "diff"))$p == 1
+  )
 )
 
 mlab <- c(thermo = "Thermometer", games = "Spiele")
@@ -763,10 +978,14 @@ halfeye_panel <- function(d, s, title, xlab, caption = NULL) {
 pooled_figure <- function(model_sel) {
   type_lab <- c(ap_explicit_sd = "bekennend", ap_vote_anchored_sd = "implizit")
   rows_a <- rev(c(
-    "Thermometer · bekennend", "Thermometer · implizit",
-    "Spiele · bekennend", "Spiele · implizit"
+    "Thermometer · bekennend",
+    "Thermometer · implizit",
+    "Spiele · bekennend",
+    "Spiele · implizit"
   ))
-  pick <- function(df, q) filter(df, model == model_sel, group == "pooled", quantity %in% q)
+  pick <- function(df, q) {
+    filter(df, model == model_sel, group == "pooled", quantity %in% q)
+  }
 
   da <- pick(draws_all, names(type_lab)) |>
     mutate(
@@ -774,7 +993,12 @@ pooled_figure <- function(model_sel) {
       row = factor(paste(mlab[measure], fill, sep = " · "), levels = rows_a)
     )
   sa <- pick(summ, names(type_lab)) |>
-    mutate(row = factor(paste(mlab[measure], type_lab[quantity], sep = " · "), levels = rows_a))
+    mutate(
+      row = factor(
+        paste(mlab[measure], type_lab[quantity], sep = " · "),
+        levels = rows_a
+      )
+    )
 
   db <- pick(draws_all, "delta_ap_sd") |>
     mutate(fill = mlab[measure], row = factor(fill, levels = rev(mlab)))
@@ -787,15 +1011,29 @@ pooled_figure <- function(model_sel) {
     mutate(row = factor("Thermometer − Spiele"))
 
   sd_note <- paste0(
-    "1 SD = ", fmt(post$scales$games$sd, 1), " Punkte (Spiele) · ",
-    fmt(post$scales$thermo$sd, 1), " Grad (Thermometer)"
+    "1 SD = ",
+    fmt(post$scales$games$sd, 1),
+    " Punkte (Spiele) · ",
+    fmt(post$scales$thermo$sd, 1),
+    " Grad (Thermometer)"
   )
 
-  pa <- halfeye_panel(da, sa, "(a) Polarisierung nach Typ", "AP: eigene minus fremde Partei (SD)", sd_note) +
+  pa <- halfeye_panel(
+    da,
+    sa,
+    "(a) Polarisierung nach Typ",
+    "AP: eigene minus fremde Partei (SD)",
+    sd_note
+  ) +
     scale_fill_manual(values = c(bekennend = col_expl, implizit = col_impl))
   pb <- halfeye_panel(db, sb, "(b) bekennend − implizit", "ΔAP (SD)") +
     scale_fill_manual(values = col_meas)
-  pc <- halfeye_panel(dc, sc, "(c) Unterschied der Unterschiede", "ΔAP Thermometer − ΔAP Spiele (SD)") +
+  pc <- halfeye_panel(
+    dc,
+    sc,
+    "(c) Unterschied der Unterschiede",
+    "ΔAP Thermometer − ΔAP Spiele (SD)"
+  ) +
     scale_fill_manual(values = c(diff = grey2))
 
   (pa | (pb / pc)) + plot_layout(widths = c(1.25, 1))
@@ -803,9 +1041,17 @@ pooled_figure <- function(model_sel) {
 
 # Country figure: Delta AP per measure and the difference, one row per country
 country_data <- function(model_sel) {
-  panels <- c(thermo = "ΔAP Thermometer", games = "ΔAP Spiele", diff = "Thermometer − Spiele")
+  panels <- c(
+    thermo = "ΔAP Thermometer",
+    games = "ΔAP Spiele",
+    diff = "Thermometer − Spiele"
+  )
   s <- summ |>
-    filter(model == model_sel, group != "pooled", quantity %in% c("delta_ap_sd", "diff")) |>
+    filter(
+      model == model_sel,
+      group != "pooled",
+      quantity %in% c("delta_ap_sd", "diff")
+    ) |>
     mutate(
       panel = factor(panels[measure], levels = panels),
       land = coalesce(unname(laender[group]), group)
@@ -830,18 +1076,34 @@ country_figure <- function(s_all, lands) {
     geom_vline(xintercept = 0, colour = grey1) +
     geom_blank(data = lim, aes(x = lo), inherit.aes = FALSE) +
     geom_blank(data = lim, aes(x = hi_ext), inherit.aes = FALSE) +
-    geom_linerange(aes(xmin = lower_99, xmax = upper_99, colour = panel), linewidth = 0.5) +
-    geom_linerange(aes(xmin = lower_95, xmax = upper_95, colour = panel), linewidth = 1.3) +
+    geom_linerange(
+      aes(xmin = lower_99, xmax = upper_99, colour = panel),
+      linewidth = 0.5
+    ) +
+    geom_linerange(
+      aes(xmin = lower_95, xmax = upper_95, colour = panel),
+      linewidth = 1.3
+    ) +
     geom_point(aes(x = median, colour = panel), size = 1.8) +
-    geom_text(aes(x = hi_lab, label = fmt_p(p)), hjust = 0, size = 2.5, colour = navy) +
+    geom_text(
+      aes(x = hi_lab, label = fmt_p(p)),
+      hjust = 0,
+      size = 2.5,
+      colour = navy
+    ) +
     facet_wrap(~panel, scales = "free_x", nrow = 1) +
-    scale_colour_manual(values = c(
-      "ΔAP Thermometer" = navy,
-      "ΔAP Spiele" = accent,
-      "Thermometer − Spiele" = grey2
-    )) +
+    scale_colour_manual(
+      values = c(
+        "ΔAP Thermometer" = navy,
+        "ΔAP Spiele" = accent,
+        "Thermometer − Spiele" = grey2
+      )
+    ) +
     scale_x_continuous(labels = scales::label_number(decimal.mark = ",")) +
-    labs(x = "SD-Einheiten · Punkt = Median, Balken = 95-%- und 99-%-Intervall", y = NULL) +
+    labs(
+      x = "SD-Einheiten · Punkt = Median, Balken = 95-%- und 99-%-Intervall",
+      y = NULL
+    ) +
     theme_res() +
     theme(
       strip.text = element_text(colour = navy, face = "bold"),
@@ -1011,7 +1273,11 @@ data.frame(
     "Spiele (Befragte × Runde)",
     "Thermometer (Befragte × bewertete Partei)"
   ),
-  Befragte = fmt_n(c(n_resp, n_distinct(games$meta_responseid), n_distinct(thermo$meta_responseid))),
+  Befragte = fmt_n(c(
+    n_resp,
+    n_distinct(games$meta_responseid),
+    n_distinct(thermo$meta_responseid)
+  )),
   Zeilen = c("–", fmt_n(nrow(games)), fmt_n(nrow(thermo)))
 ) |>
   knitr::kable(align = c("l", "r", "r"))
@@ -1038,8 +1304,16 @@ Die strengere Stichprobe: nur Befragte, die den Aufmerksamkeitstest bestanden un
 library(ggdag)
 
 dag_lab <- c(
-  Y = "Ergebnis", T = "Typ", R = "eigen/fremd", P = "Partei", C = "Land",
-  W = "Welle", U = "Unbeobachtet", Z = "Profilmerkmale", G = "Spiel", K = "Runde"
+  Y = "Ergebnis",
+  T = "Typ",
+  R = "eigen/fremd",
+  P = "Partei",
+  C = "Land",
+  W = "Welle",
+  U = "Unbeobachtet",
+  Z = "Profilmerkmale",
+  G = "Spiel",
+  K = "Runde"
 )
 
 dag_games <- dagify(
@@ -1092,11 +1366,17 @@ draw_dag <- function(dag, title) {
     theme_dag() +
     theme(
       legend.position = "none",
-      plot.title = element_text(colour = navy, face = "bold", hjust = 0.5, size = 11)
+      plot.title = element_text(
+        colour = navy,
+        face = "bold",
+        hjust = 0.5,
+        size = 11
+      )
     )
 }
 
-draw_dag(dag_games, "Spiele (Punkte)") | draw_dag(dag_thermo, "Thermometer (Grad)")
+draw_dag(dag_games, "Spiele (Punkte)") |
+  draw_dag(dag_thermo, "Thermometer (Grad)")
 ```
 
 - Unbeobachtete Eigenschaften (U: Interesse, Stärke der Präferenz, soziale Erwünschtheit …) wirken auf Bekenntnis **und** Verhalten
@@ -1194,7 +1474,10 @@ support <- raw_thermo |>
   filter(explicit >= 1, vote_anchored >= 1)
 raw_cells <- raw_thermo |>
   filter(der_anchor %in% support$der_anchor) |>
-  summarise(m = weighted.mean(q_thermo, der_w), .by = c(type, der_thermo_relationship)) |>
+  summarise(
+    m = weighted.mean(q_thermo, der_w),
+    .by = c(type, der_thermo_relationship)
+  ) |>
   tidyr::pivot_wider(names_from = der_thermo_relationship, values_from = m) |>
   mutate(ap = co - out)
 raw_ap <- setNames(raw_cells$ap, raw_cells$type)
@@ -1241,14 +1524,23 @@ Dieselbe Abbildung aus den Beta-Binomial-Modellen. ΔAP Thermometer `r est("ther
 post$diagnostics |>
   mutate(
     name = c(
-      games_bb = "Spiele, BB", games_gauss = "Spiele, Gauß",
-      thermo_bb = "Thermometer, BB", thermo_gauss = "Thermometer, Gauß"
+      games_bb = "Spiele, BB",
+      games_gauss = "Spiele, Gauß",
+      thermo_bb = "Thermometer, BB",
+      thermo_gauss = "Thermometer, Gauß"
     )[name],
     max_rhat = fmt(max_rhat, 3),
     across(c(min_ess_bulk, min_ess_tail), \(x) format(round(x), big.mark = "."))
   ) |>
   knitr::kable(
-    col.names = c("Modell", "max. R̂", "min. ESS (bulk)", "min. ESS (tail)", "Divergenzen", "max. Baumtiefe erreicht"),
+    col.names = c(
+      "Modell",
+      "max. R̂",
+      "min. ESS (bulk)",
+      "min. ESS (tail)",
+      "Divergenzen",
+      "max. Baumtiefe erreicht"
+    ),
     align = c("l", "r", "r", "r", "r", "r")
   )
 ```
@@ -1268,18 +1560,36 @@ post$diagnostics |>
 ppc <- readr::read_rds(here("data", "05_results", "eu25_ppc.rds"))
 pc <- function(measure, model, stat, cell, what = "observed") {
   r <- ppc$checks
-  r[[what]][r$kind == "posterior" & r$group == "pooled" & r$measure == measure &
-    r$model == model & r$stat == stat & r$cell == cell]
+  r[[what]][
+    r$kind == "posterior" &
+      r$group == "pooled" &
+      r$measure == measure &
+      r$model == model &
+      r$stat == stat &
+      r$cell == cell
+  ]
 }
 pct <- function(x) paste0(fmt(100 * x, 0), " %")
 phi <- function(measure) {
   d <- ppc$dispersion
   d$median[d$kind == "posterior" & d$measure == measure & d$model == "bb"]
 }
-cells4 <- c("explicit co", "explicit out", "vote_anchored co", "vote_anchored out")
-bias <- sapply(cells4, \(k) pc("thermo", "bb", "mean", k, "rep_median") - pc("thermo", "bb", "mean", k))
-out_max <- max(sapply(cells4, \(k) pc("thermo", "gauss", "share_outside", k, "rep_median")))
-party_out <- sum(ppc$party$median < 0 | ppc$party$median > ifelse(ppc$party$measure == "games", 10, 100))
+cells4 <- c(
+  "explicit co",
+  "explicit out",
+  "vote_anchored co",
+  "vote_anchored out"
+)
+bias <- sapply(cells4, \(k) {
+  pc("thermo", "bb", "mean", k, "rep_median") - pc("thermo", "bb", "mean", k)
+})
+out_max <- max(sapply(cells4, \(k) {
+  pc("thermo", "gauss", "share_outside", k, "rep_median")
+}))
+party_out <- sum(
+  ppc$party$median < 0 |
+    ppc$party$median > ifelse(ppc$party$measure == "games", 10, 100)
+)
 dap_bb_raw <- pc("thermo", "bb", "delta_ap", "all", "rep_median")
 dap_obs_raw <- pc("thermo", "bb", "delta_ap", "all")
 ```
