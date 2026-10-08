@@ -1,0 +1,762 @@
+---
+title: |
+  CSAP Code Notebook 3.5
+subtitle: |
+  eu25games 2019: estimand-focused predictive checks of the AP contrast models (no refits)
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+This notebook checks the four cached fits of notebook 3.2, and their prior-only fits, against the statistics the estimand is built from.
+The posterior predictive checks in 3.2 compare densities and unweighted cell means. Here the test statistics are chosen to be as close as possible to the estimand:
+
+1. the respondent-weighted cell means within the common support, the raw $AP_t$ per type and the raw $\Delta AP$, computed on the observed outcome and on every replicated dataset, pooled and by country;
+2. the SD by type × relation cell (the variance assumption);
+3. the share at the anchors by cell (games 0, 5, 10; thermometer 0, 50, 100, and multiples of 10 for heaping);
+4. for the Gaussian models: the share of replications outside the scale by cell, and the party-level g-computed cell means outside 0--100;
+5. the same statistics under the prior, and the prior $\Delta AP$ by g-computation, which should be centred on 0.
+
+The raw $\Delta AP$ of statistic 1 is not the g-computed $\Delta AP$ of 3.3: g-computation sets type and relation counterfactually for every row and so averages over parties differently. But it is the statistic of the data that the estimand summarises, so a model that cannot reproduce it cannot be trusted on the estimand.
+
+- Input: the fits `data/04_models/{games,thermo}_{bb,gauss}{,_prior}.rds` (git-ignored). **Nothing is fitted here.** There is no `brm()` call, and the notebook stops if a fit is missing.
+- Cache: replicated draws and party-level predictions go to `data/04_models/derived/` (git-ignored), keyed on the fit file's MD5, the number of draws and the seed. They are recomputed only when that key changes.
+- Output: `data/05_results/eu25_ppc.rds`, the check summaries (small, tracked).
+
+**Nothing in this notebook is a claim.** The checks are reported with their uncertainty and not interpreted beyond what they test.
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "brms",
+  "cmdstanr",
+  "posterior",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Same seed and number of draws as 3.2 and 3.3, so the same posterior draws are used
+seed <- 2019
+ndraws_post <- 1000
+
+model_dir <- here("data", "04_models")
+derived_dir <- file.path(model_dir, "derived")
+out_dir <- here("data", "05_results")
+dir.create(derived_dir, showWarnings = FALSE, recursive = TRUE)
+dir.create(out_dir, showWarnings = FALSE)
+
+fit_names <- c(
+  "games_gauss", "games_bb", "thermo_gauss", "thermo_bb",
+  "games_gauss_prior", "games_bb_prior", "thermo_gauss_prior", "thermo_bb_prior"
+)
+fit_files <- file.path(model_dir, paste0(fit_names, ".rds"))
+stopifnot(all(file.exists(fit_files)))
+
+# Fingerprint of every fit before anything is loaded; compared again at the end
+fit_fingerprint <- function() {
+  tibble(
+    name = fit_names,
+    md5 = unname(tools::md5sum(fit_files)),
+    mtime = file.mtime(fit_files)
+  )
+}
+fp_start <- fit_fingerprint()
+```
+
+# Data
+
+The estimation data are rebuilt exactly as in notebook 3.3, which copies 3.2 (*Data*: *Games*, *Thermometer*, *Common Support*).
+**This code must stay identical to 3.2**: the fits were estimated on these rows.
+The development subsample, on which the prior-only fits were run, is drawn as in 3.2 (*Development Subsample*).
+Every fit is checked row by row against its own `fit$data` before it is used.
+
+```{r}
+#| label: data
+
+eu25_games <- read_rds(here("data", "03_final", "eu25_games.rds"))
+eu25_thermo <- read_rds(here("data", "03_final", "eu25_thermo.rds"))
+
+# Games, as in 3.2 (games-sample)
+games <- eu25_games |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_cj_partisan_relationship %in% c("co", "out")
+  ) |>
+  mutate(
+    der_explicit = as.integer(type == "explicit"),
+    der_co = as.integer(der_cj_partisan_relationship == "co"),
+    der_trust = as.integer(game == "trust"),
+    der_wave3 = as.integer(wave == 3),
+    der_cell = paste(type, der_cj_partisan_relationship),
+    der_anchor = paste(country, anchor, sep = ": "),
+    round = factor(round),
+    across(c(cj_age, cj_sex, cj_rel, cj_class, der_cj_eu_identity), factor)
+  ) |>
+  mutate(der_w = 1 / n(), .by = meta_responseid)
+
+games_scale <- list(mean = mean(games$cj_pl2), sd = sd(games$cj_pl2))
+games <- games |>
+  mutate(der_y_z = (cj_pl2 - games_scale$mean) / games_scale$sd)
+
+# Thermometer, as in 3.2 (thermo-sample)
+thermo <- eu25_thermo |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_thermo_relationship %in% c("co", "out")
+  ) |>
+  mutate(
+    der_explicit = as.integer(type == "explicit"),
+    der_co = as.integer(der_thermo_relationship == "co"),
+    der_wave3 = as.integer(wave == 3),
+    der_cell = paste(type, der_thermo_relationship),
+    der_anchor = paste(country, anchor, sep = ": ")
+  ) |>
+  mutate(der_w = 1 / n(), .by = meta_responseid)
+
+thermo_scale <- list(mean = mean(thermo$q_thermo), sd = sd(thermo$q_thermo))
+thermo <- thermo |>
+  mutate(der_y_z = (q_thermo - thermo_scale$mean) / thermo_scale$sd)
+
+# Common support, as in 3.2 (games-support, thermo-support)
+add_support <- function(df) {
+  support <- df |>
+    distinct(der_anchor, meta_responseid, type) |>
+    count(der_anchor, type) |>
+    pivot_wider(names_from = type, values_from = n, values_fill = 0) |>
+    filter(explicit >= 1, vote_anchored >= 1)
+  mutate(df, der_support = der_anchor %in% support$der_anchor)
+}
+games <- add_support(games)
+thermo <- add_support(thermo)
+
+# Development subsample, as in 3.2 (dev-sample)
+set.seed(seed)
+persons <- union(games$meta_pid, thermo$meta_pid)
+dev_pids <- sample(persons, round(0.1 * length(persons)))
+games_dev <- filter(games, meta_pid %in% dev_pids)
+thermo_dev <- filter(thermo, meta_pid %in% dev_pids)
+
+datasets <- list(
+  games = games, thermo = thermo,
+  games_dev = games_dev, thermo_dev = thermo_dev
+)
+scales <- list(games = games_scale, thermo = thermo_scale)
+
+# The rows a fit was estimated on must be these rows, in this order
+assert_rows <- function(fit, d, yvar) {
+  fd <- fit$data
+  stopifnot(
+    nrow(fd) == nrow(d),
+    isTRUE(all.equal(as.numeric(fd[[yvar]]), as.numeric(d[[yvar]]))),
+    all(fd$der_co == d$der_co),
+    all(fd$der_explicit == d$der_explicit),
+    all(as.character(fd$country) == as.character(d$country)),
+    all(as.character(fd$meta_pid) == as.character(d$meta_pid))
+  )
+  invisible(TRUE)
+}
+```
+
+# Check Code
+
+## Cache
+
+`cached()` stores an expensive derived object under `data/04_models/derived/<fit>_<what>_<key>.rds`.
+The key is the first eight characters of the fit file's MD5, the number of draws and the seed, so a refit, a different number of draws or a different seed all give a new file.
+The files are written uncompressed: they are large, local and read often.
+
+```{r}
+#| label: cache-code
+
+cache_key <- function(md5, ndraws, seed) {
+  paste(substr(md5, 1, 8), ndraws, seed, sep = "_")
+}
+
+cached <- function(fit_name, what, key, compute) {
+  path <- file.path(derived_dir, paste0(fit_name, "_", what, "_", key, ".rds"))
+  if (file.exists(path)) {
+    message(fit_name, ": ", what, " from cache")
+    return(read_rds(path))
+  }
+  t0 <- Sys.time()
+  x <- compute()
+  write_rds(x, path, compress = "none")
+  message(
+    fit_name, ": ", what, " computed in ",
+    round(as.numeric(Sys.time() - t0, units = "mins"), 1), " min"
+  )
+  x
+}
+```
+
+## Test Statistics
+
+Every statistic is computed by one function that takes a matrix of outcomes, one row per draw and one column per data row, on the **native scale** (tokens 0--10, points 0--100).
+The observed outcome is passed as a one-row matrix, so observed and replicated statistics come from the same code.
+The Gaussian replications are back-transformed from the z-scale first.
+
+- **Estimand statistics** use the estimand's rows and weights: the common support, and the respondent weight `der_w`. Columns: weighted cell means, $AP_t$ and $\Delta AP$, pooled and by country.
+- **Shape statistics** describe the fitted distribution, so they use all rows of the fit, unweighted (as the outcome tables in 3.2 do). Columns: SD, anchor shares, heaping and (Gaussian) out-of-scale share, by cell. A Gaussian replication counts at an anchor if it *rounds* to it. It is not clamped to the scale, because clamping would pile all out-of-scale mass onto 0 and 100 and fake the spikes.
+
+```{r}
+#| label: stat-code
+
+cells <- c("explicit co", "explicit out", "vote_anchored co", "vote_anchored out")
+
+# One indicator (or weight) column per level of f
+ind_matrix <- function(f, w = 1) {
+  f <- factor(f)
+  m <- vapply(levels(f), \(l) as.numeric(f == l) * w, numeric(length(f)))
+  matrix(m, nrow = length(f), dimnames = list(NULL, levels(f)))
+}
+
+# Columns of a statistics matrix, filled with NA where a cell is missing
+pick <- function(m, cols) {
+  out <- matrix(NA_real_, nrow(m), length(cols), dimnames = list(NULL, cols))
+  have <- intersect(cols, colnames(m))
+  out[, have] <- m[, have]
+  out
+}
+
+estimand_stats <- function(Y, d) {
+  s <- d$der_support
+  dd <- d[s, ]
+  Ys <- Y[, s, drop = FALSE]
+  W <- cbind(
+    ind_matrix(paste(dd$der_cell, "pooled", sep = "|"), dd$der_w),
+    ind_matrix(paste(dd$der_cell, dd$country, sep = "|"), dd$der_w)
+  )
+  M <- sweep(Ys %*% W, 2, colSums(W), "/")
+  colnames(M) <- paste0("mean|", colnames(W))
+
+  grp <- c("pooled", sort(unique(dd$country)))
+  g <- function(cell) pick(M, paste0("mean|", cell, "|", grp))
+  ap_e <- g("explicit co") - g("explicit out")
+  ap_v <- g("vote_anchored co") - g("vote_anchored out")
+  dap <- ap_e - ap_v
+  colnames(ap_e) <- paste0("ap|explicit|", grp)
+  colnames(ap_v) <- paste0("ap|vote_anchored|", grp)
+  colnames(dap) <- paste0("delta_ap|all|", grp)
+  cbind(M, ap_e, ap_v, dap)
+}
+
+shape_stats <- function(Y, d, measure, gauss) {
+  C <- ind_matrix(d$der_cell)
+  n <- colSums(C)
+  per_cell <- \(X, stat) {
+    out <- sweep(X %*% C, 2, n, "/")
+    colnames(out) <- paste0(stat, "|", colnames(C), "|pooled")
+    out
+  }
+  mu <- per_cell(Y, "mean")
+  m2 <- per_cell(Y^2, "m2")
+  sdv <- sqrt(pmax(m2 - mu^2, 0) * rep(n / (n - 1), each = nrow(Y)))
+  colnames(sdv) <- sub("^m2", "sd", colnames(m2))
+
+  Yr <- if (gauss) round(Y) else Y
+  top <- if (measure == "games") 10 else 100
+  anchors <- if (measure == "games") c(0, 5, 10) else c(0, 50, 100)
+  out <- list(sdv)
+  for (a in anchors) {
+    out[[length(out) + 1]] <- per_cell((Yr == a) * 1, paste0("share_", a))
+  }
+  if (measure == "thermo") {
+    out[[length(out) + 1]] <- per_cell(
+      (Yr %% 10 == 0 & Yr >= 0 & Yr <= top) * 1, "share_mult10"
+    )
+  }
+  if (gauss) {
+    out[[length(out) + 1]] <- per_cell((Y < 0 | Y > top) * 1, "share_outside")
+  }
+  do.call(cbind, out)
+}
+
+# Observed value against the replicated distribution of each statistic
+summarise_check <- function(obs, rep) {
+  tibble(
+    column = colnames(rep),
+    observed = obs[1, colnames(rep)],
+    rep_median = apply(rep, 2, median, na.rm = TRUE),
+    rep_lower = apply(rep, 2, quantile, 0.025, na.rm = TRUE),
+    rep_upper = apply(rep, 2, quantile, 0.975, na.rm = TRUE),
+    p_rep_ge_obs = colMeans(sweep(rep, 2, obs[1, colnames(rep)], ">="), na.rm = TRUE)
+  ) |>
+    separate_wider_delim(column, "|", names = c("stat", "cell", "group")) |>
+    mutate(inside_95 = observed >= rep_lower & observed <= rep_upper)
+}
+```
+
+## Party-Level and Prior g-Computation
+
+The party-level check needs g-computed cell means per anchor party.
+`cell_sums()` is the function of 3.3, with the grouping variable as an argument: it sets type and relation counterfactually for every row of the support, predicts with `posterior_epred()`, and returns each group's weighted sums and weight totals.
+For the prior-only fits it is run pooled, to repeat 3.2's check that the prior $\Delta AP$ is centred on 0.
+
+```{r}
+#| label: gcomp-code
+
+cell_sums <- function(fit, data, ids, back = identity, by = "country", chunk = 5000) {
+  grp <- factor(if (by == "pooled") rep("pooled", nrow(data)) else data[[by]])
+  m <- ind_matrix(grp, data$der_w)
+  rows <- split(seq_len(nrow(data)), ceiling(seq_len(nrow(data)) / chunk))
+
+  cl <- expand_grid(der_explicit = 0:1, der_co = 0:1)
+  sums <- map2(cl$der_explicit, cl$der_co, \(e, k) {
+    nd <- mutate(data, der_explicit = e, der_co = k)
+    tot <- 0
+    for (i in rows) {
+      ep <- back(posterior_epred(fit, newdata = nd[i, ], draw_ids = ids))
+      tot <- tot + ep %*% m[i, , drop = FALSE]
+    }
+    tot
+  })
+  names(sums) <- c("vote_anchored out", "vote_anchored co", "explicit out", "explicit co")
+  list(sums = sums, w = colSums(m))
+}
+```
+
+# Computation
+
+The fits are loaded one at a time and dropped before the next (about 560 MB each).
+For each fit: the rows are checked against `fit$data`; the replicated draws are taken from the cache or computed (`posterior_predict()`, 1,000 posterior draws with the draw positions of 3.3, or all 300 draws of a prior-only fit); the statistics are computed on the observed and the replicated outcomes; for the Gaussian posterior fits the party-level g-computation runs (cached); for the prior-only fits the pooled prior $\Delta AP$.
+
+```{r}
+#| label: compute
+
+specs <- tibble(name = fit_names) |>
+  mutate(
+    measure = sub("_.*", "", name),
+    model = if_else(grepl("gauss", name), "gauss", "bb"),
+    kind = if_else(grepl("_prior$", name), "prior", "posterior"),
+    data = if_else(kind == "prior", paste0(measure, "_dev"), measure),
+    yvar = case_when(
+      model == "gauss" ~ "der_y_z",
+      measure == "games" ~ "cj_pl2",
+      TRUE ~ "q_thermo"
+    )
+  )
+
+results <- pmap(specs, \(name, measure, model, kind, data, yvar) {
+  t0 <- Sys.time()
+  fit <- read_rds(file.path(model_dir, paste0(name, ".rds")))
+  d <- datasets[[data]]
+  assert_rows(fit, d, yvar)
+
+  md5 <- fp_start$md5[fp_start$name == name]
+  set.seed(seed)
+  ids <- if (kind == "posterior") {
+    sample(seq_len(ndraws(fit)), min(ndraws_post, ndraws(fit)))
+  } else {
+    seq_len(ndraws(fit))
+  }
+  key <- cache_key(md5, length(ids), seed)
+
+  sc <- scales[[measure]]
+  gauss <- model == "gauss"
+  back <- if (gauss) \(x) x * sc$sd + sc$mean else identity
+  top <- if (measure == "games") 10 else 100
+
+  # Replicated outcomes, native scale (Gaussian stored on the z-scale)
+  yrep <- cached(name, "yrep", key, \() {
+    set.seed(seed)
+    posterior_predict(fit, draw_ids = ids)
+  })
+  Y <- back(yrep)
+  rm(yrep)
+  y <- matrix(back(d[[yvar]]), nrow = 1)
+
+  checks <- bind_rows(
+    summarise_check(estimand_stats(y, d), estimand_stats(Y, d)),
+    summarise_check(shape_stats(y, d, measure, gauss), shape_stats(Y, d, measure, gauss))
+  )
+  rm(Y)
+  gc()
+
+  # Dispersion parameter
+  dpar <- if (gauss) "sigma" else "phi"
+  dp <- as_draws_df(fit, variable = dpar)[[dpar]]
+  disp <- tibble(
+    parameter = dpar,
+    median = median(dp),
+    lower = quantile(dp, 0.025),
+    upper = quantile(dp, 0.975)
+  )
+
+  # Party-level g-computed cell means (Gaussian posterior fits)
+  party <- NULL
+  if (gauss && kind == "posterior") {
+    cs <- cached(name, "party_sums", key, \() {
+      cell_sums(fit, filter(d, der_support), ids, back, by = "der_anchor")
+    })
+    party <- imap(cs$sums, \(tot, cell) {
+      means <- sweep(tot, 2, cs$w, "/")
+      tibble(
+        cell = cell,
+        anchor = colnames(means),
+        median = apply(means, 2, median),
+        share_draws_outside = colMeans(means < 0 | means > top)
+      )
+    }) |>
+      bind_rows()
+  }
+
+  # Prior Delta AP by g-computation, pooled (prior-only fits)
+  prior_gcomp <- NULL
+  if (kind == "prior") {
+    cs <- cell_sums(fit, filter(d, der_support), ids, back, by = "pooled")
+    mm <- map(cs$sums, \(tot) tot[, 1] / cs$w)
+    prior_gcomp <- tibble(
+      .draw = ids,
+      ap_explicit = mm[["explicit co"]] - mm[["explicit out"]],
+      ap_vote_anchored = mm[["vote_anchored co"]] - mm[["vote_anchored out"]],
+      delta_ap = ap_explicit - ap_vote_anchored
+    )
+  }
+
+  rm(fit)
+  gc()
+  message(name, ": ", round(as.numeric(Sys.time() - t0, units = "mins"), 1), " min")
+  list(checks = checks, disp = disp, party = party, prior_gcomp = prior_gcomp)
+})
+names(results) <- fit_names
+
+collect <- function(part) {
+  out <- map2(results, fit_names, \(r, nm) {
+    if (is.null(r[[part]])) return(NULL)
+    mutate(r[[part]], name = nm, .before = 1)
+  }) |>
+    bind_rows()
+  if (nrow(out) == 0) return(NULL)
+  out |>
+    left_join(select(specs, name, measure, model, kind), by = "name") |>
+    relocate(measure, model, kind, .after = name)
+}
+checks <- collect("checks")
+dispersion <- collect("disp")
+party <- collect("party")
+prior_gcomp <- collect("prior_gcomp")
+```
+
+# Results
+
+Each table and figure compares the observed statistic with the 95% interval of the same statistic over the replicated datasets.
+`p_rep_ge_obs` is the share of replications at or above the observed value. Values near 0 or 1 mean the model misses the statistic. They are not tests to be read off at a threshold.
+
+## 1. Estimand Statistics
+
+Weighted cell means, $AP_t$ and $\Delta AP$, pooled, posterior.
+
+```{r}
+#| label: tbl-estimand-pooled
+
+checks |>
+  filter(kind == "posterior", group == "pooled", stat %in% c("mean", "ap", "delta_ap")) |>
+  select(measure, model, stat, cell, observed, rep_median, rep_lower, rep_upper, p_rep_ge_obs) |>
+  arrange(measure, stat, cell, model) |>
+  knitr::kable(digits = 2)
+```
+
+```{r}
+#| label: fig-estimand-pooled
+#| fig-width: 10
+#| fig-height: 6
+
+est_pooled <- checks |>
+  filter(kind == "posterior", group == "pooled", stat %in% c("mean", "ap", "delta_ap")) |>
+  mutate(label = fct_rev(fct_inorder(paste0(stat, ": ", cell))))
+
+ggplot(est_pooled, aes(y = label)) +
+  geom_linerange(
+    aes(xmin = rep_lower, xmax = rep_upper, colour = model),
+    position = position_dodge(width = 0.6),
+    linewidth = 1.2
+  ) +
+  geom_point(
+    aes(x = rep_median, colour = model),
+    position = position_dodge(width = 0.6),
+    size = 1.5
+  ) +
+  geom_point(aes(x = observed), shape = 4, size = 2.5, stroke = 1) +
+  facet_wrap(~measure, scales = "free_x") +
+  scale_colour_manual(values = c(gauss = "#08306b", bb = "#d94801")) +
+  labs(
+    title = "Estimand statistics: observed (×) and 95% replicated interval",
+    subtitle = "Respondent-weighted, common support, pooled; native scale",
+    x = NULL,
+    y = NULL,
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+```
+
+By country: the raw $\Delta AP$ of each country against its replicated interval.
+
+```{r}
+#| label: fig-estimand-country
+#| fig-width: 10
+#| fig-height: 8
+
+checks |>
+  filter(kind == "posterior", group != "pooled", stat == "delta_ap") |>
+  ggplot(aes(y = group)) +
+  geom_linerange(
+    aes(xmin = rep_lower, xmax = rep_upper, colour = model),
+    position = position_dodge(width = 0.6),
+    linewidth = 1
+  ) +
+  geom_point(aes(x = observed), shape = 4, size = 2, stroke = 0.8) +
+  facet_wrap(~measure, scales = "free_x") +
+  scale_colour_manual(values = c(gauss = "#08306b", bb = "#d94801")) +
+  labs(
+    title = "Raw Delta AP by country: observed (×) and 95% replicated interval",
+    x = "Delta AP (native scale)",
+    y = NULL,
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+```
+
+Share of the 25 countries whose observed statistic lies inside the 95% replicated interval:
+
+```{r}
+#| label: tbl-estimand-country
+
+checks |>
+  filter(kind == "posterior", group != "pooled", stat %in% c("ap", "delta_ap")) |>
+  summarise(
+    countries = sum(!is.na(observed)),
+    share_inside_95 = mean(inside_95, na.rm = TRUE),
+    .by = c(measure, model, stat, cell)
+  ) |>
+  arrange(measure, stat, cell, model) |>
+  knitr::kable(digits = 2)
+```
+
+## 2. SD by Cell
+
+```{r}
+#| label: tbl-sd
+
+checks |>
+  filter(kind == "posterior", stat == "sd") |>
+  select(measure, model, cell, observed, rep_median, rep_lower, rep_upper, p_rep_ge_obs) |>
+  arrange(measure, cell, model) |>
+  knitr::kable(digits = 2)
+```
+
+## 3. Anchor Shares by Cell
+
+```{r}
+#| label: fig-anchors
+#| fig-width: 10
+#| fig-height: 7
+
+checks |>
+  filter(kind == "posterior", grepl("^share_(\\d+|mult10)$", stat)) |>
+  mutate(stat = sub("share_", "", stat)) |>
+  ggplot(aes(y = cell)) +
+  geom_linerange(
+    aes(xmin = rep_lower, xmax = rep_upper, colour = model),
+    position = position_dodge(width = 0.6),
+    linewidth = 1.2
+  ) +
+  geom_point(aes(x = observed), shape = 4, size = 2.5, stroke = 1) +
+  facet_grid(measure ~ stat, scales = "free_x") +
+  scale_x_continuous(labels = scales::percent) +
+  scale_colour_manual(values = c(gauss = "#08306b", bb = "#d94801")) +
+  labs(
+    title = "Share of rows at the anchors: observed (×) and 95% replicated interval",
+    subtitle = "Gaussian replications counted if they round to the value",
+    x = NULL,
+    y = NULL,
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+```
+
+```{r}
+#| label: tbl-anchors
+
+checks |>
+  filter(kind == "posterior", grepl("^share_(\\d+|mult10)$", stat)) |>
+  select(measure, model, stat, cell, observed, rep_median, rep_lower, rep_upper) |>
+  arrange(measure, stat, cell, model) |>
+  knitr::kable(digits = 3)
+```
+
+## 4. Gaussian: Out of Scale
+
+Share of replicated rows outside the scale, by cell:
+
+```{r}
+#| label: tbl-outside
+
+checks |>
+  filter(kind == "posterior", stat == "share_outside") |>
+  select(measure, cell, rep_median, rep_lower, rep_upper) |>
+  arrange(measure, cell) |>
+  knitr::kable(digits = 3)
+```
+
+Party-level g-computed cell means outside 0--100 (or 0--10): parties whose posterior median is outside, and the share of draws outside, by cell.
+
+```{r}
+#| label: tbl-party
+
+party |>
+  summarise(
+    parties = n(),
+    parties_median_outside = sum(median < 0 | median > if_else(measure == "games", 10, 100)),
+    mean_share_draws_outside = mean(share_draws_outside),
+    max_share_draws_outside = max(share_draws_outside),
+    .by = c(measure, cell)
+  ) |>
+  arrange(measure, cell) |>
+  knitr::kable(digits = 3)
+
+party |>
+  filter(median < 0 | median > if_else(measure == "games", 10, 100)) |>
+  arrange(measure, cell, median) |>
+  select(measure, cell, anchor, median, share_draws_outside) |>
+  knitr::kable(digits = 2)
+```
+
+## Dispersion Parameters
+
+```{r}
+#| label: tbl-dispersion
+
+dispersion |>
+  select(measure, model, kind, parameter, median, lower, upper) |>
+  arrange(kind, measure, model) |>
+  knitr::kable(digits = 2)
+```
+
+## 5. Prior Predictive
+
+The same statistics under the prior-only fits (development subsample, all draws).
+The prior is meant to spread the outcome over the scale, not to reproduce the data, so here the question is only whether the observed statistics lie well inside the prior range.
+
+```{r}
+#| label: tbl-prior
+
+checks |>
+  filter(kind == "prior", group == "pooled") |>
+  select(measure, model, stat, cell, observed, rep_median, rep_lower, rep_upper) |>
+  arrange(measure, stat, cell, model) |>
+  knitr::kable(digits = 2)
+```
+
+The prior $\Delta AP$ by g-computation should be centred on 0, as in 3.2:
+
+```{r}
+#| label: tbl-prior-gcomp
+
+prior_gcomp |>
+  pivot_longer(c(ap_explicit, ap_vote_anchored, delta_ap), names_to = "quantity") |>
+  summarise(
+    median = median(value),
+    lower = quantile(value, 0.025),
+    upper = quantile(value, 0.975),
+    .by = c(measure, model, quantity)
+  ) |>
+  arrange(measure, model, quantity) |>
+  knitr::kable(digits = 2)
+```
+
+# Save
+
+One small list for the slides and the paper:
+
+- `checks`: every statistic per fit, with observed value and replicated interval;
+- `dispersion`: posterior (and prior) median and 95% interval of `sigma` or `phi`;
+- `party`: party-level g-computed cell means of the Gaussian fits (median and share of draws outside the scale);
+- `prior_gcomp`: prior draws of $AP_t$ and $\Delta AP$ by g-computation.
+
+```{r}
+#| label: save
+
+write_rds(
+  list(
+    checks = checks,
+    dispersion = dispersion,
+    party = party,
+    prior_gcomp = prior_gcomp
+  ),
+  file.path(out_dir, "eu25_ppc.rds"),
+  compress = "xz"
+)
+
+file.size(file.path(out_dir, "eu25_ppc.rds")) / 1e6
+```
+
+# Fits Unchanged
+
+The fit files must be byte-identical before and after this notebook.
+
+```{r}
+#| label: fits-unchanged
+
+fp_end <- fit_fingerprint()
+stopifnot(identical(fp_start, fp_end))
+fp_end |>
+  mutate(md5 = substr(md5, 1, 8)) |>
+  knitr::kable()
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

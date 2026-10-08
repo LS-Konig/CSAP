@@ -1260,20 +1260,44 @@ post$diagnostics |>
 
 ## Grenzen der Modelle {.smaller}
 
+```{r}
+#| label: ppc-values
+#| include: false
+
+# Predictive checks of notebook 3.5 (posterior, pooled)
+ppc <- readr::read_rds(here("data", "05_results", "eu25_ppc.rds"))
+pc <- function(measure, model, stat, cell, what = "observed") {
+  r <- ppc$checks
+  r[[what]][r$kind == "posterior" & r$group == "pooled" & r$measure == measure &
+    r$model == model & r$stat == stat & r$cell == cell]
+}
+pct <- function(x) paste0(fmt(100 * x, 0), " %")
+phi <- function(measure) {
+  d <- ppc$dispersion
+  d$median[d$kind == "posterior" & d$measure == measure & d$model == "bb"]
+}
+cells4 <- c("explicit co", "explicit out", "vote_anchored co", "vote_anchored out")
+bias <- sapply(cells4, \(k) pc("thermo", "bb", "mean", k, "rep_median") - pc("thermo", "bb", "mean", k))
+out_max <- max(sapply(cells4, \(k) pc("thermo", "gauss", "share_outside", k, "rep_median")))
+party_out <- sum(ppc$party$median < 0 | ppc$party$median > ifelse(ppc$party$measure == "games", 10, 100))
+dap_bb_raw <- pc("thermo", "bb", "delta_ap", "all", "rep_median")
+dap_obs_raw <- pc("thermo", "bb", "delta_ap", "all")
+```
+
 **Gauß (Hauptmodell)**
 
-- Legt Vorhersagemasse außerhalb der Skala; Parteimittel können 0–100 überschreiten
-- Kann die Häufungen nicht erzeugen: Thermometer ~20–23 % Nullen in den Fremd-Zellen, 27 % Hunderter bei Bekennenden/eigen; Spiele: Häufung bei 0 (fremd) und bei 5 (überall)
+- Legt Vorhersagemasse außerhalb der Skala (Thermometer bis `r pct(out_max)` je Zelle); g-computierte Parteimittel bleiben aber innerhalb der Skala (`r party_out` Überschreitungen)
+- Kann die Häufungen nicht erzeugen: Thermometer `r pct(pc("thermo", "gauss", "share_0", "vote_anchored out"))`–`r pct(pc("thermo", "gauss", "share_0", "explicit out"))` Nullen in den Fremd-Zellen, `r pct(pc("thermo", "gauss", "share_100", "explicit co"))` Hunderter bei Bekennenden/eigen; Spiele: Häufung bei 0 (fremd) und bei 5 (überall)
 - Eine Residual-SD für alle Zellen – Intervalle je Zelle womöglich schlecht kalibriert
 
 **Beta-Binomial (Robustheit)**
 
-- Thermometer: gemeinsames $\phi \approx 1{,}94$ → U-förmig; zu wenige Nullen in den Fremd-Zellen (0,15 statt 0,23; 0,14 statt 0,20), zu viele Hunderter in den Eigen-Zellen
-- Unterschätzt alle vier Zellmittel um 3–4,5 Grad, bei Impliziten/eigen stärker (~4,5) als fremd (~2,7) → implizite AP ~2 Grad zu niedrig, ΔAP überhöht
-- Spiele: $\phi \approx 7{,}7$ → ein Buckel, verfehlt die Häufungen bei 0 und 5; ΔAP trotzdem wie im Gauß-Modell
+- Thermometer: gemeinsames $\phi \approx$ `r fmt(phi("thermo"))` → U-förmig; zu wenige Nullen in den Fremd-Zellen (`r fmt(pc("thermo", "bb", "share_0", "explicit out", "rep_median"))` statt `r fmt(pc("thermo", "bb", "share_0", "explicit out"))`; `r fmt(pc("thermo", "bb", "share_0", "vote_anchored out", "rep_median"))` statt `r fmt(pc("thermo", "bb", "share_0", "vote_anchored out"))`), zu viele Hunderter in den Eigen-Zellen
+- Unterschätzt alle vier Zellmittel um `r fmt(-max(bias), 1)`–`r fmt(-min(bias), 1)` Grad, bei Impliziten/eigen am stärksten → roher ΔAP `r fmt(dap_bb_raw, 1)` statt `r fmt(dap_obs_raw, 1)` Grad, also überhöht
+- Spiele: $\phi \approx$ `r fmt(phi("games"), 1)` → ein Buckel, verfehlt die Häufungen bei 0 und 5; ΔAP trotzdem wie im Gauß-Modell
 
 ::: {.notes}
-Werte aus den Posterior Predictive Checks in Notebook 3.2. Beide Modelle haben Schwächen an der Verteilungsform. Für die Schätzgröße ist das beim Gauß-Modell harmlos, weil es die Zellmittel trotzdem trifft; beim Beta-Binomial-Modell verschiebt die falsche Streuung die Mittelwerte selbst.
+Werte aus den Predictive Checks in Notebook 3.5 (gewichtete Zellmittel im gemeinsamen Träger; Anteile über alle Zeilen). Beide Modelle haben Schwächen an der Verteilungsform. Für die Schätzgröße ist das beim Gauß-Modell harmlos, weil es die Zellmittel trotzdem trifft; beim Beta-Binomial-Modell verschiebt die falsche Streuung die Mittelwerte selbst.
 :::
 
 ------------------------------------------------------------------------
