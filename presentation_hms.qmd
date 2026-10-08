@@ -84,8 +84,7 @@ theme_schematic <- function(base = 13) {
 1. Polarisierung als Familie, nicht als Sache
 2. Affektive Polarisierung
 3. Empirische Einblicke
-4. Schlussfolgerungen aus der Anaylse
-5. Konsequenzen für die Polarisierungsdebatte
+4. Fazit
 
 # Polarisierung als Familie, nicht als Sache
 
@@ -535,11 +534,14 @@ ggplot(cells, aes(x, y)) +
 - Schon vor jeder Schätzung stehen konzeptuelle Entscheidungen
 - Und sie bestimmen die Grundgesamtheit, auf die sich die Schätzung bezieht (*population of inference*)
 
-# Empirie
+# Empirische Einblicke
 
-------------------------------------------------------------------------
+## Engeres Verständnis: subjektive Parteibindung {.smaller}
 
-## Wie viele sind es? {.smaller}
+::: {style="font-size: 0.8em;"}
+- Aus Sicht der Theorie sozialer Identität zählt, wer sich einer Partei **zugehörig fühlt**
+- Konsequenz: Wer *keine* Bindung angibt, fällt heraus
+:::
 
 ```{r}
 #| label: composition-data
@@ -582,7 +584,7 @@ rm(raw)
 #| fig-width: 9
 #| fig-height: 5
 #| fig-align: center
-#| out-width: "82%"
+#| out-width: "90%"
 
 laender <- c(
   AT = "Österreich",
@@ -646,6 +648,8 @@ pooled_txt <- pooled |>
 d_comp <- leaf_shares |>
   mutate(
     land = coalesce(unname(laender[country]), country),
+    n_land = sum(n),
+    land = paste0(land, " (", format(n_land, big.mark = "."), ")"),
     attached = sum(share[startsWith(as.character(leaf), "Attached")]),
     .by = country
   ) |>
@@ -709,14 +713,12 @@ ggplot(d_comp, aes(x = share, y = land, fill = leaf)) +
   )
 ```
 
-[Daten: eu25games2019 [@muno2026eu25games], basierend auf @hahm2024divided, Wellen 2 und 3, nur Befragte mit bestandenem Aufmerksamkeitstest, ungewichtet. Insgesamt: `r pooled_txt`.]{style="font-size: 0.45em; color: #7F94A5;"}
+::: {style="font-size: 0.45em; line-height: 1.25; color: #7F94A5; margin-top: 0;"}
+Daten: eu25games2019 [@muno2026eu25games], basierend auf @hahm2024divided, Wellen 2 und 3, nur Befragte mit bestandenem Aufmerksamkeitstest, ungewichtet. Insgesamt: `r pooled_txt`.
+:::
 
 ::: {.notes}
-Wie viele sind das? Hier für alle 25 Länder: Blautöne sind Menschen mit Parteibindung, Orangetöne Menschen ohne. Dunkelblau sind die Expliziten, Dunkelrot die Impliziten.
 
-Zwei Dinge. Erstens: Die Impliziten sind keine Randgruppe. Über alle Länder hinweg ist es etwa jeder Vierte bis Fünfte. Zweitens: Der Anteil schwankt stark zwischen Ländern.
-
-Das heißt: Wer nur die Expliziten untersucht, ändert, über wen er eigentlich Aussagen macht – und zwar in jedem Land unterschiedlich stark. Das ist eine Messentscheidung, die meistens stillschweigend getroffen wird.
 :::
 
 ------------------------------------------------------------------------
@@ -740,7 +742,7 @@ Das heißt: Wer nur die Expliziten untersucht, ändert, über wen er eigentlich 
 ::: {style="margin-top: 0.9em;"}
 ::: {.columns}
 ::: {.column width="50%"}
-**Einstellung: Gefühlsthermometer**
+[**Einstellung: Gefühlsthermometer**]{style="color: #003056;"}
 
 ![](./images/eu25-thermo-ie.png){height="230px" fig-align="center"}
 
@@ -748,7 +750,7 @@ Das heißt: Wer nur die Expliziten untersucht, ändert, über wen er eigentlich 
 :::
 
 ::: {.column width="50%"}
-**Verhalten: Diktator- und Vertrauensspiel**
+[**Verhalten: Diktator- und Vertrauensspiel**]{style="color: #003056;"}
 
 ![](./images/cj-example-profile.png){height="230px" fig-align="center"}
 
@@ -812,7 +814,7 @@ summ <- draws_all |>
     .by = c(model, measure, group, quantity)
   )
 
-# Main model: Gaussian (cell means, see "Warum das Gauß-Modell?"); BB = robustness
+# Main model: Gaussian (cell means, see appendix "Verteilung der Ergebnisvariablen"); BB = robustness
 main_model <- "gauss"
 
 # Inline numbers for the notes: "0,66 [0,63; 0,69]"
@@ -1098,59 +1100,62 @@ pooled_panels(main_model)$b
 :::
 
 ::: {.notes}
-*(Ergebnisse, ca. 1:30)*
 
-Alle Länder zusammen, Gauß-Modell (Begründung im Anhang; das Beta-Binomial-Modell kommt zum selben Ergebnis). Alles in Standardabweichungen, damit Punkte und Grad vergleichbar werden.
-
-Links: Polarisierung, also eigene minus fremde Partei, getrennt nach Typ und Messung. Beim Thermometer: explizit `r est("thermo", "ap_explicit_sd")`, implizit `r est("thermo", "ap_vote_anchored_sd")` Standardabweichungen. Bei den Spielen: explizit `r est("games", "ap_explicit_sd")`, implizit `r est("games", "ap_vote_anchored_sd")`. In Rohwerten: beim Thermometer `r est("thermo", "ap_explicit", d = 1)` gegenüber `r est("thermo", "ap_vote_anchored", d = 1)` Grad, bei den Spielen `r est("games", "ap_explicit")` gegenüber `r est("games", "ap_vote_anchored")` Punkte von zehn.
-
-Rechts oben: der Unterschied zwischen Expliziten und Impliziten innerhalb jeder Messung. Thermometer `r est("thermo", "delta_ap_sd")`, Spiele `r est("games", "delta_ap_sd")` SD.
-
-Die Zahlen in Klammern sind 95-%-Intervalle. Bei jeder Verteilung steht die Wahrscheinlichkeit, dass der Wert größer als null ist.
-
-[Deutung mit Tristan abstimmen – Beschreibung hier bewusst ohne Urteil.]
-:::
-
-
-# Was folgt daraus?
-
-## Was folgt daraus? {.smaller}
-
-- **Messen heißt entscheiden:** Wer zählt als Anhänger, was zählt als Polarisierung – beides sind begriffliche Entscheidungen
-- [Platzhalter: Die verbreitetsten Messungen (Thermometer, Sympathie-Skalen) könnten Ausmaß und Anstieg affektiver Polarisierung **überzeichnen**]{style="color: #DE7E50;"}
-- **Mehr ist nicht automatisch schlechter:** Der Zusammenhang zwischen affektiver Polarisierung und Unterstützung der Demokratie ist nicht linear [@janssen2024breaking]
-
-::: {.notes}
-*(Block 4 und 5, ca. 1:30)*
-
-Was folgt daraus?
-
-Erstens: Messen heißt entscheiden. Wen ich als Parteianhänger zähle und was ich als Polarisierung messe, sind keine technischen Details, sondern begriffliche Entscheidungen.
-
-Zweitens [vorläufig, abhängig von den Ergebnissen]: Die Messungen, auf denen fast die ganze Forschung beruht, könnten das Ausmaß affektiver Polarisierung überzeichnen – wenn Menschen in ihren Einstellungen härter urteilen, als sie dann handeln.
-
-Drittens: Die frühe Erzählung „affektive Polarisierung ist schlecht für die Demokratie“ wird inzwischen kritischer gesehen. Neuere Arbeiten finden eher einen umgekehrt U-förmigen Zusammenhang: Etwas Emotion gehört zur Demokratie dazu. Erinnern Sie sich an die Merkel-Jahre – da war die Klage eher, Politik sei zu wenig leidenschaftlich, zu alternativlos.
 :::
 
 ------------------------------------------------------------------------
 
-## Fazit
+## Was folgt daraus? {.smaller}
 
-- Es gibt nicht **die eine** Polarisierung
-- Es gibt eine klare affektive Kluft zwischen eigener und fremder Partei
-- Wie groß sie ist und wie sie sich entwickelt, hängt an Mess- und Begriffsentscheidungen
-- Alarmistische Erzählungen helfen nicht – und stehen auf dünner empirischer Grundlage
+- **Messen heißt entscheiden:**
+  - Wer wird mitgezählt? Anhänger, Wähler, Wahlberechtigte
+  - Welche Facette deckt das Instrument ab? Vertikal oder horizontal, Einstellung oder Verhalten
+  - Wird Polarisierung als Zustand oder Prozess verstanden?
+- **Ergebnis:** Explizite Anhänger urteilen härter -- handeln aber nur ein bisschen anders, robust über Länder hinweg (Anhang)
+- **Parteiidentifikation** spielt für verhaltensbezogene AP eine wesentlich geringere Rolle
+- **Horizontale AP** ist, am Verhalten gemessen, deutlich geringer als vertikale AP, gemessen an Einstellungen
+- [Da Letztere das etablierte Standardmaß vieler Studien ist: Nicht unwahrscheinlich, dass viele Schätzungen das Ausmaß affektiver Polarisierung in der Bevölkerung **überschätzen**]{style="color: #DE7E50;"}
 
 ::: {.notes}
-Zum Schluss vier Sätze.
+Was folgt daraus?
 
-Es gibt nicht *die* Polarisierung – es gibt eine Familie von Phänomenen.
+Erstens: Messen heißt entscheiden. Wen ich mitzähle – nur Anhänger, alle Wähler oder alle Wahlberechtigten –, welche Facette mein Instrument abdeckt und ob ich Polarisierung als Zustand oder als Prozess verstehe: Das sind keine technischen Details, sondern begriffliche Entscheidungen. Diese Studie ist eine Momentaufnahme, sagt also etwas über den Zustand, nicht über einen Trend.
 
-Es gibt eine klare affektive Kluft: Menschen behandeln Anhänger der eigenen Partei besser als die anderer Parteien.
+Zweitens das Ergebnis: Wer sich zu einer Partei bekennt, urteilt härter, handelt aber nur ein bisschen anders. Das gilt nicht nur im Durchschnitt, sondern zeigt sich auch in den einzelnen Ländern; die Länderschätzungen stehen im Anhang.
 
-Aber wie groß diese Kluft ist und ob sie wächst, hängt davon ab, wie wir sie messen.
+Drittens: Für das Verhalten spielt die Parteiidentifikation eine wesentlich geringere Rolle als für die Einstellungen.
 
-Und deshalb: Alarmistische Erzählungen helfen nicht weiter – und sie stehen auf dünnerem Boden, als ihr Ton vermuten lässt. Vielen Dank.
+Viertens: Gegenüber Mitbürgern, im Verhalten gemessen, ist affektive Polarisierung deutlich schwächer als gegenüber Parteien, in Einstellungen gemessen. Und weil gerade das Gefühlsthermometer das etablierte Standardmaß der Forschung ist, ist es nicht unwahrscheinlich, dass viele Schätzungen das Ausmaß affektiver Polarisierung in der Bevölkerung überschätzen.
+:::
+
+------------------------------------------------------------------------
+
+## Fazit {.smaller}
+
+1. Es gibt nicht **die eine** Polarisierung
+2. Es gibt eine messbare affektive Polarisierung in Europa zwischen eigener und anderen Parteien
+3. Sinnvolle Aussagen über Ausmaß und Dynamik sind nur vor dem Hintergrund von Maß, Stichprobenzusammensetzung und den damit verbundenen konzeptionellen Entscheidungen möglich
+4. Alarmistische Erzählungen helfen wenig – und stehen auf dünner empirischer Grundlage
+5. Die einfache Gleichung „mehr Polarisierung = schlechter“ wird von neueren Studien differenziert:
+   - Weniger Animosität ändert demokratische Einstellungen nicht [@broockman2023doesaffective]
+   - Der Zusammenhang ist nicht linear, sondern eher umgekehrt U-förmig [@janssen2024breaking]
+   - Die Ablehnung radikaler Parteien kann eine Leitplanke sein [@harteveld2022affective]
+   - Gegner oder Feind? [@westphal2025politicaltheory]
+
+::: {.notes}
+Zum Schluss fünf Punkte.
+
+Erstens: Es gibt nicht *die* Polarisierung – es gibt eine Familie von Phänomenen.
+
+Zweitens: Es gibt eine messbare affektive Polarisierung in Europa: Menschen bewerten und behandeln Anhänger der eigenen Partei besser als die anderer Parteien.
+
+Drittens: Wie groß sie ist und ob sie wächst, lässt sich nur vor dem Hintergrund von Maß, Stichprobe und den damit verbundenen begrifflichen Entscheidungen sagen.
+
+Viertens: Alarmistische Erzählungen helfen deshalb wenig – und sie stehen auf dünnerem Boden, als ihr Ton vermuten lässt.
+
+Fünftens: Auch die Gleichung „mehr Polarisierung ist schlechter für die Demokratie“ greift zu kurz. Broockman, Kalla und Westwood haben Animosität in Experimenten erfolgreich reduziert – demokratische Einstellungen hat das nicht verändert. Janssen und Turkenburg finden eher einen umgekehrt U-förmigen Zusammenhang: Etwas Emotion gehört zur Demokratie dazu. Erinnern Sie sich an die Merkel-Jahre – da war die Klage eher, Politik sei zu wenig leidenschaftlich, zu alternativlos. Und wenn eine Partei tatsächlich antidemokratisch ist, ist starke Ablehnung eher eine Leitplanke als eine Pathologie. Die politische Theorie unterscheidet hier zwischen dem legitimen Gegner und dem Feind – nur Letzteres ist ein demokratisches Problem, und ein Thermometer liefert in beiden Fällen dieselbe Zahl.
+
+Vielen Dank.
 :::
 
 # Vielen Dank für Ihre Aufmerksamkeit!
@@ -1168,6 +1173,8 @@ Ich freue mich über Fragen, Kritik und Anregungen ❤
 
 # Anhang
 
+# Länderspezifische Ergebnisse
+
 ## Länder: AP Thermometer {.smaller}
 
 ```{r}
@@ -1178,8 +1185,18 @@ Ich freue mich über Fragen, Kritik und Anregungen ❤
 #| out-width: "100%"
 
 rank_pair(list(
-  list(measure = "thermo", quantity = "ap_explicit_sd", title = "explizit", colour = col_expl),
-  list(measure = "thermo", quantity = "ap_vote_anchored_sd", title = "implizit", colour = col_impl)
+  list(
+    measure = "thermo",
+    quantity = "ap_explicit_sd",
+    title = "explizit",
+    colour = col_expl
+  ),
+  list(
+    measure = "thermo",
+    quantity = "ap_vote_anchored_sd",
+    title = "implizit",
+    colour = col_impl
+  )
 ))
 ```
 
@@ -1195,8 +1212,18 @@ rank_pair(list(
 #| out-width: "100%"
 
 rank_pair(list(
-  list(measure = "games", quantity = "ap_explicit_sd", title = "explizit", colour = col_expl),
-  list(measure = "games", quantity = "ap_vote_anchored_sd", title = "implizit", colour = col_impl)
+  list(
+    measure = "games",
+    quantity = "ap_explicit_sd",
+    title = "explizit",
+    colour = col_expl
+  ),
+  list(
+    measure = "games",
+    quantity = "ap_vote_anchored_sd",
+    title = "implizit",
+    colour = col_impl
+  )
 ))
 ```
 
@@ -1213,13 +1240,24 @@ rank_pair(list(
 
 rank_pair(
   list(
-    list(measure = "thermo", quantity = "delta_ap_sd", title = "Thermometer", colour = navy),
-    list(measure = "games", quantity = "delta_ap_sd", title = "Spiele", colour = accent, show_p = TRUE)
+    list(
+      measure = "thermo",
+      quantity = "delta_ap_sd",
+      title = "Thermometer",
+      colour = navy
+    ),
+    list(
+      measure = "games",
+      quantity = "delta_ap_sd",
+      title = "Spiele",
+      colour = accent,
+      show_p = TRUE
+    )
   )
 )
 ```
 
-------------------------------------------------------------------------
+# Datengrundlage
 
 ## Frageformulierungen (eu25games, Irland) {.smaller}
 
@@ -1244,240 +1282,234 @@ Wortlaut aus den irischen Fragebögen der Wellen 2 und 3 (eu25games-Repository).
 ## Stichprobe {.smaller}
 
 ```{r}
-#| label: sample-sizes
+#| label: appendix-samples
 #| cache: true
 
-games <- readr::read_rds(here("data", "03_final", "eu25_games.rds"))
-thermo <- readr::read_rds(here("data", "03_final", "eu25_thermo.rds"))
-
-n_resp <- n_distinct(c(games$meta_responseid, thermo$meta_responseid))
-fmt_n <- function(x) format(x, big.mark = ".")
-
-data.frame(
-  Datensatz = c(
-    "Analysestichprobe",
-    "Spiele (Befragte × Runde)",
-    "Thermometer (Befragte × bewertete Partei)"
-  ),
-  Befragte = fmt_n(c(
-    n_resp,
-    n_distinct(games$meta_responseid),
-    n_distinct(thermo$meta_responseid)
-  )),
-  Zeilen = c("–", fmt_n(nrow(games)), fmt_n(nrow(thermo)))
-) |>
-  knitr::kable(align = c("l", "r", "r"))
-```
-
-- **Analysestichprobe:** Befragte der Wellen 2 und 3, die den Aufmerksamkeitstest bestanden und den Fragebogen vollständig ausgefüllt haben
-- Eine Zeile je Person und Welle – wer an beiden Wellen teilnahm, zählt zweimal (im Modell: eigene Personenebene)
-
-::: {.notes}
-Die strengere Stichprobe: nur Befragte, die den Aufmerksamkeitstest bestanden und den Fragebogen abgeschlossen haben, aus den Wellen 2 und 3, in denen Spiele und Thermometer erhoben wurden. Jede Person spielt sechs Runden und bewertet sechs Parteien.
-:::
-
-------------------------------------------------------------------------
-
-## Kausal oder beschreibend? {.smaller}
-
-```{r}
-#| label: schematic-dags
-#| fig-width: 10
-#| fig-height: 3.6
-#| fig-align: center
-#| out-width: "92%"
-
-library(ggdag)
-
-dag_lab <- c(
-  Y = "Ergebnis",
-  T = "Typ",
-  R = "eigen/fremd",
-  P = "Partei",
-  C = "Land",
-  W = "Welle",
-  U = "Unbeobachtet",
-  Z = "Profilmerkmale",
-  G = "Spiel",
-  K = "Runde"
-)
-
-dag_games <- dagify(
-  Y ~ T + R + P + C + W + U + Z + G + K,
-  T ~ P + U,
-  R ~ T,
-  P ~ C,
-  exposure = "T",
-  outcome = "Y",
-  latent = "U",
-  coords = list(
-    x = c(C = 0, P = 1, T = 2, R = 2, U = 3, Y = 3, W = 3, Z = 4, G = 4, K = 4),
-    y = c(C = 2, P = 1, T = 2, R = 0, U = 3, Y = 1, W = -1, Z = 2, G = 1, K = 0)
-  ),
-  labels = dag_lab[c("Y", "T", "R", "P", "C", "W", "U", "Z", "G", "K")]
-)
-
-dag_thermo <- dagify(
-  Y ~ T + R + P + C + W + U,
-  T ~ P + U,
-  R ~ P,
-  P ~ C,
-  exposure = "T",
-  outcome = "Y",
-  latent = "U",
-  coords = list(
-    x = c(C = 0, P = 1, T = 2, R = 2, U = 3, Y = 3, W = 3),
-    y = c(C = 2, P = 1, T = 2, R = 0, U = 3, Y = 1, W = -1)
-  ),
-  labels = dag_lab[c("Y", "T", "R", "P", "C", "W", "U")]
-)
-
-draw_dag <- function(dag, title) {
-  td <- tidy_dagitty(dag)
-  ggplot(td, aes(x = x, y = y, xend = xend, yend = yend)) +
-    geom_dag_edges(
-      edge_colour = grey2,
-      start_cap = ggraph::circle(7, "mm"),
-      end_cap = ggraph::circle(7, "mm")
-    ) +
-    geom_label(
-      data = dplyr::distinct(as.data.frame(td$data), name, .keep_all = TRUE),
-      aes(label = label, colour = name %in% c("T", "Y")),
-      size = 3,
-      label.size = 0.4
-    ) +
-    scale_colour_manual(values = c(`TRUE` = accent, `FALSE` = navy)) +
-    scale_x_continuous(expand = expansion(add = 0.6)) +
-    labs(title = title) +
-    theme_dag() +
-    theme(
-      legend.position = "none",
-      plot.title = element_text(
-        colour = navy,
-        face = "bold",
-        hjust = 0.5,
-        size = 11
-      )
-    )
-}
-
-draw_dag(dag_games, "Spiele (Punkte)") |
-  draw_dag(dag_thermo, "Thermometer (Grad)")
-```
-
-- Unbeobachtete Eigenschaften (U: Interesse, Stärke der Präferenz, soziale Erwünschtheit …) wirken auf Bekenntnis **und** Verhalten
-- Daher: ein **beschreibender** Vergleich innerhalb von Parteien, kein kausaler Effekt des Bekenntnisses
-
-::: {.notes}
-Die Kausaldiagramme: In den Spielen ist das Gegenüber zufällig gezogen, der Unterschied eigen/fremd ist also kausal identifiziert, sobald man den Typ festhält. Beim Unterschied zwischen den Typen gilt das nicht: Unbeobachtete Eigenschaften können beides beeinflussen – ob jemand sich bekennt, und wie er andere behandelt. Darum spreche ich von einem beschreibenden Vergleich innerhalb von Parteien.
-:::
-
-------------------------------------------------------------------------
-
-## Modell {.smaller}
-
-Für jede Beobachtung $i$ (eine Runde bzw. eine Bewertung) von Person $j$ mit Partei $p$ in Land $c$:
-
-$$
-\eta_i = \alpha + \beta_R R_i + \beta_T T_i + \beta_{RT} R_i T_i + \boldsymbol{\gamma}^\top \mathbf{x}_i + \mathbf{z}_i^\top \left(\mathbf{u}_{c} + \mathbf{u}_{cp}\right) + v_{j}
-$$
-
-- $R$: Gegenüber/bewertete Partei eigen (1) oder fremd (0); $T$: explizit (1) oder implizit (0)
-- $\mathbf{x}$: Kontrollen – Spiel, Runde, Welle, gezeigte Profilmerkmale (Spiele); Welle (Thermometer)
-- $\mathbf{z} = (1, R, T, RT)$: alle vier Terme variieren nach **Land** und nach **Partei im Land** ($\mathbf{u}_c, \mathbf{u}_{cp}$ multivariat normal)
-- $v_j$: Personeneffekt über Runden und Wellen hinweg
-- **Hauptmodell:** Gauß, $Y^{z}_i \sim \text{Normal}(\eta_i, \sigma)$ auf dem z-standardisierten Ergebnis (Identitäts-Link)
-- **Robustheit:** Beta-Binomial, $Y_i \sim \text{BetaBinomial}(n, \text{logit}^{-1}(\eta_i), \phi)$ mit $n = 10$ Punkten bzw. $100$ Grad
-- brms / Stan (cmdstanr), 4 Ketten à 2.000 Iterationen
-
-::: {.notes}
-Ein Modell für beide Messungen, mit derselben Struktur. Die entscheidende Größe ist die Interaktion von eigen/fremd und Typ, und zwar mit Variation nach Land und nach Partei – so wird der Vergleich innerhalb jeder Partei geschätzt. Hauptmodell ist das Gauß-Modell, weil die Schätzgröße aus Zellmittelwerten besteht (nächste Folien); das Beta-Binomial-Modell ist der Robustheitscheck.
-:::
-
-------------------------------------------------------------------------
-
-## Priors {.smaller}
-
-- Alle Koeffizienten um **null** zentriert: a priori kein Unterschied
-- Fokale Terme (eigen/fremd, Typ, Interaktion): Normal(0, 1) – große Unterschiede bleiben möglich
-- Kontrollen: Normal(0, 0,2) (Gauß) bzw. Normal(0, 0,25) (Beta-Binomial); Streuungen der variierenden Effekte: Exponential(5); Korrelationen: LKJ(2)
-- Gauß: Residual-SD $\sigma$: Exponential(2)
-- Beta-Binomial: Präzision $\phi$: Gamma(4, 0,4) – schließt eine U-förmige Verteilung a priori aus, nicht aber durch die Daten
-- Geprüft per **Prior Predictive Check**: Die implizierten Ergebnisse verteilen sich über die ganze Skala, statt sich an den Rändern zu stauen
-
-::: {.notes}
-Eine erste, weitere Prior-Spezifikation hat zu U-förmigen vorhergesagten Verteilungen geführt – zu viel Masse bei 0 und 10. Die jetzige ist mit einer Simulation durch das Design des Modells selbst gewählt. Die fokalen Terme bleiben bewusst weit, damit der Prior den interessierenden Unterschied nicht gegen null zieht.
-:::
-
-------------------------------------------------------------------------
-
-## Schätzgröße {.smaller}
-
-Für Typ $t \in \{\text{explizit}, \text{implizit}\}$:
-
-$$
-AP_t = E(Y \mid \text{eigen}, t) - E(Y \mid \text{fremd}, t), \qquad \Delta AP = AP_{\text{explizit}} - AP_{\text{implizit}}
-$$
-
-$$
-\Delta AP^{SD}_{\text{Thermometer}} - \Delta AP^{SD}_{\text{Spiele}}, \quad \text{berichtet mit } \Pr(> 0)
-$$
-
-- **Logik wie der API** [@reiljan2020fear]: eigene Partei minus die anderen – hier aber modellbasiert, als Kontrast von Randmittelwerten statt als Rechnung je Befragtem
-- **g-Computation:** Typ und eigen/fremd kontrafaktisch für alle Beobachtungen setzen, vorhersagen, mitteln – Ziehung für Ziehung
-- **Gemeinsamer Träger:** nur Parteien mit expliziten **und** impliziten Anhängern
-- **Gewichte:** jede Person zählt einmal, gleiche Gewichte in allen vier Zellen
-- **Standardisierung:** geteilt durch die SD des Ergebnisses – macht Punkte und Grad vergleichbar
-
-::: {.notes}
-Die Schätzgrößen sind Differenzen von Mittelwerten, nicht einzelne Koeffizienten. Für den Vergleich der beiden Messungen wird jeweils durch die Standardabweichung geteilt. Die Ziehungen der beiden unabhängig geschätzten Modelle werden paarweise kombiniert.
-:::
-
-------------------------------------------------------------------------
-
-## Warum das Gauß-Modell? {.smaller}
-
-```{r}
-#| label: raw-cells
-#| include: false
-
-# Raw weighted cell means of the thermometer, on the rows and weights of the
-# estimand (filter, respondent weights and common support as in notebook 3.3)
-raw_thermo <- readr::read_rds(here("data", "03_final", "eu25_thermo.rds")) |>
+# Analysis samples, filters as in notebook 3.2 (explicit and vote-anchored;
+# games: partner's party shown and co/out; thermometer: co/out ratings)
+games_s <- readr::read_rds(here("data", "03_final", "eu25_games.rds")) |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_cj_partisan_relationship %in% c("co", "out")
+  ) |>
+  mutate(der_cell = paste(type, der_cj_partisan_relationship))
+thermo_s <- readr::read_rds(here("data", "03_final", "eu25_thermo.rds")) |>
   filter(
     type %in% c("explicit", "vote_anchored"),
     der_thermo_relationship %in% c("co", "out")
   ) |>
-  mutate(
-    der_anchor = paste(country, anchor, sep = ": "),
-    der_w = 1 / n(),
-    .by = meta_responseid
-  )
-support <- raw_thermo |>
-  distinct(der_anchor, meta_responseid, type) |>
-  count(der_anchor, type) |>
-  tidyr::pivot_wider(names_from = type, values_from = n, values_fill = 0) |>
-  filter(explicit >= 1, vote_anchored >= 1)
-raw_cells <- raw_thermo |>
-  filter(der_anchor %in% support$der_anchor) |>
-  summarise(
-    m = weighted.mean(q_thermo, der_w),
-    .by = c(type, der_thermo_relationship)
-  ) |>
-  tidyr::pivot_wider(names_from = der_thermo_relationship, values_from = m) |>
-  mutate(ap = co - out)
-raw_ap <- setNames(raw_cells$ap, raw_cells$type)
-raw_dap <- raw_ap[["explicit"]] - raw_ap[["vote_anchored"]]
+  mutate(der_cell = paste(type, der_thermo_relationship))
 ```
 
-- **Die Schätzgröße besteht aus Zellmittelwerten:** AP und ΔAP sind Differenzen der vier Mittelwerte Typ × eigen/fremd
-- Das Gauß-Modell **reproduziert diese vier Zellmittelwerte** (Posterior Predictive Check der Zellmittel, beide Messungen)
-- Thermometer: g-computiertes ΔAP `r fmt(med("thermo", "delta_ap"), 1)` Grad, nahe am rohen Kontrast der Zellmittel `r fmt(raw_ap[["explicit"]], 1)` − `r fmt(raw_ap[["vote_anchored"]], 1)` = `r fmt(raw_dap, 1)` Grad (gemeinsamer Träger)
-- Ein Gauß-Modell mit Identitäts-Link schätzt **bedingte Mittelwerte robust**, auch wenn die Verteilungsform falsch ist – das Beta-Binomial-Modell hat diese Eigenschaft nicht
-- Das heißt **nicht**, dass das Gauß-Modell die Daten besser beschreibt: An der Verteilungsform scheitert es (siehe Grenzen)
+```{r}
+#| label: sample-sizes
+
+fmt_n <- function(x) format(x, big.mark = ".")
+n_row <- function(d) {
+  c(
+    fmt_n(nrow(d)),
+    fmt_n(n_distinct(d$meta_responseid)),
+    n_distinct(d$country)
+  )
+}
+```
+
+::: {style="color: #003056; margin-top: 1.4em;"}
+
+```{r}
+#| label: sample-table
+
+rbind(
+  `Spiele (Runden)` = n_row(games_s),
+  `Thermometer (Bewertungen)` = n_row(thermo_s)
+) |>
+  knitr::kable(
+    col.names = c("Beobachtungen", "Befragte", "Länder"),
+    align = c("r", "r", "r")
+  )
+```
+
+:::
+
+- **Daten:** dreiwellige Befragung zur Europawahl 2019 in 25 Ländern, teils Panel, teils Auffrischungsstichprobe [@hahm2023divided; @hahm2024divided]
+- **Bereinigte, harmonisierte Fassung** [@muno2026eu25games] auf Zenodo: [doi.org/10.5281/zenodo.21294634](https://doi.org/10.5281/zenodo.21294634)
+- Spiele und Thermometer aus Wellen 2 und 3: je 6 Runden bzw. 6 bewertete Parteien pro Befragtem; Befragte, die den Aufmerksamkeitstest bestanden und den Fragebogen abgeschlossen haben
+- **Analysestichprobe:** explizite und implizite Anhänger; in den Spielen nur Runden, in denen die Partei des Gegenübers gezeigt wurde, im Thermometer nur Bewertungen der eigenen und fremder Parteien
 
 ::: {.notes}
-Die Wahl folgt aus der Schätzgröße, nicht aus der Anpassung. Wir interessieren uns für Differenzen von Mittelwerten. Ein lineares Modell trifft Mittelwerte auch dann, wenn die Verteilung um sie herum falsch beschrieben ist. Beim Beta-Binomial-Modell hängt der vorhergesagte Mittelwert dagegen an der richtig spezifizierten Streuung: Ist sie falsch, verschieben sich die Mittelwerte – und damit AP und ΔAP. Die rohen Zellmittel sind hier auf denselben Zeilen und mit denselben Gewichten berechnet wie die Schätzgröße; das g-computierte ΔAP mittelt anders über die Parteien (das Modell setzt Typ und eigen/fremd für alle Zeilen kontrafaktisch) und liegt deshalb nicht exakt, aber nahe am rohen Kontrast.
+Vor dem Filtern haben beide Datensätze gleich viele Zeilen, weil jede Person sechs Runden spielt und sechs Parteien bewertet. Die Spielstichprobe ist kleiner, weil in der Hälfte der Bedingungen die Partei des Gegenübers nicht gezeigt wurde.
+:::
+
+# Modellspezifikationen
+
+## Linearer Prädiktor {.smaller}
+
+::: {style="margin-top: 1.2em; color: #003056;"}
+Beobachtung $i$: eine Runde bzw. eine Bewertung von Person $j[i]$, deren Partei $p[i]$ in Land $c[i]$ liegt (Index-Lookup: $c[i]$ = „das Land von Beobachtung $i$“)
+:::
+
+$$
+\eta_i = \alpha + \beta_R R_i + \beta_T T_i + \beta_{RT} R_i T_i + \boldsymbol{\gamma}^\top \mathbf{x}_i + \mathbf{z}_i^\top \left(\mathbf{u}_{c[i]} + \mathbf{u}_{c[i]p[i]}\right) + v_{j[i]}
+$$
+
+::: {style="font-size: 0.9em;"}
+- $R_i$: eigene (1) oder fremde (0) Partei; $T_i$: explizit (1) oder implizit (0)
+- $\alpha$: Achsenabschnitt – implizite Anhänger gegenüber einer fremden Partei, Kontrollen auf Referenzkategorie
+- $\beta_R$: Abstand eigen/fremd der Impliziten; $\beta_T$: Unterschied explizit/implizit gegenüber Fremden; $\beta_{RT}$: um wie viel der Abstand eigen/fremd bei Expliziten größer ist – die drei **fokalen Terme**
+- $\boldsymbol{\gamma}^\top \mathbf{x}_i = \sum_k \gamma_k x_{ik}$: Kontrollen als Dummies – Spiel, Runde, Welle, gezeigte Profilmerkmale (Spiele) bzw. Welle (Thermometer)
+- $\mathbf{z}_i = (1, R_i, T_i, R_i T_i)^\top$ wiederholt das fokale Design: $\mathbf{u}_c$ enthält die Abweichungen von Land $c$ von $\alpha, \beta_R, \beta_T, \beta_{RT}$; $\mathbf{u}_{cp}$ die Abweichungen der Partei $p$ von ihrem Land – der Vergleich wird so **innerhalb jeder Partei** geschätzt
+- $v_j$: Personeneffekt über Runden, Bewertungen und Wellen hinweg
+:::
+
+::: {.notes}
+Ein Prädiktor für beide Messungen und beide Modellfamilien. Jeder Term ist eine Zahl; das hochgestellte T ist die Transposition, also ein Skalarprodukt. Die Schätzgrößen AP und ΔAP werden nicht aus den Koeffizienten abgelesen, sondern als Kontraste von Randmittelwerten auf der Ergebnisskala berechnet.
+:::
+
+------------------------------------------------------------------------
+
+## Verteilung der Ergebnisvariablen {.smaller}
+
+::: {style="margin-top: 1.6em;"}
+::: {.columns}
+::: {.column width="50%"}
+
+```{r}
+#| label: appendix-games-outcome
+#| fig-width: 6.5
+#| fig-height: 4.1
+#| out-width: "100%"
+
+games_s |>
+  count(der_cell, game, cj_pl2) |>
+  mutate(share = n / sum(n), .by = c(der_cell, game)) |>
+  ggplot(aes(x = cj_pl2, y = share, fill = game)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.75) +
+  facet_wrap(~der_cell) +
+  scale_x_continuous(breaks = 0:10) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(dictator = "#08306b", trust = "#d94801")) +
+  labs(
+    title = "Tokens given, by partisan type and partner relation",
+    subtitle = "Explicit and vote-anchored respondents, rounds with the partner's party shown",
+    x = "Tokens given (of 10)",
+    y = "Share of rounds",
+    fill = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank())
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| label: appendix-thermo-outcome
+#| fig-width: 6.5
+#| fig-height: 4.1
+#| out-width: "100%"
+
+thermo_s |>
+  ggplot(aes(x = q_thermo)) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    binwidth = 5,
+    boundary = 0,
+    fill = "#08306b",
+    colour = "white",
+    linewidth = 0.2
+  ) +
+  facet_wrap(~der_cell) +
+  labs(
+    title = "Thermometer ratings, by partisan type and relation to the rated party",
+    subtitle = "Explicit and vote-anchored respondents, bins of 5 points",
+    x = "Rating (0-100)",
+    y = "Density"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(panel.grid.minor = element_blank())
+```
+
+:::
+:::
+:::
+
+- **Nicht normalverteilt:** Häufungen bei 0 und 5 Punkten (Spiele) bzw. bei 0 und 100 Grad (Thermometer)
+- **Trotzdem ein lineares Modell:** AP und ΔAP sind Kontraste **bedingter Erwartungswerte** (Zellmittel); ein Gauß-Modell mit Identitäts-Link bildet diese auch bei falscher Verteilungsform ab
+- **Robustheit:** zusätzlich ein Beta-Binomial-Modell geschätzt – die Ergebnisse bleiben gleich (letzte Folie)
+
+::: {.notes}
+Die Verteilungen sind klar nicht normal. Für die Schätzgröße zählt aber nicht die Form der Verteilung, sondern ihr Mittelwert in jeder Zelle Typ × eigen/fremd. Den trifft ein lineares Modell auch dann, wenn die Streuung um ihn herum falsch beschrieben ist.
+:::
+
+------------------------------------------------------------------------
+
+## Gauß-Modell {.smaller}
+
+::: {style="margin-top: 1em; color: #003056;"}
+::: {.columns}
+::: {.column width="50%"}
+**Priors** – alle Koeffizienten **um null zentriert**
+
+::: {style="font-size: 0.8em;"}
+$$
+\begin{aligned}
+\alpha &\sim \text{Normal}(0,\, 0{,}5) \\
+\beta_R,\ \beta_T,\ \beta_{RT} &\sim \text{Normal}(0,\, 1) \\
+\gamma_k &\sim \text{Normal}(0,\, 0{,}2) \\
+\mathbf{u}_c \sim \text{MVN}(\mathbf{0}, \Sigma_C), &\quad \mathbf{u}_{cp} \sim \text{MVN}(\mathbf{0}, \Sigma_P) \\
+\Sigma &= \text{diag}(\boldsymbol{\tau})\, \Omega\, \text{diag}(\boldsymbol{\tau}) \\
+v_j &\sim \text{Normal}(0,\, \sigma_v) \\
+\tau_k,\ \sigma_v &\sim \text{Exponential}(5) \\
+\Omega_C,\ \Omega_P &\sim \text{LKJ}(2) \\
+\sigma &\sim \text{Exponential}(2)
+\end{aligned}
+$$
+:::
+:::
+
+::: {.column width="50%"}
+**Likelihood** – $Y^z$ z-standardisiert
+
+::: {style="font-size: 0.85em;"}
+$$
+Y^z_i \sim \text{Normal}(\eta_i,\, \sigma), \qquad
+p(\mathbf{Y} \mid \boldsymbol{\theta}, \mathbf{X}) = \prod_i \text{Normal}(Y^z_i \mid \eta_i,\, \sigma)
+$$
+:::
+
+**Posterior**
+
+::: {style="font-size: 0.85em;"}
+$$
+p(\boldsymbol{\theta} \mid \mathbf{Y}, \mathbf{X}) \propto p(\mathbf{Y} \mid \boldsymbol{\theta}, \mathbf{X})\; p(\boldsymbol{\theta})
+$$
+
+$$
+\boldsymbol{\theta} = (\alpha, \beta_R, \beta_T, \beta_{RT}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \boldsymbol{\tau}, \Omega, \sigma_v, \sigma)
+$$
+:::
+:::
+:::
+
+::: {style="font-size: 0.85em; margin-top: 0.4em;"}
+**Von der Posterior zur Schätzgröße** – für jede Ziehung $s$: Typ und eigen/fremd für **alle beobachteten Zeilen** kontrafaktisch setzen, vorhersagen und mitteln (jede Person zählt gleich; nur Parteien mit expliziten **und** impliziten Anhängern)
+:::
+
+::: {style="font-size: 0.75em;"}
+$$
+AP_t^{(s)} = \sum_i w_i \left[\eta_i^{(s)}(R{=}1, T{=}t) - \eta_i^{(s)}(R{=}0, T{=}t)\right], \qquad
+\Delta AP^{(s)} = AP_{\text{explizit}}^{(s)} - AP_{\text{implizit}}^{(s)}
+$$
+:::
+:::
+
+::: {style="font-size: 0.75em; color: #003056;"}
+Geschätzt mit brms [@burkner2017brms] (Stan, cmdstanr): 4 Ketten à 2.000 Iterationen (1.000 Warm-up), `adapt_delta` = 0,95; daraus 1.000 Ziehungen für die Schätzgrößen – deren Verteilung ergibt Median, Intervalle und Pr(>0).
+:::
+
+::: {.notes}
+Normal ist hier mit Mittelwert und Standardabweichung notiert. Die fokalen Terme sind bewusst weit, damit der Prior den interessierenden Unterschied nicht gegen null zieht. Die Gewichte $w_i$ summieren sich zu eins, jede Person zählt gleich; AP ist damit in SD-Einheiten des Ergebnisses. Der Prior auf alpha liegt in brms auf dem Achsenabschnitt bei zentrierten Prädiktoren. Die Priors sind per Prior Predictive Check gewählt: Eine erste, weitere Spezifikation hat zu viel Masse außerhalb der Skala erzeugt.
 :::
 
 ------------------------------------------------------------------------
@@ -1497,118 +1529,5 @@ pooled_figure("bb")
 Beide Modellfamilien kommen zum selben Schluss: ΔAP Thermometer `r fmt(med("thermo", "delta_ap"), 1)` (Gauß) bzw. `r fmt(med("thermo", "delta_ap", "bb"), 1)` Grad (BB), Spiele `r fmt(med("games", "delta_ap"))` bzw. `r fmt(med("games", "delta_ap", "bb"))` Punkte, Unterschied der Unterschiede `r fmt(med("diff", "diff"))` bzw. `r fmt(med("diff", "diff", "bb"))` SD – jeweils mit Pr(>0) > 0,999.
 
 ::: {.notes}
-Dieselbe Abbildung aus den Beta-Binomial-Modellen. ΔAP Thermometer `r est("thermo", "delta_ap_sd", model = "bb")`, Spiele `r est("games", "delta_ap_sd", model = "bb")`, Unterschied `r est("diff", "diff", model = "bb")` SD. Das Beta-Binomial liegt beim Thermometer etwas höher; das ist keine „vorsichtigere“ Schätzung, sondern eine Folge seiner Fehlspezifikation (nächste Folie), bei gleich engen Intervallen.
-:::
-
-------------------------------------------------------------------------
-
-## Konvergenz {.smaller}
-
-```{r}
-#| label: results-diagnostics
-
-post$diagnostics |>
-  mutate(
-    name = c(
-      games_bb = "Spiele, BB",
-      games_gauss = "Spiele, Gauß",
-      thermo_bb = "Thermometer, BB",
-      thermo_gauss = "Thermometer, Gauß"
-    )[name],
-    max_rhat = fmt(max_rhat, 3),
-    across(c(min_ess_bulk, min_ess_tail), \(x) format(round(x), big.mark = "."))
-  ) |>
-  knitr::kable(
-    col.names = c(
-      "Modell",
-      "max. R̂",
-      "min. ESS (bulk)",
-      "min. ESS (tail)",
-      "Divergenzen",
-      "max. Baumtiefe erreicht"
-    ),
-    align = c("l", "r", "r", "r", "r", "r")
-  )
-```
-
-- BB = Beta-Binomial; 4 Ketten à 2.000 Iterationen (1.000 Warm-up), `adapt_delta` = 0,95; Werte über alle Parameter, inkl. Personeneffekte
-- Schätzgrößen aus 1.000 Posterior-Ziehungen je Modell
-
-------------------------------------------------------------------------
-
-## Grenzen der Modelle {.smaller}
-
-```{r}
-#| label: ppc-values
-#| include: false
-
-# Predictive checks of notebook 3.5 (posterior, pooled)
-ppc <- readr::read_rds(here("data", "05_results", "eu25_ppc.rds"))
-pc <- function(measure, model, stat, cell, what = "observed") {
-  r <- ppc$checks
-  r[[what]][
-    r$kind == "posterior" &
-      r$group == "pooled" &
-      r$measure == measure &
-      r$model == model &
-      r$stat == stat &
-      r$cell == cell
-  ]
-}
-pct <- function(x) paste0(fmt(100 * x, 0), " %")
-phi <- function(measure) {
-  d <- ppc$dispersion
-  d$median[d$kind == "posterior" & d$measure == measure & d$model == "bb"]
-}
-cells4 <- c(
-  "explicit co",
-  "explicit out",
-  "vote_anchored co",
-  "vote_anchored out"
-)
-bias <- sapply(cells4, \(k) {
-  pc("thermo", "bb", "mean", k, "rep_median") - pc("thermo", "bb", "mean", k)
-})
-out_max <- max(sapply(cells4, \(k) {
-  pc("thermo", "gauss", "share_outside", k, "rep_median")
-}))
-party_out <- sum(
-  ppc$party$median < 0 |
-    ppc$party$median > ifelse(ppc$party$measure == "games", 10, 100)
-)
-dap_bb_raw <- pc("thermo", "bb", "delta_ap", "all", "rep_median")
-dap_obs_raw <- pc("thermo", "bb", "delta_ap", "all")
-```
-
-**Gauß (Hauptmodell)**
-
-- Legt Vorhersagemasse außerhalb der Skala (Thermometer bis `r pct(out_max)` je Zelle); g-computierte Parteimittel bleiben aber innerhalb der Skala (`r party_out` Überschreitungen)
-- Kann die Häufungen nicht erzeugen: Thermometer `r pct(pc("thermo", "gauss", "share_0", "vote_anchored out"))`–`r pct(pc("thermo", "gauss", "share_0", "explicit out"))` Nullen in den Fremd-Zellen, `r pct(pc("thermo", "gauss", "share_100", "explicit co"))` Hunderter bei Expliziten/eigen; Spiele: Häufung bei 0 (fremd) und bei 5 (überall)
-- Eine Residual-SD für alle Zellen – Intervalle je Zelle womöglich schlecht kalibriert
-
-**Beta-Binomial (Robustheit)**
-
-- Thermometer: gemeinsames $\phi \approx$ `r fmt(phi("thermo"))` → U-förmig; zu wenige Nullen in den Fremd-Zellen (`r fmt(pc("thermo", "bb", "share_0", "explicit out", "rep_median"))` statt `r fmt(pc("thermo", "bb", "share_0", "explicit out"))`; `r fmt(pc("thermo", "bb", "share_0", "vote_anchored out", "rep_median"))` statt `r fmt(pc("thermo", "bb", "share_0", "vote_anchored out"))`), zu viele Hunderter in den Eigen-Zellen
-- Unterschätzt alle vier Zellmittel um `r fmt(-max(bias), 1)`–`r fmt(-min(bias), 1)` Grad, bei Impliziten/eigen am stärksten → roher ΔAP `r fmt(dap_bb_raw, 1)` statt `r fmt(dap_obs_raw, 1)` Grad, also überhöht
-- Spiele: $\phi \approx$ `r fmt(phi("games"), 1)` → ein Buckel, verfehlt die Häufungen bei 0 und 5; ΔAP trotzdem wie im Gauß-Modell
-
-::: {.notes}
-Werte aus den Predictive Checks in Notebook 3.5 (gewichtete Zellmittel im gemeinsamen Träger; Anteile über alle Zeilen). Beide Modelle haben Schwächen an der Verteilungsform. Für die Schätzgröße ist das beim Gauß-Modell harmlos, weil es die Zellmittel trotzdem trifft; beim Beta-Binomial-Modell verschiebt die falsche Streuung die Mittelwerte selbst.
-:::
-
-------------------------------------------------------------------------
-
-## Grenzen des Designs {.smaller}
-
-- **Beschreibend, nicht kausal:** Unbeobachtete Merkmale können Bekenntnis und Verhalten zugleich treiben; Personenmerkmale als Kontrollen fehlen noch
-- **Dünne Zellen:** Implizite trafen nur zufällig auf Gegenüber der eigenen Partei (etwa jede zehnte Runde) – ihre Schätzungen stützen sich stärker auf das Pooling
-- **Etwas andere „Fremde“:** Explizite sahen fremde Parteien aus den übrigen Parteien, Implizite aus allen Hauptparteien
-- **Europawahl:** Die Wahlfrage betrifft die Europawahl 2019, in Welle 2 meist als Absicht oder hypothetisch – die Wellen klassifizieren leicht unterschiedlich
-- **Reihenfolge der Fragen:** noch nicht abschließend geprüft
-- **Momentaufnahme:** 2019, keine Zeitreihe
-
-**Nächster Schritt:** eine prädiktive Diagnose je Zelle Typ × eigen/fremd (LOO, Kalibrierung) ist in Vorbereitung – nachrangig gegenüber den Prüfungen der Schätzgröße
-
-::: {.notes}
-Die wichtigste Grenze zuerst: Das ist ein beschreibender Vergleich. Wer sich zu einer Partei bekennt, unterscheidet sich vermutlich auch in anderen Dingen. Die übrigen Punkte betreffen das Design der Spiele und die Wahlfrage.
+Dieselbe Abbildung aus den Beta-Binomial-Modellen: $Y_i \sim \text{BetaBinomial}(n, \text{logit}^{-1}(\eta_i), \phi)$ mit $n = 10$ Punkten bzw. 100 Grad. ΔAP Thermometer `r est("thermo", "delta_ap_sd", model = "bb")`, Spiele `r est("games", "delta_ap_sd", model = "bb")`, Unterschied `r est("diff", "diff", model = "bb")` SD.
 :::
