@@ -1,5 +1,5 @@
 ---
-last_modified: 2026-10-02
+last_modified: 2026-10-06
 scope: raw input, variable references, party matching, derived files, external sources
 ---
 
@@ -73,6 +73,9 @@ These are written by the current pipeline. Details are in the notebooks.
   copied their "no party" answer.
 
 - `data/04_models/` (3.2, git-ignored): cached brms fits, written only when `full_fit = TRUE`.
+- `data/05_results/eu25_ap_post.rds` (3.3, tracked): posterior draws of the estimands from the four fits
+  (1,000 draws, pooled and per country), the paired cross-measure difference, outcome scales, MCMC
+  diagnostics and sample sizes. Slides and the manuscript read this file, never the fits.
 - **Thermometer list.** Every respondent in a country rated the same six parties in the same slot
   order (checked in 3.2). This is why the thermometer models carry no rated-party term.
 

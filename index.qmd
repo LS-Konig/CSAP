@@ -284,26 +284,30 @@ Standardization of effects to compare attitudinal and behavioral, posterior diff
 for HMS presentation: conceptual analytical section on polarization (see other talk or seminar), then focus on affective polarization, then the empirical contrast, conclusion: term "polarization" is vague, speaking of "the polarization" does not make sense, and normative notion (more polarization = bad) is not linear (see one curvilinear paper), rather U-shaped, 
 
 1. Polarization as a family, not a thing
-  - ancient origins (poles) -> physics (polarized light) -> social science 
-  - mutliple facets (+ example for each)
+  - ancient origins (greek and latin word for poles as "axis around which something spins") -> 17/18th century physics (polarized light) -> post ww2 social science 
+  - mutliple facets (+ example for each) see current presentation
   -> polarization is not a "thing"
 2. Affective polarization
-  - in pol science, debate on polarization "ended" with "affective turn"
+  - in pol science, debate on (ideological) polarization of American public "ended" with "affective turn"
   - Iyengar and minimal original definition
   - but even here its more complicated
   - 2x2 matrix with vertical/horizontal and attitudinal/behavioral
 3. Empirical insights
   - AP focuses on identity / attachement
-  - systematic comparison of people who report attachement vs people who explicitly deny it (show distribution plots and highlight that this matters for scope of population of inference)
-  - hierachical modelling for within party contrast
+  - systematic comparison of people who report attachement vs people who explicitly deny it (show distribution plots and highlight that this matters for scope of population of inference from notebook 3.1)
+  - hierachical modelling for within party contrast (dark blue vs dark red parts of distributions figure)
   - vertical attitudinal (thermometer scales) vs behavioral horizontal (dictator/trust games) with illustration slide for each
-  - results tba (I guess contrast larger for vertical attitudinal than for horizontal behavioral -> AP if measured by attitudes might be overly exagerrated)
-4. implications for democracy
+  - model and estimation specifications and technical details in appendix/backup slides
+  - results tba (I guess contrast larger for vertical attitudinal than for horizontal behavioral -> AP if measured by attitudes might be overly exagerrated), but prepare: 
+    - for pooled sample and across two outcomes: AP by type, difference between types within measure, and difference between type differences across measures (i.e. how the partisan attachement effect on AP differs between allocation behavior and attitude reportings)
+    - so more precise: I want for the pooled results a 3-panel figure, the left one shows the posterior AP distributions by type and measure (I had in mind these posterior tidy ggplot geoms that show distribution, median as point and error bars for 95 and 99 CIs, plus a small note below the standardized AP x axis about what a 1 means on each outcome scale), then the middle one shows the posterior deltas within outcome between the types, and the right panel then the posterior difference etween the type contrasts of the two outcomes 
+    - then this same for all countries separately (smaller, maybe two separate slides), the point being mainly that (to be evaluated once results are in) patterns generally hold across countries
+4. takeaways of empirics (tbd depending on results)
   - measurement in social science always involves conceptual choices 
-  - most widespread measures (thermometer/like-dislike) may overexaggerate "extent" of AP
+  - most widespread measures (thermometer/like-dislike) may overexaggerate "extent" or "rise" of AP
   - additionally, early narrative of AP = bad for democracy recently scrutinized, some work now suggests inverted U shape relationship (think about how during Merkel people complained about too little emotions in politics)
 5. conclusion:
-  - there is no such a thing as "the polarization"
+  - there is no such a thing as "the one polarization"
   - there is a clear affective polarization gap
   - but making meaninful inferences about magnitude and dynamic is subject to conceptual/measurement choices by researchers
   - alarming narratives are neither helpful nor resting on evidence 

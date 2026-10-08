@@ -60,7 +60,8 @@ $env:PATH = "C:\Program Files\R\R-4.6.1\bin;" + $env:PATH
 $env:QUARTO_R = "C:\Program Files\R\R-4.6.1\bin"
 
 quarto render index.qmd         # manuscript
-quarto render presentation.qmd  # RevealJS deck
+quarto render presentation_uottawa.qmd  # RevealJS deck (uOttawa)
+quarto render presentation_hms.qmd      # RevealJS deck (HMS, German)
 ```
 
 ## Context index
@@ -68,8 +69,8 @@ quarto render presentation.qmd  # RevealJS deck
 | File | Read when… | Last modified |
 |------|-----------|---------------|
 | `.claude/design.md` | the task concerns the argument, the explicit vs. vote-anchored contrast, outcomes, estimands, models, or `index.qmd`'s notes | 2026-09-29 |
-| `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-10-02 |
-| `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule (repo layout, pipeline order, Quarto quirks, LFS) | 2026-10-05 |
+| `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-10-06 |
+| `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule (repo layout, pipeline order, Quarto quirks, LFS) | 2026-10-06 |
 
 ## Maintaining this system
 
