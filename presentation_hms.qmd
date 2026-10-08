@@ -427,6 +427,7 @@ ggplot() +
 - Die Abneigung kann weit über sachliche Meinungsunterschiede hinausgehen
 
 ::: {.notes}
+
 :::
 
 ------------------------------------------------------------------------
@@ -521,6 +522,7 @@ ggplot(cells, aes(x, y)) +
 ```
 
 ::: {.notes}
+
 :::
 
 ------------------------------------------------------------------------
@@ -767,6 +769,7 @@ AP^m_t = E(Y^m \mid R = \text{eigen}, T = t) - E(Y^m \mid R = \text{fremd}, T = 
 $$
 
 ::: {.notes}
+
 :::
 
 ------------------------------------------------------------------------
@@ -1117,15 +1120,7 @@ pooled_panels(main_model)$b
 - [Da Letztere das etablierte Standardmaß vieler Studien ist: Nicht unwahrscheinlich, dass viele Schätzungen das Ausmaß affektiver Polarisierung in der Bevölkerung **überschätzen**]{style="color: #DE7E50;"}
 
 ::: {.notes}
-Was folgt daraus?
 
-Erstens: Messen heißt entscheiden. Wen ich mitzähle – nur Anhänger, alle Wähler oder alle Wahlberechtigten –, welche Facette mein Instrument abdeckt und ob ich Polarisierung als Zustand oder als Prozess verstehe: Das sind keine technischen Details, sondern begriffliche Entscheidungen. Diese Studie ist eine Momentaufnahme, sagt also etwas über den Zustand, nicht über einen Trend.
-
-Zweitens das Ergebnis: Wer sich zu einer Partei bekennt, urteilt härter, handelt aber nur ein bisschen anders. Das gilt nicht nur im Durchschnitt, sondern zeigt sich auch in den einzelnen Ländern; die Länderschätzungen stehen im Anhang.
-
-Drittens: Für das Verhalten spielt die Parteiidentifikation eine wesentlich geringere Rolle als für die Einstellungen.
-
-Viertens: Gegenüber Mitbürgern, im Verhalten gemessen, ist affektive Polarisierung deutlich schwächer als gegenüber Parteien, in Einstellungen gemessen. Und weil gerade das Gefühlsthermometer das etablierte Standardmaß der Forschung ist, ist es nicht unwahrscheinlich, dass viele Schätzungen das Ausmaß affektiver Polarisierung in der Bevölkerung überschätzen.
 :::
 
 ------------------------------------------------------------------------
@@ -1143,19 +1138,7 @@ Viertens: Gegenüber Mitbürgern, im Verhalten gemessen, ist affektive Polarisie
    - Gegner oder Feind? [@westphal2025politicaltheory]
 
 ::: {.notes}
-Zum Schluss fünf Punkte.
 
-Erstens: Es gibt nicht *die* Polarisierung – es gibt eine Familie von Phänomenen.
-
-Zweitens: Es gibt eine messbare affektive Polarisierung in Europa: Menschen bewerten und behandeln Anhänger der eigenen Partei besser als die anderer Parteien.
-
-Drittens: Wie groß sie ist und ob sie wächst, lässt sich nur vor dem Hintergrund von Maß, Stichprobe und den damit verbundenen begrifflichen Entscheidungen sagen.
-
-Viertens: Alarmistische Erzählungen helfen deshalb wenig – und sie stehen auf dünnerem Boden, als ihr Ton vermuten lässt.
-
-Fünftens: Auch die Gleichung „mehr Polarisierung ist schlechter für die Demokratie“ greift zu kurz. Broockman, Kalla und Westwood haben Animosität in Experimenten erfolgreich reduziert – demokratische Einstellungen hat das nicht verändert. Janssen und Turkenburg finden eher einen umgekehrt U-förmigen Zusammenhang: Etwas Emotion gehört zur Demokratie dazu. Erinnern Sie sich an die Merkel-Jahre – da war die Klage eher, Politik sei zu wenig leidenschaftlich, zu alternativlos. Und wenn eine Partei tatsächlich antidemokratisch ist, ist starke Ablehnung eher eine Leitplanke als eine Pathologie. Die politische Theorie unterscheidet hier zwischen dem legitimen Gegner und dem Feind – nur Letzteres ist ein demokratisches Problem, und ein Thermometer liefert in beiden Fällen dieselbe Zahl.
-
-Vielen Dank.
 :::
 
 # Vielen Dank für Ihre Aufmerksamkeit!
@@ -1274,7 +1257,7 @@ rank_pair(
 **Explizit** = Bindung an eine Partei **und** Wahl derselben Partei. **Implizit** = „No, I do not feel close to any political party“ **und** eine Partei bei der Wahlfrage.
 
 ::: {.notes}
-Wortlaut aus den irischen Fragebögen der Wellen 2 und 3 (eu25games-Repository). Die Wahlfrage bezieht sich auf die Europawahl im Mai 2019; in Welle 2 war sie überwiegend eine Absicht oder hypothetisch.
+
 :::
 
 ------------------------------------------------------------------------
@@ -1337,7 +1320,7 @@ rbind(
 - **Analysestichprobe:** explizite und implizite Anhänger; in den Spielen nur Runden, in denen die Partei des Gegenübers gezeigt wurde, im Thermometer nur Bewertungen der eigenen und fremder Parteien
 
 ::: {.notes}
-Vor dem Filtern haben beide Datensätze gleich viele Zeilen, weil jede Person sechs Runden spielt und sechs Parteien bewertet. Die Spielstichprobe ist kleiner, weil in der Hälfte der Bedingungen die Partei des Gegenübers nicht gezeigt wurde.
+
 :::
 
 # Modellspezifikationen
@@ -1362,7 +1345,7 @@ $$
 :::
 
 ::: {.notes}
-Ein Prädiktor für beide Messungen und beide Modellfamilien. Jeder Term ist eine Zahl; das hochgestellte T ist die Transposition, also ein Skalarprodukt. Die Schätzgrößen AP und ΔAP werden nicht aus den Koeffizienten abgelesen, sondern als Kontraste von Randmittelwerten auf der Ergebnisskala berechnet.
+
 :::
 
 ------------------------------------------------------------------------
@@ -1439,7 +1422,7 @@ thermo_s |>
 - **Robustheit:** zusätzlich ein Beta-Binomial-Modell geschätzt – die Ergebnisse bleiben gleich (letzte Folie)
 
 ::: {.notes}
-Die Verteilungen sind klar nicht normal. Für die Schätzgröße zählt aber nicht die Form der Verteilung, sondern ihr Mittelwert in jeder Zelle Typ × eigen/fremd. Den trifft ein lineares Modell auch dann, wenn die Streuung um ihn herum falsch beschrieben ist.
+
 :::
 
 ------------------------------------------------------------------------
@@ -1509,7 +1492,7 @@ Geschätzt mit brms [@burkner2017brms] (Stan, cmdstanr): 4 Ketten à 2.000 Itera
 :::
 
 ::: {.notes}
-Normal ist hier mit Mittelwert und Standardabweichung notiert. Die fokalen Terme sind bewusst weit, damit der Prior den interessierenden Unterschied nicht gegen null zieht. Die Gewichte $w_i$ summieren sich zu eins, jede Person zählt gleich; AP ist damit in SD-Einheiten des Ergebnisses. Der Prior auf alpha liegt in brms auf dem Achsenabschnitt bei zentrierten Prädiktoren. Die Priors sind per Prior Predictive Check gewählt: Eine erste, weitere Spezifikation hat zu viel Masse außerhalb der Skala erzeugt.
+
 :::
 
 ------------------------------------------------------------------------
@@ -1529,5 +1512,5 @@ pooled_figure("bb")
 Beide Modellfamilien kommen zum selben Schluss: ΔAP Thermometer `r fmt(med("thermo", "delta_ap"), 1)` (Gauß) bzw. `r fmt(med("thermo", "delta_ap", "bb"), 1)` Grad (BB), Spiele `r fmt(med("games", "delta_ap"))` bzw. `r fmt(med("games", "delta_ap", "bb"))` Punkte, Unterschied der Unterschiede `r fmt(med("diff", "diff"))` bzw. `r fmt(med("diff", "diff", "bb"))` SD – jeweils mit Pr(>0) > 0,999.
 
 ::: {.notes}
-Dieselbe Abbildung aus den Beta-Binomial-Modellen: $Y_i \sim \text{BetaBinomial}(n, \text{logit}^{-1}(\eta_i), \phi)$ mit $n = 10$ Punkten bzw. 100 Grad. ΔAP Thermometer `r est("thermo", "delta_ap_sd", model = "bb")`, Spiele `r est("games", "delta_ap_sd", model = "bb")`, Unterschied `r est("diff", "diff", model = "bb")` SD.
+
 :::
