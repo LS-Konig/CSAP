@@ -1,0 +1,815 @@
+---
+title: |
+  CSAP Code Notebook 3.4
+subtitle: |
+  eu25games 2019: leave-one-out predictive diagnostics by cell, for any cached brms fit (no refits)
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+This notebook scores cached brms fits by approximate leave-one-out cross-validation (PSIS-LOO) and breaks the result down by type × relation cell.
+It is written to work for any cached fit: the four current ones (Gaussian and beta-binomial, games and thermometer) and later ones (a Gaussian with σ by cell, beta-binomial variants with φ by cell, hurdle or inflated custom families).
+
+**LOO is secondary here.** The main model checks are the estimand checks of notebook 3.5 (weighted cell means, raw $AP_t$ and $\Delta AP$, anchor shares). LOO never decides the main model. Its job is a by-cell diagnostic: where a model predicts badly, and whether its predictive distributions are calibrated in each cell.
+
+- Input: the full fits `data/04_models/<fit>.rds` (git-ignored). **Nothing is fitted here.** There is no `brm()` call, and the notebook stops if a fit is missing.
+- Cache: every finished chunk of rows is written to `data/04_models/derived/loo/<fit>_<md5>_<mode>_c<chunk size>/` (git-ignored). A stopped run resumes where it stopped.
+- Output: `data/05_results/eu25_loo.rds` (pointwise results without person IDs, per-cell summaries, PIT values, a short table for slides).
+
+**Nothing in this notebook is a claim.**
+
+## What Is Compared With What
+
+Each fit is scored on its own scale with its own `log_lik()` (custom families through their `log_lik_*` function). For the Gaussian fits that is a density on the z-scored outcome; for the beta-binomial fits a probability mass on the integers. These two numbers are not on a common scale, so:
+
+- **elpd differences are computed only between fits with the same outcome variable, the same scale and the same rows in the same order.** The code checks the outcome, the country, the person, `der_co` and `der_explicit` row by row and refuses to compute a difference otherwise.
+- So a Gaussian against a Gaussian with σ by cell is fine (both z-scale), and a beta-binomial against a distributional, hurdle or inflated beta-binomial is fine (all integer pmfs).
+- A Gaussian against a beta-binomial needs the **cross-family module** (`cross_family <- TRUE`). It turns the Gaussian into a pmf on the same integers, $P(Y = y) = \Phi\big((z_{y+1/2} - \mu)/\sigma\big) - \Phi\big((z_{y-1/2} - \mu)/\sigma\big)$, with open bins at the ends of the scale. This is the only valid basis for an elpd difference between a Gaussian and an integer-outcome family. Because both sides are then probabilities of the same integer events, no Jacobian is involved.
+- The **LOO-PIT** by cell is scale-free and is the main cross-family by-cell comparison.
+
+## Run Settings
+
+- `run_mode`: `"test"` scores a stratified test set (`test_per_cell` rows per cell) and reports the time per row, from which the full runtime is estimated; `"full"` scores every row.
+- `use_subsample`: in full mode, score a stratified subsample of `subsample_per_cell` rows per cell instead of every row (for speed; the smallest cell, games vote-anchored co, has about 2,300 rows). By-cell results are then means over the sampled rows, which is unbiased within a cell because the sample is stratified by cell.
+- `cross_family`: also score the Gaussian fits as discretized pmfs (see above).
+- `chunk_size`: rows per chunk. PSIS works row by row, so stacking chunks gives exactly the result of one call on all rows.
+- All posterior draws are used (4,000 per fit).
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "brms",
+  "cmdstanr",
+  "posterior",
+  "loo",
+  "matrixStats",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Run settings
+run_mode <- "test"
+use_subsample <- FALSE
+cross_family <- FALSE
+test_per_cell <- 250
+subsample_per_cell <- 2000
+chunk_size <- 2000
+seed <- 2019
+
+loo_fits <- c("games_gauss", "games_bb", "thermo_gauss", "thermo_bb")
+
+model_dir <- here("data", "04_models")
+loo_dir <- file.path(model_dir, "derived", "loo")
+out_dir <- here("data", "05_results")
+dir.create(loo_dir, showWarnings = FALSE, recursive = TRUE)
+
+fit_files <- file.path(model_dir, paste0(loo_fits, ".rds"))
+stopifnot(all(file.exists(fit_files)))
+
+fit_fingerprint <- function() {
+  tibble(
+    name = loo_fits,
+    md5 = unname(tools::md5sum(fit_files)),
+    mtime = file.mtime(fit_files)
+  )
+}
+fp_start <- fit_fingerprint()
+
+mode_tag <- case_when(
+  run_mode == "test" ~ paste0("test", test_per_cell),
+  use_subsample ~ paste0("sub", subsample_per_cell),
+  TRUE ~ "full"
+)
+mode_tag
+```
+
+# Data
+
+The estimation data are rebuilt exactly as in notebooks 3.3 and 3.5 (copied from 3.2). **This code must stay identical to 3.2.**
+The LOO cell is type × relation in the thermometer, and type × relation × game in the games.
+
+```{r}
+#| label: data
+
+eu25_games <- read_rds(here("data", "03_final", "eu25_games.rds"))
+eu25_thermo <- read_rds(here("data", "03_final", "eu25_thermo.rds"))
+
+# Games, as in 3.2 (games-sample)
+games <- eu25_games |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_cj_partisan_relationship %in% c("co", "out")
+  ) |>
+  mutate(
+    der_explicit = as.integer(type == "explicit"),
+    der_co = as.integer(der_cj_partisan_relationship == "co"),
+    der_trust = as.integer(game == "trust"),
+    der_wave3 = as.integer(wave == 3),
+    der_cell = paste(type, der_cj_partisan_relationship),
+    der_anchor = paste(country, anchor, sep = ": "),
+    round = factor(round),
+    across(c(cj_age, cj_sex, cj_rel, cj_class, der_cj_eu_identity), factor)
+  ) |>
+  mutate(der_w = 1 / n(), .by = meta_responseid)
+
+games_scale <- list(mean = mean(games$cj_pl2), sd = sd(games$cj_pl2))
+games <- games |>
+  mutate(der_y_z = (cj_pl2 - games_scale$mean) / games_scale$sd)
+
+# Thermometer, as in 3.2 (thermo-sample)
+thermo <- eu25_thermo |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_thermo_relationship %in% c("co", "out")
+  ) |>
+  mutate(
+    der_explicit = as.integer(type == "explicit"),
+    der_co = as.integer(der_thermo_relationship == "co"),
+    der_wave3 = as.integer(wave == 3),
+    der_cell = paste(type, der_thermo_relationship),
+    der_anchor = paste(country, anchor, sep = ": ")
+  ) |>
+  mutate(der_w = 1 / n(), .by = meta_responseid)
+
+thermo_scale <- list(mean = mean(thermo$q_thermo), sd = sd(thermo$q_thermo))
+thermo <- thermo |>
+  mutate(der_y_z = (q_thermo - thermo_scale$mean) / thermo_scale$sd)
+
+# LOO cells
+games <- mutate(games, der_cell_loo = paste(der_cell, game))
+thermo <- mutate(thermo, der_cell_loo = der_cell)
+
+datasets <- list(games = games, thermo = thermo)
+scales <- list(games = games_scale, thermo = thermo_scale)
+```
+
+# LOO Code
+
+## Fit Descriptions and the Comparability Rule
+
+Every scored object carries its outcome variable, its scale and its row keys.
+`compare_ok()` is the only gate to `elpd_diff_cells()`.
+
+```{r}
+#| label: spec-code
+
+specs <- tibble(name = loo_fits) |>
+  mutate(
+    measure = sub("_.*", "", name),
+    family = if_else(grepl("gauss", name), "gaussian", "beta_binomial"),
+    yvar = case_when(
+      family == "gaussian" ~ "der_y_z",
+      measure == "games" ~ "cj_pl2",
+      TRUE ~ "q_thermo"
+    ),
+    # Scale of the scored density: z (continuous) or the integer pmf
+    scale = if_else(family == "gaussian", "z", "integer"),
+    top = if_else(measure == "games", 10, 100)
+  )
+
+# Row keys: the outcome on its native integer scale and the design identifiers
+row_keys <- function(fd, measure, yvar) {
+  sc <- scales[[measure]]
+  y <- if (yvar == "der_y_z") fd[[yvar]] * sc$sd + sc$mean else fd[[yvar]]
+  tibble(
+    y = as.integer(round(y)),
+    country = as.character(fd$country),
+    meta_pid = as.character(fd$meta_pid),
+    der_co = as.integer(fd$der_co),
+    der_explicit = as.integer(fd$der_explicit)
+  )
+}
+
+compare_ok <- function(a, b) {
+  same_outcome <- identical(a$outcome, b$outcome) && identical(a$scale, b$scale)
+  same_rows <- identical(a$rows, b$rows) && identical(a$keys, b$keys)
+  if (!same_outcome) {
+    message(a$label, " vs ", b$label, ": different outcome or scale (",
+      a$outcome, "/", a$scale, " vs ", b$outcome, "/", b$scale, ")")
+  }
+  if (!same_rows) message(a$label, " vs ", b$label, ": different rows")
+  same_outcome && same_rows
+}
+
+# Pointwise elpd differences, overall and by cell; refuses non-comparable pairs
+elpd_diff_cells <- function(a, b) {
+  if (!compare_ok(a, b)) stop("elpd difference refused: fits are not comparable")
+  d <- tibble(cell = a$cell, diff = a$elpd - b$elpd)
+  bind_rows(
+    summarise(d, cell = "all", n = n(), elpd_diff = sum(diff), se = sqrt(n * var(diff))),
+    summarise(d, n = n(), elpd_diff = sum(diff), se = sqrt(n * var(diff)), .by = cell)
+  ) |>
+    mutate(a = a$label, b = b$label, .before = 1)
+}
+```
+
+## Rows to Score
+
+```{r}
+#| label: rows-code
+
+stratified_rows <- function(d, n_per) {
+  set.seed(seed)
+  idx <- split(seq_len(nrow(d)), d$der_cell_loo)
+  sort(unlist(
+    lapply(idx, \(i) if (length(i) <= n_per) i else sample(i, n_per)),
+    use.names = FALSE
+  ))
+}
+
+rows_to_score <- function(d) {
+  if (run_mode == "test") return(stratified_rows(d, test_per_cell))
+  if (use_subsample) return(stratified_rows(d, subsample_per_cell))
+  seq_len(nrow(d))
+}
+```
+
+## One Chunk
+
+For a chunk of rows, all with all 4,000 draws:
+
+1. `log_lik()`: the pointwise log predictive density of each draw.
+2. PSIS (`loo::psis()` with relative efficiencies by chain) gives the smoothed, normalized log importance weights $\log w_{is}$ and the Pareto $\hat{k}$ of each row. The LOO log predictive density of row $i$ is $\log \sum_s w_{is}\, p(y_i \mid \theta_s)$.
+3. LOO-PIT, with the same weights and the replicated outcomes of `posterior_predict()` for the same rows and draws. For integer outcomes the randomized PIT $u_i = P_{\text{loo}}(Y < y_i) + V_i\, P_{\text{loo}}(Y = y_i)$ with $V_i \sim U(0, 1)$, which is uniform under a calibrated model; for the Gaussian on the z-scale the plain $u_i = P_{\text{loo}}(Y \le y_i)$.
+
+The random numbers (replications and $V_i$) are seeded per chunk, so a resumed run gives the same values as an uninterrupted one.
+
+```{r}
+#| label: chunk-code
+
+psis_elpd <- function(ll, chains) {
+  r_eff <- loo::relative_eff(exp(ll), chain_id = chains)
+  ps <- suppressWarnings(loo::psis(-ll, r_eff = r_eff))
+  lw <- weights(ps, log = TRUE, normalize = TRUE)
+  list(elpd = colLogSumExps(lw + ll), k = ps$diagnostics$pareto_k, lw = lw)
+}
+
+loo_chunk <- function(fit, nd, yvar, gauss, chunk_id) {
+  set.seed(seed + chunk_id)
+  chains <- rep(seq_len(nchains(fit)), each = ndraws(fit) / nchains(fit))
+  ll <- log_lik(fit, newdata = nd)
+  p <- psis_elpd(ll, chains)
+  rm(ll)
+
+  yrep <- posterior_predict(fit, newdata = nd)
+  y <- nd[[yvar]]
+  ymat <- matrix(y, nrow(yrep), ncol(yrep), byrow = TRUE)
+  w <- exp(p$lw)
+  pit <- if (gauss) {
+    colSums(w * (yrep <= ymat))
+  } else {
+    colSums(w * (yrep < ymat)) + runif(length(y)) * colSums(w * (yrep == ymat))
+  }
+  tibble(elpd = p$elpd, k = p$k, pit = pmin(pmax(pit, 0), 1))
+}
+```
+
+## Cross-Family Module (optional)
+
+Only run with `cross_family <- TRUE`, and only for Gaussian fits.
+`log_bin()` is the log probability of the integer bin of $y$ under $N(\mu, \sigma)$ on the z-scale, computed on the log scale in the tail that is numerically stable.
+The discretization check confirms, on the first chunk, that the bin probabilities of a row sum to 1 over the whole scale, and compares the binned log probability with the continuous density approximation $\log \phi(z_i; \mu, \sigma) - \log(\text{SD}_y)$ for interior values. The two should be close where the bin is narrow relative to $\sigma$.
+
+```{r}
+#| label: cross-family-code
+
+# log P(lo < Z < hi) for Z ~ N(mu, sigma); mu: draws x rows, sigma: draws
+log_bin <- function(mu, sigma, lo, hi) {
+  a <- sweep(-mu, 2, lo, "+") / sigma
+  b <- sweep(-mu, 2, hi, "+") / sigma
+  lower <- {
+    lb <- pnorm(b, log.p = TRUE)
+    lb + log1p(-exp(pnorm(a, log.p = TRUE) - lb))
+  }
+  upper <- {
+    ua <- pnorm(a, lower.tail = FALSE, log.p = TRUE)
+    ua + log1p(-exp(pnorm(b, lower.tail = FALSE, log.p = TRUE) - ua))
+  }
+  ifelse(a > 0, upper, lower)
+}
+
+bin_edges <- function(y, sc, top) {
+  list(
+    lo = ifelse(y == 0, -Inf, (y - 0.5 - sc$mean) / sc$sd),
+    hi = ifelse(y == top, Inf, (y + 0.5 - sc$mean) / sc$sd)
+  )
+}
+
+bin_chunk <- function(fit, nd, sc, top, check = FALSE) {
+  chains <- rep(seq_len(nchains(fit)), each = ndraws(fit) / nchains(fit))
+  mu <- posterior_epred(fit, newdata = nd)
+  sigma <- as_draws_df(fit, variable = "sigma")$sigma
+  yn <- round(nd$der_y_z * sc$sd + sc$mean)
+  stopifnot(all(abs(nd$der_y_z * sc$sd + sc$mean - yn) < 1e-8))
+  e <- bin_edges(yn, sc, top)
+  ll <- log_bin(mu, sigma, e$lo, e$hi)
+  p <- psis_elpd(ll, chains)
+
+  chk <- NULL
+  if (check) {
+    # Bin probabilities over the whole scale sum to 1 (first 20 rows, 50 draws)
+    s <- seq_len(min(50, nrow(mu)))
+    sums <- sapply(seq_len(min(20, ncol(mu))), \(i) {
+      ek <- bin_edges(0:top, sc, top)
+      p_k <- sapply(0:top, \(k) exp(log_bin(
+        mu[s, rep(i, 1), drop = FALSE], sigma[s], ek$lo[k + 1], ek$hi[k + 1]
+      )))
+      range(rowSums(p_k))
+    })
+    interior <- yn > 0 & yn < top
+    ll_cont <- dnorm(
+      matrix(nd$der_y_z, nrow(mu), ncol(mu), byrow = TRUE), mu, sigma, log = TRUE
+    ) - log(sc$sd)
+    chk <- tibble(
+      max_abs_sum_minus_1 = max(abs(sums - 1)),
+      median_abs_diff_interior = median(abs(ll - ll_cont)[, interior]),
+      p90_abs_diff_interior = quantile(abs(ll - ll_cont)[, interior], 0.9)
+    )
+  }
+  list(res = tibble(elpd_bin = p$elpd, k_bin = p$k), check = chk)
+}
+```
+
+## Resumable Driver
+
+`score_fit()` loads one fit, checks its rows against the rebuilt data, and scores the selected rows chunk by chunk.
+A chunk that already has a file is skipped. Each chunk file holds its row indices, the results and the seconds it took.
+
+```{r}
+#| label: driver-code
+
+score_fit <- function(spec) {
+  d <- datasets[[spec$measure]]
+  rows <- rows_to_score(d)
+  md5 <- fp_start$md5[fp_start$name == spec$name]
+  dir <- file.path(
+    loo_dir,
+    paste0(spec$name, "_", substr(md5, 1, 8), "_", mode_tag, "_c", chunk_size)
+  )
+  dir.create(dir, showWarnings = FALSE, recursive = TRUE)
+  chunks <- split(rows, ceiling(seq_along(rows) / chunk_size))
+  gauss <- spec$family == "gaussian"
+  sc <- scales[[spec$measure]]
+
+  todo_native <- !file.exists(file.path(dir, sprintf("chunk_%04d.rds", seq_along(chunks))))
+  todo_bin <- cross_family & gauss &
+    !file.exists(file.path(dir, sprintf("chunk_%04d_bin.rds", seq_along(chunks))))
+
+  fit <- NULL
+  if (any(todo_native | todo_bin)) {
+    fit <- read_rds(file.path(model_dir, paste0(spec$name, ".rds")))
+    fd <- fit$data
+    stopifnot(
+      nrow(fd) == nrow(d),
+      identical(row_keys(fd, spec$measure, spec$yvar), row_keys(d, spec$measure, spec$yvar))
+    )
+  }
+
+  for (j in seq_along(chunks)) {
+    nd <- d[chunks[[j]], ]
+    if (todo_native[j]) {
+      t0 <- Sys.time()
+      res <- loo_chunk(fit, nd, spec$yvar, gauss, j)
+      secs <- as.numeric(Sys.time() - t0, units = "secs")
+      write_rds(list(rows = chunks[[j]], res = res, secs = secs),
+        file.path(dir, sprintf("chunk_%04d.rds", j)))
+      message(spec$name, " chunk ", j, "/", length(chunks), ": ", round(secs), " s")
+    }
+    if (todo_bin[j]) {
+      t0 <- Sys.time()
+      b <- bin_chunk(fit, nd, sc, spec$top, check = (j == 1))
+      secs <- as.numeric(Sys.time() - t0, units = "secs")
+      write_rds(list(rows = chunks[[j]], res = b$res, check = b$check, secs = secs),
+        file.path(dir, sprintf("chunk_%04d_bin.rds", j)))
+      message(spec$name, " bin chunk ", j, "/", length(chunks), ": ", round(secs), " s")
+    }
+  }
+  rm(fit)
+  gc()
+
+  # Collect
+  read_chunks <- function(suffix) {
+    f <- file.path(dir, sprintf("chunk_%04d%s.rds", seq_along(chunks), suffix))
+    parts <- map(f, read_rds)
+    stopifnot(identical(unlist(map(parts, "rows")), rows))
+    list(
+      res = bind_rows(map(parts, "res")),
+      secs = sum(map_dbl(parts, "secs")),
+      check = bind_rows(map(parts, "check"))
+    )
+  }
+  native <- read_chunks("")
+  bin <- if (cross_family && gauss) read_chunks("_bin") else NULL
+
+  list(
+    spec = spec,
+    rows = rows,
+    keys = row_keys(d[rows, ], spec$measure, spec$yvar),
+    native = native,
+    bin = bin
+  )
+}
+```
+
+# Scoring
+
+The fits are scored one at a time; each is dropped from memory before the next is loaded.
+
+```{r}
+#| label: score
+
+scored <- map(seq_len(nrow(specs)), \(i) score_fit(as.list(specs[i, ])))
+names(scored) <- specs$name
+```
+
+## Runtime
+
+Seconds per row, and the runtime a full run would need (all rows, all draws, one fit after the other).
+In test mode, this is the estimate to check before switching to `run_mode <- "full"`.
+
+```{r}
+#| label: runtime
+
+runtime <- imap(scored, \(s, nm) {
+  n_full <- nrow(datasets[[s$spec$measure]])
+  tibble(
+    name = nm,
+    rows_scored = length(s$rows),
+    secs = s$native$secs + if (is.null(s$bin)) 0 else s$bin$secs,
+    secs_per_row = secs / rows_scored,
+    rows_full = n_full,
+    est_full_hours = secs_per_row * n_full / 3600
+  )
+}) |>
+  bind_rows()
+
+bind_rows(runtime, summarise(runtime, name = "total", est_full_hours = sum(est_full_hours))) |>
+  knitr::kable(digits = c(0, 0, 0, 4, 0, 1))
+```
+
+# Pointwise Results
+
+One row per scored data row and fit: the cell, the LOO elpd, Pareto $\hat{k}$, the LOO-PIT value and, for integer-outcome scores, the leave-one-out empirical baseline.
+
+**The baseline.** Each row is predicted by the frequencies of the *other* rows in its cell, smoothed with +0.5 per scale value: $p_i = (n_{c, y_i} - 1 + 0.5) / (N_c - 1 + 0.5 K)$, with $K = 11$ or $101$ scale values. The model's elpd per row minus this baseline shows how much the model gains over the raw cell distribution. It exists only for integer pmfs: the beta-binomial fits, and the Gaussian fits when scored through the cross-family module.
+
+```{r}
+#| label: pointwise
+
+baseline_ll <- function(d, measure, top) {
+  y <- if (measure == "games") d$cj_pl2 else d$q_thermo
+  n_cell <- ave(y, d$der_cell_loo, FUN = length)
+  n_val <- ave(y, d$der_cell_loo, y, FUN = length)
+  log((n_val - 1 + 0.5) / (n_cell - 1 + 0.5 * (top + 1)))
+}
+
+pointwise <- imap(scored, \(s, nm) {
+  d <- datasets[[s$spec$measure]]
+  base <- baseline_ll(d, s$spec$measure, s$spec$top)[s$rows]
+  out <- tibble(
+    name = nm,
+    measure = s$spec$measure,
+    family = s$spec$family,
+    row = s$rows,
+    der_cell = d$der_cell[s$rows],
+    cell = d$der_cell_loo[s$rows],
+    game = if (s$spec$measure == "games") d$game[s$rows] else NA_character_,
+    country = d$country[s$rows],
+    y = s$keys$y,
+    elpd = s$native$res$elpd,
+    k = s$native$res$k,
+    pit = s$native$res$pit,
+    baseline = base,
+    elpd_bin = if (is.null(s$bin)) NA_real_ else s$bin$res$elpd_bin,
+    k_bin = if (is.null(s$bin)) NA_real_ else s$bin$res$k_bin
+  )
+  # The baseline gain is defined for integer pmfs only
+  mutate(
+    out,
+    gain_native = if (s$spec$family == "gaussian") NA_real_ else elpd - baseline,
+    gain_bin = elpd_bin - baseline
+  )
+}) |>
+  bind_rows()
+```
+
+# Per-Cell Diagnostics
+
+## 1. elpd per Row and Pareto k̂
+
+The mean LOO elpd per row in each cell, with its standard error, and the share of rows with $\hat{k} > 0.7$ and $\hat{k} > 1$.
+
+**How to read it.** Within one model, the elpd per row mixes two things: how spread out the outcome is in that cell, and how badly the model fits there. A cell with widely spread ratings has a low elpd per row even under a perfect model. So this shows where a model predicts with least certainty, not on its own where it fits worst. It is comparable across fits only within a comparable set (section 4).
+
+```{r}
+#| label: tbl-elpd-cell
+
+cell_summary <- function(df, ...) {
+  df |>
+    summarise(
+      n = n(),
+      elpd_mean = mean(elpd),
+      elpd_se = sd(elpd) / sqrt(n),
+      share_k_07 = mean(k > 0.7),
+      share_k_1 = mean(k > 1),
+      .by = c(...)
+    )
+}
+
+elpd_cell <- bind_rows(
+  cell_summary(pointwise, name, der_cell) |> rename(cell = der_cell),
+  cell_summary(filter(pointwise, measure == "games"), name, cell)
+) |>
+  distinct()
+
+elpd_cell |>
+  arrange(name, cell) |>
+  knitr::kable(digits = 3)
+```
+
+## Reliability
+
+Shares of rows with $\hat{k} > 0.7$ (PSIS estimate unreliable) and $\hat{k} > 1$ (unusable), by fit.
+The by-cell table is repeated on the rows with $\hat{k} \le 0.7$ as a check. These rows are **not** a random subset: high $\hat{k}$ marks influential rows, which are often the poorly predicted ones, so the restricted results flatter the model.
+
+```{r}
+#| label: tbl-reliability
+
+pointwise |>
+  summarise(
+    n = n(),
+    share_k_07 = mean(k > 0.7),
+    share_k_1 = mean(k > 1),
+    max_k = max(k),
+    .by = name
+  ) |>
+  knitr::kable(digits = 3)
+
+cell_summary(filter(pointwise, k <= 0.7), name, der_cell) |>
+  arrange(name, der_cell) |>
+  knitr::kable(digits = 3)
+```
+
+Leave-one-out here leaves out **one row**, not one person. A person contributes several rounds or ratings, and the person intercept learns from the other rows of the same person, so row-level LOO is optimistic about predicting a new person.
+Leave-one-person-out would need either K-fold cross-validation grouped by `meta_pid` (which means refits) or PSIS with moment matching, which needs fits saved with `save_pars(all = TRUE)`. Neither is done here. The current fits predate `save_pars(all = TRUE)`, and new fits from notebook 3.2 keep all parameters.
+
+## 2. LOO-PIT by Cell
+
+Under a calibrated model the LOO-PIT values are uniform in every cell.
+The figure shows the difference between their empirical CDF and the uniform CDF, with a pointwise 95% band for a uniform sample of that size.
+A hump above zero in the lower half means too many observations fall in the lower tail of the predictive distribution, for example more zeros than the model expects.
+Because the PIT is scale-free, it compares fits across families directly.
+
+```{r}
+#| label: fig-pit
+#| fig-width: 10
+#| fig-height: 8
+
+pit_grid <- seq(0.01, 0.99, by = 0.01)
+pit_ecdf <- pointwise |>
+  reframe(
+    u = pit_grid,
+    ecdf_diff = ecdf(pit)(pit_grid) - pit_grid,
+    band = 1.96 * sqrt(pit_grid * (1 - pit_grid) / n()),
+    .by = c(name, measure, family, der_cell)
+  )
+
+ggplot(pit_ecdf, aes(x = u)) +
+  geom_ribbon(aes(ymin = -band, ymax = band), fill = "grey85") +
+  geom_hline(yintercept = 0, colour = "grey50") +
+  geom_line(aes(y = ecdf_diff, colour = family), linewidth = 0.8) +
+  facet_grid(measure ~ der_cell) +
+  scale_colour_manual(values = c(gaussian = "#08306b", beta_binomial = "#d94801")) +
+  labs(
+    title = "LOO-PIT: empirical CDF minus uniform CDF, by cell",
+    subtitle = "Grey: pointwise 95% band for a uniform sample of the same size",
+    x = "u",
+    y = "ECDF(u) - u",
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+```
+
+```{r}
+#| label: tbl-pit
+
+pit_cell <- pointwise |>
+  summarise(
+    n = n(),
+    share_pit_below_05 = mean(pit < 0.05),
+    share_pit_above_95 = mean(pit > 0.95),
+    max_abs_ecdf_diff = max(abs(ecdf(pit)(pit_grid) - pit_grid)),
+    .by = c(name, der_cell)
+  )
+pit_cell |>
+  arrange(name, der_cell) |>
+  knitr::kable(digits = 3)
+```
+
+## 3. Gain over the Empirical Cell Distribution
+
+For integer pmfs only: the mean of model elpd minus baseline per row, by cell.
+Positive values mean the model predicts a row better than the raw distribution of its cell does.
+
+```{r}
+#| label: tbl-gain
+
+gain_cell <- bind_rows(
+  pointwise |>
+    filter(!is.na(gain_native)) |>
+    summarise(n = n(), gain_mean = mean(gain_native), gain_se = sd(gain_native) / sqrt(n),
+      .by = c(name, der_cell)) |>
+    mutate(score = "native"),
+  pointwise |>
+    filter(!is.na(gain_bin)) |>
+    summarise(n = n(), gain_mean = mean(gain_bin), gain_se = sd(gain_bin) / sqrt(n),
+      .by = c(name, der_cell)) |>
+    mutate(score = "discretized")
+)
+
+gain_cell |>
+  arrange(name, score, der_cell) |>
+  knitr::kable(digits = 3)
+```
+
+## 4. elpd Differences within Comparable Sets
+
+The scored objects are the native scores of every fit and, with `cross_family <- TRUE`, the discretized scores of the Gaussian fits.
+Every pair with the same outcome, scale and rows is compared; every other pair is refused by `compare_ok()`.
+The standard error of a summed difference over $N$ rows is $\sqrt{N \cdot \text{var}(d_i)}$.
+
+```{r}
+#| label: comparisons
+
+scores <- list()
+for (nm in names(scored)) {
+  s <- scored[[nm]]
+  pw <- filter(pointwise, name == nm)
+  scores[[nm]] <- list(
+    label = nm,
+    outcome = sub("_.*", "", nm),
+    scale = s$spec$scale,
+    rows = s$rows,
+    keys = s$keys,
+    cell = pw$der_cell,
+    elpd = pw$elpd
+  )
+  if (!is.null(s$bin)) {
+    scores[[paste0(nm, "_bin")]] <- list(
+      label = paste0(nm, " (discretized)"),
+      outcome = sub("_.*", "", nm),
+      scale = "integer",
+      rows = s$rows,
+      keys = s$keys,
+      cell = pw$der_cell,
+      elpd = pw$elpd_bin
+    )
+  }
+}
+
+pairs <- combn(names(scores), 2, simplify = FALSE)
+comparable <- keep(pairs, \(p) {
+  a <- scores[[p[1]]]
+  b <- scores[[p[2]]]
+  identical(a$outcome, b$outcome) && identical(a$scale, b$scale)
+})
+
+elpd_diffs <- if (length(comparable)) {
+  map(comparable, \(p) elpd_diff_cells(scores[[p[1]]], scores[[p[2]]])) |> bind_rows()
+} else {
+  message("No comparable pair among the scored fits (set cross_family <- TRUE to compare Gaussian and beta-binomial).")
+  NULL
+}
+
+# The gate refuses a non-comparable pair
+refused <- tryCatch(
+  {
+    elpd_diff_cells(scores[["games_gauss"]], scores[["games_bb"]])
+    FALSE
+  },
+  error = \(e) TRUE
+)
+stopifnot(refused)
+
+if (!is.null(elpd_diffs)) knitr::kable(elpd_diffs, digits = 2)
+```
+
+```{r}
+#| label: discretization-check
+
+disc_check <- imap(scored, \(s, nm) {
+  if (is.null(s$bin)) return(NULL)
+  mutate(s$bin$check, name = nm, .before = 1)
+}) |>
+  bind_rows()
+if (nrow(disc_check)) knitr::kable(disc_check, digits = 4)
+```
+
+# Save
+
+```{r}
+#| label: save
+
+slide_table <- elpd_cell |>
+  filter(cell %in% unique(pointwise$der_cell)) |>
+  left_join(
+    select(pit_cell, name, cell = der_cell, max_abs_ecdf_diff),
+    by = c("name", "cell")
+  ) |>
+  left_join(
+    gain_cell |>
+      filter(score == "native" | grepl("gauss", name)) |>
+      select(name, cell = der_cell, gain_mean),
+    by = c("name", "cell")
+  ) |>
+  select(name, cell, n, elpd_mean, share_k_07, max_abs_ecdf_diff, gain_mean)
+
+write_rds(
+  list(
+    settings = list(
+      run_mode = run_mode, mode_tag = mode_tag, cross_family = cross_family,
+      chunk_size = chunk_size, seed = seed
+    ),
+    pointwise = pointwise,
+    elpd_cell = elpd_cell,
+    pit_cell = pit_cell,
+    pit_ecdf = pit_ecdf,
+    gain_cell = gain_cell,
+    elpd_diffs = elpd_diffs,
+    disc_check = disc_check,
+    runtime = runtime,
+    slide_table = slide_table
+  ),
+  file.path(out_dir, "eu25_loo.rds"),
+  compress = "xz"
+)
+file.size(file.path(out_dir, "eu25_loo.rds")) / 1e6
+```
+
+# Fits Unchanged
+
+```{r}
+#| label: fits-unchanged
+
+fp_end <- fit_fingerprint()
+stopifnot(identical(fp_start, fp_end))
+fp_end |>
+  mutate(md5 = substr(md5, 1, 8)) |>
+  knitr::kable()
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
