@@ -1,0 +1,449 @@
+---
+title: |
+  CSAP Code Notebook 3.3
+subtitle: |
+  eu25games 2019: posterior post-processing of the AP contrast models (estimands for slides and paper)
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+This notebook turns the four cached fits of notebook 3.2 into the estimands, and saves them as one small file of posterior draws.
+Anything that shows results (the HMS deck, later the manuscript) reads that file instead of the fits, so it renders in seconds.
+
+- Input: the full fits `data/04_models/{games,thermo}_{bb,gauss}.rds` (git-ignored). Nothing is refitted here. If a fit is missing, the notebook stops.
+- Output: `data/05_results/eu25_ap_post.rds`.
+
+The estimands are those of 3.2 (*Estimand*): $AP_t = E(Y \mid Co, t) - E(Y \mid Out, t)$, $\Delta AP = AP_{\text{explicit}} - AP_{\text{vote-anchored}}$, and the cross-measure difference $\Delta AP^{SD}_{\text{thermo}} - \Delta AP^{SD}_{\text{games}}$.
+They are computed for the pooled support and for each country, and every quantity is reported with its posterior median, 95% and 99% intervals and $\Pr(> 0)$.
+
+**Nothing in this notebook is a claim.** The estimates are reported with their uncertainty and not interpreted here.
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "brms",
+  "cmdstanr",
+  "posterior",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Same seed as 3.2, so the same posterior draws are used
+seed <- 2019
+ndraws_post <- 1000
+max_treedepth <- 10
+
+model_dir <- here("data", "04_models")
+out_dir <- here("data", "05_results")
+dir.create(out_dir, showWarnings = FALSE)
+
+fit_files <- file.path(
+  model_dir,
+  c("games_bb.rds", "games_gauss.rds", "thermo_bb.rds", "thermo_gauss.rds")
+)
+stopifnot(all(file.exists(fit_files)))
+```
+
+# Data
+
+The estimation data are rebuilt exactly as in notebook 3.2 (*Data*: *Games*, *Thermometer*, *Common Support*).
+**This code must stay identical to 3.2**: the fits were estimated on these rows, and the estimands average over them.
+Only the lines the estimands need are kept; the tables and figures stay in 3.2.
+
+```{r}
+#| label: data
+
+eu25_games <- read_rds(here("data", "03_final", "eu25_games.rds"))
+eu25_thermo <- read_rds(here("data", "03_final", "eu25_thermo.rds"))
+
+# Games, as in 3.2 (games-sample)
+games <- eu25_games |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_cj_partisan_relationship %in% c("co", "out")
+  ) |>
+  mutate(
+    der_explicit = as.integer(type == "explicit"),
+    der_co = as.integer(der_cj_partisan_relationship == "co"),
+    der_trust = as.integer(game == "trust"),
+    der_wave3 = as.integer(wave == 3),
+    der_cell = paste(type, der_cj_partisan_relationship),
+    der_anchor = paste(country, anchor, sep = ": "),
+    round = factor(round),
+    across(c(cj_age, cj_sex, cj_rel, cj_class, der_cj_eu_identity), factor)
+  ) |>
+  mutate(der_w = 1 / n(), .by = meta_responseid)
+
+games_scale <- list(mean = mean(games$cj_pl2), sd = sd(games$cj_pl2))
+games <- games |>
+  mutate(der_y_z = (cj_pl2 - games_scale$mean) / games_scale$sd)
+
+# Thermometer, as in 3.2 (thermo-sample)
+thermo <- eu25_thermo |>
+  filter(
+    type %in% c("explicit", "vote_anchored"),
+    der_thermo_relationship %in% c("co", "out")
+  ) |>
+  mutate(
+    der_explicit = as.integer(type == "explicit"),
+    der_co = as.integer(der_thermo_relationship == "co"),
+    der_wave3 = as.integer(wave == 3),
+    der_cell = paste(type, der_thermo_relationship),
+    der_anchor = paste(country, anchor, sep = ": ")
+  ) |>
+  mutate(der_w = 1 / n(), .by = meta_responseid)
+
+thermo_scale <- list(mean = mean(thermo$q_thermo), sd = sd(thermo$q_thermo))
+thermo <- thermo |>
+  mutate(der_y_z = (q_thermo - thermo_scale$mean) / thermo_scale$sd)
+
+# Common support, as in 3.2 (games-support, thermo-support)
+add_support <- function(df) {
+  support <- df |>
+    distinct(der_anchor, meta_responseid, type) |>
+    count(der_anchor, type) |>
+    pivot_wider(names_from = type, values_from = n, values_fill = 0) |>
+    filter(explicit >= 1, vote_anchored >= 1)
+  mutate(df, der_support = der_anchor %in% support$der_anchor)
+}
+games <- add_support(games)
+thermo <- add_support(thermo)
+
+# Sample sizes, for the slides
+n_info <- bind_rows(games = games, thermo = thermo, .id = "measure") |>
+  summarise(
+    rows = n(),
+    respondent_waves = n_distinct(meta_responseid),
+    persons = n_distinct(meta_pid),
+    anchors = n_distinct(der_anchor),
+    anchors_support = n_distinct(der_anchor[der_support]),
+    rows_support = sum(der_support),
+    .by = measure
+  )
+n_info
+```
+
+# Estimand Code
+
+The cell means follow `ap_draws()` of 3.2, with one change for speed.
+3.2 calls it three times per model (pooled, by country, by party), and each call runs `posterior_epred()` over all rows in four counterfactual cells.
+Here it runs **once per model, by country**, and returns each country's weighted *sums* and weight totals instead of means.
+Country means are sums over weights. The pooled mean is the sum over all countries divided by the total weight, which is exactly the respondent-weighted pooled mean of 3.2.
+The draws are the same as in 3.2: `set.seed(seed)` and then 1,000 of the 4,000 draws, as `ap_draws()` does.
+
+```{r}
+#| label: estimand-code
+
+# Weighted sums of the predicted outcome per country, per cell and draw
+cell_sums <- function(fit, data, ids, back = identity, chunk = 5000) {
+  grp <- factor(data$country)
+  m <- sapply(levels(grp), \(l) (grp == l) * data$der_w)
+  m <- matrix(m, nrow = nrow(data), dimnames = list(NULL, levels(grp)))
+  rows <- split(seq_len(nrow(data)), ceiling(seq_len(nrow(data)) / chunk))
+
+  cells <- expand_grid(der_explicit = 0:1, der_co = 0:1)
+  sums <- map2(cells$der_explicit, cells$der_co, \(e, k) {
+    nd <- mutate(data, der_explicit = e, der_co = k)
+    tot <- 0
+    for (i in rows) {
+      ep <- back(posterior_epred(fit, newdata = nd[i, ], draw_ids = ids))
+      tot <- tot + ep %*% m[i, , drop = FALSE]
+    }
+    tot
+  })
+  names(sums) <- paste0("m", cells$der_explicit, "_", cells$der_co)
+  list(sums = sums, w = colSums(m))
+}
+
+# Cell means by draw: countries and pooled
+cell_means <- function(cs) {
+  map(cs$sums, \(tot) {
+    by_country <- sweep(tot, 2, cs$w, "/")
+    pooled <- rowSums(tot) / sum(cs$w)
+    cbind(pooled = pooled, by_country)
+  })
+}
+
+# AP by type and Delta AP by draw, raw and in SD units
+ap_contrasts <- function(means, sd_y, ids) {
+  long <- imap(means, \(mat, cell) {
+    as_tibble(mat) |>
+      mutate(.draw = ids) |>
+      pivot_longer(-.draw, names_to = "group", values_to = cell)
+  }) |>
+    reduce(inner_join, by = c(".draw", "group"))
+
+  long |>
+    transmute(
+      .draw,
+      group,
+      ap_vote_anchored = m0_1 - m0_0,
+      ap_explicit = m1_1 - m1_0,
+      delta_ap = ap_explicit - ap_vote_anchored,
+      ap_vote_anchored_sd = ap_vote_anchored / sd_y,
+      ap_explicit_sd = ap_explicit / sd_y,
+      delta_ap_sd = delta_ap / sd_y
+    )
+}
+
+# Median, 95% and 99% intervals, Pr(> 0)
+summarise_post <- function(df, ...) {
+  df |>
+    summarise(
+      median = median(value),
+      lower_95 = quantile(value, 0.025),
+      upper_95 = quantile(value, 0.975),
+      lower_99 = quantile(value, 0.005),
+      upper_99 = quantile(value, 0.995),
+      p_positive = mean(value > 0),
+      .by = c(...)
+    )
+}
+
+# MCMC diagnostics, as in 3.2
+mcmc_check <- function(fit) {
+  s <- withCallingHandlers(
+    summarise_draws(as_draws_df(fit), "rhat", "ess_bulk", "ess_tail"),
+    warning = \(w) {
+      if (grepl("ESS has been capped", conditionMessage(w))) {
+        invokeRestart("muffleWarning")
+      }
+    }
+  )
+  np <- nuts_params(fit)
+  tibble(
+    max_rhat = max(s$rhat, na.rm = TRUE),
+    min_ess_bulk = min(s$ess_bulk, na.rm = TRUE),
+    min_ess_tail = min(s$ess_tail, na.rm = TRUE),
+    divergent = sum(np$Value[np$Parameter == "divergent__"]),
+    max_treedepth = sum(
+      np$Value[np$Parameter == "treedepth__"] >= max_treedepth
+    )
+  )
+}
+```
+
+# Posterior Computation
+
+The models are loaded and processed one at a time, and each fit is dropped from memory before the next is loaded (about 560 MB each).
+The Gaussian models are fitted on the z-scored outcome, so their predictions are back-transformed to tokens and points before averaging, as in 3.2.
+
+```{r}
+#| label: post
+
+specs <- tribble(
+  ~name,          ~measure, ~model,  ~data,  ~scale,
+  "games_bb",     "games",  "bb",    "games",  "games",
+  "games_gauss",  "games",  "gauss", "games",  "games",
+  "thermo_bb",    "thermo", "bb",    "thermo", "thermo",
+  "thermo_gauss", "thermo", "gauss", "thermo", "thermo"
+)
+datasets <- list(games = games, thermo = thermo)
+scales <- list(games = games_scale, thermo = thermo_scale)
+
+post <- pmap(specs, \(name, measure, model, data, scale) {
+  t0 <- Sys.time()
+  fit <- read_rds(file.path(model_dir, paste0(name, ".rds")))
+
+  set.seed(seed)
+  ids <- sample(seq_len(ndraws(fit)), min(ndraws_post, ndraws(fit)))
+
+  sc <- scales[[scale]]
+  back <- if (model == "gauss") \(x) x * sc$sd + sc$mean else identity
+
+  cs <- cell_sums(fit, filter(datasets[[data]], der_support), ids, back)
+  contrasts <- ap_contrasts(cell_means(cs), sc$sd, ids) |>
+    mutate(model = model, measure = measure, .before = 1)
+  diag <- mcmc_check(fit) |>
+    mutate(name = name, .before = 1)
+
+  rm(fit)
+  gc()
+  message(name, ": ", round(as.numeric(Sys.time() - t0, units = "mins"), 1), " min")
+  list(contrasts = contrasts, diag = diag)
+})
+
+contrasts <- map(post, "contrasts") |> bind_rows()
+diagnostics <- map(post, "diag") |> bind_rows()
+diagnostics |> knitr::kable(digits = 3)
+```
+
+## Cross-Measure Difference
+
+$\Delta AP^{SD}_{\text{thermo}} - \Delta AP^{SD}_{\text{games}}$, per model and group.
+The two measures were fitted separately, so draws are paired by index, as in 3.2. With the same seed, both use the same draw positions.
+
+```{r}
+#| label: cross
+
+cross <- contrasts |>
+  select(model, measure, group, .draw, delta_ap_sd) |>
+  mutate(i = row_number(), .by = c(model, measure, group)) |>
+  select(-.draw) |>
+  pivot_wider(names_from = measure, values_from = delta_ap_sd) |>
+  transmute(model, group, i, diff = thermo - games)
+
+stopifnot(!anyNA(cross$diff))
+```
+
+## Check Against 3.2
+
+The pooled beta-binomial estimates must reproduce the pooled tables printed by 3.2 (same draws, same rows, same weights).
+The 3.2 values are copied from its rendered output.
+
+```{r}
+#| label: check-32
+
+ref_32 <- tribble(
+  ~model, ~measure, ~quantity,     ~median_32,
+  "bb",   "games",  "delta_ap",    0.37,
+  "bb",   "games",  "delta_ap_sd", 0.15,
+  "bb",   "thermo", "delta_ap",    20.74,
+  "bb",   "thermo", "delta_ap_sd", 0.66
+)
+
+check <- contrasts |>
+  filter(group == "pooled") |>
+  pivot_longer(-c(model, measure, .draw, group), names_to = "quantity") |>
+  summarise(median = median(value), .by = c(model, measure, quantity)) |>
+  inner_join(ref_32, by = c("model", "measure", "quantity"))
+check
+
+stopifnot(all(abs(check$median - check$median_32) < 0.011 * pmax(1, abs(check$median_32))))
+```
+
+# Summaries
+
+Pooled estimates for both models.
+
+```{r}
+#| label: summary-pooled
+
+contrasts |>
+  filter(group == "pooled") |>
+  pivot_longer(-c(model, measure, .draw, group), names_to = "quantity") |>
+  summarise_post(model, measure, quantity) |>
+  arrange(model, measure, quantity) |>
+  knitr::kable(digits = 3)
+
+cross |>
+  filter(group == "pooled") |>
+  rename(value = diff) |>
+  summarise_post(model) |>
+  knitr::kable(digits = 3)
+```
+
+By country, beta-binomial: $\Delta AP^{SD}$ per measure and the cross-measure difference.
+
+```{r}
+#| label: summary-country
+
+contrasts |>
+  filter(model == "bb", group != "pooled") |>
+  select(measure, group, value = delta_ap_sd) |>
+  summarise_post(measure, group) |>
+  select(measure, group, median, lower_95, upper_95, p_positive) |>
+  pivot_wider(
+    names_from = measure,
+    values_from = c(median, lower_95, upper_95, p_positive)
+  ) |>
+  arrange(group) |>
+  knitr::kable(digits = 2)
+
+cross |>
+  filter(model == "bb", group != "pooled") |>
+  rename(value = diff) |>
+  summarise_post(group) |>
+  arrange(group) |>
+  knitr::kable(digits = 2)
+```
+
+# Save
+
+One list, small enough to track in git:
+
+- `draws`: posterior draws of all quantities, long (`model`, `measure`, `group`, `.draw`, `quantity`, `value`);
+- `cross`: the paired cross-measure difference (`model`, `group`, `i`, `diff`);
+- `scales`: outcome mean and SD per measure, for back-translating SD units;
+- `diagnostics`: MCMC diagnostics per fit;
+- `n`: sample sizes per measure.
+
+```{r}
+#| label: save
+
+draws <- contrasts |>
+  pivot_longer(
+    -c(model, measure, .draw, group),
+    names_to = "quantity",
+    values_to = "value"
+  )
+
+write_rds(
+  list(
+    draws = draws,
+    cross = cross,
+    scales = scales,
+    diagnostics = diagnostics,
+    n = n_info
+  ),
+  file.path(out_dir, "eu25_ap_post.rds"),
+  compress = "xz"
+)
+
+file.size(file.path(out_dir, "eu25_ap_post.rds")) / 1e6
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```
