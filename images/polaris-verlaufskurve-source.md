@@ -1,0 +1,1 @@
+DWDS-Verlaufskurve für „polaris*“, erstellt durch das Digitale Wörterbuch der deutschen Sprache, <https://www.dwds.de/r/plot/?view=1&corpus=zeitungenxl&norm=date%2Bclass&smooth=spline&genres=0&grand=1&slice=1&prune=0&window=0&wbase=0&logavg=0&logscale=0&xrange=1946%3A2026&q1=polaris*>, abgerufen am 8.10.2026.

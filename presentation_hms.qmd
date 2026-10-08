@@ -91,9 +91,26 @@ theme_schematic <- function(base = 13) {
 
 ## Ein gegenwärtiges Trendwort...
 
-Polarisierung/Polarisation/polarisieren ist momentan allgegenwärtig im -- nicht nur deutschen -- Sprachgebrauch angekommen (vgl. Merriam Webster Wort des Jahres 2024 https://www.merriam-webster.com/wordplay/word-of-the-year-2024 oder Verlaufskurve png)
+*Polarisierung*, *Polarisation*, *polarisieren*: Die Begriffsfamilie ist im -- nicht nur deutschen -- Sprachgebrauch allgegenwärtig
 
-## ... mit langer Geschichte ...
+::: {.columns}
+::: {.column width="50%"}
+::: {.paper-fig}
+![Merriam-Webster: Wort des Jahres 2024 [@merriamwebster2024polarization]](./images/merriam-webster.png)
+:::
+:::
+
+::: {.column width="50%"}
+::: {.paper-fig}
+![„polaris\*“ im DWDS-Zeitungskorpus [@dwds2026polaris]](./images/polaris-verlaufskurve.png)
+:::
+:::
+:::
+
+## ... mit langer Geschichte ... {.smaller}
+
+::: {.columns}
+::: {.column width="60%"}
 
 - **Antike:** Griechisch *polos*, lateinisch *polus*: die Achse, um die sich etwas dreht [@etymonline2026pole]
   - Drehpunkt, Himmelsachse, geographische Pole
@@ -101,15 +118,18 @@ Polarisierung/Polarisation/polarisieren ist momentan allgegenwärtig im -- nicht
 - **19. Jh., Physik:** Polarisation als Orientierung/Ausrichtung [@etymonline2026polarize]
   - Optik: Lichtwellen werden in einer Ebene ausgerichtet (Begriff und Verb @malus1811memoire)
   - Elektromagnetismus: Ladungen bzw. Pole werden gegensätzlich angeordnet
-- **Ab 1945, Gesellschaft:** Übertragung auf soziale und politische Gruppen als „Verstärkung von Unterschieden" [@etymonline2026polarize]
+- **Ab 1945, Gesellschaft:** Übertragung auf soziale und politische Gruppen als „Verstärkung von Unterschieden“ [@etymonline2026polarize]
   - Hier kommen Spaltung und Konflikt als Wertung hinzu
+:::
+
+::: {.column width="40%"}
 
 ```{r}
 #| label: schematic-physics
-#| fig-width: 8
-#| fig-height: 3.3
+#| fig-width: 4.2
+#| fig-height: 5.4
 #| fig-align: center
-#| out-width: "74%"
+#| out-width: "100%"
 
 ang <- seq(0, 165, by = 15) * pi / 180
 pre <- do.call(
@@ -235,8 +255,11 @@ p_mag <- ggplot() +
   labs(title = "Magnet: zwei Pole", subtitle = " ") +
   theme_schematic()
 
-p_light | p_mag
+p_light / p_mag
 ```
+
+:::
+:::
 
 ::: {.notes}
 
@@ -246,7 +269,9 @@ p_light | p_mag
 
 ## ... und mindestens vier Gesichtern ... {.smaller}
 
+::: {style="max-width: 78%;"}
 - Mindestens vier mathematisch verschiedene Konzepte -- die sich **in denselben Daten gegenläufig** verhalten können
+:::
 
 ```{r}
 #| label: schematic-four-dists
@@ -316,13 +341,13 @@ p_sort <- ggplot(d_sort, aes(x, y, colour = g)) +
 
 ## ... und drei offenen Fragen
 
-- zwei Lager (bipolar) oder viele (multipolar)?
-- Zustand (*Polarisation*) oder Dynamik/Prozess(*Polarisierung*)?
+- Zwei Lager (bipolar) oder viele (multipolar)?
+- Zustand (*Polarisation*) oder Dynamik/Prozess (*Polarisierung*)?
 - Wer ist polarisiert (Population) -- und gegen wen/was (Ziel)?
 
 ## Quer dazu: Wahrnehmung und Wirklichkeit
 
-- Jede dieser Formen gibt es **zweimal**: wie sie ist -- und wie sie wahrgenommen
+- Jedes dieser Konzepte gibt es **zweimal**: wie es ist -- und wie es wahrgenommen wird
 - Menschen überschätzen systematisch, wie extrem und wie anders „die anderen“ sind [@levendusky2016mis; @ahler2018parties]
 - Wahrgenommene Polarisierung kann wachsen, während die tatsächliche gleich bleibt
 
