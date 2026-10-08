@@ -1,1 +1,23 @@
-to be "Clauded": new notebook to nicer visualization standards, update what I did
+
+
+
+draft a new notebook in a new subdir code/03_analyses for the
+  eu25games, where you prep the data so they are in long form,
+  with two datasets one for the experimental outcome (one row =
+  one round played) and one for the thermometer outcome (one row
+  = one evaluation).
+
+  Read C/R/research/MBEU25 targeted to get to know how to handle
+  duplicate IDs and so on (to address the panel duplicates issue
+  noted in 2.1 sec caveats).
+
+  The overall goal is to have those two datasets ready for being
+  analyzed (see notes on HMS presentation in index.qmd).
+
+  I also want a figure like the one in
+  "2.1_eu25_composition.html#country-by-wave" but for both waves
+  combined, and vertically sorted by blue shares descending. You
+  can include that in the new notebook.
+
+  Ask back if anything is unclear, vague or ambiguous. Feel free
+  to suggest improvements over strategy if you have better ideas.
