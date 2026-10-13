@@ -90,7 +90,9 @@ theme_schematic <- function(base = 13) {
 
 ## Ein gegenwärtiges Trendwort...
 
+::: {style="color: #003056;"}
 *Polarisierung*, *Polarisation*, *polarisieren*: Die Begriffsfamilie ist im -- nicht nur deutschen -- Sprachgebrauch allgegenwärtig
+:::
 
 ::: {.columns}
 ::: {.column width="50%"}

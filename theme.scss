@@ -37,7 +37,9 @@ $presentation-heading-color: #003056;
   }
 }
 
-.reveal .slides > section > p, .reveal .slides > section > section > p {
+/* .pdf-page wraps each slide in export mode ("e") */
+.reveal .slides > section > p, .reveal .slides > section > section > p,
+.reveal .slides > .pdf-page > section > p {
     color: $main-text;
 }
 
@@ -65,6 +67,10 @@ $presentation-heading-color: #003056;
 }
 .reveal li {
   color: #003056;
+}
+/* Reference list (::: {#refs}) */
+.reveal #refs, .reveal .csl-entry {
+  color: $main-text;
 }
 
 /* Adjust the logo size */
