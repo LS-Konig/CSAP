@@ -518,6 +518,20 @@ cses_tree |>
   )
 ```
 
+The grey *vote item not fielded* segments of France, Lithuania and Romania are the studies that followed a presidential election only.
+In these studies every respondent is coded "no lower-house election" (`9999996`), and the study records a presidential vote (`IMD3002_PR_1`) instead.
+So the segment marks a missing election, not a question that was skipped.
+These studies are listed below.
+
+```{r}
+#| label: vote-not-fielded
+
+# Studies without a lower-house election
+cses_tree |>
+  filter(vote == "not_fielded") |>
+  count(module, study, country)
+```
+
 ```{r}
 #| label: country-module
 #| output: asis
@@ -548,6 +562,7 @@ cses_tree |>
 # Caveats
 
 - **The vote is a national lower-house vote**, measured right after the election; the EES and eu25games notebooks use a European Parliament vote.
+- **Presidential studies have no vote branch.** France 2002, 2012, 2017 and 2022, Lithuania 1997, and Romania 2009 and 2014 followed a presidential election only, so their respondents sit in *vote item not fielded*.
 - **Abstention and missing share code `9999999`**, so *no vote reported* mixes both.
 - **Close is not naming.** Respondents close to a party with no usable party code are in *not matchable*.
 - **CSES folds inconsistent answers into the binary** (notebook 1.6): a "yes" with no party is kept as yes, a "no" with a party as no.

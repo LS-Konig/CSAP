@@ -235,6 +235,8 @@ ees_2004 <- ees_2004 |>
     # 94 no, 95 refused, 99 dk/na
     att = case_when(
       a == 94 ~ "no",
+      # Estonia files its no-party answers under 95 (see caveats)
+      a == 95 & country_raw == "estonia" ~ "no",
       a %in% c(95, 99) ~ "dk",
       .default = "yes"
     ),
@@ -526,6 +528,7 @@ ees_tree |>
 Each bar is one country-wave; blues report an attachment, greens are 2009 leaners, oranges report neither, greys are DK.
 The segments run from the attached (blues) through the leaners (greens, where asked) to those without an attachment (oranges), with DK and not fielded (greys) last.
 Missing bars are waves in which a country was not surveyed, or (Belgium and Lithuania 2004) did not field the attachment item.
+Estonia 2004 has its "refused" answers recoded to *no attachment*; see the caveats.
 
 ```{r}
 #| label: fig-leaves
@@ -600,6 +603,10 @@ The other four waves ask only the strength of attachment of those who named a pa
   Two members of one alliance, two predecessors of one successor, and a breakaway and its parent stay *different party*.
   Italy 2004 stays low for a different reason: attachment to the Margherita or the PdCI pairs with a vote for Il Girasole hundreds of times, which points to a mislabelled vote code in the release.
 - **The 2004 DK category** also contains no-answers, as noted in notebook 1.5.
+- **Estonia 2004 codes its no-party answers as refusals.** On `v211`, 911 of 1,606 Estonian respondents are coded `95` (refused) and only 12 are coded `94` (no party-ID). Every other country has 0--2% refusals and 10--60% "no".
+  The 95s are spread across voters and non-voters, so they do not come from a filter.
+  The codebook supplement shows the same split in the first edition (`q30`), and the codebook has no note on it.
+  This notebook therefore counts Estonia's 95 as *no attachment*. Notebook 1.5 still counts it as a refusal.
 
 # Session Info
 
