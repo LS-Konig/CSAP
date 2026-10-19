@@ -47,10 +47,9 @@ models/
 *.out.ipynb
 *.embed.ipynb
 
-# Raw external survey sources (Eurobarometer, CSES, EES, ESS): ~3.2 GB on disk,
+# Raw external survey sources (CSES, EES, ESS): ~1.8 GB on disk,
 # kept local and freely re-downloadable from GESIS / cses.org / europeansocialsurvey.org.
 # For ESS this covers the 1.5 GB CSV extract, its codebook and the derived Parquet tree.
-/data/01_raw/eb/
 /data/01_raw/cses/
 /data/01_raw/ees/
 /data/01_raw/ess/

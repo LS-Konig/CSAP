@@ -1,5 +1,5 @@
 ---
-last_modified: 2026-10-06
+last_modified: 2026-10-19
 scope: raw input, variable references, party matching, derived files, external sources
 ---
 
@@ -89,7 +89,7 @@ The deleted pipeline produced these. They predate the Party Facts match rule. Th
   completed the questionnaire, are not within-wave duplicates, and played the games. Each
   panelist is reduced to their earliest game wave.
 - `data/03_final/thermo_long.rds`: thermometer ratings in long format.
-- `data/03_final/{pid,eb,cses}_*.csv`: attachment-share series and item crosswalks from the
+- `data/03_final/{pid,cses}_*.csv`: attachment-share series and item crosswalks from the
   external sources.
 
 Derived variable names in the analysis frame:
@@ -124,9 +124,6 @@ opening them (see `CLAUDE.md`).
   source carrying the branching closeness probe. Matching study IDs across releases needs
   care, because the IMD splits two elections held in one year (`DEU12002`/`DEU22002`,
   `GRC12015`/`GRC22015`) and regional samples (`BELF`/`BELW`).
-- `data/01_raw/eb/`: Eurobarometer. It holds the Mannheim trend file 1970–2002, the harmonised files 2004–2021,
-  EB 95.3, and the Central & Eastern EB 1990–1997 (1.4 GB in total). The attachment item runs 1975–1994,
-  plus a single 2009 wave. The CEEB carries none. Verify coverage wave by wave.
 - `data/01_raw/ees/{1999,2004,2009,2014,2019,2024}/`: European Election Studies.
   `data/01_raw/key-items.qmd` maps the PID, vote choice, like/dislike and PTV items to their
   per-wave question numbers.

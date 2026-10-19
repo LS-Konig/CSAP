@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Last modified: 2026-10-02
+Last modified: 2026-10-19
 
 This is the entry point. It holds only what every task needs. The detail lives in the
 context files indexed below, and you should open those only when a task needs them.
@@ -9,7 +9,7 @@ context files indexed below, and you should open those only when a task needs th
 
 A comparative study of **partisanship and affective polarization (AP) across 25 European
 democracies**. It uses the thermometer ratings and the conjoint trust/dictator games from Hahm,
-Hilpert & König (2024), together with EES, CSES, ESS and Eurobarometer for the over-time side. The authors are Tristan
+Hilpert & König (2024), together with EES, CSES and ESS for the over-time side. The authors are Tristan
 Muno and Thomas König, University of Mannheim. The paper is targeted at APSR or another general-interest journal.
 
 ## Status (as of 2026-09-29)
@@ -69,7 +69,7 @@ quarto render presentation_hms.qmd      # RevealJS deck (HMS, German)
 | File | Read when… | Last modified |
 |------|-----------|---------------|
 | `.claude/design.md` | the task concerns the argument, the explicit vs. vote-anchored contrast, outcomes, estimands, models, or `index.qmd`'s notes | 2026-09-29 |
-| `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-10-06 |
+| `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-10-19 |
 | `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule (repo layout, pipeline order, Quarto quirks, LFS) | 2026-10-19 |
 
 ## Maintaining this system

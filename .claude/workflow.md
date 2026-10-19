@@ -65,8 +65,8 @@ Files larger than 100 MB must be tracked with LFS, because GitHub rejects larger
 `code/00_helper/glftrackeR.R` (run it from the repo root) to auto-track any file above the
 threshold before committing. It appends literal relative paths to `.gitattributes`, not globs.
 
-**Not everything large belongs in the repo at all.** The whole of `data/01_raw/{eb,cses,ees}/`
-is git-ignored. It is ~1.6 GB, against a `.git` already past 3 GB, and all of it can be re-downloaded. Apply the
+**Not everything large belongs in the repo at all.** The whole of `data/01_raw/{cses,ees}/`
+is git-ignored. It is ~0.2 GB, against a `.git` already past 3 GB, and all of it can be re-downloaded. Apply the
 same test before LFS-tracking anything new.
 
 Nothing is LFS-tracked at present. `.gitattributes` still carries an entry for
