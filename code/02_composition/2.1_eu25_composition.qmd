@@ -78,8 +78,9 @@ The leaves named after the typology are *explicit partisan* (attached, same part
 Vote-anchored respondents are not leaners: leaners come from the attitudinal probe, the vote-anchored from the vote.
 
 Every box gives the number of respondents, and every arrow gives the share of the box above it.
-The figures use one colour family per kind of answer: blues for attached respondents, greens for leaners, oranges for neither, greys for DK and not fielded.
-Their segments are stacked in the order of the tree's leaves.
+The two groups the contrast rests on are filled in the colours of the figures: the *explicit partisans* (attachment reported, vote for the same party) in dark blue, the *vote-anchored* (attachment denied, vote reported) in dark orange.
+The arrows leading to them are drawn thick in the same colours, and in black where a path leads to both.
+The figures use one colour family per kind of answer: blues for attached respondents, greens for leaners, oranges for neither, greys for DK and not fielded, stacked in that order.
 
 # Load Data
 
@@ -1041,7 +1042,7 @@ eu25_tree |>
 
 The figure compares the leaves of the tree across countries and waves.
 Each bar is one country-wave, and each colour one leaf: blues are respondents who report an attachment, oranges those who report none, and grey the DK group.
-The segments are stacked in the order of the tree: voters first, then non-voters.
+The segments run from the attached (blues) to those without an attachment (oranges), with DK (grey) last.
 The Mermaid trees below it give the exact counts for every cell.
 
 ```{r}
@@ -1089,7 +1090,7 @@ eu25_tree |>
 ```
 
 ```{r}
-#| label: fig-country-wave
+#| label: country-wave
 #| output: asis
 #| fig-width: 9
 #| fig-height: 7

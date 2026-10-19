@@ -524,7 +524,7 @@ ees_tree |>
 # Country by Wave
 
 Each bar is one country-wave; blues report an attachment, greens are 2009 leaners, oranges report neither, greys are DK.
-The segments are stacked in the order of the tree: voters first, then non-voters.
+The segments run from the attached (blues) through the leaners (greens, where asked) to those without an attachment (oranges), with DK and not fielded (greys) last.
 Missing bars are waves in which a country was not surveyed, or (Belgium and Lithuania 2004) did not field the attachment item.
 
 ```{r}
@@ -576,7 +576,7 @@ ees_tree |>
 ```
 
 ```{r}
-#| label: fig-country-wave
+#| label: country-wave
 #| output: asis
 #| fig-width: 9
 #| fig-height: 7

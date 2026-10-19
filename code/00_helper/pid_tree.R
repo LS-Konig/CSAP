@@ -116,27 +116,6 @@ leaf_colours <- c(
 ) |>
   rlang::set_names(leaf_levels)
 
-# Leaves in tree order: vote first groups the leaves by vote
-leaf_order <- function(vote_first = FALSE) {
-  if (!vote_first) {
-    return(leaf_levels)
-  }
-  c(
-    "Attached: same party",
-    "Attached: different party",
-    "Attached: vote not matchable",
-    "Leaner: same party",
-    "Leaner: different party",
-    "Leaner: vote not matchable",
-    "No attachment: vote",
-    "Attached: no vote",
-    "Leaner: no vote",
-    "No attachment: no vote",
-    "Attachment DK / missing",
-    "Vote item not fielded"
-  )
-}
-
 # Checks -------------------------------------------------------------------------
 
 # Fail loudly on unexpected codes
@@ -193,27 +172,34 @@ tree_paths <- function(df) {
   )
 }
 
-# Box label from a node id; leaves carry the typology name
-tree_label <- function(node, leaf) {
+# Typology name of a node, for leaves only
+tree_type <- function(node, leaf) {
   purrr::map2_chr(node, leaf, \(id, is_leaf) {
-    if (id == "root") {
-      return("Respondents")
-    }
     seg <- strsplit(id, "__", fixed = TRUE)[[1]][-1]
     last <- seg[length(seg)]
-    label <- tree_steps$label[match(last, tree_steps$step)]
-    # Typology names on the leaves
     has <- \(s) s %in% seg
     no_party <- has("a_no") && !has("l_yes") && !has("l_dk")
-    suffix <- dplyr::case_when(
+    if (id == "root") {
+      return(NA_character_)
+    }
+    dplyr::case_when(
       last == "m_same" && has("a_yes") ~ "explicit partisan",
       last == "m_same" && has("l_yes") ~ "leaner",
       is_leaf && no_party && has("v_yes") ~ "vote-anchored",
       is_leaf && no_party && has("v_no") ~ "non-partisan",
-      .default = NA
+      .default = NA_character_
     )
-    if (is.na(suffix)) label else paste0(label, "<br>(", suffix, ")")
   })
+}
+
+# Box label from a node id; leaves carry the typology name
+tree_label <- function(node, type) {
+  label <- tree_steps$label[match(stringr::str_extract(node, "[^_]+_[^_]+$"), tree_steps$step)]
+  dplyr::case_when(
+    node == "root" ~ "Respondents",
+    is.na(type) ~ label,
+    .default = paste0(label, "<br>(", type, ")")
+  )
 }
 
 # Sibling-ordered sort key of a node id
@@ -268,7 +254,8 @@ tree_counts <- function(df, ...) {
       .by = dplyr::all_of(grp)
     ) |>
     dplyr::mutate(
-      label = tree_label(node, leaf),
+      type = tree_type(node, leaf),
+      label = tree_label(node, type),
       key = tree_key(node)
     )
 
@@ -307,13 +294,16 @@ mermaid_tree <- function(counts) {
     dplyr::mutate(
       last = stringr::str_extract(node, "[^_]+_[^_]+$"),
       cls = dplyr::case_when(
+        type %in% "explicit partisan" ~ ":::explicit",
+        type %in% "vote-anchored" ~ ":::anchored",
         last %in% tree_muted ~ ":::muted",
         stringr::str_detect(node, "l_yes") ~ ":::lean",
         .default = ""
       )
     )
 
-  # Boxes, grey for DK and not fielded, dashed for leaners
+  # Boxes: filled for the two groups of interest, grey for DK and not
+  # fielded, dashed for leaners
   boxes <- counts |>
     dplyr::mutate(
       box = paste0(
@@ -345,13 +335,36 @@ mermaid_tree <- function(counts) {
       )
     )
 
+  # Thick edges on the paths to the two groups of interest
+  on_path <- \(nodes, leaves) {
+    purrr::map_lgl(nodes, \(x) any(startsWith(paste0(leaves, "__"), paste0(x, "__"))))
+  }
+  to_explicit <- on_path(edges$node, counts$node[counts$type %in% "explicit partisan"])
+  to_anchored <- on_path(edges$node, counts$node[counts$type %in% "vote-anchored"])
+  path_colour <- dplyr::case_when(
+    to_explicit & to_anchored ~ "#333333",
+    to_explicit ~ "#08306b",
+    to_anchored ~ "#a63603"
+  )
+  links <- paste0(
+    "  linkStyle ",
+    which(!is.na(path_colour)) - 1,
+    " stroke:",
+    path_colour[!is.na(path_colour)],
+    ",stroke-width:3px"
+  )
+  if (all(is.na(path_colour))) links <- character()
+
   paste(
     c(
       "flowchart TD",
       boxes$box,
       edges$edge,
+      links,
       "  classDef muted fill:#f2f2f2,stroke:#999,color:#555",
-      "  classDef lean fill:#f2f9f2,stroke:#238b45,stroke-dasharray:4 3"
+      "  classDef lean fill:#f2f9f2,stroke:#238b45,stroke-dasharray:4 3",
+      "  classDef explicit fill:#08306b,stroke:#041a3d,stroke-width:3px,color:#fff",
+      "  classDef anchored fill:#a63603,stroke:#5e1f02,stroke-width:3px,color:#fff"
     ),
     collapse = "\n"
   )
@@ -486,15 +499,10 @@ tree_leaves <- function(df, levels = leaf_levels) {
     dplyr::select(-".lean")
 }
 
-# Majority question order of a tree frame
-tree_vote_first <- function(df) {
-  "vote_first" %in% names(df) && mean(df$vote_first) >= 0.5
-}
-
-# Stacked leaf shares, one panel per facet
+# Stacked leaf shares, one panel per facet; blues, greens, oranges, greys
 plot_leaf_shares <- function(df, x, facet, ncol = 5) {
   df |>
-    tree_leaves(levels = leaf_order(tree_vote_first(df))) |>
+    tree_leaves() |>
     dplyr::count({{ facet }}, {{ x }}, leaf) |>
     dplyr::mutate(share = n / sum(n), .by = c({{ facet }}, {{ x }})) |>
     ggplot2::ggplot(ggplot2::aes(x = {{ x }}, y = share, fill = leaf)) +
@@ -513,7 +521,8 @@ plot_leaf_shares <- function(df, x, facet, ncol = 5) {
       panel.grid.major.x = ggplot2::element_blank(),
       panel.grid.minor = ggplot2::element_blank()
     ) +
-    ggplot2::guides(fill = ggplot2::guide_legend(nrow = 3))
+    # One legend column per colour family
+    ggplot2::guides(fill = ggplot2::guide_legend(nrow = 4))
 }
 
 # Composition by country --------------------------------------------------------
@@ -525,12 +534,11 @@ leaf_text_colour <- function(fill) {
   dplyr::if_else(lum < 0.5, "white", "#003056")
 }
 
-# One bar per country, as in the HMS deck (presentation_hms.qmd)
+# One bar per country, as in the HMS deck (presentation_hms.qmd); blues,
+# greens, oranges, greys from the left
 plot_country_composition <- function(df) {
-  levels <- leaf_order(tree_vote_first(df))
-
   d <- df |>
-    tree_leaves(levels = levels) |>
+    tree_leaves() |>
     dplyr::count(country, leaf) |>
     dplyr::mutate(
       share = n / sum(n),
@@ -578,7 +586,8 @@ plot_country_composition <- function(df) {
     ) +
     ggplot2::scale_colour_identity() +
     ggplot2::scale_fill_manual(values = leaf_colours, drop = TRUE) +
-    ggplot2::guides(fill = ggplot2::guide_legend(nrow = 3)) +
+    # One legend column per colour family
+    ggplot2::guides(fill = ggplot2::guide_legend(nrow = 4)) +
     ggplot2::scale_x_continuous(
       labels = scales::percent,
       breaks = seq(0, 1, 0.25),
@@ -597,16 +606,28 @@ plot_country_composition <- function(df) {
 }
 
 # One country figure per group value, in tabs (asis chunk)
+# knitr would hold printed plots until the end of the chunk, after the
+# tabset, so each figure is saved here and linked inside its own tab.
 emit_figure_tabset <- function(df, by, level = 2, subtitle = NULL) {
+  opts <- knitr::opts_current$get()
   cat("\n::: {.panel-tabset}\n\n")
-  for (g in dplyr::group_split(df, .data[[by]])) {
+  groups <- dplyr::group_split(df, .data[[by]])
+  for (i in seq_along(groups)) {
+    g <- groups[[i]]
     value <- as.character(g[[by]][1])
-    cat(strrep("#", level), " ", value, "\n\n", sep = "")
-    print(
+    path <- knitr::fig_path(".png", number = i)
+    dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+    ggplot2::ggsave(
+      path,
       plot_country_composition(g) +
-        ggplot2::labs(title = value, subtitle = subtitle)
+        ggplot2::labs(title = value, subtitle = subtitle),
+      width = opts$fig.width,
+      height = opts$fig.height,
+      dpi = 192,
+      bg = "white"
     )
-    cat("\n\n")
+    cat(strrep("#", level), " ", value, "\n\n", sep = "")
+    cat("![](", path, "){width=100%}\n\n", sep = "")
   }
   cat(":::\n\n")
 }

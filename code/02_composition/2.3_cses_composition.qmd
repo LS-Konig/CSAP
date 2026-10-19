@@ -465,7 +465,7 @@ cses_tree |>
 
 In the CSES the natural cell is the election study, not a calendar year.
 Three country-years hold two studies each (Belgium 2019 as Flanders and Wallonia, Germany 2002, Greece 2015); the bars pool them, the trees keep them apart.
-Bars are stacked in the vote-first order of most studies, so a module-3 bar shows the same leaves in the same places as the others.
+The segments run from the attached (blues) through the leaners (greens) to those without an attachment (oranges), with DK and not fielded (greys) last.
 
 ```{r}
 #| label: fig-leaves
@@ -519,7 +519,7 @@ cses_tree |>
 ```
 
 ```{r}
-#| label: fig-country-module
+#| label: country-module
 #| output: asis
 #| fig-width: 9
 #| fig-height: 7

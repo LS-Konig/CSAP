@@ -511,7 +511,7 @@ ess_tree |>
 # Country by Round
 
 Each bar is one country-round; blues report an attachment, oranges report none, grey is DK.
-The segments are stacked in the order of the tree: voters first, then non-voters.
+The segments run from the attached (blues) to those without an attachment (oranges), with DK (grey) last.
 Missing bars are rounds in which a country was not surveyed.
 
 ```{r}
@@ -560,7 +560,7 @@ ess_tree |>
 ```
 
 ```{r}
-#| label: fig-country-round
+#| label: country-round
 #| output: asis
 #| fig-width: 9
 #| fig-height: 7
