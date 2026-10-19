@@ -1136,8 +1136,8 @@ pooled_panels(main_model)$b
 5. Die einfache Gleichung „mehr Polarisierung = schlechter“ wird von neueren Studien differenziert:
    - Weniger Animosität ändert demokratische Einstellungen nicht [@broockman2023doesaffective]
    - Der Zusammenhang ist nicht linear, sondern eher umgekehrt U-förmig [@janssen2024breaking]
-   - Die Ablehnung radikaler Parteien kann eine Leitplanke sein [@harteveld2022affective]
-   - Gegner oder Feind? [@westphal2025politicaltheory]
+   - Die Ablehnung radikaler Parteien kann eine Leitplanke sein [@harteveld2022affective; @mason2026polarization]
+   - Gegner oder Feind? [@westphal2025politicaltheory; @mouffe2013agonistics]
 
 ::: {.notes}
 
