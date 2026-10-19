@@ -67,6 +67,70 @@ ess <- open_dataset(
 )
 ```
 
+# Question Order
+
+Every item about turnout, vote choice and party attachment, in the order of each round's source questionnaire (the English master on europeansocialsurvey.org: [round 1](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS1_source_main_questionnaire.pdf), [2](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS2_source_main_questionnaire.pdf), [3](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS3_source_main_questionnaire.pdf), [4](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS4_source_main_questionnaire.pdf), [5](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS5_source_main_questionnaire_0.pdf), [6](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS6_source_main_questionnaire.pdf), [7](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS7_source_main_questionnaire.pdf), [8](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS8_source_questionnaires.pdf), [9](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS9_source_questionnaires.pdf), [10](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS-Round-10-Source-Questionnaire_FINAL_A.pdf), [11](https://www.europeansocialsurvey.org/sites/default/files/2024-01/ESS%20Round%2011%20Source%20Questionnaire_FINAL_Alert%2004.pdf)).
+These are core items, so the wording is the same in every round (see the codebook, `data/01_raw/ess/Datafile-subset codebook.html`); only the numbering moves.
+
+```{r}
+#| label: items
+
+# Question numbers per round group
+numbers <- tribble(
+  ~rounds, ~vote, ~prtv, ~clsprty, ~prtcl, ~prtdgcl, ~mmbprty, ~prtmb,
+  "1", "B13", "B14", "B25a", "B25b", "B25c", "B26", "B27",
+  "2-5", "B11", "B12", "B20a", "B20b", "B20c", "B21", "B22",
+  "6-7", "B9", "B10", "B18a", "B18b", "B18c", NA, NA,
+  "8-11", "B13", "B14", "B23", "B24", "B25", NA, NA
+)
+
+# Wording, role and filter per item
+item_text <- tribble(
+  ~variable, ~role, ~wording, ~asked,
+  "vote", "turnout (national)",
+  "Some people don't vote nowadays for one reason or another. Did you vote in the last [country] national election in [month/year]?",
+  "all",
+  "prtv", "vote (national recall)", "Which party did you vote for in that election?", "if voted",
+  "clsprty", "attachment",
+  "Is there a particular political party you feel closer to than all the other parties?", "all",
+  "prtcl", "party", "Which one?", "if yes",
+  "prtdgcl", "strength", "How close do you feel to this party? Do you feel that you are ... [very close / quite close / not close / not at all close]", "if a party named",
+  "mmbprty", "membership", "Are you a member of any political party?", "all (rounds 1-5)",
+  "prtmb", "membership party", "Which one?", "if a member"
+)
+
+items <- numbers |>
+  pivot_longer(-rounds, names_to = "variable", values_to = "question", values_drop_na = TRUE) |>
+  mutate(pos = row_number(), .by = rounds) |>
+  left_join(item_text, by = "variable") |>
+  mutate(variable = if_else(variable %in% c("prtv", "prtcl", "prtmb"), paste0(variable, "<cc>"), variable))
+
+items |>
+  select(Rounds = rounds, `#` = pos, Question = question, Variable = variable, Role = role, Wording = wording, `Asked of` = asked) |>
+  knitr::kable()
+
+# Vote before attachment, per round
+item_order <- items |>
+  summarise(
+    vote_first = pos[role == "vote (national recall)"] < pos[role == "attachment"],
+    .by = rounds
+  ) |>
+  separate_wider_delim(rounds, "-", names = c("from", "to"), too_few = "align_start", cols_remove = FALSE) |>
+  mutate(to = coalesce(to, from), across(c(from, to), as.integer)) |>
+  reframe(essround = from:to, vote_first, .by = rounds)
+item_order
+```
+
+In order, for every round: `vote` → `prtv` → (other participation items) → `clsprty` → `prtcl` → `prtdgcl`, and in rounds 1 to 5 → `mmbprty` → `prtmb`.
+The vote recall comes eight to eleven questions before the attachment item in every round, so every tree below splits on the vote first.
+Two things set the ESS apart from the other sources:
+
+- **The attachment item is comparative**: *closer to than all the other parties*, which the CSES and the EES 2009 wave use for the probe, not for the base item. The source questionnaires (in rounds 1 and 11, for instance) define "feel closer to" as "the party one most identifies or sympathises with or is most attached to, regardless of how one votes".
+  There is no leaner probe.
+- **The vote is a recall of the last national election**, which can lie years back, and is asked right after a turnout filter.
+
+The survey is face to face, except for the self-completion samples of round 10 (see notebook 1.7).
+
 # The Party Problem
 
 The ESS asks both items as a filter followed by a party:
@@ -365,7 +429,9 @@ ess_tree <- ess_tree |>
         "R10 2021",
         "R11 2023"
       )
-    )
+    ),
+    # Tree order from the source questionnaire
+    vote_first = item_order$vote_first[match(essround, item_order$essround)]
   ) |>
   select(
     round,
@@ -376,7 +442,8 @@ ess_tree <- ess_tree |>
     vote,
     match,
     att_label,
-    vote_label
+    vote_label,
+    vote_first
   )
 ```
 
@@ -405,7 +472,7 @@ ess_tree |>
 
 # Pooled Tree
 
-All 25 countries and all eleven rounds.
+All 25 countries and all eleven rounds, split on the vote first, as every round asked it.
 
 ```{r}
 #| label: tree-pooled
@@ -443,7 +510,8 @@ ess_tree |>
 
 # Country by Round
 
-Each bar is one country-round; blues report an attachment, oranges report none, greys are DK.
+Each bar is one country-round; blues report an attachment, oranges report none, grey is DK.
+The segments are stacked in the order of the tree: voters first, then non-voters.
 Missing bars are rounds in which a country was not surveyed.
 
 ```{r}
@@ -472,12 +540,40 @@ ess_tree |>
   emit_nested_tabset(outer = "country", inner = "round", level = 2)
 ```
 
+# Composition by Country
+
+One bar per country, as in the HMS deck (`presentation_hms.qmd`), with the number of respondents after each country and the share of every leaf on its segment (under 3%, the bare number).
+Countries are sorted by the share reporting an attachment.
+The pooled figure mixes rounds, and countries took part in different numbers of rounds (Romania in one, Latvia in four).
+
+```{r}
+#| label: fig-country-pooled
+#| fig-width: 9
+#| fig-height: 7
+
+ess_tree |>
+  plot_country_composition() +
+  labs(
+    title = "Partisan composition in the ESS, 2002-2023",
+    subtitle = "Unweighted shares; the vote is the last national election"
+  )
+```
+
+```{r}
+#| label: fig-country-round
+#| output: asis
+#| fig-width: 9
+#| fig-height: 7
+
+emit_figure_tabset(ess_tree, by = "round", subtitle = "Unweighted shares; the vote is the last national election")
+```
+
 # Leaner Probes
 
-The ESS has no leaner probe.
+The ESS has no leaner probe, so no tree here has a leaner level.
 `clsprty` already asks for a party one feels *closer to than all the other parties*, a comparative wording that other surveys use for the probe itself, not for the base item.
 Its only follow-up is the strength of closeness (`prtdgcl`), asked of those who named a party.
-So the ESS *Close to a party* box is closer to "attachment or leaning" than the EES or CSES base items are, and no tree here carries a dashed note.
+So the ESS *Attachment reported* box is closer to "attachment or leaning" than the EES or CSES base items are.
 
 # Caveats
 

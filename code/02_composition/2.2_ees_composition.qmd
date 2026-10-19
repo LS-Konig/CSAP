@@ -80,6 +80,121 @@ ees_2024 <- read_csv2(
 )
 ```
 
+# Question Order
+
+Every item about turnout, vote choice and party attachment, in questionnaire order.
+The sources are the master questionnaires in `data/01_raw/ees/`: `ZA4566_bq.pdf` (2004), `questionnaire/ZA5055_q_gb.pdf` (2009, the British version, since there is no English master), `ZA5160_bq.pdf` (2014), `ZA7581_q_all.xlsx` (2019, the Irish column) and `ZA8868_q_master-1.pdf` (2024); `data/01_raw/key-items.qmd` gives the full codings.
+
+```{r}
+#| label: items
+
+items <- tribble(
+  ~year, ~pos, ~question, ~variable, ~role, ~wording, ~asked,
+  # 2004, interviewer-administered
+  2004, 1, "Q9", "", "turnout (EP)",
+  "A lot of people abstained in the European Parliament elections of June 13, while others voted. Did you cast your vote?",
+  "all",
+  2004, 2, "Q10", "v112", "vote (EP, used)", "Which party did you vote for?", "if voted",
+  2004, 3, "Q11", "v113", "vote (national recall)",
+  "Which party did you vote for at the [General Election] of [Year]?", "all",
+  2004, 4, "Q12", "", "vote intention (national)",
+  "And if there was a general election tomorrow, which party would you vote for?", "all",
+  2004, 5, "Q30", "v211", "attachment and party",
+  "Do you consider yourself to be close to any particular party? If so, which party do you feel close to?",
+  "all",
+  2004, 6, "Q30a", "v212", "strength",
+  "Do you feel yourself to be very close to this party, fairly close, or merely a sympathiser?",
+  "if a party named",
+  # 2009, interviewer-administered
+  2009, 1, "Q24", "q24", "turnout (EP)",
+  "A lot of people abstained in the European Parliament elections of June 4, while others voted. Did you cast your vote?",
+  "all",
+  2009, 2, "Q25", "q25", "vote (EP, used)", "Which party did you vote for?", "if voted",
+  2009, 3, "Q26", "q26", "hypothetical vote (EP)",
+  "If you had voted in the European Parliament elections, which party would you have voted for?",
+  "if not voted",
+  2009, 4, "Q27", "q27", "vote (national recall)",
+  "Which party did you vote for at the General Election of 2005?", "all",
+  2009, 5, "Q28", "q28", "vote intention (national)",
+  "And if there was a general election tomorrow, which party would you vote for?", "all",
+  2009, 6, "Q87", "q87", "attachment and party",
+  "Do you consider yourself to be close to any particular party? If so, which party do you feel close to? [open, not read out]",
+  "all",
+  2009, 7, "Q88", "q88", "strength",
+  "Do you feel yourself to be very close to this party, fairly close, or merely a sympathiser?",
+  "if a party named",
+  2009, 8, "Q89", "q89", "leaner probe",
+  "Do you feel yourself a little closer to one of the political parties than others?",
+  "if no, refused or don't know at Q87",
+  2009, 9, "Q90", "q90", "leaner party", "Which party is that?", "if yes at Q89",
+  # 2014, interviewer-administered (Eurobarometer post-election survey, QP, plus EES items, QPP)
+  2014, 1, "QP1", "", "turnout (EP)",
+  "[...] Did you yourself vote in the recent European Parliament elections?", "all",
+  2014, 2, "QP2", "qp2_ees", "vote (EP, used)",
+  "Which party did you vote for in these recent European Parliament elections?", "if voted",
+  2014, 3, "QPP5", "qpp5_ees", "vote (national recall)",
+  "Which party did you vote for in these last parliamentary elections?", "all",
+  2014, 4, "QPP6", "", "vote intention (national)",
+  "And if there were a general election tomorrow, which party would you vote for?", "all",
+  2014, 5, "QPP21", "qpp21_ees", "attachment and party",
+  "Do you consider yourself to be close to any particular political party? If so, which party do you feel close to? [not shown, not read out]",
+  "all",
+  2014, 6, "QPP22", "", "strength",
+  "Do you feel yourself to be very close to this party, fairly close, or merely a sympathiser?",
+  "if a party named",
+  # 2019, online
+  2019, 1, "Q6", "", "turnout (EP)",
+  "The European Parliament elections were held on [date]. For one reason or another, some people did not vote in these elections. [...]",
+  "all",
+  2019, 2, "Q7", "Q7n", "vote (EP, used)",
+  "Which party did you vote for in the European Parliament elections?", "if voted",
+  2019, 3, "Q9", "Q9n", "vote (national recall)",
+  "Which party did you vote for at the General Election of [year]?", "all",
+  2019, 4, "Q25", "Q25n", "attachment and party",
+  "Do you consider yourself to be close to any particular party? If so, which party do you feel close to?",
+  "all",
+  2019, 5, "Q26", "", "strength",
+  "Do you feel yourself to be very close to this party, fairly close or merely a sympathiser?",
+  "if a party named",
+  # 2024, online
+  2024, 1, "Q5", "", "turnout (EP)",
+  "The European Parliament elections were held on [date]. For one reason or another, some people did not vote in these elections. Did you vote in the recent European Parliament elections?",
+  "all",
+  2024, 2, "Q6", "q6 / q6n", "vote (EP, used)",
+  "Which party did you vote for in the European Parliament elections?", "if voted",
+  2024, 3, "Q8", "q8", "vote (national recall)",
+  "Which party did you vote for at the [General Election] of [Year of Last General Election]?", "all",
+  2024, 4, "Q19", "q19 / q19n", "attachment and party",
+  "Do you consider yourself to be close to any particular party? If so, which party do you feel close to?",
+  "all; no strength item"
+)
+
+items |>
+  select(Wave = year, `#` = pos, Question = question, Variable = variable, Role = role, Wording = wording, `Asked of` = asked) |>
+  knitr::kable()
+
+# Vote before attachment, per wave
+item_order <- items |>
+  summarise(
+    vote_first = min(pos[role == "vote (EP, used)"]) < min(pos[role == "attachment and party"]),
+    .by = year
+  )
+item_order
+```
+
+In order:
+
+- **2004:** Q9 → Q10 → Q11 → Q12 → Q30 → Q30a
+- **2009:** Q24 → Q25 / Q26 → Q27 → Q28 → Q87 → Q88 / Q89 → Q90
+- **2014:** QP1 → QP2 → QPP5 → QPP6 → QPP21 → QPP22
+- **2019:** Q6 → Q7 → Q9 → Q25 → Q26
+- **2024:** Q5 → Q6 → Q8 → Q19
+
+Every wave asks the EP vote near the start and the attachment item much later, after the national recall (and, before 2019, a national vote intention), so every tree below splits on the vote first.
+The attachment wording is the same in every wave and names the party in the same step.
+What differs is how it is asked: by an interviewer, as an open question with no party list read out or shown (explicitly so in 2009 and 2014), against a party list on screen in the online waves (2019, 2024), which also drop the refusal option.
+Only 2009 follows a *no* or *don't know* with a leaner probe (`Q89`, then `Q90` for the party); the trees show it as a leaner level for that wave.
+
 # Select Attachment and Vote Items
 
 The attachment item is the same question in every wave -- *do you consider yourself to be close to any particular party? If so, which party do you feel close to?* -- and it names the party in the same step.
@@ -100,6 +215,7 @@ the attachment party and the EP vote are compared by Party Facts party, with the
 The match comes from `data/02_processed/ees_party_match.parquet`, joined on wave and the respondent's position in the wave's file.
 
 The attachment categories follow notebook 1.5, with one difference: don't know, refusal and missing are pooled into the tree's grey *DK* box.
+In 2009, respondents without an attachment are split by the probe `q89`, and a leaner's party (`q90`) is matched to the EP vote like an attachment (`ext_match_lean_vote_ep`, notebook 1.9).
 
 ```{r}
 #| label: select-2004
@@ -145,6 +261,13 @@ ees_2009 <- ees_2009 |>
       a == 0 ~ "no",
       is.na(a) | a %in% c(77, 88, 99) ~ "dk",
       .default = "yes"
+    ),
+    # Leaner probe q89: 1 yes, 2 no, 7 refused, 8 dk, 9 nap
+    lean = case_when(
+      att == "yes" ~ NA,
+      q89 == 1 ~ "yes",
+      q89 == 2 ~ "no",
+      .default = "dk"
     ),
     # Seven-digit parties, 20/98 other
     vote = if_else(v > 1000 | v %in% c(20, 98), "yes", "no", missing = "no"),
@@ -276,9 +399,19 @@ ees_tree <- bind_rows(ees_2004, ees_2009, ees_2014, ees_2019, ees_2024) |>
 # Level 3: Party Facts match with the EP vote, with alliances and lineage
 # (notebook 1.9); `route` says which table made a pair the same party
 ees_match <- read_parquet(here("data", "02_processed", "ees_party_match.parquet")) |>
-  transmute(year = factor(wave, levels = levels(ees_tree$year)), row, match_cntry = cntry, pf_match = ext_match_vote_ep, route = ext_route_vote_ep)
+  transmute(
+    year = factor(wave, levels = levels(ees_tree$year)), row, match_cntry = cntry,
+    pf_match = ext_match_vote_ep, route = ext_route_vote_ep,
+    # Leaner party (q90), 2009 only
+    lean_match = ext_match_lean_vote_ep, lean_route = ext_route_lean_vote_ep
+  )
 ees_pf <- read_parquet(here("data", "02_processed", "ees_party_pf.parquet")) |>
-  transmute(year = factor(wave, levels = levels(ees_tree$year)), row, att_pf = ext_pid_pf_name, vote_pf = ext_vote_ep_pf_name)
+  transmute(
+    year = factor(wave, levels = levels(ees_tree$year)), row,
+    # The leaner's party where there is one
+    att_pf = if_else(is.na(ext_pid_lean_pf_name), ext_pid_pf_name, ext_pid_lean_pf_name),
+    vote_pf = ext_vote_ep_pf_name
+  )
 
 n_before <- nrow(ees_tree)
 ees_tree <- ees_tree |>
@@ -291,12 +424,20 @@ ees_tree <- ees_tree |>
   })() |>
   mutate(
     match = case_when(
-      att != "yes" | vote != "yes" ~ NA,
-      .default = coalesce(pf_match, "unmatchable")
-    )
+      vote != "yes" ~ NA,
+      att == "yes" ~ coalesce(pf_match, "unmatchable"),
+      lean %in% "yes" ~ coalesce(lean_match, "unmatchable"),
+      .default = NA
+    ),
+    route = case_when(
+      match != "same" ~ NA,
+      att == "yes" ~ route,
+      .default = lean_route
+    ),
+    # Tree order from the questionnaire
+    vote_first = item_order$vote_first[match(year, item_order$year)]
   ) |>
-  mutate(route = if_else(match == "same", route, NA)) |>
-  select(year, country, att, vote, match, route, a, v, att_pf, vote_pf)
+  select(year, country, att, lean, vote, match, route, a, v, att_pf, vote_pf, vote_first)
 stopifnot(nrow(ees_tree) == n_before)
 
 # Respondents and countries per wave
@@ -320,7 +461,7 @@ The third lists the pairs that are the *same party* only through an alliance or 
 
 # Levels by wave
 ees_tree |>
-  count(year, att, vote, match) |>
+  count(year, att, lean, vote, match) |>
   pivot_wider(names_from = year, values_from = n) |>
   print(n = Inf)
 
@@ -342,8 +483,9 @@ ees_tree |>
 
 # Pooled Tree
 
-All 25 countries and all five waves.
+All 25 countries and all five waves, split on the vote first, as every wave asked it.
 The panel of countries is unbalanced (see notebook 1.5), so this tree mixes different country sets.
+Only 2009 asked the leaner probe, so the respondents of the other waves without an attachment sit in the grey *probe not fielded* boxes.
 
 ```{r}
 #| label: tree-pooled
@@ -351,7 +493,7 @@ The panel of countries is unbalanced (see notebook 1.5), so this tree mixes diff
 
 ees_tree |>
   tree_counts() |>
-  mermaid_tree(leaner = "q89, 2009 wave only") |>
+  mermaid_tree() |>
   emit_mermaid()
 ```
 
@@ -361,14 +503,9 @@ ees_tree |>
 #| label: tree-wave
 #| output: asis
 
-# Probe only fielded in 2009
-lean_2009 <- function(counts) {
-  if (as.character(counts$year[1]) == "2009") "q89 (then q90 for the party)"
-}
-
 ees_tree |>
   tree_counts(year) |>
-  emit_tree_tabset(by = "year", level = 2, leaner = lean_2009)
+  emit_tree_tabset(by = "year", level = 2)
 ```
 
 # Trees by Country
@@ -381,12 +518,13 @@ All five waves pooled within each country.
 
 ees_tree |>
   tree_counts(country) |>
-  emit_tree_tabset(by = "country", level = 2, leaner = "q89, 2009 wave only")
+  emit_tree_tabset(by = "country", level = 2)
 ```
 
 # Country by Wave
 
-Each bar is one country-wave; blues report an attachment, oranges report none, greys are DK.
+Each bar is one country-wave; blues report an attachment, greens are 2009 leaners, oranges report neither, greys are DK.
+The segments are stacked in the order of the tree: voters first, then non-voters.
 Missing bars are waves in which a country was not surveyed, or (Belgium and Lithuania 2004) did not field the attachment item.
 
 ```{r}
@@ -414,16 +552,43 @@ ees_tree |>
   emit_nested_tabset(
     outer = "country",
     inner = "year",
-    level = 2,
-    leaner = lean_2009
+    level = 2
   )
+```
+
+# Composition by Country
+
+One bar per country, as in the HMS deck (`presentation_hms.qmd`), with the number of respondents after each country and the share of every leaf on its segment (under 3%, the bare number).
+Countries are sorted by the share reporting an attachment.
+The pooled figure mixes waves, and countries joined in different years (see notebook 1.5).
+
+```{r}
+#| label: fig-country-pooled
+#| fig-width: 9
+#| fig-height: 7
+
+ees_tree |>
+  plot_country_composition() +
+  labs(
+    title = "Partisan composition in the EES, 2004-2024",
+    subtitle = "Unweighted shares; the vote is the European Parliament vote"
+  )
+```
+
+```{r}
+#| label: fig-country-wave
+#| output: asis
+#| fig-width: 9
+#| fig-height: 7
+
+emit_figure_tabset(ees_tree, by = "year", subtitle = "Unweighted shares; the vote is the European Parliament vote")
 ```
 
 # Leaner Probes
 
 Only the 2009 wave follows the attachment item with a leaner probe: `q89` (*do you feel yourself a little closer to one of the political parties than others?*), asked of everyone who said no, don't know or refused at `q87`, and `q90` for the party.
-The other four waves ask only the strength of attachment of those who named a party (`v212`, `q88`, `qpp22`, `Q26`), which is not a probe.
-In the trees, the 2009 *No attachment* box therefore still contains the respondents who would have been classed as leaners.
+The trees split those respondents into leaners and the rest, and match a leaner's party to the EP vote.
+The other four waves ask only the strength of attachment of those who named a party (`v212`, `q88`, `qpp22`, `Q26`), which is not a probe, and 2024 not even that.
 
 # Caveats
 

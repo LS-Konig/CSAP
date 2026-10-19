@@ -879,11 +879,13 @@ pairs |>
 # Match Files
 
 For every vote item, the match with the attachment item of the same respondent (`ext_match_*`) and, when it is the same party, the route (`ext_route_*`).
+In the CSES the party asked after the base item and the leaner probe is one item (`IMD3005_3` / `f3023_3`), so leaners are matched like the attached.
+The EES 2009 wave codes the leaner's party separately (`q90`, `pid_lean` in notebook 1.4); its matches carry a `lean_` prefix (`ext_match_lean_vote_ep`).
 
 ```{r}
 #| label: match-files
 
-add_matches <- function(df, att, votes) {
+add_matches <- function(df, att, votes, prefix = "") {
   for (v in votes) {
     a <- df[[paste0("ext_", att, "_pf_name")]]
     b <- df[[paste0("ext_", v, "_pf_name")]]
@@ -891,8 +893,8 @@ add_matches <- function(df, att, votes) {
     r <- pf_match_route(df$cntry, a, b, rules, df$year)
     # no vote item for this respondent
     m[is.na(b)] <- NA
-    df[[paste0("ext_match_", v)]] <- m
-    df[[paste0("ext_route_", v)]] <- r
+    df[[paste0("ext_match_", prefix, v)]] <- m
+    df[[paste0("ext_route_", prefix, v)]] <- r
   }
   df
 }
@@ -913,6 +915,8 @@ cses_match <- cses |>
 
 ees_match <- ees |>
   add_matches("pid", vote_stubs(ees, "^ext_vote_.*_pf_name$")) |>
+  # Leaner party, 2009 only
+  add_matches("pid_lean", vote_stubs(ees, "^ext_vote_.*_pf_name$"), prefix = "lean_") |>
   select(wave, row, respondent, cntry, region, starts_with(c("ext_match_", "ext_route_")))
 
 write_parquet(ess_match, here("data", "02_processed", "ess_party_match.parquet"), compression = "zstd")

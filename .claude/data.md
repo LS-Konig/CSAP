@@ -43,6 +43,9 @@ These pairs are **different**:
 
 The tables are pairwise and never chained.
 
+Leaners are matched too. In the CSES, the attached and the leaners share one party item (`IMD3005_3`).
+The EES 2009 leaner party (`q90`) has its own columns, `ext_match_lean_vote_ep` and `ext_route_lean_vote_ep`.
+
 Lineage counting as *same* is a deliberate choice (Tristan, 2026-09-29). `pf_match_route()`
 and the `ext_route_*` columns of the match files record the route of every *same*, so an
 analysis can exclude lineage. Change the rule only in 1.9 and `pf_code.R`, never per notebook.
@@ -53,6 +56,8 @@ These are written by the current pipeline. Details are in the notebooks.
 
 - `data/02_processed/eu25_partisan.rds` (2.1): one row per attention-passing respondent-wave, keyed on
   `meta_responseid`. It holds the tree columns `att`, `vote`, `match` and `route`, plus `pid` and `vote_party`.
+  The vote exists in all three waves. Wave 1's EP 2019 vote *intention* (`Q61`) is the release's
+  `q_eu_vote_2014`, a misleading name.
 - `data/03_final/eu25_games.rds` (3.1): one row per round played, 29,300 respondent-waves × 6 rounds
   in waves 2–3. Both waves are kept for panelists, identified by `meta_pid` and `wave`.
 - `data/03_final/eu25_thermo.rds` (3.1): one row per party rating (`slot`, `q_thermo`, `ext_q_thermo_pf_*`).

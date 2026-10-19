@@ -57,22 +57,29 @@ rules <- pf_rules()
 # The Tree
 
 Every composition notebook (2.1 to 2.4) sorts respondents into the same sequential tree, following the typology in the notes of `index.qmd`.
+The levels follow the order in which the questionnaire asked the items (each notebook's *Question Order* section).
+Where the vote came before the attachment item, the tree splits on the vote first; where the attachment came first, on the attachment first.
+A tree that pools waves or studies with different orders (only the CSES has any) uses the order of most of its respondents.
 
-1. **Attachment.** Does the respondent report feeling close to a party?
-   The answer is *yes* (a party is named), *no*, or *don't know / refused / missing*.
-   The last group gets its own grey box so that the shares at every level add up to 100%.
-   An "other" answer counts as *yes* only if its open text names a real party (see [Other Answers](#other-answers)).
-2. **Vote.** Does the respondent report a party vote?
-   *No vote reported* collects non-voters, blank or invalid ballots, don't know, refusals and missing answers, and "other" votes whose open text names no party.
-   Where a survey wave never asked the vote item, the branch reads *vote item not fielded* instead, so that "not asked" is not confused with "did not answer".
-3. **Match.** Only for respondents who report both, the two parties are compared by their Party Facts coding with the rule of notebook 1.9: *same party* when they are the same party, one is an alias of the other, one is an electoral alliance or joint list that contains the other, or one continued in the other through a rename, refoundation or merger (from the year of the succession on); *different party* otherwise, including two members of one alliance, two predecessors of one successor, and a breakaway and its parent.
-   Because both sides are always a named party, no respondent in this notebook is *not matchable*.
+- **Vote.** Does the respondent report a party vote?
+  *No vote reported* collects non-voters, blank or invalid ballots, don't know, refusals and missing answers, and "other" votes whose open text names no party.
+  Where a survey wave never asked the vote item, the branch reads *vote item not fielded* instead, so that "not asked" is not confused with "did not answer".
+- **Attachment.** Does the respondent report feeling close to a party?
+  The answer is *yes* (a party is named), *no*, or *don't know / refused / missing*.
+  The last group gets its own grey box so that the shares at every level add up to 100%.
+  An "other" answer counts as *yes* only if its open text names a real party (see [Other Answers](#other-answers)).
+- **Leaner probe.** Where the survey follows a *no* or *don't know* with *do you feel yourself a little closer to one of the political parties than the others?* (the CSES and the EES 2009 wave), those respondents split into *leaner*, *not leaning*, and a grey *probe DK* box.
+  Leaner boxes have a dashed green border.
+  Where a tree pools surveys with and without the probe, the respondents who never got it sit in a grey *probe not fielded* box.
+- **Match.** Only for respondents who report a vote and name a party (attached or leaner), the two parties are compared by their Party Facts coding with the rule of notebook 1.9: *same party* when they are the same party, one is an alias of the other, one is an electoral alliance or joint list that contains the other, or one continued in the other through a rename, refoundation or merger (from the year of the succession on); *different party* otherwise, including two members of one alliance, two predecessors of one successor, and a breakaway and its parent.
+  Because both sides are always a named party, no respondent in this notebook is *not matchable*.
 
-Two leaves are named after the typology: *no attachment, vote reported* is the **vote-anchored** group (the data files call it *implicit*), and *no attachment, no vote* is the non-partisan group.
-Leaner probes are deliberately **not** part of the tree.
-Where a survey carries one, a dashed note hangs off the *No attachment* box so that it can be picked up later.
+The leaves named after the typology are *explicit partisan* (attached, same party), *leaner* (leaner, same party), **vote-anchored** (vote reported, no attachment, and not a leaner where the probe was asked; the data files call it *implicit*), and *non-partisan* (no vote, no attachment, not a leaner).
+Vote-anchored respondents are not leaners: leaners come from the attitudinal probe, the vote-anchored from the vote.
 
 Every box gives the number of respondents, and every arrow gives the share of the box above it.
+The figures use one colour family per kind of answer: blues for attached respondents, greens for leaners, oranges for neither, greys for DK and not fielded.
+Their segments are stacked in the order of the tree's leaves.
 
 # Load Data
 
@@ -93,15 +100,109 @@ eu25games <- read_rds(
   filter(der_att_check_3)
 ```
 
+# Question Order
+
+Every item about turnout, vote choice and party attachment, in the order a respondent saw them.
+The source is the Irish English version of each wave's Qualtrics questionnaire (`data/questionaire/W{1,2,3}_EU25_Survey_Ireland_basic.pdf` in the `eu25games2019` repository); the release variable is from its `variable_crosswalk.csv`.
+Qualtrics numbers questions by creation, not by display, so the order below is the display order of the printed flow (in wave 3, `Q52` comes after `Q54`--`Q56`).
+The survey is online and self-completed in every wave.
+
+```{r}
+#| label: items
+
+items <- tribble(
+  ~wave, ~pos, ~question, ~variable, ~role, ~wording, ~asked,
+  # Wave 1
+  1, 1, "Q61", "q_eu_vote_2014", "vote intention (EP 2019)",
+  "On Friday, May 24th 2019, the European election takes place. All citizens of the European Union elect the members of the European Parliament. Which party will you vote for? [not eligible / will not vote / parties / other / don't know]",
+  "all; asked right after the EU text of a priming experiment (Q61, Q64, Q67 or Q69 by arm)",
+  1, 2, "Q75", "q_party_id", "attachment and party",
+  "Do you consider yourself to be close to any particular political party? If so, which party do you feel close to? [parties / other / No, I do not feel close to any political party]",
+  "all; asked right after the text of a second priming experiment (Q75, Q80, Q85 or Q89 by arm)",
+  1, 3, "Q76", "q_party_closeness", "strength",
+  "Do you feel yourself to be very close to this party, fairly close, or merely a sympathiser?",
+  "if a party or other named",
+  # Wave 2
+  2, 1, "Q42", "q_vote_turnout_likelihood", "turnout",
+  "On Friday, 24 May 2019, the European election takes place. [...] How likely is it that you will vote in the upcoming election? [not eligible / certain not to ... certain to vote / have already voted / don't know]",
+  "all",
+  2, 2, "Q43", "q_vote_turnout_confirm", "turnout check",
+  "Just to be clear, we are recording that you already voted in the election [...]. Is that right?",
+  "if already voted",
+  2, 3, "Q44", "q_vote_choice_past", "vote cast (EP 2019)",
+  "Which party did you give your 1st preference vote to in this election?",
+  "if confirmed as voted",
+  2, 4, "Q45", "q_vote_choice_intended", "vote intention (EP 2019)",
+  "Which party will you give your 1st preference vote in this election?",
+  "if might, likely or certain to vote",
+  2, 5, "Q46", "q_vote_choice_hypo", "hypothetical vote (EP 2019)",
+  "Just assuming you were going to vote in the election, which party would you give your 1st preference vote?",
+  "if not eligible, unlikely or certain not to vote, or don't know",
+  2, 6, "Q51", "q_vote_choice_past2014", "previous vote (EP 2014)",
+  "This question is about the previous European Parliament elections that were held five years ago. Which party did you give your 1st preference vote in the previous European Parliament elections in 2014?",
+  "all",
+  2, 7, "Q52", "q_party_id", "attachment and party",
+  "Do you consider yourself to be close to any particular political party? If so, which party do you feel close to?",
+  "all; no strength item",
+  # Wave 3
+  3, 1, "Q53", "q_vote_turnout_likelihood", "turnout",
+  "European Parliament elections were held on Friday, 24 May 2019. For one reason or another, some people in Ireland did not vote in these elections. [...] Which of the following statements best describes you? [not eligible / did not vote / thought about voting / usually vote but didn't / I am sure I voted]",
+  "all",
+  3, 2, "Q54", "q_vote_choice_past", "vote cast (EP 2019)",
+  "Which party did you give your 1st preference vote to in this election?",
+  "if sure they voted",
+  3, 3, "Q55", "q_vote_choice_hypo", "hypothetical vote (EP 2019)",
+  "Just assuming you had voted in the election, which party would you have voted for?",
+  "if not voted or not eligible",
+  3, 4, "Q56", "q_vote_choice_past2014", "previous vote (EP 2014)",
+  "This question is about the previous European Parliament elections that were held five years ago. [...]",
+  "all",
+  3, 5, "Q52", "q_party_id", "attachment and party",
+  "Do you consider yourself to be close to any particular political party? If so, which party do you feel close to?",
+  "all; no strength item"
+)
+
+items |>
+  select(Wave = wave, `#` = pos, Question = question, Variable = variable, Role = role, Wording = wording, `Asked of` = asked) |>
+  knitr::kable()
+
+# Vote before attachment, per wave
+item_order <- items |>
+  summarise(
+    vote_first = min(pos[str_detect(role, "EP 2019")]) <
+      min(pos[str_detect(role, "attachment")]),
+    .by = wave
+  )
+item_order
+```
+
+In order:
+
+- **Wave 1:** Q61 → Q75 → Q76
+- **Wave 2:** Q42 → Q43 → Q44 / Q45 / Q46 → Q51 → Q52
+- **Wave 3:** Q53 → Q54 / Q55 → Q56 → Q52
+
+The vote comes before the attachment item in all three waves, so every tree below splits on the vote first.
+Some differences matter for a comparison:
+
+- **The vote changes meaning across waves.** Wave 1 asks a pure intention months before the election; wave 2 routes respondents to a cast vote, an intention or a hypothetical vote depending on their turnout answer; wave 3 asks a cast vote or a hypothetical one.
+  The hypothetical vote is asked of non-voters and counts as a reported vote below (as in the old pipeline).
+- **The previous EP vote (2014)** sits between the 2019 vote and the attachment item in waves 2 and 3, so the attachment item follows two party-choice questions there and one in wave 1.
+- **Priming.** In wave 1 both the vote and the attachment item come right after an experimental text about the EU, whose content varies by arm.
+- **Strength** of attachment is asked only in wave 1.
+- **The French wave-2 questionnaire** is a separate version with its own items (`q_party_id_fra` and friends), folded in below.
+- The attachment item names the party in the same step (no separate yes/no filter), and there is no leaner probe.
+
 # Select Attachment and Vote Items
 
 The attachment item is the EES wording -- *do you consider yourself to be close to any particular political party? If so, which party do you feel close to?* -- asked in all three waves.
 French respondents in wave 2 answered a separate French version of every party item (`q_party_id_fra` and friends), so those columns are coalesced into the main ones.
 
-The vote item concerns the **European Parliament election of May 2019** and exists only in waves 2 and 3.
+The vote item concerns the **European Parliament election of May 2019** in all three waves.
+Wave 1 asks the intended vote (`Q61`). The release names this item `q_eu_vote_2014`, but the question is about the 2019 election.
 Wave 2 was fielded around the election and asks for the intended vote, the vote already cast, or a hypothetical vote; wave 3 asks for the vote cast or a hypothetical vote.
-They are coalesced in the order intention, hypothetical, past -- the recall-maximising rule of the old pipeline (`code/02_key_variables/2.1_key_variables.qmd`, commit `4651e2c`).
-Wave 1 carries no vote item at all.
+The wave-2 and wave-3 items are coalesced in the order intention, hypothetical, past -- the recall-maximising rule of the old pipeline (`code/02_key_variables/2.1_key_variables.qmd`, commit `4651e2c`).
+The questionnaire routes each respondent to only one of them by their turnout answer (see [Question Order](#question-order)).
 
 Every party answer comes with a Party Facts name (`ext_*_pf_name`).
 Non-party answers carry a literal sentinel string instead, and parties missing from Party Facts are marked `[og]` -- those are real parties and are kept as such.
@@ -116,6 +217,7 @@ pf_no_party <- c(
   "dont-know",
   "refused",
   "did-not-vote",
+  "will-not-vote",
   "blank-invalid",
   "not-eligible"
 )
@@ -137,7 +239,7 @@ A respondent either names a party, says "none", or leaves it empty; the empty an
 
 ## Other Answers {#other-answers}
 
-Every party item offers an "other" option with an open text field (`q_*_other_raw`), and the release codes that text to Party Facts as well (`ext_q_*_other_pf_name`).
+Every party item offers an "other" option with an open text field (`q_*_other_raw`; `q_eu_vote_2014_raw_text` for the wave-1 vote), and the release codes that text to Party Facts as well (`ext_q_*_other_pf_name`; `ext_q_eu_vote_2014_text_pf_name`).
 An "other" answer is replaced by what its open text says, so that it counts as attachment or vote only if the text names a real party:
 
 - **A real party:** the party is used, for the tree level and for the match.
@@ -596,7 +698,59 @@ other_text_parties <- tribble(
   "United Kingdom", "Animal Welfare Party [hand]", "Animal Welfare Party",
   "United Kingdom", "Scottish Green Party [hand]",
   c("Scottish Green Party", "Scottish Greens"),
-  "United Kingdom", "Yorkshire Party [hand]", c("The Yorkshire Party", "Yorkshire party")
+  "United Kingdom", "Yorkshire Party [hand]", c("The Yorkshire Party", "Yorkshire party"),
+  # Wave-1 vote intention (Q61) only; texts above apply to it as well
+  "Belgium", "Front Démocratique des Francophones / DéFI", c("Defi", "defi"),
+  "Belgium", "Partij van de Arbeid van België — Parti du Travail de Belgique", "pvda",
+  "Bulgaria", "Демократична България [og]", "Обединение \"Демократична България\"",
+  "Bulgaria", "Glas Naroden [og]", "ПП \"Глас Народен\"",
+  "Croatia", "Start - Stranka Antikorupcije, Razvoja i Transparentnosti [og]",
+  "Dalija Orešković - Start",
+  "Croatia", "HDSSB [hand]", "hdssb",
+  "Croatia", "Pokret za modernu Hrvatsku [hand]", "Pokret za modernu hrvatsku",
+  "Czechia", "Alternativa pro Českou republiku [hand]",
+  "Alternativa pro Českou republiku s Klárou Samkovou",
+  "Denmark", "JFK21 [hand]", "JFK 21",
+  "Estonia", "Elurikkuse Erakond", "Elurikkus",
+  "Finland", "Liike Nyt [og]", "Mahdollisesti Liike Nyt",
+  "Finland", "Vasemmistoliitto",
+  "Todennäköisesti Vasemmistoliittoa, mutta ennen päätöstä haluan nähdä, ketkä ovat ehdokkaina.",
+  "France", "Génération.s, le mouvement", "Hamon",
+  "France", "Gilets jaunes [og]", c("Les gilets jaunes", "les gilets jaunes !"),
+  "France", "Debout la France", "debout la france",
+  "Greece", "Métopo Evropaikís Realistikís Anypakoís", "Diem 25",
+  "Greece", "Agrotiko Ktinotrofiko Komma Ellados [og]", "KAEΠ",
+  "Greece", "Elliniki Lisi", "ΕΛΛΗΝΙΚΗ ΛΥΣΗ",
+  "Greece", "Oikologoi Prasinoi", "Πράσινους",
+  "Greece", "Antarsya [og]", "ανταρσύα",
+  "Hungary", "MIÉP [hand]", "Miép Magyar igazság és élet pártja",
+  "Italy", "DiEM25 [og]", c("DiEM25", "Diem25"),
+  "Italy", "Volt [og]", "VOLT",
+  "Latvia", "Kristīgi demokrātiskā savienība", "Kristīgo Demokrātu Savienība",
+  "Latvia", "Vienotība", "Par Valdi Dombrovski",
+  "Lithuania", "Lietuvos Respublikos Liberalų sąjūdis", "Liberalų sajūdis",
+  "Lithuania", "Tėvynės sąjunga — Lietuvos krikščionys demokratai", "Lietuvos koncervatoriai",
+  "Lithuania", "Visuomeninis rinkimų komitetas „Vytautas Radžvilas: susigrąžinkime valstybę!“ [og]",
+  "Vytautas Radžvilas: Susigrąžinkime valstybę",
+  "Lithuania", "Stanislovo Tomo komitetas [hand]", "Stanislovo Tomo komitetas",
+  "Netherlands", "Democraten 66", "D66",
+  "Netherlands", "Code Oranje [hand]", "Code Oranje",
+  "Poland", "Spring", "Biedroń",
+  "Romania", "Partidul Libertății Unității și Solidarității (PLUS) [og]", "PLUS",
+  "Slovenia", "Demokratična stranka upokojencev Slovenije",
+  "Nisem povsem prepričana, če bi volila danes bi izbrala desus",
+  "Slovenia", "Lista Marjana Šarca",
+  "Nagibam se k LMŠ, vendar bom izviral tudi glede na osebo, ki bo kandidirala",
+  "Spain", "Andalucía X Sí [hand]", "Andalucía X Sí",
+  "Spain", "Equo [hand]", c("EQUO", "Equo"),
+  "Sweden", "Socialdemokraterna / Sveriges socialdemokratiska arbetareparti",
+  "Socialdemokraterna",
+  "Sweden", "Medborgerlig samling [og]", "Medborgelig samling",
+  "United Kingdom", "Labour Party",
+  "Are we still allowed to vote in the UK? If yes, I would vote Labour",
+  "United Kingdom", "Green Party of England and Wales",
+  "*if* A50 extended/revoked and I therefore become eligible, I'd probably vote Green",
+  "United Kingdom", "Official Monster Raving Loony Party [hand]", "Monster Raving Loonies"
 ) |>
   unnest_longer(text)
 
@@ -646,14 +800,21 @@ eu25_tree <- eu25games |>
     ),
     # The "other" answer behind the vote
     vote_answer = coalesce(
+      ext_q_eu_vote_2014_pf_name,
       ext_q_vote_choice_intended_pf_name,
       ext_q_vote_choice_hypo_pf_name,
       ext_q_vote_choice_past_pf_name,
       ext_q_vote_choice_hypo_fra_pf_name,
       ext_q_vote_choice_past_fra_pf_name
     ),
-    # Intention, hypothetical, past
+    # Wave-1 intention; then intention, hypothetical, past
     vote_party = coalesce(
+      resolve_other(
+        ext_q_eu_vote_2014_pf_name,
+        ext_q_eu_vote_2014_text_pf_name,
+        q_eu_vote_2014_raw_text,
+        meta_country
+      ),
       resolve_other(
         ext_q_vote_choice_intended_pf_name,
         ext_q_vote_choice_intended_other_pf_name,
@@ -691,7 +852,8 @@ eu25_tree <- eu25games |>
 open_texts <- eu25games |>
   select(
     country_name = meta_country,
-    matches("^q_(party_id|vote_choice_(intended|hypo|past))_other(_fra)?_raw$")
+    matches("^q_(party_id|vote_choice_(intended|hypo|past))_other(_fra)?_raw$"),
+    q_eu_vote_2014_raw_text
   ) |>
   pivot_longer(-country_name, values_to = "text") |>
   mutate(text = str_squish(text)) |>
@@ -706,7 +868,7 @@ stopifnot(
 
 # Names reused from the release exist in it
 pf_names <- eu25games |>
-  select(matches("^ext_q_(party_id|vote_choice).*_pf_name$")) |>
+  select(matches("^ext_q_(party_id|vote_choice|eu_vote_2014).*_pf_name$")) |>
   unlist(use.names = FALSE) |>
   unique()
 reused <- other_text_parties |>
@@ -774,9 +936,8 @@ eu25_tree <- eu25_tree |>
       pid %in% pf_no_party ~ "no",
       .default = "yes"
     ),
-    # Level 2: vote, unasked in wave 1
+    # Level 2: vote, asked in every wave
     vote = case_when(
-      wave == 1 ~ "not_fielded",
       is.na(vote_party) | vote_party %in% c(pf_no_party, pf_other) ~ "no",
       .default = "yes"
     ),
@@ -787,9 +948,11 @@ eu25_tree <- eu25_tree |>
       .default = pf_match(country, pid, vote_party, rules, 2019L)
     ),
     route = if_else(match == "same", pf_match_route(country, pid, vote_party, rules, 2019L), NA),
+    # Tree order from the questionnaire
+    vote_first = item_order$vote_first[match(wave, item_order$wave)],
     wave = factor(paste("Wave", wave))
   ) |>
-  select(meta_responseid, wave, country, att, vote, match, route, pid, vote_party)
+  select(meta_responseid, wave, country, att, vote, match, route, pid, vote_party, vote_first)
 
 # Every country mapped
 stopifnot(all(eu25_tree$country %in% countries_25))
@@ -837,8 +1000,8 @@ eu25games |>
 
 # Pooled Tree
 
-All 25 countries and all three waves.
-Because wave 1 never asked the vote item, a third of the pooled sample sits in the grey *vote item not fielded* boxes; the per-wave trees below separate this out.
+All 25 countries and all three waves, split on the vote first, as the questionnaire asked it.
+The vote is a pure intention in wave 1 and a cast, intended or hypothetical vote in waves 2 and 3 (see [Question Order](#question-order)); the per-wave trees below separate these out.
 
 ```{r}
 #| label: tree-pooled
@@ -877,7 +1040,8 @@ eu25_tree |>
 # Country by Wave
 
 The figure compares the leaves of the tree across countries and waves.
-Each bar is one country-wave, and each colour one leaf: blues are respondents who report an attachment, oranges those who report none, and greys the DK and not-fielded groups.
+Each bar is one country-wave, and each colour one leaf: blues are respondents who report an attachment, oranges those who report none, and grey the DK group.
+The segments are stacked in the order of the tree: voters first, then non-voters.
 The Mermaid trees below it give the exact counts for every cell.
 
 ```{r}
@@ -905,22 +1069,44 @@ eu25_tree |>
   emit_nested_tabset(outer = "country", inner = "wave", level = 2)
 ```
 
+# Composition by Country
+
+One bar per country, as in the HMS deck (`presentation_hms.qmd`), with the number of respondent-waves after each country and the share of every leaf on its segment (under 3%, the bare number).
+Countries are sorted by the share reporting an attachment.
+The deck's figure uses the deduplicated wave-2 and wave-3 sample of notebook 3.1; these use every attention-check passer, so the numbers differ slightly.
+
+```{r}
+#| label: fig-country-pooled
+#| fig-width: 9
+#| fig-height: 7
+
+eu25_tree |>
+  plot_country_composition() +
+  labs(
+    title = "Partisan composition in eu25games, all waves",
+    subtitle = "Unweighted shares of attention-check passers (respondent-waves)"
+  )
+```
+
+```{r}
+#| label: fig-country-wave
+#| output: asis
+#| fig-width: 9
+#| fig-height: 7
+
+emit_figure_tabset(eu25_tree, by = "wave", subtitle = "Unweighted shares of attention-check passers")
+```
+
 # Leaner Probes
 
-The eu25games questionnaire carries no leaner probe.
-The only follow-up to the attachment item is its strength (`q_party_closeness`: very close, fairly close, merely a sympathiser), asked of those who name a party and only in wave 1.
-So no tree in this notebook has a dashed note.
-
-| Item | Waves | Leaner probe |
-|---|---|---|
-| `q_party_id` (attachment) | 1, 2, 3 | none |
-| `q_party_closeness` (strength) | 1 | not a probe: asked of those who named a party |
+The eu25games questionnaire carries no leaner probe, so no tree in this notebook has a leaner level.
+The only follow-up to the attachment item is its strength (`q_party_closeness`), asked in wave 1 of those who name a party (see [Question Order](#question-order)).
 
 # Caveats
 
-- **The vote is a European Parliament vote**, and in wave 2 mostly an intended or hypothetical one.
+- **The vote is a European Parliament vote**: an intention in wave 1, and in wave 2 mostly an intended or hypothetical one.
   Comparing it with a national-election recall in the CSES and ESS notebooks means comparing different quantities.
-- **Wave 1 has no vote.** Its trees stop at the attachment level.
+- **The release's name for the wave-1 vote is misleading.** `q_eu_vote_2014` holds the 2019 vote intention (`Q61`), not a 2014 vote.
 - **Hand-coded "other" answers.** Open texts the release left uncoded are coded by hand (see [Other Answers](#other-answers)), which is a judgement call for short or misspelt texts.
   A party that appears only in hand-coded texts carries a `[hand]` name, so an attachment to it can only match a vote that was hand-coded as well.
   Votes for independent candidates count as *no vote reported*, and attachment to them as *DK / missing*.
@@ -942,6 +1128,7 @@ stopifnot(!anyDuplicated(eu25_tree$meta_responseid))
 
 eu25_tree |>
   mutate(wave = as.integer(str_remove(wave, "Wave "))) |>
+  select(-vote_first) |>
   write_rds(
     here("data", "02_processed", "eu25_partisan.rds"),
     compress = "xz"

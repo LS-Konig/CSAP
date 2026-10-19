@@ -65,6 +65,122 @@ load(here("data", "01_raw", "cses", "imd", "cses_imd.rdata"))
 load(here("data", "01_raw", "cses", "mod6", "cses6.rdata"))
 ```
 
+# Question Order
+
+Every item about turnout, vote choice and party attachment in the order of each module's master questionnaire.
+The sources are the CSES module questionnaires on cses.org: [module 2](https://cses.org/wp-content/uploads/2019/04/20030108_cses2_questionnaire.txt), [module 3](https://cses.org/wp-content/uploads/2019/04/cses3_Questionnaire.txt), [module 4](https://cses.org/wp-content/uploads/2019/03/cses4_Questionnaire.pdf), [module 5](https://cses.org/wp-content/uploads/2019/05/cses5_Questionnaire.txt), and `data/01_raw/cses/mod6/ZA7748_q_micro.pdf` for module 6.
+Module 1 has no single master questionnaire; the item numbers come from the [module 1 codebook](https://cses.org/wp-content/uploads/2019/04/cses1_codebook_part2_variables.txt).
+The master gives the order *within* the module. Each national study embeds the module in its own survey and words the vote items to national standards, so the order a respondent saw can differ from the master, and the CSES asks collaborators only to field the module undisturbed and preferably first.
+
+```{r}
+#| label: items
+
+items <- tribble(
+  ~module, ~pos, ~question, ~variable, ~role, ~wording, ~asked,
+  # Module 1: the vote items come from the national study
+  1, 1, "Q3 (LQ3 / SQ3)", "IMD3005_1", "attachment",
+  "Do you usually think of yourself as close to any particular political party?", "all",
+  1, 2, "Q3b", "IMD3005_3", "party",
+  "Which party do you feel closest to?", "if yes",
+  1, 3, "Q3c", "IMD3005_2", "leaner probe",
+  "Do you feel yourself a little closer to one of the political parties than the others?", "if no",
+  1, 4, "Q3d", "IMD3005_3", "leaner party", "Which party is that?", "if yes at Q3c",
+  1, 5, "Q3e", "IMD3005_4", "strength",
+  "Do you feel very close to this [party/party block], somewhat close, or not very close?", "if a party named",
+  1, NA, "national", "IMD3002_LH_PL", "vote (current lower house)",
+  "[not in the module questionnaire; asked in the national study, position varies]", "voters",
+  # Module 2
+  2, 1, "Q3", "IMD3001_LH", "turnout", "[current election: did respondent cast a ballot]", "all",
+  2, 2, "Q4B / Q4C", "IMD3002_LH_PL / _DC", "vote (current lower house)",
+  "[party list / district candidate; wording to national standards]", "if cast a ballot",
+  2, 3, "Q12 / Q13", "IMD3004_*", "previous vote", "[previous election]", "all",
+  2, 4, "Q18", "IMD3005_1", "attachment",
+  "Do you usually think of yourself as close to any particular political party?", "all",
+  2, 5, "Q18A / Q18B", "IMD3005_3", "party",
+  "[parties close to, in order of mention] / Which party do you feel closest to?", "if yes",
+  2, 6, "Q18C", "IMD3005_2", "leaner probe",
+  "Do you feel yourself a little closer to one of the political parties than the others?",
+  "if no, don't know or refused at Q18, or no party named",
+  2, 7, "Q18D", "IMD3005_3", "leaner party", "Which party is that?", "if yes at Q18C",
+  2, 8, "Q18E", "IMD3005_4", "strength", "[degree of closeness to this party]", "if a party named",
+  # Module 3: attachment before the vote
+  3, 1, "Q20", "IMD3005_1", "attachment",
+  "Do you usually think of yourself as close to any particular party?", "all",
+  3, 2, "Q20a", "IMD3005_2", "leaner probe",
+  "Do you feel yourself a little closer to one of the political parties than the others?",
+  "if no, don't know or refused at Q20",
+  3, 3, "Q20b", "IMD3005_3", "party", "Which party do you feel closest to?", "if yes at Q20 or Q20a",
+  3, 4, "Q20c", "IMD3005_4", "strength", "[degree of closeness to this party]", "if a party named",
+  3, 5, "Q21", "IMD3001_LH", "turnout", "[current election: did respondent cast a ballot]", "all",
+  3, 6, "Q21c / Q21d", "IMD3002_LH_PL / _DC", "vote (current lower house)",
+  "[party list / district candidate; wording to national standards]", "if cast a ballot",
+  3, 7, "Q23", "IMD3004_*", "previous vote", "[previous election]", "all",
+  # Module 4
+  4, 1, "Q5LH-a", "IMD3001_LH", "turnout", "[current lower house election: did respondent cast a ballot]", "all",
+  4, 2, "Q5LH-b / -c", "IMD3002_LH_PL / _DC", "vote (current lower house)",
+  "[party list / district candidate; wording to national standards]", "if cast a ballot",
+  4, 3, "Q6a-c", "IMD3004_*", "previous vote", "[previous election]", "all",
+  4, 4, "Q16", "IMD3005_1", "attachment",
+  "Do you usually think of yourself as close to any particular party?", "all",
+  4, 5, "Q16a", "IMD3005_2", "leaner probe",
+  "Do you feel yourself a little closer to one of the political parties than the others?",
+  "if no, don't know or refused at Q16",
+  4, 6, "Q16b", "IMD3005_3", "party", "Which party do you feel closest to?", "if yes at Q16 or Q16a",
+  4, 7, "Q16c", "IMD3005_4", "strength", "[degree of closeness to this party]", "if a party named",
+  # Module 5
+  5, 1, "Q12LH-a", "IMD3001_LH", "turnout", "[current lower house election: did respondent cast a ballot]", "all",
+  5, 2, "Q12LH-b / -c", "IMD3002_LH_PL / _DC", "vote (current lower house)",
+  "[party list / district candidate; wording to national standards]", "if cast a ballot",
+  5, 3, "Q13a-c", "IMD3004_*", "previous vote", "[previous election]", "all",
+  5, 4, "Q22a", "IMD3005_1", "attachment",
+  "Do you usually think of yourself as close to any particular party?", "all",
+  5, 5, "Q22b", "IMD3005_2", "leaner probe",
+  "Do you feel yourself a little closer to one of the political parties than the others?",
+  "if no, don't know or refused at Q22a",
+  5, 6, "Q22c", "IMD3005_3", "party", "Which party do you feel closest to?", "if yes at Q22a or Q22b",
+  5, 7, "Q22d", "IMD3005_4", "strength", "[degree of closeness to this party]", "if a party named",
+  # Module 6
+  6, 1, "Q10LH-a", "f3010_lh", "turnout", "[current lower house election: did respondent cast a ballot]", "all",
+  6, 2, "Q10LH-b / -c", "f3011_lh_pl / _dc", "vote (current lower house)",
+  "[party list / district candidate; wording to national standards]", "if cast a ballot",
+  6, 3, "Q14a-c", "f3015_lh / f3016_lh_*", "previous vote", "[previous election]", "all",
+  6, 4, "Q23a", "f3023_1", "attachment",
+  "Do you usually think of yourself as close to any particular party?", "all",
+  6, 5, "Q23b", "f3023_2", "leaner probe",
+  "Do you feel yourself a little closer to one of the political parties than the others?",
+  "if no, don't know or refused at Q23a",
+  6, 6, "Q23c", "f3023_3", "party", "Which party do you feel closest to?", "if yes at Q23a or Q23b",
+  6, 7, "Q23d", "f3023_4", "strength", "[degree of closeness to this party]", "if a party named"
+)
+
+items |>
+  select(Module = module, `#` = pos, Question = question, Variable = variable, Role = role, Wording = wording, `Asked of` = asked) |>
+  knitr::kable()
+
+# Vote before attachment, per module; unknown for module 1
+item_order <- items |>
+  summarise(
+    vote_first = min(pos[role == "vote (current lower house)"]) < min(pos[role == "attachment"]),
+    .by = module
+  )
+item_order
+```
+
+In order, within the module:
+
+- **Module 1:** Q3 → Q3b / Q3c → Q3d → Q3e; the vote is asked in the national part of the survey
+- **Module 2:** Q3 → Q4 → Q12 → Q13 → Q18 → Q18A/B or Q18C → Q18D → Q18E
+- **Module 3:** Q20 → Q20a → Q20b → Q20c → Q21 → Q21b–d → Q23
+- **Module 4:** Q5 → Q6 → Q16 → Q16a → Q16b → Q16c
+- **Module 5:** Q12 → Q13 → Q22a → Q22b → Q22c → Q22d
+- **Module 6:** Q10 → Q14 → Q23a → Q23b → Q23c → Q23d
+
+The vote comes first in modules 2, 4, 5 and 6, so their trees split on the vote first.
+Module 3 puts the attachment battery directly before the vote, so its trees split on the attachment first.
+Module 1 has no fixed order; its trees follow the majority order of the pooled data (vote first), which is an assumption.
+The attachment battery itself is the same in every module: a base item that does not name the party, then the probe for those who do not say yes, then one party item for both.
+Module 2 splits the party item into the party for the attached (`Q18A/B`) and for the leaner (`Q18D`), modules 3 to 6 ask it once after the probe; the IMD stores both in `IMD3005_3`.
+
 # Select Attachment and Vote Items
 
 **Attachment** is the base item -- *do you usually think of yourself as close to any particular party?* -- coded `1` yes, `0` no, `7` refused, `8` don't know, `9` missing.
@@ -80,7 +196,9 @@ Abstention and missing share the code `9999999`, so they cannot be told apart.
 This matters most in Germany, where CSES codes attachment to the CDU and the CSU separately but the list vote for the CDU/CSU union, and in Romania's alliance years.
 Codes `9999988`--`9999992` (none of the parties, independent, other left/right/unspecified) name something that is not a codeable party and count as *not matchable*.
 
-The branching leaner probe (`IMD3005_2` / `f3023_2`) is carried along only to flag where it exists.
+**Leaner probe** (`IMD3005_2` / `f3023_2`): respondents who do not say yes to the base item are asked whether they feel a little closer to one party; `1` yes, `0` no, `7`/`8`/`9` refused, don't know or missing.
+Code `9` also stands for "not asked", so a study counts as fielding the probe only if some respondent without an attachment answered it yes or no; elsewhere the probe level is absent (or *probe not fielded* where a tree pools studies).
+A leaner's party is the same item as an attachment's (`IMD3005_3`), so leaners are matched to the vote the same way.
 
 ```{r}
 #| label: select-imd
@@ -169,7 +287,32 @@ cses_tree <- bind_rows(cses_imd_tree, cses_mod6_tree) |>
       .default = "no"
     ),
     module = factor(module),
-    year = factor(year)
+    year = factor(year),
+    # Tree order from the module questionnaire; NA for module 1
+    vote_first = item_order$vote_first[match(module, item_order$module)]
+  )
+
+# Module 1 takes the majority order
+majority_vote_first <- mean(cses_tree$vote_first, na.rm = TRUE) >= 0.5
+cses_tree <- cses_tree |>
+  mutate(vote_first = coalesce(vote_first, majority_vote_first))
+
+# Studies where the probe was asked
+probe_studies <- cses_tree |>
+  filter(att == "no") |>
+  summarise(fielded = any(probe %in% c(0, 1)), .by = study) |>
+  filter(fielded) |>
+  pull(study)
+
+# Leaner probe, only where fielded
+cses_tree <- cses_tree |>
+  mutate(
+    lean = case_when(
+      att == "yes" | !study %in% probe_studies ~ NA,
+      probe == 1 ~ "yes",
+      probe == 0 ~ "no",
+      .default = "dk"
+    )
   )
 
 # Level 3: Party Facts match, with alliances and lineage (notebook 1.9), for
@@ -193,8 +336,9 @@ cses_tree <- cses_tree |>
   left_join(cses_match, by = c("release", "study", "respondent")) |>
   left_join(cses_pf, by = c("release", "study", "respondent")) |>
   mutate(
+    # Attached and leaners name a party
     match = case_when(
-      att != "yes" | vote != "yes" ~ NA,
+      !(att == "yes" | lean %in% "yes") | vote != "yes" ~ NA,
       .default = coalesce(if_else(vote_pl == other_from + 7, match_dc, match_pl), "unmatchable")
     ),
     route = if_else(match == "same", if_else(vote_pl == other_from + 7, route_dc, route_pl), NA)
@@ -205,6 +349,7 @@ cses_tree <- cses_tree |>
     country,
     year,
     att,
+    lean,
     vote,
     match,
     route,
@@ -212,7 +357,8 @@ cses_tree <- cses_tree |>
     party,
     vote_code,
     att_pf,
-    vote_pf
+    vote_pf,
+    vote_first
   )
 stopifnot(nrow(cses_tree) == n_before)
 
@@ -239,9 +385,13 @@ The fourth lists the pairs that are the *same party* only through an alliance or
 
 # Levels by module
 cses_tree |>
-  count(module, att, vote, match) |>
+  count(module, att, lean, vote, match) |>
   pivot_wider(names_from = module, values_from = n) |>
   print(n = Inf)
+
+# Respondents by question order
+cses_tree |>
+  count(module, vote_first)
 
 # Same-party share per study
 cses_tree |>
@@ -272,6 +422,7 @@ cses_tree |>
 
 All 25 countries and all six modules.
 The unit is the respondent, and each study contributes its own sample size, so countries with more or larger studies weigh more.
+The tree splits on the vote first, the order of most respondents; module 3 asked the attachment first (see [Question Order](#question-order)), and its own trees below follow that.
 
 ```{r}
 #| label: tree-pooled
@@ -279,7 +430,7 @@ The unit is the respondent, and each study contributes its own sample size, so c
 
 cses_tree |>
   tree_counts() |>
-  mermaid_tree(leaner = "IMD3005_2 / f3023_2 (not in every study)") |>
+  mermaid_tree() |>
   emit_mermaid()
 ```
 
@@ -294,16 +445,12 @@ Each module is a five-year window of national elections, so the module is the na
 cses_tree |>
   mutate(module = fct_relabel(module, \(x) paste("Module", x))) |>
   tree_counts(module) |>
-  emit_tree_tabset(
-    by = "module",
-    level = 2,
-    leaner = "IMD3005_2 / f3023_2 (not in every study)"
-  )
+  emit_tree_tabset(by = "module", level = 2)
 ```
 
 # Trees by Country
 
-All studies of a country pooled.
+All studies of a country pooled, in the order of most of its respondents.
 
 ```{r}
 #| label: tree-country
@@ -311,33 +458,14 @@ All studies of a country pooled.
 
 cses_tree |>
   tree_counts(country) |>
-  emit_tree_tabset(
-    by = "country",
-    level = 2,
-    leaner = "IMD3005_2 / f3023_2 (not in every study)"
-  )
+  emit_tree_tabset(by = "country", level = 2)
 ```
 
 # Country by Election Study
 
 In the CSES the natural cell is the election study, not a calendar year.
 Three country-years hold two studies each (Belgium 2019 as Flanders and Wallonia, Germany 2002, Greece 2015); the bars pool them, the trees keep them apart.
-
-```{r}
-#| label: probe-studies
-
-# Studies where the probe was asked
-probe_studies <- cses_tree |>
-  filter(att == "no") |>
-  summarise(fielded = any(probe %in% c(0, 1)), .by = study) |>
-  filter(fielded) |>
-  pull(study)
-
-# Probe note only where fielded
-lean_study <- function(counts) {
-  if (counts$study[1] %in% probe_studies) "IMD3005_2 / f3023_2"
-}
-```
+Bars are stacked in the vote-first order of most studies, so a module-3 bar shows the same leaves in the same places as the others.
 
 ```{r}
 #| label: fig-leaves
@@ -367,16 +495,45 @@ cses_tree |>
   emit_nested_tabset(
     outer = "country",
     inner = "study",
-    level = 2,
-    leaner = lean_study
+    level = 2
   )
+```
+
+# Composition by Country
+
+One bar per country, as in the HMS deck (`presentation_hms.qmd`), with the number of respondents after each country and the share of every leaf on its segment (under 3%, the bare number).
+Countries are sorted by the share reporting an attachment; leaners (greens) are not counted in it.
+The pooled figure mixes studies from up to three decades, and countries differ in how many studies they have.
+
+```{r}
+#| label: fig-country-pooled
+#| fig-width: 9
+#| fig-height: 7
+
+cses_tree |>
+  plot_country_composition() +
+  labs(
+    title = "Partisan composition in the CSES, 1996-2024",
+    subtitle = "Unweighted shares; the vote is the current lower-house vote"
+  )
+```
+
+```{r}
+#| label: fig-country-module
+#| output: asis
+#| fig-width: 9
+#| fig-height: 7
+
+cses_tree |>
+  mutate(module = fct_relabel(module, \(x) paste("Module", x))) |>
+  emit_figure_tabset(by = "module", subtitle = "Unweighted shares; the vote is the current lower-house vote")
 ```
 
 # Leaner Probes
 
 The CSES is the one source here with a leaner probe in almost every study: *do you feel yourself a little closer to one of the political parties than the others?* (`IMD3005_2`, `f3023_2`), asked of everyone who does not say yes to the base item.
-The table lists the studies in which the probe was **not** fielded for the *no attachment* group.
-Among the rest, a large share of the *No attachment* box are leaners -- notebook 1.6 puts them at 15% to 25% of all respondents -- which a later version of the tree can split off.
+The trees split those respondents into leaners and the rest, and match a leaner's party to the vote.
+The table lists the studies in which the probe was **not** fielded for the *no attachment* group; their trees have no leaner level.
 
 ```{r}
 #| label: probe-table
@@ -397,6 +554,8 @@ cses_tree |>
 - **Alliances and unions count as the same party** as their member parties (notebook 1.9), so the CDU/CSU union code no longer pushes German studies towards *different party*.
 - **Lineage counts as the same party** (notebook 1.9): a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on (PDS and Die Linke, PD and PDL in Romania, Isamaaliit and IRL in Estonia). Two predecessors of one successor and a breakaway and its parent stay *different party*; the `route` column records which table made a pair the same party.
 - **Module 6 is an advance release** covering eight of the 25 countries.
+- **The tree order is the master order.** National studies embed the module in their own questionnaires and may ask the vote elsewhere; module 1 has no master order at all and is drawn vote first.
+- **Leaners are matched like the attached**, since the CSES records one party item for both; a leaner's *same party* is a weaker tie than an attached respondent's, and the two are kept apart in every tree and figure.
 
 # Session Info
 
