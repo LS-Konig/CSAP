@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 1.3
+  CSAP Code Notebook 1.6
 subtitle: |
   CSES IMD and module 6: reported party attachment, 1996-2024
 date: last-modified

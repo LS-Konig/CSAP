@@ -9,7 +9,20 @@ execute:
   cache: true
 draft: true
 draft-mode: visible
+# Word count for the manuscript only (the code notebooks don't need it)
+format:
+  html:
+    citeproc: false
+    filters:
+      - at: pre-quarto
+        path: _extensions/andrewheiss/wordcount/citeproc.lua
+      - at: pre-quarto
+        path: _extensions/andrewheiss/wordcount/wordcount.lua
+  pdf: default # options from _quarto.yml
+  docx: default
 ---
+
+# DRAFT
 
 US literature party-over-policy vs policy-over-party debate -> is it group identity itself or does group membership signal ideological/policy position that are being disliked? 
 
@@ -227,6 +240,18 @@ Hurdle model: Don't introduce a hurdle merely because there are many zeros. It i
 Alternative: Given that the positive allocations look approximately Normal, a latent continuous allocation model could be an interesting sensitivity/alternative model: an underlying continuous willingness-to-give gets mapped onto the integer 0–10 scale.
 Overall McElreath/Gelman approach: Start from the scientific data-generating story, fit a few plausible models, and use PPCs to identify models that fail. Don't assume that the model with the best-looking fit has thereby been proven to represent the true psychological mechanism.
 
+# Outcomes and Data Coverage
+
+| Outcome | EES | CSES | ESS | eu25games (2019) |
+|---|---|---|---|---|
+| Ideological polarization (self-placement) | LR, EU | LR (EU only via optional scale, M5–6, some studies) | LR; EU (R2–4, 6–11) | LR, EU |
+| Perceived polarization (party placements) | LR, EU | LR | – | LR, EU |
+| Vertical AP (party ratings) | PTV (all waves) | Like/dislike of parties and leaders (M1–6) | – | Thermometer (6 parties) |
+| Horizontal AP (toward partisans) | Like/dislike of party supporters (2024 only; attitudinal) | – | – | Dictator and trust games (behavioral) |
+
+: Polarization outcomes by data source {#tbl-coverage}
+
+
 ## common approach: hierarchical modeling
 
 though the distribution of types various tremendously across countries, posterior uncertainties will reflect that appropriately -- e.g. for Denmark, there isn't much too learn, since most respondents are explicit partisans, hence the uncertainty (posterior variances) should be wider for Denmark.
@@ -239,6 +264,8 @@ The explicit–implicit contrast ($\Delta$) serves as a diagnostic. The identity
 and policy accounts of partisanship predict different *profiles* of $\Delta$
 across the four polarization outcomes, so the pattern across outcomes
 constitutes the test.
+
+Note that these formulated expectations refer to *within* party contrasts, assuming this controls for selection and confounding variables
 
 | Outcome | Identity account predicts | Policy account predicts |
 |---|---|---|

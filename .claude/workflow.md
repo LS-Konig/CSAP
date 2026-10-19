@@ -1,5 +1,5 @@
 ---
-last_modified: 2026-10-06
+last_modified: 2026-10-19
 scope: repo layout, notebook pipeline, Quarto quirks, Git LFS, literature submodule
 ---
 
@@ -18,7 +18,7 @@ Read this before adding files or notebooks, rendering, or committing data.
 | `code/code-template.qmd` | Boilerplate for a new analysis notebook (tidyverse + here + sessioninfo) |
 | `code/01_preparation/1.1_ess_to_parquet.qmd` | Converts the raw ESS CSV to a partitioned Parquet dataset. It only converts the raw-layer format: no cleaning, no recoding. It is idempotent and re-renders cheaply once the output is current |
 | `code/01_preparation/1.2`–`1.4` | Party Facts coding of the ESS, CSES and EES party items (attachment, vote, batteries). They write `ext_*_pf_name` / `ext_*_pf_id` as in the eu25games release, to `data/02_processed/{ess,cses,ees}_party_pf.{csv,parquet}`. Each ends in a *Known Quirks* section that lists every hand decision |
-| `code/01_preparation/1.5`–`1.8` | Share of reported party attachment over time: EES 2004–2024 (1.5), CSES IMD + module 6 1996–2024 (1.6), ESS rounds 1–11 (1.7), and the eu25games PID distribution (1.8). Exploratory. **They write nothing.** Their `title:` fields still carry old numbers (1.2–1.5) |
+| `code/01_preparation/1.5`–`1.8` | Share of reported party attachment over time: EES 2004–2024 (1.5), CSES IMD + module 6 1996–2024 (1.6), ESS rounds 1–11 (1.7), and the eu25games PID distribution (1.8). Exploratory. **They write nothing.** |
 | `code/01_preparation/1.9_party_alliances.qmd` | The attachment-vote match rule. It builds the alias, alliance and lineage tables (`data/02_processed/pf_{aliases,alliances,lineage}.csv`) and writes the match files `{ess,cses,ees}_party_match.parquet`. See *Party matching* in `data.md` |
 | `code/02_composition/2.1`–`2.4` | Partisan composition trees (attachment → vote → same party) for eu25games, EES, CSES and ESS. Each draws Mermaid flowcharts pooled, by period, by country and by country × period, plus leaf-share plots. They render as plain pages, not manuscript notebooks (see the comment in `_quarto.yml`) |
 | `code/02_composition/2.1_eu25_composition.qmd` (output) | Also writes `data/02_processed/eu25_partisan.rds`, the eu25games partisan classification that 3.1 builds on |

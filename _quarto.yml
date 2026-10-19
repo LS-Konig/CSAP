@@ -67,12 +67,6 @@ date-format: MMMM D, YYYY
 
 format:
   html:
-    citeproc: false
-    filters:
-      - at: pre-quarto
-        path: _extensions/andrewheiss/wordcount/citeproc.lua
-      - at: pre-quarto
-        path: _extensions/andrewheiss/wordcount/wordcount.lua
     toc: true
     toc-depth: 3
     include-in-header:

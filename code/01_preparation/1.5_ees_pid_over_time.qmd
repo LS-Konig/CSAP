@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 1.2
+  CSAP Code Notebook 1.5
 subtitle: |
   EES voter studies: reported party attachment, 2004-2024
 date: last-modified
