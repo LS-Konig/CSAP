@@ -21,3 +21,195 @@ draft a new notebook in a new subdir code/03_analyses for the
 
   Ask back if anything is unclear, vague or ambiguous. Feel free
   to suggest improvements over strategy if you have better ideas.
+
+
+
+  --- backup oktober 20
+
+  Leading question and inferential goals
+
+  What does partisanship itself contribute to the different forms of polarization? "Partisanship" means reporting an attachment, compared with people of the same party who deny one.
+
+  Goals, for each outcome:
+  1. A pooled European type contrast
+  2. Comparative variation across countries
+  3. Dynamic change over time (not for the games)
+  4. A decomposition of change and of cross-country differences into the mix of types vs. polarization within types
+  5. A profile of type contrasts across outcomes as the party-over-policy diagnostic
+
+  Contributions: comparative research on polarization and behavior, and the US party-over-policy debate. Europe adds leverage the US lacks: attachment and vote come apart, and there are several out-parties at
+  different policy distances.
+
+  The four types and what each one adds
+
+  ┌────────────────────┬─────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────────────────┐
+  │        Type        │       Definition        │                                                       What it adds                                                        │        Main comparison        │
+  ├────────────────────┼─────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────┤
+  │ Explicit           │ attached, voted for the │ the reference partisan                                                                                                    │ —                             │
+  │                    │  same party             │                                                                                                                           │                               │
+  ├────────────────────┼─────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────┤
+  │ Denier             │ denies attachment,      │ same party, no attachment: the core contrast                                                                              │ vs. explicit, within the vote │
+  │ (vote-anchored)    │ votes for a party       │                                                                                                                           │  party                        │
+  ├────────────────────┼─────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────┤
+  │ Mismatched         │ attached to A, voted    │ separates attachment from vote: shares the attachment with explicit partisans of A and the vote with deniers of B. For    │ vs. explicit (within A), vs.  │
+  │                    │ for B                   │ AP, the A-vs-B rating is within the same person                                                                           │ deniers (within B)            │
+  ├────────────────────┼─────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────┤
+  │                    │                         │ no party of their own. A baseline for composition and for how general party ratings run. A diagnostic: if deniers         │ country-level reference, not  │
+  │ Non-partisan       │ no attachment, no vote  │ resemble non-partisans on pre-treatment traits but explicit partisans on the outcome, that points to selection by the     │ within-party                  │
+  │                    │                         │ vote                                                                                                                      │                               │
+  └────────────────────┴─────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────┘
+
+  The three voting types are each selected by the vote in a different way. Together they bracket the attachment effect; none of them identifies it alone.
+
+  Table 1: outcomes
+
+  Outcome: 0 Composition
+  Data, time: EES, CSES, ESS, eu25; over time
+  Unit: respondent
+  Polarization quantity: —
+  Type estimand: share of each type by country and time
+  Multilevel structure: respondents in surveys in countries; trend by country
+  Specialities: feeds the decomposition; wording differences between studies are part of the model
+  ────────────────────────────────────────
+  Outcome: 1 Ideological polarization (LR, EU)
+  Data, time: EES, CSES (mostly LR), ESS (EU in some rounds), eu25; over time
+  Unit: respondent
+  Polarization quantity: extremity (individual); dispersion and bimodality (group)
+  Type estimand: Δ extremity within party; group quantities computed on each type's distribution with a common party mix
+  Multilevel structure: respondents in party × country × survey; surveys in countries; trend
+  Specialities: centre for extremity still open (report alternatives); EU coverage thinner
+  ────────────────────────────────────────
+  Outcome: 2 Ideological sorting (LR × EU)
+  Data, time: where both items exist (EES, ESS rounds, eu25); over time
+  Unit: respondent (joint distribution)
+  Polarization quantity: strength of the LR–EU association, any shape
+  Type estimand: alignment within each type, common party mix
+  Multilevel structure: as 1
+  Specialities: group-level quantity; nonlinear (inverted U); sign differs by country, so measure within country and pool magnitudes
+  ────────────────────────────────────────
+  Outcome: 3 Perceived party polarization (LR, EU)
+  Data, time: EES, CSES (LR), eu25; over time
+  Unit: respondent × placed party
+  Polarization quantity: spread of a respondent's placements over a fixed party set; scale-use-corrected stretch as extension
+  Type estimand: Δ spread within party; Δ excess over a benchmark (actual positions)
+  Multilevel structure: placements in respondents in party × country × survey; time
+  Specialities: everyone in a country-survey faces the same real party system
+  ────────────────────────────────────────
+  Outcome: 4 Perceived party sorting
+  Data, time: EES, eu25; over time
+  Unit: respondent × placed party
+  Polarization quantity: how aligned a respondent's own LR and EU placements are across parties
+  Type estimand: Δ perceived alignment; Δ excess over actual alignment
+  Multilevel structure: as 3
+  Specialities: few parties per respondent, so pool across respondents rather than computing a noisy per-person correlation
+  ────────────────────────────────────────
+  Outcome: 5 Vertical attitudinal AP (+ EES 2024 horizontal attitudinal)
+  Data, time: EES (PTV), CSES (like/dislike), eu25 thermometer; EES 2024 supporter ratings
+  Unit: respondent × rated party
+  Polarization quantity: in vs. out rating
+  Type estimand: $AP_t$ and $\Delta AP$; mismatched respondents have two in-relations (attachment party, vote party); distance gradient
+  Multilevel structure: ratings in respondents and target parties; respondents in party × country × survey; time
+  Specialities: relation coded per target (attached and voted / attached only / voted only / neither); PTV is not pure affect; EES 2024 fills the horizontal-attitudinal cell
+  ────────────────────────────────────────
+  Outcome: 6 Horizontal behavioral AP
+  Data, time: eu25 games, 2019 only
+  Unit: respondent × round
+  Polarization quantity: tokens to co vs. out partner
+  Type estimand: $AP_t$, $\Delta AP$, split into in-group favoritism (co vs. control) and out-group derogation (control vs. out); control = co-national partner with no party shown
+  Multilevel structure: rounds in respondents in party × country
+  Specialities: partner party randomized, but stratified by type; beta-binomial ruled out (unimodal, misses the spikes, mean off), so a mean model with cell-specific dispersion plus an ordinal shape check
+
+  Table 2: what the contrast buys, and its limits
+
+  The same for all outcomes:
+  - Absorbed: everything shared within party × country: platform, status, the set of out-parties, elite cues, national norms about admitting an attachment.
+  - Not absorbed: individual-level confounders of attachment (age and socialization, parental partisanship, interest, ideological intensity).
+  - Selection by the vote: the vote can act as a collider, because deniers are selected on their reasons to vote for the party.
+  - Measurement: self-labelling and wording effects, plus recall error in the vote.
+  - Triangulating across studies addresses wording effects, but not confounding that all studies share.
+  - What a causal reading needs: conditional ignorability of attachment given party × country and pre-treatment covariates, no selection on the outcome through the vote, and type meaning the same across
+    wordings.
+
+  Outcome family: Composition
+  What the contrast buys: description of how the type mix varies across countries and time; the weights for the decomposition
+  Boundaries: trends partly reflect switching between studies or wordings
+  Causal reading also needs: none (descriptive only)
+  Where it likely fails: level comparisons across studies without wording effects
+  ────────────────────────────────────────
+  Outcome family: Ideology and sorting
+  What the contrast buys: rules out "attached partisans are in more extreme parties"; with the common party mix, group quantities aren't driven by party choice
+  Boundaries: reverse causation: extreme or coherent people may attach because their views fit a party. Selection on proximity makes deniers look less extreme at centrist parties and more extreme at flank
+  parties. Sorting within one party has restricted range
+  Causal reading also needs: attachment prior to positions; no proximity selection
+  Where it likely fails: the strongest threat: ideology → attachment is at least as plausible as the reverse. Treat as association net of party sorting. The party-position diagnostic tests the selection
+  ────────────────────────────────────────
+  Outcome family: Perceived polarization and sorting
+  What the contrast buys: the real party system is held fixed within country-survey, so perceived differences aren't system differences; a benchmark separates perception from reality
+  Boundaries: sophistication raises attachment and may make perceived spread more accurate, not more biased; scale use differs between respondents; the set of placed parties differs by type
+  Causal reading also needs: ignorability given sophistication; comparable scale use
+  Where it likely fails: the sophistication confound is likely substantial; the benchmark and scale-use correction narrow it, they don't remove it
+  ────────────────────────────────────────
+  Outcome family: Vertical AP (+ 2024 horizontal attitudinal)
+  What the contrast buys: within party, plus within person across targets; target effects absorb how well liked a party is in general; the mismatched A-vs-B comparison is the best-identified quantity; distance
+
+  to the target tests party vs. policy
+  Boundaries: the vote as collider: deniers vote for P partly because they dislike the others, which plausibly pulls ΔAP toward zero; out-party sets differ by type; adjusting for distance gives a controlled
+  direct effect (distance is partly a consequence of attachment); PTV mixes liking with viability
+  Causal reading also needs: no selection on the outcome through the vote; no "dislike of others → attachment" path (negative partisanship)
+  Where it likely fails: selection by the vote is the likely failure; its plausible direction is attenuation. The mismatched group is itself selected on voting against its attachment, and mixes strategic
+  voters, multiple party ID, recall error and matching artefacts
+  ────────────────────────────────────────
+  Outcome family: Horizontal behavioral AP
+  What the contrast buys: the partner's party is randomized, so $AP_t$ is a causal effect of the partner label for each type; the control splits favoritism from derogation; same respondents as the thermometer
+  give a within-person attitudinal vs. behavioral comparison
+  Boundaries: $\Delta AP$ is how a causal effect varies by a non-randomized moderator, so it is descriptive; few co-partisan partners for deniers and few vote-only partners for mismatched respondents; the
+  party
+  label also carries inferred policy; one election year
+  Causal reading also needs: the same ignorability of type as above
+  Where it likely fails: ΔAP inherits every confounding problem of type; only the effect of the partner label is experimental
+
+  Table 3: building the model step by step
+
+  The same estimand (g-computed marginal-mean contrasts with stated weights) is computed at every step, so the steps can be compared directly.
+
+  ┌──────┬─────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────┐
+  │ Step │                           Layer added                           │                           What it contributes                           │                   What to compare                    │
+  ├──────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ 1    │ Likelihood on one survey                                        │ a family that reproduces the outcome's shape and cell means             │ posterior predictive checks by cell                  │
+  ├──────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ 2    │ Party within country (plus respondent and target layers for     │ the within-party contrast, assuming one common gap. The benchmark       │ against raw within-party cell means                  │
+  │      │ repeated outcomes)                                              │                                                                         │                                                      │
+  ├──────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ 3    │ Contrast varying by country                                     │ comparative inference with partial pooling: the comparative figure      │ how much countries differ, relative to the prior     │
+  ├──────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ 4    │ Contrast varying by party                                       │ heterogeneity across parties; the estimand uses your stated weights     │ a shift from step 2 means the gap varies with party  │
+  │      │                                                                 │ rather than implicit precision weights                                  │ composition                                          │
+  ├──────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ 5    │ Dual party membership for mismatched respondents (attachment    │ separates attachment from vote in one model                             │ against fits that code only one in-party             │
+  │      │ party and vote party)                                           │                                                                         │                                                      │
+  ├──────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ 6    │ Study and wording layer (pooling across sources)                │ one European scale across operationalizations                           │ separate per-study fits as triangulation             │
+  ├──────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ 7    │ Time: surveys within countries, type-specific smooth trends     │ dynamic inference: the over-time figure, and the decomposition          │ stability when single studies are dropped; trends    │
+  │      │ varying by country                                              │                                                                         │ vs. switching between studies                        │
+  ├──────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ 8    │ Distributional layer (dispersion by cell)                       │ calibrated uncertainty by cell                                          │ predictive checks and calibration by cell            │
+  ├──────┼─────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────┤
+  │ 9    │ Diagnostics and adjustments: policy distance, benchmark, party  │ the party-vs.-policy tests; identification robustness                   │ adjusted vs. unadjusted; sensitivity to an           │
+  │      │ position, pre-treatment covariates                              │                                                                         │ unobserved confounder                                │
+  └──────┴─────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────┘
+
+  Alongside every step:
+  - Prior sensitivity: the variance components of small groups lean on the prior.
+  - Uncorrelated varying effects as a check.
+  - Fake-data simulation from step 4 on, recovering known contrasts at your real cell sizes.
+
+  For the games: steps 1–5, 8 and 9 apply; there is no study or time layer.
+
+  Bringing the outcomes together
+
+  - Party-over-policy profile: the pattern of type contrasts across the six polarization outcomes, set against the predictions of each account. Write it down before fitting.
+  - Sorting adds the opinion-structure prediction. If partisanship bundles positions, attached partisans should be more aligned, and see the party system as more aligned, than deniers.
+  - Decomposition over time and across countries for outcomes 1–5: change in the type mix vs. change within types.
+  - Attitudinal vs. behavioral only within eu25 (same respondents, standardized). The EES 2024 horizontal-attitudinal panel separates target from measurement mode, but descriptively, since it uses different
+    respondents and a different year.
