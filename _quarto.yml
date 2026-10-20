@@ -33,16 +33,26 @@ project:
 manuscript:
   article: index.qmd
   notebooks:
-    - code/01_preparation/1.1_ess_to_parquet.qmd
-    - code/01_preparation/1.2_ess_partyfacts.qmd
-    - code/01_preparation/1.3_cses_partyfacts.qmd
-    - code/01_preparation/1.4_ees_partyfacts.qmd
-    - code/01_preparation/1.5_ees_pid_over_time.qmd
-    - code/01_preparation/1.6_cses_pid_over_time.qmd
-    - code/01_preparation/1.7_ess_pid_over_time.qmd
-    - code/01_preparation/1.9_party_alliances.qmd
-    - code/01_preparation/1.8_eu25_pid.qmd
-    - code/03_analyses/3.1_eu25_prep.qmd
+    - notebook: code/01_preparation/1.1_ess_to_parquet.qmd
+      title: ESS to Parquet
+    - notebook: code/01_preparation/1.2_ess_partyfacts.qmd
+      title: ESS Party Facts
+    - notebook: code/01_preparation/1.3_cses_partyfacts.qmd
+      title: CSES Party Facts
+    - notebook: code/01_preparation/1.4_ees_partyfacts.qmd
+      title: EES Party Facts
+    - notebook: code/01_preparation/1.5_ees_pid_over_time.qmd
+      title: EES PID over Time
+    - notebook: code/01_preparation/1.6_cses_pid_over_time.qmd
+      title: CSES PID over Time
+    - notebook: code/01_preparation/1.7_ess_pid_over_time.qmd
+      title: ESS PID over Time
+    - notebook: code/01_preparation/1.9_party_alliances.qmd
+      title: Party Alliances
+    - notebook: code/01_preparation/1.8_eu25_pid.qmd
+      title: EU25 PID
+    - notebook: code/03_analyses/3.1_eu25_prep.qmd
+      title: EU25 Prep
 
 execute:
   freeze: auto
