@@ -24,30 +24,35 @@ format:
 
 # DRAFT
 
-US literature party-over-policy vs policy-over-party debate -> is it group identity itself or does group membership signal ideological/policy position that are being disliked? 
+Design agreed on 2026-10-20. The full tables (types, outcomes, limits of the contrast, model building) are in `.claude/design.md`. These notes keep the outline and the parts that feed the manuscript.
+
+US literature party-over-policy vs policy-over-party debate -> is it group identity itself or does group membership signal ideological/policy position that are being disliked?
 
 In Europe, different notion of partisanship
 
-then section partisanship in Europe (over time, using EES data) (feel close vs denying)
+then section partisanship in Europe (over time, using EES, CSES, ESS data) (feel close vs denying) -> composition of the four partisan types
 
 over time development of PID (great dealignment or realignment?)
 
-PID and perceived ideological polarization: over time development of PID effect on perceived policy positions of parties
+PID and ideological polarization on two dimensions (LR, EU), and sorting between the two
 
-section on multiple facets of AP (2x2 matrix), we have attitudinal vertical over time, horizontal behavioral at one time experimentally cross-nationally
+PID and perceived ideological polarization: over time development of PID effect on perceived policy positions of parties, and on perceived sorting of the party system
+
+section on multiple facets of AP (2x2 matrix), we have attitudinal vertical over time, attitudinal horizontal in EES 2024, horizontal behavioral at one time experimentally cross-nationally
 
 then triangulation research design: match / correlate EES/EU25 data in 2019 via thermo scores
 
 over time development of PID effect on AP
 
-estimate within party contrast using multilevel modelling, how does attachement (vs denied attachement) increase AP?
+estimate within party contrasts using multilevel modelling: how does AP differ between partisan types of the same party?
 
 to-do:
   - finish data collection and survey items overview (EES, CSES, ESS)
+  - coverage table item × study × round × country (LR and EU self-placement, LR and EU party placements, PTV, like/dislike, attachment wording)
 
 
 
-  EES -> PTV
+  EES -> PTV (all waves), like/dislike of party supporters (2024)
   CSES -> party & leader like/dislike
   ESS -> PID only
   eu25 -> party thermo and cj
@@ -86,16 +91,16 @@ I then proceed to summarize the history of the notion of partisanship in Europe.
 Empirically, I combine existing data from ongoing large scale survey projects from the European Election Study, the Comparative Study on Electoral Systems and the European Social Survey with a cross-national experimental dataset from 2019.
 
 In a first study, I trace the distribution of partisanship across Euroepean electorates in the first quarter of the 21st century.
-Whereas the notion of the "great dealignment" has been the dominant description of the post WW2 period for Western Europe, I try to conceptually disentangle party membership, party affiliation, and stated party preference (via standard vote choice items). 
+Whereas the notion of the "great dealignment" has been the dominant description of the post WW2 period for Western Europe, I try to conceptually disentangle party membership, party affiliation, and stated party preference (via standard vote choice items).
 The (preliminary) first impression shows no uniform trend across Europe regarding partisanship, with large variation between different survey project, all of which use slightly different approaches for capturing respondents' feelings of attachement.
 
-In a second study, I investigate the relationship between partisanship and ideological polarization on two dimensions, the left-right and European integration dimension.
+In a second study, I investigate the relationship between partisanship and ideological polarization on two dimensions, the left-right and European integration dimension, and the sorting between the two (whether they become more strongly correlated).
 
-In a third study, I take a closer look at how partisanship impacts *perceived* ideological polarization of their respective party systems.
+In a third study, I take a closer look at how partisanship impacts *perceived* ideological polarization of their respective party systems, on both dimensions, and the perceived sorting of the party system.
 
-In a fourth study, I then turn to affective polarization, specifically *vertical* affective polarization, directed towards parties (as opposed to *partisans*).
+In a fourth study, I then turn to affective polarization, specifically *vertical* affective polarization, directed towards parties (as opposed to *partisans*), with *horizontal* attitudinal polarization from the 2024 EES as a complement.
 
-In a fifth study, I compare experimentally measured *horizontal* affective polarization among partisans and deniers.
+In a fifth study, I compare experimentally measured *horizontal* affective polarization across partisan types.
 
 This study makes multiple contributions: First, it is the most comprehensive study of political polarization in Europe, focusing on its various facets (actual and perceived ideological, vertical and horizontal affective), applying both a dynamic and static lense.
 
@@ -127,9 +132,10 @@ at its core, I use a .
 
 The question is: What is the net contribution of partisanship *itself* on various forms of political polarization?
 
-For this, I focus on the contrast between respondents that do report an attachement (hereafter refered to as explicit partisans) from respondents that *deny* such an attachement, i.e., select the response "No, I don't feel attached to any political party", but report a preference via vote choice items, hereafter refered to implicit partisans.
+For this, I focus on the contrast between respondents that do report an attachement (hereafter refered to as explicit partisans) from respondents that *deny* such an attachement, i.e., select the response "No, I don't feel attached to any political party", but report a preference via vote choice items, hereafter refered to as deniers (vote-anchored partisans).
+Two further types complete the picture: respondents attached to one party who voted for another (mismatched), and non-partisans.
 
-This contrast allows to estimate the effect of partisan attachement within party (and country), accounting for between-party variation in polarization outcomes.
+This contrast allows to estimate the association of partisan attachement with polarization within party (and country), accounting for between-party variation in polarization outcomes.
 
 The key challenge to causal interpretation of this contrast is that partisan attachement is not random -- there are factors correlated with partisan attachement.
 
@@ -137,38 +143,31 @@ If those factors influence both the choice of reporting partisan affiliation and
 
 Hence, in a first step, I review the the notion and history of partisanship in Europe, with a special focus on determinants of partisanship.
 
-Building on this, I examine empirically which variables are associated with reporting a partisanship in the first place, to identify possible control variables.
+Building on this, I examine empirically which variables are associated with reporting a partisanship in the first place, to identify possible (pre-treatment) control variables.
 
-reports attachement: yes or no
-reports vote: yes or no
+so sequentially its a tree:
 
-which yields 4 different cell options
+| report attachement | report vote | type |
+| -- | -- | -- |
+| yes | yes, same party | explicit partisan |
+| yes | yes, but other party | mismatched (strategic/inconsequential voter?) |
+| no | yes | denier (no attachement but preference revealed) |
+| no | no | non-partisan |
 
-
-            rep vote
-re att   y  y
-         n  n
-
-what makes this of course more complicated: leaner questions, multiple PID. 
+what makes this of course more complicated: leaner questions, multiple PID.
 But (CHECK) many survey start or use binary questions.
 
 So the interesting part is, how do respondents that report attachement differ along multiple polarization dimensions if they have the same partisan anchor compared to those that *deny* such an attachement if directly asked.
 
-so sequentially its a tree:
-
-| report attachement | report vote |
-| -- | -- |
-| yes | yes, same | -> explicit partisan
-| yes | yes, but other | -> partisan strategic/inconsequential voter?
-| no | yes | -> implicit partisan (no attachement but preference revealed)
-| no | no | -> non-partisan
-
+The mismatched separate attachment from vote: they share the attachment with explicit partisans of party A and the vote with deniers of party B. The non-partisans have no party of their own; they are a baseline and a diagnostic for selection by the vote.
 
 ultimate goals:
-over time ideological contrast
-over time perception contrast
-over time vertical contrast
-cross national horizontal behavioral contrast
+
+1. pooled European type contrast per outcome
+2. comparative: how the contrast varies across countries
+3. dynamic: how it changes over time (not the games)
+4. decomposition of change and of cross-country differences into the mix of types vs. polarization within types
+5. party-over-policy diagnostic: the profile of type contrasts across outcomes
 
 where contrasts are estimated within party (and country)
 
@@ -181,71 +180,64 @@ U -> polarization
 
 V -> type
 
+Type -> Vote <- U, and polarization -> Vote (e.g. disliking the alternatives): conditioning on the vote can select deniers on the outcome
+
+For ideology also polarization -> Type (people with extreme or coherent views attach because a party fits)
+
 ## Estimation
 
-### Ideological Polarization
+All outcomes: hierarchical models with respondents in party × country × survey and surveys in countries, plus a time trend where the data are over time. Estimands are contrasts of marginal means computed by g-computation with respondent weights over parties with more than one type. The model is built up step by step (design.md), and the ladder is adjusted as fits come in.
 
-how to measure at respondent level? distance from center? distance from overall (country=?) mean/median? all?
+Where one type is rare (e.g. Denmark), the posterior shows this through wider uncertainty. The posterior reflects sampling and the pooling assumptions, not selection or the composition of a group.
 
-aggregate: standard deviation of lr scale -> descr fig, individual level then brms analysis
+### Composition
 
-LR primarily, EU also (less data though)
+Share of each of the four types by country and time, with study and wording effects. Descriptive; feeds the decomposition.
 
-over time available
+### Ideological polarization and sorting
 
-$Y_{ipct}$ as outcome, respondent $i$ anchored in party $p$ from country $c$ at time $t$.
+LR primarily, EU also (less data though); over time available.
 
-modelled as a function of partisan type $T_i$ (1/0) with party, country and time random slopes (nested) and random intercepts
+Extremity $E(|Y - c| \mid t)$ within party, with the centre $c$ still open (scale midpoint, country mean or median: report alternatives). Group quantities (dispersion, bimodality) on each type's predicted distribution with a common party mix.
 
-### perceived ideological party polarization
+Sorting: strength of the LR–EU association within a type, whatever its shape (the relation can be an inverted U, and its sign differs between countries), measured within country and pooled as magnitudes.
 
-respondent level standard deviation of party placements, lr and EU (where available)
+### Perceived ideological party polarization and sorting
 
-over time available
+Respondent-level spread of party placements over a fixed party set, LR and EU (where available); over time available. Extension: scale-use-corrected stretch (Bayesian Aldrich–McKelvey). Benchmark: actual positions.
 
-$Y_{ipct}$ as outcome, respondent $i$ anchored in party $p$ from country $c$ at time $t$.
+Perceived sorting: how aligned a respondent's LR and EU placements are across parties, against the actual alignment.
 
-modelled as a function of partisan type $T_i$ (1/0) with party, country and time random slopes (nested) and random intercepts
+### Vertical affective polarization
 
-### vertical affective polarization
+PTV (EES), like/dislike (CSES), thermometer (eu25); over time available. API primary, other measures robustness. Horizontal attitudinal complement: EES 2024 like/dislike of party supporters.
 
-thermometer (CSES, eu25), PTV/like-dislike (EES),
+One row per respondent × rated party, with the relation of the target to the respondent coded as attached and voted / attached only / voted only / neither.
 
-API primary, other measures robustness
+QoI: $AP_t = E(Y \mid Co, t) - E(Y \mid Out, t)$, $\Delta AP = AP_{explicit} - AP_{denier}$; for the mismatched, the attachment-party and the vote-party relation are contrasted within person.
 
-over time available
+### Horizontal behavioral AP
 
-$Y_{ipct}$ as outcome (thermometer score), respondent $i$ anchored in party $p$ from country $c$ at time $t$.
+Dictator/trust games, 2019 only.
 
-modelled as a function of partisan anchor (1 for ingroup, 0 else), partisan type $T_i$ (1/0) with party, country and time random slopes (nested) and random intercepts
+QoI as above, plus the split into in-group favoritism $E(Y \mid Co, t) - E(Y \mid Control, t)$ and out-group derogation $E(Y \mid Control, t) - E(Y \mid Out, t)$. Control = a co-national partner with no party shown.
 
-QoI: $AP = E(Y | Co) - E(Y | Out)$, $\Delta AP = E(AP | Explicit) - E(AP | implicit)$, where the hierarchical structure ensures this contrast *within* parties (and, logically, countries) 
+The partner's party is randomized within type (attached respondents were more likely to see a co-partisan), so $AP_t$ is a causal effect of the partner label for each type; $\Delta AP$ is not.
 
-### horizontal behavioral AP
+Likelihood: the beta-binomial is ruled out (unimodal, misses the spikes at 0, 5 and 10, cell means off). Current line: the Gaussian on cell means with dispersion by cell, plus an ordinal model as a check of the shape. Acceptance criteria for a new model:
 
-dictator/trust games
-
-API equivalent
-
-$Y_{ipct}$ as outcome (token allocation), respondent $i$ anchored in party $p$ from country $c$ at time $t$.
-
-modelled as a function of partisan anchor (1 for ingroup, 0 else), partisan type $T_i$ (1/0) with party, country and time random slopes (nested) and random intercepts
-
-QoI: $AP = E(Y | Co) - E(Y | Out)$, $\Delta AP = E(AP | Explicit) - E(AP | implicit)$, where the hierarchical structure ensures this contrast *within* parties (and, logically, countries) 
-
-Scientific theory: Treat the 0–10 token allocation as a single underlying “how much should I give?” decision. The recipient attributes shift the desired allocation, which can sometimes reach the lower boundary of 0. Thus, 0 is not necessarily a qualitatively different behavioral state.
-Starting model: A beta-binomial is a sensible first model because the outcome is discrete and bounded at 0–10, while allowing more dispersion than a simple binomial. It lets the attributes influence the underlying propensity to allocate tokens.
-Model checking: Use posterior predictive checks to see whether the beta-binomial can reproduce the observed zero mass and the distribution from 1–10. Check this both overall and across experimental conditions/covariates.
-Hurdle model: Don't introduce a hurdle merely because there are many zeros. It implies a different generative story: first decide whether to give anything, then decide how much. Consider it if the beta-binomial systematically underpredicts zeros despite fitting the positive allocations well.
-Alternative: Given that the positive allocations look approximately Normal, a latent continuous allocation model could be an interesting sensitivity/alternative model: an underlying continuous willingness-to-give gets mapped onto the integer 0–10 scale.
-Overall McElreath/Gelman approach: Start from the scientific data-generating story, fit a few plausible models, and use PPCs to identify models that fail. Don't assume that the model with the best-looking fit has thereby been proven to represent the true psychological mechanism.
+i. It passes the weighted cell-mean and raw-ΔAP checks of notebook 3.5.
+ii. It passes the anchor-share checks by cell (3.5) and is calibrated by cell (LOO-PIT, notebook 3.4).
+iii. Only then: native LOO among the comparable fits. Cross-family elpd only via the discretization module of 3.4.
 
 # Outcomes and Data Coverage
 
 | Outcome | EES | CSES | ESS | eu25games (2019) |
 |---|---|---|---|---|
 | Ideological polarization (self-placement) | LR, EU | LR (EU only via optional scale, M5–6, some studies) | LR; EU (R2–4, 6–11) | LR, EU |
+| Ideological sorting (LR × EU self-placement) | where both asked | rarely (EU optional) | R2–4, 6–11 | yes |
 | Perceived polarization (party placements) | LR, EU | LR | – | LR, EU |
+| Perceived sorting (LR × EU party placements) | where both asked | – | – | yes |
 | Vertical AP (party ratings) | PTV (all waves) | Like/dislike of parties and leaders (M1–6) | – | Thermometer (6 parties) |
 | Horizontal AP (toward partisans) | Like/dislike of party supporters (2024 only; attitudinal) | – | – | Dictator and trust games (behavioral) |
 
@@ -263,29 +255,36 @@ Overall McElreath/Gelman approach: Start from the scientific data-generating sto
 : Partisanship items by data source {#tbl-pid-items}
 
 
-## common approach: hierarchical modeling
-
-though the distribution of types various tremendously across countries, posterior uncertainties will reflect that appropriately -- e.g. for Denmark, there isn't much too learn, since most respondents are explicit partisans, hence the uncertainty (posterior variances) should be wider for Denmark.
-
 ## Under what assumptions can this be interpreted as *causal* contrast?
+
+Common to all outcomes: the within-party contrast absorbs everything shared within party × country (platform, status, set of out-parties, elite cues, national norms about admitting an attachment). It does not absorb individual-level confounders of attachment (age and socialization, parental partisanship, interest, ideological intensity). The vote can act as a collider, and self-labelling, wording and vote recall add measurement error. A causal reading needs conditional ignorability of attachment given party × country and pre-treatment covariates, no selection on the outcome through the vote, and a type that means the same across wordings. Triangulating across studies addresses wording, not shared confounding. The three voting types bracket the attachment effect rather than identifying it.
+
+- **Ideology and sorting**: the contrast rules out "attached partisans are in more extreme parties". Reverse causation (ideology -> attachment) is the strongest threat, and selection on proximity makes deniers look less extreme at centrist parties and more extreme at flank parties (diagnostic: type × party position). Read as an association net of party sorting.
+- **Perceived polarization and sorting**: the real party system is fixed within a country-survey. Sophistication raises attachment and may make perceived spread more *accurate*; benchmark and scale-use correction narrow this confound, they do not remove it.
+- **Vertical AP**: within party plus within person across targets; the mismatched rating of attachment party vs. vote party is the best-identified quantity. Deniers vote for their party partly because they dislike the others, which plausibly pulls ΔAP toward zero. Adjusting for policy distance gives a controlled direct effect, since distance is partly a consequence of attachment.
+- **Horizontal behavioral AP**: the partner label is randomized, so $AP_t$ is causal per type; ΔAP is effect heterogeneity by a non-randomized moderator and inherits every confounding problem of type. One election year; few co-partners for deniers.
 
 ## Theoretical Implications and Empirical Tests
 
-The explicit–implicit contrast ($\Delta$) serves as a diagnostic. The identity
+The explicit–denier contrast ($\Delta$) serves as a diagnostic. The identity
 and policy accounts of partisanship predict different *profiles* of $\Delta$
-across the four polarization outcomes, so the pattern across outcomes
+across the polarization outcomes, so the pattern across outcomes
 constitutes the test.
 
-Note that these formulated expectations refer to *within* party contrasts, assuming this controls for selection and confounding variables
+Note that these formulated expectations refer to *within* party contrasts; how far that controls for selection and confounding is set out in the section above.
 
 | Outcome | Identity account predicts | Policy account predicts |
 |---|---|---|
 | Ideological extremity | Small or modest $\Delta$ | Large $\Delta$ (attachment reflects stronger policy commitment) |
+| Ideological sorting | to be specified | to be specified |
 | Perceived polarization | $\Delta > 0$ beyond actual positions (partisan lens exaggerates distances) | $\Delta$ tracks actual party placements; no excess perception |
+| Perceived sorting | to be specified | to be specified |
 | Vertical AP (toward parties) | Large $\Delta$, robust to adjusting for policy distance | $\Delta$ shrinks substantially once policy distance is adjusted for |
 | Horizontal AP (toward ordinary partisans) | Large $\Delta$, possibly exceeding vertical, since ordinary partisans carry little policy information | Small $\Delta$, since ordinary partisans are weak policy signals |
 
 : Competing predictions of the identity and policy accounts across polarization outcomes {#tbl-predictions}
+
+The tests below form the diagnostic step of the model building.
 
 ### Test 1: Estimate $\Delta$ with and without policy adjustment
 
@@ -301,105 +300,14 @@ coefficient plot with the four outcomes, each showing both estimates.
 Perceived polarization is constructed relative to a benchmark: sample-mean
 placements, expert placements (e.g., Chapel Hill Expert Survey), or
 manifesto-based positions. The quantity of interest is whether explicit
-partisans' perceived spread *exceeds* the benchmark more than implicit
-partisans' does. Greater overestimation among explicit partisans supports
+partisans' perceived spread *exceeds* the benchmark more than deniers' does.
+Greater overestimation among explicit partisans supports
 the identity lens.
 
 ### Test 3: Compare horizontal and vertical AP
 
 Within the 2019 data, where both types are measurable, $\Delta$ for dislike of
 parties
-
-
-possible interesting deeper look: conflicting instances (attachement and vote differ) -> which shows more ingroup favoritism?
-
-## Next models: getting both the expectation and the shape right
-
-Notes only, nothing fitted. Current state: Gaussian (z-scale) and beta-binomial fits of notebook 3.2; the Gaussian is the main estimate because the estimand is built from cell means (3.3, 3.5); the beta-binomial is robustness.
-
-**Diagnosis.** Both outcomes look like point masses at anchors plus a smooth interior hump: 0 = outright rejection, 100 = full endorsement (thermometer), 5 = even split (games). The mix depends on co/out × type (thermometer: ~20–23% zeros in the out-cells, 27% hundreds in explicit co; games: spike at 0 in the out-cells, at 5 everywhere). One shared dispersion parameter cannot represent that. With a non-Gaussian likelihood a wrong dispersion also biases the means: the beta-binomial's shared φ ≈ 1.94 (thermometer) turns the rows U-shaped, underpredicts all four cell means by 3–4.5 points, more in vote-anchored co than out, and so inflates ΔAP.
-
-**Candidates, in order of cost.**
-
-1. **Gaussian with σ by cell**: `sigma ~ der_co * der_explicit + (1 | country)`. Same mean structure, better calibrated intervals by cell. The immediate next robustness model.
-2. **Beta-binomial with φ by cell**: `phi ~ der_co * der_explicit + (1 | country)`.
-3. **Thermometer hurdle beta-binomial.** P(0) = pz, P(100) = (1 − pz) · ph, interior 1–99 a truncated beta-binomial, so φ is not dragged down to fake the spikes. `pz`, `ph`, `phi` all `~ der_co * der_explicit`. A person intercept on `pz` (habitual zero-givers); a rated-party term `(1 | country:ext_q_thermo_pf_name)` on `pz`/`mu` (zeros concentrate on fringe parties; it does not change what the g-computation averages over); focal priors on `pz` with SD 2–3 (it moves ~5–6 logits between cells). Needs a brms `custom_family` with `log_lik_*`, `posterior_predict_*` and `posterior_epred_*`. With `posterior_epred_*` defined, `ap_draws()` and notebook 3.3 work unchanged. Untested sketch below.
-4. **Games: zero-and-five inflated beta-binomial.** 5 is interior, so it needs an inflation point, not a hurdle; `phi ~ cell`.
-5. **Cumulative ordinal model** with `disc ~ der_co * der_explicit`, only if heaping cannot be absorbed otherwise. Proportional odds alone cannot change the shape, and 100 thresholds on 124k rows is costly.
-
-**New fits** use `save_pars(all = TRUE)` (already set in 3.2's `fit_brm()`), so LOO with moment matching is possible.
-
-**AP decomposition.** Swap one component at a time in the g-computation (e.g. the out-cell mean with the co-cell `pz`) to split AP and ΔAP into the extensive margin (more zeros) and the intensive margin (lower interior ratings).
-
-**Acceptance criteria for a new model.**
-
-i. It passes the weighted cell-mean and raw-ΔAP checks of notebook 3.5.
-ii. It passes the anchor-share checks by cell (3.5) and is calibrated by cell (LOO-PIT, notebook 3.4).
-iii. Only then: native LOO among the comparable fits (beta-binomial variants against each other; Gaussian variants against each other). Cross-family elpd only via the discretization module of 3.4.
-
-Sketch (untested):
-
-```r
-hbb <- custom_family(
-  "hbb", dpars = c("mu", "phi", "pz", "ph"),
-  links = c("logit", "log", "logit", "logit"),
-  lb = c(0, 0, 0, 0), ub = c(1, NA, 1, 1),
-  type = "int", vars = "vint1[n]"
-)
-stan_funs <- "
-real hbb_lpmf(int y, real mu, real phi, real pz, real ph, int T) {
-  real a = mu * phi; real b = (1 - mu) * phi;
-  if (y == 0) return log(pz);
-  if (y == T) return log1m(pz) + log(ph);
-  return log1m(pz) + log1m(ph) + beta_binomial_lpmf(y | T, a, b)
-    - log1m_exp(log_sum_exp(beta_binomial_lpmf(0 | T, a, b),
-                            beta_binomial_lpmf(T | T, a, b)));
-}"
-posterior_epred_hbb <- function(prep) {
-  mu <- brms::get_dpar(prep, "mu"); phi <- brms::get_dpar(prep, "phi")
-  pz <- brms::get_dpar(prep, "pz"); ph <- brms::get_dpar(prep, "ph")
-  T <- prep$data$vint1[1]; a <- mu * phi; b <- (1 - mu) * phi
-  f0 <- exp(lbeta(a, b + T) - lbeta(a, b)); fT <- exp(lbeta(a + T, b) - lbeta(a, b))
-  (1 - pz) * (ph * T + (1 - ph) * (T * mu - T * fT) / (1 - f0 - fT))
-}
-```
-
-# HMS presentation
-
-timeline: estimate for eu25games data, have results and presentation until oktober 7th, ideally: partisan attachement gap for allocation games less than for thermometer, revision due to stricter attention check, etc.
-
-Standardization of effects to compare attitudinal and behavioral, posterior differences in contrast between the two as probability statement
-
-for HMS presentation: conceptual analytical section on polarization (see other talk or seminar), then focus on affective polarization, then the empirical contrast, conclusion: term "polarization" is vague, speaking of "the polarization" does not make sense, and normative notion (more polarization = bad) is not linear (see one curvilinear paper), rather U-shaped, 
-
-1. Polarization as a family, not a thing
-  - ancient origins (greek and latin word for poles as "axis around which something spins") -> 17/18th century physics (polarized light) -> post ww2 social science 
-  - mutliple facets (+ example for each) see current presentation
-  -> polarization is not a "thing"
-2. Affective polarization
-  - in pol science, debate on (ideological) polarization of American public "ended" with "affective turn"
-  - Iyengar and minimal original definition
-  - but even here its more complicated
-  - 2x2 matrix with vertical/horizontal and attitudinal/behavioral
-3. Empirical insights
-  - AP focuses on identity / attachement
-  - systematic comparison of people who report attachement vs people who explicitly deny it (show distribution plots and highlight that this matters for scope of population of inference from notebook 3.1)
-  - hierachical modelling for within party contrast (dark blue vs dark red parts of distributions figure)
-  - vertical attitudinal (thermometer scales) vs behavioral horizontal (dictator/trust games) with illustration slide for each
-  - model and estimation specifications and technical details in appendix/backup slides
-  - results tba (I guess contrast larger for vertical attitudinal than for horizontal behavioral -> AP if measured by attitudes might be overly exagerrated), but prepare: 
-    - for pooled sample and across two outcomes: AP by type, difference between types within measure, and difference between type differences across measures (i.e. how the partisan attachement effect on AP differs between allocation behavior and attitude reportings)
-    - so more precise: I want for the pooled results a 3-panel figure, the left one shows the posterior AP distributions by type and measure (I had in mind these posterior tidy ggplot geoms that show distribution, median as point and error bars for 95 and 99 CIs, plus a small note below the standardized AP x axis about what a 1 means on each outcome scale), then the middle one shows the posterior deltas within outcome between the types, and the right panel then the posterior difference etween the type contrasts of the two outcomes 
-    - then this same for all countries separately (smaller, maybe two separate slides), the point being mainly that (to be evaluated once results are in) patterns generally hold across countries
-4. takeaways of empirics (tbd depending on results)
-  - measurement in social science always involves conceptual choices 
-  - most widespread measures (thermometer/like-dislike) may overexaggerate "extent" or "rise" of AP
-  - additionally, early narrative of AP = bad for democracy recently scrutinized, some work now suggests inverted U shape relationship (think about how during Merkel people complained about too little emotions in politics)
-5. conclusion:
-  - there is no such a thing as "the one polarization"
-  - there is a clear affective polarization gap
-  - but making meaninful inferences about magnitude and dynamic is subject to conceptual/measurement choices by researchers
-  - alarming narratives are neither helpful nor resting on evidence 
 
 
 

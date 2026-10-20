@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Last modified: 2026-10-19
+Last modified: 2026-10-20
 
 This is the entry point. It holds only what every task needs. The detail lives in the
 context files indexed below, and you should open those only when a task needs them.
@@ -12,13 +12,14 @@ democracies**. It uses the thermometer ratings and the conjoint trust/dictator g
 Hilpert & König (2024), together with EES, CSES and ESS for the over-time side. The authors are Tristan
 Muno and Thomas König, University of Mannheim. The paper is targeted at APSR or another general-interest journal.
 
-## Status (as of 2026-09-29)
+## Status (as of 2026-10-20)
 
 **The framing is being restarted.** On 2026-09-08 the repo was stripped back to a manuscript
 stub, the deck, the data and a notebook template, so that a new argument can be built without
-an older one arguing back. The notes at the top of `index.qmd` are the current direction. They are a
-sketch, not a specification (summarised in `design.md`). Do not treat them, or anything
-reconstructed from git history, as settled.
+an older one arguing back. On 2026-10-20 the empirical design was agreed: question, partisan
+types, outcomes, estimands, limits of the contrast and model building. It lives in
+`design.md`, and the `index.qmd` notes were trimmed to match. The design states no finding,
+and nothing reconstructed from git history is settled.
 
 Built so far: the Party Facts coding of the ESS, CSES and EES party items, the attachment-vote
 match rule, and the partisan composition trees. The first model set-up (notebook 3.2) is built but not yet fully fitted. The near-term aim in the
@@ -68,7 +69,7 @@ quarto render presentation_hms.qmd      # RevealJS deck (HMS, German)
 
 | File | Read when… | Last modified |
 |------|-----------|---------------|
-| `.claude/design.md` | the task concerns the argument, the explicit vs. vote-anchored contrast, outcomes, estimands, models, or `index.qmd`'s notes | 2026-09-29 |
+| `.claude/design.md` | the task concerns the argument, the partisan types and their contrasts, outcomes, the limits of the contrast, estimands, model building, or `index.qmd`'s notes | 2026-10-20 |
 | `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-10-19 |
 | `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule (repo layout, pipeline order, Quarto quirks, LFS) | 2026-10-19 |
 
