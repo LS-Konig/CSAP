@@ -1,5 +1,5 @@
 ---
-last_modified: 2026-10-20
+last_modified: 2026-10-22
 scope: agreed empirical design: question, goals, partisan types, outcomes, limits of the contrast, estimands, model building, open decisions
 ---
 
@@ -10,7 +10,7 @@ estimand. Data mechanics live in `data.md`.
 
 **Status.** Tristan and Claude agreed this design in a consult on 2026-10-20. It fixes the
 question, the outcomes, the estimands and the threats to inference. **It states no finding.**
-The model-building ladder is a guide, not a fixed sequence: it is adjusted as fits come in.
+The model-building ladder is a guide, not a fixed sequence: it is adjusted during model development and as fits come in.
 The `index.qmd` notes were trimmed to match.
 
 ## Question and contributions
@@ -39,18 +39,37 @@ several out-parties at varying policy distances.
 
 ## Partisan types
 
-All four types are used from the start. They come from the attachment × vote tree, with
+All four core types, plus leaners where a probe exists, are used from the start. They come from the attachment × vote tree, with
 "same party" decided by `pf_match()` (see `data.md`).
 
 | Type | Definition | What it adds | Main comparison |
 |---|---|---|---|
 | **Explicit** | attached, voted for the same party | the reference partisan | — |
 | **Denier** (vote-anchored) | denies an attachment, reports a vote | same party, no attachment: the core contrast | vs. explicit, within the vote party |
+| **Leaner** (CSES, EES 2009) | no attachment, but leans towards a party when probed, voted for it | a weaker attachment between explicit and denier: grades the attachment instead of treating it as on/off | vs. explicit and vs. denier, within the vote party |
 | **Mismatched** | attached to A, voted for B | separates attachment from vote: shares the attachment with explicit partisans of A and the vote with deniers of B. In AP, rating A vs. B is a **within-person** comparison | vs. explicit within A; vs. deniers within B |
 | **Non-partisan** | no attachment, no vote | baseline for composition and for how parties are rated in general. **Diagnostic**: if deniers resemble non-partisans on pre-treatment traits but explicit partisans on the outcome, the vote is selecting them on the outcome | country-level reference, not within party |
 
-- The three voting types are each selected by the vote in a different way. Together they
-  **bracket** the attachment effect; none of them identifies it alone.
+- **No contrast identifies the attachment effect alone.** Each is selected by the vote in its
+  own way. Whether it acts as a floor or a ceiling depends on the direction of that selection,
+  which the design does not fix in advance:
+  - *Explicit vs. denier* (within the vote party): a **floor** if deniers vote for the party
+    partly because they dislike the alternatives (selection on the outcome). A **ceiling** if
+    deniers are less engaged voters who vote for it out of habit, so the contrast also carries
+    engagement.
+  - *Explicit vs. non-partisan* (country level): a **ceiling** if not voting and not being
+    attached both go with low engagement, so the contrast adds the vote and engagement to
+    attachment. Not a ceiling if non-partisans hold strong views but reject parties. In AP,
+    non-partisans have no in-party, so this compares only how the same targets are rated.
+  - *Explicit vs. mismatched* (within the attachment party A): holds attachment fixed and
+    varies the vote. It bounds nothing alone. If attachment and vote add up, it splits
+    explicit vs. non-partisan together with the denier contrast.
+  - *Mismatched vs. denier* (within the vote party B): same vote, attachment elsewhere. It
+    shows whether an attachment pulls against the party voted for, not the effect of being
+    attached to it.
+  - Read together: if the floor and ceiling candidates fall in the order their conditions
+    imply, the effect lies between them. If they cross, at least one condition fails. The
+    non-partisan diagnostic above and the step-9 adjustments show which.
 - **Mismatched respondents belong to two parties.** Respondent-level models give them both
   an attachment-party and a vote-party membership (cross-classified), so both comparisons are
   within party.
@@ -60,8 +79,15 @@ All four types are used from the start. They come from the attachment × vote tr
 - The mismatched group mixes strategic or coalition voting, multiple PID, recall error and
   match artefacts. Splitting within-bloc from cross-bloc mismatches, and auditing
   `pf_match()` for successor parties and alliances, come before interpretation.
-- The notes name three complications of the type itself: leaner probes, multiple PID, and
-  wording that asks about attachment, closeness or identity.
+- **Leaners exist only where a probe was fielded**: CSES and EES 2009. Leaner-specific
+  results rest on those studies, and cover outcomes 0, 1, 3 and 5 (CSES has no EU items and
+  no games). Where there is no probe, leaners sit among the deniers (if they voted) or the
+  non-partisans, so a denier in ESS or eu25 is not the same category as a probed CSES denier.
+  The probed studies show how much of the explicit vs. denier gap leaners carry. A leaner who
+  voted for another party is kept apart from the mismatched type and reported only if the
+  cell allows.
+- Two further complications of the type: multiple PID, and wording that asks about
+  attachment, closeness or identity (the ESS "closer to" item already takes in some leaners).
 
 ## Outcomes
 
