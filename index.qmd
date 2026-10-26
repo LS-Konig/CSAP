@@ -275,12 +275,12 @@ Note that these formulated expectations refer to *within* party contrasts; how f
 
 | Outcome | Identity account predicts | Policy account predicts |
 |---|---|---|
-| Ideological extremity | Small or modest $\Delta$ | Large $\Delta$ (attachment reflects stronger policy commitment) |
-| Ideological sorting | to be specified | to be specified |
-| Perceived polarization | $\Delta > 0$ beyond actual positions (partisan lens exaggerates distances) | $\Delta$ tracks actual party placements; no excess perception |
-| Perceived sorting | to be specified | to be specified |
-| Vertical AP (toward parties) | Large $\Delta$, robust to adjusting for policy distance | $\Delta$ shrinks substantially once policy distance is adjusted for |
-| Horizontal AP (toward ordinary partisans) | Large $\Delta$, possibly exceeding vertical, since ordinary partisans carry little policy information | Small $\Delta$, since ordinary partisans are weak policy signals |
+| Ideological polarization | Little extra extremity; lower within-party dispersion (cue-taking, conformity) | More extremity (attachment follows positions, so a large $\Delta$ does not show that attachment shapes positions) |
+| Ideological sorting | Stronger overall sorting; weaker within-party association (conformity to the party's bundle compresses co-partisans); stronger between-party association | Stronger overall sorting; stronger within-party association (coherent citizens attach); stronger between-party association |
+| Perceived polarization | Spread exceeds the benchmark, concentrated in out-party placements | Larger spread (sophistication) that tracks actual positions; no excess |
+| Perceived sorting | Out-parties lumped together on both dimensions (us vs. them), so perceived alignment exceeds actual, driven by out-party placements | Perceived alignment tracks actual alignment |
+| Vertical AP (toward parties) | Large $\Delta$ that survives holding target distance fixed; mismatched rate their attachment party at least as high as their vote party | $\Delta$ shrinks once target distance is held fixed; mismatched rate their vote party higher |
+| Horizontal AP (games) | Larger label effect, driven by in-group favoritism; little gradient in the partner party's distance; behavioral $\Delta$ comparable to attitudinal | Label works through inferred policy: derogation rises with the partner party's distance; small $\Delta$; behavioral $\Delta$ smaller than toward parties |
 
 : Competing predictions of the identity and policy accounts across polarization outcomes {#tbl-predictions}
 
@@ -317,44 +317,91 @@ parties
 ## Introduction
 
 This paper investigates the relationship between partisanship and polarization in Europe.
+It asks what reporting an attachment to a party contributes to the different forms of
+polarization, compared with voters of the same party who deny such an attachment.
+The question has four parts:
+
+- **A. Contribution.** How do citizens who report an attachment differ from voters of the same party who deny one, in their ideological positions, their perceptions of the party system, and their feelings toward parties and partisans? The within-party contrasts bracket the contribution of attachment net of party; they do not identify it (causal only for the partner label in the games).
+- **B. Account.** Does the profile of these contrasts across outcomes fit a party-over-policy account (attachment as a social identity) or a policy-over-party account (attachment as a signal of policy commitment) better? This is a pattern fit, not a direct test.
+- **C1. Change beyond composition.** Has polarization in European electorates changed beyond what the changing mix of partisan types implies?
+- **C2. Change and context of the contrast.** Has the gap between explicit partisans and deniers changed since the turn of the millennium, and how much does it vary across the 25 countries?
+
+Each analysis below answers the same template: (a) state, the pooled European contrast; (b) dynamic, its trend; (c) cross-national, its variation across countries; (d) decomposition, aggregate change and country differences split into the mix of types and polarization within types. A predictions line states what each account expects. A is answered by the (a) parts, B by comparing them across outcomes, C1 by the (d) parts, C2 by the (b) and (c) parts.
 
 ## Partisanship and Polarization in Europe
 
 ## Empirical Strategy
 
-### Dealignment or Realignment? Partisanship in Europe in the 21st Century
+### Dealignment or Realignment? Partisanship in Europe since the Turn of the Millennium
 
-Composition analysis (0), are there more, less, or stable levels of partisanship in Europe?
+From the earliest study in the data (CSES Module 1; start year to be checked) to 2024. This analysis supplies the weights for every (d) part.
 
-Pooled over time trend of types, by country facet. Include number of parties in visualization somehow (more parties + stable or increasing partisanship numbers = realignment, less parties and/or less partisans = dealignment)?
+- **RQ0a (state).** What shares of European citizens are explicit partisans, deniers, mismatched, and non-partisans?
+- **RQ0b (dynamic).** How have these shares changed? Where explicit partisanship declined, did deniers (attachment lost, vote kept) or non-partisans (both lost) rise?
+- **RQ0c (cross-national).** Does a common European trend describe the countries, or do they diverge?
+- **RQ0d (measurement).** How much of the variation in levels stems from attachment wording and study rather than from the electorates? In the probed studies, what share of non-attached voters lean towards a party?
+- **RQ0e (realignment).** Where the level of attachment is stable, does its distribution across parties shift, for example toward new or challenger parties (Party Facts)? The number of parties alone cannot separate dealignment from realignment.
 
-### Partisanship and ideological polarization
+### Partisanship and Ideological Polarization
 
-Are partisans more strongly ideologically polarized, even controlling for party specific effects?
+- **RQ1a (state).** Within the same party, do explicit partisans hold more extreme and more dispersed left–right and EU positions than deniers? Where do leaners, mismatched voters and non-partisans fall?
+- **RQ1b (dynamic).** Has the gap in extremity and dispersion between explicit partisans and deniers changed?
+- **RQ1c (cross-national).** How much does this gap vary across countries?
+- **RQ1d (decomposition).** Has ideological polarization in European electorates changed beyond what the changing mix of types implies?
 
-Model LR and EU self-placements, estimate extremity and dispersion contrast *within* party, + individual level controls
+*Predictions.* Policy account: more extremity among explicit partisans, since attachment follows positions (a large gap is what this account predicts, so it does not show that attachment shapes positions). Identity account: little extra extremity, but lower within-party dispersion through cue-taking and conformity. Dispersion is split into within-party spread, between-party spread and the offset of the type mean.
 
-pooled Europe, over time Europe, by country, by country over time
+One placement model per dimension; extremity and dispersion from its posterior under a common party mix; alternative centres reported.
 
-### Partisanship and ideological sorting
+### Partisanship and Ideological Sorting
 
-Are partisans more strongly sorted? Analyzing differences in sorting along LR and EU placement among partisans and deniers
+- **RQ2a (state).** Within the same parties, are left–right and EU positions more strongly associated among explicit partisans than among deniers, holding the party mix fixed?
+- **RQ2b (dynamic).** Has this gap changed?
+- **RQ2c (cross-national).** How much does it vary across countries (in magnitude, since shape and sign differ)?
+- **RQ2d (decomposition).** Has sorting in European electorates changed beyond the changing mix of types?
 
-### Partisanship and perceived ideological party polarization
+*Predictions.* Both accounts expect stronger overall sorting among explicit partisans. They part on the within-party component: conformity to the party's bundle (identity) compresses co-partisans and weakens the association; coherent citizens attaching (policy) strengthens it. The between-party component is higher under both.
 
-Do partisans perceive the party system to be stronger polarized compared to respondents supporting the same party without being attached to it?
+### Partisanship and Perceived Ideological Party Polarization
 
-### Partisanship and perceived ideological sorting
+- **RQ3a (state).** Within the same party, do explicit partisans perceive the parties as further apart on left–right and EU than deniers, and does this exceed what actual party positions imply?
+- **RQ3b (dynamic).** Has this gap changed?
+- **RQ3c (cross-national).** How much does it vary across countries?
+- **RQ3d (decomposition).** Has perceived polarization changed beyond (i) the changing mix of types and (ii) the change in actual party-system polarization?
 
-Do partisans perceive the party system to be more strongly sorted (with respect to LR and EU dimension) compared to deniers?
+*Predictions.* Identity account: perceived spread exceeds the benchmark, concentrated in the placements of out-parties. Policy account (with sophistication): larger spread that tracks actual positions, without excess. Only the excess, not raw spread, separates the two.
 
-### Partisanship and vertical attitudinal affective polarization
+### Partisanship and Perceived Ideological Party Sorting
 
-Are partisans stronger affectively polarized than non partisans?
-Has this changed over time?
-Does this differ by country?
+- **RQ4a (state).** Within the same party, do explicit partisans perceive the parties' left–right and EU positions as more aligned than deniers, and beyond the actual alignment?
+- **RQ4b (dynamic).** Has this gap changed, where the series allows (pending the coverage table)?
+- **RQ4c (cross-national).** How much does it vary across countries?
+- **RQ4d (decomposition).** As RQ3d: mix of types, within-type perception, actual alignment.
 
-### Partisanship and horizontal behavioral affective polarization
+*Predictions.* Identity account: an us-versus-them lens lumps the out-parties together on both dimensions, so perceived alignment exceeds actual alignment, driven by out-party placements. Policy account (with sophistication): perceived alignment tracks actual alignment.
 
-Do partisans show stronger behavioral discrimination toward co- and outpartisans in experimental settings?
-Does this differ by country?
+### Partisanship and Vertical Attitudinal Affective Polarization
+
+- **RQ5a (state).** Within the same party, is the gap between ratings of the in-party and the out-parties larger for explicit partisans than for deniers? For mismatched voters, is the party they are attached to or the party they voted for rated higher (within person)?
+- **RQ5b (distance).** How much of the explicit–denier gap remains at equal policy distance to the rated party?
+- **RQ5c (dynamic).** Has the gap changed?
+- **RQ5d (cross-national).** How much does it vary across countries?
+- **RQ5e (decomposition).** Has affective polarization changed beyond the changing mix of types?
+- **RQ5f (horizontal attitudinal, EES 2024).** Among the same respondents, is the explicit–denier gap toward party supporters larger or smaller than toward parties?
+
+*Predictions.* Identity account: a large gap that survives holding target distance fixed; mismatched voters rate their attachment party at least as high as their vote party. Policy account: the gap shrinks once distance is held fixed; mismatched voters rate their vote party higher.
+
+Like/dislike and thermometer as the primary measures, PTV as a separate operationalization. Selection by the vote plausibly pulls the gap toward zero; the distance-adjusted gap is a controlled direct effect.
+
+### Partisanship and Horizontal Behavioral Affective Polarization
+
+Trust and dictator games, eu25 2019; the same questions are answered for each game.
+
+- **RQ6a (state).** Does the partner's party label shift how much respondents send, toward co-partisans and away from out-partisans relative to a co-national partner with no party shown, and is this shift larger for explicit partisans than for deniers of the same party? How much is in-group favoritism and how much out-group derogation?
+- **RQ6b (cross-national).** How much does the gap vary across countries?
+- **RQ6c (decomposition).** How much of the country differences reflects the mix of types?
+- **RQ6d (attitudinal vs. behavioral).** Among the same respondents, is the explicit–denier gap in sending larger or smaller than in thermometer ratings (in SD units)?
+
+*Predictions.* Identity account: a larger label effect for explicit partisans, driven by in-group favoritism, with little gradient in the partner party's distance; the behavioral gap is comparable to the attitudinal one. Policy account: the label works through inferred policy, so derogation rises with the partner party's distance and the gap is small; the behavioral gap is smaller than toward parties.
+
+The partner's label is randomized within type, so the label effect is causal for each type; the explicit–denier gap is not.
