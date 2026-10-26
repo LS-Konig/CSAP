@@ -312,3 +312,49 @@ parties
 
 
 @boxell2024cross as example for how to display differing survey wordings
+
+
+## Introduction
+
+This paper investigates the relationship between partisanship and polarization in Europe.
+
+## Partisanship and Polarization in Europe
+
+## Empirical Strategy
+
+### Dealignment or Realignment? Partisanship in Europe in the 21st Century
+
+Composition analysis (0), are there more, less, or stable levels of partisanship in Europe?
+
+Pooled over time trend of types, by country facet. Include number of parties in visualization somehow (more parties + stable or increasing partisanship numbers = realignment, less parties and/or less partisans = dealignment)?
+
+### Partisanship and ideological polarization
+
+Are partisans more strongly ideologically polarized, even controlling for party specific effects?
+
+Model LR and EU self-placements, estimate extremity and dispersion contrast *within* party, + individual level controls
+
+pooled Europe, over time Europe, by country, by country over time
+
+### Partisanship and ideological sorting
+
+Are partisans more strongly sorted? Analyzing differences in sorting along LR and EU placement among partisans and deniers
+
+### Partisanship and perceived ideological party polarization
+
+Do partisans perceive the party system to be stronger polarized compared to respondents supporting the same party without being attached to it?
+
+### Partisanship and perceived ideological sorting
+
+Do partisans perceive the party system to be more strongly sorted (with respect to LR and EU dimension) compared to deniers?
+
+### Partisanship and vertical attitudinal affective polarization
+
+Are partisans stronger affectively polarized than non partisans?
+Has this changed over time?
+Does this differ by country?
+
+### Partisanship and horizontal behavioral affective polarization
+
+Do partisans show stronger behavioral discrimination toward co- and outpartisans in experimental settings?
+Does this differ by country?
