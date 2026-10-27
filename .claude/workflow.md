@@ -27,7 +27,7 @@ Read this before adding files or notebooks, rendering, or committing data.
 | `code/03_analyses/3.3_eu25_ap_post.qmd` | Posterior post-processing of 3.2's four cached fits (never refits). Rebuilds 3.2's estimation data verbatim (keep the two in sync), computes AP, ΔAP and the cross-measure difference by g-computation once per model by country (pooled = weight-averaged country means), checks the pooled values against 3.2's output, and writes `data/05_results/eu25_ap_post.rds` (draws, Pr(>0)-ready). Not listed in `_quarto.yml`; a render takes long because it loads ~2.2 GB of fits |
 | `code/00_helper/` | `pf_code.R` (Party Facts coding helpers, checks, and the match rule `pf_match()` / `pf_match_route()`), `pid_tree.R` (composition-tree helpers), `copyR.R` (refreshes the raw file from a sibling clone), `glftrackeR.R` (auto-LFS tracking) |
 | `data/` | See `data.md` |
-| `references.bib` | APSR-format bibliography (~2,000 entries) |
+| `references.bib` | APSR-format bibliography (~1,750 entries) |
 | `images/` | Figures used by the deck |
 | `literature/` | Git submodule for the private repo `LS-Konig/CSAP-lit`. `summaries/` may be read freely; ask before opening `md/` or `pdf/` (see `CLAUDE.md`) |
 
