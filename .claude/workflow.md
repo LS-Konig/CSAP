@@ -1,6 +1,6 @@
 ---
-last_modified: 2026-10-19
-scope: repo layout, notebook pipeline, Quarto quirks, Git LFS, literature submodule
+last_modified: 2026-10-27
+scope: repo layout, notebook pipeline, Quarto quirks, Git LFS, literature submodule and summaries
 ---
 
 # Workflow
@@ -29,7 +29,7 @@ Read this before adding files or notebooks, rendering, or committing data.
 | `data/` | See `data.md` |
 | `references.bib` | APSR-format bibliography (~2,000 entries) |
 | `images/` | Figures used by the deck |
-| `literature/` | Git submodule for the private repo `LS-Konig/CSAP-lit`. Ask before opening (see `CLAUDE.md`) |
+| `literature/` | Git submodule for the private repo `LS-Konig/CSAP-lit`. `summaries/` may be read freely; ask before opening `md/` or `pdf/` (see `CLAUDE.md`) |
 
 **Planned: a `presentation/` subfolder.** Move the deck into its own folder: `presentation_uottawa.qmd`, its rendered HTML, `theme.scss` and `images/` (the last two are used only by the deck). The bibliography then becomes `../references.bib`, and the render command in `CLAUDE.md` changes to match. Do this on `main` once the 3.2 fits and renders are finished, not while they are running.
 
@@ -57,7 +57,34 @@ render commands. `QUARTO_R` must be set first.
 
 `literature/` holds `pdf/` (book chapters in `pdf/<book>/`) and the pdf2md output in `md/`. It is
 plain git, with no LFS. After cloning, run `git submodule update --init`. Push new PDFs in batches of
-≤100 MB. There is no `summaries/` folder yet.
+≤100 MB.
+
+### Literature summaries
+
+`literature/summaries/` is the retrieval layer: one working-notes summary per `md/` entry, named
+by citekey. Start with `INDEX.md`, a routing table grouped by theme with a hook for each entry,
+and `THEMES.md`, which maps each topic tag to its entries. Every summary has YAML (`role_in_csap`,
+`topics`, `fulltext`) and nine fixed `## ` sections: Gist · Role in CSAP · Data · Design ·
+Measures · Findings · Limits · Where to look · Quotable. Edited volumes add `## Chapters`, with one
+`###` block per chapter citekey. Search breadth-first: INDEX/THEMES → summary → the full text, only
+at the lines that "Where to look" names.
+
+When new `md/` conversions arrive:
+
+1. **Find the gaps.** List the `md/` folders that have no `summaries/<citekey>.md`, and check each
+   citekey against `references.bib`.
+2. **Draft with subagents.** Use `general-purpose` agents with `model: haiku` for articles and
+   chapters, 3–5 papers each (≤ ~300 KB of text). Use `model: sonnet` for books, edited volumes and
+   files ≥ 300 KB, one per book; split large handbooks by chapter range into part files and merge
+   them. Each prompt carries a condensed project brief, the rule that no claim is settled, the
+   template, `reiljan2020fear.md` as the exemplar, and the procedure. Agents read the full text,
+   take metadata from the bib and flag mismatches, take line ranges from `grep -n '^#'`, and grep
+   every quote back out of the source. Each agent returns `citekey | type | hook | tags | flags`.
+3. **Route.** Regenerate `INDEX.md` and `THEMES.md` from the summaries' YAML and the agents'
+   hooks. Do not re-read the full texts.
+4. **Check by script.** Every summary has the nine sections and a citekey that matches its file
+   name. Each `fulltext:` path exists, and each Quotable quote is found verbatim in its source.
+   Report the agents' flags to Tristan.
 
 ## Git LFS
 

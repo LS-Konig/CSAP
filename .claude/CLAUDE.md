@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Last modified: 2026-10-20
+Last modified: 2026-10-27
 
 This is the entry point. It holds only what every task needs. The detail lives in the
 context files indexed below, and you should open those only when a task needs them.
@@ -38,6 +38,9 @@ not verdicts.
   methodology PDFs that ship with the raw data. Name the file and say why it's needed. The
   two designated variable references are exempt: the eu25games upstream codebook HTML and the ESS codebook
   HTML (see `data.md`). The rule also does not apply to the project's own code, data or config.
+- **`literature/summaries/` is exempt** and is the first stop for any literature question:
+  `INDEX.md` → `THEMES.md` → one summary. Ask before opening a full text in `md/` or `pdf/`,
+  naming the line range the summary points to (see `workflow.md`).
 - **`.claude/context/` is Tristan's own folder** for material he collects for specific
   prompts: the dissertation proposal (`proposal.qmd`) and his prompt scratchpad
   (`prompt-canvas.qmd`). Read a file there only when he points to it. Do not edit it.
@@ -71,7 +74,7 @@ quarto render presentation_hms.qmd      # RevealJS deck (HMS, German)
 |------|-----------|---------------|
 | `.claude/design.md` | the task concerns the argument, the partisan types and their contrasts, outcomes, the limits of the contrast, estimands, model building, or `index.qmd`'s notes | 2026-10-22 |
 | `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-10-19 |
-| `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule (repo layout, pipeline order, Quarto quirks, LFS) | 2026-10-19 |
+| `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule and its summaries (repo layout, pipeline order, Quarto quirks, LFS, summary workflow) | 2026-10-27 |
 
 ## Maintaining this system
 
