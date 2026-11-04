@@ -1,6 +1,14 @@
 ---
 title: |
-  Partisanship and Political Polarization in Europe
+  What Does Partisanship Add? Party Attachment and the Many Faces of Polarization in 25 European Democracies since 2000
+abstract: |
+  American research on polarization debates whether citizens divide because of their party identity or because of the policies their parties stand for, a debate framed as party over policy versus policy over party. In a sorted two-party system the two accounts are hard to tell apart: party label and policy package come together, so observational data cannot easily show whether citizens respond to the label or to the positions it stands for.
+
+  This paper extends that question beyond affective polarization. It asks what a reported party attachment adds to the various forms of political polarization: ideological polarization and sorting, perceived polarization of the party system, and affective polarization in attitudes and behaviour. European multiparty systems give leverage on this question because attachment and vote often come apart. Alongside explicit partisans, who report an attachment to the party they vote for, there are deniers, who vote for a party but deny any attachment to it. Comparing the two within the same party holds the party's label and policy package constant, while the reported attachment differs. Because every citizen also faces several out-parties at different policy distances, the design adds a further point of comparison that two-party systems lack.
+
+  Empirically, the study combines harmonised waves of the European Election Studies, the CSES and the European Social Survey covering 25 European democracies in the 21st century. It adds a 2019 survey of the same countries that pairs party thermometers with trust and dictator games played with co-partisan, out-partisan and non-partisan partners. Partial pooling across parties, countries and survey years yields a European-wide contrast between explicit partisans and deniers for each outcome, along with how that contrast varies across countries and over time.
+
+  The paper thus offers a systematic account of partisanship in 21st-century Europe: how the mix of explicit partisans and deniers has evolved, and how each type relates to the many facets of polarization. It also brings evidence from multiparty systems to a debate that has so far rested mainly on the American case.
 execute:
   echo: false
   warning: false
