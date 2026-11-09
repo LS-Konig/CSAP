@@ -1,14 +1,8 @@
 ---
 title: |
-  What Does Partisanship Add? Party Attachment and the Many Faces of Polarization in 25 European Democracies since 2000
+  Whose Polarization? Party Attachment and the Many Faces of Polarization in 25 European Democracies
 abstract: |
-  American research on polarization debates whether citizens divide because of their party identity or because of the policies their parties stand for, a debate framed as party over policy versus policy over party. In a sorted two-party system the two accounts are hard to tell apart: party label and policy package come together, so observational data cannot easily show whether citizens respond to the label or to the positions it stands for.
-
-  This paper extends that question beyond affective polarization. It asks what a reported party attachment adds to the various forms of political polarization: ideological polarization and sorting, perceived polarization of the party system, and affective polarization in attitudes and behaviour. European multiparty systems give leverage on this question because attachment and vote often come apart. Alongside explicit partisans, who report an attachment to the party they vote for, there are deniers, who vote for a party but deny any attachment to it. Comparing the two within the same party holds the party's label and policy package constant, while the reported attachment differs. Because every citizen also faces several out-parties at different policy distances, the design adds a further point of comparison that two-party systems lack.
-
-  Empirically, the study combines harmonised waves of the European Election Studies, the CSES and the European Social Survey covering 25 European democracies in the 21st century. It adds a 2019 survey of the same countries that pairs party thermometers with trust and dictator games played with co-partisan, out-partisan and non-partisan partners. Partial pooling across parties, countries and survey years yields a European-wide contrast between explicit partisans and deniers for each outcome, along with how that contrast varies across countries and over time.
-
-  The paper thus offers a systematic account of partisanship in 21st-century Europe: how the mix of explicit partisans and deniers has evolved, and how each type relates to the many facets of polarization. It also brings evidence from multiparty systems to a debate that has so far rested mainly on the American case.
+  Polarization describes how orientations are distributed in a population, and research on affective polarization usually takes that population to be partisans. Who counts as a partisan, however, is rarely argued. Studies define the in-party by a reported attachment or by the vote, as if the two were interchangeable, while the share of citizens who report an attachment differs widely across European democracies. I argue that this choice is itself a claim about what partisanship is. If attachment merely restates the vote, conditioning on it is harmless; if it is an identity, the polarization of partisans is a different phenomenon from the polarization of voters. European multiparty systems allow this to be examined, because attachment and vote come apart. I compare voters of the same party who report an attachment with voters who deny one, across six facets of polarization: ideological extremity and sorting, perceived party polarization and sorting, affect toward parties, and behavior toward other citizens in trust and dictator games with randomized partner parties. Combining the European Election Studies, the Comparative Study of Electoral Systems, the European Social Survey and a 2019 survey of 25 democracies, the design traces the partisan composition of European electorates in the 21st century, the profile of attachment's contribution across facets, its variation across countries, and how much change in polarization reflects change in who is partisan.
 execute:
   echo: false
   warning: false
@@ -30,386 +24,366 @@ format:
   docx: default
 ---
 
-# DRAFT
+::: {.callout-important title="Workshop draft"}
+This draft sets out the argument and the research design. The empirical sections (@sec-composition to @sec-decomposition) are placeholders that state what each analysis will show and how it will be read. No estimates are reported, and no finding is claimed. Limitations and open issues are collected in @sec-limitations.
+:::
 
-Design agreed on 2026-10-20. The full tables (types, outcomes, limits of the contrast, model building) are in `.claude/design.md`. These notes keep the outline and the parts that feed the manuscript.
+# Introduction {#sec-intro}
 
-US literature party-over-policy vs policy-over-party debate -> is it group identity itself or does group membership signal ideological/policy position that are being disliked?
+Every claim about polarization is a claim about a distribution. To say that a society is polarized is to say that some orientation, be it a policy position, a perception of the parties, a feeling toward them or a way of treating other citizens, is spread out, clustered at opposing ends, or aligned with other orientations among some set of people. The concept therefore leaves a question open that is easily passed over: whose orientations are we describing? The answer fixes the population of inference, and with it what any estimate of polarization can mean.
 
-In Europe, different notion of partisanship
+Research answers this question in different ways, and often without saying so. The distinction between elites and the mass public is well established, and I set it aside here to focus on the mass public. Within the mass public, however, the population varies from study to study. Measures of affective polarization (AP) are computed among partisans only [@reiljan2020fear], across the whole electorate [@wagner2021affective], or with the in-party defined by the vote [@harteveld2021fragmentedfoes]. In the United States, part of the dispute over whether the public has polarized or merely sorted turned on whether one looks at party identifiers or at the public at large [@fiorina2008polarization]. Partisans themselves are defined in some studies by a reported attachment and in others by the vote, as if the two were interchangeable.
 
-then section partisanship in Europe (over time, using EES, CSES, ESS data) (feel close vs denying) -> composition of the four partisan types
+In comparative research, this choice has consequences. An index computed among partisans mixes two quantities: who the partisans are, and how polarized they are. The share of citizens who report an attachment differs across countries, across question wordings and across years (@sec-composition). Comparisons of partisan-only measures across countries or over time therefore confound the composition of the partisan population with the polarization within it, and partisan-only and electorate-wide measures can indeed trace different trends [@garzia2023affective].
 
-over time development of PID (great dealignment or realignment?)
+The problem is not merely one of choosing the right denominator. Restricting the population to those who report an attachment, rather than to those who vote for a party, is harmless only if the attachment adds nothing beyond the vote. If attachment merely restates a vote choice, the two populations describe the same phenomenon. If attachment is a group identity, the polarization of partisans is a different phenomenon from the polarization of voters, and the choice of population decides which one is measured. The measurement choice thus presupposes an answer to a substantive question: what does party attachment itself contribute to polarization?
 
-PID and ideological polarization on two dimensions (LR, EU), and sorting between the two
+Two literatures each answer half of this question. European electoral research asked early on whether party identification is distinct from the vote in multiparty systems at all [@budge1976party; @shively1979development; @thomassen2005theeuropean], and whether attachment should be understood as an affective tie or as an evaluation [@holmberg2007partisanship]. That debate concerned vote choice, not polarization. Research on AP, in turn, asks whether citizens dislike their opponents because of a group identity or because of the policies that identity signals [@dias2022nature; @orr2023affective; @webster2017ideological; @lelkes2021policy]. That debate is conducted mainly in a two-party system where attachment, vote and policy package coincide, so that even experimental manipulations of partisan identity shift perceived policy agreement [@orr2023affective]. Neither literature estimates the contribution of attachment with the vote held fixed, and neither does so across the different facets of polarization.
 
-PID and perceived ideological polarization: over time development of PID effect on perceived policy positions of parties, and on perceived sorting of the party system
+European multiparty systems allow both. Because attachment and vote come apart, voters of the same party differ in whether they report an attachment to it. Comparing them within the party holds fixed the party's policy signal, the set of out-parties its voters face, and the cues its elites send. Every respondent also faces several out-parties at different policy distances, which allows distance to vary within a person. A cross-national survey of 25 European democracies fielded in 2019 adds trust and dictator games in which the partner's party is randomized [@hahm2024divided]. I classify respondents into partisan types by crossing attachment with the vote, and I compare them on six facets of polarization, using the European Election Studies (EES), the Comparative Study of Electoral Systems (CSES), the European Social Survey (ESS) and the 2019 survey (EU25).
 
-section on multiple facets of AP (2x2 matrix), we have attitudinal vertical over time, attitudinal horizontal in EES 2024, horizontal behavioral at one time experimentally cross-nationally
+The paper asks four research questions (RQs):
 
-then triangulation research design: match / correlate EES/EU25 data in 2019 via thermo scores
+- **RQ1 (who).** How common is each partisan type across European electorates, and has the partisan composition changed since 2000?
+- **RQ2 (whether and what kind).** Does attachment add to polarization beyond the vote, on which facets, and through attachment to the in-group or rejection of the out-group?
+- **RQ3 (where).** Does the contribution of attachment vary across countries and parties?
+- **RQ4 (so what).** Do changes in who is partisan, or changes in how polarized partisans are, account for changes in polarization?
 
-over time development of PID effect on AP
+The paper contributes to three literatures. For research on polarization and its measurement, it makes the choice of population explicit and shows how much it matters for comparisons across countries and over time (RQ1, RQ4). For research on partisanship, it answers the long-standing European question of what an attachment is by examining its consequences rather than its correlates (RQ2). For comparative research, it provides a 21st-century account of partisan composition in 25 democracies and a decomposition of polarization change into composition and change within partisan types (RQ1, RQ3, RQ4).
 
-estimate within party contrasts using multilevel modelling: how does AP differ between partisan types of the same party?
+@sec-concepts defines the facets of polarization, the partisan types and three readings of what partisanship is. @sec-expectations derives what each reading implies for each facet. @sec-design sets out the research design. @sec-composition to @sec-decomposition hold the analyses, one per RQ, and @sec-limitations collects the limitations. One caveat applies throughout: the within-party comparison brackets the contribution of attachment rather than identifying it, and the only quantity with a causal interpretation is the effect of the partner's party label in the games.
 
-to-do:
-  - finish data collection and survey items overview (EES, CSES, ESS)
-  - coverage table item × study × round × country (LR and EU self-placement, LR and EU party placements, PTV, like/dislike, attachment wording)
+# Polarization and Partisanship {#sec-concepts}
 
+## Polarization as a Distribution {#sec-polarization}
 
+I distinguish the facets of polarization along two dimensions. The first is the *object* of the orientation: a citizen's own policy positions, their perceptions of where the parties stand, their feelings toward the parties, and their behavior toward other citizens. The second is the *form* of polarization: its *level*, meaning how extreme or how far apart orientations are, or its *structure*, meaning how strongly orientations on different dimensions are aligned. Applied to the left–right (LR) and European integration (EU) dimensions, this yields six facets, which I always discuss in the same order: (1) ideological extremity, (2) ideological sorting, (3) perceived party polarization, (4) perceived party sorting, (5) vertical attitudinal AP, that is, feelings toward parties, and (6) horizontal behavioral AP, that is, behavior toward citizens who support a party. Ratings of party supporters in the EES 2024 provide horizontal attitudinal AP as a complement.
 
-  EES -> PTV (all waves), like/dislike of party supporters (2024)
-  CSES -> party & leader like/dislike
-  ESS -> PID only
-  eu25 -> party thermo and cj
+Studying all six facets together is necessary for the question at hand. The accounts of partisanship discussed below agree that partisans dislike opposing parties more than other citizens do. They disagree about *where* the attachment acts: on the positions citizens hold, on how they see the parties, or on how they feel about and treat their opponents. A study of one facet cannot tell the accounts apart. Only the pattern of the attachment's contribution across facets can.
 
+## Attachment and Vote {#sec-types}
 
-Partisanship and Polarization in Europe
+Party attachment is a standing tie that a citizen reports when asked whether they feel close to a party. The vote is a single act at one election. Crossing the two, and adding the leaner probe where a survey fields one, yields five partisan types (@tbl-types).
 
-The notion of polarization has been omnipresent in the literature of the last decade, although (or maybe because of) it is an inherently vague and ambiguous concept.
+| Reports an attachment | Leans when probed | Reports a vote | Partisan type |
+|---|---|---|---|
+| yes | — | yes, for the same party | explicit partisan |
+| no | no (or not asked) | yes | denier |
+| no | yes, toward the party voted for | yes | leaner |
+| yes | — | yes, for a different party | mismatched partisan |
+| no | no (or not asked) | no | non-partisan |
 
-Whereas earlier research focused on the alignment (or separation) in the broadest sense of ideological positions, be it at the elite or mass level, the seminal contribution by @iyengar2012affect has led to an "affective turn" in the literature.
+: Partisan types from the attachment × vote tree {#tbl-types}
 
-Highlighting the notion of partisanship as a social identity, affective polarization has originally been defined as the tendency of partisans to like their fellow copartisans and dislike outpartisans, respectively.
+The central type is the denier: a vote-anchored respondent who reports voting for a party but answers that they feel close to none. Deniers are the empirical form of the conceptual distinction between attachment and vote, since they share the act with explicit partisans of their party but not the tie. The other types extend the comparison. Leaners, available only where a probe was fielded, allow the attachment to be graded rather than treated as present or absent. Mismatched partisans separate attachment from vote, since they share the attachment with the explicit partisans of one party and the vote with the deniers of another. Non-partisans, who report neither, provide the baseline against which the other types are compared.
 
-Though the on a fundamental level inherently human notion, namely that people like some people more than others, is itself little surprising, the worry was caused more by an observed increase in this affective gap, which has been theorized to hinder political cooperation across party lines, thus ultimately harming the core of democratic life itself.
+## Three Readings of Partisanship {#sec-readings}
 
-Since the introduction of affective polarization, a productive research agenda spent vast efforts on studying its causes, consequences, dynamics and measurement itself.
+What, then, could an attachment add to a vote? The literature offers three readings.
 
-Yet, recent studies call for more cautious interpretations of the underlying group notion attached to the Social Identity Theory (SIT) framework, which served (and still serves) as the theoretical basis for most affective polarization studies (and, therefore, most *polarization* studies in recent years).
+The **functional reading** holds that in multiparty systems a reported attachment largely restates the vote. In this view, rooted in Shively's functional model of party identification [@shively1979development], expressed partisanship becomes "synonymous with the vote" where parties do not serve as independent guides to behavior [@thomassen2005theeuropean, ch. 1]. Comparative work found that partisanship and the vote have become more independent over time [@thomassen2005theeuropean, ch. 5], and in the Netherlands, party identification has been treated as partly endogenous to the vote [@van2021dealignment]. If this reading holds, explicit partisans and deniers of the same party should not differ on any facet.
 
-Specifically, a recent debate in the American literature called into question if the measured affective gaps between partisans is a consequence of group attachements *per se*, or whether those group attachement serve as a cue signalling a respective policy/ideological position.
+The **evaluative reading** holds that an attachment is a standing judgment of a party's policies and performance, a running tally of past evaluations [@fiorina1981retrospective]. Holmberg argues that the Michigan concept has been stretched to cover both an affective attachment and such an evaluative partisanship, and that the two should be measured separately [@holmberg2007partisanship]. Richardson describes European partisanship in the 1980s as "cognitive partisanship to a substantial degree" [@richardson1991european], and work outside Europe describes partisanship as a standing choice that tracks performance [@mattes2020theconsequences]. If this reading holds, the attachment adds most where policy is: in the positions citizens hold and in the policy content of their judgments of parties.
 
-The fundamental issue is that both the party-over-policy and policy-over-party accounts yield, for most applied research designs, observationally equivalent outcomes.
+The **identity reading** holds that an attachment is a group identity [@campbell1960american; @green2004partisan]. Identity-based measures predict party ratings and political activity beyond the conventional strength item [@greene2004social; @bankert2017measuring]. Huddy, Bankert and Davies find the expressive pattern among strong partisans in four European countries and conclude that Europe and the United States differ in the level of partisanship, not its nature [@huddy2018expressive]. Stable partisans of cleavage parties in Britain and the Netherlands were found to hold hostile views of other cleavage parties [@richardson1991european]. If this reading holds, the attachment adds little to positions and most to how citizens see, feel about and treat their opponents.
 
-What further complicates this issue is that the measurement on partisanship mixes up the terms "affiliation", "attachement", "closeness" and "identity", though each might create different responses.
-Few (if any, at this point I haven't seen any) ask directly if respondents *identify* with a party, more commong are question wordings using *attachement* or *feeling close*.
-Though beyond the scope of this study, future research could use experimental designs to examine how these various types, all of which aim to capture *emotional/subjective/felt* attachement/identification to a party, yield different response patterns.
+The identity reading has two variants, because an identity can operate through attachment to the in-group or through rejection of out-groups. Research on negative partisanship shows that rejection of a party is distinct from attachment to another and has its own consequences [@rose1998negative; @medeiros2014forgotten; @mayer2017how; @samuels2018partisans]. Hostility toward opponents tracks negative partisan identity more closely than positive identity [@bankert2023politics], and in France, ties to parties increasingly rest on rejection [@tiberj2025parties]. The **in-group variant** locates the attachment's contribution in warmth toward one's own party and favoritism toward its supporters. The **out-group variant** locates it in dislike of opposing parties and derogation of their supporters.
 
-In this study, I aim to shed light on the relationship between partisan affiliation (alias *partisanship*) and political polarization in Europe.
+## Measurement as a Conceptual Question {#sec-measurement}
 
-Covering multiple facets of ideological and affective polarization, I study how partisanship -- reporting an attachement to a political party -- is associated with different types of polarization.
+How attachment is asked about is part of what it means. Survey items ask whether respondents feel *close* to a party far more often than whether they *identify* with one, and closeness may capture a tie to a party seen as a distinct object rather than a party that is part of oneself [@elliott2024like]. Closeness-only wordings can exclude weakly attached voters [@sinnott1998party], whereas leaners resemble weak partisans in how they vote and evaluate [@petrocik2009measuring]. Many citizens hold attachments to more than one party [@block2026partisan]. These points motivate the leaner and mismatched types. They also make variation in wording across surveys both a resource, because a pattern that recurs across wordings is less likely to reflect one item, and a threat, because the same type may not mean the same thing in every survey (@sec-limitations).
 
-As a start, I review and summarize the different notions of the term polarization.
+## Dealignment as an Open Question {#sec-dealignment}
 
-I then proceed to summarize the history of the notion of partisanship in Europe.
+The composition of the partisan population is not fixed either. The dominant account of the post-war period is one of partisan dealignment [@dalton2002parties], driven by political events [@crewe1977partisan] or by cognitive mobilization [@dalton1984cognitive]. Yet even for that period the decline was uneven: steep in some countries, cyclical in others and absent in yet others [@schmitt1998political], and not monotonic [@thomassen2005theeuropean]. Whether dealignment continued into the 21st century is an open question. It has been asked whether German dealignment has halted [@arzheimer2017another], French closeness has declined since 2002 [@tiberj2025parties], and party systems whose parties take inconsistent positions have fewer partisans [@dassonneville2023partisan]. I therefore do not assume a trend. Three trajectories are possible: continued dealignment, stabilization, or realignment, in which attachment shifts toward parties of a new cultural or transnational cleavage rather than disappearing [@kriesi2008west; @hooghe2018cleavage]. Which of them holds, and where, is the first empirical question of this paper (RQ1).
 
-Empirically, I combine existing data from ongoing large scale survey projects from the European Election Study, the Comparative Study on Electoral Systems and the European Social Survey with a cross-national experimental dataset from 2019.
+## The Party-versus-Policy Debate as a Special Case {#sec-special-case}
 
-In a first study, I trace the distribution of partisanship across Euroepean electorates in the first quarter of the 21st century.
-Whereas the notion of the "great dealignment" has been the dominant description of the post WW2 period for Western Europe, I try to conceptually disentangle party membership, party affiliation, and stated party preference (via standard vote choice items).
-The (preliminary) first impression shows no uniform trend across Europe regarding partisanship, with large variation between different survey project, all of which use slightly different approaches for capturing respondents' feelings of attachement.
+The American debate over whether partisans dislike each other because of party or because of policy [@dias2022nature; @orr2023affective] maps onto the contrast between the identity and the evaluative reading, applied to one facet in a system where the two are hard to separate. This paper extends that debate in three ways. It examines the other facets, which the two readings predict differently. It holds the party's policy signal fixed by comparing voters of the same party. And it distinguishes the in-group from the out-group variant of the identity reading.
 
-In a second study, I investigate the relationship between partisanship and ideological polarization on two dimensions, the left-right and European integration dimension, and the sorting between the two (whether they become more strongly correlated).
+# Expectations {#sec-expectations}
 
-In a third study, I take a closer look at how partisanship impacts *perceived* ideological polarization of their respective party systems, on both dimensions, and the perceived sorting of the party system.
+## The Logic of a Profile {#sec-profile-logic}
 
-In a fourth study, I then turn to affective polarization, specifically *vertical* affective polarization, directed towards parties (as opposed to *partisans*), with *horizontal* attitudinal polarization from the 2024 EES as a complement.
+The quantity of interest is the gap between explicit partisans and deniers of the same party, written $\Delta$ and estimated separately for each facet. The functional reading predicts that $\Delta$ is zero on every facet. It is a null that the paper can lose to, and the design has to be able to show it. The evaluative and identity readings both predict that $\Delta$ differs from zero, but they predict different *patterns* across facets. The evidence is therefore the profile of $\Delta$, not any single estimate.
 
-In a fifth study, I compare experimentally measured *horizontal* affective polarization across partisan types.
+## The Ladder of Facets {#sec-ladder}
 
-This study makes multiple contributions: First, it is the most comprehensive study of political polarization in Europe, focusing on its various facets (actual and perceived ideological, vertical and horizontal affective), applying both a dynamic and static lense.
+The order of the facets runs from a citizen's own positions, through perceptions of the parties and feelings toward them, to behavior toward other citizens. Along this ladder, the orientations move from those that policy can explain to those that are increasingly about groups. The evaluative reading therefore predicts that $\Delta$ is largest at the bottom of the ladder and fades toward the top. The identity reading predicts the reverse: a small $\Delta$ on positions that grows through perceptions to affect and behavior. The functional reading predicts a flat profile at zero. The ladder also orders the threats to inference, which ease from reverse causation for positions, through sophistication for perceptions and selection through the vote for affect, to a randomized treatment in the games.
 
+## Expectations by Facet {#sec-facet-expectations}
 
+**Ideological extremity.** Under the evaluative reading, explicit partisans hold more extreme positions than deniers of the same party, because attachment forms around positions that set a party apart. Under the identity reading, the gap in extremity is small, but explicit partisans cluster more tightly around their party's position, because identifiers follow their party's cues [@slothuus2021political; @bisgaard2018partisan]. The quantity that discriminates is the dispersion of positions within the party, not their level. A larger extremity together with lower dispersion would mean that the facet cannot separate the readings on its own.
 
-On the term "polarization."
-Etymological roots in ancient Europe:
-Greek: "Polos" refers to the pivot, axis, or fixed point around which a sphere turns
-Latin: Polus (classical) & Polaris (medieval): pertaining to the poles of the earth
-French physicist Etienne Louis Malus coined Polariser in early 1800s
+**Ideological sorting.** Under the evaluative reading, LR and EU positions are more strongly associated among explicit partisans within the same party, because coherent citizens are the ones who attach. Under the identity reading, adopting the party's bundle compresses the variation among co-partisans and weakens the association within the party, while strengthening it between parties. Both readings expect stronger sorting overall, so the quantity that discriminates is the sign of the gap within the party. Because variation within a party is restricted, this facet has the least power.
 
-physical (light) polarization, magnetism etc.
+**Perceived party polarization.** Under the evaluative reading, explicit partisans perceive the parties as further apart because they are better informed, so their placements track the parties' actual positions. Under the identity reading, explicit partisans perceive the parties as further apart than they are, and the excess is concentrated in their placements of out-parties. The quantity that discriminates is the excess of perceived over actual spread. The evidence for false polarization comes mainly from the United States [@levendusky2016mis], so this expectation is the least grounded in European work and is treated as exploratory.
 
-post WWII: social and political notion, Arthur Koestler, Lipset and Parsons
+**Perceived party sorting.** Under the evaluative reading, explicit partisans perceive the parties' LR and EU positions as aligned to the extent that they actually are. Under the identity reading, an us-versus-them lens lumps the out-parties together on both dimensions, so perceived alignment exceeds actual alignment, driven by the placements of out-parties. The quantity that discriminates is the excess of perceived over actual alignment.
 
-2024 merriam webster word of the year 2024: "division into two sharply distinct opposites; especially, a state in which the opinions, beliefs, or interests of a group or society no longer range along a continuum but become concentrated at opposing extremes." [Merriam Webster](https://www.merriam-webster.com/wordplay/word-of-the-year-2024)
+**Vertical attitudinal AP.** Both readings predict that dislike of a party rises with its policy distance from the respondent, as found in multiparty systems [@harteveld2021fragmentedfoes; @gidron2022dislikes]. They differ in what the attachment adds to this gradient. Under the evaluative reading, attachment steepens the gradient, so the gap between explicit partisans and deniers disappears once distance to the rated party is held fixed. Under the identity reading, attachment shifts the gradient, so the gap persists at equal distance. The in-group variant locates the gap in ratings of one's own party, the out-group variant in ratings of the others. For mismatched partisans, the identity reading predicts that the party they are attached to is rated at least as highly as the party they voted for, while the evaluative reading predicts the reverse.
 
-But when is a division a division, when is it sharply distinct? The above definition mixes state and process understanding.
-Also the magnetic metaphor (of magnetic poles) induces the image of opposing forces.
-In a social context, that notion is contaminated with negative normative evaluation.
+**Horizontal behavioral AP.** In the games, the partner's party label shifts how many tokens respondents send, and the party label produces the largest penalty among the profile attributes [@hahm2024divided]. The identity reading predicts a larger label effect for explicit partisans than for deniers. Its in-group variant locates the gap in favoritism toward co-partisans, relative to a partner whose party is not shown, and its out-group variant in derogation of out-partisans. The evaluative reading predicts that derogation rises with the partner party's distance and that the gap between types is small. Because the same respondents rate the parties, the identity reading also predicts a behavioral gap comparable to the attitudinal one, whereas the evaluative reading predicts a smaller behavioral gap.
 
+@tbl-predictions summarizes the expectations.
 
-
-
-
-Typonomy of partisanship
-
-at its core, I use a .
-
-The question is: What is the net contribution of partisanship *itself* on various forms of political polarization?
-
-For this, I focus on the contrast between respondents that do report an attachement (hereafter refered to as explicit partisans) from respondents that *deny* such an attachement, i.e., select the response "No, I don't feel attached to any political party", but report a preference via vote choice items, hereafter refered to as deniers (vote-anchored partisans).
-Two further types complete the picture: respondents attached to one party who voted for another (mismatched), and non-partisans.
-
-This contrast allows to estimate the association of partisan attachement with polarization within party (and country), accounting for between-party variation in polarization outcomes.
-
-The key challenge to causal interpretation of this contrast is that partisan attachement is not random -- there are factors correlated with partisan attachement.
-
-If those factors influence both the choice of reporting partisan affiliation and polarization outcomes, this induces counfounding bias, potentially yielding misleading associations between partisan affiliation and polarization.
-
-Hence, in a first step, I review the the notion and history of partisanship in Europe, with a special focus on determinants of partisanship.
-
-Building on this, I examine empirically which variables are associated with reporting a partisanship in the first place, to identify possible (pre-treatment) control variables.
-
-so sequentially its a tree:
-
-| report attachement | report vote | type |
-| -- | -- | -- |
-| yes | yes, same party | explicit partisan |
-| yes | yes, but other party | mismatched (strategic/inconsequential voter?) |
-| no | yes | denier (no attachement but preference revealed) |
-| no | no | non-partisan |
-
-what makes this of course more complicated: leaner questions, multiple PID.
-But (CHECK) many survey start or use binary questions.
-
-So the interesting part is, how do respondents that report attachement differ along multiple polarization dimensions if they have the same partisan anchor compared to those that *deny* such an attachement if directly asked.
-
-The mismatched separate attachment from vote: they share the attachment with explicit partisans of party A and the vote with deniers of party B. The non-partisans have no party of their own; they are a baseline and a diagnostic for selection by the vote.
-
-ultimate goals:
-
-1. pooled European type contrast per outcome
-2. comparative: how the contrast varies across countries
-3. dynamic: how it changes over time (not the games)
-4. decomposition of change and of cross-country differences into the mix of types vs. polarization within types
-5. party-over-policy diagnostic: the profile of type contrasts across outcomes
-
-where contrasts are estimated within party (and country)
-
-## DAG
-
-Type -> polarization
-
-U -> Type
-U -> polarization
-
-V -> type
-
-Type -> Vote <- U, and polarization -> Vote (e.g. disliking the alternatives): conditioning on the vote can select deniers on the outcome
-
-For ideology also polarization -> Type (people with extreme or coherent views attach because a party fits)
-
-## Estimation
-
-All outcomes: hierarchical models with respondents in party × country × survey and surveys in countries, plus a time trend where the data are over time. Estimands are contrasts of marginal means computed by g-computation with respondent weights over parties with more than one type. The model is built up step by step (design.md), and the ladder is adjusted as fits come in.
-
-Where one type is rare (e.g. Denmark), the posterior shows this through wider uncertainty. The posterior reflects sampling and the pooling assumptions, not selection or the composition of a group.
-
-### Composition
-
-Share of each of the four types by country and time, with study and wording effects. Descriptive; feeds the decomposition.
-
-### Ideological polarization and sorting
-
-LR primarily, EU also (less data though); over time available.
-
-Extremity $E(|Y - c| \mid t)$ within party, with the centre $c$ still open (scale midpoint, country mean or median: report alternatives). Group quantities (dispersion, bimodality) on each type's predicted distribution with a common party mix.
-
-Sorting: strength of the LR–EU association within a type, whatever its shape (the relation can be an inverted U, and its sign differs between countries), measured within country and pooled as magnitudes.
-
-### Perceived ideological party polarization and sorting
-
-Respondent-level spread of party placements over a fixed party set, LR and EU (where available); over time available. Extension: scale-use-corrected stretch (Bayesian Aldrich–McKelvey). Benchmark: actual positions.
-
-Perceived sorting: how aligned a respondent's LR and EU placements are across parties, against the actual alignment.
-
-### Vertical affective polarization
-
-PTV (EES), like/dislike (CSES), thermometer (eu25); over time available. API primary, other measures robustness. Horizontal attitudinal complement: EES 2024 like/dislike of party supporters.
-
-One row per respondent × rated party, with the relation of the target to the respondent coded as attached and voted / attached only / voted only / neither.
-
-QoI: $AP_t = E(Y \mid Co, t) - E(Y \mid Out, t)$, $\Delta AP = AP_{explicit} - AP_{denier}$; for the mismatched, the attachment-party and the vote-party relation are contrasted within person.
-
-### Horizontal behavioral AP
-
-Dictator/trust games, 2019 only.
-
-QoI as above, plus the split into in-group favoritism $E(Y \mid Co, t) - E(Y \mid Control, t)$ and out-group derogation $E(Y \mid Control, t) - E(Y \mid Out, t)$. Control = a co-national partner with no party shown.
-
-The partner's party is randomized within type (attached respondents were more likely to see a co-partisan), so $AP_t$ is a causal effect of the partner label for each type; $\Delta AP$ is not.
-
-Likelihood: the beta-binomial is ruled out (unimodal, misses the spikes at 0, 5 and 10, cell means off). Current line: the Gaussian on cell means with dispersion by cell, plus an ordinal model as a check of the shape. Acceptance criteria for a new model:
-
-i. It passes the weighted cell-mean and raw-ΔAP checks of notebook 3.5.
-ii. It passes the anchor-share checks by cell (3.5) and is calibrated by cell (LOO-PIT, notebook 3.4).
-iii. Only then: native LOO among the comparable fits. Cross-family elpd only via the discretization module of 3.4.
-
-# Outcomes and Data Coverage
-
-| Outcome | EES | CSES | ESS | eu25games (2019) |
+| Facet | Functional reading | Evaluative reading | Identity reading | Discriminating quantity |
 |---|---|---|---|---|
-| Ideological polarization (self-placement) | LR, EU | LR (EU only via optional scale, M5–6, some studies) | LR; EU (R2–4, 6–11) | LR, EU |
-| Ideological sorting (LR × EU self-placement) | where both asked | rarely (EU optional) | R2–4, 6–11 | yes |
-| Perceived polarization (party placements) | LR, EU | LR | – | LR, EU |
-| Perceived sorting (LR × EU party placements) | where both asked | – | – | yes |
-| Vertical AP (party ratings) | PTV (all waves) | Like/dislike of parties and leaders (M1–6) | – | Thermometer (6 parties) |
-| Horizontal AP (toward partisans) | Like/dislike of party supporters (2024 only; attitudinal) | – | – | Dictator and trust games (behavioral) |
+| Ideological extremity | no gap | explicit partisans more extreme | little extra extremity; lower dispersion within the party | dispersion within the party |
+| Ideological sorting | no gap | stronger association within the party | weaker within the party, stronger between parties | sign of the gap within the party |
+| Perceived party polarization | no gap | larger spread that tracks actual positions | spread beyond actual positions, in out-party placements | excess over actual spread |
+| Perceived party sorting | no gap | tracks actual alignment | out-parties lumped together; excess alignment | excess over actual alignment |
+| Vertical attitudinal AP | no gap; mismatched rate the vote party higher | gap vanishes at equal distance; mismatched rate the vote party higher | gap persists at equal distance (in-group variant: in-party ratings; out-group variant: out-party ratings); mismatched rate the attachment party at least as high | gap at equal distance; locus; mismatched ratings |
+| Horizontal behavioral AP | no gap | derogation rises with partner distance; small gap | larger label effect (in-group variant: favoritism; out-group variant: derogation); behavioral gap comparable to attitudinal | favoritism vs. derogation by type; distance gradient |
 
-: Polarization outcomes by data source {#tbl-coverage}
+: Expectations of the three readings by facet, for the gap between explicit partisans and deniers of the same party {#tbl-predictions}
 
-# Partisanship and Data Coverage
+## Leaners and Mismatched Partisans {#sec-other-types}
+
+The other types sharpen the test. The functional reading implies that explicit partisans, leaners and deniers of the same party do not differ. If attachment is graded, as both the evaluative and the identity reading allow, leaners should fall between explicit partisans and deniers. Mismatched partisans provide the comparison with the fewest confounders in the design: their rating of the party they are attached to against the party they voted for is a comparison within one person, holding everything about that person fixed.
+
+## Context {#sec-context-expectations}
+
+The contribution of attachment need not be the same everywhere (RQ3). Out-party hostility was strongest among supporters of old cleavage parties [@richardson1991european], which suggests larger gaps for cleavage parties. The polarization of a party system has competing implications: it has been linked to stronger identification [@thomassen2005theeuropean, ch. 7], yet it also weakens the extent to which closeness to a party prevents switching [@dejaeghere2017comparative]. Attachments to parties of the new cultural cleavage may carry larger gaps, because identities have formed around that cleavage [@bornschier2021us; @zollinger2024cleavage]. Given 25 countries and noisy measures of context, I treat these as expectations that guide interpretation, not as hypotheses to be tested.
+
+## Composition and Change {#sec-change-expectations}
+
+Each trajectory of composition (@sec-dealignment) has its own implication for RQ4. Under continued dealignment with *concentration*, the citizens who give up an attachment are the less engaged, as found for Germany [@dassonneville2012age], so the share of explicit partisans falls while $\Delta$ rises, and aggregate polarization can remain stable. Under continued dealignment with *alienation*, citizens who give up an attachment become negative toward the party system [@dassonneville2018indifference], so negative affect appears among deniers and non-partisans who have no in-party. Under stabilization, changes in polarization come from within partisan types. Under realignment, new attachments to parties of the new cleavage carry a larger $\Delta$.
+
+# Research Design {#sec-design}
+
+The design rests on five elements: a comparison within the vote party, a set of partisan types that brackets the contribution of attachment, a randomized treatment that anchors one part of the inference, triangulation across sources, and a single estimation framework that delivers the European, comparative and dynamic quantities together.
+
+## The Within-Party Contrast {#sec-contrast}
+
+All comparisons are made among voters of the same party in the same country. This holds fixed everything that is shared within a party and country: the platform and the policy signal it sends, the set of out-parties its voters face, the cues its elites send, and the national norms about admitting an attachment. It rules out the explanation that explicit partisans differ from deniers only because they vote for different parties. What the contrast does not hold fixed are individual characteristics that shape both attachment and polarization, such as socialization, political interest and ideological intensity. Conditioning on the vote can also select respondents on the outcome: deniers may vote for a party partly because they dislike the alternatives. And reported attachment and vote carry measurement error.
+
+## Bracketing with Partisan Types {#sec-bracketing}
+
+No single contrast identifies the contribution of attachment, because each is selected by the vote in its own way. I therefore read the contrasts together. The contrast between explicit partisans and deniers is a lower bound if deniers vote for their party partly out of dislike for the alternatives, and an upper bound if deniers are less engaged voters who vote out of habit. The contrast between explicit partisans and non-partisans is likely an upper bound, because not voting and not attaching both tend to go with low engagement, so the contrast adds the vote and engagement to the attachment. Mismatched partisans separate attachment from vote, and the comparison of non-partisans with deniers on characteristics that precede the vote shows whether the vote selects deniers on the outcome. If the contrasts fall in the order their conditions imply, the contribution of attachment lies between them. If they cross, at least one condition fails, and the diagnostics show which.
+
+## A Randomized Anchor {#sec-anchor}
+
+In the EU25 games, the partner's party is randomized within each partisan type. The effect of the party label, $AP_t$, is therefore causal for each type. The difference in this effect between explicit partisans and deniers, $\Delta$, is not, because the types themselves are not randomized. Because the same respondents also rate the parties on thermometers, the comparison between attitudinal and behavioral AP is made within persons.
+
+## Sources and Triangulation {#sec-sources}
+
+Each source contributes a different part of the inference (@tbl-coverage). The EES covers the period since 2004 with LR and EU self-placements, placements of the parties and propensity-to-vote (PTV) ratings, and in 2024 ratings of party supporters. The CSES covers the period since 1996 with LR placements, like–dislike ratings of parties and a leaner probe in every module. The ESS covers 2002 to 2024 with an attachment item and self-placements, which makes it the main source for composition. The EU25 survey adds party thermometers and the games for one year, 2019. Party attachments and votes are coded to Party Facts identifiers in all four sources and matched by one common rule. Where the same pattern appears across sources that word the attachment item differently, it is unlikely to stem from one item. Triangulation addresses measurement, however, and not confounding that all sources share.
+
+| Facet | EES | CSES | ESS | EU25 (2019) |
+|---|---|---|---|---|
+| Ideological extremity (self-placement) | LR, EU | LR (EU only in some studies) | LR; EU (some rounds) | LR, EU |
+| Ideological sorting (LR × EU self-placement) | where both asked | rarely | some rounds | yes |
+| Perceived party polarization (party placements) | LR, EU | LR | — | LR, EU |
+| Perceived party sorting (LR × EU party placements) | where both asked | — | — | yes |
+| Vertical attitudinal AP (party ratings) | PTV (all waves) | like–dislike of parties and leaders | — | thermometer (six parties) |
+| Horizontal AP (toward partisans) | like–dislike of party supporters (2024; attitudinal) | — | — | dictator and trust games (behavioral) |
+
+: Facets of polarization by data source {#tbl-coverage}
+
+## Estimation Strategy {#sec-estimation}
+
+The quantities of interest are contrasts of marginal means. For a facet with outcome $Y$, the gap between explicit partisans and deniers is
+
+$$
+\Delta = \sum_{p} w_p \left[ E(Y \mid \text{explicit}, p) - E(Y \mid \text{denier}, p) \right],
+$$
+
+where $p$ indexes the vote parties in which both types occur and $w_p$ are common party weights. For AP, the type-specific gap between ratings of co-partisan and out-partisan targets is $AP_t = E(Y \mid \text{co}, t) - E(Y \mid \text{out}, t)$. In the games it is split into in-group favoritism, $E(Y \mid \text{co}, t) - E(Y \mid \text{control}, t)$, and out-group derogation, $E(Y \mid \text{control}, t) - E(Y \mid \text{out}, t)$, where the control is a co-national partner whose party is not shown. Quantities that describe a group, such as dispersion or alignment, are computed on each type's predicted distribution under the same party weights, so that a difference between types cannot reflect a difference in the parties they vote for. All estimates are expressed in standard-deviation units so that facets can be compared.
+
+The estimates come from Bayesian multilevel models in which respondents are nested in parties, countries and surveys, with time entering as a trend. Partial pooling yields, from one framework, the pooled European contrast, its variation across countries and its change over time. The decomposition of change into the mix of types and change within types is computed on the posterior draws. The models are built up step by step, and the same estimand is computed at every step, so that a change in the estimate shows which part of the model drives it.
+
+## Reading Rules {#sec-reading-rules}
+
+Four rules for interpretation are fixed before the results. First, because conditioning on the vote plausibly pulls the AP gap toward zero, a positive gap is conservative and a null is weak evidence. Second, gaps in ideology are read as associations net of party sorting, because ideology may cause attachment. Third, the perception facets are exploratory, because sophistication may make explicit partisans more accurate rather than more biased. Fourth, variation across countries is described, not explained. @sec-limitations states the limits of each facet in full.
+
+# Who Is Partisan? {#sec-composition}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** RQ1: the shares of explicit partisans, deniers, leaners, mismatched partisans and non-partisans by country and year, since 2000.
+- **Expectation.** Continued dealignment, stabilization or realignment (@sec-dealignment), by country.
+- **Exhibit.** Type shares by country × period, with the effects of study and wording modelled; the shift of attachment across party families as the test of realignment.
+- **Reading.** Which trajectory holds where, and how large the problem of comparing partisan-only measures (@sec-intro) is in practice.
+- **Limits.** Trends partly reflect switches between studies and wordings; a denier in the ESS is not the same category as a probed denier in the CSES (@sec-limitations).
+:::
+
+# What Attachment Adds {#sec-contribution}
+
+Each analysis follows the same template: the question, the expectations from @sec-facet-expectations, the estimate of $\Delta$, its reading against the three readings, and its limits.
+
+## Ideological Extremity {#sec-res-extremity}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** Within the same party, do explicit partisans hold more extreme LR and EU positions than deniers, and are their positions less dispersed?
+- **Expectation.** @tbl-predictions, row 1: dispersion within the party discriminates.
+- **Exhibit.** $\Delta$ in extremity and in dispersion; $\Delta$ by party position.
+- **Limits.** Reverse causation; selection on proximity (@sec-limitations).
+:::
+
+## Ideological Sorting {#sec-res-sorting}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** Are LR and EU positions more or less strongly associated among explicit partisans than among deniers of the same party, within and between parties?
+- **Expectation.** @tbl-predictions, row 2: the sign of the gap within the party discriminates.
+- **Exhibit.** $\Delta$ in the strength of the LR–EU association within and between parties.
+- **Limits.** Restricted range within parties; coverage; low power (@sec-limitations).
+:::
+
+## Perceived Party Polarization {#sec-res-perceived-polarization}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** Do explicit partisans perceive the parties as further apart than deniers of the same party, and beyond the parties' actual positions?
+- **Expectation.** @tbl-predictions, row 3: the excess over actual spread discriminates.
+- **Exhibit.** $\Delta$ in perceived spread and in its excess over a benchmark; out-party vs. in-party placements.
+- **Limits.** Sophistication; scale use; exploratory (@sec-limitations).
+:::
+
+## Perceived Party Sorting {#sec-res-perceived-sorting}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** Do explicit partisans perceive the parties' LR and EU positions as more aligned than deniers of the same party, and beyond the actual alignment?
+- **Expectation.** @tbl-predictions, row 4: the excess over actual alignment discriminates.
+- **Exhibit.** $\Delta$ in perceived alignment and in its excess.
+- **Limits.** Few placed parties per respondent; sophistication (@sec-limitations).
+:::
+
+## Vertical Attitudinal Affective Polarization {#sec-res-vertical}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** Is the gap between ratings of one's own party and the out-parties larger for explicit partisans than for deniers of the same party, does it persist at equal policy distance, and is it located in in-party or out-party ratings? Do mismatched partisans rate their attachment party or their vote party higher?
+- **Expectation.** @tbl-predictions, row 5.
+- **Exhibit.** $\Delta$ unadjusted and at equal distance to the rated party; in-party and out-party components; the within-person rating of the attachment party against the vote party; EES 2024 ratings of party supporters as the horizontal attitudinal complement.
+- **Limits.** Selection through the vote; distance-adjusted estimates are controlled direct effects; PTV is not a pure measure of affect (@sec-limitations).
+:::
+
+## Horizontal Behavioral Affective Polarization {#sec-res-behavioral}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** Is the effect of the partner's party label larger for explicit partisans than for deniers, and is the difference located in favoritism or in derogation? Is the behavioral gap comparable to the attitudinal gap in the same respondents?
+- **Expectation.** @tbl-predictions, row 6.
+- **Exhibit.** $AP_t$ by type, split into favoritism and derogation; the gradient in the partner party's distance; behavioral against attitudinal $\Delta$ in standard-deviation units.
+- **Limits.** $\Delta$ is not randomized; one year; few co-partisan partners for deniers (@sec-limitations).
+:::
+
+## The Profile {#sec-res-profile}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** RQ2: which reading does the pattern of $\Delta$ across facets fit?
+- **Exhibit.** $\Delta$ for each facet in standard-deviation units, in ladder order, with leaners and mismatched partisans, set against the patterns the three readings predict (@sec-ladder).
+- **Reading.** A flat profile at zero favors the functional reading, a falling profile the evaluative reading, a rising profile the identity reading. A mixed profile indicates which kind of attachment European partisanship is on which facet.
+:::
+
+# Where Attachment Matters {#sec-where}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** RQ3: how does $\Delta$ vary across countries and parties?
+- **Exhibit.** $\Delta$ by country for the facets with the best coverage; $\Delta$ for cleavage parties, for parties of the new cultural cleavage and by the polarization of the party system.
+- **Reading.** Against the expectations in @sec-context-expectations; descriptive, not a test of context effects.
+- **Limits.** 25 countries; noisy measures of context (@sec-limitations).
+:::
+
+# Composition and Polarization within Types {#sec-decomposition}
+
+::: {.callout-note title="Planned analysis"}
+- **Question.** RQ4: how much of the change in polarization over time, and of the differences between countries, reflects the mix of partisan types, and how much reflects polarization within types?
+- **Exhibit.** The decomposition by country and by the trajectory identified in @sec-composition; a counterfactual partisan-only index that shows how such a measure would have ranked countries and trends.
+- **Reading.** Against the expectations in @sec-change-expectations.
+- **Limits.** Age, period and cohort are not separated; few elections per country; the dynamics are not read causally (@sec-limitations).
+:::
+
+# Limitations and Open Issues {#sec-limitations}
+
+This section collects the limitations of the design and the issues that remain open. It serves both as the limitations section of the paper and as a record of what must not be forgotten as the analyses proceed.
+
+## Identification {#sec-lim-identification}
+
+The within-party contrast does not hold fixed individual characteristics that shape both attachment and polarization, such as age and socialization, parental partisanship, political interest and ideological intensity. A causal reading of $\Delta$ would require that attachment is as good as random given party, country and characteristics that precede it; that the vote does not select respondents on the outcome; and that a type means the same across wordings. None of these is guaranteed.
+
+- **Selection through the vote.** Deniers may vote for their party partly because they dislike the alternatives. This plausibly pulls the AP gap toward zero. The mismatched group is itself selected on voting against its attachment.
+- **Reverse causation for ideology.** Citizens with extreme or coherent views may attach because a party fits them. Selection on proximity makes deniers look less extreme at centrist parties and more extreme at parties on the flanks; the gap by party position tests this.
+- **Sophistication for perception.** Attachment goes with political sophistication, which may make perceptions of the parties more accurate rather than more biased. Benchmarks and corrections for scale use narrow this confound but do not remove it.
+- **Controlled direct effects.** Holding policy distance fixed in the AP analyses yields a controlled direct effect, because distance is partly a consequence of attachment.
+- **The games.** The label effect is causal for each type, but $\Delta$ is a difference in a causal effect by a moderator that is not randomized, and it inherits every confounding problem of the types. The party label also carries inferred policy.
+- **Uncertainty.** The posterior reflects sampling and the assumptions of pooling. It does not reflect selection or the composition of a group. Where a type is rare in a country, this shows as wider uncertainty.
+- **Triangulation.** A pattern that is robust across sources can still be robustly biased by confounding that all sources share.
+
+## Measurement {#sec-lim-measurement}
+
+- **Wording.** Items ask about closeness, which may differ from identification [@elliott2024like]. The ESS item asks whether a party is closer than all others and so already takes in some leaners. Wording differs by source and, in the EES, by wave.
+- **Leaners.** The leaner probe exists only in the CSES and the EES 2009. Elsewhere, leaners are counted among deniers if they voted and among non-partisans if they did not, so a denier in the ESS or EU25 is not the same category as a probed denier in the CSES. A leaner who voted for another party is kept apart from the mismatched type and reported only where cells allow.
+- **Translations in EU25.** The Italian item asks about a relative attachment, and the Danish and Greek items ask about sharing a party's views.
+- **Multiple attachments.** Single-party items cannot record attachments to more than one party [@block2026partisan].
+- **The vote.** Recalled votes carry error. In EU25, the wave-1 vote item is the intended vote at the 2019 European Parliament election.
+- **Question order.** In most surveys the vote is asked before the attachment item; CSES Module 3 is the exception.
+- **Outcomes.** PTV ratings mix affect with assessments of a party's viability and are treated as a separate operationalization. The EU attribute in the games is an identity cue, not a policy position, and so offers no randomized test of party against policy.
+
+## Party Matching and Types {#sec-lim-matching}
+
+- Whether the attachment party is the party voted for is decided by one rule across all sources, which counts identical parties, aliases, alliances and lineage as the same party. Counting lineage as the same party is a deliberate choice; the route of every match is recorded, so analyses can exclude it.
+- Alliances and successor parties need an audit before the mismatched type is interpreted.
+- The mismatched group mixes strategic and coalition voting, multiple attachments, recall error and matching artifacts. Mismatches within an ideological bloc are separated from mismatches across blocs before interpretation.
+- Hand decisions in the Party Facts coding are documented in the preparation notebooks and must be reviewed for the parties that drive the estimates.
+
+## Data and Coverage {#sec-lim-coverage}
+
+- Coverage of the EU dimension is thinner than coverage of LR. The CSES has no EU items, no ratings of party supporters and no games.
+- The EES 2024 ratings of party supporters come from different respondents and a different year than the games, so the comparison of horizontal attitudinal with horizontal behavioral AP is descriptive.
+- In the EU25 games, partners' parties were drawn from the attachment answer. Attached respondents meet a co-partisan in about half the rounds, deniers only by chance, so the denier cells with co-partisan partners are thin. In Latvia, the draw for respondents without an attachment copied their answer that they feel close to no party. The games cover one election year.
+- Few elections per country make country-specific trends rely on the prior.
+- A coverage table of item × study × round × country, checked against the codebooks, is the first deliverable and decides which facets enter the comparative and dynamic analyses.
+
+## Comparative and Dynamic Inference {#sec-lim-dynamic}
+
+- With 25 countries and noisy measures of context, variation across countries is described rather than explained.
+- Age, period and cohort are not separated. Over-time patterns are interpreted with this in mind and are not read causally.
+- Trends may reflect switching between studies and wordings rather than change in electorates; robustness to dropping single studies is checked.
+
+## Open Design Decisions {#sec-lim-open}
+
+- The centre against which extremity is measured: the scale midpoint, the country mean or the median. Alternatives will be reported.
+- The measure of sorting: a flexible association measured within countries, with magnitudes pooled, never raw correlations.
+- The likelihood for each facet, chosen by predictive checks.
+- How to display differences in wording across surveys, following @boxell2024cross.
+
+## Literature Still to Be Consulted {#sec-lim-literature}
+
+- The classic texts cited in @sec-intro and @sec-concepts for standard claims [@campbell1960american; @budge1976party; @shively1979development; @fiorina1981retrospective; @green2004partisan] must be checked against the texts before submission.
+- European evidence on perceived polarization by partisan type has not yet been located.
+
+## Questions for the Workshop {#sec-lim-workshop}
+
+1. Is the opening on the population of inference convincing as a motivation, or does it read as a measurement note?
+2. Are the functional, evaluative and identity readings the right map, and is the in-group/out-group split of the identity reading useful?
+3. Is the ladder of facets an intuitive order for presenting expectations and results?
+4. Should the games, or the composition analysis, be a separate paper?
+
+# Discussion {#sec-discussion}
+
+::: {.callout-note title="Planned"}
+- One paragraph per RQ: the partisan composition of European electorates; what partisanship is in Europe, as the profile reads it; where it matters; and whose polarization is measured when partisan-only measures are used.
+- Recommendations for measurement: the population of inference, the definition of the in-party, and closeness versus identity items.
+- The American party-versus-policy debate revisited: what holding the party's policy signal fixed allows, and what it does not.
+- What kind of attachment European partisanship is, and whether it is the kind that serves democracy [@elliott2024like; @bankert2023politics].
+:::
+
+# Conclusion {#sec-conclusion}
+
+::: {.callout-note title="Planned"}
+Return to the opening question: whose polarization is measured, and what partisanship adds to it.
+:::
+
+# Appendix {#sec-appendix}
 
 | Dataset | Attachment item | "No" option | Leaner probe | Strength follow-up |
 |---|---|---|---|---|
 | EES 2004–2024 | "Do you consider yourself to be close to any particular party? If so, which party do you feel close to?" (2014: "political party"). One question: the "no" answer sits in the party list | "No, I do not feel close to any party" (2004: "no") | 2009 only: "Do you feel yourself a little closer to one of the political parties than others?" → "Which party is that?" | "Very close to this party, fairly close, or merely a sympathiser?" (2004–2019; none in 2024) |
 | CSES M1–6 | "Do you usually think of yourself as close to any particular party?" (M1–2: "political party"). Separate yes/no filter | No (code 0) | All modules, asked of everyone not saying yes: "Do you feel yourself a little closer to one of the political parties than the others?" | "Very close, somewhat close, or not very close?", asked of close *and* leaning respondents |
 | ESS R1–11 | "Is there a particular political party you feel closer to than all the other parties?" Yes/no filter, then "Which one?" | No (code 2) | None; the root item is itself relative ("closer than all the other parties") | "Very close, quite close, not close, not at all close" (all rounds); party membership R1–5 only |
-| eu25games 2019 | EES wording: "Do you consider yourself to be close to any particular political party? If so, which party do you feel close to?" Translations vary: IT relative ("più vicino rispetto agli altri"), DK/GR ask about sharing a party's *views* | "No, I do not feel close to any political party" (in the party list, beside "Other") | None | EES strength item, wave 1 only |
+| EU25 2019 | EES wording: "Do you consider yourself to be close to any particular political party? If so, which party do you feel close to?" Translations vary: IT relative ("più vicino rispetto agli altri"), DK/GR ask about sharing a party's *views* | "No, I do not feel close to any political party" (in the party list, beside "Other") | None | EES strength item, wave 1 only |
 
 : Partisanship items by data source {#tbl-pid-items}
 
+# References {.unnumbered}
 
-## Under what assumptions can this be interpreted as *causal* contrast?
-
-Common to all outcomes: the within-party contrast absorbs everything shared within party × country (platform, status, set of out-parties, elite cues, national norms about admitting an attachment). It does not absorb individual-level confounders of attachment (age and socialization, parental partisanship, interest, ideological intensity). The vote can act as a collider, and self-labelling, wording and vote recall add measurement error. A causal reading needs conditional ignorability of attachment given party × country and pre-treatment covariates, no selection on the outcome through the vote, and a type that means the same across wordings. Triangulating across studies addresses wording, not shared confounding. The three voting types bracket the attachment effect rather than identifying it.
-
-- **Ideology and sorting**: the contrast rules out "attached partisans are in more extreme parties". Reverse causation (ideology -> attachment) is the strongest threat, and selection on proximity makes deniers look less extreme at centrist parties and more extreme at flank parties (diagnostic: type × party position). Read as an association net of party sorting.
-- **Perceived polarization and sorting**: the real party system is fixed within a country-survey. Sophistication raises attachment and may make perceived spread more *accurate*; benchmark and scale-use correction narrow this confound, they do not remove it.
-- **Vertical AP**: within party plus within person across targets; the mismatched rating of attachment party vs. vote party is the best-identified quantity. Deniers vote for their party partly because they dislike the others, which plausibly pulls ΔAP toward zero. Adjusting for policy distance gives a controlled direct effect, since distance is partly a consequence of attachment.
-- **Horizontal behavioral AP**: the partner label is randomized, so $AP_t$ is causal per type; ΔAP is effect heterogeneity by a non-randomized moderator and inherits every confounding problem of type. One election year; few co-partners for deniers.
-
-## Theoretical Implications and Empirical Tests
-
-The explicit–denier contrast ($\Delta$) serves as a diagnostic. The identity
-and policy accounts of partisanship predict different *profiles* of $\Delta$
-across the polarization outcomes, so the pattern across outcomes
-constitutes the test.
-
-Note that these formulated expectations refer to *within* party contrasts; how far that controls for selection and confounding is set out in the section above.
-
-| Outcome | Identity account predicts | Policy account predicts |
-|---|---|---|
-| Ideological polarization | Little extra extremity; lower within-party dispersion (cue-taking, conformity) | More extremity (attachment follows positions, so a large $\Delta$ does not show that attachment shapes positions) |
-| Ideological sorting | Stronger overall sorting; weaker within-party association (conformity to the party's bundle compresses co-partisans); stronger between-party association | Stronger overall sorting; stronger within-party association (coherent citizens attach); stronger between-party association |
-| Perceived polarization | Spread exceeds the benchmark, concentrated in out-party placements | Larger spread (sophistication) that tracks actual positions; no excess |
-| Perceived sorting | Out-parties lumped together on both dimensions (us vs. them), so perceived alignment exceeds actual, driven by out-party placements | Perceived alignment tracks actual alignment |
-| Vertical AP (toward parties) | Large $\Delta$ that survives holding target distance fixed; mismatched rate their attachment party at least as high as their vote party | $\Delta$ shrinks once target distance is held fixed; mismatched rate their vote party higher |
-| Horizontal AP (games) | Larger label effect, driven by in-group favoritism; little gradient in the partner party's distance; behavioral $\Delta$ comparable to attitudinal | Label works through inferred policy: derogation rises with the partner party's distance; small $\Delta$; behavioral $\Delta$ smaller than toward parties |
-
-: Competing predictions of the identity and policy accounts across polarization outcomes {#tbl-predictions}
-
-The tests below form the diagnostic step of the model building.
-
-### Test 1: Estimate $\Delta$ with and without policy adjustment
-
-For each outcome, the within-party contrast is estimated twice: unadjusted,
-and conditional on the respondent's own ideological distance to the relevant
-parties (left–right, and EU integration where available). The identity
-account predicts that the affective $\Delta$s survive adjustment; the policy
-account predicts they largely vanish. The central figure is a single
-coefficient plot with the four outcomes, each showing both estimates.
-
-### Test 2: Measure perception bias directly
-
-Perceived polarization is constructed relative to a benchmark: sample-mean
-placements, expert placements (e.g., Chapel Hill Expert Survey), or
-manifesto-based positions. The quantity of interest is whether explicit
-partisans' perceived spread *exceeds* the benchmark more than deniers' does.
-Greater overestimation among explicit partisans supports
-the identity lens.
-
-### Test 3: Compare horizontal and vertical AP
-
-Within the 2019 data, where both types are measurable, $\Delta$ for dislike of
-parties
-
-
-
-@boxell2024cross as example for how to display differing survey wordings
-
-
-## Introduction
-
-This paper investigates the relationship between partisanship and polarization in Europe.
-It asks what reporting an attachment to a party contributes to the different forms of
-polarization, compared with voters of the same party who deny such an attachment.
-The question has four parts:
-
-- **A. Contribution.** How do citizens who report an attachment differ from voters of the same party who deny one, in their ideological positions, their perceptions of the party system, and their feelings toward parties and partisans? The within-party contrasts bracket the contribution of attachment net of party; they do not identify it (causal only for the partner label in the games).
-- **B. Account.** Does the profile of these contrasts across outcomes fit a party-over-policy account (attachment as a social identity) or a policy-over-party account (attachment as a signal of policy commitment) better? This is a pattern fit, not a direct test.
-- **C1. Change beyond composition.** Has polarization in European electorates changed beyond what the changing mix of partisan types implies?
-- **C2. Change and context of the contrast.** Has the gap between explicit partisans and deniers changed since the turn of the millennium, and how much does it vary across the 25 countries?
-
-Each analysis below answers the same template: (a) state, the pooled European contrast; (b) dynamic, its trend; (c) cross-national, its variation across countries; (d) decomposition, aggregate change and country differences split into the mix of types and polarization within types. A predictions line states what each account expects. A is answered by the (a) parts, B by comparing them across outcomes, C1 by the (d) parts, C2 by the (b) and (c) parts.
-
-## Partisanship and Polarization in Europe
-
-## Empirical Strategy
-
-### Dealignment or Realignment? Partisanship in Europe since the Turn of the Millennium
-
-From the earliest study in the data (CSES Module 1; start year to be checked) to 2024. This analysis supplies the weights for every (d) part.
-
-- **RQ0a (state).** What shares of European citizens are explicit partisans, deniers, mismatched, and non-partisans?
-- **RQ0b (dynamic).** How have these shares changed? Where explicit partisanship declined, did deniers (attachment lost, vote kept) or non-partisans (both lost) rise?
-- **RQ0c (cross-national).** Does a common European trend describe the countries, or do they diverge?
-- **RQ0d (measurement).** How much of the variation in levels stems from attachment wording and study rather than from the electorates? In the probed studies, what share of non-attached voters lean towards a party?
-- **RQ0e (realignment).** Where the level of attachment is stable, does its distribution across parties shift, for example toward new or challenger parties (Party Facts)? The number of parties alone cannot separate dealignment from realignment.
-
-### Partisanship and Ideological Polarization
-
-- **RQ1a (state).** Within the same party, do explicit partisans hold more extreme and more dispersed left–right and EU positions than deniers? Where do leaners, mismatched voters and non-partisans fall?
-- **RQ1b (dynamic).** Has the gap in extremity and dispersion between explicit partisans and deniers changed?
-- **RQ1c (cross-national).** How much does this gap vary across countries?
-- **RQ1d (decomposition).** Has ideological polarization in European electorates changed beyond what the changing mix of types implies?
-
-*Predictions.* Policy account: more extremity among explicit partisans, since attachment follows positions (a large gap is what this account predicts, so it does not show that attachment shapes positions). Identity account: little extra extremity, but lower within-party dispersion through cue-taking and conformity. Dispersion is split into within-party spread, between-party spread and the offset of the type mean.
-
-One placement model per dimension; extremity and dispersion from its posterior under a common party mix; alternative centres reported.
-
-### Partisanship and Ideological Sorting
-
-- **RQ2a (state).** Within the same parties, are left–right and EU positions more strongly associated among explicit partisans than among deniers, holding the party mix fixed?
-- **RQ2b (dynamic).** Has this gap changed?
-- **RQ2c (cross-national).** How much does it vary across countries (in magnitude, since shape and sign differ)?
-- **RQ2d (decomposition).** Has sorting in European electorates changed beyond the changing mix of types?
-
-*Predictions.* Both accounts expect stronger overall sorting among explicit partisans. They part on the within-party component: conformity to the party's bundle (identity) compresses co-partisans and weakens the association; coherent citizens attaching (policy) strengthens it. The between-party component is higher under both.
-
-### Partisanship and Perceived Ideological Party Polarization
-
-- **RQ3a (state).** Within the same party, do explicit partisans perceive the parties as further apart on left–right and EU than deniers, and does this exceed what actual party positions imply?
-- **RQ3b (dynamic).** Has this gap changed?
-- **RQ3c (cross-national).** How much does it vary across countries?
-- **RQ3d (decomposition).** Has perceived polarization changed beyond (i) the changing mix of types and (ii) the change in actual party-system polarization?
-
-*Predictions.* Identity account: perceived spread exceeds the benchmark, concentrated in the placements of out-parties. Policy account (with sophistication): larger spread that tracks actual positions, without excess. Only the excess, not raw spread, separates the two.
-
-### Partisanship and Perceived Ideological Party Sorting
-
-- **RQ4a (state).** Within the same party, do explicit partisans perceive the parties' left–right and EU positions as more aligned than deniers, and beyond the actual alignment?
-- **RQ4b (dynamic).** Has this gap changed, where the series allows (pending the coverage table)?
-- **RQ4c (cross-national).** How much does it vary across countries?
-- **RQ4d (decomposition).** As RQ3d: mix of types, within-type perception, actual alignment.
-
-*Predictions.* Identity account: an us-versus-them lens lumps the out-parties together on both dimensions, so perceived alignment exceeds actual alignment, driven by out-party placements. Policy account (with sophistication): perceived alignment tracks actual alignment.
-
-### Partisanship and Vertical Attitudinal Affective Polarization
-
-- **RQ5a (state).** Within the same party, is the gap between ratings of the in-party and the out-parties larger for explicit partisans than for deniers? For mismatched voters, is the party they are attached to or the party they voted for rated higher (within person)?
-- **RQ5b (distance).** How much of the explicit–denier gap remains at equal policy distance to the rated party?
-- **RQ5c (dynamic).** Has the gap changed?
-- **RQ5d (cross-national).** How much does it vary across countries?
-- **RQ5e (decomposition).** Has affective polarization changed beyond the changing mix of types?
-- **RQ5f (horizontal attitudinal, EES 2024).** Among the same respondents, is the explicit–denier gap toward party supporters larger or smaller than toward parties?
-
-*Predictions.* Identity account: a large gap that survives holding target distance fixed; mismatched voters rate their attachment party at least as high as their vote party. Policy account: the gap shrinks once distance is held fixed; mismatched voters rate their vote party higher.
-
-Like/dislike and thermometer as the primary measures, PTV as a separate operationalization. Selection by the vote plausibly pulls the gap toward zero; the distance-adjusted gap is a controlled direct effect.
-
-### Partisanship and Horizontal Behavioral Affective Polarization
-
-Trust and dictator games, eu25 2019; the same questions are answered for each game.
-
-- **RQ6a (state).** Does the partner's party label shift how much respondents send, toward co-partisans and away from out-partisans relative to a co-national partner with no party shown, and is this shift larger for explicit partisans than for deniers of the same party? How much is in-group favoritism and how much out-group derogation?
-- **RQ6b (cross-national).** How much does the gap vary across countries?
-- **RQ6c (decomposition).** How much of the country differences reflects the mix of types?
-- **RQ6d (attitudinal vs. behavioral).** Among the same respondents, is the explicit–denier gap in sending larger or smaller than in thermometer ratings (in SD units)?
-
-*Predictions.* Identity account: a larger label effect for explicit partisans, driven by in-group favoritism, with little gradient in the partner party's distance; the behavioral gap is comparable to the attitudinal one. Policy account: the label works through inferred policy, so derogation rises with the partner party's distance and the gap is small; the behavioral gap is smaller than toward parties.
-
-The partner's label is randomized within type, so the label effect is causal for each type; the explicit–denier gap is not.
+::: {#refs}
+:::

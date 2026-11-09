@@ -1,5 +1,5 @@
 ---
-last_modified: 2026-10-22
+last_modified: 2026-11-09
 scope: agreed empirical design: question, goals, partisan types, outcomes, limits of the contrast, estimands, model building, open decisions
 ---
 
@@ -19,13 +19,32 @@ The `index.qmd` notes were trimmed to match.
 "Partisanship" means reporting an attachment to a party. It is compared with respondents of
 the same party who deny one.
 
+Framing (agreed 2026-11-09; the argument is written out in `index.qmd` §1–4): polarization is a
+property of a distribution, so every measure implies a population. Studies define partisans by
+attachment or by vote as if interchangeable; that choice presupposes an answer to what
+attachment adds beyond the vote. Three readings of partisanship: **functional** (attachment
+restates the vote), **evaluative** (standing judgment of policy and performance), **identity**
+(group identity, with an in-group and an out-group variant). The US party-vs-policy debate is
+the evaluative vs. identity contrast on one facet. Dealignment in the 21st century is an open
+question, answered by the composition analysis, not assumed.
+
+Research questions: **RQ1** who (composition and its change since 2000); **RQ2** whether and
+what kind (the profile of Δ across facets, in-group vs. out-group locus); **RQ3** where
+(countries, parties); **RQ4** so what (composition vs. polarization within types).
+
 Contributions:
 
-- the comparative literature on polarization and political behavior: many facets, 25 countries, over time;
-- the US debate of party-over-policy vs. policy-over-party: is the group attachment what people dislike, or the policy position it signals?
+- polarization and AP measurement: the population of inference made explicit (RQ1, RQ4);
+- partisanship research: the European question of what attachment is, answered by its consequences (RQ2);
+- comparative research: 21st-century composition and a decomposition of change (RQ1, RQ3, RQ4).
 
 Europe offers leverage the US lacks. Attachment and vote come apart, and every respondent faces
 several out-parties at varying policy distances.
+
+Prose conventions: types are explicit partisans, deniers, leaners, mismatched partisans,
+non-partisans; facets always in ladder order (extremity, sorting, perceived polarization,
+perceived sorting, vertical attitudinal AP, horizontal behavioral AP); sources EES, CSES, ESS,
+EU25; American spelling; first person singular.
 
 ## Inferential goals
 
@@ -34,8 +53,8 @@ several out-parties at varying policy distances.
 3. **Dynamic**: how it changes over time (one figure; not the games).
 4. **Decomposition**: change over time and differences between countries, split into the
    *mix of types* (composition) and *polarization within types*.
-5. **Party-over-policy diagnostic**: the profile of type contrasts across outcomes, plus the
-   tests in step 9 of the model building.
+5. **Readings diagnostic** (RQ2): the profile of type contrasts across outcomes, read against
+   the functional, evaluative and identity readings, plus the tests in step 9 of the model building.
 
 ## Partisan types
 
@@ -199,8 +218,8 @@ steps is a result; the step that moves it is informative.
   placements, PTV and like/dislike, attachment wording): the first deliverable, checked
   against the codebooks.
 - The **likelihood per outcome**, chosen by predictive checks.
-- The **identity vs. policy predictions** for the two sorting outcomes (`tbl-predictions` in
-  `index.qmd`). Write them down before fitting.
+- The **predictions of the three readings** (functional, evaluative, identity) per facet are in
+  `tbl-predictions` in `index.qmd`. Refine them before fitting, especially for the two sorting outcomes.
 
 ## Prior framing (superseded)
 

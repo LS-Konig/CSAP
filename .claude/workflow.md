@@ -1,5 +1,5 @@
 ---
-last_modified: 2026-10-27
+last_modified: 2026-11-09
 scope: repo layout, notebook pipeline, Quarto quirks, Git LFS, literature submodule and summaries
 ---
 
@@ -11,7 +11,7 @@ Read this before adding files or notebooks, rendering, or committing data.
 
 | Path | What it is |
 |------|-----------|
-| `index.qmd` | The manuscript. For now it holds YAML front matter plus Tristan's direction notes (see `design.md`), with no prose sections |
+| `index.qmd` | The manuscript. Since 2026-11-09 a workshop draft: argument (§1–3) and high-level design (§4) in prose, placeholder callouts for the empirical sections (§5–8), a Limitations and Open Issues section (§9) that collects everything not to forget, and the partisanship-items table in the appendix. No empirics yet. The previous notes are in git history (`10a9442`) |
 | `presentation_uottawa.qmd` | RevealJS slides (rendered output `presentation_uottawa.html`, kept in git for documentation) with the University of Mannheim SCSS theme (`theme.scss`). Three figure embeds are commented out, because the notebooks that produced them were deleted |
 | `presentation_hms.qmd` | German 10-minute deck for the Hanns Martin Schleyer-Stiftung (Berlin, October 2026), same theme. It recomputes the eu25games composition sample of notebook 3.1 (reading the raw release, chunk cached). Its result slides read only `data/05_results/eu25_ap_post.rds` (notebook 3.3), so the deck renders without loading any fit. `images/eu25-thermo-ie.png` is cropped from the Irish wave-3 questionnaire in the sibling `eu25games2019` repo |
 | `_quarto.yml` | The project config. Only the notebooks it lists are rendered by the project |
