@@ -1,5 +1,5 @@
 ---
-last_modified: 2026-10-19
+last_modified: 2026-11-12
 scope: raw input, variable references, party matching, derived files, external sources
 ---
 
@@ -129,9 +129,14 @@ opening them (see `CLAUDE.md`).
   source carrying the branching closeness probe. Matching study IDs across releases needs
   care, because the IMD splits two elections held in one year (`DEU12002`/`DEU22002`,
   `GRC12015`/`GRC22015`) and regional samples (`BELF`/`BELW`).
-- `data/01_raw/ees/{1999,2004,2009,2014,2019,2024}/`: European Election Studies.
+- `data/01_raw/ees/{2004,2009,2014,2019,2024}/`: European Election Studies.
   `data/01_raw/key-items.qmd` maps the PID, vote choice, like/dislike and PTV items to their
-  per-wave question numbers.
+  per-wave question numbers. **Earlier waves (1999 and before) are postponed** (2026-11-12).
+  The EES 1999 data are restricted on the DANS Data Station
+  ([P1560](https://doi.org/10.17026/DANS-Z9J-VY6M)) and need a DANS login and an access request
+  first. GESIS hosts only the 1999 codebook and questionnaire
+  ([EES 1999 page](https://www.gesis.org/en/services/finding-and-accessing-data/international-survey-programs/ees-1999-study)).
+  Check access for 1989 (GESIS ZA2320) and 1994 (ZA2865) when this is picked up.
 - `data/01_raw/ess/`: the European Social Survey, as a Data Wizard subset of the cumulative file.
   `Datafile-subset.csv` is 1.5 GB (430,581 × 2,836, rounds 1–11, 222 country × round cells) and comes with
   its codebook HTML, **which is the variable reference**. Do not re-document ESS variables
