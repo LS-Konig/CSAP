@@ -249,6 +249,7 @@ read_country <- function(cc) {
       idno,
       clsprty,
       vote,
+      pspwght,
       matches(paste0("^prtcl[a-z]?", lc, "$")),
       matches(vote_pattern)
     ) |>
@@ -280,7 +281,7 @@ read_country <- function(cc) {
     )
 
   raw |>
-    select(row, cntry, essround, name, idno, clsprty, vote) |>
+    select(row, cntry, essround, name, idno, clsprty, vote, pspwght) |>
     left_join(att, by = "row") |>
     left_join(vot, by = "row")
 }
@@ -296,6 +297,12 @@ stopifnot(nrow(ess_raw) == nrow(ess |> filter(cntry %in% countries_25)))
 
 **Attachment** is `clsprty`: `1` yes, `2` no, `7`/`8`/`9` DK.
 **Vote** is reported if `vote` is `1` and the party answer is a party or an *other* answer; a non-vote label, `66`--`99`, or no voting at all (`vote` `2`, not eligible `3`, or missing) means *no vote reported*.
+
+**Weight** is `pspwght`, the post-stratification weight including the design weight (codebook).
+It adjusts each country-round to Labour Force Survey margins of age, gender, education and (in most countries) region, not to the vote ([ESS post-stratification weights documentation](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS_post_stratification_weights_documentation.pdf)).
+It is rescaled to mean 1 within each country-round.
+`pweight` (population size) is not needed, since nothing here pools countries into a European share.
+Trees show unweighted N in the boxes and weighted shares on the edges; all figures are weighted.
 
 ```{r}
 #| label: harmonise
@@ -336,8 +343,12 @@ ess_tree <- ess_raw |>
       "yes",
       "no",
       missing = "no"
-    )
-  )
+    ),
+    # Post-stratification weight, including the design weight
+    weight = as.numeric(pspwght)
+  ) |>
+  # Mean 1 within each country-round
+  norm_weight(cntry, essround)
 ```
 
 # Matching Parties
@@ -443,7 +454,8 @@ ess_tree <- ess_tree |>
     match,
     att_label,
     vote_label,
-    vote_first
+    vote_first,
+    weight
   )
 ```
 
@@ -526,7 +538,7 @@ ess_tree |>
   scale_x_discrete(breaks = c("1", "6", "11"), drop = FALSE) +
   labs(
     title = "Partisan composition in the ESS by country and round, 2002-2023",
-    subtitle = "Unweighted shares; the vote is the last national election",
+    subtitle = "Weighted shares (pspwght); the vote is the last national election",
     x = "ESS round"
   )
 ```
@@ -555,7 +567,7 @@ ess_tree |>
   plot_country_composition() +
   labs(
     title = "Partisan composition in the ESS, 2002-2023",
-    subtitle = "Unweighted shares; the vote is the last national election"
+    subtitle = "Weighted shares (pspwght); the vote is the last national election"
   )
 ```
 
@@ -565,7 +577,7 @@ ess_tree |>
 #| fig-width: 9
 #| fig-height: 7
 
-emit_figure_tabset(ess_tree, by = "round", subtitle = "Unweighted shares; the vote is the last national election")
+emit_figure_tabset(ess_tree, by = "round", subtitle = "Weighted shares (pspwght); the vote is the last national election")
 ```
 
 # Leaner Probes
@@ -575,8 +587,45 @@ The ESS has no leaner probe, so no tree here has a leaner level.
 Its only follow-up is the strength of closeness (`prtdgcl`), asked of those who named a party.
 So the ESS *Attachment reported* box is closer to "attachment or leaning" than the EES or CSES base items are.
 
+# Weighted and Unweighted Shares
+
+How much `pspwght` moves each leaf, by country (all rounds pooled), largest differences first, in percentage points.
+
+```{r}
+#| label: weight-check
+
+ess_tree |>
+  weight_check(country) |>
+  print(n = 25)
+```
+
+# Type File
+
+One row per respondent with the common composition types (`tree_ctype()` in `pid_tree.R`), the weight and the survey cell, for notebooks 2.5 and 2.6.
+The year is the round's modal fieldwork year.
+
+```{r}
+#| label: write-types
+
+ess_types <- ess_tree |>
+  mutate(year = str_extract(as.character(round), "\\d{4}$")) |>
+  write_types(
+    source = "ESS",
+    survey = paste0("ESS", essround),
+    year = year,
+    vote_ref = "last national",
+    weight_source = "pspwght",
+    path = here("data", "02_processed", "ess_types.parquet")
+  )
+
+ess_types |>
+  count(ctype, wt = weight) |>
+  mutate(share = round(n / sum(n), 3))
+```
+
 # Caveats
 
+- **Shares are weighted** with `pspwght`.
 - **The vote is the last national election**, which can lie up to four or five years before the interview.
 - **Round 10 pools two modes** (face-to-face and self-completion) on disjoint country sets, see notebook 1.7.
 - **Matching is by Party Facts party, with alliances and lineage** (notebook 1.9); the same rule is used in all four composition notebooks, so their *same party* shares are comparable.

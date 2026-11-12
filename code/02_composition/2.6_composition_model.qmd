@@ -1,0 +1,606 @@
+---
+title: |
+  CSAP Code Notebook 2.6
+subtitle: |
+  Partisan composition over time: a multinomial model across sources
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+Notebook 2.5 shows each source as its own line.
+This notebook fits one model to all of them, to put the four sources on one scale and to read a trend through noisy, unevenly spaced surveys.
+The model is **descriptive**: it has no substantive predictors, only country, time and source.
+Its output is a set of type shares per country and year *as the ESS would have measured them*, with posterior uncertainty, next to the raw cells of 2.5.
+
+**Fit switch.** `full_fit <- TRUE` fits with 4 chains of 2,000 iterations (1,000 warm-up) and caches the fit in `data/04_models/` (git-ignored).
+`full_fit <- FALSE` fits with 2 chains of 400 iterations and saves nothing; those estimates only show that the pipeline runs.
+With `refit_allowed <- FALSE`, an existing cached fit is loaded and never refitted, even if the data changed; set it to `TRUE` to refit.
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "arrow",
+  "brms",
+  "cmdstanr",
+  "posterior",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Shared tree helpers: countries_25, ctype_levels
+source(here("code", "00_helper", "pid_tree.R"))
+
+# Fit settings
+full_fit <- FALSE
+refit_allowed <- FALSE
+settings <- if (full_fit) {
+  list(chains = 4, iter = 2000, warmup = 1000)
+} else {
+  list(chains = 2, iter = 400, warmup = 200)
+}
+model_dir <- here("data", "04_models")
+if (full_fit) dir.create(model_dir, showWarnings = FALSE, recursive = TRUE)
+
+# Reference source and year for predictions
+ref_source <- "ESS"
+```
+
+# Data
+
+The input is the cell table of notebook 2.5: one row per survey × country, with the weighted share of each type and the cell's Kish effective sample size.
+The model needs counts.
+So each cell enters with **effective counts**, the weighted shares times `n_eff`, rounded.
+A cell then carries as much information as its weights allow, no more.
+
+```{r}
+#| label: data
+
+cells <- read_parquet(here("data", "02_processed", "composition_cells.parquet"))
+
+# Short column names per type; non-partisan first, the reference category
+type_cols <- c(
+  "non-partisan" = "nonpartisan",
+  "explicit" = "explicit",
+  "mismatched" = "mismatched",
+  "denier" = "denier",
+  "attached non-voter" = "attnonvoter"
+)
+
+d <- cells |>
+  mutate(
+    col = type_cols[as.character(ctype)],
+    k_eff = round(share_w * n_eff)
+  ) |>
+  select(source, survey, country, year, n, n_eff, col, k_eff) |>
+  pivot_wider(names_from = col, values_from = k_eff) |>
+  mutate(
+    # The EES moved online, with the party list on screen, in 2019 (notebook
+    # 2.2); its explicit shares jump with it (notebook 2.5), so the two modes
+    # are separate instruments
+    source = if_else(source == "EES", if_else(year >= 2019, "EES online", "EES interview"), as.character(source)),
+    source = factor(source, levels = c(ref_source, setdiff(c("ESS", "EES interview", "EES online", "CSES", "EU25"), ref_source))),
+    country = factor(country, levels = countries_25),
+    cell = paste(survey, country),
+    # Decades from 2010
+    year_c = (year - 2010) / 10
+  )
+
+# Count matrix in the order of type_cols
+d$y <- as.matrix(d[, unname(type_cols)])
+d$total <- rowSums(d$y)
+
+# Cells per source; total effective respondents
+d |>
+  summarise(cells = n(), n_eff = sum(total), .by = source)
+```
+
+# Model
+
+$$
+\mathbf{y}_c \sim \text{Multinomial}(N_c, \boldsymbol{\pi}_c), \qquad
+\log \frac{\pi_{c,k}}{\pi_{c,\text{non-partisan}}} = \alpha_k + \beta_{k,\text{source}[c]} + f_k(t_c) + a_{k,j[c]} + b_{k,j[c]}\, t_c + u_{k,c}
+$$
+
+for cell $c$ (one survey in one country $j$, in year $t$) and type $k$, against non-partisans as the reference category.
+
+- $\beta_{k,\text{source}}$: the **source offset**, the difference that wording, mode and the vote asked about make, common to all countries; the ESS is the reference.
+  It is identified where two sources observe a country at about the same time (the overlap table in 2.5).
+- $f_k(t)$: a smooth European trend (thin-plate spline, `k = 5`).
+- $a_{k,j}$, $b_{k,j}$: each country's level and linear trend around the European one (correlated varying effects).
+- $u_{k,c}$: a cell effect, for the variation between surveys beyond sampling error (house and fieldwork effects).
+
+This is the first rung: country deviations from the European trend are linear.
+Country-specific smooths come next if the posterior predictive checks show curvature the linear deviations miss.
+
+```{r}
+#| label: formula
+
+f <- bf(
+  y | trials(total) ~ source + s(year_c, k = 5) + (1 + year_c | country) + (1 | cell),
+  family = multinomial()
+)
+
+# One set of priors per linear predictor
+dpars <- paste0("mu", unname(type_cols)[-1])
+priors <- map(dpars, \(dp) {
+  c(
+    set_prior("normal(0, 2)", class = "Intercept", dpar = dp),
+    set_prior("normal(0, 1)", class = "b", dpar = dp),
+    set_prior("exponential(2)", class = "sd", dpar = dp),
+    set_prior("exponential(2)", class = "sds", dpar = dp)
+  )
+}) |>
+  reduce(c) |>
+  c(set_prior("lkj(2)", class = "cor"))
+
+priors
+```
+
+The priors are weakly informative on the log-odds scale: an intercept within about ±4 (shares from 2% to 98% of the non-partisan count), source offsets mostly within ±2, and standard deviations of the varying effects mostly below 1.
+The prior predictive check below shows what they imply for the shares.
+
+```{r}
+#| label: fit-helper
+
+fit_model <- function(name, sample_prior = "no") {
+  path <- file.path(model_dir, paste0(name, ".rds"))
+  if (full_fit && file.exists(path) && !refit_allowed) {
+    return(readRDS(path))
+  }
+  brm(
+    f,
+    data = d,
+    prior = priors,
+    sample_prior = sample_prior,
+    chains = settings$chains,
+    iter = settings$iter,
+    warmup = settings$warmup,
+    cores = settings$chains,
+    backend = "cmdstanr",
+    seed = 20261110,
+    refresh = 0,
+    silent = 2,
+    file = if (full_fit) file.path(model_dir, name),
+    file_refit = if (refit_allowed) "on_change" else "never"
+  )
+}
+```
+
+## Prior Predictive Check
+
+Type shares drawn from the priors alone, for the observed cells.
+They should spread over the whole unit interval without piling up at 0 or 1.
+
+```{r}
+#| label: prior-fit
+
+fit_prior <- fit_model("composition_m1_prior", sample_prior = "only")
+```
+
+```{r}
+#| label: fig-prior
+#| fig-width: 9
+#| fig-height: 4
+
+prior_shares <- posterior_epred(fit_prior, ndraws = 200)
+# draws x cells x types, divided by the cell total
+prior_shares <- sweep(prior_shares, 2, d$total, "/")
+
+dimnames(prior_shares)[[3]] |>
+  set_names() |>
+  map(\(k) tibble(share = as.vector(prior_shares[, , k]))) |>
+  list_rbind(names_to = "type") |>
+  ggplot(aes(x = share)) +
+  geom_histogram(bins = 40, fill = "#0072B2") +
+  facet_wrap(vars(type), nrow = 1) +
+  scale_x_continuous(labels = scales::percent, breaks = c(0, 0.5, 1)) +
+  labs(title = "Prior predictive type shares", x = NULL, y = NULL) +
+  theme_minimal(base_size = 10)
+```
+
+## Fit
+
+```{r}
+#| label: fit
+
+fit <- fit_model("composition_m1")
+
+# Draws used for predictions
+n_draws <- min(1000, ndraws(fit))
+
+# Convergence
+draws_summary <- summarise_draws(as_draws_df(fit), "rhat", "ess_bulk", "ess_tail")
+draws_summary |>
+  summarise(
+    max_rhat = max(rhat, na.rm = TRUE),
+    min_ess_bulk = min(ess_bulk, na.rm = TRUE),
+    min_ess_tail = min(ess_tail, na.rm = TRUE)
+  )
+
+# Divergent transitions
+nuts_params(fit) |>
+  filter(Parameter == "divergent__") |>
+  summarise(divergent = sum(Value))
+```
+
+# Posterior Predictive Checks
+
+For every cell, the observed weighted share of each type against the 90% interval of the shares the model predicts for that cell (cell effects included).
+If the model fits, about 90% of the cells fall inside their interval, in every source and type.
+A source whose coverage falls short is one the model treats too much like the others.
+
+```{r}
+#| label: ppc
+
+pred <- posterior_predict(fit, ndraws = n_draws)
+pred <- sweep(pred, 2, d$total, "/")
+
+obs <- d$y / d$total
+
+ppc <- map(seq_along(type_cols), \(k) {
+  tibble(
+    source = d$source,
+    country = d$country,
+    year = d$year,
+    type = names(type_cols)[k],
+    observed = obs[, k],
+    lo = apply(pred[, , k], 2, quantile, 0.05),
+    hi = apply(pred[, , k], 2, quantile, 0.95)
+  )
+}) |>
+  list_rbind() |>
+  mutate(inside = observed >= lo & observed <= hi)
+
+# Coverage of the 90% intervals
+ppc |>
+  summarise(coverage = round(mean(inside), 2), cells = n(), .by = c(source, type)) |>
+  pivot_wider(names_from = type, values_from = coverage) |>
+  arrange(source)
+```
+
+# Trajectories
+
+The fitted share of each type by country and year, **as the ESS would measure it** (source set to ESS, cell effects left out).
+The line is the posterior median, the band the 90% interval.
+The points are the raw weighted cells of notebook 2.5, by source; they sit off the line where their source measures differently, which is what the source offsets absorb.
+Trajectories are drawn only over the years a country is observed by some source.
+
+```{r}
+#| label: trajectories
+
+# Country-years within each country's observed range
+grid <- d |>
+  summarise(first = min(year), last = max(year), .by = country) |>
+  mutate(year = map2(first, last, \(a, b) seq(a, b))) |>
+  unnest(year) |>
+  mutate(
+    source = factor(ref_source, levels = levels(d$source)),
+    year_c = (year - 2010) / 10,
+    total = 1L
+  )
+
+epred <- posterior_epred(
+  fit,
+  newdata = grid,
+  re_formula = ~ (1 + year_c | country),
+  ndraws = n_draws
+)
+
+traj <- map(seq_along(type_cols), \(k) {
+  grid |>
+    select(country, year) |>
+    mutate(
+      type = names(type_cols)[k],
+      median = apply(epred[, , k], 2, median),
+      lo = apply(epred[, , k], 2, quantile, 0.05),
+      hi = apply(epred[, , k], 2, quantile, 0.95)
+    )
+}) |>
+  list_rbind()
+```
+
+```{r}
+#| label: plot-helper
+
+source_colours <- c(ESS = "#0072B2", EES = "#E69F00", CSES = "#009E73", EU25 = "#CC79A7")
+source_shapes <- c(ESS = 16, EES = 17, CSES = 15, EU25 = 18)
+# Offsets split the EES by mode
+source_colours <- c(source_colours, "EES interview" = "#E69F00", "EES online" = "#E69F00")
+source_shapes <- c(source_shapes, "EES interview" = 17, "EES online" = 2)
+
+plot_fitted <- function(type) {
+  raw <- cells |>
+    filter(ctype == type) |>
+    mutate(country = factor(country, levels = countries_25))
+  traj |>
+    filter(type == !!type) |>
+    ggplot(aes(x = year)) +
+    geom_ribbon(aes(ymin = lo, ymax = hi), fill = "grey80") +
+    geom_line(aes(y = median), linewidth = 0.6, colour = "grey20") +
+    geom_point(
+      data = raw,
+      aes(y = share_w, colour = source, shape = source),
+      size = 1.2,
+      alpha = 0.7
+    ) +
+    facet_wrap(vars(country), ncol = 5, drop = FALSE) +
+    scale_colour_manual(values = source_colours) +
+    scale_shape_manual(values = source_shapes) +
+    scale_x_continuous(breaks = c(2000, 2010, 2020), labels = c("'00", "'10", "'20")) +
+    scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+    coord_cartesian(xlim = c(1996, 2024)) +
+    labs(
+      title = paste("Fitted share:", type),
+      subtitle = "Posterior median and 90% interval at the ESS measurement; points are raw weighted cells by source",
+      x = NULL,
+      y = NULL,
+      colour = NULL,
+      shape = NULL
+    ) +
+    theme_minimal(base_size = 10) +
+    theme(
+      legend.position = "top",
+      panel.grid.minor = element_blank(),
+      strip.text = element_text(face = "bold")
+    )
+}
+```
+
+::: {.panel-tabset}
+
+## Explicit
+
+```{r}
+#| label: fig-fit-explicit
+#| fig-width: 10
+#| fig-height: 10
+
+plot_fitted("explicit")
+```
+
+## Denier
+
+```{r}
+#| label: fig-fit-denier
+#| fig-width: 10
+#| fig-height: 10
+
+plot_fitted("denier")
+```
+
+## Mismatched
+
+```{r}
+#| label: fig-fit-mismatched
+#| fig-width: 10
+#| fig-height: 10
+
+plot_fitted("mismatched")
+```
+
+## Attached non-voter
+
+```{r}
+#| label: fig-fit-attnv
+#| fig-width: 10
+#| fig-height: 10
+
+plot_fitted("attached non-voter")
+```
+
+## Non-partisan
+
+```{r}
+#| label: fig-fit-nonpartisan
+#| fig-width: 10
+#| fig-height: 10
+
+plot_fitted("non-partisan")
+```
+
+:::
+
+# Change per Country
+
+The posterior change in each type's share between a country's first and last observed year, at the ESS measurement, in percentage points, with 50% and 90% intervals.
+Countries are sorted by the median change in the explicit share.
+Countries observed over different spans are not directly comparable; the span is printed in the label.
+
+```{r}
+#| label: change
+
+span <- d |>
+  summarise(first = min(year), last = max(year), .by = country)
+
+idx_first <- match(paste(span$country, span$first), paste(grid$country, grid$year))
+idx_last <- match(paste(span$country, span$last), paste(grid$country, grid$year))
+
+change <- map(seq_along(type_cols), \(k) {
+  delta <- 100 * (epred[, idx_last, k] - epred[, idx_first, k])
+  span |>
+    mutate(
+      type = names(type_cols)[k],
+      median = apply(delta, 2, median),
+      lo90 = apply(delta, 2, quantile, 0.05),
+      hi90 = apply(delta, 2, quantile, 0.95),
+      lo50 = apply(delta, 2, quantile, 0.25),
+      hi50 = apply(delta, 2, quantile, 0.75),
+      p_decline = colMeans(delta < 0)
+    )
+}) |>
+  list_rbind()
+
+country_order <- change |>
+  filter(type == "explicit") |>
+  arrange(median) |>
+  mutate(label = paste0(country, " (", first, "-", last, ")"))
+```
+
+```{r}
+#| label: fig-change
+#| fig-width: 11
+#| fig-height: 7
+
+change |>
+  left_join(select(country_order, country, label), by = "country") |>
+  mutate(
+    label = factor(label, levels = country_order$label),
+    type = factor(type, levels = names(type_cols)[c(2, 3, 4, 5, 1)])
+  ) |>
+  ggplot(aes(y = label)) +
+  geom_vline(xintercept = 0, colour = "grey60") +
+  geom_linerange(aes(xmin = lo90, xmax = hi90), linewidth = 0.4, colour = "#0072B2") +
+  geom_linerange(aes(xmin = lo50, xmax = hi50), linewidth = 1.4, colour = "#0072B2") +
+  geom_point(aes(x = median), size = 1.6, colour = "#0072B2") +
+  facet_wrap(vars(type), nrow = 1) +
+  labs(
+    title = "Change in type shares, first to last observed year",
+    subtitle = "Percentage points at the ESS measurement; posterior median, 50% and 90% intervals",
+    x = "Change (pp)",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank())
+```
+
+# Source Offsets
+
+How the sources differ when they measure the same electorate.
+The figure shows each type's share for a typical country (varying effects at zero) in 2014, as each source would measure it, minus the ESS share, in percentage points.
+
+```{r}
+#| label: offsets
+
+offset_grid <- tibble(
+  source = factor(levels(d$source), levels = levels(d$source)),
+  year_c = 0.4,
+  total = 1L
+)
+
+offset_epred <- posterior_epred(fit, newdata = offset_grid, re_formula = NA, ndraws = n_draws)
+
+offsets <- map(seq_along(type_cols), \(k) {
+  delta <- 100 * (offset_epred[, , k] - offset_epred[, 1, k])
+  tibble(
+    source = offset_grid$source,
+    type = names(type_cols)[k],
+    median = apply(delta, 2, median),
+    lo = apply(delta, 2, quantile, 0.05),
+    hi = apply(delta, 2, quantile, 0.95)
+  )
+}) |>
+  list_rbind() |>
+  filter(source != ref_source)
+
+offsets |>
+  mutate(across(c(median, lo, hi), \(x) round(x, 1)))
+```
+
+```{r}
+#| label: fig-offsets
+#| fig-width: 10
+#| fig-height: 3.5
+
+offsets |>
+  mutate(type = factor(type, levels = names(type_cols)[c(2, 3, 4, 5, 1)])) |>
+  ggplot(aes(y = source, x = median, colour = source, shape = source)) +
+  geom_vline(xintercept = 0, colour = "grey60") +
+  geom_linerange(aes(xmin = lo, xmax = hi), linewidth = 0.5) +
+  geom_point(size = 2) +
+  facet_wrap(vars(type), nrow = 1) +
+  scale_colour_manual(values = source_colours, guide = "none") +
+  scale_shape_manual(values = source_shapes, guide = "none") +
+  labs(
+    title = "Source offsets against the ESS",
+    subtitle = "Typical country, 2014; percentage points, posterior median and 90% interval",
+    x = "Difference from ESS (pp)",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank())
+```
+
+# Save
+
+The trajectories, changes and offsets (posterior summaries) and the draws of the change per country go to `data/05_results/composition_post.rds`, which slides and the manuscript read instead of the fit.
+Only a full fit is saved.
+
+```{r}
+#| label: save
+
+if (full_fit) {
+  dir.create(here("data", "05_results"), showWarnings = FALSE)
+  list(
+    trajectories = traj,
+    change = change,
+    offsets = offsets,
+    ppc_coverage = ppc |> summarise(coverage = mean(inside), .by = c(source, type)),
+    diagnostics = draws_summary,
+    settings = settings,
+    reference = list(source = ref_source, offset_year = 2014)
+  ) |>
+    write_rds(here("data", "05_results", "composition_post.rds"))
+}
+```
+
+# Caveats
+
+- **The source offsets are assumed common to all countries.** Where a source measures differently in one country (a national wording, an odd sample), the difference lands in that country's cells and trend.
+- **The offsets are identified only by overlaps.** Countries observed by one source alone take the offsets estimated elsewhere.
+- **Linear country deviations.** A country whose trend bends differently from the European spline is smoothed toward a line; check the trajectories against the raw points.
+- **Effective counts are rounded** weighted counts, an approximation to a weighted likelihood.
+- **The model does not read causally.** It describes who reports which type; it does not separate age, period and cohort.
+- **Development fits** (`full_fit <- FALSE`) are too short to interpret.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

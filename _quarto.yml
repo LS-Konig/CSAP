@@ -22,6 +22,7 @@ project:
     - code/02_composition/2.2_ees_composition.qmd
     - code/02_composition/2.3_cses_composition.qmd
     - code/02_composition/2.4_ess_composition.qmd
+    - code/02_composition/2.5_composition_raw.qmd
     - code/03_analyses/3.1_eu25_prep.qmd
   # Copies frozen figures and the plain composition pages into _manuscript/
   post-render:

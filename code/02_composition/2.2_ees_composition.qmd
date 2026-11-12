@@ -217,6 +217,22 @@ The match comes from `data/02_processed/ees_party_match.parquet`, joined on wave
 The attachment categories follow notebook 1.5, with one difference: don't know, refusal and missing are pooled into the tree's grey *DK* box.
 In 2009, respondents without an attachment are split by the probe `q89`, and a leaner's party (`q90`) is matched to the EP vote like an attachment (`ext_match_lean_vote_ep`, notebook 1.9).
 
+**Weights.** Every wave uses a socio-demographic weight and never a political one, since a weight to the official vote would correct away part of what the types measure:
+
+| Wave | Weight | What it adjusts for | Political weights left out |
+|---|---|---|---|
+| 2004 | `sesweight1` (Germany `sesweight3`) | built per country by the fieldwork institute (codebook `ZA4566_cod.pdf`, appendix 5) | `psweight`, `nweight`, `epweight` |
+| 2009 | `v100` | sample weight per country, calibrated | `v131`, `v132` |
+| 2014 | `w1` | national target ("weight result from target") | `w1pol` and the other `*pol` weights |
+| 2019 | `WGT3` | sex × age, region (`D8`), urbanity (`D12`), education | `WGT4`, `WGT5` |
+| 2024 | `Weight2` | gender × age, region, locality, education, capped at 3 (`ZA8868_mr.pdf`, 2.8.1) | none in the file |
+
+In 2004, Austria, Hungary, Slovakia and Northern Ireland are unweighted: their fieldwork weights contain EP or national election results (Hungary and Northern Ireland are political weights outright), and Italy's weight is undocumented but used.
+Countries without any socio-demographic weight (Cyprus, Czech Republic, Denmark, Finland, France, Greece, Lithuania, Netherlands, Sweden) are unweighted too, and respondents with a missing weight in a weighted country get 1.
+2004 pools Britain and Northern Ireland into `GB`, with Northern Ireland as 1,582 of 3,082 respondents; it is weighted down to its share of the UK electorate at the 2004 EP election (1,072,669 of 44,157,267, 2.4%).
+Weights are rescaled to mean 1 within each country-wave.
+Trees show unweighted N in the boxes and weighted shares on the edges; all figures are weighted.
+
 ```{r}
 #| label: select-2004
 
@@ -243,8 +259,28 @@ ees_2004 <- ees_2004 |>
     # 1-89 parties, 90 other
     vote = if_else(v %in% 1:90, "yes", "no"),
     att_party = if_else(a %in% 1:89, as.character(a), NA),
-    vote_party = if_else(v %in% 1:89, as.character(v), NA)
-  )
+    vote_party = if_else(v %in% 1:89, as.character(v), NA),
+    s1 = as.numeric(sesweight1),
+    s3 = as.numeric(sesweight3)
+  ) |>
+  # Socio-demographic weight per country (codebook appendix 5): none where
+  # the fieldwork weight contains vote results; respondents missing a weight
+  # in a weighted country get 1
+  mutate(
+    weight_source = case_when(
+      country_raw %in% c("austria", "hungary", "slovakia", "northern ireland") ~ "none (weight contains vote)",
+      country_raw == "germany" ~ "sesweight3",
+      any(!is.na(s1)) ~ "sesweight1",
+      .default = "none"
+    ),
+    weight = case_when(
+      weight_source == "sesweight3" ~ coalesce(s3, 1),
+      weight_source == "sesweight1" ~ coalesce(s1, 1),
+      .default = 1
+    ),
+    .by = country_raw
+  ) |>
+  select(-s1, -s3)
 ```
 
 ```{r}
@@ -274,7 +310,10 @@ ees_2009 <- ees_2009 |>
     # Seven-digit parties, 20/98 other
     vote = if_else(v > 1000 | v %in% c(20, 98), "yes", "no", missing = "no"),
     att_party = if_else(a > 1000, as.character(a), NA),
-    vote_party = if_else(v > 1000, as.character(v), NA)
+    vote_party = if_else(v > 1000, as.character(v), NA),
+    # Sample weight per country (calibrated)
+    weight = as.numeric(v100),
+    weight_source = "v100"
   )
 ```
 
@@ -298,7 +337,10 @@ ees_2014 <- ees_2014 |>
     # Seven-digit parties, 20/98 other
     vote = if_else(v > 1000 | v %in% c(20, 98), "yes", "no", missing = "no"),
     att_party = if_else(a > 1000, as.character(a), NA),
-    vote_party = if_else(v > 1000, as.character(v), NA)
+    vote_party = if_else(v > 1000, as.character(v), NA),
+    # Socio-demographic weight to the national target (w1pol is political)
+    weight = as.numeric(w1),
+    weight_source = "w1"
   )
 ```
 
@@ -322,7 +364,10 @@ ees_2019 <- ees_2019 |>
     # 0 no vote, 96 blank, 98/99 missing
     vote = if_else(v %in% c(1:19, 20, 90), "yes", "no", missing = "no"),
     att_party = if_else(a %in% 1:19, as.character(a), NA),
-    vote_party = if_else(v %in% 1:19, as.character(v), NA)
+    vote_party = if_else(v %in% 1:19, as.character(v), NA),
+    # Sex-age, region, urbanity and education (WGT4/5 are political)
+    weight = as.numeric(WGT3),
+    weight_source = "WGT3"
   )
 ```
 
@@ -346,7 +391,10 @@ ees_2024 <- ees_2024 |>
     # 91 blank, 96 no vote, 98 dk
     vote = if_else(v > 1000 | v == 90, "yes", "no", missing = "no"),
     att_party = if_else(q19n %in% 1:87, as.character(q19n), NA),
-    vote_party = if_else(q6n %in% 1:87, as.character(q6n), NA)
+    vote_party = if_else(q6n %in% 1:87, as.character(q6n), NA),
+    # Post-stratification including education
+    weight = as.numeric(Weight2),
+    weight_source = "Weight2"
   )
 ```
 
@@ -356,6 +404,10 @@ Country names are mapped onto ISO2 exactly as in notebook 1.5, with Britain and 
 
 ```{r}
 #| label: bind
+
+# Northern Ireland's share of the UK electorate at the 2004 EP election:
+# 1,072,669 of 44,157,267
+ni_share <- 1072669 / 44157267
 
 ees_tree <- bind_rows(ees_2004, ees_2009, ees_2014, ees_2019, ees_2024) |>
   mutate(
@@ -394,9 +446,30 @@ ees_tree <- bind_rows(ees_2004, ees_2009, ees_2014, ees_2019, ees_2024) |>
   ) |>
   # Keep the project's 25 democracies
   filter(country %in% countries_25) |>
+  # Mean 1 within each sample (Britain and Northern Ireland apart)
+  mutate(weight = weight / mean(weight), .by = c(year, country_raw)) |>
+  mutate(
+    # 2004: Northern Ireland at its share of the UK electorate, not its 51%
+    # of the pooled sample
+    ni = country_raw == "northern ireland",
+    weight = if_else(
+      ni,
+      weight * ni_share / (1 - ni_share) * sum(!ni) / sum(ni),
+      weight
+    ),
+    .by = c(year, country)
+  ) |>
+  select(-ni) |>
+  # Mean 1 within each country-wave
+  norm_weight(year, country) |>
   mutate(
     year = factor(year)
   )
+
+# Northern Ireland's weighted share of GB 2004
+ees_tree |>
+  filter(year == "2004", country == "GB") |>
+  summarise(ni_weighted = sum(weight[country_raw == "northern ireland"]) / sum(weight))
 
 # Level 3: Party Facts match with the EP vote, with alliances and lineage
 # (notebook 1.9); `route` says which table made a pair the same party
@@ -439,7 +512,7 @@ ees_tree <- ees_tree |>
     # Tree order from the questionnaire
     vote_first = item_order$vote_first[match(year, item_order$year)]
   ) |>
-  select(year, country, att, lean, vote, match, route, a, v, att_pf, vote_pf, vote_first)
+  select(year, country, att, lean, vote, match, route, a, v, att_pf, vote_pf, vote_first, weight, weight_source)
 stopifnot(nrow(ees_tree) == n_before)
 
 # Respondents and countries per wave
@@ -541,7 +614,7 @@ ees_tree |>
   scale_x_discrete(labels = \(x) str_sub(x, 3, 4)) +
   labs(
     title = "Partisan composition in the EES by country and wave, 2004-2024",
-    subtitle = "Unweighted shares; the vote is the European Parliament vote",
+    subtitle = "Weighted shares (socio-demographic weights); the vote is the European Parliament vote",
     x = "Wave (20..)"
   )
 ```
@@ -574,7 +647,7 @@ ees_tree |>
   plot_country_composition() +
   labs(
     title = "Partisan composition in the EES, 2004-2024",
-    subtitle = "Unweighted shares; the vote is the European Parliament vote"
+    subtitle = "Weighted shares (socio-demographic weights); the vote is the European Parliament vote"
   )
 ```
 
@@ -584,7 +657,7 @@ ees_tree |>
 #| fig-width: 9
 #| fig-height: 7
 
-emit_figure_tabset(ees_tree, by = "year", subtitle = "Unweighted shares; the vote is the European Parliament vote")
+emit_figure_tabset(ees_tree, by = "year", subtitle = "Weighted shares (socio-demographic weights); the vote is the European Parliament vote")
 ```
 
 # Leaner Probes
@@ -593,8 +666,43 @@ Only the 2009 wave follows the attachment item with a leaner probe: `q89` (*do y
 The trees split those respondents into leaners and the rest, and match a leaner's party to the EP vote.
 The other four waves ask only the strength of attachment of those who named a party (`v212`, `q88`, `qpp22`, `Q26`), which is not a probe, and 2024 not even that.
 
+# Weighted and Unweighted Shares
+
+How much the weights move each leaf, by country and wave, largest differences first, in percentage points.
+
+```{r}
+#| label: weight-check
+
+ees_tree |>
+  weight_check(country, year) |>
+  print(n = 25)
+```
+
+# Type File
+
+One row per respondent with the common composition types (`tree_ctype()` in `pid_tree.R`), the weight and the survey cell, for notebooks 2.5 and 2.6.
+
+```{r}
+#| label: write-types
+
+ees_types <- ees_tree |>
+  write_types(
+    source = "EES",
+    survey = paste0("EES", year),
+    year = year,
+    vote_ref = "European Parliament",
+    weight_source = weight_source,
+    path = here("data", "02_processed", "ees_types.parquet")
+  )
+
+ees_types |>
+  count(ctype, wt = weight) |>
+  mutate(share = round(n / sum(n), 3))
+```
+
 # Caveats
 
+- **Shares are weighted** with socio-demographic weights, and some 2004 countries are unweighted (see *Weights* above).
 - **The vote is an EP vote.** European elections are second-order: turnout is low and sincere voting for small parties is common, so *no vote reported* and *different party* are both larger than they would be with a national recall.
   The national recall is listed in the table above for a later comparison.
 - **Mode changes between 2014 and 2019**, from interviewer-administered to online panels with no refusal option (see notebook 1.5).

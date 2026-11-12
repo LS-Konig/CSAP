@@ -50,6 +50,33 @@ Lineage counting as *same* is a deliberate choice (Tristan, 2026-09-29). `pf_mat
 and the `ext_route_*` columns of the match files record the route of every *same*, so an
 analysis can exclude lineage. Change the rule only in 1.9 and `pf_code.R`, never per notebook.
 
+## Weights
+
+The composition notebooks (2.2–2.4) weight with **socio-demographic weights only**. Political
+weights adjust the sample to the official vote, which would correct away part of what the
+partisan types measure. Each weight is rescaled to mean 1 within its survey × country cell
+(`norm_weight()` in `pid_tree.R`).
+
+| Source | Weight | Notes |
+|---|---|---|
+| ESS | `pspwght` | post-stratification including the design weight; LFS margins of age, gender, education, region ([ESS documentation](https://www.europeansocialsurvey.org/sites/default/files/2023-06/ESS_post_stratification_weights_documentation.pdf)) |
+| CSES IMD / module 6 | `IMD1010_2` / `f1101_2` (demographic), else `IMD1010_1` / `f1101_1` (sample), else none | `_3` is political, never used. Coded 1 where a study supplied none ([module 6 codebook part 5](https://cses.org/wp-content/uploads/2025/12/cses6_codebook_part5_designs_and_weights.txt)) |
+| EES 2004 | `sesweight1`; Germany `sesweight3` | per-country weights from the fieldwork institutes (`ZA4566_cod.pdf`, appendix 5). AT, HU, SK and Northern Ireland are unweighted, because their weights contain vote results. CY, CZ, DK, FI, FR, GR, LT, NL and SE have no socio-demographic weight. Northern Ireland (pooled into GB) is weighted to 2.43% of the UK electorate |
+| EES 2009 | `v100` | sample weight per country, calibrated; `v131`/`v132` are political |
+| EES 2014 | `w1` | "weight result from target"; `w*pol` are political |
+| EES 2019 | `WGT3` | sex × age, region, urbanity, education; `WGT4`/`WGT5` are political |
+| EES 2024 | `Weight2` | gender × age, region, locality, education, capped at 3 (`ZA8868_mr.pdf`, 2.8.1) |
+| eu25games | none | the release has no weight |
+
+## Composition files
+
+- `data/02_processed/{eu25,ees,cses,ess}_types.parquet` (2.1–2.4): one row per respondent (respondent-wave in eu25) with
+  `source`, `survey`, `country`, `year`, `vote_ref`, `weight`, `weight_source`, `leaf`, `ctype` (the common types of
+  `tree_ctype()`) and `lean`.
+- `data/02_processed/composition_cells.parquet` (2.5): one row per survey × country × type, with weighted and
+  unweighted shares, `n`, Kish `n_eff` and a Wilson interval. This is the input of 2.6.
+- `data/05_results/composition_post.rds` (2.6, full fit only): posterior summaries of the trajectories, changes and source offsets.
+
 ## Current eu25games analysis files
 
 These are written by the current pipeline. Details are in the notebooks.

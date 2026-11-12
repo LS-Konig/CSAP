@@ -213,3 +213,73 @@ draft a new notebook in a new subdir code/03_analyses for the
   - Decomposition over time and across countries for outcomes 1–5: change in the type mix vs. change within types.
   - Attitudinal vs. behavioral only within eu25 (same respondents, standardized). The EES 2024 horizontal-attitudinal panel separates target from measurement mode, but descriptively, since it uses different
     respondents and a different year.
+
+
+
+
+
+
+
+
+
+--- 10.11.
+
+I've finished all three steps: the four composition notebooks are weighted, there are two new
+  notebooks (2.5 raw, 2.6 model), and everything renders. The model has only had a short development
+  fit so far, so its estimates aren't readable yet. Nothing is committed.
+
+  Step 1: weights in 2.1–2.4. Only demographic weights are used, never political ones:
+
+  ┌──────────┬─────────────────────────────────────────────────────────────────────────────┐
+  │  Source  │                                   Weight                                    │
+  ├──────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ ESS      │ pspwght                                                                     │
+  ├──────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ CSES     │ demographic weight (IMD1010_2 / f1101_2), else the sample weight, else none │
+  ├──────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ EES 2004 │ sesweight1 (Germany sesweight3)                                             │
+  ├──────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ EES 2009 │ v100                                                                        │
+  ├──────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ EES 2014 │ w1                                                                          │
+  ├──────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ EES 2019 │ WGT3                                                                        │
+  ├──────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ EES 2024 │ Weight2                                                                     │
+  ├──────────┼─────────────────────────────────────────────────────────────────────────────┤
+  │ eu25     │ none: the release has no weight, so it stays unweighted                     │
+  └──────────┴─────────────────────────────────────────────────────────────────────────────┘
+
+  - EES 2004 needed special handling. Austria, Hungary, Slovakia and Northern Ireland are left
+    unweighted, because their "socio-demographic" weights actually contain election results (codebook
+    appendix 5). Northern Ireland is 51% of the pooled GB sample, so I weighted it down to its 2.4%
+    share of the UK electorate.
+  - Trees show unweighted N in the boxes and weighted percentages on the arrows. All figures are
+    weighted.
+  Step 2: 2.5_composition_raw.qmd (no model). One figure per type, each with 25 country panels and one
+  line per source, with weighted and unweighted tabs. It also has coverage and overlap tables, a
+  figure of leaners among deniers, and writes composition_cells.parquet (520 survey × country cells).
+  Three cells look like coding errors to check in 2.3: CSES Belgium (~1999) and Romania (~2004) at
+  about 73% explicit, and one Irish CSES study near 0%.
+
+  Step 3: 2.6_composition_model.qmd (model).
+  - What it fits: source offsets, a European time trend, each country's own level and linear trend,
+    and a per-survey effect.
+  - What it shows: trajectories at the ESS measurement with the raw cells behind them, the change per
+    country, and the source offsets.
+  - Change from the plan: the EES is split into a face-to-face and an online instrument. The 2.5 lines
+    show the EES share jumping when it moved online in 2019, so a single EES offset would have been
+    wrong.
+  - Development fit only (full_fit <- FALSE, 2 short chains): R-hat reaches 1.05 and there are 10
+    divergent transitions, which is normal for so few draws. For the real fit, set full_fit <- TRUE
+    and render. I haven't run it, and I don't know yet how long it takes.
+  - The common-offset assumption already looks strained. Italy's EES runs far above its ESS, and
+    Denmark's CSES falls below it. If that holds in the full fit, the next step is to let the offsets
+    vary by country.
+
+  Two more choices to confirm:
+  - I made attached non-voters a fifth type, so the shares cover everyone with a type.
+  - Voting leaners count as deniers, which is how a survey without a leaner probe counts them.
+
+  Sources: CSES module 6 codebook, part 5 · GESIS CSES weights · ESS post-stratification weights · UK
+  electorate, 2004 EP election

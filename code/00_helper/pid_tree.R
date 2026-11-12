@@ -17,6 +17,10 @@
 #                                                  att != "yes"; NA where the
 #                                                  probe was not fielded
 #   vote_first TRUE / FALSE                        vote asked before attachment?
+#   weight     numeric                             survey weight (see data.md,
+#                                                  *Weights*); shares and plots
+#                                                  are weighted when present,
+#                                                  counts N stay unweighted
 #
 # plus any grouping columns (country, period). The tree follows the question
 # order: vote -> attachment -> probe -> match where the vote came first,
@@ -134,12 +138,32 @@ check_tree_frame <- function(df) {
   invisible(df)
 }
 
+# Weights -----------------------------------------------------------------------
+
+# Weight column, 1 where absent
+tree_weight <- function(df) {
+  if ("weight" %in% names(df)) df$weight else rep(1, nrow(df))
+}
+
+# Rescale weights to mean 1 within each survey cell (e.g. study x country), so
+# that pooling cells keeps each cell's own sample size; NA and negative weights
+# fail loudly
+norm_weight <- function(df, ...) {
+  stopifnot(!anyNA(df$weight), all(df$weight >= 0))
+  df |>
+    dplyr::mutate(weight = weight / mean(weight), .by = c(...))
+}
+
+# Kish effective sample size
+n_eff <- function(w) sum(w)^2 / sum(w^2)
+
 # Node counts -------------------------------------------------------------------
 
 # Order and probe level per group
 tree_layout <- function(df, grp) {
   if (!"vote_first" %in% names(df)) df$vote_first <- FALSE
   if (!"lean" %in% names(df)) df$lean <- NA_character_
+  df$.w <- tree_weight(df)
   df |>
     dplyr::mutate(
       # Majority order of the group
@@ -224,7 +248,7 @@ tree_counts <- function(df, ...) {
   cur <- rep("root", nrow(df))
   long <- list(dplyr::bind_cols(
     df[, grp, drop = FALSE],
-    tibble::tibble(node = "root", parent = NA_character_)
+    tibble::tibble(node = "root", parent = NA_character_, .w = df$.w)
   ))
   for (s in steps) {
     nxt <- dplyr::if_else(is.na(s), NA, paste0(cur, "__", s))
@@ -233,23 +257,28 @@ tree_counts <- function(df, ...) {
       long,
       list(dplyr::bind_cols(
         df[keep, grp, drop = FALSE],
-        tibble::tibble(node = nxt[keep], parent = cur[keep])
+        tibble::tibble(node = nxt[keep], parent = cur[keep], .w = df$.w[keep])
       ))
     )
     cur <- dplyr::coalesce(nxt, cur)
   }
+  # Unweighted n, weighted n_w
   counts <- dplyr::bind_rows(long) |>
-    dplyr::count(dplyr::across(dplyr::all_of(c(grp, "node", "parent"))))
+    dplyr::summarise(
+      n = dplyr::n(),
+      n_w = sum(.w),
+      .by = dplyr::all_of(c(grp, "node", "parent"))
+    )
 
-  # Attach parent N, share and label
+  # Attach parent N, weighted share and label
   counts <- counts |>
     dplyr::left_join(
       counts |>
-        dplyr::select(dplyr::all_of(grp), parent = node, n_parent = n),
+        dplyr::select(dplyr::all_of(grp), parent = node, n_parent = n, n_w_parent = n_w),
       by = c(grp, "parent")
     ) |>
     dplyr::mutate(
-      share = n / n_parent,
+      share = n_w / n_w_parent,
       leaf = !node %in% parent,
       .by = dplyr::all_of(grp)
     ) |>
@@ -319,7 +348,7 @@ mermaid_tree <- function(counts) {
       )
     )
 
-  # Edges labelled with the parent share
+  # Edges labelled with the (weighted) parent share
   edges <- counts |>
     dplyr::filter(!is.na(parent)) |>
     dplyr::mutate(
@@ -502,8 +531,9 @@ tree_leaves <- function(df, levels = leaf_levels) {
 # Stacked leaf shares, one panel per facet; blues, greens, oranges, greys
 plot_leaf_shares <- function(df, x, facet, ncol = 5) {
   df |>
+    dplyr::mutate(.w = tree_weight(df)) |>
     tree_leaves() |>
-    dplyr::count({{ facet }}, {{ x }}, leaf) |>
+    dplyr::count({{ facet }}, {{ x }}, leaf, wt = .w) |>
     dplyr::mutate(share = n / sum(n), .by = c({{ facet }}, {{ x }})) |>
     ggplot2::ggplot(ggplot2::aes(x = {{ x }}, y = share, fill = leaf)) +
     ggplot2::geom_col(width = 0.85, colour = "white", linewidth = 0.2) +
@@ -538,10 +568,12 @@ leaf_text_colour <- function(fill) {
 # greens, oranges, greys from the left
 plot_country_composition <- function(df) {
   d <- df |>
+    dplyr::mutate(.w = tree_weight(df)) |>
     tree_leaves() |>
-    dplyr::count(country, leaf) |>
+    dplyr::summarise(n = dplyr::n(), n_w = sum(.w), .by = c(country, leaf)) |>
     dplyr::mutate(
-      share = n / sum(n),
+      # Weighted share, unweighted N
+      share = n_w / sum(n_w),
       n_country = sum(n),
       attached = sum(share[startsWith(as.character(leaf), "Attached")]),
       .by = country
@@ -630,4 +662,84 @@ emit_figure_tabset <- function(df, by, level = 2, subtitle = NULL) {
     cat("![](", path, "){width=100%}\n\n", sep = "")
   }
   cat(":::\n\n")
+}
+
+# Weighted vs. unweighted -------------------------------------------------------
+
+# Leaf shares per group, unweighted and weighted, with the difference in
+# percentage points; largest absolute differences first
+weight_check <- function(df, ...) {
+  df |>
+    dplyr::mutate(.w = tree_weight(df)) |>
+    tree_leaves() |>
+    dplyr::summarise(n = dplyr::n(), n_w = sum(.w), .by = c(..., leaf)) |>
+    dplyr::mutate(
+      unweighted = 100 * n / sum(n),
+      weighted = 100 * n_w / sum(n_w),
+      diff_pp = weighted - unweighted,
+      .by = c(...)
+    ) |>
+    dplyr::select(..., leaf, n, unweighted, weighted, diff_pp) |>
+    dplyr::mutate(dplyr::across(c(unweighted, weighted, diff_pp), \(x) round(x, 1))) |>
+    dplyr::arrange(dplyr::desc(abs(diff_pp)))
+}
+
+# Common composition types --------------------------------------------------------
+
+# The types every source can form. Leaners are folded in as a survey without the
+# probe folds them: a leaner says "no" to the base item, so a voting leaner is a
+# denier and a non-voting leaner a non-partisan. Attached non-voters are their
+# own category. NA: attachment DK, vote item not fielded, or an attached voter
+# whose two answers cannot be compared (left out of the denominator).
+ctype_levels <- c(
+  "explicit",
+  "mismatched",
+  "denier",
+  "attached non-voter",
+  "non-partisan"
+)
+
+tree_ctype <- function(leaf) {
+  leaf <- as.character(leaf)
+  factor(
+    dplyr::case_when(
+      leaf == "Attached: same party" ~ "explicit",
+      leaf == "Attached: different party" ~ "mismatched",
+      leaf == "Attached: no vote" ~ "attached non-voter",
+      leaf %in% c(
+        "No attachment: vote",
+        "Leaner: same party",
+        "Leaner: different party",
+        "Leaner: vote not matchable"
+      ) ~ "denier",
+      leaf %in% c("No attachment: no vote", "Leaner: no vote") ~ "non-partisan",
+      .default = NA_character_
+    ),
+    levels = ctype_levels
+  )
+}
+
+# Respondent-level type file for notebooks 2.5 and 2.6
+# `survey` names the fieldwork cell within a country (study, wave or round),
+# `year` its fieldwork year, `vote_ref` which election the vote refers to.
+write_types <- function(df, source, survey, year, vote_ref, weight_source, path) {
+  lean <- if ("lean" %in% names(df)) df$lean else rep(NA_character_, nrow(df))
+  out <- df |>
+    tree_leaves() |>
+    dplyr::transmute(
+      source = source,
+      survey = as.character({{ survey }}),
+      country,
+      year = as.integer(as.character({{ year }})),
+      vote_ref = vote_ref,
+      weight = tree_weight(df),
+      weight_source = {{ weight_source }},
+      leaf,
+      ctype = tree_ctype(leaf),
+      # NA for the attached and where no probe was fielded
+      lean = lean
+    )
+  stopifnot(!anyNA(out$year), !anyNA(out$weight))
+  arrow::write_parquet(out, path)
+  invisible(out)
 }

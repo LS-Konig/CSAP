@@ -1,0 +1,514 @@
+---
+title: |
+  CSAP Code Notebook 2.5
+subtitle: |
+  Partisan composition over time, by source: raw weighted shares
+date: last-modified
+date-format: MMMM D, YYYY
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: true
+  eval: true
+  message: true
+---
+
+# Setup
+
+This notebook puts the four sources side by side without a model.
+Each survey in each country is one **cell**, and each source is one line.
+Where the lines of two sources disagree in the same country and period, the gap is a difference between the instruments (wording, mode, and which vote they ask about), not a change in the electorate.
+Notebook 2.6 models these gaps; this notebook shows what the model starts from.
+
+```{r}
+#| label: setup
+
+# To track render duration
+start_time <- Sys.time()
+
+# set width of console output
+options(width = 80)
+
+# Install and load required packages
+p_required <- c(
+  "tidyverse",
+  "here",
+  "arrow",
+  "sessioninfo"
+)
+packages <- rownames(installed.packages())
+p_to_install <- p_required[!(p_required %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+sapply(p_required, require, character.only = TRUE)
+rm(p_required, p_to_install, packages)
+
+# Shared tree helpers: countries_25, ctype_levels, n_eff()
+source(here("code", "00_helper", "pid_tree.R"))
+```
+
+# Load the Type Files
+
+Notebooks 2.1--2.4 each write one row per respondent with the common composition type (`tree_ctype()` in `pid_tree.R`):
+
+- **explicit**: attached, voted for the same party;
+- **mismatched**: attached to one party, voted for another;
+- **denier**: no attachment, reported a party vote (voting leaners included, as a survey without a leaner probe would count them);
+- **attached non-voter**: attached, no party vote reported;
+- **non-partisan**: no attachment, no party vote (non-voting leaners included).
+
+Attachment DK, studies without a vote item, and attached voters whose two answers cannot be compared have no type and are left out of every denominator.
+
+```{r}
+#| label: load
+
+types <- c("eu25", "ees", "cses", "ess") |>
+  map(\(s) read_parquet(here("data", "02_processed", paste0(s, "_types.parquet")))) |>
+  list_rbind() |>
+  mutate(source = factor(source, levels = c("ESS", "EES", "CSES", "EU25")))
+
+# Respondents per source, with and without a type
+types |>
+  count(source, typed = !is.na(ctype)) |>
+  pivot_wider(names_from = typed, values_from = n, names_prefix = "typed_")
+
+# Weights used, by source
+types |>
+  distinct(source, survey, country, weight_source) |>
+  count(source, weight_source)
+```
+
+# Cells
+
+One row per survey × country × type.
+`share_w` is the weighted share, `share_u` the unweighted one.
+`n` is the cell's unweighted number of typed respondents and `n_eff` its Kish effective sample size, $(\sum w)^2 / \sum w^2$, which shrinks `n` by how uneven the weights are.
+The interval is a 95% Wilson interval computed with `n_eff` in place of `n`, so it reflects sampling noise under the weights, nothing else.
+
+```{r}
+#| label: cells
+
+# Wilson interval for a share p from n observations
+wilson <- function(p, n, z = 1.96) {
+  centre <- (p + z^2 / (2 * n)) / (1 + z^2 / n)
+  half <- z * sqrt(p * (1 - p) / n + z^2 / (4 * n^2)) / (1 + z^2 / n)
+  list(lo = centre - half, hi = centre + half)
+}
+
+typed <- types |>
+  filter(!is.na(ctype))
+
+# Cell totals
+cell_totals <- typed |>
+  summarise(
+    n = n(),
+    n_eff = n_eff(weight),
+    w_total = sum(weight),
+    vote_ref = first(vote_ref),
+    # Several where a cell pools samples (EES 2004 GB)
+    weight_source = paste(sort(unique(weight_source)), collapse = " + "),
+    .by = c(source, survey, country, year)
+  )
+
+cells <- typed |>
+  summarise(
+    k = n(),
+    k_w = sum(weight),
+    .by = c(source, survey, country, year, ctype)
+  ) |>
+  # Zero cells for types absent from a survey
+  complete(
+    nesting(source, survey, country, year),
+    ctype,
+    fill = list(k = 0L, k_w = 0)
+  ) |>
+  left_join(cell_totals, by = c("source", "survey", "country", "year")) |>
+  mutate(
+    share_w = k_w / w_total,
+    share_u = k / n,
+    lo = wilson(share_w, n_eff)$lo,
+    hi = wilson(share_w, n_eff)$hi
+  ) |>
+  select(source, survey, country, year, vote_ref, weight_source, ctype, k, n, n_eff, share_w, share_u, lo, hi) |>
+  arrange(source, country, year, ctype)
+
+# Shares add up to 1 in every cell
+cells |>
+  summarise(w = sum(share_w), u = sum(share_u), .by = c(survey, country)) |>
+  (\(d) stopifnot(all(abs(d$w - 1) < 1e-9), all(abs(d$u - 1) < 1e-9)))()
+
+# Cells per source
+cell_totals |>
+  summarise(
+    cells = n(),
+    countries = n_distinct(country),
+    years = paste(min(year), max(year), sep = "-"),
+    median_n = median(n),
+    median_n_eff = round(median(n_eff)),
+    .by = source
+  )
+
+write_parquet(cells, here("data", "02_processed", "composition_cells.parquet"))
+```
+
+The cell table is written to `data/02_processed/composition_cells.parquet`.
+It is the input of notebook 2.6 and the table of raw numbers behind every modelled share.
+
+# Coverage and Overlap
+
+Notebook 2.6 can only tell a source difference from a change over time where two sources observe the same country at about the same time.
+The first table counts, per country, the cells of each source.
+The second lists the **overlaps**: pairs of cells from two different sources in the same country at most one year apart.
+
+```{r}
+#| label: coverage
+
+cell_totals |>
+  count(country, source) |>
+  pivot_wider(names_from = source, values_from = n, values_fill = 0) |>
+  arrange(country) |>
+  print(n = 25)
+```
+
+```{r}
+#| label: overlap
+
+overlaps <- cell_totals |>
+  select(country, source, survey, year) |>
+  (\(d) inner_join(d, d, by = "country", suffix = c("_a", "_b"), relationship = "many-to-many"))() |>
+  filter(
+    as.integer(source_a) < as.integer(source_b),
+    abs(year_a - year_b) <= 1
+  )
+
+# Overlaps per source pair
+overlaps |>
+  count(source_a, source_b, name = "overlaps") |>
+  arrange(desc(overlaps))
+
+# Countries with an overlap per source pair
+overlaps |>
+  summarise(countries = n_distinct(country), .by = c(source_a, source_b))
+```
+
+# Trajectories by Type
+
+One figure per type, with the 25 countries as panels on one y-axis.
+Each source is a line with its own colour and point shape, each point a survey, each bar its 95% interval.
+The EES and EU25 ask about the European Parliament vote, the CSES about the current lower-house vote and the ESS about the last national election, so the types built from the vote (explicit, mismatched, denier, attached non-voter, non-partisan) differ between sources for that reason as well as for the wording.
+Each figure has a weighted and an unweighted tab.
+
+```{r}
+#| label: plot-helper
+
+# Okabe-Ito, validated (dataviz); shapes as the second encoding
+source_colours <- c(ESS = "#0072B2", EES = "#E69F00", CSES = "#009E73", EU25 = "#CC79A7")
+source_shapes <- c(ESS = 16, EES = 17, CSES = 15, EU25 = 18)
+
+type_titles <- c(
+  "explicit" = "explicit partisans",
+  "mismatched" = "mismatched partisans",
+  "denier" = "deniers",
+  "attached non-voter" = "attached non-voters",
+  "non-partisan" = "non-partisans"
+)
+
+plot_trajectory <- function(type, weighted = TRUE) {
+  d <- cells |>
+    filter(ctype == type) |>
+    mutate(
+      share = if (weighted) share_w else share_u,
+      lo = if (weighted) lo else NA_real_,
+      hi = if (weighted) hi else NA_real_,
+      country = factor(country, levels = countries_25)
+    )
+  ggplot(d, aes(x = year, y = share, colour = source, shape = source)) +
+    geom_linerange(aes(ymin = lo, ymax = hi), linewidth = 0.3, alpha = 0.6, na.rm = TRUE) +
+    geom_line(linewidth = 0.5) +
+    geom_point(size = 1.4) +
+    facet_wrap(vars(country), ncol = 5, drop = FALSE) +
+    scale_colour_manual(values = source_colours, drop = FALSE) +
+    scale_shape_manual(values = source_shapes, drop = FALSE) +
+    scale_x_continuous(breaks = c(2000, 2010, 2020), labels = c("'00", "'10", "'20")) +
+    scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+    coord_cartesian(xlim = c(1996, 2024)) +
+    labs(
+      title = paste("Share of", type_titles[[type]]),
+      subtitle = if (weighted) {
+        "Weighted shares with 95% intervals (Kish effective n); one point per survey"
+      } else {
+        "Unweighted shares; one point per survey"
+      },
+      x = NULL,
+      y = NULL,
+      colour = NULL,
+      shape = NULL
+    ) +
+    theme_minimal(base_size = 10) +
+    theme(
+      legend.position = "top",
+      panel.grid.minor = element_blank(),
+      strip.text = element_text(face = "bold")
+    )
+}
+```
+
+## Explicit Partisans
+
+::: {.panel-tabset}
+
+### Weighted
+
+```{r}
+#| label: fig-explicit-w
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("explicit")
+```
+
+### Unweighted
+
+```{r}
+#| label: fig-explicit-u
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("explicit", weighted = FALSE)
+```
+
+:::
+
+## Deniers
+
+::: {.panel-tabset}
+
+### Weighted
+
+```{r}
+#| label: fig-denier-w
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("denier")
+```
+
+### Unweighted
+
+```{r}
+#| label: fig-denier-u
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("denier", weighted = FALSE)
+```
+
+:::
+
+## Mismatched Partisans
+
+::: {.panel-tabset}
+
+### Weighted
+
+```{r}
+#| label: fig-mismatched-w
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("mismatched")
+```
+
+### Unweighted
+
+```{r}
+#| label: fig-mismatched-u
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("mismatched", weighted = FALSE)
+```
+
+:::
+
+## Attached Non-Voters
+
+::: {.panel-tabset}
+
+### Weighted
+
+```{r}
+#| label: fig-attnv-w
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("attached non-voter")
+```
+
+### Unweighted
+
+```{r}
+#| label: fig-attnv-u
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("attached non-voter", weighted = FALSE)
+```
+
+:::
+
+## Non-Partisans
+
+::: {.panel-tabset}
+
+### Weighted
+
+```{r}
+#| label: fig-nonpartisan-w
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("non-partisan")
+```
+
+### Unweighted
+
+```{r}
+#| label: fig-nonpartisan-u
+#| fig-width: 10
+#| fig-height: 10
+
+plot_trajectory("non-partisan", weighted = FALSE)
+```
+
+:::
+
+# What the Weights Change
+
+The largest differences between weighted and unweighted shares, in percentage points, over all cells.
+The EU25 cells are unweighted and so do not appear.
+
+```{r}
+#| label: weight-diff
+
+cells |>
+  mutate(diff_pp = round(100 * (share_w - share_u), 1)) |>
+  filter(source != "EU25") |>
+  arrange(desc(abs(diff_pp))) |>
+  select(source, survey, country, ctype, n, share_u, share_w, diff_pp) |>
+  mutate(across(c(share_u, share_w), \(x) round(x, 3))) |>
+  print(n = 20)
+
+# Typical shift by source and type
+cells |>
+  filter(source != "EU25") |>
+  summarise(
+    median_abs_pp = round(100 * median(abs(share_w - share_u)), 2),
+    max_abs_pp = round(100 * max(abs(share_w - share_u)), 1),
+    .by = c(source, ctype)
+  ) |>
+  arrange(source, ctype)
+```
+
+# Leaners
+
+Only surveys with a leaner probe (the CSES studies that fielded it, and EES 2009) can split the deniers.
+The figure shows, in those cells, the weighted share of deniers who say they lean toward a party when probed.
+Wherever there is no probe, these leaners are counted among the deniers.
+
+```{r}
+#| label: leaners
+
+# Cells where the probe was fielded
+probed <- types |>
+  filter(!is.na(lean)) |>
+  distinct(source, survey, country)
+
+leaner_cells <- types |>
+  semi_join(probed, by = c("source", "survey", "country")) |>
+  filter(ctype == "denier") |>
+  summarise(
+    leaner = sum(weight * (lean %in% "yes")) / sum(weight),
+    n = n(),
+    .by = c(source, survey, country, year)
+  ) |>
+  mutate(
+    lo = wilson(leaner, n)$lo,
+    hi = wilson(leaner, n)$hi
+  )
+
+leaner_cells |>
+  summarise(cells = n(), median_leaner_share = round(median(leaner), 2), .by = source)
+```
+
+```{r}
+#| label: fig-leaners
+#| fig-width: 10
+#| fig-height: 9
+
+leaner_cells |>
+  mutate(country = factor(country, levels = countries_25)) |>
+  ggplot(aes(x = year, y = leaner, colour = source, shape = source)) +
+  geom_linerange(aes(ymin = lo, ymax = hi), linewidth = 0.3, alpha = 0.6) +
+  geom_line(linewidth = 0.5) +
+  geom_point(size = 1.4) +
+  facet_wrap(vars(country), ncol = 5, drop = FALSE) +
+  scale_colour_manual(values = source_colours) +
+  scale_shape_manual(values = source_shapes) +
+  scale_x_continuous(breaks = c(2000, 2010, 2020), labels = c("'00", "'10", "'20")) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
+  coord_cartesian(xlim = c(1996, 2024)) +
+  labs(
+    title = "Leaners among deniers, where a probe was fielded",
+    subtitle = "Weighted share of no-attachment voters who lean toward a party; 95% intervals",
+    x = NULL,
+    y = NULL,
+    colour = NULL,
+    shape = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    legend.position = "top",
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(face = "bold")
+  )
+```
+
+# Caveats
+
+- **The sources ask about different votes**: EP vote (EES, EU25), current lower-house vote (CSES), last national election (ESS). Every type except the attachment itself depends on the vote.
+- **The wordings differ**: the ESS asks for a party one feels *closer to than all the other parties*, the CSES and EES whether one is *close to* a party, the CSES then probes the rest. See notebooks 2.1--2.4.
+- **The intervals are sampling intervals.** They say nothing about wording, mode, coverage or nonresponse beyond what the weights correct.
+- **EU25 is unweighted** and counts respondent-waves, so panelists appear up to three times.
+- **Years are nominal**: the round's modal fieldwork year in the ESS, the election year in the CSES and EES.
+- **Respondents without a type** (DK, unmatched, no vote item) are left out of the denominators, which assumes they distribute like the rest.
+
+# Session Info
+
+```{r}
+#| label: session-info
+
+session_info()
+```
+
+# Render Time
+
+```{r}
+#| label: render-time
+
+end_time <- Sys.time()
+
+rendering_time <- end_time - start_time
+
+message(paste(
+  "Document rendered in:",
+  round(as.numeric(rendering_time, units = "secs"), 2),
+  "seconds.
+"
+))
+```

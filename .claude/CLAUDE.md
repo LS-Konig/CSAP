@@ -74,7 +74,7 @@ quarto render presentation_hms.qmd      # RevealJS deck (HMS, German)
 |------|-----------|---------------|
 | `.claude/design.md` | the task concerns the argument, the partisan types and their contrasts, outcomes, the limits of the contrast, estimands, model building, or `index.qmd`'s draft | 2026-11-09 |
 | `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-11-12 |
-| `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule and its summaries (repo layout, pipeline order, Quarto quirks, LFS, summary workflow) | 2026-11-09 |
+| `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule and its summaries (repo layout, pipeline order, Quarto quirks, LFS, summary workflow) | 2026-11-10 |
 
 ## Maintaining this system
 

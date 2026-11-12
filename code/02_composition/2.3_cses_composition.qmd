@@ -200,6 +200,12 @@ Codes `9999988`--`9999992` (none of the parties, independent, other left/right/u
 Code `9` also stands for "not asked", so a study counts as fielding the probe only if some respondent without an attachment answered it yes or no; elsewhere the probe level is absent (or *probe not fielded* where a tree pools studies).
 A leaner's party is the same item as an attachment's (`IMD3005_3`), so leaners are matched to the vote the same way.
 
+**Weights.** CSES carries the weights each collaborator deposited, in three variables: sample (`IMD1010_1` / `f1101_1`), demographic (`IMD1010_2` / `f1101_2`) and political (`IMD1010_3` / `f1101_3`), each coded `1` where a study supplied none ([CSES Module 6 codebook, part 5](https://cses.org/wp-content/uploads/2025/12/cses6_codebook_part5_designs_and_weights.txt)).
+A study's shares use its demographic weight, else its sample weight, else none.
+The political weight adjusts the sample to the official vote count, and so would correct away part of what the types measure; it is never used.
+Weights are rescaled to mean 1 within each study, so that pooled figures keep each study's sample size.
+Trees show unweighted N in the boxes and weighted shares on the edges; all figures are weighted.
+
 ```{r}
 #| label: select-imd
 
@@ -224,6 +230,9 @@ cses_imd_tree <- cses_imd |>
     party = IMD3005_3,
     vote_pl = IMD3002_LH_PL,
     vote_dc = IMD3002_LH_DC,
+    # Original weights: sample, demographic
+    w_sample = IMD1010_1,
+    w_demo = IMD1010_2,
     other_from = 9999988
   ) |>
   # Drop archive label tables
@@ -249,6 +258,9 @@ cses_mod6_tree <- cses6 |>
     party = f3023_3,
     vote_pl = f3011_lh_pl,
     vote_dc = f3011_lh_dc,
+    # Original weights: sample, demographic
+    w_sample = f1101_1,
+    w_demo = f1101_2,
     other_from = 999988
   ) |>
   # Drop archive label tables
@@ -291,6 +303,31 @@ cses_tree <- bind_rows(cses_imd_tree, cses_mod6_tree) |>
     # Tree order from the module questionnaire; NA for module 1
     vote_first = item_order$vote_first[match(module, item_order$module)]
   )
+
+# Weight per study: the demographic weight where the study supplied one, else
+# the sample weight, else none; the political weight is never used
+cses_tree <- cses_tree |>
+  mutate(
+    has_demo = any(w_demo != 1),
+    has_sample = any(w_sample != 1),
+    .by = study
+  ) |>
+  mutate(
+    weight = case_when(has_demo ~ w_demo, has_sample ~ w_sample, .default = 1),
+    weight_source = case_when(
+      has_demo ~ "demographic",
+      has_sample ~ "sample",
+      .default = "none"
+    )
+  ) |>
+  # Mean 1 within each study
+  norm_weight(study)
+
+# Studies by weight used
+cses_tree |>
+  distinct(module, study, weight_source) |>
+  count(module, weight_source) |>
+  pivot_wider(names_from = weight_source, values_from = n, values_fill = 0)
 
 # Module 1 takes the majority order
 majority_vote_first <- mean(cses_tree$vote_first, na.rm = TRUE) >= 0.5
@@ -358,7 +395,9 @@ cses_tree <- cses_tree |>
     vote_code,
     att_pf,
     vote_pf,
-    vote_first
+    vote_first,
+    weight,
+    weight_source
   )
 stopifnot(nrow(cses_tree) == n_before)
 
@@ -481,7 +520,7 @@ cses_tree |>
   ) +
   labs(
     title = "Partisan composition in the CSES by country and election, 1996-2024",
-    subtitle = "Unweighted shares; the vote is the current lower-house vote",
+    subtitle = "Weighted shares (demographic, else sample weight); the vote is the current lower-house vote",
     x = "Election year (19.. / 20..)"
   )
 ```
@@ -514,7 +553,7 @@ cses_tree |>
   plot_country_composition() +
   labs(
     title = "Partisan composition in the CSES, 1996-2024",
-    subtitle = "Unweighted shares; the vote is the current lower-house vote"
+    subtitle = "Weighted shares (demographic, else sample weight); the vote is the current lower-house vote"
   )
 ```
 
@@ -540,7 +579,7 @@ cses_tree |>
 
 cses_tree |>
   mutate(module = fct_relabel(module, \(x) paste("Module", x))) |>
-  emit_figure_tabset(by = "module", subtitle = "Unweighted shares; the vote is the current lower-house vote")
+  emit_figure_tabset(by = "module", subtitle = "Weighted shares (demographic, else sample weight); the vote is the current lower-house vote")
 ```
 
 # Leaner Probes
@@ -559,8 +598,43 @@ cses_tree |>
   arrange(module, study)
 ```
 
+# Weighted and Unweighted Shares
+
+How much the weights move each leaf, by country (all studies pooled), largest differences first, in percentage points.
+
+```{r}
+#| label: weight-check
+
+cses_tree |>
+  weight_check(country) |>
+  print(n = 25)
+```
+
+# Type File
+
+One row per respondent with the common composition types (`tree_ctype()` in `pid_tree.R`), the weight and the survey cell, for notebooks 2.5 and 2.6.
+
+```{r}
+#| label: write-types
+
+cses_types <- cses_tree |>
+  write_types(
+    source = "CSES",
+    survey = study,
+    year = year,
+    vote_ref = "national lower house",
+    weight_source = weight_source,
+    path = here("data", "02_processed", "cses_types.parquet")
+  )
+
+cses_types |>
+  count(ctype, wt = weight) |>
+  mutate(share = round(n / sum(n), 3))
+```
+
 # Caveats
 
+- **Shares are weighted** with each study's demographic weight, else its sample weight; studies with neither are unweighted (see the table under *Harmonise to the Tree*).
 - **The vote is a national lower-house vote**, measured right after the election; the EES and eu25games notebooks use a European Parliament vote.
 - **Presidential studies have no vote branch.** France 2002, 2012, 2017 and 2022, Lithuania 1997, and Romania 2009 and 2014 followed a presidential election only, so their respondents sit in *vote item not fielded*.
 - **Abstention and missing share code `9999999`**, so *no vote reported* mixes both.
