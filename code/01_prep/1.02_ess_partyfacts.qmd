@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 1.2
+  CSAP Code Notebook 1.02
 subtitle: |
   ESS party items coded to Party Facts
 date: last-modified
@@ -23,7 +23,7 @@ This notebook gives every ESS party item in the 25 democracies a pair of Party F
 - `ext_<item>_pf_id`: the Party Facts id, `NA` for `[og]` and sentinels.
 
 The items are party attachment (`prtcl*`, stub `prtcl`) and national vote.
-The main vote (stub `prtv`) is the list vote: Germany's second vote (`prtv*de2`), Lithuania's multi-member list vote (`prtv*lt1`), and `prtvt*` elsewhere, as in notebook 2.4.
+The main vote (stub `prtv`) is the list vote: Germany's second vote (`prtv*de2`), Lithuania's multi-member list vote (`prtv*lt1`), and `prtvt*` elsewhere, as in notebook 2.04.
 The other German and Lithuanian votes get their own stubs: `prtv_de1` (first vote), `prtv_lt2` and `prtv_lt3` (single-member constituency, first and second round).
 
 Two outputs, both in `data/02_processed/`:
@@ -61,7 +61,7 @@ source(here("code", "00_helper", "pf_code.R"))
 
 # Codebook Labels
 
-Every `prtcl*` and `prtv*` variable is one block in the ESS codebook, with a table of codes and value labels (parser as in notebook 2.4).
+Every `prtcl*` and `prtv*` variable is one block in the ESS codebook, with a table of codes and value labels (parser as in notebook 2.04).
 All codes are kept here, the missing codes included, because some codes above 66 are real answers ("Other", "Blank vote").
 
 ```{r}
@@ -908,7 +908,7 @@ crosswalk |>
 Among respondents who report both an attachment party and a main-vote party, the share whose two answers carry the same Party Facts id.
 This is a check on the coding, not a result: a country far below the others would point to a party coded differently on the two lists.
 The low shares (Hungary, Romania, Poland, France) come mostly from electoral alliances, which Party Facts keeps as entities of their own: attachment to Fidesz with a vote for the Fidesz–KDNP list, PO with KO, PSD with the PSD+PC alliance, SLD with SLD–UP.
-The coding keeps that distinction here; notebook 1.9 adds the alliance membership, under which such a pair counts as the same party.
+The coding keeps that distinction here; notebook 1.09 adds the alliance membership, under which such a pair counts as the same party.
 
 ```{r}
 #| label: same-party
@@ -942,7 +942,7 @@ What a user of the two output files should know, collected in one place:
 - **A few Party Facts links are wrong** and are overridden by hand: PSL's round-1 link points to the PSL of 1945–49 (6757, coded 602), and Lithuania's Nationalist Union to the interwar party (377, coded 9107).
 - **Only the 25 democracies** are coded; other ESS countries are not in the output.
 - **Codes 66 and 99** (not applicable, no answer) stay `NA`; 77 and 88 become `refused` and `dont-know`. Codes above 66 that are real answers ("Other", "Blank vote", Italy's "voted only in the majoritarian race") are coded by their label.
-- **Electoral alliances** (Fidesz–KDNP, KO, PSD+PC, SLD–UP, ...) keep their own Party Facts id here, so the attachment/vote check above understates agreement; the alliance-aware comparison is in notebook 1.9.
+- **Electoral alliances** (Fidesz–KDNP, KO, PSD+PC, SLD–UP, ...) keep their own Party Facts id here, so the attachment/vote check above understates agreement; the alliance-aware comparison is in notebook 1.09.
 
 # Session Info
 

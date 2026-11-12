@@ -11,7 +11,7 @@
 #    for every notebook that has a preview page.
 # 2. Plain pages. The composition notebooks render next to their source (see
 #    the comment in _quarto.yml). Copy each page and its _files/ folder to
-#    _manuscript/code/02_composition/.
+#    _manuscript/code/<folder>/ (folders in `page_dirs` below).
 
 # Frozen figures -----------------------------------------------------------------
 
@@ -33,12 +33,16 @@ for (src in fig_dirs) {
 
 # Plain pages --------------------------------------------------------------------
 
-page_src <- file.path("code", "02_composition")
-page_out <- file.path("_manuscript", "code", "02_composition")
+# Folders whose notebooks render as plain pages
+page_dirs <- c("02_types", "rq1_who")
 
-pages <- list.files(page_src, pattern = "\\.html$", full.names = TRUE)
+for (page_dir in page_dirs) {
+  page_src <- file.path("code", page_dir)
+  page_out <- file.path("_manuscript", "code", page_dir)
 
-if (length(pages) > 0) {
+  pages <- list.files(page_src, pattern = "\\.html$", full.names = TRUE)
+  if (length(pages) == 0) next
+
   dir.create(page_out, recursive = TRUE, showWarnings = FALSE)
   for (page in pages) {
     file.copy(page, page_out, overwrite = TRUE)

@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 2.1
+  CSAP Code Notebook 2.01
 subtitle: |
   eu25games 2019: partisan composition trees
 date: last-modified
@@ -49,14 +49,14 @@ rm(p_required, p_to_install, packages)
 # Shared tree helpers
 source(here("code", "00_helper", "pid_tree.R"))
 
-# Party Facts helpers and the alias, alliance and lineage tables of notebook 1.9
+# Party Facts helpers and the alias, alliance and lineage tables of notebook 1.09
 source(here("code", "00_helper", "pf_code.R"))
 rules <- pf_rules()
 ```
 
 # The Tree
 
-Every composition notebook (2.1 to 2.4) sorts respondents into the same sequential tree, following the typology in the notes of `index.qmd`.
+Every composition notebook (2.01 to 2.04) sorts respondents into the same sequential tree, following the typology in the notes of `index.qmd`.
 The levels follow the order in which the questionnaire asked the items (each notebook's *Question Order* section).
 Where the vote came before the attachment item, the tree splits on the vote first; where the attachment came first, on the attachment first.
 A tree that pools waves or studies with different orders (only the CSES has any) uses the order of most of its respondents.
@@ -71,7 +71,7 @@ A tree that pools waves or studies with different orders (only the CSES has any)
 - **Leaner probe.** Where the survey follows a *no* or *don't know* with *do you feel yourself a little closer to one of the political parties than the others?* (the CSES and the EES 2009 wave), those respondents split into *leaner*, *not leaning*, and a grey *probe DK* box.
   Leaner boxes have a dashed green border.
   Where a tree pools surveys with and without the probe, the respondents who never got it sit in a grey *probe not fielded* box.
-- **Match.** Only for respondents who report a vote and name a party (attached or leaner), the two parties are compared by their Party Facts coding with the rule of notebook 1.9: *same party* when they are the same party, one is an alias of the other, one is an electoral alliance or joint list that contains the other, or one continued in the other through a rename, refoundation or merger (from the year of the succession on); *different party* otherwise, including two members of one alliance, two predecessors of one successor, and a breakaway and its parent.
+- **Match.** Only for respondents who report a vote and name a party (attached or leaner), the two parties are compared by their Party Facts coding with the rule of notebook 1.09: *same party* when they are the same party, one is an alias of the other, one is an electoral alliance or joint list that contains the other, or one continued in the other through a rename, refoundation or merger (from the year of the succession on); *different party* otherwise, including two members of one alliance, two predecessors of one successor, and a breakaway and its parent.
   Because both sides are always a named party, no respondent in this notebook is *not matchable*.
 
 The leaves named after the typology are *explicit partisan* (attached, same party), *leaner* (leaner, same party), **vote-anchored** (vote reported, no attachment, and not a leaner where the probe was asked; the data files call it *implicit*), and *non-partisan* (no vote, no attachment, not a leaner).
@@ -85,7 +85,7 @@ The figures use one colour family per kind of answer: blues for attached respond
 # Load Data
 
 The source is the published harmonised release, not the old analysis frame in `data/03_final/`.
-As in notebook 1.8, only respondents who passed the attention check (`der_att_check_3`) are kept.
+As in notebook 1.08, only respondents who passed the attention check (`der_att_check_3`) are kept.
 
 ```{r}
 #| label: load-eu25-data
@@ -97,7 +97,7 @@ eu25games <- read_rds(
     "eu25games2019.rds"
   )
 ) |>
-  # Attention-check passers, as in 1.8
+  # Attention-check passers, as in 1.08
   filter(der_att_check_3)
 ```
 
@@ -943,7 +943,7 @@ eu25_tree <- eu25_tree |>
       .default = "yes"
     ),
     # Level 3: same Party Facts party, with aliases, alliances and lineage
-    # (notebook 1.9); all waves were fielded in 2019
+    # (notebook 1.09); all waves were fielded in 2019
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
       .default = pf_match(country, pid, vote_party, rules, 2019L)
@@ -962,7 +962,7 @@ stopifnot(all(eu25_tree$country %in% countries_25))
 # Checks
 
 The raw answers behind each tree level, printed so that any unexpected code is visible.
-The first table crosses the three levels by wave, the second lists the most frequent attachment/vote pairs that end up as *different party*, and the third the pairs that are the *same party* only through an alias, an alliance or lineage (the audit trail of the tables of notebook 1.9).
+The first table crosses the three levels by wave, the second lists the most frequent attachment/vote pairs that end up as *different party*, and the third the pairs that are the *same party* only through an alias, an alliance or lineage (the audit trail of the tables of notebook 1.09).
 
 ```{r}
 #| label: checks
@@ -1074,7 +1074,7 @@ eu25_tree |>
 
 One bar per country, as in the HMS deck (`presentation_hms.qmd`), with the number of respondent-waves after each country and the share of every leaf on its segment (under 3%, the bare number).
 Countries are sorted by the share reporting an attachment.
-The deck's figure uses the deduplicated wave-2 and wave-3 sample of notebook 3.1; these use every attention-check passer, so the numbers differ slightly.
+The deck's figure uses the deduplicated wave-2 and wave-3 sample of notebook r2.01; these use every attention-check passer, so the numbers differ slightly.
 
 ```{r}
 #| label: fig-country-pooled
@@ -1113,14 +1113,14 @@ The only follow-up to the attachment item is its strength (`q_party_closeness`),
   Votes for independent candidates count as *no vote reported*, and attachment to them as *DK / missing*.
 - **Unweighted.** The release has no survey weight; the other three composition notebooks are weighted.
 - **Respondent-waves, not persons.** See the panel table above.
-- **Matching is by Party Facts party, with aliases, alliances and lineage** (notebook 1.9), in all four composition notebooks alike. A party and an electoral alliance containing it count as the *same party* (Fidesz and the Fidesz–KDNP list, Civic Platform and the European Coalition, Podemos and Unidas Podemos); so do a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on; and the release's own labels for a listed party (the PvdA's EP list label, "Spring" for Wiosna) are aliases of it.
+- **Matching is by Party Facts party, with aliases, alliances and lineage** (notebook 1.09), in all four composition notebooks alike. A party and an electoral alliance containing it count as the *same party* (Fidesz and the Fidesz–KDNP list, Civic Platform and the European Coalition, Podemos and Unidas Podemos); so do a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on; and the release's own labels for a listed party (the PvdA's EP list label, "Spring" for Wiosna) are aliases of it.
   Two members of one alliance (PLUS and USR in 2019, two years before they merged), two predecessors of one successor, a breakaway and its parent, and `[hand]` parties outside the tables stay *different party*; genuine switches (e.g. Conservative attachment, Brexit Party vote in Britain) stay as they are. The `route` column records which table made a pair the same party.
 - **Panel duplicates.** A handful of panelists appear many times over (one 29 times), which the attention-check filter does not remove.
-  Notebook 3.1 removes them for the analysis data.
+  Notebook r2.01 removes them for the analysis data.
 
 # Save
 
-The tree frame, one row per respondent-wave, is the partisan classification the analysis notebooks build on (notebook 3.1 joins it by `meta_responseid`).
+The tree frame, one row per respondent-wave, is the partisan classification the analysis notebooks build on (notebook r2.01 joins it by `meta_responseid`).
 
 ```{r}
 #| label: save-partisan
@@ -1139,7 +1139,7 @@ eu25_tree |>
 
 # Type File
 
-One row per respondent-wave with the common composition types (`tree_ctype()` in `pid_tree.R`) and the survey cell (the wave), for notebooks 2.5 and 2.6.
+One row per respondent-wave with the common composition types (`tree_ctype()` in `pid_tree.R`) and the survey cell (the wave), for notebooks r1.01 and r1.02.
 The release ships no survey weight, so every respondent has weight 1 and the shares here and in all figures are unweighted.
 
 ```{r}

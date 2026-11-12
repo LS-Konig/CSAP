@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 2.5
+  CSAP Code Notebook r1.01
 subtitle: |
   Partisan composition over time, by source: raw weighted shares
 date: last-modified
@@ -22,7 +22,7 @@ execute:
 This notebook puts the four sources side by side without a model.
 Each survey in each country is one **cell**, and each source is one line.
 Where the lines of two sources disagree in the same country and period, the gap is a difference between the instruments (wording, mode, and which vote they ask about), not a change in the electorate.
-Notebook 2.6 models these gaps; this notebook shows what the model starts from.
+Notebook r1.02 models these gaps; this notebook shows what the model starts from.
 
 ```{r}
 #| label: setup
@@ -54,7 +54,7 @@ source(here("code", "00_helper", "pid_tree.R"))
 
 # Load the Type Files
 
-Notebooks 2.1--2.4 each write one row per respondent with the common composition type (`tree_ctype()` in `pid_tree.R`):
+Notebooks 2.01--2.4 each write one row per respondent with the common composition type (`tree_ctype()` in `pid_tree.R`):
 
 - **explicit**: attached, voted for the same party;
 - **mismatched**: attached to one party, voted for another;
@@ -157,11 +157,11 @@ write_parquet(cells, here("data", "02_processed", "composition_cells.parquet"))
 ```
 
 The cell table is written to `data/02_processed/composition_cells.parquet`.
-It is the input of notebook 2.6 and the table of raw numbers behind every modelled share.
+It is the input of notebook r1.02 and the table of raw numbers behind every modelled share.
 
 # Coverage and Overlap
 
-Notebook 2.6 can only tell a source difference from a change over time where two sources observe the same country at about the same time.
+Notebook r1.02 can only tell a source difference from a change over time where two sources observe the same country at about the same time.
 The first table counts, per country, the cells of each source.
 The second lists the **overlaps**: pairs of cells from two different sources in the same country at most one year apart.
 
@@ -482,7 +482,7 @@ leaner_cells |>
 # Caveats
 
 - **The sources ask about different votes**: EP vote (EES, EU25), current lower-house vote (CSES), last national election (ESS). Every type except the attachment itself depends on the vote.
-- **The wordings differ**: the ESS asks for a party one feels *closer to than all the other parties*, the CSES and EES whether one is *close to* a party, the CSES then probes the rest. See notebooks 2.1--2.4.
+- **The wordings differ**: the ESS asks for a party one feels *closer to than all the other parties*, the CSES and EES whether one is *close to* a party, the CSES then probes the rest. See notebooks 2.01--2.4.
 - **The intervals are sampling intervals.** They say nothing about wording, mode, coverage or nonresponse beyond what the weights correct.
 - **EU25 is unweighted** and counts respondent-waves, so panelists appear up to three times.
 - **Years are nominal**: the round's modal fieldwork year in the ESS, the election year in the CSES and EES.

@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 1.7
+  CSAP Code Notebook 1.07
 subtitle: |
   ESS rounds 1-11: reported party attachment over time
 date: last-modified
@@ -47,7 +47,7 @@ rm(p_required, p_to_install, packages)
 
 # Load ESS Data
 
-The source is the partitioned Parquet dataset written by notebook 1.1, not the 1.5 GB CSV it
+The source is the partitioned Parquet dataset written by notebook 1.01, not the 1.5 GB CSV it
 was built from. The whole point of that conversion is that a reader fetches only the columns
 it needs, so nothing here parses the extract again.
 
@@ -111,7 +111,7 @@ ess_pid <- ess |>
 
 There is nothing to join: the ESS arrives as one long file, the extract already holds exactly
 the project's 25 democracies, and country identifiers are already alpha-2. The country filter
-below is therefore a no-op, kept as a guard and for symmetry with notebooks 1.2 and 1.3.
+below is therefore a no-op, kept as a guard and for symmetry with notebooks 1.02 and 1.03.
 
 ```{r}
 #| label: bind
@@ -210,8 +210,8 @@ is the lowest in the series. Because the two samples cover disjoint sets of coun
 fully confounded with country composition there, and the gap cannot be attributed to mode alone.
 
 Second, **`clsprty` is a filter item, not a party name**. The party actually named is recorded
-separately in the country-specific `prtcl<cc>` family. As in notebook 1.3, this series is
-therefore not level-comparable with the EES series in notebook 1.2 -- only its movement is.
+separately in the country-specific `prtcl<cc>` family. As in notebook 1.03, this series is
+therefore not level-comparable with the EES series in notebook 1.02 -- only its movement is.
 
 Third, **the refusal band is not comparable across the three notebooks**. The ESS uses codes
 `7` and `9` sparingly, 0.2% to 1.5% per round, against 4% to 7% in the EES. That difference is
@@ -285,8 +285,8 @@ ggplot(shares_country, aes(x = round, y = share, colour = pid_cat)) +
 ```
 
 Read next to the other two notebooks, the ESS series declines from 50.9% to 43.1% close to a
-party, moving in the same direction as the CSES series in notebook 1.3 (44.5% to 40.4%) and
-against the EES series in notebook 1.2 (55.9% to 66.3%). Two of the three sources agree; the
+party, moving in the same direction as the CSES series in notebook 1.03 (44.5% to 40.4%) and
+against the EES series in notebook 1.02 (55.9% to 66.3%). Two of the three sources agree; the
 EES is the one that does not, and its late waves are also the ones carrying the mode break
 described there.
 
@@ -447,7 +447,7 @@ two checks on that; neither is a correction.
 
 Third, **the nonresponse gap is not an ESS peculiarity**. Measured on the same base, the
 three sources land in the same place: 72% to 86% of deniers place themselves against 92% to
-96% of partisans, in the EES of notebook 1.2 and the CSES of notebook 1.3 as much as here.
+96% of partisans, in the EES of notebook 1.02 and the CSES of notebook 1.03 as much as here.
 The gap is a property of the item, not of any one survey, so it is not something a change of
 source would fix.
 

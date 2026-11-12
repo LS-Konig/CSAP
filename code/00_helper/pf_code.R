@@ -1,7 +1,7 @@
 # Party Facts coding ------------------------------------------------------------
 #
-# Shared helpers for the Party Facts notebooks in code/01_preparation/
-# (1.2 ESS, 1.3 CSES, 1.4 EES). They follow the eu25games release
+# Shared helpers for the Party Facts notebooks in code/01_prep/
+# (1.02 ESS, 1.03 CSES, 1.04 EES). They follow the eu25games release
 # (eu25games2019/code/07_recode.qmd, chunks party-recode-map / -join /
 # -validate): every party-bearing item <item> gets
 #
@@ -10,7 +10,7 @@
 #   ext_<item>_pf_id    Party Facts id; NA for [og] and sentinels
 #
 # The second half holds the rule that compares two party answers (attachment
-# and vote) with the alias, alliance and lineage tables of notebook 1.9; see
+# and vote) with the alias, alliance and lineage tables of notebook 1.09; see
 # "Matching two party answers" below.
 
 library(tidyverse)
@@ -219,7 +219,7 @@ pf_check <- function(map, keys, core = pf_core()) {
 #
 # Attachment and vote (or any two party answers of one respondent) are compared
 # by their Party Facts names (ext_*_pf_name), with three tables built in notebook
-# 1.9 (data/02_processed/). Two answers are the *same party* by one of four
+# 1.09 (data/02_processed/). Two answers are the *same party* by one of four
 # routes, checked in this order:
 #
 #   identical  the same name;

@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 3.4
+  CSAP Code Notebook r2.04
 subtitle: |
   eu25games 2019: leave-one-out predictive diagnostics by cell, for any cached brms fit (no refits)
 date: last-modified
@@ -22,7 +22,7 @@ execute:
 This notebook scores cached brms fits by approximate leave-one-out cross-validation (PSIS-LOO) and breaks the result down by type × relation cell.
 It is written to work for any cached fit: the four current ones (Gaussian and beta-binomial, games and thermometer) and later ones (a Gaussian with σ by cell, beta-binomial variants with φ by cell, hurdle or inflated custom families).
 
-**LOO is secondary here.** The main model checks are the estimand checks of notebook 3.5 (weighted cell means, raw $AP_t$ and $\Delta AP$, anchor shares). LOO never decides the main model. Its job is a by-cell diagnostic: where a model predicts badly, and whether its predictive distributions are calibrated in each cell.
+**LOO is secondary here.** The main model checks are the estimand checks of notebook r2.05 (weighted cell means, raw $AP_t$ and $\Delta AP$, anchor shares). LOO never decides the main model. Its job is a by-cell diagnostic: where a model predicts badly, and whether its predictive distributions are calibrated in each cell.
 
 - Input: the full fits `data/04_models/<fit>.rds` (git-ignored). **Nothing is fitted here.** There is no `brm()` call, and the notebook stops if a fit is missing.
 - Cache: every finished chunk of rows is written to `data/04_models/derived/loo/<fit>_<md5>_<mode>_c<chunk size>/` (git-ignored). A stopped run resumes where it stopped.
@@ -114,7 +114,7 @@ mode_tag
 
 # Data
 
-The estimation data are rebuilt exactly as in notebooks 3.3 and 3.5 (copied from 3.2). **This code must stay identical to 3.2.**
+The estimation data are rebuilt exactly as in notebooks r2.03 and r2.05 (copied from r2.02). **This code must stay identical to r2.02.**
 The LOO cell is type × relation in the thermometer, and type × relation × game in the games.
 
 ```{r}
@@ -123,7 +123,7 @@ The LOO cell is type × relation in the thermometer, and type × relation × gam
 eu25_games <- read_rds(here("data", "03_final", "eu25_games.rds"))
 eu25_thermo <- read_rds(here("data", "03_final", "eu25_thermo.rds"))
 
-# Games, as in 3.2 (games-sample)
+# Games, as in r2.02 (games-sample)
 games <- eu25_games |>
   filter(
     type %in% c("explicit", "vote_anchored"),
@@ -145,7 +145,7 @@ games_scale <- list(mean = mean(games$cj_pl2), sd = sd(games$cj_pl2))
 games <- games |>
   mutate(der_y_z = (cj_pl2 - games_scale$mean) / games_scale$sd)
 
-# Thermometer, as in 3.2 (thermo-sample)
+# Thermometer, as in r2.02 (thermo-sample)
 thermo <- eu25_thermo |>
   filter(
     type %in% c("explicit", "vote_anchored"),
@@ -580,7 +580,7 @@ cell_summary(filter(pointwise, k <= 0.7), name, der_cell) |>
 ```
 
 Leave-one-out here leaves out **one row**, not one person. A person contributes several rounds or ratings, and the person intercept learns from the other rows of the same person, so row-level LOO is optimistic about predicting a new person.
-Leave-one-person-out would need either K-fold cross-validation grouped by `meta_pid` (which means refits) or PSIS with moment matching, which needs fits saved with `save_pars(all = TRUE)`. Neither is done here. The current fits predate `save_pars(all = TRUE)`, and new fits from notebook 3.2 keep all parameters.
+Leave-one-person-out would need either K-fold cross-validation grouped by `meta_pid` (which means refits) or PSIS with moment matching, which needs fits saved with `save_pars(all = TRUE)`. Neither is done here. The current fits predate `save_pars(all = TRUE)`, and new fits from notebook r2.02 keep all parameters.
 
 ## 2. LOO-PIT by Cell
 

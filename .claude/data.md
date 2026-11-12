@@ -27,7 +27,7 @@ Do not re-document variables here.
 ## Party matching
 
 Whether a respondent's attachment party is the party they voted for is decided in one place,
-`pf_match()` in `code/00_helper/pf_code.R`, with the tables of notebook 1.9, in all four
+`pf_match()` in `code/00_helper/pf_code.R`, with the tables of notebook 1.09, in all four
 sources alike. Two answers are the **same party** by one of four routes:
 
 1. an identical Party Facts name;
@@ -48,11 +48,11 @@ The EES 2009 leaner party (`q90`) has its own columns, `ext_match_lean_vote_ep` 
 
 Lineage counting as *same* is a deliberate choice (Tristan, 2026-09-29). `pf_match_route()`
 and the `ext_route_*` columns of the match files record the route of every *same*, so an
-analysis can exclude lineage. Change the rule only in 1.9 and `pf_code.R`, never per notebook.
+analysis can exclude lineage. Change the rule only in 1.09 and `pf_code.R`, never per notebook.
 
 ## Weights
 
-The composition notebooks (2.2–2.4) weight with **socio-demographic weights only**. Political
+The composition notebooks (2.02–2.04) weight with **socio-demographic weights only**. Political
 weights adjust the sample to the official vote, which would correct away part of what the
 partisan types measure. Each weight is rescaled to mean 1 within its survey × country cell
 (`norm_weight()` in `pid_tree.R`).
@@ -70,28 +70,41 @@ partisan types measure. Each weight is rescaled to mean 1 within its survey × c
 
 ## Composition files
 
-- `data/02_processed/{eu25,ees,cses,ess}_types.parquet` (2.1–2.4): one row per respondent (respondent-wave in eu25) with
+- `data/02_processed/{eu25,ees,cses,ess}_types.parquet` (2.01–2.04): one row per respondent (respondent-wave in eu25) with
   `source`, `survey`, `country`, `year`, `vote_ref`, `weight`, `weight_source`, `leaf`, `ctype` (the common types of
   `tree_ctype()`) and `lean`.
-- `data/02_processed/composition_cells.parquet` (2.5): one row per survey × country × type, with weighted and
-  unweighted shares, `n`, Kish `n_eff` and a Wilson interval. This is the input of 2.6.
-- `data/05_results/composition_post.rds` (2.6, full fit only): posterior summaries of the trajectories, changes and source offsets.
+- `data/02_processed/composition_cells.parquet` (r1.01): one row per survey × country × type, with weighted and
+  unweighted shares, `n`, Kish `n_eff` and a Wilson interval. This is the input of r1.02.
+- `data/05_results/composition_post.rds` (r1.02, full fit only): posterior summaries of the trajectories, changes and source offsets.
+
+## Composition coverage
+
+Survey × country cells with type shares in `composition_cells.parquet` (counted 2026-11-12):
+
+| Source | Cells | Years | Pattern |
+|---|---|---|---|
+| ESS | 222 | 2002–2023, 11 rounds | densest; patchy in RO (1), LV (4), HR (5), GR and IT (6) |
+| EES | 118 | 2004, 2009, 2014, 2019, 2024 | nearly balanced: 21 countries in all five waves; BE, BG, GB, LT, RO in four, HR in three |
+| CSES | 102 | 1996–2024, irregular | uneven: one study in EE, FR, HR; seven in CZ, DE, PL, PT |
+| EU25 | 25 | 2019 | one cell per country, EES wording |
+
+Leaner probes: every CSES module and EES 2009.
 
 ## Current eu25games analysis files
 
 These are written by the current pipeline. Details are in the notebooks.
 
-- `data/02_processed/eu25_partisan.rds` (2.1): one row per attention-passing respondent-wave, keyed on
+- `data/02_processed/eu25_partisan.rds` (2.01): one row per attention-passing respondent-wave, keyed on
   `meta_responseid`. It holds the tree columns `att`, `vote`, `match` and `route`, plus `pid` and `vote_party`.
   The vote exists in all three waves. Wave 1's EP 2019 vote *intention* (`Q61`) is the release's
   `q_eu_vote_2014`, a misleading name.
-- `data/03_final/eu25_games.rds` (3.1): one row per round played, 29,300 respondent-waves × 6 rounds
+- `data/03_final/eu25_games.rds` (r2.01): one row per round played, 29,300 respondent-waves × 6 rounds
   in waves 2–3. Both waves are kept for panelists, identified by `meta_pid` and `wave`.
-- `data/03_final/eu25_thermo.rds` (3.1): one row per party rating (`slot`, `q_thermo`, `ext_q_thermo_pf_*`).
+- `data/03_final/eu25_thermo.rds` (r2.01): one row per party rating (`slot`, `q_thermo`, `ext_q_thermo_pf_*`).
 - **Column convention.** Release columns keep their harmonised, published names. Per-round conjoint
   columns drop the game and round (`cj_dict2_eupos` becomes `cj_eupos`). Anything derived carries `der_`. The carried
-  variables are set in one place, the `resp_vars` / `round_vars` vectors at the top of 3.1.
-- Both 3.1 files carry `type`, `anchor` and a co/out relation from `pf_match()`:
+  variables are set in one place, the `resp_vars` / `round_vars` vectors at the top of r2.01.
+- Both r2.01 files carry `type`, `anchor` and a co/out relation from `pf_match()`:
   `der_cj_partisan_relationship` in the games and `der_thermo_relationship` in the thermometers.
 - **Shown vs. drawn (games).**
   - The treatment condition varies by round.
@@ -104,12 +117,12 @@ These are written by the current pipeline. Details are in the notebooks.
   about half the rounds, vote-anchored respondents only by chance (about 10%). In Latvia, the draw for respondents without an attachment
   copied their "no party" answer.
 
-- `data/04_models/` (3.2, git-ignored): cached brms fits, written only when `full_fit = TRUE`.
-- `data/05_results/eu25_ap_post.rds` (3.3, tracked): posterior draws of the estimands from the four fits
+- `data/04_models/` (r2.02, git-ignored): cached brms fits, written only when `full_fit = TRUE`.
+- `data/05_results/eu25_ap_post.rds` (r2.03, tracked): posterior draws of the estimands from the four fits
   (1,000 draws, pooled and per country), the paired cross-measure difference, outcome scales, MCMC
   diagnostics and sample sizes. Slides and the manuscript read this file, never the fits.
 - **Thermometer list.** Every respondent in a country rated the same six parties in the same slot
-  order (checked in 3.2). This is why the thermometer models carry no rated-party term.
+  order (checked in r2.02). This is why the thermometer models carry no rated-party term.
 
 ## Derived files still on disk
 
@@ -167,7 +180,7 @@ opening them (see `CLAUDE.md`).
 - `data/01_raw/ess/`: the European Social Survey, as a Data Wizard subset of the cumulative file.
   `Datafile-subset.csv` is 1.5 GB (430,581 × 2,836, rounds 1–11, 222 country × round cells) and comes with
   its codebook HTML, **which is the variable reference**. Do not re-document ESS variables
-  elsewhere. `code/01_preparation/1.1_ess_to_parquet.qmd` converts the CSV to
+  elsewhere. `code/01_prep/1.01_ess_parquet.qmd` converts the CSV to
   `data/01_raw/ess/parquet/`, hive-partitioned `cntry=<X>/essround=<N>/`, ZSTD, with missing codes
   left untouched. Read it with `arrow::open_dataset()` or DuckDB `read_parquet(...,
   hive_partitioning = true)` rather than touching the CSV. Round 10 is two stacked samples

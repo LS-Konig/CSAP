@@ -561,6 +561,35 @@ None of these is guaranteed.
 Return to the opening question: whose polarization is measured, and what partisanship adds to it.
 :::
 
+
+# Empirical Analysis
+
+## RQ1: Partisanship in Europe in the 21st Century
+
+- **Levels.** How are electorates split into the types (explicit, denier, leaner, mismatched, attached non-voter, non-partisan), pooled and by country? (Fig. 1, pooled panel)
+- **Dealignment.** Has the share reporting an attachment fallen since 2002, and where? If so, by detachment (explicit → denier: still voting, no tie) or by disengagement (→ non-partisan: neither)? (Fig. 1, 25 country panels, ESS lines)
+- **Realignment.** Does attachment follow the vote to new-cleavage families (green, radical right)? Their share among partisans against their share among voters, i.e. conversion P(attached | voted for family). (Fig. 2)
+- **Measurement.** How much of the level differences between countries and sources is the item wording (ESS "closer than others" vs. EES/CSES "close to"; probed leaners in the CSES)? (EES/CSES points beside the ESS lines; leaner share of CSES deniers)
+- **Who the deniers are.** Do deniers resemble explicit partisans or non-partisans on pre-treatment traits (age, education, interest)? Bridge to RQ2 (bracketing diagnostic) and RQ4 (concentration vs. alienation).
+- **Support for RQ2.** In which party × country cells do explicit partisans and deniers both occur in usable numbers, and how large and how cross-bloc is the mismatched group?
+
+## RQ2: Partisanship and Polarization in Europe
+
+- how do partisan types differ with respect to polarization?
+- facets of polarization: ideological (LR & EU), sorting (LR & EU), perceived party (LR & EU), perceived sorting (LR & EU), affective polarization (attitudinal vertical & horizontal behavioral, latter only 2019, both with focus on ingroup and outgroup)
+- pooled type contrasts on each outcome
+
+## RQ3: Cross-national patterns and over time trends 
+
+- do and if so how do the associations between partisan types and polarization measures differ between countries?
+- how do they develop over time?
+- within country over time?
+
+## RQ4: Are observed changes in polarization driven by changing partisan compositions or changing polarization within partisan types?
+
+- are over time trends attributable to composition changes or reflect actual increases of polarization? What is the relative share of each (x% of polarization is attributable to composition change (e.g. realignment), y% is due to partisans / people themself becoming more polarized)
+
+
 # Appendix {#sec-appendix}
 
 | Dataset | Attachment item | "No" option | Leaner probe | Strength follow-up |

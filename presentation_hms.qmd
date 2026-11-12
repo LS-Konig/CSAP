@@ -557,7 +557,7 @@ source(here("code", "00_helper", "pid_tree.R"))
 raw <- readr::read_rds(here("data", "01_raw", "eu25games2019.rds"))
 partisan <- readr::read_rds(here("data", "02_processed", "eu25_partisan.rds"))
 
-# Composition sample as in notebook 3.1 (Sample and Duplicates)
+# Composition sample as in notebook r2.01 (Sample and Duplicates)
 comp <- raw |>
   filter(der_att_check_3, meta_wave %in% c(2, 3), !is.na(meta_pid)) |>
   add_count(meta_wave, meta_pid, name = "n_rows") |>
@@ -854,7 +854,7 @@ med <- function(measure, quantity, model = main_model, group = "pooled") {
   ]
 }
 
-# Sanity check against the pooled medians printed by notebook 3.3. Display
+# Sanity check against the pooled medians printed by notebook r2.03. Display
 # values never come from here; this only stops the render if the file changed.
 ref_33 <- tribble(
   ~model  , ~measure , ~quantity          , ~ref  ,
@@ -1270,7 +1270,7 @@ rank_pair(
 #| label: appendix-samples
 #| cache: true
 
-# Analysis samples, filters as in notebook 3.2 (explicit and vote-anchored;
+# Analysis samples, filters as in notebook r2.02 (explicit and vote-anchored;
 # games: partner's party shown and co/out; thermometer: co/out ratings)
 games_s <- readr::read_rds(here("data", "03_final", "eu25_games.rds")) |>
   filter(

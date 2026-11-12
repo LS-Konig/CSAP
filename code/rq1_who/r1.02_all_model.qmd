@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 2.6
+  CSAP Code Notebook r1.02
 subtitle: |
   Partisan composition over time: a multinomial model across sources
 date: last-modified
@@ -19,10 +19,10 @@ execute:
 
 # Setup
 
-Notebook 2.5 shows each source as its own line.
+Notebook r1.01 shows each source as its own line.
 This notebook fits one model to all of them, to put the four sources on one scale and to read a trend through noisy, unevenly spaced surveys.
 The model is **descriptive**: it has no substantive predictors, only country, time and source.
-Its output is a set of type shares per country and year *as the ESS would have measured them*, with posterior uncertainty, next to the raw cells of 2.5.
+Its output is a set of type shares per country and year *as the ESS would have measured them*, with posterior uncertainty, next to the raw cells of r1.01.
 
 **Fit switch.** `full_fit <- TRUE` fits with 4 chains of 2,000 iterations (1,000 warm-up) and caches the fit in `data/04_models/` (git-ignored).
 `full_fit <- FALSE` fits with 2 chains of 400 iterations and saves nothing; those estimates only show that the pipeline runs.
@@ -75,7 +75,7 @@ ref_source <- "ESS"
 
 # Data
 
-The input is the cell table of notebook 2.5: one row per survey × country, with the weighted share of each type and the cell's Kish effective sample size.
+The input is the cell table of notebook r1.01: one row per survey × country, with the weighted share of each type and the cell's Kish effective sample size.
 The model needs counts.
 So each cell enters with **effective counts**, the weighted shares times `n_eff`, rounded.
 A cell then carries as much information as its weights allow, no more.
@@ -103,7 +103,7 @@ d <- cells |>
   pivot_wider(names_from = col, values_from = k_eff) |>
   mutate(
     # The EES moved online, with the party list on screen, in 2019 (notebook
-    # 2.2); its explicit shares jump with it (notebook 2.5), so the two modes
+    # 2.02); its explicit shares jump with it (notebook r1.01), so the two modes
     # are separate instruments
     source = if_else(source == "EES", if_else(year >= 2019, "EES online", "EES interview"), as.character(source)),
     source = factor(source, levels = c(ref_source, setdiff(c("ESS", "EES interview", "EES online", "CSES", "EU25"), ref_source))),
@@ -132,7 +132,7 @@ $$
 for cell $c$ (one survey in one country $j$, in year $t$) and type $k$, against non-partisans as the reference category.
 
 - $\beta_{k,\text{source}}$: the **source offset**, the difference that wording, mode and the vote asked about make, common to all countries; the ESS is the reference.
-  It is identified where two sources observe a country at about the same time (the overlap table in 2.5).
+  It is identified where two sources observe a country at about the same time (the overlap table in r1.01).
 - $f_k(t)$: a smooth European trend (thin-plate spline, `k = 5`).
 - $a_{k,j}$, $b_{k,j}$: each country's level and linear trend around the European one (correlated varying effects).
 - $u_{k,c}$: a cell effect, for the variation between surveys beyond sampling error (house and fieldwork effects).
@@ -290,7 +290,7 @@ ppc |>
 
 The fitted share of each type by country and year, **as the ESS would measure it** (source set to ESS, cell effects left out).
 The line is the posterior median, the band the 90% interval.
-The points are the raw weighted cells of notebook 2.5, by source; they sit off the line where their source measures differently, which is what the source offsets absorb.
+The points are the raw weighted cells of notebook r1.01, by source; they sit off the line where their source measures differently, which is what the source offsets absorb.
 Trajectories are drawn only over the years a country is observed by some source.
 
 ```{r}

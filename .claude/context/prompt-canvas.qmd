@@ -283,3 +283,152 @@ I've finished all three steps: the four composition notebooks are weighted, ther
 
   Sources: CSES module 6 codebook, part 5 · GESIS CSES weights · ESS post-stratification weights · UK
   electorate, 2004 EP election
+
+  ---
+
+  The starting point: polarization depends on a population
+
+  Polarization describes how something is distributed: how extreme
+  or spread out people's views are, or how closely their views line
+  up. So every measure has to say whose views it describes. AP
+  research answers this inconsistently and usually without saying
+  so. Some studies use partisans only, some the whole electorate,
+  some define the in-party by the vote. Partisans are defined
+  either by a reported attachment or by the vote, as if the two
+  were the same thing.
+
+  Why that choice is a substantive question
+
+  1. Comparisons mix two things. A measure computed only among
+     partisans combines who the partisans are (composition) with
+     how polarized they are. The share of attached citizens differs
+     across countries, wordings and years, so cross-national and
+     over-time comparisons of partisan-only measures mix the two.
+  2. The choice already assumes an answer. Counting partisans by
+     attachment instead of by vote is harmless only if attachment
+     adds nothing beyond the vote. So the measurement choice rests
+     on a real question: what does partisanship itself add to
+     polarization?
+
+  Two literatures that each answer half
+
+  - European electoral research asked whether party identification
+    is even distinct from the vote in multiparty systems, and
+    whether it is an emotional tie or an evaluation. But it studied
+    vote choice, not polarization.
+  - US AP research asks whether people dislike opponents because of
+    identity or because of policy. But in a two-party system,
+    attachment, vote and policy package coincide, so they are hard
+    to separate.
+  - Neither estimates what attachment adds with the vote held
+    fixed, and neither does it across several kinds of
+    polarization.
+
+  Why Europe helps
+
+  In European multiparty systems, attachment and vote come apart.
+  Voters of the same party differ in whether they report an
+  attachment. Comparing them within a party holds fixed the party's
+  policy signal, its elite cues and the set of out-parties its
+  voters face. Each voter also faces several out-parties at
+  different policy distances. On top of that, the EU25 games
+  randomize the partner's party label.
+
+  Partisan types
+
+  The types come from crossing attachment with the vote:
+
+  - Explicit partisan: attached to and voted for the same party.
+  - Denier: voted for a party but reports no attachment. This is
+    the central contrast.
+  - Leaner: no attachment, but leans toward the party voted for
+    when probed. This grades the attachment instead of treating it
+    as on/off.
+  - Mismatched partisan: attached to party A, voted for party B. In
+    AP, comparing their ratings of A and B is a within-person
+    comparison.
+  - Non-partisan: no attachment and no vote. This is the baseline.
+
+  Three readings of partisanship
+
+  - Functional: in multiparty systems, attachment just restates the
+    vote. Prediction: Δ (explicit minus denier) = 0 on every
+    facet. The paper can lose to this null, and the design must be
+    able to show it.
+  - Evaluative: attachment is a standing judgment of policy and
+    performance. Prediction: Δ is largest on positions and fades
+    toward affect and behavior.
+  - Identity: attachment is a group identity. Prediction: Δ is
+    small on positions and grows through perceptions to affect and
+    behavior. It has two variants: an in-group variant (warmth
+    toward one's own party, favoritism) and an out-group variant
+    (rejection of other parties, derogation).
+
+  The US party-vs-policy debate is the evaluative-vs-identity
+  contrast applied to just one facet.
+
+  The ladder of facets, read as a profile
+
+  The six facets run from positions, through perceptions of the
+  parties, to feelings and behavior:
+
+  1. extremity
+  2. sorting
+  3. perceived party polarization
+  4. perceived party sorting
+  5. vertical attitudinal AP (feelings toward parties)
+  6. horizontal behavioral AP (behavior toward other citizens, in
+     the games)
+
+  No single estimate decides between the readings. The evidence is
+  the profile of Δ across the ladder. Each facet has a quantity
+  that tells the readings apart, for example:
+
+  - dispersion within the party, not the level of extremity;
+  - how far perceived spread exceeds actual spread;
+  - whether the AP gap persists when distance to the rated party is
+    held fixed;
+  - favoritism vs. derogation in the games.
+
+  The threats to inference also ease up the ladder: reverse
+  causation for positions, sophistication for perceptions,
+  selection through the vote for affect, and a randomized treatment
+  in the games.
+
+  Limits of inference
+
+  - The within-party contrast brackets the effect of attachment
+    rather than identifying it. Each comparison is selected by the
+    vote in its own way, so it may act as a floor or a ceiling.
+    - Explicit vs. denier is plausibly attenuated in AP, because
+      deniers may vote for a party partly out of dislike for the
+      others.
+    - Explicit vs. non-partisan is plausibly inflated by
+      differences in engagement.
+  - Reading the contrasts together: if they fall in the order their
+    conditions imply, the effect lies between them. If they cross,
+    at least one condition fails.
+  - The only causal quantity is the effect of the partner's party
+    label in the games. How that effect differs between types is
+    still descriptive.
+
+  The four research questions
+
+  - RQ1 (who): partisan composition since 2000. Dealignment is
+    treated as open: it could continue, stabilize, or turn into
+    realignment toward new-cleavage parties.
+  - RQ2 (whether and what kind): the profile of Δ, and whether it
+    sits with the in-group or the out-group.
+  - RQ3 (where): variation across countries and parties.
+  - RQ4 (so what): decomposing change in polarization into change
+    in the mix of types vs. change within types.
+
+  Contributions
+
+  - Polarization research: makes the population of inference
+    explicit.
+  - Partisanship research: answers the old European question of
+    what an attachment is by looking at its consequences rather
+    than its correlates.
+  - Comparative research: gives a 21st-century account of partisan
+    composition and a decomposition of polarization change.

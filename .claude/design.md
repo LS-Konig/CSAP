@@ -1,17 +1,18 @@
 ---
-last_modified: 2026-11-09
-scope: agreed empirical design: question, goals, partisan types, outcomes, limits of the contrast, estimands, model building, open decisions
+last_modified: 2026-11-12
+scope: agreed empirical design, organized by the four studies (RQ1–RQ4): question, shared building blocks, per-RQ design, estimands, model building, open decisions
 ---
 
 # Design
 
 Read this before touching `index.qmd`'s argument, planning an analysis, or choosing an
-estimand. Data mechanics live in `data.md`.
+estimand. Data mechanics and coverage live in `data.md`. The argument, step by step, lives in
+`argument.qmd` (root).
 
-**Status.** Tristan and Claude agreed this design in a consult on 2026-10-20. It fixes the
-question, the outcomes, the estimands and the threats to inference. **It states no finding.**
-The model-building ladder is a guide, not a fixed sequence: it is adjusted during model development and as fits come in.
-The `index.qmd` notes were trimmed to match.
+**Status.** Tristan and Claude agreed this design in a consult on 2026-10-20 and reorganized it
+around the four studies on 2026-11-12. **It states no finding.** RQ1 and RQ2 are designed;
+RQ3 and RQ4 are deliberately open until results come in. The model-building ladder is a
+guide, not a fixed sequence.
 
 ## Question and contributions
 
@@ -28,9 +29,14 @@ restates the vote), **evaluative** (standing judgment of policy and performance)
 the evaluative vs. identity contrast on one facet. Dealignment in the 21st century is an open
 question, answered by the composition analysis, not assumed.
 
-Research questions: **RQ1** who (composition and its change since 2000); **RQ2** whether and
-what kind (the profile of Δ across facets, in-group vs. out-group locus); **RQ3** where
-(countries, parties); **RQ4** so what (composition vs. polarization within types).
+The four studies:
+
+| RQ | Question | Status |
+|---|---|---|
+| **RQ1 Who** | partisan composition and its change since 2000: dealignment, realignment | designed |
+| **RQ2 What** | whether and what kind: the profile of Δ across facets, in-group vs. out-group locus | designed |
+| **RQ3 Where** | how the contribution of attachment varies across countries, parties and time | open |
+| **RQ4 So what** | composition vs. polarization within types as sources of change | open |
 
 Contributions:
 
@@ -46,20 +52,12 @@ non-partisans; facets always in ladder order (extremity, sorting, perceived pola
 perceived sorting, vertical attitudinal AP, horizontal behavioral AP); sources EES, CSES, ESS,
 EU25; American spelling; first person singular.
 
-## Inferential goals
+## Shared building blocks
 
-1. A **pooled European type contrast** per outcome (the main result).
-2. **Comparative**: how the contrast varies across countries (one figure).
-3. **Dynamic**: how it changes over time (one figure; not the games).
-4. **Decomposition**: change over time and differences between countries, split into the
-   *mix of types* (composition) and *polarization within types*.
-5. **Readings diagnostic** (RQ2): the profile of type contrasts across outcomes, read against
-   the functional, evaluative and identity readings, plus the tests in step 9 of the model building.
+### Partisan types
 
-## Partisan types
-
-All four core types, plus leaners where a probe exists, are used from the start. They come from the attachment × vote tree, with
-"same party" decided by `pf_match()` (see `data.md`).
+They come from the attachment × vote tree, with "same party" decided by `pf_match()` (see
+`data.md`). All types are used from the start; leaners where a probe exists.
 
 | Type | Definition | What it adds | Main comparison |
 |---|---|---|---|
@@ -67,65 +65,106 @@ All four core types, plus leaners where a probe exists, are used from the start.
 | **Denier** (vote-anchored) | denies an attachment, reports a vote | same party, no attachment: the core contrast | vs. explicit, within the vote party |
 | **Leaner** (CSES, EES 2009) | no attachment, but leans towards a party when probed, voted for it | a weaker attachment between explicit and denier: grades the attachment instead of treating it as on/off | vs. explicit and vs. denier, within the vote party |
 | **Mismatched** | attached to A, voted for B | separates attachment from vote: shares the attachment with explicit partisans of A and the vote with deniers of B. In AP, rating A vs. B is a **within-person** comparison | vs. explicit within A; vs. deniers within B |
+| **Attached non-voter** | attached, no vote | attachment surviving the loss of the vote; matters for dealignment (RQ1) | composition only, for now |
 | **Non-partisan** | no attachment, no vote | baseline for composition and for how parties are rated in general. **Diagnostic**: if deniers resemble non-partisans on pre-treatment traits but explicit partisans on the outcome, the vote is selecting them on the outcome | country-level reference, not within party |
 
-- **No contrast identifies the attachment effect alone.** Each is selected by the vote in its
-  own way. Whether it acts as a floor or a ceiling depends on the direction of that selection,
-  which the design does not fix in advance:
-  - *Explicit vs. denier* (within the vote party): a **floor** if deniers vote for the party
-    partly because they dislike the alternatives (selection on the outcome). A **ceiling** if
-    deniers are less engaged voters who vote for it out of habit, so the contrast also carries
-    engagement.
-  - *Explicit vs. non-partisan* (country level): a **ceiling** if not voting and not being
-    attached both go with low engagement, so the contrast adds the vote and engagement to
-    attachment. Not a ceiling if non-partisans hold strong views but reject parties. In AP,
-    non-partisans have no in-party, so this compares only how the same targets are rated.
-  - *Explicit vs. mismatched* (within the attachment party A): holds attachment fixed and
-    varies the vote. It bounds nothing alone. If attachment and vote add up, it splits
-    explicit vs. non-partisan together with the denier contrast.
-  - *Mismatched vs. denier* (within the vote party B): same vote, attachment elsewhere. It
-    shows whether an attachment pulls against the party voted for, not the effect of being
-    attached to it.
-  - Read together: if the floor and ceiling candidates fall in the order their conditions
-    imply, the effect lies between them. If they cross, at least one condition fails. The
-    non-partisan diagnostic above and the step-9 adjustments show which.
-- **Mismatched respondents belong to two parties.** Respondent-level models give them both
-  an attachment-party and a vote-party membership (cross-classified), so both comparisons are
-  within party.
-- **In AP the relation is coded per target party**: attached and voted / attached only /
-  voted only / neither. Which in-party yields more polarization for mismatched respondents is
-  then a contrast inside one model, not a choice between two codings.
-- The mismatched group mixes strategic or coalition voting, multiple PID, recall error and
-  match artefacts. Splitting within-bloc from cross-bloc mismatches, and auditing
-  `pf_match()` for successor parties and alliances, come before interpretation.
-- **Leaners exist only where a probe was fielded**: CSES and EES 2009. Leaner-specific
-  results rest on those studies, and cover outcomes 0, 1, 3 and 5 (CSES has no EU items and
-  no games). Where there is no probe, leaners sit among the deniers (if they voted) or the
-  non-partisans, so a denier in ESS or eu25 is not the same category as a probed CSES denier.
-  The probed studies show how much of the explicit vs. denier gap leaners carry. A leaner who
-  voted for another party is kept apart from the mismatched type and reported only if the
-  cell allows.
-- Two further complications of the type: multiple PID, and wording that asks about
-  attachment, closeness or identity (the ESS "closer to" item already takes in some leaners).
+- The attached non-voter is already a common type in `tree_ctype()` and r1.02. Whether it is an official type in RQ2 is **open**.
+- **Leaners exist only where a probe was fielded**: CSES and EES 2009. Where there is no probe, leaners sit among the deniers (if they voted) or the non-partisans, so a denier in ESS or EU25 is not the same category as a probed CSES denier. A leaner who voted for another party is kept apart from the mismatched type and reported only if the cell allows.
+- **Mismatched respondents belong to two parties.** Respondent-level models give them both an attachment-party and a vote-party membership (cross-classified). The group mixes strategic or coalition voting, multiple PID, recall error and match artefacts; splitting within-bloc from cross-bloc mismatches, and auditing `pf_match()` for successor parties and alliances, come before interpretation.
+- Further complications: multiple PID, and wording that asks about attachment, closeness or identity (the ESS "closer to" item already takes in some leaners).
 
-## Outcomes
+### Sources and their roles
+
+Decided 2026-11-12. Coverage counts are in `data.md` (*Composition coverage*).
+
+- **EES** is the backbone: the source of most RQ2 outcomes, five waves (2004–2024), nearly balanced across the 25 countries.
+- **CSES** adds the leaner probe (every module) and like/dislike ratings; irregular and uneven by country.
+- **EU25** (2019) adds the games and thermometers; it uses the EES attachment wording, so its 2019 point sits on the EES scale.
+- **ESS** validates the partisanship side only: densest for attachment (11 rounds), almost no polarization outcomes (LR, EU in some rounds, no party placements or ratings).
+- Weights: socio-demographic only (see `data.md`).
+
+### General estimand rules
+
+The quantities of interest are contrasts of marginal means, not coefficient arithmetic:
+
+- $AP_t = E(Y \mid Co, t) - E(Y \mid Out, t)$
+- $\Delta AP = AP_{\text{explicit}} - AP_{\text{denier}}$, and the analogous contrasts for the other types
+- **g-computation** from the fitted model: set type and relation counterfactually, predict with all varying effects, and average with respondent weights over parties in common support (`ap_draws()` in notebook r2.02).
+- **Group-level quantities** (dispersion, bimodality, alignment) are computed on a type's predicted distribution mixed with **common party weights**. Otherwise "deniers are more dispersed" could only mean "deniers vote for more varied parties".
+- The **same estimand at every model step**, so that the steps can be compared.
+- **Cross-outcome comparisons** in SD units, reported as posterior probabilities. The attitudinal vs. behavioral comparison is made on EU25 only (same respondents).
+- The posterior reflects sampling uncertainty and the pooling assumptions. It does not reflect selection or the composition of a group.
+
+## RQ1 Who: composition, dealignment, realignment
+
+Agreed 2026-11-12. Subquestions (mirrored in `index.qmd` §Empirical Analysis):
+
+1. **Levels.** How electorates split into the types, pooled and by country.
+2. **Dealignment.** Whether the attached share has fallen since 2002, and where; and if so by **detachment** (explicit → denier: still voting, no tie) or **disengagement** (→ non-partisan: neither).
+3. **Realignment.** Whether attachment follows the vote to new-cleavage families.
+4. **Measurement.** How much of level differences between countries and sources is item wording; what share of unprobed "deniers" are leaners.
+5. **Who the deniers are.** Whether deniers resemble explicit partisans or non-partisans on pre-treatment traits (age, education, interest). Feeds the RQ2 bracketing diagnostic and the RQ4 concentration vs. alienation scenarios.
+6. **Support for RQ2.** Which party × country cells hold both explicit partisans and deniers in usable numbers; size and bloc structure of the mismatched group.
+
+**Logic.**
+
+- Dealignment (*how many* attach) and realignment (*to what*) answer different questions. They are not alternatives and can hold together. A stable attached share is not evidence for realignment.
+- The distribution of partisans over party families mirrors vote shares. Realignment of *attachment* therefore needs **conversion**, P(attached | voted for family f), or equivalently a family's share among partisans against its share among voters. New parties start with low conversion because they are young, so a closing gap is the signal.
+- Attached share = Σ_f vote share_f × conversion_f. Aggregate dealignment can therefore come from votes moving to low-conversion parties alone. Decompose the change into **vote mix** and **within-family conversion** (the RQ4 logic one level down).
+
+**Figure 1 (dealignment).** Left: pooled panel with all types as separate lines. Right: 25 country small multiples showing the **attached share** only, sorted by a robust change measure (a per-country slope over the common window, or first vs. last waves; not t1 vs. t_max). EES as solid line with points; ESS as a thin light line; CSES and EU25 as unconnected points with their own shapes. The main figure uses the common types (leaners folded into deniers or non-partisans).
+
+**Figure 2 (realignment).** Same layout. Per panel: the new-cleavage share among partisans against the same share among voters (or conversion by family).
+
+**Leaner exhibit.** From CSES and EES 2009: the share of would-be deniers who lean when probed, and how much of the explicit vs. denier gap they carry.
+
+**Pooling rule.** The pooled panel averages **country shares with fixed weights** over the countries observed in a wave, never raw respondents; mark changes in the country set (late accession, Brexit).
+
+**The composition model (r1.02).** Multinomial with source offsets, a European spline, linear country deviations and a cell effect. Known limits: linear country slopes cannot show a kink (a halt in dealignment); one constant offset per source assumes wording effects equal across countries and years; vote recall depends on time since the election, so the denier and mismatched shares may carry an election-cycle artefact. RQ1 is descriptive: no causal reading is needed, but trends partly reflect switches between studies or wordings, so levels are not compared across studies without wording effects.
+
+**Open (RQ1).**
+
+- Party classification for realignment: family via ParlGov (Party Facts link) collapsed into old mass vs. new-cleavage families as default; GAL–TAN (CHES) and mainstream/challenger as checks. Not fixed.
+- Country trend shape in the model (factor smooths where the data allow) and a time-since-election term.
+- Whether the attached non-voter is reported as its own type.
+
+## RQ2 What: the profile of Δ across facets
+
+Inferential goals: a **pooled European type contrast** per outcome (the main result), and the
+**readings diagnostic**: the profile of type contrasts across outcomes, read against the
+functional, evaluative and identity readings, plus the tests in step 9 of the model building.
+
+### Outcomes
 
 | Outcome | Data, time | Unit | Polarization quantity | Type estimand | Multilevel structure | Specialities |
 |---|---|---|---|---|---|---|
-| **0 Composition** | EES, CSES, ESS, eu25; over time | respondent | — | share of each type by country and time | respondents in surveys in countries; trend by country | feeds the decomposition; wording and study differences are part of the model |
-| **1 Ideological polarization** (LR, EU) | EES, CSES (mostly LR), ESS (EU in some rounds), eu25; over time | respondent | extremity (individual); dispersion and bimodality (group) | Δ extremity within party; group quantities on each type's distribution under a **common party mix** | respondents in party × country × survey; surveys in countries; trend | the centre of extremity is open (report alternatives); EU coverage is thinner |
-| **2 Ideological sorting** (LR × EU) | where both items exist (EES, ESS rounds, eu25); over time | respondent (joint distribution) | strength of the LR–EU association, whatever its shape | alignment within each type, common party mix | as 1 | a group quantity; nonlinear (inverted U, Hooghe, Marks & Wilson 2002); the sign differs between countries, so measure within country and pool magnitudes |
-| **3 Perceived party polarization** (LR, EU) | EES, CSES (LR), eu25; over time | respondent × placed party | spread of a respondent's placements over a fixed party set; scale-use-corrected stretch (Bayesian Aldrich–McKelvey) as an extension | Δ spread within party; Δ excess over a benchmark of actual positions | placements in respondents in party × country × survey; time | everyone in a country-survey faces the same real party system |
-| **4 Perceived party sorting** | EES, eu25; over time | respondent × placed party | how aligned a respondent's own LR and EU placements are across parties | Δ perceived alignment; Δ excess over actual alignment | as 3 | few parties per respondent, so pool across respondents rather than computing a per-person correlation |
-| **5 Vertical attitudinal AP** (+ EES 2024 horizontal attitudinal) | EES (PTV), CSES (like/dislike), eu25 thermometer; EES 2024 ratings of party supporters | respondent × rated party | in vs. out rating | $AP_t$, $\Delta AP$; two in-relations for mismatched; gradient in distance to the target | ratings in respondents and target parties; respondents in party × country × survey; time | relation coded per target; PTV is not pure affect, so it is a separate operationalization; EES 2024 fills the horizontal-attitudinal cell |
-| **6 Horizontal behavioral AP** | eu25 games, 2019 only | respondent × round | tokens to a co- vs. out-partner | $AP_t$, $\Delta AP$, split into **in-group favoritism** (co vs. control) and **out-group derogation** (control vs. out) | rounds in respondents in party × country | see *Games specifics* |
+| **1 Ideological polarization** (LR, EU) | EES, CSES (mostly LR), ESS (EU in some rounds), EU25; over time | respondent | extremity (individual); dispersion and bimodality (group) | Δ extremity within party; group quantities on each type's distribution under a **common party mix** | respondents in party × country × survey; surveys in countries; trend | the centre of extremity is open (report alternatives); EU coverage is thinner |
+| **2 Ideological sorting** (LR × EU) | where both items exist (EES, ESS rounds, EU25); over time | respondent (joint distribution) | strength of the LR–EU association, whatever its shape | alignment within each type, common party mix | as 1 | a group quantity; nonlinear (inverted U, Hooghe, Marks & Wilson 2002); the sign differs between countries, so measure within country and pool magnitudes |
+| **3 Perceived party polarization** (LR, EU) | EES, CSES (LR), EU25; over time | respondent × placed party | spread of a respondent's placements over a fixed party set; scale-use-corrected stretch (Bayesian Aldrich–McKelvey) as an extension | Δ spread within party; Δ excess over a benchmark of actual positions | placements in respondents in party × country × survey; time | everyone in a country-survey faces the same real party system |
+| **4 Perceived party sorting** | EES, EU25; over time | respondent × placed party | how aligned a respondent's own LR and EU placements are across parties | Δ perceived alignment; Δ excess over actual alignment | as 3 | few parties per respondent, so pool across respondents rather than computing a per-person correlation |
+| **5 Vertical attitudinal AP** (+ EES 2024 horizontal attitudinal) | EES (PTV), CSES (like/dislike), EU25 thermometer; EES 2024 ratings of party supporters | respondent × rated party | in vs. out rating | $AP_t$, $\Delta AP$; two in-relations for mismatched; gradient in distance to the target | ratings in respondents and target parties; respondents in party × country × survey; time | relation coded per target; PTV is not pure affect, so it is a separate operationalization; EES 2024 fills the horizontal-attitudinal cell |
+| **6 Horizontal behavioral AP** | EU25 games, 2019 only | respondent × round | tokens to a co- vs. out-partner | $AP_t$, $\Delta AP$, split into **in-group favoritism** (co vs. control) and **out-group derogation** (control vs. out) | rounds in respondents in party × country | see *Games specifics* |
 
 Sorting means the two dimensions becoming more strongly correlated (the HMS deck's
 *Sortierung*). Sorting of respondents relative to their party's position is **out of scope**.
 Distance to one's own party is not an outcome either. Distance to the *target* party enters
-AP as the party-vs.-policy test.
+AP as the party-vs.-policy test. **In AP the relation is coded per target party**: attached and
+voted / attached only / voted only / neither, so which in-party yields more polarization for
+mismatched respondents is a contrast inside one model.
 
-## Scope and limits of the within-party contrast
+### Bracketing: no contrast identifies the attachment effect alone
+
+Each contrast is selected by the vote in its own way. Whether it acts as a floor or a ceiling
+depends on the direction of that selection, which the design does not fix in advance:
+
+- *Explicit vs. denier* (within the vote party): a **floor** if deniers vote for the party partly because they dislike the alternatives (selection on the outcome). A **ceiling** if deniers are less engaged voters who vote for it out of habit, so the contrast also carries engagement.
+- *Explicit vs. non-partisan* (country level): a **ceiling** if not voting and not being attached both go with low engagement, so the contrast adds the vote and engagement to attachment. Not a ceiling if non-partisans hold strong views but reject parties. In AP, non-partisans have no in-party, so this compares only how the same targets are rated.
+- *Explicit vs. mismatched* (within the attachment party A): holds attachment fixed and varies the vote. It bounds nothing alone. If attachment and vote add up, it splits explicit vs. non-partisan together with the denier contrast.
+- *Mismatched vs. denier* (within the vote party B): same vote, attachment elsewhere. It shows whether an attachment pulls against the party voted for, not the effect of being attached to it.
+- Read together: if the floor and ceiling candidates fall in the order their conditions imply, the effect lies between them. If they cross, at least one condition fails. The non-partisan diagnostic and the step-9 adjustments show which.
+- The probed studies show how much of the explicit vs. denier gap leaners carry (outcomes 1, 3 and 5; CSES has no EU items and no games).
+
+### Scope and limits of the within-party contrast
 
 **What holds for every outcome:**
 
@@ -134,44 +173,29 @@ AP as the party-vs.-policy test.
 - **The vote can be a collider.** Deniers are selected on their reasons to vote for the party: proximity, candidates, dislike of the alternatives.
 - **Measurement**: self-labelling and wording, plus recall error in the vote. Triangulating across studies and wordings addresses measurement, but not confounding that all studies share: a robust pattern can be robustly biased.
 - **A causal reading needs**: conditional ignorability of attachment given party × country and pre-treatment covariates, no selection on the outcome through the vote, and a type that means the same across wordings.
-- The posterior reflects sampling uncertainty and the pooling assumptions. It does not reflect selection or the composition of a group.
 
 | Outcome family | What the contrast buys | Boundaries | Causal reading also needs | Where it likely fails |
 |---|---|---|---|---|
-| **Composition** | how the type mix varies across countries and time; the weights for the decomposition | trends partly reflect switching between studies or wordings | none (descriptive) | level comparisons across studies without wording effects |
 | **Ideology and sorting** | rules out "attached partisans are in more extreme parties"; with the common party mix, group quantities are not driven by party choice | **reverse causation**: extreme or coherent people may attach *because* their views fit a party. Selection on proximity makes deniers look less extreme at centrist parties and more extreme at flank parties. Sorting within one party has restricted range | attachment prior to positions; no proximity selection | the strongest threat: ideology → attachment is at least as plausible as the reverse. Read as association net of party sorting. Type × party position tests the selection |
 | **Perceived polarization and sorting** | the real party system is fixed within a country-survey, so perceived differences are not system differences; a benchmark separates perception from reality | **sophistication** raises attachment and may make perceived spread *more accurate*, not more biased; scale use differs; the set of placed parties differs by type | ignorability given sophistication; comparable scale use | the sophistication confound is likely substantial. Benchmark and scale-use correction narrow it; they do not remove it |
 | **Vertical AP** (+ 2024 horizontal attitudinal) | within party plus **within person** across targets; target effects absorb how well liked a party is in general; the mismatched A-vs-B rating is the best-identified quantity in the design | the vote as collider (deniers vote for P partly because they dislike the others) plausibly **pulls ΔAP toward zero**; out-party sets differ by type; adjusting for distance gives a *controlled direct effect*, because distance is partly a consequence of attachment; PTV mixes liking with viability | no selection on the outcome through the vote; no path from dislike of others to attachment (negative partisanship) | selection by the vote; its plausible direction is attenuation. The mismatched group is itself selected on voting against its attachment |
 | **Horizontal behavioral AP** | the partner's party is **randomized**, so $AP_t$ is a causal effect of the partner label for each type; the control splits favoritism from derogation; the same respondents rate the thermometer, so attitudinal vs. behavioral is within person | $\Delta AP$ is how a causal effect *varies by a non-randomized moderator*, so it is descriptive; few co-partners for deniers and few vote-only partners for mismatched respondents; the party label also carries inferred policy; one election year | the same ignorability of type | ΔAP inherits every confounding problem of type; only the effect of the partner label is experimental |
 
-## Estimands
+### Model building
 
-The quantities of interest are contrasts of marginal means, not coefficient arithmetic:
-
-- $AP_t = E(Y \mid Co, t) - E(Y \mid Out, t)$
-- $\Delta AP = AP_{\text{explicit}} - AP_{\text{denier}}$, and the analogous contrasts for the other types
-
-- **g-computation** from the fitted model: set type and relation counterfactually, predict with all varying effects, and average with respondent weights over parties in common support (`ap_draws()` in notebook 3.2).
-- **Group-level quantities** (dispersion, bimodality, alignment) are computed on a type's predicted distribution mixed with **common party weights**. Otherwise "deniers are more dispersed" could only mean "deniers vote for more varied parties".
-- The **same estimand at every model step**, so that the steps can be compared.
-- **Cross-outcome comparisons** in SD units, reported as posterior probabilities. The attitudinal vs. behavioral comparison is made on eu25 only (same respondents).
-- **Decomposition** over time and across countries, computed on the posterior draws: type mix vs. within-type change.
-
-## Model building
-
-The ladder below is a **guide, not a fixed sequence**. Steps are merged, reordered or added
-as fits come in. At each step, track how the estimand moves, not only LOO. Stability across
-steps is a result; the step that moves it is informative.
+The ladder is a **guide, not a fixed sequence**. Steps are merged, reordered or added as fits
+come in. At each step, track how the estimand moves, not only LOO. Stability across steps is a
+result; the step that moves it is informative.
 
 | Step | Layer added | What it contributes | What to compare |
 |---|---|---|---|
 | 1 | **Likelihood**, on one survey | a family that reproduces the outcome's shape and cell means | posterior predictive checks by cell |
 | 2 | **Party within country** (plus respondent and target layers for repeated outcomes) | the within-party contrast, assuming one common gap. **The benchmark** | against raw within-party cell means |
-| 3 | **Contrast varying by country** | comparative inference with partial pooling: the comparative figure | how much countries differ, relative to the prior |
+| 3 | **Contrast varying by country** | comparative inference with partial pooling: the comparative figure (RQ3) | how much countries differ, relative to the prior |
 | 4 | **Contrast varying by party** | heterogeneity across parties; the estimand uses the stated weights instead of implicit precision weights | a shift from step 2 means the gap varies with party composition |
 | 5 | **Dual party membership** for mismatched respondents | separates attachment from vote in one model | against fits that code only one in-party |
 | 6 | **Study and wording layer** (pooling sources) | one European scale across operationalizations | separate per-study fits as triangulation |
-| 7 | **Time**: surveys within countries, type-specific smooth trends varying by country | dynamic inference (the over-time figure) and the decomposition | stability when single studies are dropped; trends vs. switching between studies |
+| 7 | **Time**: surveys within countries, type-specific smooth trends varying by country | dynamic inference (RQ3) and the decomposition (RQ4) | stability when single studies are dropped; trends vs. switching between studies |
 | 8 | **Distributional layer** (dispersion by cell) | calibrated uncertainty by cell | predictive checks and calibration by cell |
 | 9 | **Diagnostics and adjustments**: distance to the target (party vs. policy), the perception benchmark, type × party position, pre-treatment covariates | the party-vs.-policy tests; robustness of identification | adjusted vs. unadjusted; sensitivity to an unobserved confounder |
 
@@ -181,45 +205,41 @@ steps is a result; the step that moves it is informative.
 - **Figures need not come from one model.** The comparative figure can come from a cross-section at step 4, the over-time figure from step 7. Only the decomposition needs both at once.
 - The dynamics are not read causally. Age, period and cohort are not separated, but are kept in mind when interpreting.
 
-## Design facts
+### Games specifics
 
-- **Target and measurement mode are perfectly confounded** in the eu25 data. The thermometer
-  is vertical-attitudinal and the games are horizontal-behavioral, so a contrast across the two is
-  **attitudinal vs. behavioral**, never vertical vs. horizontal. The EES 2024 ratings of party
-  supporters (horizontal-attitudinal) partly fill the gap, but descriptively only: different
-  respondents and a different year.
-- **Attachment is not randomly assigned** (see *Scope and limits*). Candidate controls come
-  from the DAG and from the literature on the determinants of partisanship, and must be
-  pre-treatment.
+- **Randomization is stratified by type.** Attached respondents were more likely to see a co-partisan partner; the round is random. Co vs. out is random within type and party, so $AP_t$ is identified. The cost is precision for deniers. The drawn relationship is recorded in every round (`der_cj_partisan_relationship_drawn`), so P(drawn co | type, anchor party) can be tabulated. Check whether it depends on anything outside the model, and how thin the vote-only cell of mismatched respondents is.
+- **Control** = a co-national partner with no party shown. The conditions with an EU or a drawn nationality are not the control.
+- **The EU attribute is an identity cue** ("sees themselves as an EU citizen"), not a policy position. It offers no randomized party-vs.-policy test.
+- **Beta-binomial is ruled out**: it is unimodal or U-shaped, misses the spikes at 0, 5 and 10, and recovers the cell means poorly. Current line: a mean model with cell-specific dispersion (the Gaussian on cell means, the main estimate in notebooks r2.03 and r2.05), with an ordinal model as a check of the shape.
 
-## Games specifics
-
-- **Randomization is stratified by type.** Attached respondents were more likely to see a
-  co-partisan partner; the round is random. Co vs. out is random within type and party, so
-  $AP_t$ is identified. The cost is precision for deniers. The drawn relationship is recorded in
-  every round (`der_cj_partisan_relationship_drawn`), so P(drawn co | type, anchor party) can be
-  tabulated. Check whether it depends on anything outside the model, and how thin the
-  vote-only cell of mismatched respondents is.
-- **Control** = a co-national partner with no party shown. The conditions with an EU or a drawn
-  nationality are not the control.
-- **The EU attribute is an identity cue** ("sees themselves as an EU citizen"), not a policy
-  position. It offers no randomized party-vs.-policy test.
-- **Beta-binomial is ruled out**: it is unimodal or U-shaped, misses the spikes at 0, 5 and 10,
-  and recovers the cell means poorly. Current line: a mean model with cell-specific dispersion
-  (the Gaussian on cell means, the main estimate in notebooks 3.3 and 3.5), with an ordinal
-  model as a check of the shape.
-
-## Open decisions
+### Open (RQ2)
 
 - The **centre for extremity**: scale midpoint, country mean or median. Report alternatives.
-- The **sorting measure**: a flexible association (e.g. variance in EU explained by a smooth
-  function of LR), within country, pooling magnitudes, never raw correlations.
-- A **coverage table**, item × study × round × country (LR and EU self-placement, LR and EU
-  placements, PTV and like/dislike, attachment wording): the first deliverable, checked
-  against the codebooks.
+- The **sorting measure**: a flexible association (e.g. variance in EU explained by a smooth function of LR), within country, pooling magnitudes, never raw correlations.
 - The **likelihood per outcome**, chosen by predictive checks.
-- The **predictions of the three readings** (functional, evaluative, identity) per facet are in
-  `tbl-predictions` in `index.qmd`. Refine them before fitting, especially for the two sorting outcomes.
+- The **predictions of the three readings** per facet (`tbl-predictions` in `index.qmd`). Refine them before fitting, especially for the two sorting outcomes.
+
+## RQ3 Where: across countries, parties and time (open)
+
+Deliberately open until RQ2 results exist. What is fixed: the comparative figure comes from
+ladder steps 3–4 (contrast varying by country and party), the over-time figure from step 7.
+Context expectations (cleavage parties, party-system polarization, new-cleavage parties;
+`index.qmd` §Context) guide interpretation; with 25 countries and noisy context measures they
+are not tested as hypotheses. Variation across countries is described, not explained.
+
+## RQ4 So what: composition vs. polarization within types (open)
+
+Deliberately open until RQ1 and RQ2 results exist. What is fixed: change over time and
+differences between countries are split, on the posterior draws, into the **mix of types**
+(composition, from RQ1) and **polarization within types** (from RQ2). The composition
+trajectories map to scenarios (`index.qmd` §Composition and Change): dealignment with
+concentration, dealignment with alienation, stabilization, realignment.
+
+## Cross-cutting design facts
+
+- **Target and measurement mode are perfectly confounded** in the EU25 data. The thermometer is vertical-attitudinal and the games are horizontal-behavioral, so a contrast across the two is **attitudinal vs. behavioral**, never vertical vs. horizontal. The EES 2024 ratings of party supporters (horizontal-attitudinal) partly fill the gap, but descriptively only: different respondents and a different year.
+- **Attachment is not randomly assigned.** Candidate controls come from the DAG and from the literature on the determinants of partisanship, and must be pre-treatment.
+- A **coverage table**, item × study × round × country (LR and EU self-placement, LR and EU placements, PTV and like/dislike, attachment wording), checked against the codebooks, is still to be built. The composition coverage is in `data.md`.
 
 ## Prior framing (superseded)
 

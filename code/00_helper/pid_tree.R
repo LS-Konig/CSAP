@@ -1,6 +1,6 @@
 # Partisan composition trees ---------------------------------------------------
 #
-# Shared helpers for the composition notebooks in code/02_composition/.
+# Shared helpers for the composition notebooks in code/02_types/ and code/rq1_who/.
 # Every source is first harmonised to one row per respondent with these columns:
 #
 #   att        "yes" / "no" / "dk"                 reports a party attachment?
@@ -719,7 +719,7 @@ tree_ctype <- function(leaf) {
   )
 }
 
-# Respondent-level type file for notebooks 2.5 and 2.6
+# Respondent-level type file for notebooks r1.01 and r1.02
 # `survey` names the fieldwork cell within a country (study, wave or round),
 # `year` its fieldwork year, `vote_ref` which election the vote refers to.
 write_types <- function(df, source, survey, year, vote_ref, weight_source, path) {

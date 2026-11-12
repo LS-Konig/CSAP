@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Last modified: 2026-10-27
+Last modified: 2026-11-12
 
 This is the entry point. It holds only what every task needs. The detail lives in the
 context files indexed below, and you should open those only when a task needs them.
@@ -22,8 +22,13 @@ types, outcomes, estimands, limits of the contrast and model building. It lives 
 and nothing reconstructed from git history is settled.
 
 Built so far: the Party Facts coding of the ESS, CSES and EES party items, the attachment-vote
-match rule, and the partisan composition trees. The first model set-up (notebook 3.2) is built but not yet fully fitted. The near-term aim in the
+match rule, and the partisan composition trees. The first model set-up (notebook r2.02) is built but not yet fully fitted. The near-term aim in the
 notes is first results and a presentation by 7 October 2026.
+
+On 2026-11-12 the project was reorganized around **four studies, RQ1–RQ4** (who, what, where,
+so what): `design.md` is structured by RQ, `code/` has one folder per RQ, and the argument is
+pinned down step by step in `argument.qmd` (root). RQ1 and RQ2 are designed; RQ3 and RQ4 stay
+open until results exist.
 
 ## No claim is settled
 
@@ -72,9 +77,10 @@ quarto render presentation_hms.qmd      # RevealJS deck (HMS, German)
 
 | File | Read when… | Last modified |
 |------|-----------|---------------|
-| `.claude/design.md` | the task concerns the argument, the partisan types and their contrasts, outcomes, the limits of the contrast, estimands, model building, or `index.qmd`'s draft | 2026-11-09 |
+| `.claude/design.md` | the task concerns any of the four studies (RQ1–RQ4), the partisan types and their contrasts, sources, outcomes, the limits of the contrast, estimands, model building, or `index.qmd`'s draft | 2026-11-12 |
 | `.claude/data.md` | editing any `code/` notebook, joining sources, matching parties, or reasoning about coverage, item codings or variable names | 2026-11-12 |
-| `.claude/workflow.md` | adding files or notebooks, rendering, committing data, or working with the literature submodule and its summaries (repo layout, pipeline order, Quarto quirks, LFS, summary workflow) | 2026-11-10 |
+| `.claude/workflow.md` | adding files or notebooks (naming scheme), rendering, committing data, or working with the literature submodule and its summaries (repo layout, pipeline order, Quarto quirks, LFS, summary workflow) | 2026-11-12 |
+| `argument.qmd` (root) | the task concerns the logic of the argument; Tristan's ledger of premises ⇒ conclusions. Add a step only once it is agreed, never as a draft | 2026-11-12 |
 
 ## Maintaining this system
 

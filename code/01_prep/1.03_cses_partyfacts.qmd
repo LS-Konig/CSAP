@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 1.3
+  CSAP Code Notebook 1.03
 subtitle: |
   CSES party items coded to Party Facts
 date: last-modified
@@ -17,7 +17,7 @@ execute:
   message: true
 ---
 
-This notebook gives every CSES party item in the 25 democracies a pair of Party Facts variables, as notebook 1.2 does for the ESS and the eu25games release does for its own items:
+This notebook gives every CSES party item in the 25 democracies a pair of Party Facts variables, as notebook 1.02 does for the ESS and the eu25games release does for its own items:
 
 - `ext_<item>_pf_name`: the Party Facts core name, `"<CSES name> [og]"` for a party that is not in Party Facts, or a sentinel for a non-party answer;
 - `ext_<item>_pf_id`: the Party Facts id, `NA` for `[og]` and sentinels.
@@ -71,7 +71,7 @@ source(here("code", "00_helper", "pf_code.R"))
 
 # Load CSES Data
 
-As in notebooks 1.6 and 2.3, `load()` creates `cses_imd` and `cses6`.
+As in notebooks 1.06 and 2.03, `load()` creates `cses_imd` and `cses6`.
 The value labels sit in data-frame attributes (`val.labels` names each variable's label table, `label.table` holds the tables), so they are taken before the frames are cut down.
 
 ```{r}
@@ -872,7 +872,7 @@ crosswalk |>
 ```
 
 Among respondents who report both an attachment party and a lower-house list vote (district vote where there is no list), the share whose two answers carry the same Party Facts id.
-As in notebook 1.2, this is a check on the coding: electoral alliances, which Party Facts keeps as entities of their own, pull the share down.
+As in notebook 1.02, this is a check on the coding: electoral alliances, which Party Facts keeps as entities of their own, pull the share down.
 Germany is the clearest case here: CSES codes attachment to the CDU and the CSU separately (Party Facts 1375 and 1731) but the list vote for the CDU/CSU union (211); Romania's alliances (USL, PSD+PUR, DA) do the same.
 
 ```{r}
@@ -902,7 +902,7 @@ respondents |>
 - **The Module 6 respondent id is `f1003_1`.** `f1005` is the numeric study id, despite its position among the id variables.
 - **Two IMD labels are mojibake** (UTF-8 read as CP1252: "Fidesz â€“ KDNP", "Center Party â€“ Nationalists") and are decoded again before matching.
 - **`9999999` holds both missing and abstention** on the vote items and cannot be split; it stays `NA`, as do the not-applicable codes `95` and `96`.
-- **Alliances and unions:** CSES codes attachment to the CDU and the CSU separately (1375, 1731) but the German list vote for the CDU/CSU union (211), and Romanian studies code alliances (USL, PSD+PUR, DA) on the vote. The codes here keep those entities apart; notebook 1.9 adds the membership under which a party and its alliance count as the same party.
+- **Alliances and unions:** CSES codes attachment to the CDU and the CSU separately (1375, 1731) but the German list vote for the CDU/CSU union (211), and Romanian studies code alliances (USL, PSD+PUR, DA) on the vote. The codes here keep those entities apart; notebook 1.09 adds the membership under which a party and its alliance count as the same party.
 - **Only the 25 democracies**, from both releases, are coded.
 
 # Session Info

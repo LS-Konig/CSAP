@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 1.6
+  CSAP Code Notebook 1.06
 subtitle: |
   CSES IMD and module 6: reported party attachment, 1996-2024
 date: last-modified
@@ -88,7 +88,7 @@ IMD uses upper-case `IMD`-prefixed names, module 6 lower-case `f`-prefixed ones.
 CSES asks a follow-up probe of everyone who does not say yes (*do you feel yourself a little
 closer to one of the political parties than the others?*, `IMD3005_2` / `f3023_2`). That probe
 is deliberately **not** used here: the base item alone is the analogue of the EES question in
-notebook 1.2, and the probe is unfielded in nine of the studies below.
+notebook 1.02, and the probe is unfielded in nine of the studies below.
 
 Left--right self-placement -- *where would you place yourself on a scale from 0 to 10, where
 0 means the left and 10 means the right?* -- is carried through the same chunks, for the final
@@ -158,7 +158,7 @@ cses_mod6 <- cses6 |>
 
 The two releases do not overlap -- the IMD's latest election is 2021, module 6 begins in 2022
 -- so no study is counted twice. Country identifiers are already alpha-2 in both files, so
-unlike the EES in notebook 1.2 no name lookup is needed; the one exception is module 6's `SL`
+unlike the EES in notebook 1.02 no name lookup is needed; the one exception is module 6's `SL`
 for Slovenia, corrected above.
 
 Two studies never fielded the item at all and are dropped whole rather than counted as
@@ -263,7 +263,7 @@ Six things are worth keeping in view when reading the figures.
 First, **close to a party is not the same as naming a party**. The CSES item is binary; the
 party itself is asked at a separate variable (`IMD3005_3`). A respondent can be close to a
 party here without ever naming one, so this series is not level-comparable with the EES series
-in notebook 1.2 -- only its movement is.
+in notebook 1.02 -- only its movement is.
 
 Second, **the leaner probe is excluded**, and it is large. Respondents who say no to the base
 item but yes to the follow-up probe are between 15% and 25% of all respondents depending on
@@ -484,7 +484,7 @@ First, **the deniers here include the leaners**. The branching probe is not used
 notebook, so the 15% to 25% of respondents who say they feel a little closer to one party
 than the others sit inside *No attachment*. Those are people with a real if weak partisan
 leaning, counted on the denier side. The gap between the two lines below is therefore
-narrower than the same gap in notebooks 1.2 and 1.4 would be for that reason alone, and the
+narrower than the same gap in notebooks 1.02 and 1.04 would be for that reason alone, and the
 three are not comparable in level.
 
 Second, **placements are measured just after an election**. Every CSES study follows a

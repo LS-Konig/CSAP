@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 3.2
+  CSAP Code Notebook r2.02
 subtitle: |
   eu25games 2019: within-party AP contrast of explicit and vote-anchored partisans (model set-up)
 date: last-modified
@@ -21,7 +21,7 @@ execute:
 
 This notebook sets up the models for the first eu25games estimates.
 The quantity of interest is the gap in affective polarization (AP) between **explicit** partisans (attachment and vote name the same party) and **vote-anchored** partisans (no attachment, but a reported vote), estimated *within* party and country.
-In the composition figure of notebook 3.1, these are the dark-blue leaf ("Attached: same party") and the dark-orange leaf ("No attachment: vote").
+In the composition figure of notebook r2.01, these are the dark-blue leaf ("Attached: same party") and the dark-orange leaf ("No attachment: vote").
 There are two outcomes, and each gets its own models:
 
 - **Games**: tokens (0--10) given to a partner in the dictator and trust games (horizontal, behavioral);
@@ -30,7 +30,7 @@ There are two outcomes, and each gets its own models:
 The notebook follows the Bayesian workflow in eight steps: scientific model, estimand, data summary, formal model, prior predictive check, fit, MCMC diagnostics and posterior predictive check, estimand computation, limitations.
 For every outcome, a Gaussian model (on the standardized outcome) is built first, then a beta-binomial model.
 The beta-binomial is the generative model of the integer outcome. The Gaussian model recovers conditional means and serves as robustness.
-(Update: the HMS deck and notebook 3.5 treat the Gaussian models as the main estimates, because the estimand is built from cell means and the identity-link Gaussian reproduces them; the beta-binomial is the robustness check. The text below keeps the original set-up.)
+(Update: the HMS deck and notebook r2.05 treat the Gaussian models as the main estimates, because the estimand is built from cell means and the identity-link Gaussian reproduces them; the beta-binomial is the robustness check. The text below keeps the original set-up.)
 
 **Nothing in this notebook is a claim.**
 With `full_fit <- TRUE` (the current setting), every model is fitted on the full analysis sample with production settings, and the fits are cached in `data/04_models/` (git-ignored). The estimates are reported with their uncertainty, and they are not interpreted here.
@@ -269,7 +269,7 @@ For the **games** there are three more nodes, all fixed by the design: $Z$, the 
 $Z$ is randomized. $G$ and $K$ are design factors. All three only affect $Y$.
 
 The arrow $T \to R$ in the games is a design arrow.
-The partner's party was drawn with reference to the attachment answer, so explicit partisans meet a co-partisan in about half of the rounds and vote-anchored partisans in about one in ten (notebook 3.1, *How the Partner's Party Was Drawn*).
+The partner's party was drawn with reference to the attachment answer, so explicit partisans meet a co-partisan in about half of the rounds and vote-anchored partisans in about one in ten (notebook r2.01, *How the Partner's Party Was Drawn*).
 Within a type, $R$ is random.
 This is why AP is always computed *within* type: conditioning on $T$ closes the only back door into $R$.
 
@@ -378,7 +378,7 @@ The quantity of interest, the type difference in the co/out gap, is an interacti
 A DAG does not encode interactions, but the gap itself is identified within type, and the comparison of gaps across types inherits the problem of $U$.
 **The type contrast is therefore a within-party descriptive contrast, not a causal effect.**
 Under which assumptions it can be read causally is an open section in the notes (`design.md`).
-Respondent covariates that could stand in for $U$ are not joined yet (notebook 3.1, *Caveats*).
+Respondent covariates that could stand in for $U$ are not joined yet (notebook r2.01, *Caveats*).
 
 # Estimand
 
@@ -548,7 +548,7 @@ ppc_by <- function(fit, type, group, newdata, ndraws = 100, stat = NULL) {
 
 # Data
 
-The inputs are the two long datasets of notebook 3.1.
+The inputs are the two long datasets of notebook r2.01.
 Sample construction, duplicate handling, partisan type, anchor and the co/out relation are all done there and are not repeated here.
 
 ```{r}
@@ -1842,8 +1842,8 @@ cross |>
 - **Thin vote-anchored co-partisan cells in the games.** Vote-anchored respondents met a co-partisan only by chance, about one round in ten, so many parties have few or no such rounds. Their party-level gap rests on partial pooling, and the intervals show it.
 - **Out-partners differ by type.** Explicit partisans' out-partners were drawn from the other parties only, while vote-anchored respondents' partners came from all main parties. Both are "out", but from slightly different sets.
 - **The Gaussian models are robustness.** They recover conditional means, but they put predictive mass outside the scales and cannot produce the spikes at the ends.
-- **The vote is a European Parliament vote**, in wave 2 mostly an intended or hypothetical one (notebook 3.1). Because the vote item differs between waves, so does the classification into types: the wave mix of explicit and vote-anchored respondents is not the same. The DAGs leave this measurement effect out (see [Scientific Model](#scientific-model)). The wave dummy absorbs level differences between waves, but not differences in who is classified as which type.
-- **Question order is unverified.** Whether the thermometers came before or after the games is not established (notebook 3.1).
+- **The vote is a European Parliament vote**, in wave 2 mostly an intended or hypothetical one (notebook r2.01). Because the vote item differs between waves, so does the classification into types: the wave mix of explicit and vote-anchored respondents is not the same. The DAGs leave this measurement effect out (see [Scientific Model](#scientific-model)). The wave dummy absorbs level differences between waves, but not differences in who is classified as which type.
+- **Question order is unverified.** Whether the thermometers came before or after the games is not established (notebook r2.01).
 - **The priors on the varying-effect SDs are fairly tight** (exponential(5), mean 0.2 on the logit or z scale). They were tightened to remove the U-shape of the first prior set (see [Priors](#priors)). With 25 countries and about 400 parties the data should dominate, but whether the posterior SDs press against the prior is worth checking after the full fit.
 
 # Session Info

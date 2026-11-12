@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 3.5
+  CSAP Code Notebook r2.05
 subtitle: |
   eu25games 2019: estimand-focused predictive checks of the AP contrast models (no refits)
 date: last-modified
@@ -19,8 +19,8 @@ execute:
 
 # Setup
 
-This notebook checks the four cached fits of notebook 3.2, and their prior-only fits, against the statistics the estimand is built from.
-The posterior predictive checks in 3.2 compare densities and unweighted cell means. Here the test statistics are chosen to be as close as possible to the estimand:
+This notebook checks the four cached fits of notebook r2.02, and their prior-only fits, against the statistics the estimand is built from.
+The posterior predictive checks in r2.02 compare densities and unweighted cell means. Here the test statistics are chosen to be as close as possible to the estimand:
 
 1. the respondent-weighted cell means within the common support, the raw $AP_t$ per type and the raw $\Delta AP$, computed on the observed outcome and on every replicated dataset, pooled and by country;
 2. the SD by type × relation cell (the variance assumption);
@@ -28,7 +28,7 @@ The posterior predictive checks in 3.2 compare densities and unweighted cell mea
 4. for the Gaussian models: the share of replications outside the scale by cell, and the party-level g-computed cell means outside 0--100;
 5. the same statistics under the prior, and the prior $\Delta AP$ by g-computation, which should be centred on 0.
 
-The raw $\Delta AP$ of statistic 1 is not the g-computed $\Delta AP$ of 3.3: g-computation sets type and relation counterfactually for every row and so averages over parties differently. But it is the statistic of the data that the estimand summarises, so a model that cannot reproduce it cannot be trusted on the estimand.
+The raw $\Delta AP$ of statistic 1 is not the g-computed $\Delta AP$ of r2.03: g-computation sets type and relation counterfactually for every row and so averages over parties differently. But it is the statistic of the data that the estimand summarises, so a model that cannot reproduce it cannot be trusted on the estimand.
 
 - Input: the fits `data/04_models/{games,thermo}_{bb,gauss}{,_prior}.rds` (git-ignored). **Nothing is fitted here.** There is no `brm()` call, and the notebook stops if a fit is missing.
 - Cache: replicated draws and party-level predictions go to `data/04_models/derived/` (git-ignored), keyed on the fit file's MD5, the number of draws and the seed. They are recomputed only when that key changes.
@@ -63,7 +63,7 @@ if (length(p_to_install) > 0) {
 sapply(p_required, require, character.only = TRUE)
 rm(p_required, p_to_install, packages)
 
-# Same seed and number of draws as 3.2 and 3.3, so the same posterior draws are used
+# Same seed and number of draws as r2.02 and r2.03, so the same posterior draws are used
 seed <- 2019
 ndraws_post <- 1000
 
@@ -93,9 +93,9 @@ fp_start <- fit_fingerprint()
 
 # Data
 
-The estimation data are rebuilt exactly as in notebook 3.3, which copies 3.2 (*Data*: *Games*, *Thermometer*, *Common Support*).
-**This code must stay identical to 3.2**: the fits were estimated on these rows.
-The development subsample, on which the prior-only fits were run, is drawn as in 3.2 (*Development Subsample*).
+The estimation data are rebuilt exactly as in notebook r2.03, which copies r2.02 (*Data*: *Games*, *Thermometer*, *Common Support*).
+**This code must stay identical to r2.02**: the fits were estimated on these rows.
+The development subsample, on which the prior-only fits were run, is drawn as in r2.02 (*Development Subsample*).
 Every fit is checked row by row against its own `fit$data` before it is used.
 
 ```{r}
@@ -104,7 +104,7 @@ Every fit is checked row by row against its own `fit$data` before it is used.
 eu25_games <- read_rds(here("data", "03_final", "eu25_games.rds"))
 eu25_thermo <- read_rds(here("data", "03_final", "eu25_thermo.rds"))
 
-# Games, as in 3.2 (games-sample)
+# Games, as in r2.02 (games-sample)
 games <- eu25_games |>
   filter(
     type %in% c("explicit", "vote_anchored"),
@@ -126,7 +126,7 @@ games_scale <- list(mean = mean(games$cj_pl2), sd = sd(games$cj_pl2))
 games <- games |>
   mutate(der_y_z = (cj_pl2 - games_scale$mean) / games_scale$sd)
 
-# Thermometer, as in 3.2 (thermo-sample)
+# Thermometer, as in r2.02 (thermo-sample)
 thermo <- eu25_thermo |>
   filter(
     type %in% c("explicit", "vote_anchored"),
@@ -145,7 +145,7 @@ thermo_scale <- list(mean = mean(thermo$q_thermo), sd = sd(thermo$q_thermo))
 thermo <- thermo |>
   mutate(der_y_z = (q_thermo - thermo_scale$mean) / thermo_scale$sd)
 
-# Common support, as in 3.2 (games-support, thermo-support)
+# Common support, as in r2.02 (games-support, thermo-support)
 add_support <- function(df) {
   support <- df |>
     distinct(der_anchor, meta_responseid, type) |>
@@ -157,7 +157,7 @@ add_support <- function(df) {
 games <- add_support(games)
 thermo <- add_support(thermo)
 
-# Development subsample, as in 3.2 (dev-sample)
+# Development subsample, as in r2.02 (dev-sample)
 set.seed(seed)
 persons <- union(games$meta_pid, thermo$meta_pid)
 dev_pids <- sample(persons, round(0.1 * length(persons)))
@@ -224,7 +224,7 @@ The observed outcome is passed as a one-row matrix, so observed and replicated s
 The Gaussian replications are back-transformed from the z-scale first.
 
 - **Estimand statistics** use the estimand's rows and weights: the common support, and the respondent weight `der_w`. Columns: weighted cell means, $AP_t$ and $\Delta AP$, pooled and by country.
-- **Shape statistics** describe the fitted distribution, so they use all rows of the fit, unweighted (as the outcome tables in 3.2 do). Columns: SD, anchor shares, heaping and (Gaussian) out-of-scale share, by cell. A Gaussian replication counts at an anchor if it *rounds* to it. It is not clamped to the scale, because clamping would pile all out-of-scale mass onto 0 and 100 and fake the spikes.
+- **Shape statistics** describe the fitted distribution, so they use all rows of the fit, unweighted (as the outcome tables in r2.02 do). Columns: SD, anchor shares, heaping and (Gaussian) out-of-scale share, by cell. A Gaussian replication counts at an anchor if it *rounds* to it. It is not clamped to the scale, because clamping would pile all out-of-scale mass onto 0 and 100 and fake the spikes.
 
 ```{r}
 #| label: stat-code
@@ -317,8 +317,8 @@ summarise_check <- function(obs, rep) {
 ## Party-Level and Prior g-Computation
 
 The party-level check needs g-computed cell means per anchor party.
-`cell_sums()` is the function of 3.3, with the grouping variable as an argument: it sets type and relation counterfactually for every row of the support, predicts with `posterior_epred()`, and returns each group's weighted sums and weight totals.
-For the prior-only fits it is run pooled, to repeat 3.2's check that the prior $\Delta AP$ is centred on 0.
+`cell_sums()` is the function of r2.03, with the grouping variable as an argument: it sets type and relation counterfactually for every row of the support, predicts with `posterior_epred()`, and returns each group's weighted sums and weight totals.
+For the prior-only fits it is run pooled, to repeat r2.02's check that the prior $\Delta AP$ is centred on 0.
 
 ```{r}
 #| label: gcomp-code
@@ -346,7 +346,7 @@ cell_sums <- function(fit, data, ids, back = identity, by = "country", chunk = 5
 # Computation
 
 The fits are loaded one at a time and dropped before the next (about 560 MB each).
-For each fit: the rows are checked against `fit$data`; the replicated draws are taken from the cache or computed (`posterior_predict()`, 1,000 posterior draws with the draw positions of 3.3, or all 300 draws of a prior-only fit); the statistics are computed on the observed and the replicated outcomes; for the Gaussian posterior fits the party-level g-computation runs (cached); for the prior-only fits the pooled prior $\Delta AP$.
+For each fit: the rows are checked against `fit$data`; the replicated draws are taken from the cache or computed (`posterior_predict()`, 1,000 posterior draws with the draw positions of r2.03, or all 300 draws of a prior-only fit); the statistics are computed on the observed and the replicated outcomes; for the Gaussian posterior fits the party-level g-computation runs (cached); for the prior-only fits the pooled prior $\Delta AP$.
 
 ```{r}
 #| label: compute
@@ -678,7 +678,7 @@ checks |>
   knitr::kable(digits = 2)
 ```
 
-The prior $\Delta AP$ by g-computation should be centred on 0, as in 3.2:
+The prior $\Delta AP$ by g-computation should be centred on 0, as in r2.02:
 
 ```{r}
 #| label: tbl-prior-gcomp

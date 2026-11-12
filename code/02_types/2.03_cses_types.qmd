@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 2.3
+  CSAP Code Notebook 2.03
 subtitle: |
   CSES IMD and module 6: partisan composition trees
 date: last-modified
@@ -20,7 +20,7 @@ execute:
 # Setup
 
 The flowcharts are Mermaid diagrams written by R code; trees inside tabs are drawn the first time their tab is opened.
-Notebook 2.1 explains the tree itself; it is the same in all four composition notebooks.
+Notebook 2.01 explains the tree itself; it is the same in all four composition notebooks.
 
 ```{r}
 #| label: setup
@@ -53,7 +53,7 @@ source(here("code", "00_helper", "pid_tree.R"))
 
 # Load CSES Data
 
-As in notebook 1.6, `load()` creates `cses_imd` (modules 1--5) and `cses6` (module 6) as a side effect.
+As in notebook 1.06, `load()` creates `cses_imd` (modules 1--5) and `cses6` (module 6) as a side effect.
 
 ```{r}
 #| label: load-cses-data
@@ -192,7 +192,7 @@ Where the study followed no lower-house election at all (code `9999996`, e.g. th
 Blank or invalid ballots, refusals, don't know and abstention count as *no vote reported*.
 Abstention and missing share the code `9999999`, so they cannot be told apart.
 
-**Match.** Attachment party and vote are compared by their Party Facts coding (notebook 1.3), with the rule of notebook 1.9: the same party, a party and an electoral alliance containing it, or a party and the party it continued in through a rename, refoundation or merger (from the year of the succession on) count as *same party*.
+**Match.** Attachment party and vote are compared by their Party Facts coding (notebook 1.03), with the rule of notebook 1.09: the same party, a party and an electoral alliance containing it, or a party and the party it continued in through a rename, refoundation or merger (from the year of the succession on) count as *same party*.
 This matters most in Germany, where CSES codes attachment to the CDU and the CSU separately but the list vote for the CDU/CSU union, and in Romania's alliance years.
 Codes `9999988`--`9999992` (none of the parties, independent, other left/right/unspecified) name something that is not a codeable party and count as *not matchable*.
 
@@ -272,7 +272,7 @@ cses_mod6_tree <- cses6 |>
 
 Both releases share one coding scheme, differing only in the number of digits, so they are stacked first and classified once.
 The offset `other_from` holds the first non-party code of each release.
-As in notebook 1.6, the two studies that never fielded the attachment item (`BELW1999`, `LVA_2018`) are dropped whole.
+As in notebook 1.06, the two studies that never fielded the attachment item (`BELW1999`, `LVA_2018`) are dropped whole.
 
 ```{r}
 #| label: harmonise
@@ -352,7 +352,7 @@ cses_tree <- cses_tree |>
     )
   )
 
-# Level 3: Party Facts match, with alliances and lineage (notebook 1.9), for
+# Level 3: Party Facts match, with alliances and lineage (notebook 1.09), for
 # the vote the tree uses: the list vote, else the district vote; `route` says
 # which table made a pair the same party
 cses_match <- read_parquet(here("data", "02_processed", "cses_party_match.parquet")) |>
@@ -417,7 +417,7 @@ cses_tree |>
 The first table crosses the tree levels by module.
 The second gives, per election study, the share naming the *same* party among attached voters whose two answers are both real parties, sorted from the lowest.
 The third lists the most frequent German pairs still scored *different*: with CDU and CSU attachment now matched to the CDU/CSU list vote, these are genuine switches.
-The fourth lists the pairs that are the *same party* only through an alliance or lineage (the audit trail of the tables of notebook 1.9).
+The fourth lists the pairs that are the *same party* only through an alliance or lineage (the audit trail of the tables of notebook 1.09).
 
 ```{r}
 #| label: checks
@@ -612,7 +612,7 @@ cses_tree |>
 
 # Type File
 
-One row per respondent with the common composition types (`tree_ctype()` in `pid_tree.R`), the weight and the survey cell, for notebooks 2.5 and 2.6.
+One row per respondent with the common composition types (`tree_ctype()` in `pid_tree.R`), the weight and the survey cell, for notebooks r1.01 and r1.02.
 
 ```{r}
 #| label: write-types
@@ -639,9 +639,9 @@ cses_types |>
 - **Presidential studies have no vote branch.** France 2002, 2012, 2017 and 2022, Lithuania 1997, and Romania 2009 and 2014 followed a presidential election only, so their respondents sit in *vote item not fielded*.
 - **Abstention and missing share code `9999999`**, so *no vote reported* mixes both.
 - **Close is not naming.** Respondents close to a party with no usable party code are in *not matchable*.
-- **CSES folds inconsistent answers into the binary** (notebook 1.6): a "yes" with no party is kept as yes, a "no" with a party as no.
-- **Alliances and unions count as the same party** as their member parties (notebook 1.9), so the CDU/CSU union code no longer pushes German studies towards *different party*.
-- **Lineage counts as the same party** (notebook 1.9): a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on (PDS and Die Linke, PD and PDL in Romania, Isamaaliit and IRL in Estonia). Two predecessors of one successor and a breakaway and its parent stay *different party*; the `route` column records which table made a pair the same party.
+- **CSES folds inconsistent answers into the binary** (notebook 1.06): a "yes" with no party is kept as yes, a "no" with a party as no.
+- **Alliances and unions count as the same party** as their member parties (notebook 1.09), so the CDU/CSU union code no longer pushes German studies towards *different party*.
+- **Lineage counts as the same party** (notebook 1.09): a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on (PDS and Die Linke, PD and PDL in Romania, Isamaaliit and IRL in Estonia). Two predecessors of one successor and a breakaway and its parent stay *different party*; the `route` column records which table made a pair the same party.
 - **Module 6 is an advance release** covering eight of the 25 countries.
 - **The tree order is the master order.** National studies embed the module in their own questionnaires and may ask the vote elsewhere; module 1 has no master order at all and is drawn vote first.
 - **Leaners are matched like the attached**, since the CSES records one party item for both; a leaner's *same party* is a weaker tie than an attached respondent's, and the two are kept apart in every tree and figure.

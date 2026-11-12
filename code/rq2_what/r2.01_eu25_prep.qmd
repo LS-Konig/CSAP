@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 3.1
+  CSAP Code Notebook r2.01
 subtitle: |
   eu25games 2019: long-format analysis data for games and thermometers
 date: last-modified
@@ -24,7 +24,7 @@ This notebook builds the two analysis datasets for the eu25games side of the stu
 - `eu25_games`: one row per **round played** in the dictator and trust games (token allocation, horizontal and behavioral);
 - `eu25_thermo`: one row per **party evaluation** on the thermometer (0--100, vertical and attitudinal).
 
-Both carry the respondent's partisan type and anchor party from notebook 2.1 and the co-/out-partisan relation of the target, so that $AP = E(Y \mid Co) - E(Y \mid Out)$ and its explicit vs. vote-anchored contrast can be estimated from them directly.
+Both carry the respondent's partisan type and anchor party from notebook 2.01 and the co-/out-partisan relation of the target, so that $AP = E(Y \mid Co) - E(Y \mid Out)$ and its explicit vs. vote-anchored contrast can be estimated from them directly.
 No models are fitted here.
 
 ```{r}
@@ -54,7 +54,7 @@ rm(p_required, p_to_install, packages)
 # Shared tree helpers
 source(here("code", "00_helper", "pid_tree.R"))
 
-# Party Facts helpers and the alias, alliance and lineage tables of notebook 1.9
+# Party Facts helpers and the alias, alliance and lineage tables of notebook 1.09
 source(here("code", "00_helper", "pf_code.R"))
 rules <- pf_rules()
 ```
@@ -97,7 +97,7 @@ round_vars <- c(
 # Load Data
 
 The source is the published harmonised release.
-The partisan classification (attachment, vote, and whether they name the same party) is not rebuilt here: it comes from notebook 2.1, which resolves the "other" answers and hand-codes their open texts, and writes one row per respondent-wave to `data/02_processed/eu25_partisan.rds`.
+The partisan classification (attachment, vote, and whether they name the same party) is not rebuilt here: it comes from notebook 2.01, which resolves the "other" answers and hand-codes their open texts, and writes one row per respondent-wave to `data/02_processed/eu25_partisan.rds`.
 The two are joined by `meta_responseid`, the release's unique row key.
 
 ```{r}
@@ -176,7 +176,7 @@ bind_rows(sample_log)
 
 # Partisan Type and Anchor
 
-The tree of notebook 2.1 gives every respondent-wave an attachment level (`att`), a vote level (`vote`) and, for those who report both, a match (`match`).
+The tree of notebook 2.01 gives every respondent-wave an attachment level (`att`), a vote level (`vote`) and, for those who report both, a match (`match`).
 They are combined into one partisan type:
 
 | `type` | Attachment | Vote | Anchor party |
@@ -245,7 +245,7 @@ sample |>
 
 # Composition in Waves 2 and 3
 
-The figure shows the leaves of the tree of notebook 2.1 for the composition sample, waves 2 and 3 pooled.
+The figure shows the leaves of the tree of notebook 2.01 for the composition sample, waves 2 and 3 pooled.
 The unit is the respondent-wave, so a panelist who took part in both waves counts twice.
 Countries are sorted by the share of respondents who report an attachment (all blue leaves together), from the highest at the top.
 
@@ -421,7 +421,7 @@ For these two the notebook derives the displayed version:
 
 - `der_cj_eu_identity`: `cj_eupos` where EU stance was shown, `not_displayed` otherwise (the coding of the MBEU25 preparation);
 - `der_cj_party_shown`: the party was shown;
-- `der_cj_partisan_relationship`: the partner's party compared with the respondent's anchor by the match rule of notebook 1.9 (`pf_match()`): `co` (same party), `out` (another party), `none` (the partner was shown as having no party), `not_shown` (conditions 3 and 4), and missing for respondents without an anchor.
+- `der_cj_partisan_relationship`: the partner's party compared with the respondent's anchor by the match rule of notebook 1.09 (`pf_match()`): `co` (same party), `out` (another party), `none` (the partner was shown as having no party), `not_shown` (conditions 3 and 4), and missing for respondents without an anchor.
 
 The drawn values stay in the data for placebo checks only: `cj_nationality_drawn`, `cj_eupos` itself, and `der_cj_partisan_relationship_drawn` (the same comparison on the partner's party whether shown or not).
 As controls, only the displayed columns are meaningful: `cj_nationality_shown`, `der_cj_eu_identity`, `der_cj_partisan_relationship`, `cj_age`, `cj_sex`, `cj_rel`, `cj_class`.

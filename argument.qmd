@@ -1,0 +1,125 @@
+---
+title: "Argument"
+format: html
+---
+
+<!--
+The argument ledger. Not rendered by the project (not in _quarto.yml).
+
+Format of a step:
+
+**A<n>.** short name
+- P1: premise
+- P2: premise (a premise that is another step's conclusion cites it: "C(A2)")
+- ⇒ C: conclusion
+- *status*: agreed (date, where) | open
+
+Only agreed steps go in. Open questions stay as headings until they are settled.
+-->
+
+# Framing
+
+**A1.** Polarization implies a population
+
+- P1: Polarization is a property of a distribution of orientations.
+- P2: A distribution is defined over a set of people.
+- ⇒ C: Every measure of polarization implies a population of inference.
+- *status*: agreed (2026-11-09, `index.qmd` §1)
+
+**A2.** Partisan-only measures mix two quantities
+
+- P1: A measure computed among partisans depends on who the partisans are and on how polarized they are.
+- P2: The share reporting an attachment differs across countries, wordings and years.
+- ⇒ C: Comparisons of partisan-only measures across countries or over time confound composition with polarization within partisans.
+- *status*: agreed (2026-11-09, `index.qmd` §1)
+
+**A3.** The choice of population presupposes a substantive answer
+
+- P1: C(A1).
+- P2: Studies define partisans by attachment or by vote.
+- P3: The two populations describe the same phenomenon only if attachment adds nothing beyond the vote.
+- ⇒ C: Choosing the population presupposes an answer to what attachment itself contributes to polarization.
+- *status*: agreed (2026-11-09, `index.qmd` §1)
+
+**A4.** Europe allows the vote to be held fixed
+
+- P1: In European multiparty systems, attachment and vote come apart: voters of one party differ in whether they report an attachment.
+- P2: Comparing them within the party holds fixed the party's policy signal, its out-parties and its elite cues.
+- ⇒ C: The contribution of attachment can be studied with the vote held fixed, which two-party systems do not allow.
+- *status*: agreed (2026-11-09, `index.qmd` §1)
+
+# RQ1 Who
+
+**A5.** Dealignment and realignment are not alternatives
+
+- P1: Dealignment concerns how many citizens report an attachment.
+- P2: Realignment concerns which parties attachment goes to.
+- ⇒ C: Both can hold at once; a stable attached share is not evidence for realignment.
+- *status*: agreed (2026-11-12, chat)
+
+**A6.** Realignment of attachment needs conversion, not partisan shares
+
+- P1: The distribution of partisans over party families follows the families' vote shares.
+- P2: A shift in partisans that only follows a shift in votes says nothing about attachment.
+- ⇒ C: Realignment of attachment shows in conversion, P(attached | voted for family f), or in a family's share among partisans against its share among voters.
+- *status*: agreed (2026-11-12, chat)
+
+**A7.** Aggregate dealignment can come from vote shifts alone
+
+- P1: Attached share = Σ_f vote share_f × conversion_f.
+- P2: Votes can move from high-conversion to low-conversion parties with every family's conversion unchanged.
+- ⇒ C: A falling attached share can be electoral change, so its change splits into vote mix and within-family conversion.
+- *status*: agreed (2026-11-12, chat)
+
+**A8.** The partisan types split dealignment in two
+
+- P1: An explicit partisan who loses the tie can keep voting (→ denier) or stop voting as well (→ non-partisan).
+- P2: These paths imply different consequences for polarization (concentration vs. alienation).
+- ⇒ C: Dealignment is reported as detachment and disengagement, not as one falling share.
+- *status*: agreed (2026-11-12, chat)
+
+**A9.** RQ1 describes the population RQ2 studies
+
+- P1: Most polarization outcomes of RQ2 come from the EES (and EU25, with EES wording).
+- P2: Composition read from another source would describe a population the main analysis does not use.
+- ⇒ C: The EES is the backbone of RQ1; ESS validates, CSES adds the leaner probe.
+- *status*: agreed (2026-11-12, chat)
+
+# RQ2 What
+
+**A10.** The functional reading is a null the design must be able to show
+
+- P1: Under the functional reading, attachment restates the vote.
+- P2: Explicit partisans and deniers of one party share the vote.
+- ⇒ C: The functional reading predicts Δ = 0 on every facet.
+- *status*: agreed (2026-11-09, `index.qmd` §3)
+
+**A11.** The profile, not one estimate, discriminates
+
+- P1: The evaluative reading locates attachment's contribution in policy: Δ largest on positions, fading toward affect and behavior.
+- P2: The identity reading locates it in groups: Δ small on positions, growing toward affect and behavior.
+- P3: Both predict that partisans dislike opponents more.
+- ⇒ C: Only the pattern of Δ across the ordered facets separates the readings.
+- *status*: agreed (2026-11-09, `index.qmd` §3)
+
+**A12.** The contrasts bracket rather than identify
+
+- P1: Every type contrast is selected by the vote in its own way.
+- P2: The direction of that selection decides whether a contrast is a floor or a ceiling.
+- ⇒ C: No single contrast identifies the contribution of attachment; read together, and in the order their conditions imply, they bracket it.
+- *status*: agreed (2026-10-20, `design.md`)
+
+**A13.** Only the games give a causal quantity
+
+- P1: In the EU25 games the partner's party is randomized within type.
+- P2: Partisan type itself is not randomized.
+- ⇒ C: The label effect $AP_t$ is causal for each type; its difference between types, $\Delta AP$, is descriptive.
+- *status*: agreed (2026-10-20, `design.md`)
+
+# RQ3 Where
+
+*open*
+
+# RQ4 So what
+
+*open*

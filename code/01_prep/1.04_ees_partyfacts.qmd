@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 1.4
+  CSAP Code Notebook 1.04
 subtitle: |
   EES party items coded to Party Facts
 date: last-modified
@@ -17,7 +17,7 @@ execute:
   message: true
 ---
 
-This notebook gives the party items of the five EES voter studies (2004–2024) in the 25 democracies a pair of Party Facts variables, as notebooks 1.2 and 1.3 do for the ESS and the CSES:
+This notebook gives the party items of the five EES voter studies (2004–2024) in the 25 democracies a pair of Party Facts variables, as notebooks 1.02 and 1.03 do for the ESS and the CSES:
 
 - `ext_<item>_pf_name`: the Party Facts core name, `"<EES label> [og]"` for a party that is not in Party Facts, or a sentinel for a non-party answer;
 - `ext_<item>_pf_id`: the Party Facts id, `NA` for `[og]` and sentinels.
@@ -90,7 +90,7 @@ ees_dir <- here("data", "01_raw", "ees")
 
 # Load EES Data
 
-The same five files as in notebooks 1.5 and 2.2, plus each wave's party-code file.
+The same five files as in notebooks 1.05 and 2.02, plus each wave's party-code file.
 
 ```{r}
 #| label: load
@@ -105,7 +105,7 @@ ees_2024 <- read_csv2(
   guess_max = 1e5
 )
 
-# Country names and codes to ISO2 (as in notebook 2.2)
+# Country names and codes to ISO2 (as in notebook 2.02)
 to_iso2 <- function(x) {
   recode_values(
     str_to_lower(x),
@@ -791,7 +791,7 @@ Three sources point a party code to Party Facts directly:
 - Party Facts links the 2014 EES codes (dataset `ees14`);
 - the 2024 file and the 2019 code file give each party its seven-digit EES code (used 2009–2019), so the first two sources reach the other waves through it.
 
-Every such hint is checked against the names Party Facts holds for the party, as in notebook 1.3; failed hints go to the hand map.
+Every such hint is checked against the names Party Facts holds for the party, as in notebook 1.03; failed hints go to the hand map.
 
 ```{r}
 #| label: links
@@ -1659,7 +1659,7 @@ map_hand <- tribble(
   2024L, "EE", "Erakond Parempoolsed", "Erakond Parempoolsed [og]", NA, # founded 2022; 83 is the Parempoolsed of 1995
   2024L, "IE", "Sinn Féin", "Sinn Féin (Provisional)", 4L, # not 2507, the Sinn Féin of 1905-70; as in 2004-2019
   2024L, "SE", "Medborgerlig Samling", "Medborgerlig Samling [og]", NA, # founded 2014; 1633 is the party of 1964-68
-  2024L, "PT", "Aliança Democrática", "Aliança Democrática [og]", NA, # the 2024 list of PSD, CDS-PP and PPM; 1742 is the AD of 1979-80 (notebook 1.9 lists its members)
+  2024L, "PT", "Aliança Democrática", "Aliança Democrática [og]", NA, # the 2024 list of PSD, CDS-PP and PPM; 1742 is the AD of 1979-80 (notebook 1.09 lists its members)
   2024L, "FR", "Les Patriotes", "Les Patriotes [og]", NA
 ) |>
   mutate(key = norm_key(label), source = "hand")
@@ -1879,7 +1879,7 @@ crosswalk |>
 ```
 
 Among respondents who report both an attachment party and an EP-vote party, the share whose two answers carry the same Party Facts id.
-As in notebooks 1.2 and 1.3, this is a check on the coding; the EP vote is further from attachment than a national vote, and electoral alliances pull the share down.
+As in notebooks 1.02 and 1.03, this is a check on the coding; the EP vote is further from attachment than a national vote, and electoral alliances pull the share down.
 
 ```{r}
 #| label: same-party
@@ -1908,7 +1908,7 @@ respondents |>
 - **Automatic links and name matches skip parties that ended before 1950** (`pf_historic()` in `pf_code.R`). Party Facts links Spain's Partido Popular in the CSES and several other datasets to the Partido Progresista of 1834–74 (5750, short name "PP"), and short names had matched labels to Sweden's "Centern" of 1873–82 and Germany's Deutschkonservative Partei (1876–1918); the affected labels are hand-coded. The cutoff is 1950 rather than 1990 because Party Facts' `year_last` for small parties is often their last year in parliament (PPM, UDP and PSP show 1989 but existed later).
 - **Parties of another period.** The 1950 guard misses links to parties that ended later or whose name was reused, so `pf_check_period()` (in `pf_code.R`) stops the notebook when a coded party was founded more than a year after the survey or left Party Facts more than 12 years before it; the reviewed exceptions are listed at the call. Among the cases it found and that are now hand-coded: the EES 2024 Sinn Féin (linked to the Sinn Féin of 1905–70), the 2022 Parempoolsed (ESS, EES; linked to a 1995 party), the Slovenian Združena levica (ESS; linked to the Zdruzena Lista of 1992), the CSES Latvian National Alliance (linked to the LNNK of 1993–95), the CSES 2005 Polish Democratic Party (demokraci.pl, linked to the Stronnictwo Demokratyczne), and the EES Italian UDC (linked to the CCD).
 - **Renamed and refounded parties** that Party Facts splits while a code or label stays the same (Die Linke/PDS, MoDem/UDF, EELV/Les Verts, CD&V/CVP, Vlaams Blok/Belang, Forza Italia 1994/2013, PSDR/PSD) get the id of the survey year from `pf_eras` in `pf_code.R`. In the CSES this happens per respondent, since an IMD code spans studies, so `cses_party_pf.csv` shows the code's id before this step.
-- **Uncertain links coded `[og]`.** The 2024 "Aliança Democrática" (Portugal, about 470 vote answers) is the list PSD, CDS-PP and PPM formed for the 2024 elections; Party Facts has only the AD of 1979–80 (1742), a different alliance with the same name, so the answer is `Aliança Democrática [og]` and notebook 1.9 lists its members.
+- **Uncertain links coded `[og]`.** The 2024 "Aliança Democrática" (Portugal, about 470 vote answers) is the list PSD, CDS-PP and PPM formed for the 2024 elections; Party Facts has only the AD of 1979–80 (1742), a different alliance with the same name, so the answer is `Aliança Democrática [og]` and notebook 1.09 lists its members.
 - **One `[og]` name per party.** An `[og]` name is normally the answer's own label, but where a wave labels one unlisted party differently on different items, all its labels get one name, so that an attachment and a vote for it compare as the same party: 2019 Slovakia's PS–SPOLU list (three labels), Croatia's START, Italy's Forza Nuova and Partito Comunista.
 - **2004 party names exist only in the codebook PDF.** The data label every list code "party 1", "party 2", ...; the names were parsed from `ZA4566_cod.pdf` into `data/02_processed/ees2004_party_lists.csv` (parser kept above, not run). Three layout problems were fixed in the parse: Italy's code 18 (Rifondazione) and Latvia's code 21 (Jaunais Laiks) print their name on the country header line, and Denmark lists code 7 twice (the second, "Christian Peoples Party", duplicates code 9 and is dropped). France, Germany and Spain have a second list for some batteries.
 - **2004 respondent ids repeat**, so the respondent file is keyed by `wave` and `row` (the position in the wave's file); `respondent` carries the original id.
@@ -1919,7 +1919,7 @@ respondents |>
 - **Battery lists.** Position *k* names the same party in every battery of a wave. Belgium has a Flemish and a Walloon list, assigned by interview language (2009 `t103`, 2014 `p13_intlang`, 2019 `meta_lang_be`, 2024 `meta_lang`). In the 2009 code file Denmark's party 1 sits on the row carrying the country name, and Poland skips positions 1, 3, 4 and 8, which stay `NA`. The 2014 file fills the EU-placement column for Belgium only; the other countries take it from the PTV row, where its header puts it.
 - **Undocumented codes.** A few party codes (2004 Belgium 7 and 17, one 2014 Croatian code, a dozen 2024 codes) appear in the data but in no label or code file; they stay `NA` with `source = "undocumented"` (listed in the crosswalk chunk).
 - **Wrong hints overridden by hand**, e.g. Portugal's CDS-PP (hint 1359 is the PSD), Greece's 2014 Olive Tree (hint 7909 starts in 2017), Hungary's 2019 Fidesz–KDNP (hint pointed to Jobbik).
-- **Electoral alliances** keep their own Party Facts id (Fidesz–KDNP, KO, NUPES, the 2004 Ulivo list, ...); notebook 1.9 adds the membership under which a party and its alliance count as the same party.
+- **Electoral alliances** keep their own Party Facts id (Fidesz–KDNP, KO, NUPES, the 2004 Ulivo list, ...); notebook 1.09 adds the membership under which a party and its alliance count as the same party.
 
 # Session Info
 

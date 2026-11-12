@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 1.9
+  CSAP Code Notebook 1.09
 subtitle: |
   Electoral alliances, party lineage and the attachment-vote match
 date: last-modified
@@ -18,7 +18,7 @@ execute:
 ---
 
 Is a respondent's attachment party the party they voted for?
-Comparing the two answers' Party Facts names (the `ext_*_pf_name` variables of notebooks 1.2–1.4 and the eu25games release) answers this for most respondents, but not for three kinds of pair:
+Comparing the two answers' Party Facts names (the `ext_*_pf_name` variables of notebooks 1.02–1.04 and the eu25games release) answers this for most respondents, but not for three kinds of pair:
 
 - **Electoral alliances.** Party Facts keeps an electoral alliance, a joint list or a party union apart from its member parties: the CDU/CSU union (211) is not the CDU (1375) or the CSU (1731), the Fidesz–KDNP list (6366) is not Fidesz (1691), Koalicja Obywatelska (9122) is not Platforma Obywatelska (1117). By name, a respondent close to the CDU who votes for the CDU/CSU list has voted for a *different* party.
 - **Lineage.** Party Facts gives a party a new id when it is renamed or refounded, or when it merges into another party: the UMP (1595) and Les Républicains (8168), the Romanian PD (1715) and the PDL (660), Forza Italia and the Popolo della Libertà (365). Someone who still names the UMP as their party but votes for Les Républicains has not switched; their attachment has followed the organisation.
@@ -43,18 +43,18 @@ A pair is **unmatchable** when either answer is missing or a non-party answer (`
 The tables are looked up pair by pair and never chained: Alleanza Nazionale → Popolo della Libertà and Popolo della Libertà → Forza Italia (2013) do not make AN and Forza Italia (2013) the same party.
 A pair that is both alliance and lineage (a joint list that later became a party, like the PdL in 2008) is listed once, under lineage, with the year of the joint list.
 
-The rule is implemented once, in `pf_match()` and `pf_match_route()` in `code/00_helper/pf_code.R`, and used here and in the composition notebooks 2.1–2.4; `pf_match()` returns *same*, *different* or *unmatchable*, and `pf_match_route()` which of the four routes made a pair the same party, so every *same* can be traced to its table.
+The rule is implemented once, in `pf_match()` and `pf_match_route()` in `code/00_helper/pf_code.R`, and used here and in the composition notebooks 2.01–2.04; `pf_match()` returns *same*, *different* or *unmatchable*, and `pf_match_route()` which of the four routes made a pair the same party, so every *same* can be traced to its table.
 
 Outputs, in `data/02_processed/`:
 
 - `pf_alliances.csv`: one row per alliance and member (`cntry`, `alliance_name`, `member_name`, `member_id`);
 - `pf_lineage.csv`: one row per succession (`cntry`, `predecessor`, `predecessor_id`, `successor`, `successor_id`, `year`);
 - `pf_aliases.csv`: one row per alias (`cntry`, `alias`, `name`);
-- `ess_party_match.parquet`, `cses_party_match.parquet`, `ees_party_match.parquet`: the respondent keys of notebooks 1.2–1.4 with, for every vote item, `ext_match_<vote item>` (same / different / unmatchable, against the attachment item) and `ext_route_<vote item>` (identical / alias / alliance / lineage, for *same*).
-  The eu25games match is computed in notebook 2.1, which first resolves the release's open "other" answers.
+- `ess_party_match.parquet`, `cses_party_match.parquet`, `ees_party_match.parquet`: the respondent keys of notebooks 1.02–1.04 with, for every vote item, `ext_match_<vote item>` (same / different / unmatchable, against the attachment item) and `ext_route_<vote item>` (identical / alias / alliance / lineage, for *same*).
+  The eu25games match is computed in notebook 2.01, which first resolves the release's open "other" answers.
 
 Names in the tables are exactly as in the `ext_*_pf_name` variables: a Party Facts core name, or `"<label> [og]"` for a party Party Facts does not list; ids are Party Facts ids, checked to belong to the row's country.
-The tables are built from the crosswalks of notebooks 1.2–1.4, so this notebook runs after them; they do not depend on it.
+The tables are built from the crosswalks of notebooks 1.02–1.04, so this notebook runs after them; they do not depend on it.
 
 # Setup
 
@@ -604,7 +604,7 @@ write_csv(alliances, here("data", "02_processed", "pf_alliances.csv"), na = "")
 
 A few answers in the eu25games release carry a label rather than the Party Facts name of the party they name, so they differ from the same party's name in another item: the EP-list labels of the PvdA and the CDA, "Zeleni Slovenije [og]" for Zeleni Slovenije (1494), and three English or short names.
 The release is published upstream, so they are resolved here rather than recoded.
-(Label variants in the ESS, CSES and EES are fixed where they are coded, in notebooks 1.2–1.4.)
+(Label variants in the ESS, CSES and EES are fixed where they are coded, in notebooks 1.02–1.04.)
 
 ```{r}
 #| label: aliases
@@ -880,7 +880,7 @@ pairs |>
 
 For every vote item, the match with the attachment item of the same respondent (`ext_match_*`) and, when it is the same party, the route (`ext_route_*`).
 In the CSES the party asked after the base item and the leaner probe is one item (`IMD3005_3` / `f3023_3`), so leaners are matched like the attached.
-The EES 2009 wave codes the leaner's party separately (`q90`, `pid_lean` in notebook 1.4); its matches carry a `lean_` prefix (`ext_match_lean_vote_ep`).
+The EES 2009 wave codes the leaner's party separately (`q90`, `pid_lean` in notebook 1.04); its matches carry a `lean_` prefix (`ext_match_lean_vote_ep`).
 
 ```{r}
 #| label: match-files
@@ -952,7 +952,7 @@ map(
 - **Jaunā Vienotība** is listed as an alliance containing Vienotība (the 2018 and 2022 lists of Vienotība and regional parties).
 - **Nowa Lewica** is the SLD renamed after absorbing Wiosna in 2021 (lineage), and the 2023 *Lewica* list, which the Nowa Lewica committee registered, also carried Razem and the PPS (alliance). Razem never joined the party, so outside 2023 the alliance reading is generous.
 - **The SDĽ** merged into Smer in 2005, but a new party of the same name ran from 2005 on, and matching is by name, so the pair is not lineage (see `name reused`).
-- **The 2024 Portuguese Aliança Democrática** is the list of PSD, CDS-PP and PPM of 2024, coded `[og]` in notebook 1.4, not the AD of 1979–80 that Party Facts lists (1742).
+- **The 2024 Portuguese Aliança Democrática** is the list of PSD, CDS-PP and PPM of 2024, coded `[og]` in notebook 1.04, not the AD of 1979–80 that Party Facts lists (1742).
 - **EES 2004 Italy**: attachment to the Margherita, the DS or the PdCI pairs with a vote for Il Girasole (Verdi + SDI) hundreds of times, which points to a mislabelled vote code upstream rather than to an alliance or a succession; the pairs stay *different*.
 - **Alliance calls with the least certain membership** are commented in the alliance table (e.g. OĽaNO including Za ľudí, Kinima Allagis as PASOK + KIDISO, Stati Uniti d'Europa including a PSI coded `[og]`).
 

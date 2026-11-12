@@ -4,26 +4,26 @@ project:
     - robots.txt
   render:
     - index.qmd
-    - code/01_preparation/1.1_ess_to_parquet.qmd
-    - code/01_preparation/1.2_ess_partyfacts.qmd
-    - code/01_preparation/1.3_cses_partyfacts.qmd
-    - code/01_preparation/1.4_ees_partyfacts.qmd
-    - code/01_preparation/1.5_ees_pid_over_time.qmd
-    - code/01_preparation/1.6_cses_pid_over_time.qmd
-    - code/01_preparation/1.7_ess_pid_over_time.qmd
-    - code/01_preparation/1.9_party_alliances.qmd
+    - code/01_prep/1.01_ess_parquet.qmd
+    - code/01_prep/1.02_ess_partyfacts.qmd
+    - code/01_prep/1.03_cses_partyfacts.qmd
+    - code/01_prep/1.04_ees_partyfacts.qmd
+    - code/01_prep/1.05_ees_pid-trend.qmd
+    - code/01_prep/1.06_cses_pid-trend.qmd
+    - code/01_prep/1.07_ess_pid-trend.qmd
+    - code/01_prep/1.09_all_match.qmd
     # Rendered as plain pages, deliberately not listed under manuscript:
     # notebooks. The manuscript pipeline routes notebooks through .ipynb,
     # which turns `output: asis` into a code block, so their generated
     # tabsets and Mermaid trees would not render. Output lands next to the
     # source (git-ignored *.html); the post-render script copies it into
-    # _manuscript/code/02_composition/.
-    - code/02_composition/2.1_eu25_composition.qmd
-    - code/02_composition/2.2_ees_composition.qmd
-    - code/02_composition/2.3_cses_composition.qmd
-    - code/02_composition/2.4_ess_composition.qmd
-    - code/02_composition/2.5_composition_raw.qmd
-    - code/03_analyses/3.1_eu25_prep.qmd
+    # _manuscript/code/<folder>/.
+    - code/02_types/2.01_eu25_types.qmd
+    - code/02_types/2.02_ees_types.qmd
+    - code/02_types/2.03_cses_types.qmd
+    - code/02_types/2.04_ess_types.qmd
+    - code/rq1_who/r1.01_all_cells.qmd
+    - code/rq2_what/r2.01_eu25_prep.qmd
   # Copies frozen figures and the plain composition pages into _manuscript/
   post-render:
     - code/00_helper/post_render.R
@@ -34,25 +34,25 @@ project:
 manuscript:
   article: index.qmd
   notebooks:
-    - notebook: code/01_preparation/1.1_ess_to_parquet.qmd
+    - notebook: code/01_prep/1.01_ess_parquet.qmd
       title: ESS to Parquet
-    - notebook: code/01_preparation/1.2_ess_partyfacts.qmd
+    - notebook: code/01_prep/1.02_ess_partyfacts.qmd
       title: ESS Party Facts
-    - notebook: code/01_preparation/1.3_cses_partyfacts.qmd
+    - notebook: code/01_prep/1.03_cses_partyfacts.qmd
       title: CSES Party Facts
-    - notebook: code/01_preparation/1.4_ees_partyfacts.qmd
+    - notebook: code/01_prep/1.04_ees_partyfacts.qmd
       title: EES Party Facts
-    - notebook: code/01_preparation/1.5_ees_pid_over_time.qmd
+    - notebook: code/01_prep/1.05_ees_pid-trend.qmd
       title: EES PID over Time
-    - notebook: code/01_preparation/1.6_cses_pid_over_time.qmd
+    - notebook: code/01_prep/1.06_cses_pid-trend.qmd
       title: CSES PID over Time
-    - notebook: code/01_preparation/1.7_ess_pid_over_time.qmd
+    - notebook: code/01_prep/1.07_ess_pid-trend.qmd
       title: ESS PID over Time
-    - notebook: code/01_preparation/1.9_party_alliances.qmd
-      title: Party Alliances
-    - notebook: code/01_preparation/1.8_eu25_pid.qmd
+    - notebook: code/01_prep/1.09_all_match.qmd
+      title: Party Matching
+    - notebook: code/01_prep/1.08_eu25_pid.qmd
       title: EU25 PID
-    - notebook: code/03_analyses/3.1_eu25_prep.qmd
+    - notebook: code/rq2_what/r2.01_eu25_prep.qmd
       title: EU25 Prep
 
 execute:

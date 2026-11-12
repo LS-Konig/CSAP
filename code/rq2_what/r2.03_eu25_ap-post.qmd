@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 3.3
+  CSAP Code Notebook r2.03
 subtitle: |
   eu25games 2019: posterior post-processing of the AP contrast models (estimands for slides and paper)
 date: last-modified
@@ -19,13 +19,13 @@ execute:
 
 # Setup
 
-This notebook turns the four cached fits of notebook 3.2 into the estimands, and saves them as one small file of posterior draws.
+This notebook turns the four cached fits of notebook r2.02 into the estimands, and saves them as one small file of posterior draws.
 Anything that shows results (the HMS deck, later the manuscript) reads that file instead of the fits, so it renders in seconds.
 
 - Input: the full fits `data/04_models/{games,thermo}_{bb,gauss}.rds` (git-ignored). Nothing is refitted here. If a fit is missing, the notebook stops.
 - Output: `data/05_results/eu25_ap_post.rds`.
 
-The estimands are those of 3.2 (*Estimand*): $AP_t = E(Y \mid Co, t) - E(Y \mid Out, t)$, $\Delta AP = AP_{\text{explicit}} - AP_{\text{vote-anchored}}$, and the cross-measure difference $\Delta AP^{SD}_{\text{thermo}} - \Delta AP^{SD}_{\text{games}}$.
+The estimands are those of r2.02 (*Estimand*): $AP_t = E(Y \mid Co, t) - E(Y \mid Out, t)$, $\Delta AP = AP_{\text{explicit}} - AP_{\text{vote-anchored}}$, and the cross-measure difference $\Delta AP^{SD}_{\text{thermo}} - \Delta AP^{SD}_{\text{games}}$.
 They are computed for the pooled support and for each country, and every quantity is reported with its posterior median, 95% and 99% intervals and $\Pr(> 0)$.
 
 **Nothing in this notebook is a claim.** The estimates are reported with their uncertainty and not interpreted here.
@@ -57,7 +57,7 @@ if (length(p_to_install) > 0) {
 sapply(p_required, require, character.only = TRUE)
 rm(p_required, p_to_install, packages)
 
-# Same seed as 3.2, so the same posterior draws are used
+# Same seed as r2.02, so the same posterior draws are used
 seed <- 2019
 ndraws_post <- 1000
 max_treedepth <- 10
@@ -75,9 +75,9 @@ stopifnot(all(file.exists(fit_files)))
 
 # Data
 
-The estimation data are rebuilt exactly as in notebook 3.2 (*Data*: *Games*, *Thermometer*, *Common Support*).
-**This code must stay identical to 3.2**: the fits were estimated on these rows, and the estimands average over them.
-Only the lines the estimands need are kept; the tables and figures stay in 3.2.
+The estimation data are rebuilt exactly as in notebook r2.02 (*Data*: *Games*, *Thermometer*, *Common Support*).
+**This code must stay identical to r2.02**: the fits were estimated on these rows, and the estimands average over them.
+Only the lines the estimands need are kept; the tables and figures stay in r2.02.
 
 ```{r}
 #| label: data
@@ -85,7 +85,7 @@ Only the lines the estimands need are kept; the tables and figures stay in 3.2.
 eu25_games <- read_rds(here("data", "03_final", "eu25_games.rds"))
 eu25_thermo <- read_rds(here("data", "03_final", "eu25_thermo.rds"))
 
-# Games, as in 3.2 (games-sample)
+# Games, as in r2.02 (games-sample)
 games <- eu25_games |>
   filter(
     type %in% c("explicit", "vote_anchored"),
@@ -107,7 +107,7 @@ games_scale <- list(mean = mean(games$cj_pl2), sd = sd(games$cj_pl2))
 games <- games |>
   mutate(der_y_z = (cj_pl2 - games_scale$mean) / games_scale$sd)
 
-# Thermometer, as in 3.2 (thermo-sample)
+# Thermometer, as in r2.02 (thermo-sample)
 thermo <- eu25_thermo |>
   filter(
     type %in% c("explicit", "vote_anchored"),
@@ -126,7 +126,7 @@ thermo_scale <- list(mean = mean(thermo$q_thermo), sd = sd(thermo$q_thermo))
 thermo <- thermo |>
   mutate(der_y_z = (q_thermo - thermo_scale$mean) / thermo_scale$sd)
 
-# Common support, as in 3.2 (games-support, thermo-support)
+# Common support, as in r2.02 (games-support, thermo-support)
 add_support <- function(df) {
   support <- df |>
     distinct(der_anchor, meta_responseid, type) |>
@@ -154,11 +154,11 @@ n_info
 
 # Estimand Code
 
-The cell means follow `ap_draws()` of 3.2, with one change for speed.
-3.2 calls it three times per model (pooled, by country, by party), and each call runs `posterior_epred()` over all rows in four counterfactual cells.
+The cell means follow `ap_draws()` of r2.02, with one change for speed.
+r2.02 calls it three times per model (pooled, by country, by party), and each call runs `posterior_epred()` over all rows in four counterfactual cells.
 Here it runs **once per model, by country**, and returns each country's weighted *sums* and weight totals instead of means.
-Country means are sums over weights. The pooled mean is the sum over all countries divided by the total weight, which is exactly the respondent-weighted pooled mean of 3.2.
-The draws are the same as in 3.2: `set.seed(seed)` and then 1,000 of the 4,000 draws, as `ap_draws()` does.
+Country means are sums over weights. The pooled mean is the sum over all countries divided by the total weight, which is exactly the respondent-weighted pooled mean of r2.02.
+The draws are the same as in r2.02: `set.seed(seed)` and then 1,000 of the 4,000 draws, as `ap_draws()` does.
 
 ```{r}
 #| label: estimand-code
@@ -229,7 +229,7 @@ summarise_post <- function(df, ...) {
     )
 }
 
-# MCMC diagnostics, as in 3.2
+# MCMC diagnostics, as in r2.02
 mcmc_check <- function(fit) {
   s <- withCallingHandlers(
     summarise_draws(as_draws_df(fit), "rhat", "ess_bulk", "ess_tail"),
@@ -255,7 +255,7 @@ mcmc_check <- function(fit) {
 # Posterior Computation
 
 The models are loaded and processed one at a time, and each fit is dropped from memory before the next is loaded (about 560 MB each).
-The Gaussian models are fitted on the z-scored outcome, so their predictions are back-transformed to tokens and points before averaging, as in 3.2.
+The Gaussian models are fitted on the z-scored outcome, so their predictions are back-transformed to tokens and points before averaging, as in r2.02.
 
 ```{r}
 #| label: post
@@ -300,7 +300,7 @@ diagnostics |> knitr::kable(digits = 3)
 ## Cross-Measure Difference
 
 $\Delta AP^{SD}_{\text{thermo}} - \Delta AP^{SD}_{\text{games}}$, per model and group.
-The two measures were fitted separately, so draws are paired by index, as in 3.2. With the same seed, both use the same draw positions.
+The two measures were fitted separately, so draws are paired by index, as in r2.02. With the same seed, both use the same draw positions.
 
 ```{r}
 #| label: cross
@@ -315,10 +315,10 @@ cross <- contrasts |>
 stopifnot(!anyNA(cross$diff))
 ```
 
-## Check Against 3.2
+## Check Against r2.02
 
-The pooled beta-binomial estimates must reproduce the pooled tables printed by 3.2 (same draws, same rows, same weights).
-The 3.2 values are copied from its rendered output.
+The pooled beta-binomial estimates must reproduce the pooled tables printed by r2.02 (same draws, same rows, same weights).
+The r2.02 values are copied from its rendered output.
 
 ```{r}
 #| label: check-32

@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 2.4
+  CSAP Code Notebook 2.04
 subtitle: |
   ESS rounds 1-11: partisan composition trees
 date: last-modified
@@ -20,7 +20,7 @@ execute:
 # Setup
 
 The flowcharts are Mermaid diagrams written by R code; trees inside tabs are drawn the first time their tab is opened.
-Notebook 2.1 explains the tree itself; it is the same in all four composition notebooks.
+Notebook 2.01 explains the tree itself; it is the same in all four composition notebooks.
 
 ```{r}
 #| label: setup
@@ -55,7 +55,7 @@ source(here("code", "00_helper", "pid_tree.R"))
 
 # Load ESS Data
 
-The partitioned Parquet dataset from notebook 1.1, as in notebook 1.7.
+The partitioned Parquet dataset from notebook 1.01, as in notebook 1.07.
 
 ```{r}
 #| label: load-ess-data
@@ -129,7 +129,7 @@ Two things set the ESS apart from the other sources:
   There is no leaner probe.
 - **The vote is a recall of the last national election**, which can lie years back, and is asked right after a turnout filter.
 
-The survey is face to face, except for the self-completion samples of round 10 (see notebook 1.7).
+The survey is face to face, except for the self-completion samples of round 10 (see notebook 1.07).
 
 # The Party Problem
 
@@ -142,7 +142,7 @@ The party variables are **country-specific**, and re-lettered whenever a country
 More importantly, the attachment list and the vote list are **numbered independently**: the same party can be `3` on one and `5` on the other.
 The Parquet file carries only the numbers.
 So the numbers have to be turned back into parties before the two answers can be compared.
-Notebook 1.2 does that, coding every code of both lists to Party Facts; this notebook uses the codebook labels only to classify the vote (party, other, non-vote) and compares the parties through the Party Facts coding, with the alliance rule of notebook 1.9.
+Notebook 1.02 does that, coding every code of both lists to Party Facts; this notebook uses the codebook labels only to classify the vote (party, other, non-vote) and compares the parties through the Party Facts coding, with the alliance rule of notebook 1.09.
 
 The names come from the value labels in the ESS codebook (`data/01_raw/ess/Datafile-subset codebook.html`).
 Each `prtcl*` and `prtv*` variable is one block there, with a table of codes and labels.
@@ -353,8 +353,8 @@ ess_tree <- ess_raw |>
 
 # Matching Parties
 
-Attachment and vote are compared by their Party Facts coding (notebook 1.2), not by the codebook names: the two lists of one country and round spell the same party differently ("PP" against "Partido Popular (PP)", "Smer – SD" against "SMER-Social Democracy"), and the coding has already resolved every spelling to one Party Facts party.
-The match level comes from `data/02_processed/ess_party_match.parquet` (notebook 1.9), which applies one rule to all four sources:
+Attachment and vote are compared by their Party Facts coding (notebook 1.02), not by the codebook names: the two lists of one country and round spell the same party differently ("PP" against "Partido Popular (PP)", "Smer – SD" against "SMER-Social Democracy"), and the coding has already resolved every spelling to one Party Facts party.
+The match level comes from `data/02_processed/ess_party_match.parquet` (notebook 1.09), which applies one rule to all four sources:
 
 - **same party**: the same Party Facts party; a party and an electoral alliance or joint list that contains it, in either direction (Fidesz and the Fidesz–KDNP list, PO and Koalicja Obywatelska); or a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on (the UMP and Les Républicains, the CVP and CD&V, the PRL-FDF and the MR);
 - **different party**: two different parties, including two members of one alliance, two predecessors of one successor, and a breakaway and its parent;
@@ -373,7 +373,7 @@ ess_tree <- ess_tree |>
   left_join(ess_pf, by = c("cntry", "essround", "name", "idno")) |>
   left_join(ess_match, by = c("cntry", "essround", "name", "idno")) |>
   mutate(
-    # Level 3: Party Facts match, with alliances and lineage (notebook 1.9)
+    # Level 3: Party Facts match, with alliances and lineage (notebook 1.09)
     match = case_when(
       att != "yes" | vote != "yes" ~ NA,
       .default = coalesce(pf_match, "unmatchable")
@@ -383,7 +383,7 @@ ess_tree <- ess_tree |>
 stopifnot(nrow(ess_tree) == n_before)
 ```
 
-Pairs that count as the same party only through an alliance or lineage, by route and weight: the audit trail of the tables of notebook 1.9.
+Pairs that count as the same party only through an alliance or lineage, by route and weight: the audit trail of the tables of notebook 1.09.
 
 ```{r}
 #| label: route-audit
@@ -601,7 +601,7 @@ ess_tree |>
 
 # Type File
 
-One row per respondent with the common composition types (`tree_ctype()` in `pid_tree.R`), the weight and the survey cell, for notebooks 2.5 and 2.6.
+One row per respondent with the common composition types (`tree_ctype()` in `pid_tree.R`), the weight and the survey cell, for notebooks r1.01 and r1.02.
 The year is the round's modal fieldwork year.
 
 ```{r}
@@ -627,8 +627,8 @@ ess_types |>
 
 - **Shares are weighted** with `pspwght`.
 - **The vote is the last national election**, which can lie up to four or five years before the interview.
-- **Round 10 pools two modes** (face-to-face and self-completion) on disjoint country sets, see notebook 1.7.
-- **Matching is by Party Facts party, with alliances and lineage** (notebook 1.9); the same rule is used in all four composition notebooks, so their *same party* shares are comparable.
+- **Round 10 pools two modes** (face-to-face and self-completion) on disjoint country sets, see notebook 1.07.
+- **Matching is by Party Facts party, with alliances and lineage** (notebook 1.09); the same rule is used in all four composition notebooks, so their *same party* shares are comparable.
   A party and an electoral alliance or joint list containing it count as the same party, and so do a party and the party it continued in through a rename, refoundation or merger (UMP and Les Républicains, CVP and CD&V, PRL-FDF and MR), in surveys from the year of the succession on.
   Because the vote is the last national election, this is where lineage matters most: a respondent interviewed in 2016 who feels close to Les Républicains and voted UMP in 2012 has not switched.
   Two members of one alliance (CDU and CSU), two predecessors of one successor, and a breakaway and its parent stay *different party*.

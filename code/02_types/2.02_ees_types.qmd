@@ -1,6 +1,6 @@
 ---
 title: |
-  CSAP Code Notebook 2.2
+  CSAP Code Notebook 2.02
 subtitle: |
   EES voter studies 2004-2024: partisan composition trees
 date: last-modified
@@ -20,7 +20,7 @@ execute:
 # Setup
 
 The flowcharts are Mermaid diagrams written by R code; trees inside tabs are drawn the first time their tab is opened.
-Notebook 2.1 explains the tree itself; it is the same in all four composition notebooks.
+Notebook 2.01 explains the tree itself; it is the same in all four composition notebooks.
 
 ```{r}
 #| label: setup
@@ -54,7 +54,7 @@ source(here("code", "00_helper", "pid_tree.R"))
 
 # Load EES Data
 
-The same five files as in notebook 1.5.
+The same five files as in notebook 1.05.
 
 ```{r}
 #| label: load-ees-data
@@ -210,12 +210,12 @@ Every wave also carries a recall of the last **national** general election, whic
 | 2024 | `q19` (party: `q19n`) | `q6` (party: `q6n`) | `q8` | none |
 
 The items above only *classify* attachment and vote (party, no party, don't know; party vote, no vote).
-The party comparison uses the Party Facts coding of notebook 1.4 instead of the release's own codes, which do not line up across the two items in every wave (2014 and 2024 raw codes are shifted against each other, 2019 raw codes follow separate lists):
-the attachment party and the EP vote are compared by Party Facts party, with the rule of notebook 1.9, so that a party and an electoral alliance or joint list containing it count as the *same party*, and so do a party and the party it continued in through a rename, refoundation or merger (from the year of the succession on).
+The party comparison uses the Party Facts coding of notebook 1.04 instead of the release's own codes, which do not line up across the two items in every wave (2014 and 2024 raw codes are shifted against each other, 2019 raw codes follow separate lists):
+the attachment party and the EP vote are compared by Party Facts party, with the rule of notebook 1.09, so that a party and an electoral alliance or joint list containing it count as the *same party*, and so do a party and the party it continued in through a rename, refoundation or merger (from the year of the succession on).
 The match comes from `data/02_processed/ees_party_match.parquet`, joined on wave and the respondent's position in the wave's file.
 
-The attachment categories follow notebook 1.5, with one difference: don't know, refusal and missing are pooled into the tree's grey *DK* box.
-In 2009, respondents without an attachment are split by the probe `q89`, and a leaner's party (`q90`) is matched to the EP vote like an attachment (`ext_match_lean_vote_ep`, notebook 1.9).
+The attachment categories follow notebook 1.05, with one difference: don't know, refusal and missing are pooled into the tree's grey *DK* box.
+In 2009, respondents without an attachment are split by the probe `q89`, and a leaner's party (`q90`) is matched to the EP vote like an attachment (`ext_match_lean_vote_ep`, notebook 1.09).
 
 **Weights.** Every wave uses a socio-demographic weight and never a political one, since a weight to the official vote would correct away part of what the types measure:
 
@@ -238,7 +238,7 @@ Trees show unweighted N in the boxes and weighted shares on the edges; all figur
 
 # 2004: v211 attachment, v112 EP vote
 ees_2004 <- ees_2004 |>
-  # Position in the file, the key of notebook 1.4
+  # Position in the file, the key of notebook 1.04
   mutate(row = row_number()) |>
   # Item unfielded in BE, LT
   filter(!is.na(v211)) |>
@@ -400,7 +400,7 @@ ees_2024 <- ees_2024 |>
 
 # Harmonise to the Tree
 
-Country names are mapped onto ISO2 exactly as in notebook 1.5, with Britain and Northern Ireland pooled into `GB` in 2004.
+Country names are mapped onto ISO2 exactly as in notebook 1.05, with Britain and Northern Ireland pooled into `GB` in 2004.
 
 ```{r}
 #| label: bind
@@ -472,7 +472,7 @@ ees_tree |>
   summarise(ni_weighted = sum(weight[country_raw == "northern ireland"]) / sum(weight))
 
 # Level 3: Party Facts match with the EP vote, with alliances and lineage
-# (notebook 1.9); `route` says which table made a pair the same party
+# (notebook 1.09); `route` says which table made a pair the same party
 ees_match <- read_parquet(here("data", "02_processed", "ees_party_match.parquet")) |>
   transmute(
     year = factor(wave, levels = levels(ees_tree$year)), row, match_cntry = cntry,
@@ -492,7 +492,7 @@ n_before <- nrow(ees_tree)
 ees_tree <- ees_tree |>
   left_join(ees_match, by = c("year", "row")) |>
   left_join(ees_pf, by = c("year", "row")) |>
-  # the (wave, row) key lines up with notebook 1.4: same country on every row
+  # the (wave, row) key lines up with notebook 1.04: same country on every row
   (\(d) {
     stopifnot(!anyNA(d$match_cntry), all(d$country == d$match_cntry))
     d
@@ -529,7 +529,7 @@ ees_tree |>
 The first table crosses the tree levels by wave.
 The second is the alignment check described above: among respondents who report both an attachment and a comparable vote, the share naming the *same* party, by country and wave.
 A cell far below its neighbours points to a coding problem rather than to voters; the ones that remain low are discussed under the caveats.
-The third lists the pairs that are the *same party* only through an alliance or lineage (the audit trail of the tables of notebook 1.9).
+The third lists the pairs that are the *same party* only through an alliance or lineage (the audit trail of the tables of notebook 1.09).
 
 ```{r}
 #| label: checks
@@ -559,7 +559,7 @@ ees_tree |>
 # Pooled Tree
 
 All 25 countries and all five waves, split on the vote first, as every wave asked it.
-The panel of countries is unbalanced (see notebook 1.5), so this tree mixes different country sets.
+The panel of countries is unbalanced (see notebook 1.05), so this tree mixes different country sets.
 Only 2009 asked the leaner probe, so the respondents of the other waves without an attachment sit in the grey *probe not fielded* boxes.
 
 ```{r}
@@ -636,7 +636,7 @@ ees_tree |>
 
 One bar per country, as in the HMS deck (`presentation_hms.qmd`), with the number of respondents after each country and the share of every leaf on its segment (under 3%, the bare number).
 Countries are sorted by the share reporting an attachment.
-The pooled figure mixes waves, and countries joined in different years (see notebook 1.5).
+The pooled figure mixes waves, and countries joined in different years (see notebook 1.05).
 
 ```{r}
 #| label: fig-country-pooled
@@ -680,7 +680,7 @@ ees_tree |>
 
 # Type File
 
-One row per respondent with the common composition types (`tree_ctype()` in `pid_tree.R`), the weight and the survey cell, for notebooks 2.5 and 2.6.
+One row per respondent with the common composition types (`tree_ctype()` in `pid_tree.R`), the weight and the survey cell, for notebooks r1.01 and r1.02.
 
 ```{r}
 #| label: write-types
@@ -705,16 +705,16 @@ ees_types |>
 - **Shares are weighted** with socio-demographic weights, and some 2004 countries are unweighted (see *Weights* above).
 - **The vote is an EP vote.** European elections are second-order: turnout is low and sincere voting for small parties is common, so *no vote reported* and *different party* are both larger than they would be with a national recall.
   The national recall is listed in the table above for a later comparison.
-- **Mode changes between 2014 and 2019**, from interviewer-administered to online panels with no refusal option (see notebook 1.5).
-- **Electoral alliances count as the same party as their members** (notebook 1.9): an attachment to HDZ and a vote for the HDZ-led coalition list, or to PO and a vote for the European Coalition, are *same party*.
+- **Mode changes between 2014 and 2019**, from interviewer-administered to online panels with no refusal option (see notebook 1.05).
+- **Electoral alliances count as the same party as their members** (notebook 1.09): an attachment to HDZ and a vote for the HDZ-led coalition list, or to PO and a vote for the European Coalition, are *same party*.
   So do a party and the party it continued in through a rename, refoundation or merger, from the year of the succession on (the UMP and Les Républicains, the PD and the PDL).
   Two members of one alliance, two predecessors of one successor, and a breakaway and its parent stay *different party*.
   Italy 2004 stays low for a different reason: attachment to the Margherita or the PdCI pairs with a vote for Il Girasole hundreds of times, which points to a mislabelled vote code in the release.
-- **The 2004 DK category** also contains no-answers, as noted in notebook 1.5.
+- **The 2004 DK category** also contains no-answers, as noted in notebook 1.05.
 - **Estonia 2004 codes its no-party answers as refusals.** On `v211`, 911 of 1,606 Estonian respondents are coded `95` (refused) and only 12 are coded `94` (no party-ID). Every other country has 0--2% refusals and 10--60% "no".
   The 95s are spread across voters and non-voters, so they do not come from a filter.
   The codebook supplement shows the same split in the first edition (`q30`), and the codebook has no note on it.
-  This notebook therefore counts Estonia's 95 as *no attachment*. Notebook 1.5 still counts it as a refusal.
+  This notebook therefore counts Estonia's 95 as *no attachment*. Notebook 1.05 still counts it as a refusal.
 
 # Session Info
 
