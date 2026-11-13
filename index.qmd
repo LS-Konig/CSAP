@@ -9,7 +9,7 @@ abstract: |
   If attachment merely restates the vote, conditioning on it is harmless; if it is an identity, the polarization of partisans is a different phenomenon from the polarization of voters.
   European multiparty systems allow this to be examined, because attachment and vote come apart.
   I compare voters of the same party who report an attachment with voters who deny one, across six facets of polarization: ideological extremity and sorting, perceived party polarization and sorting, affect toward parties, and behavior toward other citizens in trust and dictator games with randomized partner parties.
-  Combining the European Election Studies, the Comparative Study of Electoral Systems, the European Social Survey and a 2019 survey of 25 democracies, the design traces the partisan composition of European electorates in the 21st century, the profile of attachment's contribution across facets, its variation across countries, and how much change in polarization reflects change in who is partisan.
+  Combining the European Election Studies, the Comparative Study of Electoral Systems, the European Social Survey and a 2019 survey experiment of 25 democracies, the design traces the partisan composition of European electorates in the 21st century, the profile of attachment's contribution across facets, its variation across countries, and how much change in polarization reflects change in who is partisan.
 execute:
   echo: false
   warning: false
