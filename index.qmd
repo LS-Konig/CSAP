@@ -1,15 +1,14 @@
 ---
 title: |
-  Whose Polarization? Party Attachment and the Many Faces of Polarization in 25 European Democracies
+  What Does Partisanship Add? Party Attachment and the Many Faces of Polarization in 25 European Democracies since 2000
 abstract: |
-  Polarization describes how orientations are distributed in a population, and research on affective polarization usually takes that population to be partisans.
-  Who counts as a partisan, however, is rarely argued.
-  Studies define the in-party by a reported attachment or by the vote, as if the two were interchangeable, while the share of citizens who report an attachment differs widely across European democracies.
-  I argue that this choice is itself a claim about what partisanship is.
-  If attachment merely restates the vote, conditioning on it is harmless; if it is an identity, the polarization of partisans is a different phenomenon from the polarization of voters.
-  European multiparty systems allow this to be examined, because attachment and vote come apart.
-  I compare voters of the same party who report an attachment with voters who deny one, across six facets of polarization: ideological extremity and sorting, perceived party polarization and sorting, affect toward parties, and behavior toward other citizens in trust and dictator games with randomized partner parties.
-  Combining the European Election Studies, the Comparative Study of Electoral Systems, the European Social Survey and a 2019 survey experiment of 25 democracies, the design traces the partisan composition of European electorates in the 21st century, the profile of attachment's contribution across facets, its variation across countries, and how much change in polarization reflects change in who is partisan.
+  Research on affective polarization asks whether citizens divide over party identities or over the policies parties stand for.
+  In two-party systems the two are hard to separate, because party label and policy package arrive together.
+  This paper asks a question that every measure of polarization among partisans implicitly answers: what does a reported attachment add, beyond the vote, to different forms of polarization?
+  European multiparty systems offer leverage: voters of the same party differ in whether they report an attachment, so comparing explicit partisans with deniers holds the party's label, platform and out-parties fixed.
+  The comparison covers ideological extremity and sorting, perceived party polarization, affect toward parties, and behavior in trust and dictator games with randomized partner parties.
+  Combining the European Election Studies, CSES, the European Social Survey and a 2019 survey experiment in 25 democracies, the paper traces how the mix of partisans and deniers has changed since 2000.
+  The design speaks to whether European partisanship works more like a policy evaluation or a group identity, and to how much change in polarization reflects change in who is partisan.
 execute:
   echo: false
   warning: false
